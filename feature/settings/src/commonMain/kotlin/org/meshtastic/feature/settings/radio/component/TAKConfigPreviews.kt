@@ -61,6 +61,7 @@ fun TakServerSectionDisabledPreview() {
             status = TakServerStatus.Off,
             clientCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -85,6 +86,7 @@ fun TakServerSectionEnabledPreview() {
             status = TakServerStatus.WaitingForClient,
             clientCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -109,6 +111,7 @@ fun TakServerSectionConnectedPreview() {
             status = TakServerStatus.Connected,
             clientCount = 1,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -133,6 +136,7 @@ fun TakServerSectionFailedPreview() {
             status = TakServerStatus.Failed,
             clientCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -157,6 +161,7 @@ fun TakServerSectionV1FallbackPreview() {
             status = TakServerStatus.Connected,
             clientCount = 1,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = false,
         )
     }

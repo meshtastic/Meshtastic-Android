@@ -64,6 +64,13 @@
 
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
+
+# ---- BouncyCastle (per-install TAK server certificates) -----------------------
+# :core:takserver instantiates `BouncyCastleProvider` directly and asks it for the
+# PKCS12 KeyStore and SHA256withRSA signer by name; the provider resolves those
+# algorithm classes reflectively, so R8 must keep them.
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
 -dontwarn org.openjsse.**
 
 # ---- AppSearch / AppFunctions generated document factories ------------------

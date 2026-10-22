@@ -39,8 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,12 +62,14 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.export_tak_data_package
 import org.meshtastic.core.resources.schema_tak_role
 import org.meshtastic.core.resources.schema_tak_team
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
 import org.meshtastic.core.resources.tak_server
+import org.meshtastic.core.resources.tak_server_certs_notice
 import org.meshtastic.core.resources.tak_server_channel
 import org.meshtastic.core.resources.tak_server_channel_desc
 import org.meshtastic.core.resources.tak_server_channel_option
@@ -75,6 +79,10 @@ import org.meshtastic.core.resources.tak_server_export_data_package_desc
 import org.meshtastic.core.resources.tak_server_loading
 import org.meshtastic.core.resources.tak_server_mesh_to_cot
 import org.meshtastic.core.resources.tak_server_mesh_to_cot_desc
+import org.meshtastic.core.resources.tak_server_regenerate_certs
+import org.meshtastic.core.resources.tak_server_regenerate_certs_confirm
+import org.meshtastic.core.resources.tak_server_regenerate_certs_desc
+import org.meshtastic.core.resources.tak_server_regenerate_certs_message
 import org.meshtastic.core.resources.tak_server_section
 import org.meshtastic.core.resources.tak_server_status
 import org.meshtastic.core.resources.tak_server_status_connected
@@ -98,15 +106,18 @@ import org.meshtastic.core.resources.tak_server_v1_fallback_notice
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
+import org.meshtastic.core.takserver.TakCertificateProvider
 import org.meshtastic.core.takserver.TakMeshTestRunner
 import org.meshtastic.core.takserver.TakProtocol
 import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.component.DropDownPreference
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -209,6 +220,7 @@ internal fun handleTakPermissionResult(granted: Boolean, isTakServerEnabled: Boo
 fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val takServerManager: TAKServerManager = koinInject()
+    val takCertificates: TakCertificateProvider = koinInject()
     val nodeRepository: NodeRepository = koinInject()
     val radioConfigRepository: RadioConfigRepository = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
@@ -254,7 +266,24 @@ fun TakServerScreen(onBack: () -> Unit) {
             clientCount = takClientCount,
             hasStartError = hasTakServerStartError,
         )
-    val exportLauncher = rememberDataPackageExporter { TAKDataPackageGenerator.generateDataPackage() }
+    val exportLauncher = rememberDataPackageExporter {
+        TAKDataPackageGenerator.generateDataPackage(takCertificates.dataPackageCredentials())
+    }
+    val scope = rememberCoroutineScope()
+    var showRegenerateDialog by remember { mutableStateOf(false) }
+    if (showRegenerateDialog) {
+        MeshtasticResourceDialog(
+            titleRes = Res.string.tak_server_regenerate_certs,
+            messageRes = Res.string.tak_server_regenerate_certs_message,
+            confirmTextRes = Res.string.tak_server_regenerate_certs_confirm,
+            dismissTextRes = Res.string.cancel,
+            onConfirm = {
+                showRegenerateDialog = false
+                scope.launch { takCertificates.regenerate() }
+            },
+            onDismiss = { showRegenerateDialog = false },
+        )
+    }
 
     TakPermissionHandler(
         isTakServerEnabled = isTakServerEnabled,
@@ -298,6 +327,7 @@ fun TakServerScreen(onBack: () -> Unit) {
                 status = takServerStatus,
                 clientCount = takClientCount,
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
+                onRegenerateCertificates = { showRegenerateDialog = true },
                 supportsTakV2 = supportsTakV2,
             )
             TakMeshTestCard()
@@ -318,6 +348,7 @@ internal fun TakServerSection(
     status: TakServerStatus,
     clientCount: Int,
     onExport: () -> Unit,
+    onRegenerateCertificates: () -> Unit,
     supportsTakV2: Boolean,
 ) {
     TitledCard(title = stringResource(Res.string.tak_server_section)) {
@@ -373,6 +404,36 @@ internal fun TakServerSection(
                     Icon(
                         imageVector = MeshtasticIcons.Share,
                         contentDescription = stringResource(Res.string.export_tak_data_package),
+                    )
+                }
+            }
+            Text(
+                text = stringResource(Res.string.tak_server_certs_notice),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp),
+            )
+            HorizontalDivider()
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.tak_server_regenerate_certs),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(Res.string.tak_server_regenerate_certs_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onRegenerateCertificates) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Refresh,
+                        contentDescription = stringResource(Res.string.tak_server_regenerate_certs),
                     )
                 }
             }

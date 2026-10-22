@@ -28,17 +28,14 @@ import kotlin.uuid.Uuid
  * The data package follows the MissionPackageManifest v2 format:
  * ```
  * Meshtastic_TAK_Server.zip
- * ├── meshtastic-server.pref   (ATAK connection preferences)
- * ├── truststore.p12           (server cert — matches iOS "truststore.p12")
- * ├── client.p12               (client identity for mTLS)
+ * ├── meshtastic-server.pref   (ATAK connection preferences, incl. the container password)
+ * ├── truststore.p12           (this install's CA certificate only — no private key)
+ * ├── client.p12               (this install's client identity for mTLS)
  * └── manifest.xml             (MissionPackageManifest v2)
  * ```
  *
- * The bundled certificates / password match Meshtastic-Apple so a single exported package works on both ATAK (Android)
- * and iTAK (iOS) without reconfiguration.
- *
- * Override [bundledCertBytesProvider] in tests to avoid touching the real classpath resources. In production the
- * default reads from [TakCertLoader].
+ * The certificates come from [TakCertificateProvider.dataPackageCredentials] and are unique to the exporting install,
+ * so the package only authenticates against the server that produced it.
  */
 object TAKDataPackageGenerator {
     private const val PREF_FILE_NAME = "meshtastic-server.pref"
@@ -51,32 +48,27 @@ object TAKDataPackageGenerator {
     // XML wire format consumed by ATAK/TAK servers. Staying on the compat policy until that migration
     // can be validated against real TAK interop; suppress the soft-deprecation on the factory itself.
     @Suppress("DEPRECATION")
-    private val xmlSerializer =
-        XML.compat {
-            xmlDeclMode = XmlDeclMode.Charset
-            indentString = "  "
-        }
-
-    /**
-     * Platform-specific hook for reading the bundled TLS certificate bytes. Default implementation lives in
-     * `jvmAndroidMain` and reads them from classpath resources via [TakCertLoader].
-     */
-    var bundledCertBytesProvider: BundledCertBytesProvider = DefaultBundledCertBytesProvider
+    private val xmlSerializer = XML.compat {
+        xmlDeclMode = XmlDeclMode.Charset
+        indentString = "  "
+    }
 
     /**
      * Generate a complete TAK data package zip.
      *
-     * @param useTls when true, package includes `truststore.p12` + `client.p12` and the pref file uses `ssl`; when
-     *   false, package is TCP-only (legacy).
+     * @param credentials this install's client identity + truststore; when present the package includes
+     *   `truststore.p12` + `client.p12` and the pref file uses `ssl`. When null the package is TCP-only (legacy,
+     *   tests).
      * @return zip file contents as a [ByteArray]
      */
     fun generateDataPackage(
+        credentials: TakDataPackageCredentials?,
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
-        useTls: Boolean = true,
         description: String = "Meshtastic TAK Server",
     ): ByteArray {
-        val prefContent = generateConfigPref(serverHost, port, useTls, description)
+        val useTls = credentials != null
+        val prefContent = generateConfigPref(serverHost, port, credentials?.password, description)
         val manifestContent =
             generateManifest(uid = Uuid.random().toString(), description = description, useTls = useTls)
 
@@ -84,24 +76,25 @@ object TAKDataPackageGenerator {
         entries[PREF_FILE_NAME] = prefContent.encodeToByteArray()
         entries["manifest.xml"] = manifestContent.encodeToByteArray()
 
-        if (useTls) {
-            bundledCertBytesProvider.serverP12Bytes()?.let { entries[TRUSTSTORE_FILE_NAME] = it }
-            bundledCertBytesProvider.clientP12Bytes()?.let { entries[CLIENT_P12_FILE_NAME] = it }
+        if (credentials != null) {
+            entries[TRUSTSTORE_FILE_NAME] = credentials.truststoreP12
+            entries[CLIENT_P12_FILE_NAME] = credentials.clientP12
         }
 
         return ZipArchiver.createZip(entries)
     }
 
+    /** @param certPassword password of both PKCS#12 containers; null produces the legacy plain-TCP pref. */
     internal fun generateConfigPref(
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
-        useTls: Boolean = true,
+        certPassword: String?,
         description: String = "Meshtastic TAK Server",
     ): String {
-        val protocolType = if (useTls) "ssl" else "tcp"
+        val protocolType = if (certPassword != null) "ssl" else "tcp"
         val prefs =
-            if (useTls) {
-                // TLS / mTLS mode — matches the iOS data package format exactly.
+            if (certPassword != null) {
+                // TLS / mTLS mode — same layout as the iOS data package.
                 TAKPreferencesXml(
                     preferences =
                     listOf(
@@ -131,17 +124,13 @@ object TAKDataPackageGenerator {
                                     "class java.lang.String",
                                     "cert/$TRUSTSTORE_FILE_NAME",
                                 ),
-                                TAKEntryXml("caPassword", "class java.lang.String", TAK_BUNDLED_CERT_PASSWORD),
+                                TAKEntryXml("caPassword", "class java.lang.String", certPassword),
                                 TAKEntryXml(
                                     "certificateLocation",
                                     "class java.lang.String",
                                     "cert/$CLIENT_P12_FILE_NAME",
                                 ),
-                                TAKEntryXml(
-                                    "clientPassword",
-                                    "class java.lang.String",
-                                    TAK_BUNDLED_CERT_PASSWORD,
-                                ),
+                                TAKEntryXml("clientPassword", "class java.lang.String", certPassword),
                             ),
                         ),
                     ),
@@ -206,24 +195,4 @@ object TAKDataPackageGenerator {
         appendLine("  </Contents>")
         append("</MissionPackageManifest>")
     }
-}
-
-/**
- * Supplies the bundled server / client PKCS#12 bytes for [TAKDataPackageGenerator]. Platform implementations live in
- * `jvmAndroidMain`.
- */
-interface BundledCertBytesProvider {
-    fun serverP12Bytes(): ByteArray?
-
-    fun clientP12Bytes(): ByteArray?
-}
-
-/**
- * Default provider that returns `null` on platforms without a real implementation. Overridden at startup on JVM /
- * Android by pointing [TAKDataPackageGenerator.bundledCertBytesProvider] at [TakCertLoader].
- */
-private object DefaultBundledCertBytesProvider : BundledCertBytesProvider {
-    override fun serverP12Bytes(): ByteArray? = null
-
-    override fun clientP12Bytes(): ByteArray? = null
 }
