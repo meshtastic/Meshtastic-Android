@@ -2078,6 +2078,8 @@ website
 weight
 what_is_meshtastic
 what_is_meshtastic_description
+widget_node_tracker_choose
+widget_node_tracker_not_found
 ### WIFI ###
 wifi_config
 wifi_devices

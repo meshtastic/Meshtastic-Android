@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.widget
 
-import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
@@ -24,7 +23,6 @@ import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +45,6 @@ import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
@@ -61,7 +58,6 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
@@ -196,7 +192,7 @@ class LocalStatsWidget :
                 // Summary Header: Node Chip + Battery
                 Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     state.nodeShortName?.let { name ->
-                        state.nodeColors?.let { colors -> NodeChip(shortName = name, colors = colors) }
+                        state.nodeColors?.let { colors -> WidgetNodeChip(shortName = name, colors = colors) }
                     }
                     Spacer(GlanceModifier.width(8.dp))
                     if (state.hasBattery) {
@@ -400,27 +396,6 @@ class LocalStatsWidget :
                     maxLines = 1,
                 )
             }
-        }
-    }
-
-    @SuppressLint("RestrictedApi")
-    @Composable
-    private fun NodeChip(shortName: String, colors: Pair<Int, Int>, modifier: GlanceModifier = GlanceModifier) {
-        val (fg, bg) = colors
-        Row(
-            modifier =
-            modifier
-                .width(64.dp)
-                .background(Color(bg))
-                .cornerRadius(4.dp)
-                .padding(horizontal = 6.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = shortName,
-                style = TextStyle(color = ColorProvider(Color(fg)), fontSize = 11.sp, fontWeight = FontWeight.Bold),
-            )
         }
     }
 

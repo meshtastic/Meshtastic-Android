@@ -60,6 +60,7 @@ class BundledSqliteGuardTest {
             add("org.meshtastic.core.service.MeshQuickSettingsTileService")
             add("org.meshtastic.core.nfc.MeshtasticHostApduService")
             add("org.meshtastic.feature.widget.LocalStatsWidgetReceiver")
+            add("org.meshtastic.feature.widget.NodeTrackerWidgetReceiver")
             if (BuildConfig.FLAVOR == "google") add("org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctionService")
         }
 

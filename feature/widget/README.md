@@ -2,15 +2,18 @@
 
 ## Overview
 
-The `:feature:widget` module is an **Android-only Jetpack Glance home-screen widget** (API 26+). It exposes a single widget — `LocalStatsWidget` — that displays live mesh statistics sourced from the running Meshtastic service.
+The `:feature:widget` module holds the **Android-only Jetpack Glance home-screen widgets** (API 26+):
+
+- `LocalStatsWidget` shows live mesh statistics for the connected node.
+- `NodeTrackerWidget` follows one node the user picks: battery, signal, last heard, hops away and distance from our node.
 
 **Target: Android only** (not KMP — uses `meshtastic.android.library` + `meshtastic.android.library.compose` convention plugins)
 
 ## Key Responsibilities
 
-- Display live mesh statistics on the Android home screen via Jetpack Glance
+- Display live mesh statistics and a tracked node on the Android home screen via Jetpack Glance
 - Combine four reactive data sources into a single `StateFlow<LocalStatsWidgetUiState>` for efficient re-renders
-- Support three responsive widget sizes: small square, wide rectangle, and large square
+- Pick the tracked node in `NodeTrackerConfigActivity`, the widget's configuration activity, and store it per instance in Glance state
 - Fulfill the `AppWidgetUpdater` interface from `:core:repository` so the mesh service can trigger widget refreshes without depending on Android widget APIs
 
 ## Source Structure
@@ -20,6 +23,12 @@ src/main/kotlin/org/meshtastic/feature/widget/
 ├── LocalStatsWidget.kt              ← GlanceAppWidget, 3 responsive sizes
 ├── LocalStatsWidgetReceiver.kt      ← GlanceAppWidgetReceiver
 ├── LocalStatsWidgetState.kt         ← LocalStatsWidgetUiState + StateProvider
+├── NodeTrackerWidget.kt             ← GlanceAppWidget, 2 responsive sizes
+├── NodeTrackerWidgetReceiver.kt     ← GlanceAppWidgetReceiver
+├── NodeTrackerWidgetState.kt        ← NodeTrackerWidgetState, nodeTrackerState(), DataSource
+├── NodeTrackerConfigActivity.kt     ← APPWIDGET_CONFIGURE node picker (Compose, Material 3)
+├── NodeTrackerCandidates.kt         ← picker filter and order
+├── WidgetNodeChip.kt                ← node chip shared by both widgets
 ├── AndroidAppWidgetUpdater.kt       ← implements AppWidgetUpdater (core:repository)
 ├── RefreshLocalStatsAction.kt       ← ActionCallback (refresh button)
 ├── WidgetResourceEnvironment.kt     ← bridges Compose resources into Glance
@@ -27,7 +36,20 @@ src/main/kotlin/org/meshtastic/feature/widget/
     └── FeatureWidgetModule.kt
 ```
 
-## Widget Content
+## Node Tracker
+
+Each instance stores its node number under `TRACKED_NODE_NUM_KEY` in its Glance Preferences state, and the last reading it rendered from a node DB under the `last_known_*` keys, which it shows dimmed while no node DB is open. `NodeTrackerConfigActivity` writes it, from the launcher's `APPWIDGET_CONFIGURE` on placement or reconfiguration (`widgetFeatures="reconfigurable"`), or from the widget's own "Node not found" state. The activity is exported for the launcher, so it honors only widget ids bound to `NodeTrackerWidgetReceiver`, and it returns `RESULT_CANCELED` unless a node is picked.
+
+| Size | Data shown |
+|---|---|
+| Small (under 200 dp wide) | Node chip, long name, battery, last heard |
+| Wide | Adds SNR and RSSI (direct, non-MQTT nodes only), hops away, distance (only while connected) |
+
+`nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window renders dimmed; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
+
+The widget holds no lazy collection, which the `ActionTrampolineActivity` removal in `androidApp/src/main/AndroidManifest.xml` relies on.
+
+## Local Stats Content
 
 The widget shows the following information when connected:
 
@@ -110,19 +132,26 @@ Glance doesn't provide the Compose UI locals that Compose Multiplatform's `strin
 The mesh service holds a reference to `AppWidgetUpdater` (defined in `:core:repository`) without depending on Android widget APIs. `AndroidAppWidgetUpdater` in this module provides the concrete implementation:
 
 ```kotlin
-// Simplified — the real updateAll() wraps the call in a try/catch
+// Simplified — the real update wraps each call in a try/catch
 @Single
 class AndroidAppWidgetUpdater(
     private val context: Context,
     stateProvider: LocalStatsWidgetStateProvider,
+    trackerDataSource: NodeTrackerWidgetDataSource,
 ) : AppWidgetUpdater {
     override suspend fun updateAll() {
         LocalStatsWidget().updateAll(context)
+        NodeTrackerWidget().updateAll(context)
     }
 }
 ```
 
-It also observes `stateProvider.state` itself (debounced 500 ms, ignoring timestamp-only changes) and re-renders whenever widget instances exist — Glance compositions are ephemeral, so re-renders must be driven externally. This keeps the service layer platform-agnostic while still enabling widget refresh on data changes.
+It also drives re-renders itself, because Glance compositions are ephemeral:
+
+- Local Stats: observes `stateProvider.state` (debounced 500 ms, ignoring timestamp-only changes) while instances exist.
+- Node Tracker: samples `trackerDataSource.inputs` once a second, maps it to each instance's rendered state, and updates only when one of those changes. Sampling rather than debouncing keeps a busy mesh from starving the update.
+
+This keeps the service layer platform-agnostic while still enabling widget refresh on data changes.
 
 ## Dependency Graph
 
@@ -130,8 +159,9 @@ It also observes `stateProvider.state` itself (debounced 500 ms, ignoring timest
 
 ```text
 feature:widget (Android only)
-  ├── core:common, core:model, core:resources, core:repository
+  ├── core:common, core:model, core:navigation, core:resources, core:repository, core:ui
   ├── androidx.glance.appwidget, glance.material3, glance.preview, glance.appwidget.preview
+  ├── androidx.activity.compose, compose.multiplatform.material3 (NodeTrackerConfigActivity)
   ├── compose.multiplatform.ui (LocalConfiguration, LocalDensity), compose.multiplatform.resources
   └── kermit
 ```
@@ -146,8 +176,10 @@ graph TB
   :feature:widget[widget]:::android-feature
   :feature:widget -.-> :core:common
   :feature:widget -.-> :core:model
+  :feature:widget -.-> :core:navigation
   :feature:widget -.-> :core:resources
   :feature:widget -.-> :core:repository
+  :feature:widget -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

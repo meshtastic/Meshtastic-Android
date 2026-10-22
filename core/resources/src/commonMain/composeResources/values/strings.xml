@@ -562,7 +562,7 @@
     <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
-    <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
+    <string name="doc_keywords_widget">widget,home screen,local stats,node tracker,glance,battery,utilization</string>
     <string name="doc_loading">Loading documentation…</string>
     <string name="doc_no_content">No content available.</string>
     <string name="doc_no_documentation">No documentation available</string>
@@ -2150,6 +2150,8 @@
     <string name="weight">Weight</string>
     <string name="what_is_meshtastic">What is Meshtastic?</string>
     <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>
+    <string name="widget_node_tracker_choose">Choose a node to track</string>
+    <string name="widget_node_tracker_not_found">Node not found. Tap to choose a node.</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
