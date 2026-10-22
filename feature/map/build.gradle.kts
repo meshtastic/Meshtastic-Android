@@ -45,11 +45,12 @@ kotlin {
             implementation(libs.ktor.client.core)
         }
 
-        // The camera mesh view's preview and lens intrinsics.
+        // The camera mesh view's preview, lens intrinsics and overlaid stills.
         androidMain.dependencies {
             implementation(libs.androidx.camera.camera2)
             implementation(libs.androidx.camera.compose)
             implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.effects)
             implementation(libs.androidx.camera.lifecycle)
         }
 

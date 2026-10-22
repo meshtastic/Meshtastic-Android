@@ -62,11 +62,13 @@ fun fallbackFocalPx(viewWidth: Float, viewHeight: Float): Float =
 
 /**
  * The back camera's live preview, filling [modifier]; reports intrinsics once the camera is bound, and [onAvailable]
- * false when it cannot bind or the camera fails, true once it opens.
+ * false when it cannot bind or the camera fails, true once it opens. [onStill] gets the bound camera's still, or null
+ * once it is released or where there is none.
  */
 @Composable
 expect fun HudCameraPreview(
     onIntrinsics: (CameraIntrinsics?) -> Unit,
     onAvailable: (Boolean) -> Unit,
+    onStill: (HudStill?) -> Unit,
     modifier: Modifier = Modifier,
 )
