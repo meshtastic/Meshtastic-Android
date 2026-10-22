@@ -17,5 +17,6 @@
 package org.meshtastic.feature.map.hud
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 
-@Composable actual fun rememberHudCapture(): (() -> Unit)? = null
+@Composable actual fun rememberHudCapture(still: HudStill?, overlay: GraphicsLayer): (() -> Unit)? = null
