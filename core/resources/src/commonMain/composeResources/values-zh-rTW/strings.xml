@@ -1144,6 +1144,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">重新產生</string>
     <string name="tak_server_section">伺服器</string>
     <string name="tak_server_test_card_title">TAK Mesh 測試（除錯）</string>
     <string name="tak_server_test_idle">傳送所有 %1$d 個測試固定裝置至 mesh</string>

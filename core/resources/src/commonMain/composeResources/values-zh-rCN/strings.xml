@@ -1436,6 +1436,7 @@
     <string name="tak_server_enabled">启用本地 TAK 服务器</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh 转 CoT 转换器</string>
+    <string name="tak_server_regenerate_certs_confirm">重新生成</string>
     <string name="tak_server_section">服务器</string>
     <string name="tak_server_status">状态</string>
     <string name="tak_server_status_off">关闭</string>

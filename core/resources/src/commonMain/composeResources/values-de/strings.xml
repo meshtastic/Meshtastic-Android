@@ -1314,6 +1314,7 @@
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Neu erstellen</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Status</string>
     <string name="tak_server_status_off">Aus</string>

@@ -688,6 +688,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="swipe_action_unmute">Desilenciar</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Regenerar</string>
     <string name="tak_server_section">Servidor</string>
     <string name="telemetry">Telemetría</string>
     <string name="telemetry_config">Configuración de la telemetría</string>

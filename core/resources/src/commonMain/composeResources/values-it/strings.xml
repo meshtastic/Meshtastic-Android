@@ -1422,6 +1422,7 @@
     <string name="tak_server">Server TAK</string>
     <string name="tak_server_enabled">Abilita server TAK locale</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Rigenera</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Stato</string>
     <string name="tak_server_status_off">Disattivato</string>
