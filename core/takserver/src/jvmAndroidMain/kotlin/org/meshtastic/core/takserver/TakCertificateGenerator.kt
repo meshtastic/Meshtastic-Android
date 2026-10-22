@@ -40,6 +40,7 @@ import java.security.PrivateKey
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -78,7 +79,8 @@ internal object TakCertificateGenerator {
 
     @Suppress("LongMethod")
     fun generate(random: SecureRandom = SecureRandom()): TakCertificateMaterial {
-        val installId = ByteArray(INSTALL_ID_BYTES).also(random::nextBytes).joinToString("") { "%02x".format(it) }
+        val installId =
+            ByteArray(INSTALL_ID_BYTES).also(random::nextBytes).joinToString("") { "%02x".format(Locale.ROOT, it) }
         val password =
             CharArray(TAK_CERT_PASSWORD_LENGTH) { PASSWORD_ALPHABET[random.nextInt(PASSWORD_ALPHABET.length)] }
                 .concatToString()

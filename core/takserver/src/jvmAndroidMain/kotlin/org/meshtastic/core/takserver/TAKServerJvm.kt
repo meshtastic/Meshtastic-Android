@@ -56,9 +56,7 @@ private const val TLS_HANDSHAKE_TIMEOUT_MS = 10_000
  * JSSE-backed TLS TAK server:
  * - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
  * - TLS 1.2+ with this install's server identity from [TakCertificateManager]
- * - Mutual TLS: clients MUST present the one client certificate this install issued. Loopback alone is not an access
- *   control on Android — any app holding `INTERNET` can open `127.0.0.1:8089` — so the client certificate is what keeps
- *   other apps from reading or injecting CoT, and it must therefore be unique to this install rather than bundled.
+ * - Mutual TLS: clients MUST present the one client certificate this install issued
  * - `SO_REUSEADDR` on the listen socket so an app restart doesn't hit `BindException: Address already in use` while the
  *   previous socket is in `TIME_WAIT`
  * - Per-connection [TAKClientConnection] running on [CoroutineDispatchers.io]
@@ -218,7 +216,7 @@ internal class TAKServerJvm(
 
     /**
      * Completes the TLS handshake under [TLS_HANDSHAKE_TIMEOUT_MS] and accepts the socket only if the peer presented
-     * exactly the client certificate this install issued. Anything else — no certificate, the old bundled identity,
+     * exactly the client certificate this install issued. Anything else — no certificate, one from an earlier build,
      * another install's identity, our own server certificate — is counted in [rejectedConnectionCount] and closed.
      */
     private fun verifyIssuedClient(clientSocket: Socket, endpoint: String): Boolean {

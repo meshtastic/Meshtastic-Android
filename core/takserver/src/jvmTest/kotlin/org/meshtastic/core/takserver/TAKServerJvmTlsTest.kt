@@ -44,7 +44,7 @@ import kotlin.test.assertTrue
 
 /**
  * Loopback mTLS behaviour of the real [TAKServerJvm]: only the client certificate this install issued gets in. Every
- * other identity — none, the old publicly bundled one, another install's, or this install's own server certificate — is
+ * other identity — none, one from an earlier build, another install's, or this install's own server certificate — is
  * turned away and counted, and regeneration swaps which client is accepted.
  */
 class TAKServerJvmTlsTest {
@@ -95,7 +95,7 @@ class TAKServerJvmTlsTest {
     }
 
     @Test
-    fun `old publicly bundled client identity is rejected`() = runBlocking {
+    fun `client identity from an earlier build is rejected`() = runBlocking {
         val legacyClient = resource("legacy_tak_certs/client.p12")
         val legacyCa = resource("legacy_tak_certs/ca.pem")
         // Trust both CAs on the client side so the only thing under test is the server's decision.
