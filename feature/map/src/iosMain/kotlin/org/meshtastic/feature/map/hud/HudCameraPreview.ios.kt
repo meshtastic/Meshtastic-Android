@@ -23,5 +23,6 @@ import androidx.compose.ui.Modifier
 actual fun HudCameraPreview(
     onIntrinsics: (CameraIntrinsics?) -> Unit,
     onAvailable: (Boolean) -> Unit,
+    onStill: (HudStill?) -> Unit,
     modifier: Modifier,
 ) = Unit

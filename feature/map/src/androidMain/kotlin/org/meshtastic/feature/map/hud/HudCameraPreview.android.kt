@@ -17,16 +17,22 @@
 package org.meshtastic.feature.map.hud
 
 import android.hardware.camera2.CameraCharacteristics
+import android.util.Rational
+import android.view.Surface
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.UseCaseGroup
+import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.viewfinder.core.ImplementationMode
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +42,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.IntSize
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -45,18 +54,25 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
+@Suppress("LongMethod")
 actual fun HudCameraPreview(
     onIntrinsics: (CameraIntrinsics?) -> Unit,
     onAvailable: (Boolean) -> Unit,
+    onStill: (HudStill?) -> Unit,
     modifier: Modifier,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val currentOnIntrinsics by rememberUpdatedState(onIntrinsics)
     val currentOnAvailable by rememberUpdatedState(onAvailable)
+    val currentOnStill by rememberUpdatedState(onStill)
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
+    var viewSize by remember { mutableStateOf(IntSize.Zero) }
+    val displayRotation = LocalView.current.display?.rotation ?: Surface.ROTATION_0
 
-    DisposableEffect(lifecycleOwner) {
+    // Bound once the view has a size: the view port crops every stream to what the view shows.
+    DisposableEffect(lifecycleOwner, viewSize, displayRotation) {
+        if (viewSize.width == 0 || viewSize.height == 0) return@DisposableEffect onDispose {}
         var disposed = false
         var provider: ProcessCameraProvider? = null
         var sensorIntrinsics: CameraIntrinsics? = null
@@ -70,6 +86,15 @@ actual fun HudCameraPreview(
             }
         // Stabilization stays off: it crops up to a fifth of the field of view, which the intrinsics would not see.
         val preview = Preview.Builder().build()
+        val imageCapture = ImageCapture.Builder().build()
+        val still = HudOverlayStill(context, imageCapture)
+        val group =
+            UseCaseGroup.Builder()
+                .setViewPort(ViewPort.Builder(Rational(viewSize.width, viewSize.height), displayRotation).build())
+                .addUseCase(preview)
+                .addUseCase(imageCapture)
+                .addEffect(still.effect)
+                .build()
 
         // The stream CameraX picked, and its crop, decide how much of the sensor the view shows.
         fun report() {
@@ -104,9 +129,10 @@ actual fun HudCameraPreview(
                 try {
                     val bound = future.get()
                     provider = bound
-                    val camera = bound.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview)
+                    val camera = bound.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, group)
                     sensorIntrinsics = camera.intrinsics()
                     report()
+                    currentOnStill(still)
                     // Another app holding the camera, or a HAL fault, arrives here rather than as a bind failure.
                     camera.cameraInfo.cameraState.observe(lifecycleOwner, stateObserver)
                     boundCamera = camera
@@ -121,22 +147,20 @@ actual fun HudCameraPreview(
 
         onDispose {
             disposed = true
+            currentOnStill(null)
             boundCamera?.cameraInfo?.cameraState?.removeObserver(stateObserver)
             surfaceRequest?.willNotProvideSurface()
             surfaceRequest = null
-            provider?.unbind(preview)
+            provider?.unbind(preview, imageCapture)
+            still.close()
         }
     }
 
     // Crop, not fit: CameraIntrinsics.focalPx assumes the preview fills the view and overflows the long side.
-    // Embedded, so the feed draws into the window and a capture of the window holds it.
-    surfaceRequest?.let {
-        CameraXViewfinder(
-            surfaceRequest = it,
-            modifier = modifier,
-            implementationMode = ImplementationMode.EMBEDDED,
-            contentScale = ContentScale.Crop,
-        )
+    Box(modifier = modifier.onSizeChanged { viewSize = it }) {
+        surfaceRequest?.let {
+            CameraXViewfinder(surfaceRequest = it, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        }
     }
 }
 

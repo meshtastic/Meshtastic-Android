@@ -38,15 +38,7 @@ private const val JPEG_QUALITY = 92
 @RequiresApi(Build.VERSION_CODES.Q)
 fun saveJpegToPictures(context: Context, bitmap: Bitmap, title: String): Uri? {
     val resolver = context.contentResolver
-    val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-    val name = "${title.replace(Regex("[^A-Za-z0-9]+"), "-").trim('-')}-$stamp.jpg"
-    val pending =
-        ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, name)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_RELATIVE_PATH)
-            put(MediaStore.Images.Media.IS_PENDING, 1)
-        }
+    val pending = picturesJpegEntry(title).apply { put(MediaStore.Images.Media.IS_PENDING, 1) }
     val uri =
         runCatching {
             resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), pending)
@@ -60,4 +52,15 @@ fun saveJpegToPictures(context: Context, bitmap: Bitmap, title: String): Uri? {
     // A row left pending would sit hidden in the gallery, so a failed write removes it.
     if (!written) runCatching { resolver.delete(uri, null, null) }
     return uri.takeIf { written }
+}
+
+/** The Pictures/Meshtastic entry [saveJpegToPictures] writes, for a JPEG another writer fills, such as the camera. */
+@RequiresApi(Build.VERSION_CODES.Q)
+fun picturesJpegEntry(title: String): ContentValues {
+    val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+    return ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, "${title.replace(Regex("[^A-Za-z0-9]+"), "-").trim('-')}-$stamp.jpg")
+        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_RELATIVE_PATH)
+    }
 }
