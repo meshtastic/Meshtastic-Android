@@ -43,8 +43,8 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
- * Loopback mTLS behaviour of the real [TAKServerJvm]: only the client certificate this install issued gets in. Every
- * other identity — none, one from an earlier build, another install's, or this install's own server certificate — is
+ * Loopback mTLS behavior of the real [TAKServerJvm]: only the client certificate this install issued gets in. Every
+ * other identity (none, one from an earlier build, another install's, or this install's own server certificate) is
  * turned away and counted, and regeneration swaps which client is accepted.
  */
 class TAKServerJvmTlsTest {

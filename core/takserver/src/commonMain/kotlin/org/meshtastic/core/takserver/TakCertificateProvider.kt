@@ -19,9 +19,9 @@ package org.meshtastic.core.takserver
 /**
  * The pieces of the per-install TAK PKI that go into the exported ATAK data package.
  *
- * - [clientP12] — the one client identity the server accepts (certificate + private key).
- * - [truststoreP12] — the issuing CA certificate only, so ATAK can trust the server; it carries no private key.
- * - [password] — protects both containers and is written to the `.pref` so ATAK can open them.
+ * - [clientP12]: the one client identity the server accepts (certificate + private key).
+ * - [truststoreP12]: the issuing CA certificate only, so ATAK can trust the server; it carries no private key.
+ * - [password]: protects both containers and is written to the `.pref` so ATAK can open them.
  */
 class TakDataPackageCredentials(val clientP12: ByteArray, val truststoreP12: ByteArray, val password: String)
 

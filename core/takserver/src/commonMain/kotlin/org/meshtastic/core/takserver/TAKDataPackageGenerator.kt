@@ -27,7 +27,7 @@ import kotlin.uuid.Uuid
  * ```
  * Meshtastic_TAK_Server.zip
  * ├── meshtastic-server.pref   (ATAK connection preferences, incl. the container password)
- * ├── truststore.p12           (this install's CA certificate only — no private key)
+ * ├── truststore.p12           (this install's CA certificate only, no private key)
  * ├── client.p12               (this install's client identity for mTLS)
  * └── manifest.xml             (MissionPackageManifest v2)
  * ```

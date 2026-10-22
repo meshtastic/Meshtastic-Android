@@ -20,11 +20,11 @@ package org.meshtastic.core.repository
  * The per-install TLS material for the local TAK server.
  *
  * Every blob is a PKCS#12 container protected by [password]:
- * - [serverP12] — the server identity (certificate + private key) presented to ATAK / iTAK.
- * - [clientP12] — the single client identity ATAK must present; handed to the user inside the exported data package.
- * - [truststoreP12] — the issuing CA certificate only (no private key); ATAK uses it to trust the server.
+ * - [serverP12]: the server identity (certificate + private key) presented to ATAK / iTAK.
+ * - [clientP12]: the single client identity ATAK must present; handed to the user inside the exported data package.
+ * - [truststoreP12]: the issuing CA certificate only (no private key); ATAK uses it to trust the server.
  *
- * The CA private key is discarded after issuing, so nothing — including this app — can mint further client certificates
+ * The CA private key is discarded after issuing, so nothing (including this app) can mint further client certificates
  * for this install; a fresh set is generated instead.
  */
 class TakCertificateMaterial(

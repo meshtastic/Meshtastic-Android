@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -62,7 +63,7 @@ private const val TLS_HANDSHAKE_TIMEOUT_MS = 10_000
  * - Per-connection [TAKClientConnection] running on [CoroutineDispatchers.io]
  *
  * If the certificates cannot be generated or loaded, the server refuses to start rather than silently falling back to
- * plain TCP — that failure mode would produce exactly the symptom the user was debugging ("ATAK never connects").
+ * plain TCP, since that failure mode would produce exactly the symptom the user was debugging ("ATAK never connects").
  */
 internal class TAKServerJvm(
     private val dispatchers: CoroutineDispatchers,
@@ -216,8 +217,8 @@ internal class TAKServerJvm(
 
     /**
      * Completes the TLS handshake under [TLS_HANDSHAKE_TIMEOUT_MS] and accepts the socket only if the peer presented
-     * exactly the client certificate this install issued. Anything else — no certificate, one from an earlier build,
-     * another install's identity, our own server certificate — is counted in [rejectedConnectionCount] and closed.
+     * exactly the client certificate this install issued. Anything else (no certificate, one from an earlier build,
+     * another install's identity, our own server certificate) is counted in [rejectedConnectionCount] and closed.
      */
     private fun verifyIssuedClient(clientSocket: Socket, endpoint: String): Boolean {
         val accepted =
@@ -235,7 +236,7 @@ internal class TAKServerJvm(
             }
         if (!accepted) {
             Logger.w { "TAK server rejected $endpoint: client certificate is not the one issued by this install" }
-            if (running) _rejectedConnectionCount.value += 1
+            if (running) _rejectedConnectionCount.update { it + 1 }
             try {
                 clientSocket.close()
             } catch (_: Exception) {}

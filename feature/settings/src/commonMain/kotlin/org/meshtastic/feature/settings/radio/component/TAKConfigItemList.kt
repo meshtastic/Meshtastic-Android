@@ -468,7 +468,7 @@ internal fun TakServerSection(
 }
 
 /**
- * Shown once a client has been turned away for presenting a certificate this install did not issue — most often ATAK
+ * Shown once a client has been turned away for presenting a certificate this install did not issue, most often ATAK
  * still holding a data package from before the per-install certificates (or from another install). The status row alone
  * would keep saying "waiting for ATAK" while ATAK silently fails to connect.
  */

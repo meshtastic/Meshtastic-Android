@@ -48,8 +48,8 @@ import java.util.concurrent.TimeUnit
  * single client identity, packed as PKCS#12 containers under a random password.
  *
  * Why BouncyCastle: neither Android nor the JDK exposes a public X.509 certificate *builder*. The provider is held as a
- * private instance and passed explicitly — it is never registered with `java.security.Security`, because Android
- * already ships a stripped provider under the same "BC" name and registration would be ignored or shadow it.
+ * private instance and passed explicitly. It is never registered with `java.security.Security`, because Android already
+ * ships a stripped provider under the same "BC" name and registration would be ignored or shadow it.
  *
  * Why these encodings: the containers are written with BouncyCastle's explicitly named [PKCS12_KEYSTORE_TYPE], which
  * uses pbeWithSHAAnd3-KeyTripleDES-CBC for both key and certificate bags and a SHA-1 MAC. Android 9 and older cannot

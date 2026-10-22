@@ -38,16 +38,16 @@ import kotlin.test.assertTrue
  */
 class TakCertificateGeneratorTest {
 
-    // DER encoding of OID 1.2.840.113549.1.5.13 (PBES2) — must NOT appear in the containers.
+    // DER encoding of OID 1.2.840.113549.1.5.13 (PBES2): must NOT appear in the containers.
     private val pbes2Oid =
         byteArrayOf(0x06, 0x09, 0x2A, 0x86.toByte(), 0x48, 0x86.toByte(), 0xF7.toByte(), 0x0D, 0x01, 0x05, 0x0D)
 
-    // DER encoding of OID 1.2.840.113549.1.12.1.3 (pbeWithSHA1And3-KeyTripleDES-CBC) — must appear on key bags.
+    // DER encoding of OID 1.2.840.113549.1.12.1.3 (pbeWithSHA1And3-KeyTripleDES-CBC): must appear on key bags.
     private val sha1TripleDesOid =
         byteArrayOf(0x06, 0x0A, 0x2A, 0x86.toByte(), 0x48, 0x86.toByte(), 0xF7.toByte(), 0x0D, 0x01, 0x0C, 0x01, 0x03)
 
     // DER prefix of the MacData DigestInfo for a SHA1 MAC: AlgorithmIdentifier(1.3.14.3.2.26, NULL)
-    // followed by the 20-byte OCTET STRING header — must appear.
+    // followed by the 20-byte OCTET STRING header: must appear.
     private val sha1MacDigestInfoPrefix =
         byteArrayOf(0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14)
 
@@ -62,7 +62,7 @@ class TakCertificateGeneratorTest {
         assertTrue(bytes.containsSequence(sha1MacDigestInfoPrefix), "$name is missing a SHA1 PKCS#12 MAC")
     }
 
-    /** Loads with the platform's stock PKCS#12 parser — the one the server and ATAK actually use. */
+    /** Loads with the platform's stock PKCS#12 parser, the one the server and ATAK actually use. */
     private fun loadPkcs12(bytes: ByteArray, password: String = material.password): KeyStore =
         KeyStore.getInstance("PKCS12").apply { ByteArrayInputStream(bytes).use { load(it, password.toCharArray()) } }
 
@@ -85,7 +85,7 @@ class TakCertificateGeneratorTest {
     fun `truststore holds the CA certificate and no private key`() {
         assertLegacyEncoding(material.truststoreP12, "truststore.p12")
         val trust = loadPkcs12(material.truststoreP12)
-        assertTrue(trust.privateKeys().isEmpty(), "truststore.p12 must not leak a private key")
+        assertTrue(trust.privateKeys().isEmpty(), "truststore.p12 holds only certificates")
         val ca = trust.leafCertificate()
         assertTrue(ca.basicConstraints >= 0, "truststore entry is not a CA certificate")
         assertEquals(ca.subjectX500Principal, ca.issuerX500Principal, "CA must be self-signed")
@@ -210,7 +210,7 @@ class TakCertificateGeneratorTest {
         val pref = TAKDataPackageGenerator.generateConfigPref(certPassword = credentials.password)
         assertTrue(pref.contains("127.0.0.1:8089:ssl"))
         assertTrue(pref.contains(material.password))
-        assertFalse(pref.contains("meshtastic</entry>"), "the old shared password must be gone")
+        assertFalse(pref.contains("meshtastic</entry>"), "pref uses this install's password")
         assertNull(Regex("key=\"caPassword\"[^>]*>meshtastic<").find(pref))
 
         val zip = TAKDataPackageGenerator.generateDataPackage(credentials)
@@ -218,7 +218,10 @@ class TakCertificateGeneratorTest {
         assertEquals(setOf("meshtastic-server.pref", "manifest.xml", "truststore.p12", "client.p12"), entries.keys)
         assertContentEquals(material.truststoreP12, entries.getValue("truststore.p12"))
         assertContentEquals(material.clientP12, entries.getValue("client.p12"))
-        assertFalse(entries.values.any { it.containsSequence(material.serverP12) }, "server.p12 must not be exported")
+        assertFalse(
+            entries.values.any { it.containsSequence(material.serverP12) },
+            "package carries only the client and truststore",
+        )
         val packagedPref = entries.getValue("meshtastic-server.pref").decodeToString()
         assertTrue(packagedPref.contains("""key="caPassword" class="class java.lang.String">${material.password}<"""))
         assertTrue(

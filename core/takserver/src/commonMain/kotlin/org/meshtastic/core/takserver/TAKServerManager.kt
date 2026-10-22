@@ -76,7 +76,7 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
     private val _isStarting = MutableStateFlow(false)
     override val isStarting: StateFlow<Boolean> = _isStarting.asStateFlow()
 
-    // Mirror TAKServer's event-driven connection counts — no polling needed
+    // Mirror TAKServer's event-driven connection counts; no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
     override val rejectedConnectionCount: StateFlow<Int> = takServer.rejectedConnectionCount
 
