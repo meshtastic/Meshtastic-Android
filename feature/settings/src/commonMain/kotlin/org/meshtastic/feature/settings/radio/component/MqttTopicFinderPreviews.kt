@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.network.mqtt.LatLon
+import org.meshtastic.core.network.mqtt.MqttRootDirectory
 import org.meshtastic.core.network.mqtt.MqttTopicDiscovery
 import org.meshtastic.core.network.mqtt.MqttTopicSampler
 import org.meshtastic.core.repository.GeocodedPlace
@@ -69,5 +70,14 @@ private fun sampleState(phase: MqttTopicSampler.Phase): MqttTopicFinderViewModel
             activity = activity,
             messageCount = activity.values.sumOf { it.messageCount },
         ),
+        directory = TEXAS_DIRECTORY,
     )
 }
+
+/** The slice of the published directory a Texarkana plan reads. */
+private val TEXAS_DIRECTORY =
+    MqttRootDirectory(
+        entries = emptyList(),
+        neighbors = mapOf("US-TX" to setOf("US-AR", "US-LA", "US-NM", "US-OK")),
+        subdivisionSegments = mapOf("US" to mapOf("texas" to "TX")),
+    )

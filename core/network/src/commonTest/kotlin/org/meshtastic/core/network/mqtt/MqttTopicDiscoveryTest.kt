@@ -191,16 +191,9 @@ class MqttTopicDiscoveryTest {
     }
 
     @Test
-    fun neighborsAreSymmetricInTheSeed() {
-        val neighbors = MqttRootDirectory.SEED.neighbors
-        neighbors.forEach { (a, set) -> set.forEach { b -> assertTrue(a in neighbors.getValue(b), "$b lacks $a") } }
-        assertEquals(setOf("US-AR", "US-LA", "US-NM", "US-OK"), neighbors.getValue("US-TX"))
-    }
-
-    @Test
     fun communityEntryIsSuggestedBySubdivisionOrRadius() {
         val directory =
-            MqttRootDirectory.SEED.copy(
+            US_DIRECTORY.copy(
                 entries =
                 listOf(
                     MqttRootEntry("msh/US/DMV", "DMV", subdivisions = setOf("US-DC", "US-MD", "US-VA")),
@@ -260,7 +253,7 @@ class MqttTopicDiscoveryTest {
         region: String,
         place: GeocodedPlace?,
         heard: Map<String, MqttTopicDiscovery.Activity> = emptyMap(),
-    ) = TopicPlan.build(region, place, null, MqttRootDirectory.SEED, heard)
+    ) = TopicPlan.build(region, place, null, US_DIRECTORY, heard)
 
     private fun activity(nodeCount: Int): MqttTopicDiscovery.Activity = MqttTopicDiscovery.Activity().apply {
         repeat(nodeCount) { nodes += "!${it.toString(radix = 16).padStart(length = 8, padChar = '0')}" }
@@ -303,5 +296,23 @@ class MqttTopicDiscoveryTest {
             }
             .build()
             .encode()
+    }
+
+    private companion object {
+        /** The slice of the published directory these plans touch. */
+        val US_DIRECTORY =
+            MqttRootDirectory(
+                entries = emptyList(),
+                neighbors =
+                mapOf(
+                    "US-TX" to setOf("US-AR", "US-LA", "US-NM", "US-OK"),
+                    "US-AR" to setOf("US-TX"),
+                    "US-LA" to setOf("US-TX"),
+                    "US-NM" to setOf("US-TX"),
+                    "US-OK" to setOf("US-TX"),
+                ),
+                subdivisionSegments =
+                mapOf("US" to mapOf("illinois" to "IL", "texas" to "TX", "virginia" to "VA", "washington" to "WA")),
+            )
     }
 }

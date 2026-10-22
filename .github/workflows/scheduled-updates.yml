@@ -56,6 +56,10 @@ jobs:
         id: maintenance_uf2
         run: scripts/scheduled-updates/assets.sh fetch maintenance_uf2
 
+      - name: Update MQTT root directory
+        id: mqtt_roots
+        run: scripts/scheduled-updates/assets.sh fetch mqtt_roots
+
       - name: Refresh Obtainium configs and deep links
         id: obtainium
         env:
@@ -242,6 +246,8 @@ jobs:
           BOOTLOADER_QUIRKS_DETAIL: ${{ steps.bootloader_quirks.outputs.detail }}
           MAINTENANCE_UF2_STATUS: ${{ steps.maintenance_uf2.outputs.status }}
           MAINTENANCE_UF2_DETAIL: ${{ steps.maintenance_uf2.outputs.detail }}
+          MQTT_ROOTS_STATUS: ${{ steps.mqtt_roots.outputs.status }}
+          MQTT_ROOTS_DETAIL: ${{ steps.mqtt_roots.outputs.detail }}
           OBTAINIUM_STATUS: ${{ steps.obtainium.outputs.status }}
           OBTAINIUM_DETAIL: ${{ steps.obtainium.outputs.detail }}
           SCHEMA_PIN_CHANGED: ${{ steps.schema_pin.outputs.changed }}
@@ -310,6 +316,7 @@ jobs:
             androidApp/src/main/assets/device_links.json
             androidApp/src/main/assets/device_bootloader_ota_quirks.json
             androidApp/src/main/assets/maintenance_uf2.json
+            androidApp/src/main/assets/mqtt_roots.json
             fastlane/metadata/android/**
             **/strings.xml
             **/schema_strings.xml

@@ -35,6 +35,7 @@ import org.meshtastic.core.network.mqtt.MqttTopicSampler
 import org.meshtastic.core.network.mqtt.TopicPlan
 import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.repository.MqttRootsRepository
 import org.meshtastic.core.repository.ReverseGeocoder
 import org.meshtastic.proto.ModuleConfig
 import kotlin.time.Duration.Companion.seconds
@@ -47,6 +48,7 @@ import kotlin.time.Duration.Companion.seconds
 class MqttTopicFinderViewModel(
     private val reverseGeocoder: ReverseGeocoder,
     private val locationService: LocationService,
+    private val mqttRootsRepository: MqttRootsRepository,
 ) : ViewModel() {
     data class UiState(
         val regionName: String? = null,
@@ -55,10 +57,11 @@ class MqttTopicFinderViewModel(
         val locating: Boolean = false,
         val geocodeFailed: Boolean = false,
         val sample: MqttTopicSampler.State = MqttTopicSampler.State(),
+        val directory: MqttRootDirectory = MqttRootDirectory.EMPTY,
     ) {
         /** Rebuilt from each snapshot, since whether the country level is offered depends on what has been heard. */
         val plan: TopicPlan? by lazy {
-            regionName?.let { TopicPlan.build(it, place, location, MqttRootDirectory.SEED, sample.activity) }
+            regionName?.let { TopicPlan.build(it, place, location, directory, sample.activity) }
         }
     }
 
@@ -71,6 +74,17 @@ class MqttTopicFinderViewModel(
 
     init {
         viewModelScope.launch { sampler.state.collect { sample -> _state.update { it.copy(sample = sample) } } }
+        viewModelScope.launch {
+            // The seed shows at once; the fetch replaces it when it lands.
+            loadDirectory()
+            mqttRootsRepository.reconcile()
+            loadDirectory()
+        }
+    }
+
+    private suspend fun loadDirectory() {
+        val directory = MqttRootDirectory.from(mqttRootsRepository.getSnapshot())
+        _state.update { it.copy(directory = directory) }
     }
 
     private var openedSession: Int? = null
@@ -90,7 +104,7 @@ class MqttTopicFinderViewModel(
      */
     fun start(config: ModuleConfig.MQTTConfig, regionName: String?, radioPosition: LatLon?) {
         stop()
-        _state.update { UiState(regionName = regionName, sample = it.sample) }
+        _state.update { UiState(regionName = regionName, sample = it.sample, directory = it.directory) }
         if (regionName == null) return
         planJob = viewModelScope.launch { locate(radioPosition) }
         val previous = sampleJob

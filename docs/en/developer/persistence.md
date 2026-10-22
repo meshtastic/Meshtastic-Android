@@ -60,6 +60,7 @@ The primary structured data store:
 | `EventFirmwareEditionEntity` | Event-firmware display records cached from the Meshtastic API (`/resource/eventFirmware`) |
 | `BootloaderOtaQuirksCacheEntity` | Single-row cache of the nRF52 bootloader/OTA quirk catalog (`/resource/bootloaderOtaQuirks`), stored as one serialized envelope |
 | `MaintenanceUf2CacheEntity` | Single-row cache of the maintenance-UF2 manifest (`/resource/maintenanceUf2`), stored as one serialized envelope |
+| `MqttRootsCacheEntity` | Single-row cache of the MQTT root directory the topic finder places a user with (`/resource/mqttRoots`), stored as one serialized envelope |
 | `MergeMarkerEntity` | Marks a completed `DatabaseMerger` merge so a re-run on the next connection skips it instead of duplicating rows |
 
 > ℹ️ **Note:** Waypoints are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Telemetry isn't a `Packet`: `MeshLogRepository.getTelemetryFrom` reads it from `MeshLog`. Channel *configuration* (names and LoRa settings) lives separately, in `ChannelSetEntity`.

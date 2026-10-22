@@ -1,0 +1,554 @@
+{
+  "entries": [
+    {
+      "root": "msh/US/CA/sacvalley",
+      "name": "sacvalley",
+      "center": [
+        38.64,
+        -121.163
+      ],
+      "radiusKm": 60
+    },
+    {
+      "root": "msh/US/CA/socalmesh",
+      "name": "socalmesh",
+      "center": [
+        34.114,
+        -118.304
+      ],
+      "radiusKm": 120
+    },
+    {
+      "root": "msh/US/DMV",
+      "name": "DMV",
+      "center": [
+        39.168,
+        -76.897
+      ],
+      "radiusKm": 55
+    },
+    {
+      "root": "msh/US/GA/csramsh",
+      "name": "csramsh",
+      "center": [
+        33.528,
+        -82.444
+      ],
+      "radiusKm": 45
+    },
+    {
+      "root": "msh/US/GSMC",
+      "name": "GSMC",
+      "center": [
+        32.217,
+        -82.156
+      ],
+      "radiusKm": 150
+    },
+    {
+      "root": "msh/US/IL/Central",
+      "name": "Central",
+      "center": [
+        40.157,
+        -88.559
+      ],
+      "radiusKm": 100
+    },
+    {
+      "root": "msh/US/IL/Chi",
+      "name": "Chi",
+      "center": [
+        41.956,
+        -87.917
+      ],
+      "radiusKm": 50
+    },
+    {
+      "root": "msh/US/MeshSTL",
+      "name": "MeshSTL",
+      "center": [
+        38.581,
+        -90.374
+      ],
+      "radiusKm": 50
+    },
+    {
+      "root": "msh/US/NY/CNY",
+      "name": "CNY",
+      "center": [
+        43.45,
+        -76.245
+      ],
+      "radiusKm": 100
+    },
+    {
+      "root": "msh/US/NY/WNY",
+      "name": "WNY",
+      "center": [
+        42.91,
+        -78.325
+      ],
+      "radiusKm": 80
+    },
+    {
+      "root": "msh/US/PA/WPAmesh",
+      "name": "WPAmesh",
+      "center": [
+        40.501,
+        -79.967
+      ],
+      "radiusKm": 145
+    },
+    {
+      "root": "msh/US/SecKC",
+      "name": "SecKC",
+      "center": [
+        38.876,
+        -94.817
+      ],
+      "radiusKm": 145
+    },
+    {
+      "root": "msh/US/VA/VBMesh",
+      "name": "VBMesh",
+      "center": [
+        36.844,
+        -76.14
+      ],
+      "radiusKm": 25
+    },
+    {
+      "root": "msh/US/bayarea",
+      "name": "bayarea",
+      "center": [
+        37.696,
+        -122.002
+      ],
+      "radiusKm": 200
+    },
+    {
+      "root": "msh/US/mqtt-bayme-sh",
+      "name": "mqtt-bayme-sh",
+      "center": [
+        37.69,
+        -121.992
+      ],
+      "radiusKm": 150
+    },
+    {
+      "root": "msh/EU_868/9A",
+      "name": "9A",
+      "center": [
+        45.59,
+        15.968
+      ],
+      "radiusKm": 175
+    },
+    {
+      "root": "msh/EU_868/DE/S-H",
+      "name": "S-H",
+      "center": [
+        54.218,
+        10.204
+      ],
+      "radiusKm": 75
+    },
+    {
+      "root": "msh/EU_868/Hamburg/hamburg",
+      "name": "hamburg",
+      "center": [
+        53.641,
+        10.06
+      ],
+      "radiusKm": 25
+    },
+    {
+      "root": "msh/EU_868/Scotland",
+      "name": "Scotland",
+      "center": [
+        55.974,
+        -3.165
+      ],
+      "radiusKm": 30
+    },
+    {
+      "root": "msh/EU_868/nedermsh/potatonet",
+      "name": "potatonet",
+      "center": [
+        52.029,
+        4.712
+      ],
+      "radiusKm": 170
+    }
+  ],
+  "neighbors": {
+    "US-AL": [
+      "US-FL",
+      "US-GA",
+      "US-MS",
+      "US-TN"
+    ],
+    "US-AR": [
+      "US-LA",
+      "US-MO",
+      "US-MS",
+      "US-OK",
+      "US-TN",
+      "US-TX"
+    ],
+    "US-AZ": [
+      "US-CA",
+      "US-NM",
+      "US-NV",
+      "US-UT"
+    ],
+    "US-CA": [
+      "US-AZ",
+      "US-NV",
+      "US-OR"
+    ],
+    "US-CO": [
+      "US-KS",
+      "US-NE",
+      "US-NM",
+      "US-OK",
+      "US-UT",
+      "US-WY"
+    ],
+    "US-CT": [
+      "US-MA",
+      "US-NY",
+      "US-RI"
+    ],
+    "US-DC": [
+      "US-MD",
+      "US-VA"
+    ],
+    "US-DE": [
+      "US-MD",
+      "US-NJ",
+      "US-PA"
+    ],
+    "US-FL": [
+      "US-AL",
+      "US-GA"
+    ],
+    "US-GA": [
+      "US-AL",
+      "US-FL",
+      "US-NC",
+      "US-SC",
+      "US-TN"
+    ],
+    "US-IA": [
+      "US-IL",
+      "US-MN",
+      "US-MO",
+      "US-NE",
+      "US-SD",
+      "US-WI"
+    ],
+    "US-ID": [
+      "US-MT",
+      "US-NV",
+      "US-OR",
+      "US-UT",
+      "US-WA",
+      "US-WY"
+    ],
+    "US-IL": [
+      "US-IA",
+      "US-IN",
+      "US-KY",
+      "US-MO",
+      "US-WI"
+    ],
+    "US-IN": [
+      "US-IL",
+      "US-KY",
+      "US-MI",
+      "US-OH"
+    ],
+    "US-KS": [
+      "US-CO",
+      "US-MO",
+      "US-NE",
+      "US-OK"
+    ],
+    "US-KY": [
+      "US-IL",
+      "US-IN",
+      "US-MO",
+      "US-OH",
+      "US-TN",
+      "US-VA",
+      "US-WV"
+    ],
+    "US-LA": [
+      "US-AR",
+      "US-MS",
+      "US-TX"
+    ],
+    "US-MA": [
+      "US-CT",
+      "US-NH",
+      "US-NY",
+      "US-RI",
+      "US-VT"
+    ],
+    "US-MD": [
+      "US-DC",
+      "US-DE",
+      "US-PA",
+      "US-VA",
+      "US-WV"
+    ],
+    "US-ME": [
+      "US-NH"
+    ],
+    "US-MI": [
+      "US-IN",
+      "US-OH",
+      "US-WI"
+    ],
+    "US-MN": [
+      "US-IA",
+      "US-ND",
+      "US-SD",
+      "US-WI"
+    ],
+    "US-MO": [
+      "US-AR",
+      "US-IA",
+      "US-IL",
+      "US-KS",
+      "US-KY",
+      "US-NE",
+      "US-OK",
+      "US-TN"
+    ],
+    "US-MS": [
+      "US-AL",
+      "US-AR",
+      "US-LA",
+      "US-TN"
+    ],
+    "US-MT": [
+      "US-ID",
+      "US-ND",
+      "US-SD",
+      "US-WY"
+    ],
+    "US-NC": [
+      "US-GA",
+      "US-SC",
+      "US-TN",
+      "US-VA"
+    ],
+    "US-ND": [
+      "US-MN",
+      "US-MT",
+      "US-SD"
+    ],
+    "US-NE": [
+      "US-CO",
+      "US-IA",
+      "US-KS",
+      "US-MO",
+      "US-SD",
+      "US-WY"
+    ],
+    "US-NH": [
+      "US-MA",
+      "US-ME",
+      "US-VT"
+    ],
+    "US-NJ": [
+      "US-DE",
+      "US-NY",
+      "US-PA"
+    ],
+    "US-NM": [
+      "US-AZ",
+      "US-CO",
+      "US-OK",
+      "US-TX"
+    ],
+    "US-NV": [
+      "US-AZ",
+      "US-CA",
+      "US-ID",
+      "US-OR",
+      "US-UT"
+    ],
+    "US-NY": [
+      "US-CT",
+      "US-MA",
+      "US-NJ",
+      "US-PA",
+      "US-VT"
+    ],
+    "US-OH": [
+      "US-IN",
+      "US-KY",
+      "US-MI",
+      "US-PA",
+      "US-WV"
+    ],
+    "US-OK": [
+      "US-AR",
+      "US-CO",
+      "US-KS",
+      "US-MO",
+      "US-NM",
+      "US-TX"
+    ],
+    "US-OR": [
+      "US-CA",
+      "US-ID",
+      "US-NV",
+      "US-WA"
+    ],
+    "US-PA": [
+      "US-DE",
+      "US-MD",
+      "US-NJ",
+      "US-NY",
+      "US-OH",
+      "US-WV"
+    ],
+    "US-RI": [
+      "US-CT",
+      "US-MA"
+    ],
+    "US-SC": [
+      "US-GA",
+      "US-NC"
+    ],
+    "US-SD": [
+      "US-IA",
+      "US-MN",
+      "US-MT",
+      "US-ND",
+      "US-NE",
+      "US-WY"
+    ],
+    "US-TN": [
+      "US-AL",
+      "US-AR",
+      "US-GA",
+      "US-KY",
+      "US-MO",
+      "US-MS",
+      "US-NC",
+      "US-VA"
+    ],
+    "US-TX": [
+      "US-AR",
+      "US-LA",
+      "US-NM",
+      "US-OK"
+    ],
+    "US-UT": [
+      "US-AZ",
+      "US-CO",
+      "US-ID",
+      "US-NV",
+      "US-WY"
+    ],
+    "US-VA": [
+      "US-DC",
+      "US-KY",
+      "US-MD",
+      "US-NC",
+      "US-TN",
+      "US-WV"
+    ],
+    "US-VT": [
+      "US-MA",
+      "US-NH",
+      "US-NY"
+    ],
+    "US-WA": [
+      "US-ID",
+      "US-OR"
+    ],
+    "US-WI": [
+      "US-IA",
+      "US-IL",
+      "US-MI",
+      "US-MN"
+    ],
+    "US-WV": [
+      "US-KY",
+      "US-MD",
+      "US-OH",
+      "US-PA",
+      "US-VA"
+    ],
+    "US-WY": [
+      "US-CO",
+      "US-ID",
+      "US-MT",
+      "US-NE",
+      "US-SD",
+      "US-UT"
+    ]
+  },
+  "subdivisionSegments": {
+    "US": {
+      "alabama": "AL",
+      "alaska": "AK",
+      "arizona": "AZ",
+      "arkansas": "AR",
+      "california": "CA",
+      "colorado": "CO",
+      "connecticut": "CT",
+      "delaware": "DE",
+      "district of columbia": "DC",
+      "florida": "FL",
+      "georgia": "GA",
+      "hawaii": "HI",
+      "idaho": "ID",
+      "illinois": "IL",
+      "indiana": "IN",
+      "iowa": "IA",
+      "kansas": "KS",
+      "kentucky": "KY",
+      "louisiana": "LA",
+      "maine": "ME",
+      "maryland": "MD",
+      "massachusetts": "MA",
+      "michigan": "MI",
+      "minnesota": "MN",
+      "mississippi": "MS",
+      "missouri": "MO",
+      "montana": "MT",
+      "nebraska": "NE",
+      "nevada": "NV",
+      "new hampshire": "NH",
+      "new jersey": "NJ",
+      "new mexico": "NM",
+      "new york": "NY",
+      "north carolina": "NC",
+      "north dakota": "ND",
+      "ohio": "OH",
+      "oklahoma": "OK",
+      "oregon": "OR",
+      "pennsylvania": "PA",
+      "puerto rico": "PR",
+      "rhode island": "RI",
+      "south carolina": "SC",
+      "south dakota": "SD",
+      "tennessee": "TN",
+      "texas": "TX",
+      "utah": "UT",
+      "vermont": "VT",
+      "virginia": "VA",
+      "washington": "WA",
+      "west virginia": "WV",
+      "wisconsin": "WI",
+      "wyoming": "WY"
+    }
+  }
+}

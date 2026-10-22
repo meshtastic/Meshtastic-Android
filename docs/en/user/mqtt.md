@@ -76,7 +76,8 @@ around you, with the number of nodes heard on each.
 - **Near you** lists the region, then the country when the broker shows it in use (`msh/EU_868/DE`),
   then your state or province and city, named from the node's position or, failing that, the
   phone's location. The phone's geocoder turns the location into place names; the location itself
-  never reaches the broker.
+  never reaches the broker. Community roots whose names don't say where they are (`msh/US/DMV`)
+  follow when they serve your area, from a directory the app refreshes from the Meshtastic API.
 - **Active topics** lists every other root heard. Roots under your state or city come first, then
   roots in neighboring states, then the rest.
 - **Custom topic** takes any root the node accepts: up to 31 ASCII characters, no leading or
