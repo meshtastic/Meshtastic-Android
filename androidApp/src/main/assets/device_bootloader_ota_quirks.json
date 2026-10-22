@@ -302,6 +302,14 @@
         "seeed_wio_tracker_L1_Pro_1W"
       ],
       "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 151,
+      "hwModelSlug": "NODARA",
+      "platformioTargets": [
+        "nodara"
+      ],
+      "softDevice": "6.1.1"
     }
   ]
 }
