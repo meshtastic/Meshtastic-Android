@@ -356,6 +356,7 @@ fun TakServerScreen(onBack: () -> Unit) {
 }
 
 /** Stateless TAK server enable/disable section — previewable without DI. */
+@Suppress("LongParameterList")
 @Composable
 internal fun TakServerSection(
     isTakServerEnabled: Boolean,
