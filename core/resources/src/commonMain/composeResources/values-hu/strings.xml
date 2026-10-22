@@ -312,6 +312,8 @@
     <string name="legacy_admin_channel">Régi admin csatorna</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Közvetlen</string>
     <!-- LOAD -->
     <string name="load">Terhelés</string>
     <string name="load_indexed">Terhelés %1$d</string>
@@ -414,6 +416,7 @@
     <string name="mqtt_config">MQTT beállítások</string>
     <string name="mqtt_status_connected">Csatlakoztatva</string>
     <string name="mqtt_status_disconnected">Szétkapcsolva</string>
+    <string name="mqtt_topic_finder_level_region">Régió</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/installation">docs</a>-ből.</string>
     <!-- MUTE -->

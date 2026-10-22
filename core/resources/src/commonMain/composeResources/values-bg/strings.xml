@@ -614,6 +614,9 @@
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
     <string name="licensed_mode_enable_confirm">Активиране на лицензиран режим</string>
     <string name="licensed_mode_enable_title">Да се ​​активира лицензиран (Радиолюбителски) режим?</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Директно</string>
+    <string name="live_update_unread">%1$d непрочетени</string>
     <!-- LOAD -->
     <string name="load">Натоварване</string>
     <string name="load_15_min">Натоварване 15m</string>
@@ -804,6 +807,9 @@
     <string name="mqtt_status_reconnecting">Повторно свързване…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Повторно свързване (опит %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Тестване на връзката</string>
+    <string name="mqtt_topic_finder_connecting">Свързване…</string>
+    <string name="mqtt_topic_finder_level_country">Държава</string>
+    <string name="mqtt_topic_finder_level_region">Регион</string>
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <!-- MUTE -->

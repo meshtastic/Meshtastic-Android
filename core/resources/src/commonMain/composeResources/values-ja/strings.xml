@@ -462,7 +462,6 @@
     <string name="doc_keywords_telemetry">テレメトリ,センサー,温度,湿度,気圧,電源,telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">翻訳,Crowdin,ローカライズ,言語,i18n,貢献,translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">単位,ロケール,メートル法,ヤードポンド法,温度,距離,units,locale,metric,imperial,temperature,distance</string>
-    <string name="doc_keywords_widget">ウィジェット,ホーム画面,ローカル統計,バッテリー,使用率,widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_search_placeholder">ドキュメントを検索…</string>
     <string name="doc_section_developer">開発者ガイド</string>
     <string name="doc_section_user">ユーザーガイド</string>
@@ -752,6 +751,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">アマチュア無線従事者 (ハム/HAM)</string>
     <string name="licensed_amateur_radio_text">このオプションを有効にすると、暗号化が無効になりデフォルトのMeshtasticネットワークと互換性が無くなります。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直接</string>
+    <string name="live_update_distance">%1$s 先</string>
     <!-- LOAD -->
     <string name="load">負荷</string>
     <string name="load_15_min">負荷 15分</string>
@@ -966,6 +968,8 @@
     <string name="mqtt_status_reconnecting">再接続しています…</string>
     <string name="mqtt_status_reconnecting_with_attempt">再接続しています（試行 %1$d）：%2$s</string>
     <string name="mqtt_test_connection">接続をテスト</string>
+    <string name="mqtt_topic_finder_connecting">接続しています…</string>
+    <string name="mqtt_topic_finder_level_region">リージョン</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="must_update">アプリが古く、デバイスと通信ができません。アプリストアまたはGithubでアプリを更新してください。詳細は<a href="https://meshtastic.org/docs/software/android/installation">こちら</a> に記載されています。</string>
     <!-- MUTE -->

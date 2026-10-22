@@ -37,7 +37,7 @@ By default, direct messages, alerts and notices from your node pop up on screen,
 
 Alert notifications play an alarm sound. To let them through Do Not Disturb as well, open the category and allow it to override Do Not Disturb, which is the step [Getting Started](onboarding#critical-alerts-permission) offers during setup.
 
-The service notification stays in the shade while Meshtastic is connected in the background. It shows the connection state, and also shows progress while a firmware update or a preset scan runs.
+The service notification stays in the shade while Meshtastic is connected in the background. It shows the connection state, and also shows progress while a firmware update or a preset scan runs. On Android 16 and newer you can turn it into a [Live Update](connections#live-update) that shows your mesh or one node in the status bar.
 
 > ℹ️ **Note:** The Desktop app has no notification categories. It switches notifications from its own settings instead, described in [Notification Preferences](desktop#notification-preferences).
 

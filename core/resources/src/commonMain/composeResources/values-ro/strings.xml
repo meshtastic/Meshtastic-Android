@@ -439,6 +439,8 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamator autorizat</string>
     <string name="licensed_amateur_radio_text">Activarea acestei opțiuni dezactivează criptarea și nu este compatibilă cu rețeaua implicită de Meshtastic.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direct</string>
     <!-- LOAD -->
     <string name="load">Încarcă</string>
     <string name="load_15_min">Încărcare 15m</string>
@@ -569,6 +571,7 @@
     <string name="mqtt_config">Configurare MQTT</string>
     <string name="mqtt_status_connected">Conectat</string>
     <string name="mqtt_status_disconnected">Deconectat</string>
+    <string name="mqtt_topic_finder_level_region">Regiune</string>
     <string name="must_set_region">Trebuie să alegeți o regiune!</string>
     <string name="must_update">Trebuie să updatezi această aplicație de pe Google Play  (sau Github). Aplicația este prea veche pentru a comunica cu dispozitivul.</string>
     <!-- MUTE -->

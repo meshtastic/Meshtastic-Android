@@ -303,6 +303,9 @@
     <string name="legacy_admin_channel">Canal de administração antigo</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a criptografia e não é compatível com a rede padrão do Meshtastic.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direto</string>
+    <string name="live_update_distance">%1$s de distância</string>
     <!-- LOAD -->
     <string name="load">Carregar</string>
     <string name="load_indexed">Carga %1$d</string>
@@ -387,6 +390,7 @@
     <string name="mqtt_config">Configurações MQTT</string>
     <string name="mqtt_status_connected">Conectado</string>
     <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_topic_finder_level_region">Região</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://meshtastic.org/docs/software/android/installation">docs</a>.</string>
     <!-- MUTE -->

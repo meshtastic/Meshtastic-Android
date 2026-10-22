@@ -182,6 +182,8 @@
     <!-- LAYER -->
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direct</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -238,6 +240,7 @@
     <string name="mqtt_config">MQTT Configuratie</string>
     <string name="mqtt_status_connected">Verbonden</string>
     <string name="mqtt_status_disconnected">Niet verbonden</string>
+    <string name="mqtt_topic_finder_level_region">Regio</string>
     <string name="must_set_region">Je moet een regio instellen!</string>
     <string name="must_update">Applicatie update noodzakelijk in Google Play store (of Github). Deze versie is te oud om te praten met deze radio.</string>
     <!-- MUTE -->

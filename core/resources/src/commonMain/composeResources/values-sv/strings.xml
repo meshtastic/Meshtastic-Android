@@ -536,6 +536,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkt</string>
+    <string name="live_update_distance">%1$s bort</string>
     <!-- LOAD -->
     <string name="load">Ladda</string>
     <string name="load_15_min">Ladda 15 min</string>
@@ -677,6 +680,8 @@
     <string name="mqtt_status_reconnecting">Återansluter…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Återansluter (försök %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Testa anslutningen</string>
+    <string name="mqtt_topic_finder_connecting">Ansluter…</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
     <!-- MUTE -->

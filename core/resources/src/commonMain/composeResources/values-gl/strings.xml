@@ -101,6 +101,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -137,6 +138,7 @@
     <string name="module_settings">Configuración de módulo</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_topic_finder_level_region">Rexión</string>
     <string name="must_set_region">Tes que seleccionar rexión!</string>
     <string name="must_update">Debe actualizar esta aplicación na tenda (ou Github).  É moi vella para falar con este firmware de radio. Por favor lea a nosa <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> neste tema.</string>
     <!-- MUTE -->

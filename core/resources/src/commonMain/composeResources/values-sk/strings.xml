@@ -188,6 +188,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Priamo</string>
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>
     <!-- LOCAL -->
@@ -259,6 +261,7 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_connected">Pripojený</string>
     <string name="mqtt_status_disconnected">Odpojené</string>
+    <string name="mqtt_topic_finder_level_region">Región</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/installation">Meshtastic docs</a>.</string>
     <!-- MUTE -->

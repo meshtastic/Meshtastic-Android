@@ -121,6 +121,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Neposreden</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -162,6 +164,7 @@
     <string name="module_settings">Nastavitev modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Prekinjeno</string>
+    <string name="mqtt_topic_finder_level_region">Regija</string>
     <string name="must_set_region">Nastavitev regije!</string>
     <string name="must_update">To aplikacijo morate posodobiti v trgovini Google Play (ali Github). Žal se ne more povezati s tem radiem.</string>
     <!-- MUTE -->

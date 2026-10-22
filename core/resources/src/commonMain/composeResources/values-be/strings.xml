@@ -134,6 +134,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -167,6 +168,7 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_connected">Злучаны</string>
     <string name="mqtt_status_disconnected">Адлучана</string>
+    <string name="mqtt_topic_finder_level_region">Рэгіён</string>
     <string name="must_set_region">Трэба наладзіць рэгіён!</string>
     <!-- MUTE -->
     <string name="mute_1_week">1 тыдзень</string>

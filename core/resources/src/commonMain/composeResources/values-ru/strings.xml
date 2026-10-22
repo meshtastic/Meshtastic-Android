@@ -531,7 +531,6 @@
     <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
-    <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_loading">Загрузка документации…</string>
     <string name="doc_no_content">Содержимое недоступно</string>
     <string name="doc_no_documentation">Документация недоступна</string>
@@ -908,6 +907,10 @@
     <string name="licensed_mode_enable_warning_signed">Лицензированный режим удаляет ключи шифрования каналов и отключает канал администратора, поэтому весь трафик передаётся в открытом виде, который может прочитать кто угодно, но он имеет цифровую подпись, позволяя другим нодам убедиться, что сообщение исходит от тебя. Номер вашей ноды может однократно измениться, чтобы совпасть с твоим ключом идентификации, поэтому избранное, история сообщений, удалённое администрирование и другие ноды могут поначалу воспринять её как новую; вы остаётесь ответственны за соблюдение требований вашей радиолюбительской лицензии и местных нормативов.</string>
     <string name="lightning_distance">Расстояние до грозы</string>
     <string name="lightning_strikes_1h">Молнии (за 1 ч)</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Прямой</string>
+    <string name="live_update_distance">%1$s отсюда</string>
+    <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
     <string name="load_15_min">Загрузка 15 мин</string>
@@ -1222,6 +1225,8 @@
     <string name="mqtt_status_topics_refused_all">Подключено, но брокер отклонил все темы: %1$s</string>
     <string name="mqtt_status_topics_refused_some">Подключено, но брокер отказал %1$s</string>
     <string name="mqtt_test_connection">Проверить соединение</string>
+    <string name="mqtt_topic_finder_connecting">Подключение…</string>
+    <string name="mqtt_topic_finder_level_region">Регион / Страна</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <!-- MUTE -->

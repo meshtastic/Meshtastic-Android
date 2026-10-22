@@ -461,7 +461,6 @@
     <string name="doc_keywords_telemetry">telemetria,sensore,temperatura,umidità,pressione,alimentazione</string>
     <string name="doc_keywords_translate">traduzione,crowdin,localizzazione,lingua,i18n,contribuire</string>
     <string name="doc_keywords_units">unità,lingua,metrico,imperiale,temperatura,distanza</string>
-    <string name="doc_keywords_widget">widget,schermata home,statistiche locali,glance,batteria,utilizzo</string>
     <string name="doc_search_placeholder">Cerca nella documentazione…</string>
     <string name="doc_section_developer">Guida per sviluppatori</string>
     <string name="doc_section_user">Guida utente</string>
@@ -751,6 +750,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamatore con licenza (Ham)</string>
     <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Diretto</string>
+    <string name="live_update_distance">distante %1$s</string>
     <!-- LOAD -->
     <string name="load">Carico</string>
     <string name="load_15_min">Carico 15m</string>
@@ -966,6 +968,9 @@
     <string name="mqtt_status_reconnecting">Riconnessione…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Riconnessione (tentativo %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Prova la connessione</string>
+    <string name="mqtt_topic_finder_connecting">Connessione…</string>
+    <string name="mqtt_topic_finder_level_country">Paese</string>
+    <string name="mqtt_topic_finder_level_region">Regione</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="must_update">È necessario aggiornare questa applicazione nell'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <!-- MUTE -->

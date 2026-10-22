@@ -118,6 +118,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Tiesiogiai</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -159,6 +161,7 @@
     <string name="module_settings">Modulio konfigūracija</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Atsijungta</string>
+    <string name="mqtt_topic_finder_level_region">Regionas</string>
     <string name="must_set_region">Turite nustatyti regioną!</string>
     <string name="must_update">Urite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šiuo radijo įrangos programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
     <!-- MUTE -->

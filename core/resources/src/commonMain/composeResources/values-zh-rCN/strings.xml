@@ -468,7 +468,6 @@
     <string name="doc_keywords_telemetry">遥测,传感器,温度,湿度,压力,功率</string>
     <string name="doc_keywords_translate">翻译,本地化管理平台,本地化,语言,国际化,贡献</string>
     <string name="doc_keywords_units">单位,区域设置,公制,英制,温度,距离</string>
-    <string name="doc_keywords_widget">桌面小部件,主屏幕,本地统计数据,速览,电池,占用率</string>
     <string name="doc_search_placeholder">搜索文档…</string>
     <string name="doc_section_developer">开发者指南</string>
     <string name="doc_section_user">使用文档</string>
@@ -766,6 +765,11 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">业余无线电模式（Ham）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直频</string>
+    <string name="live_update_distance">%1$s 离开</string>
+    <string name="live_update_start">开始</string>
+    <string name="live_update_unread">%1$d 未读</string>
     <!-- LOAD -->
     <string name="load">负载</string>
     <string name="load_15_min">负载15分钟</string>
@@ -980,6 +984,8 @@
     <string name="mqtt_status_reconnecting">正在重新连接…</string>
     <string name="mqtt_status_reconnecting_with_attempt">正在重新连接 (尝试 %1$d) — %2$s</string>
     <string name="mqtt_test_connection">连接测试</string>
+    <string name="mqtt_topic_finder_connecting">正在连接…</string>
+    <string name="mqtt_topic_finder_level_region">区域</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <!-- MUTE -->
