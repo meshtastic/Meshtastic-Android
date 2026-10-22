@@ -36,6 +36,8 @@ import org.meshtastic.feature.settings.component.SampleNodeCompleteFahrenheitPre
 import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteToggleMatrixPreview
+import org.meshtastic.feature.settings.radio.component.MqttTopicFinderFinishedPreview
+import org.meshtastic.feature.settings.radio.component.MqttTopicFinderListeningPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityBalancedPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityDefaultPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictConfirmationPreview
@@ -282,4 +284,18 @@ fun ScreenshotSettingsSearchResults() {
 @Composable
 fun ScreenshotSettingsSearchNoResults() {
     SettingsSearchNoResultsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMqttTopicFinderFinished() {
+    MqttTopicFinderFinishedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMqttTopicFinderListening() {
+    MqttTopicFinderListeningPreview()
 }

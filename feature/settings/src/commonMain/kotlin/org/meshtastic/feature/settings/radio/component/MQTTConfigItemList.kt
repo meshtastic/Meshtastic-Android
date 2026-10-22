@@ -34,9 +34,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.mqtt.LatLon
+import org.meshtastic.core.network.mqtt.MqttRootTopic
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.json_output_enabled
@@ -78,6 +85,7 @@ import org.meshtastic.core.resources.mqtt_status_reconnecting_with_attempt
 import org.meshtastic.core.resources.mqtt_status_topics_refused_all
 import org.meshtastic.core.resources.mqtt_status_topics_refused_some
 import org.meshtastic.core.resources.mqtt_test_connection
+import org.meshtastic.core.resources.mqtt_topic_finder
 import org.meshtastic.core.resources.schema_mqtt_address
 import org.meshtastic.core.resources.schema_mqtt_address_description
 import org.meshtastic.core.resources.schema_mqtt_enabled
@@ -102,6 +110,7 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.json_enabled
 
@@ -140,6 +149,18 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             true
         }
     val focusManager = LocalFocusManager.current
+    // Zero means closed; each opening takes the next number so the sheet samples afresh.
+    var topicFinderSession by rememberSaveable { mutableIntStateOf(0) }
+    var lastTopicFinderSession by rememberSaveable { mutableIntStateOf(0) }
+    if (topicFinderSession != 0) {
+        TopicFinder(
+            session = topicFinderSession,
+            formState = formState,
+            region = state.radioConfig.lora?.region,
+            radio = destNode,
+            onClose = { topicFinderSession = 0 },
+        )
+    }
 
     RadioConfigScreenList(
         rebootBehavior = RebootBehavior.ALWAYS,
@@ -147,6 +168,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         configState = formState,
         enabled = state.connected && consentValid,
+        saveEnabled = mqttSaveEnabled(editable = state.connected && consentValid, root = formState.value.root),
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
@@ -269,7 +291,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
-                    isError = false,
+                    isError = !mqttRootAccepted(formState.value.root),
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -277,6 +299,16 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         formState.value = formState.value.newBuilder().also { wb -> wb.root = it }.build()
                     },
                 )
+                TextButton(
+                    onClick = {
+                        lastTopicFinderSession++
+                        topicFinderSession = lastTopicFinderSession
+                    },
+                    enabled = state.connected,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                ) {
+                    Text(stringResource(Res.string.mqtt_topic_finder))
+                }
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_proxy_to_client_enabled),
@@ -329,6 +361,27 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun TopicFinder(
+    session: Int,
+    formState: ConfigState<ModuleConfig.MQTTConfig>,
+    region: Config.LoRaConfig.RegionCode?,
+    radio: Node?,
+    onClose: () -> Unit,
+) {
+    MqttTopicFinderSheet(
+        session = session,
+        config = formState.value,
+        regionName = region?.takeIf { it != Config.LoRaConfig.RegionCode.UNSET }?.name,
+        radioPosition = radio?.takeIf { it.validPosition != null }?.let { LatLon(it.latitude, it.longitude) },
+        onPick = { topic ->
+            formState.value = formState.value.newBuilder().also { wb -> wb.root = topic }.build()
+            onClose()
+        },
+        onDismiss = onClose,
+    )
 }
 
 private const val MIN_INTERVAL_SECS = 3600
@@ -526,3 +579,9 @@ private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
     is MqttProbeStatus.Other ->
         stringResource(Res.string.mqtt_probe_other_failure) to MaterialTheme.colorScheme.error
 }
+
+/** Empty is the firmware's own default root, so only a typed root can be wrong. */
+internal fun mqttRootAccepted(root: String): Boolean = root.isEmpty() || MqttRootTopic.problem(root) == null
+
+/** A root the radio would reject blocks Save while the field stays editable. */
+internal fun mqttSaveEnabled(editable: Boolean, root: String): Boolean = editable && mqttRootAccepted(root)
