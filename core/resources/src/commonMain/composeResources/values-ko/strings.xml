@@ -446,6 +446,7 @@
     <string name="swipe_action_mute">음소거</string>
     <string name="swipe_action_unmute">음소거 해제</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">재생성</string>
     <string name="tak_server_section">서버</string>
     <string name="telemetry">텔레메트리</string>
     <string name="telemetry_config">텔레메트리 설정</string>

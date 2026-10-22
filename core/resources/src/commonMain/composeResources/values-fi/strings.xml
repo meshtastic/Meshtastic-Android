@@ -1625,6 +1625,7 @@
     <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
     <string name="tak_server_mesh_to_cot_desc">Näytä Meshtastic-radiot ATAK-kartalla yhteystietoina</string>
     <string name="tak_server_permission_blocked">TAK-palvelin tarvitsee paikallisverkon käyttöoikeuden yhteyksien vastaanottamiseen, eikä Android enää pyydä sitä. Käyttöoikeus on nyt poistettu käytöstä – ota se käyttöön sovelluksen asetuksissa ja ota TAK-palvelin uudelleen käyttöön.</string>
+    <string name="tak_server_regenerate_certs_confirm">Luo uudelleen</string>
     <string name="tak_server_section">Palvelin</string>
     <string name="tak_server_status">Tila</string>
     <plurals name="tak_server_status_connected">

@@ -1249,6 +1249,7 @@
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Configuration TAK</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
+    <string name="tak_server_regenerate_certs_confirm">Régénérer</string>
     <string name="tak_server_section">Serveur</string>
     <string name="tak_server_status_off">Éteint</string>
     <string name="telemetry">Télémétrie</string>

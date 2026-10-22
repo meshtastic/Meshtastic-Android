@@ -1080,6 +1080,7 @@
     <string name="tak_server">TAK-server</string>
     <string name="tak_server_enabled">Aktivera lokal TAK-server</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Förnya</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Status</string>
     <string name="tak_server_status_off">Av</string>

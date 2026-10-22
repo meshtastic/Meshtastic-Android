@@ -681,6 +681,7 @@
     <string name="swipe_action_unmute">Némítás feloldása</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Újragenerálás</string>
     <string name="tak_server_section">Szerver</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Telemetria beállítások</string>

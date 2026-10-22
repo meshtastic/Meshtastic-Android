@@ -1850,6 +1850,7 @@
     <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
     <string name="tak_server_mesh_to_cot_desc">Показывать ноды Meshtastic на карте ATAK как контакты</string>
     <string name="tak_server_permission_blocked">Сервер TAK нуждается в доступе к локальной сети для приёма подключений, и Android больше не будет спрашивать. Сейчас доступ отключен — включи разрешение в настройках приложения и снова включи сервер.</string>
+    <string name="tak_server_regenerate_certs_confirm">Сгенерировать новый</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
     <plurals name="tak_server_status_connected">

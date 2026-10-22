@@ -459,6 +459,7 @@
     <string name="swipe_action_mute">Sessiz</string>
     <string name="swipe_action_unmute">Sesi aç</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Yeniden Oluştur</string>
     <string name="tak_server_section">Sunucu</string>
     <string name="telemetry">Telemetri</string>
     <string name="telemetry_config">Telemetri Ayarı</string>

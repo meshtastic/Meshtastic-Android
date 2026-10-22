@@ -1205,6 +1205,7 @@
     <string name="tak_server">TAK сървър</string>
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Регенериране</string>
     <string name="tak_server_section">Сървър</string>
     <string name="tak_server_status">Статус</string>
     <string name="tak_server_status_failed">Не може да се стартира TAK сървъра. Изключете го и го включете, за да опитате отново.</string>

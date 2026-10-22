@@ -1017,6 +1017,7 @@
     <string name="system_settings">Системі налаштування</string>
     <!-- TAK -->
     <string name="tak_server">Сервер TAK</string>
+    <string name="tak_server_regenerate_certs_confirm">Перегенерувати</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>

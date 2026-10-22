@@ -643,6 +643,7 @@
     <string name="swipe_action_mute">Wycisz</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Wygeneruj ponownie</string>
     <string name="tak_server_section">Serwer</string>
     <string name="tak_server_status_off">Wyłączony</string>
     <string name="telemetry">Telemetria</string>
