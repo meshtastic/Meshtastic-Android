@@ -51381,697 +51381,704 @@
   },"7340": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
-    "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
+    "content": "On Android, Meshtastic provides two home screen widgets: . | Meshtastic shows live local statistics from your connected node. | Node Tracker follows one node you choose: its battery, signal, when it was last heard, how many hops away it is, and how far it is from your connected node. | . You can place as many of each as you like. Each Node Tracker remembers its own node. ",
     "url": "/Meshtastic-Android/main/en/user/widget.html",
     
     "relUrl": "/en/user/widget.html"
   },"7341": {
     "doc": "Home Screen Widget",
-    "title": "What It Shows",
-    "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
-    "url": "/Meshtastic-Android/main/en/user/widget.html#what-it-shows",
+    "title": "Local Stats",
+    "content": "The Meshtastic widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
+    "url": "/Meshtastic-Android/main/en/user/widget.html#local-stats",
     
-    "relUrl": "/en/user/widget.html#what-it-shows"
+    "relUrl": "/en/user/widget.html#local-stats"
   },"7342": {
     "doc": "Home Screen Widget",
-    "title": "Adding the Widget",
-    "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
-    "url": "/Meshtastic-Android/main/en/user/widget.html#adding-the-widget",
+    "title": "Node Tracker",
+    "content": "The Node Tracker widget shows one node from your node list: . | The node’s chip and long name | Battery: the node’s last reported battery level, or Powered on external power | Last heard: the time your connected node last heard it, or the date if it was more than a day ago | . Widen the widget to add a second column: . | SNR and RSSI: the signal of the node’s last packet, shown only when the node is heard directly rather than through other nodes or MQTT | Hops Away: how many hops away the node is, or Direct | Distance: how far the node is from your connected node. It appears only while you are connected and both nodes have a position | . When a node has not been heard within the last two hours, the widget dims its readings so they do not read as current. Tap the widget to open that node’s details in the app. After you disconnect from your node in the app, the widget keeps the tracked node’s last readings on screen, dimmed, until you reconnect. If your node list does not include the node you picked, because you removed it or connected to a different node, the widget says Node not found. Tap it to choose another node. ",
+    "url": "/Meshtastic-Android/main/en/user/widget.html#node-tracker",
     
-    "relUrl": "/en/user/widget.html#adding-the-widget"
+    "relUrl": "/en/user/widget.html#node-tracker"
   },"7343": {
     "doc": "Home Screen Widget",
+    "title": "Adding a Widget",
+    "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets, then find Meshtastic in the list. | Drag the Meshtastic (local stats) or Node Tracker widget to your home screen. | For a Node Tracker, pick the node to follow. Your favorites are listed first, then the most recently heard nodes; type in the search field to filter by name or node ID. Backing out without picking cancels the widget. | Resize it as needed — the layout adapts to the available space. | . To track a different node later, touch &amp; hold the Node Tracker and choose the widget’s settings or reconfigure option. The exact wording depends on your launcher. ℹ️ Note: The widgets are Android-only. They are not available in the desktop app. ",
+    "url": "/Meshtastic-Android/main/en/user/widget.html#adding-a-widget",
+    
+    "relUrl": "/en/user/widget.html#adding-a-widget"
+  },"7344": {
+    "doc": "Home Screen Widget",
     "title": "Related Topics",
-    "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
+    "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Nodes — favorites, last heard, and node details | Connections — connect to a node so the widgets have data to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/en/user/widget.html#related-topics",
     
     "relUrl": "/en/user/widget.html#related-topics"
-  },"7344": {
+  },"7345": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/de/user/widget.html",
     
     "relUrl": "/de/user/widget.html"
-  },"7345": {
+  },"7346": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/de/user/widget.html#what-it-shows",
     
     "relUrl": "/de/user/widget.html#what-it-shows"
-  },"7346": {
+  },"7347": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/de/user/widget.html#adding-the-widget",
     
     "relUrl": "/de/user/widget.html#adding-the-widget"
-  },"7347": {
+  },"7348": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/de/user/widget.html#related-topics",
     
     "relUrl": "/de/user/widget.html#related-topics"
-  },"7348": {
+  },"7349": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/he/user/widget.html",
     
     "relUrl": "/he/user/widget.html"
-  },"7349": {
+  },"7350": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/he/user/widget.html#what-it-shows",
     
     "relUrl": "/he/user/widget.html#what-it-shows"
-  },"7350": {
+  },"7351": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/he/user/widget.html#adding-the-widget",
     
     "relUrl": "/he/user/widget.html#adding-the-widget"
-  },"7351": {
+  },"7352": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/he/user/widget.html#related-topics",
     
     "relUrl": "/he/user/widget.html#related-topics"
-  },"7352": {
+  },"7353": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/ca/user/widget.html",
     
     "relUrl": "/ca/user/widget.html"
-  },"7353": {
+  },"7354": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/ca/user/widget.html#what-it-shows",
     
     "relUrl": "/ca/user/widget.html#what-it-shows"
-  },"7354": {
+  },"7355": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/ca/user/widget.html#adding-the-widget",
     
     "relUrl": "/ca/user/widget.html#adding-the-widget"
-  },"7355": {
+  },"7356": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/ca/user/widget.html#related-topics",
     
     "relUrl": "/ca/user/widget.html#related-topics"
-  },"7356": {
+  },"7357": {
     "doc": "Aloitusnäytön widget",
     "title": "Aloitusnäytön widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/fi/user/widget.html",
     
     "relUrl": "/fi/user/widget.html"
-  },"7357": {
+  },"7358": {
     "doc": "Aloitusnäytön widget",
     "title": "Mitä se näyttää",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — kanavan käyttöaste (kuinka kuormitettu LoRa-kanava on prosentteina) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Liikenne — lähetetyt ja vastaanotetut paketit sekä havaitut kaksoiskappaleet | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Radiot — kuinka monta radiota on verkossa tunnetusta kokonaismäärästä | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Avaa sovellus napauttamalla widgetiä tai pyydä uudet tilastot sen päivityspainikkeella. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. Se ei säilytä viimeisimpiä arvoja näytöllä. ",
     "url": "/Meshtastic-Android/main/fi/user/widget.html#mit%C3%A4-se-n%C3%A4ytt%C3%A4%C3%A4",
     
     "relUrl": "/fi/user/widget.html#mitä-se-näyttää"
-  },"7358": {
+  },"7359": {
     "doc": "Aloitusnäytön widget",
     "title": "Widgetin lisääminen",
     "content": ". | Kosketa Androidin aloitusnäytön tyhjää aluetta pitkään. | Napauta Widgetit. | Vedä Meshtastic-pienoissovellus aloitusnäyttöön. The app ships one widget, so the picker entry is the app name. | Muuta widgetin kokoa tarvittaessa — asettelu mukautuu käytettävissä olevaan tilaan. | . ℹ️ Huomautus: Pienoissovellus on käytettävissä vain Androidissa. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/fi/user/widget.html#widgetin-lis%C3%A4%C3%A4minen",
     
     "relUrl": "/fi/user/widget.html#widgetin-lisääminen"
-  },"7359": {
+  },"7360": {
     "doc": "Aloitusnäytön widget",
     "title": "Aiheeseen liittyvät aiheet",
     "content": ". | Radion mittarit — täydellinen signaalin laatu- ja paikalliset tilastot -historia sovelluksessa | Connections — connect to a node so the widget has stats to show | Paikallinen mesh-verkon etsintä — kanavan ja lähetysajan käyttö koko mesh-verkossa | . ",
     "url": "/Meshtastic-Android/main/fi/user/widget.html#aiheeseen-liittyv%C3%A4t-aiheet",
     
     "relUrl": "/fi/user/widget.html#aiheeseen-liittyvät-aiheet"
-  },"7360": {
+  },"7361": {
     "doc": "Widget na domovské obrazovce",
     "title": "Widget na domovské obrazovce",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/cs/user/widget.html",
     
     "relUrl": "/cs/user/widget.html"
-  },"7361": {
+  },"7362": {
     "doc": "Widget na domovské obrazovce",
     "title": "Co zobrazuje",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — využití kanálu (jak je kanál LoRa vytížený, v procentech) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Provoz – pakety odeslané / přijaté a zaznamenané duplikáty | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Uzly — počet uzlů online z celkového počtu známých uzlů | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Aktualizováno – čas poslední aktualizace statistik, zobrazený v dolní části widgetu | . Klepnutím na widget otevřete aplikaci nebo pomocí tlačítka obnovení vyžádejte aktuální statistiky. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. Nezobrazuje poslední známé hodnoty. ",
     "url": "/Meshtastic-Android/main/cs/user/widget.html#co-zobrazuje",
     
     "relUrl": "/cs/user/widget.html#co-zobrazuje"
-  },"7362": {
+  },"7363": {
     "doc": "Widget na domovské obrazovce",
     "title": "Přidání widgetu",
     "content": ". | Dotkněte se prázdného místa na domovské obrazovce Androidu a podržte jej. | Klepněte na položku Widgety. | Přetáhněte widget Meshtastic na domovskou obrazovku. The app ships one widget, so the picker entry is the app name. | Podle potřeby změňte jeho velikost – rozložení se přizpůsobí dostupnému prostoru. | . ℹ️ Poznámka: Widget je k dispozici pouze pro Android. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/cs/user/widget.html#p%C5%99id%C3%A1n%C3%AD-widgetu",
     
     "relUrl": "/cs/user/widget.html#přidání-widgetu"
-  },"7363": {
+  },"7364": {
     "doc": "Widget na domovské obrazovce",
     "title": "Související témata",
     "content": ". | Metriky uzlu — kompletní historie kvality signálu a místních statistik přímo v aplikaci | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/cs/user/widget.html#souvisej%C3%ADc%C3%AD-t%C3%A9mata",
     
     "relUrl": "/cs/user/widget.html#související-témata"
-  },"7364": {
+  },"7365": {
     "doc": "ホーム画面ウィジェット",
     "title": "ホーム画面ウィジェット",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/ja/user/widget.html",
     
     "relUrl": "/ja/user/widget.html"
-  },"7365": {
+  },"7366": {
     "doc": "ホーム画面ウィジェット",
     "title": "表示される内容",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil：チャンネル利用率（LoRa チャンネルがどれだけ混雑しているかを割合で表示） | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic：送受信したパケットと、検出した重複 | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . ウィジェットをタップするとアプリが開きます。更新コントロールを使うと、最新の統計を要求できます。 . ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/ja/user/widget.html#%E8%A1%A8%E7%A4%BA%E3%81%95%E3%82%8C%E3%82%8B%E5%86%85%E5%AE%B9",
     
     "relUrl": "/ja/user/widget.html#表示される内容"
-  },"7366": {
+  },"7367": {
     "doc": "ホーム画面ウィジェット",
     "title": "ウィジェットを追加する",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | 「ウィジェット」をタップします。 | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | 必要に応じてサイズを変更します。レイアウトは利用可能なスペースに合わせて調整されます。 | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/ja/user/widget.html#%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88%E3%82%92%E8%BF%BD%E5%8A%A0%E3%81%99%E3%82%8B",
     
     "relUrl": "/ja/user/widget.html#ウィジェットを追加する"
-  },"7367": {
+  },"7368": {
     "doc": "ホーム画面ウィジェット",
     "title": "関連トピック",
     "content": ". | ノードメトリクス：アプリ内の完全な信号品質とローカル統計の履歴 | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/ja/user/widget.html#%E9%96%A2%E9%80%A3%E3%83%88%E3%83%94%E3%83%83%E3%82%AF",
     
     "relUrl": "/ja/user/widget.html#関連トピック"
-  },"7368": {
+  },"7369": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/pl/user/widget.html",
     
     "relUrl": "/pl/user/widget.html"
-  },"7369": {
+  },"7370": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/pl/user/widget.html#what-it-shows",
     
     "relUrl": "/pl/user/widget.html#what-it-shows"
-  },"7370": {
+  },"7371": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/pl/user/widget.html#adding-the-widget",
     
     "relUrl": "/pl/user/widget.html#adding-the-widget"
-  },"7371": {
+  },"7372": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/pl/user/widget.html#related-topics",
     
     "relUrl": "/pl/user/widget.html#related-topics"
-  },"7372": {
+  },"7373": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/zh-rCN/user/widget.html",
     
     "relUrl": "/zh-rCN/user/widget.html"
-  },"7373": {
+  },"7374": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/zh-rCN/user/widget.html#what-it-shows",
     
     "relUrl": "/zh-rCN/user/widget.html#what-it-shows"
-  },"7374": {
+  },"7375": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/zh-rCN/user/widget.html#adding-the-widget",
     
     "relUrl": "/zh-rCN/user/widget.html#adding-the-widget"
-  },"7375": {
+  },"7376": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/zh-rCN/user/widget.html#related-topics",
     
     "relUrl": "/zh-rCN/user/widget.html#related-topics"
-  },"7376": {
+  },"7377": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/is/user/widget.html",
     
     "relUrl": "/is/user/widget.html"
-  },"7377": {
+  },"7378": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/is/user/widget.html#what-it-shows",
     
     "relUrl": "/is/user/widget.html#what-it-shows"
-  },"7378": {
+  },"7379": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/is/user/widget.html#adding-the-widget",
     
     "relUrl": "/is/user/widget.html#adding-the-widget"
-  },"7379": {
+  },"7380": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/is/user/widget.html#related-topics",
     
     "relUrl": "/is/user/widget.html#related-topics"
-  },"7380": {
+  },"7381": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/nb/user/widget.html",
     
     "relUrl": "/nb/user/widget.html"
-  },"7381": {
+  },"7382": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/nb/user/widget.html#what-it-shows",
     
     "relUrl": "/nb/user/widget.html#what-it-shows"
-  },"7382": {
+  },"7383": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/nb/user/widget.html#adding-the-widget",
     
     "relUrl": "/nb/user/widget.html#adding-the-widget"
-  },"7383": {
+  },"7384": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/nb/user/widget.html#related-topics",
     
     "relUrl": "/nb/user/widget.html#related-topics"
-  },"7384": {
+  },"7385": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/hu/user/widget.html",
     
     "relUrl": "/hu/user/widget.html"
-  },"7385": {
+  },"7386": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/hu/user/widget.html#what-it-shows",
     
     "relUrl": "/hu/user/widget.html#what-it-shows"
-  },"7386": {
+  },"7387": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/hu/user/widget.html#adding-the-widget",
     
     "relUrl": "/hu/user/widget.html#adding-the-widget"
-  },"7387": {
+  },"7388": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/hu/user/widget.html#related-topics",
     
     "relUrl": "/hu/user/widget.html#related-topics"
-  },"7388": {
+  },"7389": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/nl/user/widget.html",
     
     "relUrl": "/nl/user/widget.html"
-  },"7389": {
+  },"7390": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/nl/user/widget.html#what-it-shows",
     
     "relUrl": "/nl/user/widget.html#what-it-shows"
-  },"7390": {
+  },"7391": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/nl/user/widget.html#adding-the-widget",
     
     "relUrl": "/nl/user/widget.html#adding-the-widget"
-  },"7391": {
+  },"7392": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/nl/user/widget.html#related-topics",
     
     "relUrl": "/nl/user/widget.html#related-topics"
-  },"7392": {
+  },"7393": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/fr-rCA/user/widget.html",
     
     "relUrl": "/fr-rCA/user/widget.html"
-  },"7393": {
+  },"7394": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/fr-rCA/user/widget.html#what-it-shows",
     
     "relUrl": "/fr-rCA/user/widget.html#what-it-shows"
-  },"7394": {
+  },"7395": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/fr-rCA/user/widget.html#adding-the-widget",
     
     "relUrl": "/fr-rCA/user/widget.html#adding-the-widget"
-  },"7395": {
+  },"7396": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/fr-rCA/user/widget.html#related-topics",
     
     "relUrl": "/fr-rCA/user/widget.html#related-topics"
-  },"7396": {
+  },"7397": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/ar/user/widget.html",
     
     "relUrl": "/ar/user/widget.html"
-  },"7397": {
+  },"7398": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/ar/user/widget.html#what-it-shows",
     
     "relUrl": "/ar/user/widget.html#what-it-shows"
-  },"7398": {
+  },"7399": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/ar/user/widget.html#adding-the-widget",
     
     "relUrl": "/ar/user/widget.html#adding-the-widget"
-  },"7399": {
+  },"7400": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/ar/user/widget.html#related-topics",
     
     "relUrl": "/ar/user/widget.html#related-topics"
-  },"7400": {
+  },"7401": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/pt/user/widget.html",
     
     "relUrl": "/pt/user/widget.html"
-  },"7401": {
+  },"7402": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/pt/user/widget.html#what-it-shows",
     
     "relUrl": "/pt/user/widget.html#what-it-shows"
-  },"7402": {
+  },"7403": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/pt/user/widget.html#adding-the-widget",
     
     "relUrl": "/pt/user/widget.html#adding-the-widget"
-  },"7403": {
+  },"7404": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/pt/user/widget.html#related-topics",
     
     "relUrl": "/pt/user/widget.html#related-topics"
-  },"7404": {
+  },"7405": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/uk/user/widget.html",
     
     "relUrl": "/uk/user/widget.html"
-  },"7405": {
+  },"7406": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/uk/user/widget.html#what-it-shows",
     
     "relUrl": "/uk/user/widget.html#what-it-shows"
-  },"7406": {
+  },"7407": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/uk/user/widget.html#adding-the-widget",
     
     "relUrl": "/uk/user/widget.html#adding-the-widget"
-  },"7407": {
+  },"7408": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/uk/user/widget.html#related-topics",
     
     "relUrl": "/uk/user/widget.html#related-topics"
-  },"7408": {
+  },"7409": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/sq/user/widget.html",
     
     "relUrl": "/sq/user/widget.html"
-  },"7409": {
+  },"7410": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/sq/user/widget.html#what-it-shows",
     
     "relUrl": "/sq/user/widget.html#what-it-shows"
-  },"7410": {
+  },"7411": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/sq/user/widget.html#adding-the-widget",
     
     "relUrl": "/sq/user/widget.html#adding-the-widget"
-  },"7411": {
+  },"7412": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/sq/user/widget.html#related-topics",
     
     "relUrl": "/sq/user/widget.html#related-topics"
-  },"7412": {
+  },"7413": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/sl/user/widget.html",
     
     "relUrl": "/sl/user/widget.html"
-  },"7413": {
+  },"7414": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/sl/user/widget.html#what-it-shows",
     
     "relUrl": "/sl/user/widget.html#what-it-shows"
-  },"7414": {
+  },"7415": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/sl/user/widget.html#adding-the-widget",
     
     "relUrl": "/sl/user/widget.html#adding-the-widget"
-  },"7415": {
+  },"7416": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/sl/user/widget.html#related-topics",
     
     "relUrl": "/sl/user/widget.html#related-topics"
-  },"7416": {
+  },"7417": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/b+sr+Latn/user/widget.html",
     
     "relUrl": "/b+sr+Latn/user/widget.html"
-  },"7417": {
+  },"7418": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/b+sr+Latn/user/widget.html#what-it-shows",
     
     "relUrl": "/b+sr+Latn/user/widget.html#what-it-shows"
-  },"7418": {
+  },"7419": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/b+sr+Latn/user/widget.html#adding-the-widget",
     
     "relUrl": "/b+sr+Latn/user/widget.html#adding-the-widget"
-  },"7419": {
+  },"7420": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/b+sr+Latn/user/widget.html#related-topics",
     
     "relUrl": "/b+sr+Latn/user/widget.html#related-topics"
-  },"7420": {
+  },"7421": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/es/user/widget.html",
     
     "relUrl": "/es/user/widget.html"
-  },"7421": {
+  },"7422": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/es/user/widget.html#what-it-shows",
     
     "relUrl": "/es/user/widget.html#what-it-shows"
-  },"7422": {
+  },"7423": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/es/user/widget.html#adding-the-widget",
     
     "relUrl": "/es/user/widget.html#adding-the-widget"
-  },"7423": {
+  },"7424": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/es/user/widget.html#related-topics",
     
     "relUrl": "/es/user/widget.html#related-topics"
-  },"7424": {
+  },"7425": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/sv/user/widget.html",
     
     "relUrl": "/sv/user/widget.html"
-  },"7425": {
+  },"7426": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/sv/user/widget.html#what-it-shows",
     
     "relUrl": "/sv/user/widget.html#what-it-shows"
-  },"7426": {
+  },"7427": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/sv/user/widget.html#adding-the-widget",
     
     "relUrl": "/sv/user/widget.html#adding-the-widget"
-  },"7427": {
+  },"7428": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/sv/user/widget.html#related-topics",
     
     "relUrl": "/sv/user/widget.html#related-topics"
-  },"7428": {
+  },"7429": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/it/user/widget.html",
     
     "relUrl": "/it/user/widget.html"
-  },"7429": {
+  },"7430": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/it/user/widget.html#what-it-shows",
     
     "relUrl": "/it/user/widget.html#what-it-shows"
-  },"7430": {
+  },"7431": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/it/user/widget.html#adding-the-widget",
     
     "relUrl": "/it/user/widget.html#adding-the-widget"
-  },"7431": {
+  },"7432": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/it/user/widget.html#related-topics",
     
     "relUrl": "/it/user/widget.html#related-topics"
-  },"7432": {
+  },"7433": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/el/user/widget.html",
     
     "relUrl": "/el/user/widget.html"
-  },"7433": {
+  },"7434": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/el/user/widget.html#what-it-shows",
     
     "relUrl": "/el/user/widget.html#what-it-shows"
-  },"7434": {
+  },"7435": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/el/user/widget.html#adding-the-widget",
     
     "relUrl": "/el/user/widget.html#adding-the-widget"
-  },"7435": {
+  },"7436": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
     "url": "/Meshtastic-Android/main/el/user/widget.html#related-topics",
     
     "relUrl": "/el/user/widget.html#related-topics"
-  },"7436": {
+  },"7437": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
     "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected node at a glance, without opening the app. ",
     "url": "/Meshtastic-Android/main/tr/user/widget.html",
     
     "relUrl": "/tr/user/widget.html"
-  },"7437": {
+  },"7438": {
     "doc": "Home Screen Widget",
     "title": "What It Shows",
     "content": "The widget displays the connected node’s current local stats: . | A node chip across the top, carrying the node’s short name in its own colors | Battery — the node’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — the percentage of airtime this node used transmitting in the last hour | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the node is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone | Heap — free versus total memory on the node, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the node has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
     "url": "/Meshtastic-Android/main/tr/user/widget.html#what-it-shows",
     
     "relUrl": "/tr/user/widget.html#what-it-shows"
-  },"7438": {
+  },"7439": {
     "doc": "Home Screen Widget",
     "title": "Adding the Widget",
     "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available in the desktop app. ",
     "url": "/Meshtastic-Android/main/tr/user/widget.html#adding-the-widget",
     
     "relUrl": "/tr/user/widget.html#adding-the-widget"
-  },"7439": {
+  },"7440": {
     "doc": "Home Screen Widget",
     "title": "Related Topics",
     "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a node so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
