@@ -69,6 +69,7 @@ import org.meshtastic.core.resources.mqtt_topic_finder_custom_example
 import org.meshtastic.core.resources.mqtt_topic_finder_custom_hint
 import org.meshtastic.core.resources.mqtt_topic_finder_failed_closed
 import org.meshtastic.core.resources.mqtt_topic_finder_failed_connect
+import org.meshtastic.core.resources.mqtt_topic_finder_failed_error
 import org.meshtastic.core.resources.mqtt_topic_finder_failed_filters
 import org.meshtastic.core.resources.mqtt_topic_finder_level_city
 import org.meshtastic.core.resources.mqtt_topic_finder_level_community
@@ -219,6 +220,7 @@ internal fun MqttTopicSampler.Failure.message(): StringResource = when (this) {
     MqttTopicSampler.Failure.CONNECT -> Res.string.mqtt_topic_finder_failed_connect
     MqttTopicSampler.Failure.FILTERS_REFUSED -> Res.string.mqtt_topic_finder_failed_filters
     MqttTopicSampler.Failure.CLOSED -> Res.string.mqtt_topic_finder_failed_closed
+    MqttTopicSampler.Failure.ERROR -> Res.string.mqtt_topic_finder_failed_error
 }
 
 internal fun MqttRootTopic.Problem.message(): StringResource = when (this) {

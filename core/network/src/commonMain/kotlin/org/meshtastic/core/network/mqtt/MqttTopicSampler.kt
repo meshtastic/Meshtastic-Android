@@ -87,6 +87,7 @@ class MqttTopicSampler(
         CONNECT,
         FILTERS_REFUSED,
         CLOSED,
+        ERROR,
     }
 
     sealed interface Phase {
@@ -122,7 +123,7 @@ class MqttTopicSampler(
 
     /**
      * Runs one sample to completion. Cancelling the caller ends it early and keeps what was heard, as does the broker
-     * closing the connection once something has arrived.
+     * closing the connection once something has arrived. Any other error fails it with [Failure.ERROR].
      */
     @Suppress("LongMethod")
     suspend fun run(config: ModuleConfig.MQTTConfig?, regionTopic: String) {
@@ -193,6 +194,11 @@ class MqttTopicSampler(
                     publish(Phase.Finished)
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w { "MQTT topic sample: unexpected (${e::class.simpleName})" }
+            _state.value = State(phase = Phase.Failed(Failure.ERROR))
         } finally {
             withContext(NonCancellable) {
                 if (_state.value.isRunning) publish(Phase.Finished)

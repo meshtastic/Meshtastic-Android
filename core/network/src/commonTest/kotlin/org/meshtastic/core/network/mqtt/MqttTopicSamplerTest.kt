@@ -123,6 +123,15 @@ class MqttTopicSamplerTest {
     }
 
     @Test
+    fun anUnexpectedSubscribeErrorFailsTheSampleWithoutThrowing() = runTest {
+        val client = FakeClient(subscribeError = IllegalArgumentException("bad filter"))
+        val sampler = sampler(client)
+        sampler.run(null, "msh/US")
+        assertEquals(Phase.Failed(Failure.ERROR), sampler.state.value.phase)
+        assertTrue(client.closed)
+    }
+
+    @Test
     fun anUnparseableAddressFailsTheSample() = runTest {
         listOf("broker.local:", "http://broker.local").forEach { address ->
             val sampler = MqttTopicSampler(timeSource = testScheduler.timeSource)

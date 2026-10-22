@@ -1346,6 +1346,7 @@
     <string name="mqtt_topic_finder_custom_hint">Up to 31 ASCII characters, no leading or trailing slash, no + or #.</string>
     <string name="mqtt_topic_finder_failed_closed">The broker closed the connection.</string>
     <string name="mqtt_topic_finder_failed_connect">Could not connect to the broker.</string>
+    <string name="mqtt_topic_finder_failed_error">The sample stopped on an unexpected error.</string>
     <string name="mqtt_topic_finder_failed_filters">The broker does not allow these topic filters.</string>
     <string name="mqtt_topic_finder_finished">Heard %1$d messages on %2$d topics</string>
     <string name="mqtt_topic_finder_footer">Listens to %1$s for one minute and publishes nothing. The broker sees your IP address and a random client ID, not your node. Your location never reaches the broker; the phone's geocoder turns it into the country, state and city names on the rows. Picking a topic fills in the Root topic field, and nothing reaches the radio until you save.</string>
