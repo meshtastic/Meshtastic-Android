@@ -127,4 +127,30 @@ class MqttRootsRepositoryImplTest {
 
         assertEquals(fetched, repository.getSnapshot())
     }
+
+    @Test
+    fun aFetchWhoseSegmentMapsAreAllEmptyKeepsTheSeed() = runBlocking {
+        repository.getSnapshot()
+        api.mqttRoots = {
+            json.decodeFromString<MqttRootsResponse>(
+                """{"entries": [], "neighbors": {}, "subdivisionSegments": {"US": {}}}""",
+            )
+        }
+
+        repository.reconcile()
+
+        assertEquals(seeded, repository.getSnapshot())
+    }
+
+    @Test
+    fun aFailedCacheWriteKeepsTheSeedWithoutThrowing() = runBlocking {
+        repository.getSnapshot()
+        api.mqttRoots = { fetched }
+        dbProvider.beforeWithDb = { error("disk I/O error") }
+
+        repository.reconcile()
+
+        assertEquals(seeded, repository.getSnapshot())
+        assertEquals(1, api.mqttRootsCalls)
+    }
 }

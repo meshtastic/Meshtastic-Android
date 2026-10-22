@@ -53,9 +53,11 @@ class MqttRootsRepositoryImpl(
     }
 
     override suspend fun reconcile() {
-        safeCatching { remoteDataSource.getMqttRoots() }
-            .onSuccess { response -> writeMutex.withLock { store(response) } }
-            .onFailure { e -> Logger.w(e) { "MqttRootsRepository: network refresh failed" } }
+        safeCatching {
+            val response = remoteDataSource.getMqttRoots()
+            writeMutex.withLock { store(response) }
+        }
+            .onFailure { e -> Logger.w(e) { "MqttRootsRepository: refresh failed" } }
     }
 
     /** Seeds the cache from the bundled snapshot if empty (fresh install, data clear). */
@@ -73,11 +75,12 @@ class MqttRootsRepositoryImpl(
     }
 
     /**
-     * Not locked itself; every caller already holds [writeMutex]. A response with no entries, neighbors or segments is
-     * ignored, so a degraded response never wipes the seed or cache back to nothing.
+     * Not locked itself; every caller already holds [writeMutex]. A response with no entries, neighbors or subdivision
+     * mappings is ignored, so a degraded response never wipes the seed or cache back to nothing.
      */
     private suspend fun store(response: MqttRootsResponse) {
-        if (response.entries.isEmpty() && response.neighbors.isEmpty() && response.subdivisionSegments.isEmpty()) {
+        val noSegments = response.subdivisionSegments.values.all { it.isEmpty() }
+        if (response.entries.isEmpty() && response.neighbors.isEmpty() && noSegments) {
             Logger.w { "MqttRootsRepository: empty response; leaving cache untouched" }
             return
         }

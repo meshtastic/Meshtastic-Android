@@ -72,9 +72,10 @@ if (.erase | type) == "object" and (.erase.nrf52Bootloader | type) == "object" t
       url=https://api.meshtastic.org/resource/mqttRoots
       fetching="MQTT root directory" api="MQTT roots API" skipping="MQTT roots update" subject="MQTT root directory"
       compare=. write=.
-      guards='if (.subdivisionSegments | type) == "object" then (.subdivisionSegments | length) else 0 end'
-      guard_warning="MQTT roots API returned no subdivisionSegments. Skipping to protect the bundled seed."
-      guard_detail="empty subdivisionSegments from MQTT roots API"
+      # Counts the subdivision names under every country, so `{"US": {}}` trips it like a missing map.
+      guards='if (.subdivisionSegments | type) == "object" then ([.subdivisionSegments[] | objects | length] | add // 0) else 0 end'
+      guard_warning="MQTT roots API returned no subdivisionSegments mappings. Skipping to protect the bundled seed."
+      guard_detail="empty subdivisionSegments mappings from MQTT roots API"
       ;;
     *)
       echo "unknown asset: $1" >&2
