@@ -31,10 +31,21 @@ import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -44,9 +55,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
@@ -56,10 +70,14 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.noiseFloorOrNull
+import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.FirmwareUpdateProgress
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
+import org.meshtastic.core.repository.LiveUpdateMode
+import org.meshtastic.core.repository.LiveUpdatePrefs
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -78,6 +96,14 @@ import org.meshtastic.core.resources.firmware_update_in_progress
 import org.meshtastic.core.resources.firmware_update_notification_android
 import org.meshtastic.core.resources.formatDurationSuspend
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.live_update_direct
+import org.meshtastic.core.resources.live_update_distance
+import org.meshtastic.core.resources.live_update_heard
+import org.meshtastic.core.resources.live_update_heard_now
+import org.meshtastic.core.resources.live_update_hops
+import org.meshtastic.core.resources.live_update_nodes_online
+import org.meshtastic.core.resources.live_update_signal
+import org.meshtastic.core.resources.live_update_unread
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
@@ -107,8 +133,10 @@ import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 import org.meshtastic.core.repository.Notification as MeshNotification
 
 /**
@@ -118,6 +146,7 @@ import org.meshtastic.core.repository.Notification as MeshNotification
  * notifications for various events like new messages, alerts, and service status changes.
  */
 @Suppress("TooManyFunctions", "LongParameterList", "LargeClass")
+@OptIn(ExperimentalCoroutinesApi::class)
 @Single
 class MeshNotificationManagerImpl(
     private val context: Context,
@@ -127,6 +156,9 @@ class MeshNotificationManagerImpl(
     private val radioConfigRepository: Lazy<RadioConfigRepository>,
     private val radioOperationLock: RadioOperationLock,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
+    private val liveUpdatePrefs: LiveUpdatePrefs,
+    private val meshPrefs: MeshPrefs,
+    private val localeUnitsProvider: LocaleUnitsProvider,
     private val scope: ServiceScope,
 ) : MeshNotificationManager {
 
@@ -172,6 +204,14 @@ class MeshNotificationManagerImpl(
         private val CHANNEL_LABEL_TIMEOUT = 2.seconds
         private const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
         private const val THUMBS_UP = "👍"
+        private const val CONNECTIONS_REQUEST_CODE = 0x4C55
+        private const val LIVE_UPDATE_SEPARATOR = " · "
+        private val LIVE_UPDATE_MIN_INTERVAL = 2.seconds
+        private val TRACK_NODE_TICK = 1.minutes
+        private const val SECONDS_PER_MINUTE = 60L
+        private const val SECONDS_PER_HOUR = 3_600L
+        private const val SECONDS_PER_DAY = 86_400L
+        private const val MILLIS_PER_SECOND = 1_000L
     }
 
     private data class ServiceNotificationSnapshot(
@@ -182,7 +222,17 @@ class MeshNotificationManagerImpl(
         val nextUpdateAt: Long,
         val activeOperations: Set<RadioOperation> = emptySet(),
         val firmwareProgress: FirmwareUpdateProgress? = null,
+        val liveUpdate: LiveUpdateReading? = null,
     )
+
+    /** What a running Live Update shows; null while it is off. */
+    private sealed interface LiveUpdateReading {
+        data class MeshStatus(val nodesOnline: Int, val nodesTotal: Int, val unread: Int, val radioBattery: Int?) :
+            LiveUpdateReading
+
+        /** [tick] changes once a minute so the elapsed "heard" text and chip age without a node update. */
+        data class TrackNode(val node: Node, val ourNode: Node?, val tick: Int) : LiveUpdateReading
+    }
 
     /** [message] is the stats text to fall back on later; a firmware-progress render keeps the previous one. */
     private data class RenderedServiceNotification(val notification: Notification, val message: String?)
@@ -292,6 +342,10 @@ class MeshNotificationManagerImpl(
     private var nextStatsUpdateMillis: Long = 0
     private var cachedMessage: String? = null
     private var cachedServiceNotification: Notification? = null
+    private var cachedLiveUpdate: LiveUpdateReading? = null
+
+    /** Test seam for the wall clock the tracked node's elapsed time is measured against. */
+    internal var clockSeconds: () -> Long = { nowSeconds }
     private val serviceNotificationSnapshots =
         MutableSharedFlow<ServiceNotificationSnapshot>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
@@ -314,6 +368,53 @@ class MeshNotificationManagerImpl(
                     serviceNotificationSnapshots.tryEmit(last.copy(firmwareProgress = progress))
                 }
             }
+        }
+        scope.launch {
+            liveUpdatePrefs.mode.flatMapLatest(::liveUpdateReadings).distinctUntilChanged().collect { reading ->
+                synchronized(serviceNotificationLock) {
+                    cachedLiveUpdate = reading
+                    val last = serviceNotificationSnapshots.replayCache.lastOrNull() ?: return@synchronized
+                    serviceNotificationSnapshots.tryEmit(last.copy(liveUpdate = reading))
+                }
+            }
+        }
+        scope.launch {
+            LiveUpdateGuard(
+                prefs = liveUpdatePrefs,
+                nodes = { nodeRepository.value.nodeDBbyNum },
+                selectedAddress = meshPrefs.deviceAddress,
+                radioOperationLock = radioOperationLock,
+            )
+                .run()
+        }
+    }
+
+    private fun liveUpdateReadings(mode: LiveUpdateMode): Flow<LiveUpdateReading?> = when (mode) {
+        LiveUpdateMode.Off -> flowOf(null)
+
+        LiveUpdateMode.MeshStatus -> {
+            val nodes = nodeRepository.value
+            combine(
+                nodes.onlineNodeCount,
+                nodes.totalNodeCount,
+                packetRepository.value.getUnreadCountTotal(),
+                nodes.ourNodeInfo.map { it?.deviceMetrics?.battery_level }.distinctUntilChanged(),
+            ) { online, total, unread, battery ->
+                LiveUpdateReading.MeshStatus(online, total, unread, battery)
+            }
+                .throttleLatest(LIVE_UPDATE_MIN_INTERVAL)
+        }
+
+        is LiveUpdateMode.TrackNode -> {
+            val nodes = nodeRepository.value
+            combine(
+                nodes.nodeDBbyNum.map { it[mode.nodeNum] }.distinctUntilChanged(),
+                nodes.ourNodeInfo,
+                ticks(TRACK_NODE_TICK),
+            ) { node, ourNode, tick ->
+                node?.let { LiveUpdateReading.TrackNode(it, ourNode, tick) }
+            }
+                .throttleLatest(LIVE_UPDATE_MIN_INTERVAL)
         }
     }
 
@@ -399,6 +500,7 @@ class MeshNotificationManagerImpl(
             nextUpdateAt = nextStatsUpdateMillis,
             activeOperations = radioOperationLock.activeOperations,
             firmwareProgress = firmwareUpdateStatusRepository.progress.value,
+            liveUpdate = cachedLiveUpdate,
         )
     }
 
@@ -427,6 +529,20 @@ class MeshNotificationManagerImpl(
                     is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
                 }
 
+        return snapshot.liveUpdate?.let { reading ->
+            val notification =
+                when (reading) {
+                    is LiveUpdateReading.MeshStatus -> createMeshStatusLiveUpdate(title, snapshot.state, reading)
+                    is LiveUpdateReading.TrackNode -> createTrackedNodeLiveUpdate(title, snapshot.state, reading)
+                }
+            RenderedServiceNotification(notification, message = snapshot.previousMessage)
+        } ?: renderServiceStateNotification(title, snapshot)
+    }
+
+    private suspend fun renderServiceStateNotification(
+        title: String,
+        snapshot: ServiceNotificationSnapshot,
+    ): RenderedServiceNotification {
         val freshMessage =
             when {
                 snapshot.localStats != null ->
@@ -815,6 +931,122 @@ class MeshNotificationManagerImpl(
             .setRequestPromotedOngoing(true)
             .apply { percent?.let { setShortCriticalText(MetricFormatter.percent(it)) } }
             .build()
+    }
+
+    private suspend fun createMeshStatusLiveUpdate(
+        title: String,
+        state: ConnectionState,
+        reading: LiveUpdateReading.MeshStatus,
+    ): Notification {
+        val lines = buildList {
+            add(getStringSuspend(Res.string.live_update_nodes_online, reading.nodesOnline, reading.nodesTotal))
+            add(getStringSuspend(Res.string.live_update_unread, reading.unread))
+            reading.radioBattery?.let { add(batteryText(it)) }
+        }
+        val chip = "${reading.nodesOnline}/${reading.nodesTotal}".takeIf { state is ConnectionState.Connected }
+        return createLiveUpdateNotification(
+            title = title,
+            subText = null,
+            lines = lines,
+            chip = chip,
+            contentIntent = createDeepLinkIntent("connections", CONNECTIONS_REQUEST_CODE),
+        )
+    }
+
+    private suspend fun createTrackedNodeLiveUpdate(
+        connectionTitle: String,
+        state: ConnectionState,
+        reading: LiveUpdateReading.TrackNode,
+    ): Notification {
+        val node = reading.node
+        val battery = node.deviceMetrics.battery_level
+        val heardSecondsAgo = (clockSeconds() - node.lastHeard).coerceAtLeast(0).takeIf { node.lastHeard > 0 }
+        val lines = buildList {
+            battery?.let { add(batteryText(it)) }
+            if (node.snrOrNull != null || node.rssiOrNull != null) {
+                add(
+                    getStringSuspend(
+                        Res.string.live_update_signal,
+                        MetricFormatter.snr(node.snrOrNull),
+                        MetricFormatter.rssi(node.rssiOrNull),
+                    ),
+                )
+            }
+            heardSecondsAgo?.let { add(heardText(node.lastHeard, it)) }
+            when {
+                node.hopsAway == 0 -> add(getStringSuspend(Res.string.live_update_direct))
+                node.hopsAway > 0 -> add(getStringSuspend(Res.string.live_update_hops, node.hopsAway))
+            }
+            reading.ourNode
+                ?.takeIf { it.num != node.num }
+                ?.let { node.distance(it) }
+                ?.let {
+                    val distance = it.toDistanceString(localeUnitsProvider.measurementSystem.value)
+                    add(getStringSuspend(Res.string.live_update_distance, distance))
+                }
+        }
+        val chip =
+            battery?.takeIf { it <= MAX_BATTERY_LEVEL }?.let { MetricFormatter.percent(it) }
+                ?: heardSecondsAgo
+                    ?.takeIf { it >= SECONDS_PER_MINUTE }
+                    ?.let { formatDurationSuspend(it, largestUnit(it)) }
+        return createLiveUpdateNotification(
+            title =
+            node.user.long_name.ifBlank { node.user.short_name }.ifBlank { NodeAddress.numToDefaultId(node.num) },
+            subText = connectionTitle.takeIf { state !is ConnectionState.Connected },
+            lines = lines,
+            chip = chip,
+            contentIntent = createOpenNodeDetailIntent(node.num),
+        )
+    }
+
+    /**
+     * A user-started Live Update on the service notification. Promotion needs an ongoing notification with a title, no
+     * custom views and no colorization, on a channel above MIN; BigTextStyle is one of the allowed styles.
+     */
+    private fun createLiveUpdateNotification(
+        title: String,
+        subText: String?,
+        lines: List<String>,
+        chip: String?,
+        contentIntent: PendingIntent,
+    ): Notification {
+        val builder =
+            commonBuilder(NotificationChannelSpec.Service, contentIntent)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                .setContentTitle(title)
+                .setContentText(lines.take(2).joinToString(LIVE_UPDATE_SEPARATOR))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
+                .setShowWhen(false)
+                .setRequestPromotedOngoing(true)
+        subText?.let { builder.setSubText(it) }
+        chip?.let { builder.setShortCriticalText(it) }
+        return builder.build()
+    }
+
+    private suspend fun batteryText(level: Int): String = if (level > MAX_BATTERY_LEVEL) {
+        getStringSuspend(Res.string.powered)
+    } else {
+        getStringSuspend(Res.string.local_stats_battery, level)
+    }
+
+    private suspend fun heardText(lastHeard: Int, secondsAgo: Long): String = if (secondsAgo < SECONDS_PER_MINUTE) {
+        getStringSuspend(Res.string.live_update_heard_now)
+    } else {
+        getStringSuspend(
+            Res.string.live_update_heard,
+            DateFormatter.formatRelativeTime(lastHeard.toLong() * MILLIS_PER_SECOND),
+        )
+    }
+
+    /** One unit is enough for the status-bar chip, which the platform cuts at a few characters. */
+    private fun largestUnit(seconds: Long): DurationUnit = when {
+        seconds < SECONDS_PER_HOUR -> DurationUnit.MINUTES
+        seconds < SECONDS_PER_DAY -> DurationUnit.HOURS
+        else -> DurationUnit.DAYS
     }
 
     @Suppress("LongMethod")
@@ -1282,4 +1514,19 @@ internal fun Set<RadioOperation>.notificationTitleResource(): StringResource? = 
         Res.string.firmware_update_in_progress
 
     else -> Res.string.discovery_scan_in_progress
+}
+
+/** Emits 0 at once, then the next count every [period]. */
+private fun ticks(period: Duration): Flow<Int> = flow {
+    var tick = 0
+    while (true) {
+        emit(tick++)
+        delay(period)
+    }
+}
+
+/** Passes the first value at once, then at most one per [period], always the latest. */
+private fun <T> Flow<T>.throttleLatest(period: Duration): Flow<T> = conflate().transform {
+    emit(it)
+    delay(period)
 }

@@ -51,6 +51,9 @@ import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.testing.FakeLiveUpdatePrefs
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
+import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ChannelSet
@@ -124,6 +127,9 @@ class MeshNotificationManagerImplConversationTest {
         radioConfigRepository = lazy { radioConfigRepository },
         radioOperationLock = RadioOperationLock(),
         firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+        liveUpdatePrefs = FakeLiveUpdatePrefs(),
+        meshPrefs = FakeMeshPrefs(),
+        localeUnitsProvider = FakeLocaleUnitsProvider(),
         scope = scope.asServiceScope(),
     )
 

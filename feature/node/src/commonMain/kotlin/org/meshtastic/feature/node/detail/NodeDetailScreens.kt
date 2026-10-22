@@ -41,11 +41,13 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.util.ActiveWhileStarted
+import org.meshtastic.core.ui.util.rememberLiveUpdateSupport
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
@@ -73,11 +75,20 @@ fun NodeDetailScreen(
     onNavigateUp: () -> Unit = {},
     compassViewModel: CompassViewModel? = null,
     openCompass: Boolean = false,
+    liveUpdateViewModel: NodeLiveUpdateViewModel? = null,
 ) {
     SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentOnNavigate by rememberUpdatedState(onNavigate)
     LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { currentOnNavigate(it) } }
+    val liveUpdateAvailable = rememberLiveUpdateSupport().available && liveUpdateViewModel != null
+    val liveUpdateMode by
+        liveUpdateViewModel?.mode?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(LiveUpdateMode.Off) }
+    val trackedInLiveUpdate =
+        uiState.node?.takeIf { liveUpdateAvailable }?.let { liveUpdateMode == LiveUpdateMode.TrackNode(it.num) }
+    val onTrackInLiveUpdate: (Int, Boolean) -> Unit = { nodeNum, track ->
+        liveUpdateViewModel?.setTracking(nodeNum, track)
+    }
     NodeDetailScaffold(
         modifier = modifier,
         uiState = uiState,
@@ -87,6 +98,8 @@ fun NodeDetailScreen(
         onNavigateUp = onNavigateUp,
         compassViewModel = compassViewModel,
         openCompass = openCompass,
+        trackedInLiveUpdate = trackedInLiveUpdate,
+        onTrackInLiveUpdate = onTrackInLiveUpdate,
     )
 }
 
@@ -116,6 +129,8 @@ private fun NodeDetailScaffold(
     onNavigateUp: () -> Unit,
     compassViewModel: CompassViewModel? = null,
     openCompass: Boolean = false,
+    trackedInLiveUpdate: Boolean? = null,
+    onTrackInLiveUpdate: (nodeNum: Int, track: Boolean) -> Unit = { _, _ -> },
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
@@ -146,9 +161,12 @@ private fun NodeDetailScaffold(
         NodeDetailContent(
             uiState = uiState,
             listState = listState,
+            trackedInLiveUpdate = trackedInLiveUpdate,
             onAction = { action ->
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
+
+                    is NodeDetailAction.TrackInLiveUpdate -> onTrackInLiveUpdate(action.nodeNum, action.track)
 
                     is NodeDetailAction.OpenCompass ->
                         activeOverlay = NodeDetailOverlay.Compass(action.node.num, action.displayUnits)

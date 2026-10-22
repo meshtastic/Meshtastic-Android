@@ -953,6 +953,29 @@
     <string name="licensed_mode_enable_warning_signed">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — but it is digitally signed, letting other nodes verify it came from you. Your node number may change once to match your identity key, so favorites, message history, remote admin, and other nodes may initially treat it as new; you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
     <string name="lightning_distance">Storm Distance</string>
     <string name="lightning_strikes_1h">Lightning (1h)</string>
+    <!-- LIVE -->
+    <string name="live_update">Live Update</string>
+    <string name="live_update_direct">Direct</string>
+    <string name="live_update_distance">%1$s away</string>
+    <string name="live_update_heard">Heard %1$s</string>
+    <string name="live_update_heard_now">Heard just now</string>
+    <string name="live_update_hops">Hops away: %1$d</string>
+    <string name="live_update_mesh_status">Mesh status</string>
+    <string name="live_update_mesh_status_summary">Connection, nodes online, unread messages and your radio's battery</string>
+    <string name="live_update_no_nodes">No nodes to track</string>
+    <string name="live_update_nodes_online">%1$d of %2$d nodes online</string>
+    <string name="live_update_off_summary">Show the mesh or one node in the status bar</string>
+    <string name="live_update_promotion_off">Live Updates are turned off for Meshtastic in system settings</string>
+    <string name="live_update_search_nodes">Search nodes</string>
+    <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
+    <string name="live_update_start">Start</string>
+    <string name="live_update_stop">Stop</string>
+    <string name="live_update_switch">Switch</string>
+    <string name="live_update_track_in">Track in Live Update</string>
+    <string name="live_update_track_node">Track a node</string>
+    <string name="live_update_track_node_summary">One node's battery, signal, last heard, hops and distance</string>
+    <string name="live_update_tracking">Tracking %1$s</string>
+    <string name="live_update_unread">%1$d unread</string>
     <!-- LOAD -->
     <string name="load">Load</string>
     <string name="load_15_min">Load 15m</string>
