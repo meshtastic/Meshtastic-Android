@@ -20,6 +20,8 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.process.ExecOperations
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
+import org.jetbrains.compose.desktop.tasks.AbstractJarsFlattenTask
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.meshtastic.buildlogic.configureGraphTasks
@@ -27,6 +29,8 @@ import org.meshtastic.buildlogic.kotlinWarningsAsErrors
 import org.meshtastic.buildlogic.maplibreDesktopRuntime
 import org.meshtastic.buildlogic.resolveVersionInfo
 import java.io.File
+import java.nio.file.FileSystems
+import java.nio.file.Files
 import javax.inject.Inject
 
 plugins {
@@ -122,6 +126,27 @@ kotlin {
 
 // Exclude generated Compose resource files from detekt analysis
 tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
+
+// Signed dependency jars (BouncyCastle) keep their META-INF signature files after ProGuard rewrites their classes or
+// the uber jar merges them, and the JVM then rejects the jar. Homebrew, Flatpak and the release installers ship these.
+object JarSignatures {
+    private val signatureFile = Regex(""".*\.(SF|RSA|DSA|EC)""", RegexOption.IGNORE_CASE)
+
+    fun strip(jar: File) = FileSystems.newFileSystem(jar.toPath()).use { fs ->
+        val metaInf = fs.getPath("META-INF")
+        if (Files.isDirectory(metaInf)) {
+            Files.list(metaInf).use { entries ->
+                entries.filter { signatureFile.matches(it.fileName.toString()) }.toList().forEach(Files::delete)
+            }
+        }
+    }
+}
+
+tasks.withType<AbstractJarsFlattenTask>().configureEach { doLast { JarSignatures.strip(flattenedJar.get().asFile) } }
+
+tasks.withType<AbstractProguardTask>().configureEach {
+    doLast { destinationDir.get().asFile.listFiles { f -> f.extension == "jar" }?.forEach(JarSignatures::strip) }
+}
 
 compose.desktop {
     application {

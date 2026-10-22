@@ -142,6 +142,13 @@
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator
 
+# ---- BouncyCastle (per-install TAK server certificates) -----------------------
+# :core:takserver asks its private BouncyCastleProvider for PKCS12 and SHA256withRSA by
+# name; the provider loads those algorithm classes reflectively.
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
+-dontwarn org.bouncycastle.**
+
 # ---- TAKPacket-SDK / proto ABI tolerance ------------------------------------
 # The SDK's TakPacketV2Serializer is compiled against atak.proto at a specific
 # commit. If the protobufs submodule advances ahead of the SDK release, minor
