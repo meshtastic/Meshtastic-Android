@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.hud
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -36,8 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
@@ -155,6 +159,8 @@ fun MeshHudScreen(
     val targets by viewModel.targets.collectAsStateWithLifecycle()
     val poseState = viewModel.pose.collectAsStateWithLifecycle()
     var intrinsics by remember { mutableStateOf<CameraIntrinsics?>(null) }
+    var still by remember { mutableStateOf<HudStill?>(null) }
+    val overlayLayer = rememberGraphicsLayer()
     var topBarBottomPx by remember { mutableIntStateOf(0) }
     var noticesHeightPx by remember { mutableIntStateOf(0) }
     var bottomPanelTopPx by remember { mutableIntStateOf(0) }
@@ -254,66 +260,77 @@ fun MeshHudScreen(
             HudCameraPreview(
                 onIntrinsics = { intrinsics = it },
                 onAvailable = { cameraAvailable = it },
+                onStill = { still = it },
                 modifier = Modifier.fillMaxSize(),
             )
         }
 
-        // Decoration only: every target it marks is a chip or radar dot with its own semantics.
-        Canvas(Modifier.fillMaxSize().clearAndSetSemantics {}) {
-            val state = poseState.value
-            val pose = state.pose ?: return@Canvas
-            drawHorizon(pose, focalPx)
-            targets.fences.forEach { drawGeofence(it, pose, focalPx) }
-            val sparkSeconds = sparkMillis.longValue / MILLIS_PER_SECOND
-            track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels, sparkSeconds) }
-            route?.let {
-                drawRoute(
-                    it,
-                    pose,
-                    focalPx,
-                    TracerouteColors.OutgoingRoute,
-                    TracerouteColors.ReturnRoute,
-                    textMeasurer,
-                    tapeStyle,
-                    routeLabels,
-                    sparkSeconds,
+        // The overlay a still carries: what is drawn over the camera, without the panels and bars around it.
+        Box(
+            Modifier.fillMaxSize().drawWithContent {
+                overlayLayer.record { this@drawWithContent.drawContent() }
+                drawLayer(overlayLayer)
+            },
+        ) {
+            // Decoration only: every target it marks is a chip or radar dot with its own semantics.
+            Canvas(Modifier.fillMaxSize().clearAndSetSemantics {}) {
+                val state = poseState.value
+                val pose = state.pose ?: return@Canvas
+                drawHorizon(pose, focalPx)
+                targets.fences.forEach { drawGeofence(it, pose, focalPx) }
+                val sparkSeconds = sparkMillis.longValue / MILLIS_PER_SECOND
+                track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels, sparkSeconds) }
+                route?.let {
+                    drawRoute(
+                        it,
+                        pose,
+                        focalPx,
+                        TracerouteColors.OutgoingRoute,
+                        TracerouteColors.ReturnRoute,
+                        textMeasurer,
+                        tapeStyle,
+                        routeLabels,
+                        sparkSeconds,
+                    )
+                }
+                if (targets.showPrecision) {
+                    targets.targets.forEach { drawPrecisionZone(it, pose, focalPx, state.headingAccuracyDeg) }
+                }
+                focused?.let {
+                    drawReticle(Color(it.subject.color), locked = finderHint(it, pose) == FinderHint.OnTarget)
+                }
+                drawCompassTape(
+                    trueHeadingDeg = (pose.azimuthDeg + targets.declinationDeg + FULL_CIRCLE_DEG) % FULL_CIRCLE_DEG,
+                    declinationDeg = targets.declinationDeg,
+                    targets = targets.targets,
+                    focalPx = focalPx,
+                    topPx = topBarBottomPx.toFloat(),
+                    cardinals = cardinals,
+                    textMeasurer = textMeasurer,
+                    labelStyle = tapeStyle,
                 )
             }
-            if (targets.showPrecision) {
-                targets.targets.forEach { drawPrecisionZone(it, pose, focalPx, state.headingAccuracyDeg) }
-            }
-            focused?.let { drawReticle(Color(it.subject.color), locked = finderHint(it, pose) == FinderHint.OnTarget) }
-            drawCompassTape(
-                trueHeadingDeg = (pose.azimuthDeg + targets.declinationDeg + FULL_CIRCLE_DEG) % FULL_CIRCLE_DEG,
-                declinationDeg = targets.declinationDeg,
+            HudChipLayer(
                 targets = targets.targets,
-                focalPx = focalPx,
-                topPx = topBarBottomPx.toFloat(),
-                cardinals = cardinals,
-                textMeasurer = textMeasurer,
-                labelStyle = tapeStyle,
-            )
-        }
-        HudChipLayer(
-            targets = targets.targets,
-            currentPose = { poseState.value.pose },
-            focalPx = focalPx,
-            topLimitPx = { topBarBottomPx + tapeClearancePx + noticesHeightPx },
-            bottomLimitPx = { bottomPanelTopPx },
-            modifier = Modifier.fillMaxSize(),
-        ) { target ->
-            HudChip(
-                target = target,
                 currentPose = { poseState.value.pose },
-                // A node opens its detail and a waypoint its info, as on the map; long press focuses either.
-                onOpen = {
-                    when (val subject = target.subject) {
-                        is HudSubject.NodeSubject -> onOpenNode(subject.node.num)
-                        is HudSubject.WaypointSubject -> infoWaypoint = subject.waypoint
-                    }
-                },
-                onToggleFocus = { viewModel.toggleFocus(target.subject) },
-            )
+                focalPx = focalPx,
+                topLimitPx = { topBarBottomPx + tapeClearancePx + noticesHeightPx },
+                bottomLimitPx = { bottomPanelTopPx },
+                modifier = Modifier.fillMaxSize(),
+            ) { target ->
+                HudChip(
+                    target = target,
+                    currentPose = { poseState.value.pose },
+                    // A node opens its detail and a waypoint its info, as on the map; long press focuses either.
+                    onOpen = {
+                        when (val subject = target.subject) {
+                            is HudSubject.NodeSubject -> onOpenNode(subject.node.num)
+                            is HudSubject.WaypointSubject -> infoWaypoint = subject.waypoint
+                        }
+                    },
+                    onToggleFocus = { viewModel.toggleFocus(target.subject) },
+                )
+            }
         }
 
         val sensorStatus =
@@ -337,7 +354,7 @@ fun MeshHudScreen(
             targets = targets,
             onNavigateUp = onNavigateUp,
             onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,
-            onCapture = rememberHudCapture().takeIf { showCamera && cameraAvailable },
+            onCapture = rememberHudCapture(still, overlayLayer).takeIf { showCamera && cameraAvailable },
             modifier =
             Modifier.align(Alignment.TopStart).onPlaced {
                 topBarBottomPx = (it.positionInParent().y + it.size.height).toInt()
