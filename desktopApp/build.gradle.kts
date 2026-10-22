@@ -363,6 +363,8 @@ abstract class RewriteDebDependencyNames : Action<Task> {
 
 tasks.withType<AbstractJPackageTask>().configureEach {
     if (targetFormat == TargetFormat.Deb) {
+        // The CMP plugin reads packageAppImage's output without declaring it, which Gradle 9.9 rejects.
+        dependsOn("packageAppImage")
         doLast(objects.newInstance<RewriteDebDependencyNames>())
     }
 }
