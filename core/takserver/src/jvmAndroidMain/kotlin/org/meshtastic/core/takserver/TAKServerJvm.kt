@@ -47,6 +47,12 @@ import kotlinx.coroutines.isActive as coroutineIsActive
 private const val SERVER_SOCKET_BACKLOG = 4
 
 /**
+ * Upper bound on the TLS handshake. A local process can open the port and send nothing; without this the handshake
+ * would pin an IO thread indefinitely, and a handful of such sockets would starve the app-wide IO dispatcher.
+ */
+private const val TLS_HANDSHAKE_TIMEOUT_MS = 10_000
+
+/**
  * JSSE-backed TLS TAK server:
  * - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
  * - TLS 1.2+ with this install's server identity from [TakCertificateManager]
@@ -75,8 +81,21 @@ internal class TAKServerJvm(
     private val connectionsLock = ReentrantLock()
     private val connections = mutableMapOf<String, TAKClientConnection>()
 
+    /**
+     * Sockets accepted but not yet past [verifyIssuedClient]; closed by [stop] so a stalled handshake cannot outlive
+     * it.
+     */
+    private val pendingSockets = mutableSetOf<Socket>()
+
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+
+    private val _rejectedConnectionCount = MutableStateFlow(0)
+    override val rejectedConnectionCount: StateFlow<Int> = _rejectedConnectionCount.asStateFlow()
+
+    /** The port the listener is bound to, or null when not running. Lets tests bind port 0 and discover the result. */
+    internal val boundPort: Int?
+        get() = serverSocket?.localPort?.takeIf { it > 0 }
 
     override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
     override var onClientConnected: (() -> Unit)? = null
@@ -104,7 +123,8 @@ internal class TAKServerJvm(
                 }
             serverSocket = boundSocket
             running = true
-            Logger.i { "TAK Server listening on 127.0.0.1:$port (TLS, mTLS enforced)" }
+            _rejectedConnectionCount.value = 0
+            Logger.i { "TAK Server listening on 127.0.0.1:${boundSocket.localPort} (TLS, mTLS enforced)" }
 
             acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
             Result.success(Unit)
@@ -179,11 +199,14 @@ internal class TAKServerJvm(
                 ioDispatcher = dispatchers.io,
             )
 
+        connectionsLock.withLock { pendingSockets += clientSocket }
         // Launch on IO so socket reads/writes don't queue behind CPU work on Default
         scope.launch(dispatchers.io) {
             // Completing the handshake here (not on the accept loop) keeps a slow or hostile client from
             // stalling accepts, and lets us reject anything but our own issued client certificate.
-            if (!verifyIssuedClient(clientSocket, endpoint)) return@launch
+            val accepted = verifyIssuedClient(clientSocket, endpoint)
+            connectionsLock.withLock { pendingSockets -= clientSocket }
+            if (!accepted) return@launch
             connectionsLock.withLock {
                 connections[connectionId] = connection
                 _connectionCount.value = connections.size
@@ -193,18 +216,28 @@ internal class TAKServerJvm(
         }
     }
 
+    /**
+     * Completes the TLS handshake under [TLS_HANDSHAKE_TIMEOUT_MS] and accepts the socket only if the peer presented
+     * exactly the client certificate this install issued. Anything else — no certificate, the old bundled identity,
+     * another install's identity, our own server certificate — is counted in [rejectedConnectionCount] and closed.
+     */
     private fun verifyIssuedClient(clientSocket: Socket, endpoint: String): Boolean {
         val accepted =
             try {
                 val tls = clientSocket as SSLSocket
+                tls.soTimeout = TLS_HANDSHAKE_TIMEOUT_MS
                 tls.startHandshake()
-                certificateManager.isIssuedClient(tls.session.peerCertificates.firstOrNull())
+                val issued = certificateManager.isIssuedClient(tls.session.peerCertificates.firstOrNull())
+                // TAKClientConnection reads block indefinitely between keepalives; restore the default.
+                if (issued) tls.soTimeout = 0
+                issued
             } catch (e: Exception) {
                 Logger.w { "TAK server TLS handshake failed for $endpoint: ${e.message}" }
                 false
             }
         if (!accepted) {
             Logger.w { "TAK server rejected $endpoint: client certificate is not the one issued by this install" }
+            if (running) _rejectedConnectionCount.value += 1
             try {
                 clientSocket.close()
             } catch (_: Exception) {}
@@ -295,13 +328,21 @@ internal class TAKServerJvm(
 
         // Guard the snapshot+clear with the same lock used by the coroutine accept/disconnect
         // paths to avoid concurrent modification or a stale connectionCount during shutdown.
-        val toClose = connectionsLock.withLock {
-            val snapshot = connections.values.toList()
-            connections.clear()
-            _connectionCount.value = 0
-            snapshot
-        }
+        val (toClose, pending) =
+            connectionsLock.withLock {
+                val snapshot = connections.values.toList()
+                connections.clear()
+                _connectionCount.value = 0
+                val stillHandshaking = pendingSockets.toList()
+                pendingSockets.clear()
+                snapshot to stillHandshaking
+            }
         toClose.forEach { it.close() }
+        pending.forEach {
+            try {
+                it.close()
+            } catch (_: Exception) {}
+        }
 
         try {
             serverSocket?.close()

@@ -43,6 +43,12 @@ interface TAKServer {
     /** Observable count of currently-connected TAK clients (ATAK/iTAK). */
     val connectionCount: StateFlow<Int>
 
+    /**
+     * Observable count of connections rejected since the listener started because the client did not present this
+     * install's certificate. Surfaces the "ATAK still has the old data package" migration state in the UI.
+     */
+    val rejectedConnectionCount: StateFlow<Int>
+
     /** Callback invoked on the IO dispatcher for every inbound CoT message from a client. */
     var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)?
 

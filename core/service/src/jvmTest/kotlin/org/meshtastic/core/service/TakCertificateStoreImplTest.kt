@@ -75,6 +75,25 @@ class TakCertificateStoreImplTest {
         val loaded = assertNotNull(store.load())
         assertEquals("pw-2", loaded.password)
         assertContentEquals(material(2).serverP12, loaded.serverP12)
+        assertContentEquals(material(2).clientP12, loaded.clientP12)
+        assertContentEquals(material(2).truststoreP12, loaded.truststoreP12)
+        assertEquals(listOf("material.enc"), File(dataDir, "tak_certs").list()!!.filter { it.endsWith(".enc") })
+    }
+
+    @Test
+    fun `truncated or garbage material reads as empty`() {
+        val store = TakCertificateStoreImpl(dataDir)
+        store.save(material(3))
+        val file = File(dataDir, "tak_certs/material.enc")
+
+        file.writeBytes(file.readBytes().copyOf(file.length().toInt() / 2))
+        assertNull(TakCertificateStoreImpl(dataDir).load(), "truncated ciphertext must read as empty")
+
+        file.writeBytes(ByteArray(40) { 0x41 })
+        assertNull(TakCertificateStoreImpl(dataDir).load(), "garbage must read as empty")
+
+        store.save(material(4))
+        assertEquals("pw-4", TakCertificateStoreImpl(dataDir).load()?.password)
     }
 
     @Test
@@ -85,6 +104,8 @@ class TakCertificateStoreImplTest {
 
         val onDisk = File(dataDir, "tak_certs/material.enc").readBytes()
         assertFalse(onDisk.containsSequence(saved.serverP12), "server.p12 bytes must be encrypted at rest")
+        assertFalse(onDisk.containsSequence(saved.clientP12), "client.p12 bytes must be encrypted at rest")
+        assertFalse(onDisk.containsSequence(saved.truststoreP12), "truststore bytes must be encrypted at rest")
         assertFalse(onDisk.containsSequence(saved.password.encodeToByteArray()), "password must be encrypted at rest")
     }
 

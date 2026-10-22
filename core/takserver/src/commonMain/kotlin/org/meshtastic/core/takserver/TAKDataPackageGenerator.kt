@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("LongMethod")
-
 package org.meshtastic.core.takserver
 
 import nl.adaptivity.xmlutil.XmlDeclMode
@@ -54,118 +52,71 @@ object TAKDataPackageGenerator {
     }
 
     /**
-     * Generate a complete TAK data package zip.
+     * Generate a complete TAK data package zip for [credentials].
      *
-     * @param credentials this install's client identity + truststore; when present the package includes
-     *   `truststore.p12` + `client.p12` and the pref file uses `ssl`. When null the package is TCP-only (legacy,
-     *   tests).
+     * There is deliberately no certificate-less variant: the server only ever speaks mTLS, so a package without this
+     * install's client identity could never connect. Callers must fail the export when credentials are unavailable.
+     *
      * @return zip file contents as a [ByteArray]
      */
     fun generateDataPackage(
-        credentials: TakDataPackageCredentials?,
+        credentials: TakDataPackageCredentials,
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
         description: String = "Meshtastic TAK Server",
     ): ByteArray {
-        val useTls = credentials != null
-        val prefContent = generateConfigPref(serverHost, port, credentials?.password, description)
-        val manifestContent =
-            generateManifest(uid = Uuid.random().toString(), description = description, useTls = useTls)
+        val prefContent = generateConfigPref(serverHost, port, credentials.password, description)
+        val manifestContent = generateManifest(uid = Uuid.random().toString(), description = description)
 
         val entries = mutableMapOf<String, ByteArray>()
         entries[PREF_FILE_NAME] = prefContent.encodeToByteArray()
         entries["manifest.xml"] = manifestContent.encodeToByteArray()
-
-        if (credentials != null) {
-            entries[TRUSTSTORE_FILE_NAME] = credentials.truststoreP12
-            entries[CLIENT_P12_FILE_NAME] = credentials.clientP12
-        }
+        entries[TRUSTSTORE_FILE_NAME] = credentials.truststoreP12
+        entries[CLIENT_P12_FILE_NAME] = credentials.clientP12
 
         return ZipArchiver.createZip(entries)
     }
 
-    /** @param certPassword password of both PKCS#12 containers; null produces the legacy plain-TCP pref. */
+    /** @param certPassword password of both PKCS#12 containers, written to the pref so ATAK can open them. */
     internal fun generateConfigPref(
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
-        certPassword: String?,
+        certPassword: String,
         description: String = "Meshtastic TAK Server",
     ): String {
-        val protocolType = if (certPassword != null) "ssl" else "tcp"
         val prefs =
-            if (certPassword != null) {
-                // TLS / mTLS mode — same layout as the iOS data package.
-                TAKPreferencesXml(
-                    preferences =
-                    listOf(
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "cot_streams",
-                            entries =
-                            listOf(
-                                TAKEntryXml("count", "class java.lang.Integer", "1"),
-                                TAKEntryXml("description0", "class java.lang.String", description),
-                                TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "connectString0",
-                                    "class java.lang.String",
-                                    "$serverHost:$port:$protocolType",
-                                ),
-                            ),
-                        ),
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "com.atakmap.app_preferences",
-                            entries =
-                            listOf(
-                                TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "caLocation",
-                                    "class java.lang.String",
-                                    "cert/$TRUSTSTORE_FILE_NAME",
-                                ),
-                                TAKEntryXml("caPassword", "class java.lang.String", certPassword),
-                                TAKEntryXml(
-                                    "certificateLocation",
-                                    "class java.lang.String",
-                                    "cert/$CLIENT_P12_FILE_NAME",
-                                ),
-                                TAKEntryXml("clientPassword", "class java.lang.String", certPassword),
-                            ),
+            TAKPreferencesXml(
+                preferences =
+                listOf(
+                    TAKPreferenceXml(
+                        version = "1",
+                        name = "cot_streams",
+                        entries =
+                        listOf(
+                            TAKEntryXml("count", "class java.lang.Integer", "1"),
+                            TAKEntryXml("description0", "class java.lang.String", description),
+                            TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
+                            TAKEntryXml("connectString0", "class java.lang.String", "$serverHost:$port:ssl"),
                         ),
                     ),
-                )
-            } else {
-                // Legacy plain-TCP mode (not used in production, kept for tests / fallback)
-                TAKPreferencesXml(
-                    preferences =
-                    listOf(
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "cot_streams",
-                            entries =
-                            listOf(
-                                TAKEntryXml("count", "class java.lang.Integer", "1"),
-                                TAKEntryXml("description0", "class java.lang.String", description),
-                                TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "connectString0",
-                                    "class java.lang.String",
-                                    "$serverHost:$port:$protocolType",
-                                ),
+                    TAKPreferenceXml(
+                        version = "1",
+                        name = "com.atakmap.app_preferences",
+                        entries =
+                        listOf(
+                            TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
+                            TAKEntryXml("caLocation", "class java.lang.String", "cert/$TRUSTSTORE_FILE_NAME"),
+                            TAKEntryXml("caPassword", "class java.lang.String", certPassword),
+                            TAKEntryXml(
+                                "certificateLocation",
+                                "class java.lang.String",
+                                "cert/$CLIENT_P12_FILE_NAME",
                             ),
-                        ),
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "com.atakmap.app_preferences",
-                            entries =
-                            listOf(
-                                TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
-                            ),
+                            TAKEntryXml("clientPassword", "class java.lang.String", certPassword),
                         ),
                     ),
-                )
-            }
+                ),
+            )
 
         return xmlSerializer
             .encodeToString(TAKPreferencesXml.serializer(), prefs)
@@ -175,11 +126,7 @@ object TAKDataPackageGenerator {
             )
     }
 
-    internal fun generateManifest(
-        uid: String,
-        description: String = "Meshtastic TAK Server",
-        useTls: Boolean = true,
-    ): String = buildString {
+    internal fun generateManifest(uid: String, description: String = "Meshtastic TAK Server"): String = buildString {
         appendLine("""<MissionPackageManifest version="2">""")
         appendLine("  <Configuration>")
         appendLine("""    <Parameter name="uid" value="${description.xmlEscaped()}.$uid"/>""")
@@ -188,10 +135,8 @@ object TAKDataPackageGenerator {
         appendLine("  </Configuration>")
         appendLine("  <Contents>")
         appendLine("""    <Content ignore="false" zipEntry="$PREF_FILE_NAME"/>""")
-        if (useTls) {
-            appendLine("""    <Content ignore="false" zipEntry="$TRUSTSTORE_FILE_NAME"/>""")
-            appendLine("""    <Content ignore="false" zipEntry="$CLIENT_P12_FILE_NAME"/>""")
-        }
+        appendLine("""    <Content ignore="false" zipEntry="$TRUSTSTORE_FILE_NAME"/>""")
+        appendLine("""    <Content ignore="false" zipEntry="$CLIENT_P12_FILE_NAME"/>""")
         appendLine("  </Contents>")
         append("</MissionPackageManifest>")
     }

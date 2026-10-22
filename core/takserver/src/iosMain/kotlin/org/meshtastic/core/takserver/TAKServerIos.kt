@@ -36,6 +36,7 @@ private class NoopTAKServer : TAKServer {
     override val certificates: TakCertificateProvider = NoopTakCertificateProvider
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+    override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0).asStateFlow()
     override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
     override var onClientConnected: (() -> Unit)? = null
 

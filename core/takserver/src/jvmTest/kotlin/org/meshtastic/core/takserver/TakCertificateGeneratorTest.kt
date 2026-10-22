@@ -24,6 +24,7 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -32,8 +33,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * The generated `.p12` containers must stay encoded with legacy PKCS#12 algorithms (SHA1/3DES key bags, SHA1 MAC).
- * Android 9 and older cannot parse PBES2/AES-encrypted containers, which breaks ATAK data package import (#6567).
+ * The generated `.p12` containers must stay encoded with legacy PKCS#12 algorithms (SHA1/3DES bags, SHA1 MAC). Android
+ * 9 and older cannot parse PBES2/AES-encrypted containers, which breaks ATAK data package import (#6567).
  */
 class TakCertificateGeneratorTest {
 
@@ -55,11 +56,9 @@ class TakCertificateGeneratorTest {
     private fun ByteArray.containsSequence(needle: ByteArray): Boolean =
         (0..size - needle.size).any { offset -> needle.indices.all { this[offset + it] == needle[it] } }
 
-    private fun assertLegacyEncoding(bytes: ByteArray, name: String, expectKeyBag: Boolean) {
+    private fun assertLegacyEncoding(bytes: ByteArray, name: String) {
         assertFalse(bytes.containsSequence(pbes2Oid), "$name uses PBES2/AES encryption, unreadable on Android <= 9")
-        if (expectKeyBag) {
-            assertTrue(bytes.containsSequence(sha1TripleDesOid), "$name is missing legacy SHA1/3DES PKCS#12 encryption")
-        }
+        assertTrue(bytes.containsSequence(sha1TripleDesOid), "$name is missing legacy SHA1/3DES PKCS#12 encryption")
         assertTrue(bytes.containsSequence(sha1MacDigestInfoPrefix), "$name is missing a SHA1 PKCS#12 MAC")
     }
 
@@ -76,15 +75,15 @@ class TakCertificateGeneratorTest {
 
     @Test
     fun `server and client p12 use legacy encoding and load with a private key`() {
-        assertLegacyEncoding(material.serverP12, "server.p12", expectKeyBag = true)
-        assertLegacyEncoding(material.clientP12, "client.p12", expectKeyBag = true)
+        assertLegacyEncoding(material.serverP12, "server.p12")
+        assertLegacyEncoding(material.clientP12, "client.p12")
         assertTrue(loadPkcs12(material.serverP12).privateKeys().isNotEmpty(), "server.p12 has no private key entry")
         assertTrue(loadPkcs12(material.clientP12).privateKeys().isNotEmpty(), "client.p12 has no private key entry")
     }
 
     @Test
     fun `truststore holds the CA certificate and no private key`() {
-        assertLegacyEncoding(material.truststoreP12, "truststore.p12", expectKeyBag = false)
+        assertLegacyEncoding(material.truststoreP12, "truststore.p12")
         val trust = loadPkcs12(material.truststoreP12)
         assertTrue(trust.privateKeys().isEmpty(), "truststore.p12 must not leak a private key")
         val ca = trust.leafCertificate()
@@ -131,7 +130,11 @@ class TakCertificateGeneratorTest {
 
         val first = manager.getOrCreate()
         assertEquals(1, generations)
-        assertNotNull(store.saved, "material must be persisted")
+        val saved = assertNotNull(store.saved, "material must be persisted")
+        assertContentEquals(first.material.serverP12, saved.serverP12)
+        assertContentEquals(first.material.clientP12, saved.clientP12)
+        assertContentEquals(first.material.truststoreP12, saved.truststoreP12)
+        assertEquals(first.material.password, saved.password)
         assertTrue(manager.isIssuedClient(first.clientCertificate))
 
         // A fresh manager over the same store must reuse the stored set rather than issue again.
@@ -158,6 +161,28 @@ class TakCertificateGeneratorTest {
         assertFalse(manager.isIssuedClient(first.clientCertificate), "old client must be rejected after regenerate")
         assertTrue(manager.isIssuedClient(second.clientCertificate))
         assertFalse(manager.isIssuedClient(null))
+    }
+
+    @Test
+    fun `manager treats a throwing store as empty`() = runTest {
+        val store =
+            object : TakCertificateStore {
+                var saved: TakCertificateMaterial? = null
+
+                override fun load(): TakCertificateMaterial? = saved ?: error("keystore reset")
+
+                override fun save(material: TakCertificateMaterial) {
+                    saved = material
+                }
+
+                override fun clear() {
+                    saved = null
+                }
+            }
+        val loaded = TakCertificateManager(store).getOrCreate()
+        assertNotNull(store.saved)
+        assertTrue(TakCertificateManager(store).isIssuedClient(null).not())
+        assertEquals(loaded.clientCertificate, TakCertificateManager(store).getOrCreate().clientCertificate)
     }
 
     private class InMemoryStore : TakCertificateStore {
@@ -191,6 +216,14 @@ class TakCertificateGeneratorTest {
         val zip = TAKDataPackageGenerator.generateDataPackage(credentials)
         val entries = readZipEntries(zip)
         assertEquals(setOf("meshtastic-server.pref", "manifest.xml", "truststore.p12", "client.p12"), entries.keys)
+        assertContentEquals(material.truststoreP12, entries.getValue("truststore.p12"))
+        assertContentEquals(material.clientP12, entries.getValue("client.p12"))
+        assertFalse(entries.values.any { it.containsSequence(material.serverP12) }, "server.p12 must not be exported")
+        val packagedPref = entries.getValue("meshtastic-server.pref").decodeToString()
+        assertTrue(packagedPref.contains("""key="caPassword" class="class java.lang.String">${material.password}<"""))
+        assertTrue(
+            packagedPref.contains("""key="clientPassword" class="class java.lang.String">${material.password}<"""),
+        )
         assertTrue(loadPkcs12(entries.getValue("truststore.p12")).privateKeys().isEmpty())
         assertTrue(loadPkcs12(entries.getValue("client.p12")).privateKeys().isNotEmpty())
     }

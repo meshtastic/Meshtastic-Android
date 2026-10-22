@@ -64,7 +64,15 @@ internal class TakCertificateManager(
         return mutex.withLock {
             cached
                 ?: run {
-                    val stored = store.load()
+                    // A store that cannot decrypt (Android keystore reset, restored backup, damaged file) must
+                    // lead to a clean reissue, not a server that fails to start on every retry.
+                    val stored =
+                        try {
+                            store.load()
+                        } catch (e: Exception) {
+                            Logger.w(e) { "TAK: could not read stored certificates, issuing a new set" }
+                            null
+                        }
                     val loaded = stored?.let { material ->
                         try {
                             load(material)

@@ -25,6 +25,8 @@ import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import javax.crypto.SecretKey
 
 /**
@@ -66,9 +68,20 @@ class TakCertificateStoreImpl(dataDir: File = File(desktopDataDir())) : TakCerti
         }
     }
 
+    /**
+     * Writes through a temp file and an atomic rename, so an interrupted save leaves the previous identity intact
+     * rather than a truncated file that would be read as "no material" and silently replaced on next start.
+     */
     override fun save(material: TakCertificateMaterial) {
         val key = masterKey ?: error("TAK: Cannot save certificate material - keystore unavailable")
-        materialFile.writeBytes(cipher.encrypt(key, serialize(material)))
+        val encrypted = cipher.encrypt(key, serialize(material))
+        val temp = Files.createTempFile(storeDir.toPath(), "$MATERIAL_FILE.", ".tmp")
+        try {
+            Files.write(temp, encrypted)
+            Files.move(temp, materialFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+        } finally {
+            Files.deleteIfExists(temp)
+        }
     }
 
     override fun clear() {

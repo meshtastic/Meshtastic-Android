@@ -41,6 +41,7 @@ class TAKServerManagerTest {
     private class FakeTAKServer : TAKServer {
         override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
@@ -175,6 +176,7 @@ class TAKServerManagerTest {
     private class FailingTAKServer : TAKServer {
         override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
@@ -193,6 +195,7 @@ class TAKServerManagerTest {
     private class DelayedTAKServer : TAKServer {
         override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 

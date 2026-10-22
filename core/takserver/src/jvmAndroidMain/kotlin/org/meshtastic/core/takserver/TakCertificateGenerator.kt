@@ -50,15 +50,18 @@ import java.util.concurrent.TimeUnit
  * private instance and passed explicitly — it is never registered with `java.security.Security`, because Android
  * already ships a stripped provider under the same "BC" name and registration would be ignored or shadow it.
  *
- * Why these encodings: BouncyCastle's `PKCS12` KeyStore writes the legacy algorithms (pbeWithSHAAnd3-KeyTripleDES-CBC
- * for keys, pbeWithSHAAnd40BitRC2-CBC for certificates, SHA-1 MAC). Android 9 and older cannot parse PBES2/AES
- * containers, which breaks ATAK data package import (#6567), so the output must stay legacy-encoded.
+ * Why these encodings: the containers are written with BouncyCastle's explicitly named [PKCS12_KEYSTORE_TYPE], which
+ * uses pbeWithSHAAnd3-KeyTripleDES-CBC for both key and certificate bags and a SHA-1 MAC. Android 9 and older cannot
+ * parse PBES2/AES containers, which breaks ATAK data package import (#6567), so the output must stay legacy-encoded and
+ * must not depend on whatever the provider's unqualified `PKCS12` default happens to be in a given release.
  *
  * The CA private key lives only on the stack of [generate] and is dropped afterwards: no further client certificates
  * can ever be minted for this install, and a compromised store yields nothing a fresh [generate] does not replace.
  */
 internal object TakCertificateGenerator {
 
+    /** BouncyCastle keystore type: legacy SHA1/3DES for key and certificate bags, SHA-1 MAC. See class KDoc. */
+    private const val PKCS12_KEYSTORE_TYPE = "PKCS12-3DES-3DES"
     private const val SERVER_ALIAS = "meshtastic-tak-server"
     private const val CLIENT_ALIAS = "meshtastic-tak-client"
     private const val CA_ALIAS = "meshtastic-tak-ca"
@@ -175,7 +178,7 @@ internal object TakCertificateGenerator {
     }
 
     private fun pkcs12(password: CharArray, populate: KeyStore.() -> Unit): ByteArray {
-        val keyStore = KeyStore.getInstance("PKCS12", provider).apply { load(null, null) }
+        val keyStore = KeyStore.getInstance(PKCS12_KEYSTORE_TYPE, provider).apply { load(null, null) }
         keyStore.populate()
         return ByteArrayOutputStream().also { keyStore.store(it, password) }.toByteArray()
     }
