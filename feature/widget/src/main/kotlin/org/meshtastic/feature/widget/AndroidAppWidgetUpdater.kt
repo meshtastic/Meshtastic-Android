@@ -65,7 +65,7 @@ class AndroidAppWidgetUpdater(
         // would starve the trackers. Only the rendered state of the tracked nodes counts as a change.
         @OptIn(FlowPreview::class)
         scope.launch {
-            trackerDataSource.inputs
+            trackerDataSource.checkedInputs
                 .sample(TRACKER_UPDATE_SAMPLE_MS)
                 .map { inputs -> trackedNodeNums().map { nodeTrackerState(it, inputs) } }
                 .distinctUntilChanged()
