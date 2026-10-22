@@ -227,6 +227,24 @@
             android:foregroundServiceType="connectedDevice|location"
             android:exported="false" />
 
+        <!-- Quick Settings tile for the radio connection; BIND_QUICK_SETTINGS_TILE limits binding to SystemUI -->
+        <service
+            android:name="org.meshtastic.core.service.MeshQuickSettingsTileService"
+            android:exported="true"
+            android:icon="@drawable/meshtastic_ic_notification"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

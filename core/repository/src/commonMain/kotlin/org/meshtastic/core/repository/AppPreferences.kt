@@ -374,6 +374,9 @@ interface MapTileProviderPrefs {
 interface RadioPrefs {
     val devAddr: StateFlow<String?>
 
+    /** The saved address once the store has loaded; [devAddr] reads null until then. */
+    suspend fun awaitDevAddr(): String?
+
     /** The persisted user-visible name of the connected device (e.g. "Meshtastic_1234"). */
     val devName: StateFlow<String?>
 

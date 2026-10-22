@@ -113,6 +113,34 @@ class ForegroundStartPolicyTest {
         }
     }
 
+    @Test
+    fun `a tile tap from the background is attempted`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertTrue(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.QuickSettingsTile,
+                    appInForeground = false,
+                    sdkInt = sdk,
+                ),
+                "QuickSettingsTile should be attempted while backgrounded on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `a tile tap while the app is visible is allowed`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertTrue(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.QuickSettingsTile,
+                    appInForeground = true,
+                    sdkInt = sdk,
+                ),
+                "QuickSettingsTile should be allowed while visible on API $sdk",
+            )
+        }
+    }
+
     // endregion
 
     // region service type selection

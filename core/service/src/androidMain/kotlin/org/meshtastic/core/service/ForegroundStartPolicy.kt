@@ -70,6 +70,10 @@ object ForegroundStartPolicy {
 
         trigger == ServiceStartTrigger.BootCompleted -> true
 
+        // SystemUI temp-allowlists the app for a tile click (reason "tile onclick"); a refusal on a release without
+        // that falls back to opening the app.
+        trigger == ServiceStartTrigger.QuickSettingsTile -> true
+
         // No exemption of its own — legal only while the app is genuinely still in the foreground.
         else -> appInForeground
     }

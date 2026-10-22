@@ -152,6 +152,17 @@ To disconnect, tap the disconnect button on the **Connect** tab:
 
 ![Disconnect from the node](../../assets/screenshots/connections_disconnect.png)
 
+## Quick Settings Tile
+
+On Android you can add a **Meshtastic** tile to Quick Settings: pull down the notification shade, tap the edit (pencil) button, and drag the tile into place.
+
+- **Connected** - the tile is on and shows your node's short name. Tap it to disconnect, the same as the disconnect button on the **Connect** tab.
+- **Connecting** - the tile is on and reads "Connecting". Tap it to cancel.
+- **Disconnected** or **Device sleeping** - the tile is off. Tap it to reconnect to the radio you last selected.
+- **No device selected** - tap the tile to open the **Connect** tab and pick a radio.
+
+Disconnecting forgets the selected radio, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. On a locked phone the tile asks you to unlock first.
+
 ## Desktop Connections
 
 On Desktop (Linux/macOS/Windows), the app supports:

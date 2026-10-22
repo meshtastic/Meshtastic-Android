@@ -339,6 +339,9 @@ class FakeMapTileProviderPrefs : MapTileProviderPrefs {
 
 class FakeRadioPrefs : RadioPrefs {
     override val devAddr = MutableStateFlow<String?>(null)
+
+    override suspend fun awaitDevAddr(): String? = devAddr.value
+
     override val devName = MutableStateFlow<String?>(null)
 
     override fun setDevAddr(address: String?) {
