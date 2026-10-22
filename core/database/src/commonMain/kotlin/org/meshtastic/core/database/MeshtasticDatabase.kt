@@ -38,6 +38,7 @@ import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MaintenanceUf2Dao
 import org.meshtastic.core.database.dao.MergeMarkerDao
 import org.meshtastic.core.database.dao.MeshLogDao
+import org.meshtastic.core.database.dao.MqttRootsDao
 import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
@@ -56,6 +57,7 @@ import org.meshtastic.core.database.entity.MaintenanceUf2CacheEntity
 import org.meshtastic.core.database.entity.MergeMarkerEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MqttRootsCacheEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
@@ -88,6 +90,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         ChannelSetEntity::class,
         BootloaderOtaQuirksCacheEntity::class,
         MaintenanceUf2CacheEntity::class,
+        MqttRootsCacheEntity::class,
     ],
     autoMigrations =
     [
@@ -152,8 +155,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 61, to = 62),
         AutoMigration(from = 62, to = 63),
         // 63 -> 64 is the manual MIGRATION_63_64 (log index added in place), applied via configureCommon().
+        AutoMigration(from = 64, to = 65),
     ],
-    version = 64,
+    version = 65,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -188,6 +192,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun bootloaderOtaQuirksDao(): BootloaderOtaQuirksDao
 
     abstract fun maintenanceUf2Dao(): MaintenanceUf2Dao
+
+    abstract fun mqttRootsDao(): MqttRootsDao
 
     companion object {
         /**
