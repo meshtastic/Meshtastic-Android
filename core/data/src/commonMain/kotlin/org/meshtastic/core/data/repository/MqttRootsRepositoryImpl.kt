@@ -75,13 +75,12 @@ class MqttRootsRepositoryImpl(
     }
 
     /**
-     * Not locked itself; every caller already holds [writeMutex]. A response with no entries, neighbors or subdivision
-     * mappings is ignored, so a degraded response never wipes the seed or cache back to nothing.
+     * Not locked itself; every caller already holds [writeMutex]. A response with no subdivision mappings is ignored,
+     * whatever else it carries, so a degraded response never replaces the subdivision names the finder needs.
      */
     private suspend fun store(response: MqttRootsResponse) {
-        val noSegments = response.subdivisionSegments.values.all { it.isEmpty() }
-        if (response.entries.isEmpty() && response.neighbors.isEmpty() && noSegments) {
-            Logger.w { "MqttRootsRepository: empty response; leaving cache untouched" }
+        if (response.subdivisionSegments.values.all { it.isEmpty() }) {
+            Logger.w { "MqttRootsRepository: response has no subdivision mappings; leaving cache untouched" }
             return
         }
         localDataSource.upsert(response.asEntity())

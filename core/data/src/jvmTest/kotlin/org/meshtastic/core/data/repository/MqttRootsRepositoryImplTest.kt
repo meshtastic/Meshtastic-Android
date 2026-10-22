@@ -143,6 +143,17 @@ class MqttRootsRepositoryImplTest {
     }
 
     @Test
+    fun aFetchWithEntriesButNoSegmentsKeepsTheCache() = runBlocking {
+        api.mqttRoots = { fetched }
+        repository.reconcile()
+
+        api.mqttRoots = { fetched.copy(subdivisionSegments = emptyMap()) }
+        repository.reconcile()
+
+        assertEquals(fetched, repository.getSnapshot())
+    }
+
+    @Test
     fun aFailedCacheWriteKeepsTheSeedWithoutThrowing() = runBlocking {
         repository.getSnapshot()
         api.mqttRoots = { fetched }
