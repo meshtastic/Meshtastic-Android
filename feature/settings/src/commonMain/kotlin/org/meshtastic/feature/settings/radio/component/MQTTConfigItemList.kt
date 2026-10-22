@@ -168,6 +168,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         configState = formState,
         enabled = state.connected && consentValid,
+        saveEnabled = mqttSaveEnabled(editable = state.connected && consentValid, root = formState.value.root),
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
@@ -290,8 +291,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
-                    // Empty is the firmware's own default root, so only a typed root can be wrong.
-                    isError = formState.value.root.isNotEmpty() && MqttRootTopic.problem(formState.value.root) != null,
+                    isError = !mqttRootAccepted(formState.value.root),
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -579,3 +579,9 @@ private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
     is MqttProbeStatus.Other ->
         stringResource(Res.string.mqtt_probe_other_failure) to MaterialTheme.colorScheme.error
 }
+
+/** Empty is the firmware's own default root, so only a typed root can be wrong. */
+internal fun mqttRootAccepted(root: String): Boolean = root.isEmpty() || MqttRootTopic.problem(root) == null
+
+/** A root the radio would reject blocks Save while the field stays editable. */
+internal fun mqttSaveEnabled(editable: Boolean, root: String): Boolean = editable && mqttRootAccepted(root)
