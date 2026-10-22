@@ -39,6 +39,7 @@ interface TAKServerManager {
     val isRunning: StateFlow<Boolean>
     val isStarting: StateFlow<Boolean>
     val connectionCount: StateFlow<Int>
+    val rejectedConnectionCount: StateFlow<Int>
     val hasStartError: StateFlow<Boolean>
     val inboundMessages: SharedFlow<InboundCoTMessage>
 
@@ -75,8 +76,9 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
     private val _isStarting = MutableStateFlow(false)
     override val isStarting: StateFlow<Boolean> = _isStarting.asStateFlow()
 
-    // Mirror TAKServer's event-driven connection count — no polling needed
+    // Mirror TAKServer's event-driven connection counts; no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
+    override val rejectedConnectionCount: StateFlow<Int> = takServer.rejectedConnectionCount
 
     private val _hasStartError = MutableStateFlow(false)
     override val hasStartError: StateFlow<Boolean> = _hasStartError.asStateFlow()
@@ -202,13 +204,12 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
     internal fun drainOfflineQueue() {
         if (!_isRunning.value) return
         scope?.launch {
-            val messages =
-                offlineQueueMutex.withLock {
-                    val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
-                    val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
-                    offlineQueue.clear()
-                    valid
-                }
+            val messages = offlineQueueMutex.withLock {
+                val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
+                offlineQueue.clear()
+                valid
+            }
             if (messages.isNotEmpty()) {
                 Logger.i { "Draining ${messages.size} queued message(s) to reconnected TAK client" }
                 messages.forEach { takServer.broadcast(it) }

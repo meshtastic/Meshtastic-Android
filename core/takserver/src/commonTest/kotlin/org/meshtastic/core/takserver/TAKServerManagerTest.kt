@@ -39,7 +39,9 @@ class TAKServerManagerTest {
 
     /** Fake TAKServer that records broadcasts and simulates connection state. */
     private class FakeTAKServer : TAKServer {
+        override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
@@ -172,7 +174,9 @@ class TAKServerManagerTest {
 
     /** Fake TAKServer that simulates a port-conflict failure on start. */
     private class FailingTAKServer : TAKServer {
+        override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
@@ -189,7 +193,9 @@ class TAKServerManagerTest {
     }
 
     private class DelayedTAKServer : TAKServer {
+        override val certificates: TakCertificateProvider = NoopCertificates
         override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
@@ -296,4 +302,10 @@ class TAKServerManagerTest {
 
         assertTrue(fakeTakServer.rawBroadcasts.isEmpty())
     }
+}
+
+private object NoopCertificates : TakCertificateProvider {
+    override suspend fun dataPackageCredentials(): TakDataPackageCredentials? = null
+
+    override suspend fun regenerate(): Result<Unit> = Result.success(Unit)
 }

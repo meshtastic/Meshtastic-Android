@@ -39,8 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,21 +62,31 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.export_tak_data_package
 import org.meshtastic.core.resources.schema_tak_role
 import org.meshtastic.core.resources.schema_tak_team
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
 import org.meshtastic.core.resources.tak_server
+import org.meshtastic.core.resources.tak_server_certs_notice
 import org.meshtastic.core.resources.tak_server_channel
 import org.meshtastic.core.resources.tak_server_channel_desc
 import org.meshtastic.core.resources.tak_server_channel_option
+import org.meshtastic.core.resources.tak_server_client_rejected
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_server_export_data_package_desc
+import org.meshtastic.core.resources.tak_server_export_failed
 import org.meshtastic.core.resources.tak_server_loading
 import org.meshtastic.core.resources.tak_server_mesh_to_cot
 import org.meshtastic.core.resources.tak_server_mesh_to_cot_desc
+import org.meshtastic.core.resources.tak_server_regenerate_certs
+import org.meshtastic.core.resources.tak_server_regenerate_certs_confirm
+import org.meshtastic.core.resources.tak_server_regenerate_certs_desc
+import org.meshtastic.core.resources.tak_server_regenerate_certs_done
+import org.meshtastic.core.resources.tak_server_regenerate_certs_failed
+import org.meshtastic.core.resources.tak_server_regenerate_certs_message
 import org.meshtastic.core.resources.tak_server_section
 import org.meshtastic.core.resources.tak_server_status
 import org.meshtastic.core.resources.tak_server_status_connected
@@ -98,17 +110,21 @@ import org.meshtastic.core.resources.tak_server_v1_fallback_notice
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
+import org.meshtastic.core.takserver.TakCertificateProvider
 import org.meshtastic.core.takserver.TakMeshTestRunner
 import org.meshtastic.core.takserver.TakProtocol
 import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.component.DropDownPreference
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
@@ -209,6 +225,8 @@ internal fun handleTakPermissionResult(granted: Boolean, isTakServerEnabled: Boo
 fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val takServerManager: TAKServerManager = koinInject()
+    val takCertificates: TakCertificateProvider = koinInject()
+    val snackbarManager: SnackbarManager = koinInject()
     val nodeRepository: NodeRepository = koinInject()
     val radioConfigRepository: RadioConfigRepository = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
@@ -235,6 +253,7 @@ fun TakServerScreen(onBack: () -> Unit) {
     val isTakServerRunning by takServerManager.isRunning.collectAsStateWithLifecycle()
     val isTakServerStarting by takServerManager.isStarting.collectAsStateWithLifecycle()
     val takClientCount by takServerManager.connectionCount.collectAsStateWithLifecycle()
+    val takRejectedCount by takServerManager.rejectedConnectionCount.collectAsStateWithLifecycle()
     val hasTakServerStartError by takServerManager.hasStartError.collectAsStateWithLifecycle()
     val myNodeInfo by nodeRepository.myNodeInfo.collectAsStateWithLifecycle()
     // The Mesh-to-CoT bridge falls back to a legacy protocol (PLI + basic chat only, no
@@ -254,7 +273,36 @@ fun TakServerScreen(onBack: () -> Unit) {
             clientCount = takClientCount,
             hasStartError = hasTakServerStartError,
         )
-    val exportLauncher = rememberDataPackageExporter { TAKDataPackageGenerator.generateDataPackage() }
+    val exportFailedText = stringResource(Res.string.tak_server_export_failed)
+    val regenerateDoneText = stringResource(Res.string.tak_server_regenerate_certs_done)
+    val regenerateFailedText = stringResource(Res.string.tak_server_regenerate_certs_failed)
+    // A null credentials result makes the exporter report failure instead of writing a package that could never
+    // connect: the server only accepts this install's client certificate.
+    val exportLauncher =
+        rememberDataPackageExporter(
+            dataPackageProvider = {
+                takCertificates.dataPackageCredentials()?.let { TAKDataPackageGenerator.generateDataPackage(it) }
+            },
+            onResult = { exported -> if (!exported) snackbarManager.showSnackbar(exportFailedText) },
+        )
+    val scope = rememberCoroutineScope()
+    var showRegenerateDialog by remember { mutableStateOf(false) }
+    if (showRegenerateDialog) {
+        MeshtasticResourceDialog(
+            titleRes = Res.string.tak_server_regenerate_certs,
+            messageRes = Res.string.tak_server_regenerate_certs_message,
+            confirmTextRes = Res.string.tak_server_regenerate_certs_confirm,
+            dismissTextRes = Res.string.cancel,
+            onConfirm = {
+                showRegenerateDialog = false
+                scope.launch {
+                    val result = takCertificates.regenerate()
+                    snackbarManager.showSnackbar(if (result.isSuccess) regenerateDoneText else regenerateFailedText)
+                }
+            },
+            onDismiss = { showRegenerateDialog = false },
+        )
+    }
 
     TakPermissionHandler(
         isTakServerEnabled = isTakServerEnabled,
@@ -297,7 +345,9 @@ fun TakServerScreen(onBack: () -> Unit) {
                 onChannelSelected = { takPrefs.setTakServerChannel(it) },
                 status = takServerStatus,
                 clientCount = takClientCount,
+                rejectedCount = takRejectedCount,
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
+                onRegenerateCertificates = { showRegenerateDialog = true },
                 supportsTakV2 = supportsTakV2,
             )
             TakMeshTestCard()
@@ -306,6 +356,7 @@ fun TakServerScreen(onBack: () -> Unit) {
 }
 
 /** Stateless TAK server enable/disable section — previewable without DI. */
+@Suppress("LongParameterList")
 @Composable
 internal fun TakServerSection(
     isTakServerEnabled: Boolean,
@@ -317,7 +368,9 @@ internal fun TakServerSection(
     onChannelSelected: (Int) -> Unit,
     status: TakServerStatus,
     clientCount: Int,
+    rejectedCount: Int,
     onExport: () -> Unit,
+    onRegenerateCertificates: () -> Unit,
     supportsTakV2: Boolean,
 ) {
     TitledCard(title = stringResource(Res.string.tak_server_section)) {
@@ -330,6 +383,10 @@ internal fun TakServerSection(
         )
         HorizontalDivider()
         TakServerStatusRow(status = status, clientCount = clientCount)
+        if (rejectedCount > 0) {
+            HorizontalDivider()
+            TakClientRejectedNotice()
+        }
         if (isTakServerEnabled) {
             HorizontalDivider()
             SwitchPreference(
@@ -376,7 +433,58 @@ internal fun TakServerSection(
                     )
                 }
             }
+            Text(
+                text = stringResource(Res.string.tak_server_certs_notice),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp),
+            )
+            HorizontalDivider()
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.tak_server_regenerate_certs),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(Res.string.tak_server_regenerate_certs_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onRegenerateCertificates) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Refresh,
+                        contentDescription = stringResource(Res.string.tak_server_regenerate_certs),
+                    )
+                }
+            }
         }
+    }
+}
+
+/**
+ * Shown once a client has been turned away for presenting a certificate this install did not issue, most often ATAK
+ * still holding a data package from before the per-install certificates (or from another install). The status row alone
+ * would keep saying "waiting for ATAK" while ATAK silently fails to connect.
+ */
+@Composable
+private fun TakClientRejectedNotice() {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(imageVector = MeshtasticIcons.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+        Text(
+            text = stringResource(Res.string.tak_server_client_rejected),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

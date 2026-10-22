@@ -46,6 +46,7 @@ internal class FakeTAKServerManager : TAKServerManager {
 
     val connections = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = connections
+    override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0)
 
     private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
     override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()

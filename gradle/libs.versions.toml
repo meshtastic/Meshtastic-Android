@@ -99,6 +99,7 @@ google-services-gradle = "4.5.0"
 markdown = "0.7.18"
 markdownRenderer = "0.46.0"
 okio = "3.18.2"
+bouncycastle = "1.80"
 uri-kmp = "0.0.21"
 spotless = "8.10.4"
 sceneview = "4.62.0"
@@ -319,6 +320,9 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 kermit = { module = "co.touchlab:kermit", version = "2.2.0" }
+# Runtime X.509 / PKCS#12 generation for the per-install TAK server PKI (jvmAndroidMain only).
+bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
 # core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
 # tooling is meant to catch going forward. Stable release (not the 3.0-alpha line).

@@ -60,7 +60,9 @@ fun TakServerSectionDisabledPreview() {
             onChannelSelected = {},
             status = TakServerStatus.Off,
             clientCount = 0,
+            rejectedCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -84,7 +86,9 @@ fun TakServerSectionEnabledPreview() {
             onChannelSelected = {},
             status = TakServerStatus.WaitingForClient,
             clientCount = 0,
+            rejectedCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -108,7 +112,9 @@ fun TakServerSectionConnectedPreview() {
             onChannelSelected = {},
             status = TakServerStatus.Connected,
             clientCount = 1,
+            rejectedCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -132,7 +138,9 @@ fun TakServerSectionFailedPreview() {
             onChannelSelected = {},
             status = TakServerStatus.Failed,
             clientCount = 0,
+            rejectedCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = true,
         )
     }
@@ -156,7 +164,9 @@ fun TakServerSectionV1FallbackPreview() {
             onChannelSelected = {},
             status = TakServerStatus.Connected,
             clientCount = 1,
+            rejectedCount = 0,
             onExport = {},
+            onRegenerateCertificates = {},
             supportsTakV2 = false,
         )
     }

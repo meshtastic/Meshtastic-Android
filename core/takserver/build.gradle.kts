@@ -56,6 +56,14 @@ kotlin {
             implementation(libs.kermit)
         }
 
+        getByName("jvmAndroidMain") {
+            dependencies {
+                // Per-install TAK PKI: X.509 builders + legacy-encoded PKCS#12 writer (see TakCertificateGenerator).
+                implementation(libs.bouncycastle.bcprov)
+                implementation(libs.bouncycastle.bcpkix)
+            }
+        }
+
         commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

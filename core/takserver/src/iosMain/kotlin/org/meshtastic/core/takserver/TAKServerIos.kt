@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.TakCertificateStore
 
 /**
  * iOS KMP stub. The real iOS TAK server lives in Meshtastic-Apple (`Meshtastic/Helpers/TAK/TAKServerManager.swift`) and
@@ -32,8 +33,10 @@ import org.meshtastic.core.di.CoroutineDispatchers
  */
 private class NoopTAKServer : TAKServer {
     override val isSupported = false
+    override val certificates: TakCertificateProvider = NoopTakCertificateProvider
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+    override val rejectedConnectionCount: StateFlow<Int> = MutableStateFlow(0).asStateFlow()
     override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
     override var onClientConnected: (() -> Unit)? = null
 
@@ -48,4 +51,15 @@ private class NoopTAKServer : TAKServer {
     override suspend fun hasConnections(): Boolean = false
 }
 
-actual fun createTAKServer(dispatchers: CoroutineDispatchers, port: Int): TAKServer = NoopTAKServer()
+private object NoopTakCertificateProvider : TakCertificateProvider {
+    override suspend fun dataPackageCredentials(): TakDataPackageCredentials? = null
+
+    override suspend fun regenerate(): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Local TAK server is not available on this platform"))
+}
+
+actual fun createTAKServer(
+    dispatchers: CoroutineDispatchers,
+    certificateStore: TakCertificateStore,
+    port: Int,
+): TAKServer = NoopTAKServer()

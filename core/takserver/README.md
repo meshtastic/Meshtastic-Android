@@ -52,8 +52,8 @@ src/
 │   └── di/
 │       └── CoreTakServerModule.kt
 ├── jvmAndroidMain/
-│   ├── kotlin/                      ← actual TAKServerJvm, TAKClientConnection, TakCertLoader, ZipArchiver, fixture loader
-│   └── resources/                   ← tak_certs/ (server.p12, client.p12, ca.pem), tak_test_fixtures/*.xml
+│   ├── kotlin/                      ← actual TAKServerJvm, TAKClientConnection, TakCertificateGenerator/Manager, ZipArchiver, fixture loader
+│   └── resources/                   ← tak_test_fixtures/*.xml
 ├── androidMain/kotlin/              ← actual AtakFileWriter (Android)
 ├── jvmMain/kotlin/                  ← actual AtakFileWriter (Desktop)
 └── iosMain/kotlin/                  ← actual TAKServerIos (unsupported stub), AtakFileWriter, ZipArchiver, fixture loader
@@ -78,7 +78,7 @@ interface TAKServer {
 }
 ```
 
-The mTLS listener binds on port 8089 using a bundled `server.p12` / `ca.pem` identity, compatible with the ATAK Data Package provisioning flow.
+The mTLS listener binds on `127.0.0.1:8089`. On first start it generates a private CA, a server identity and a single client identity for this install (`TakCertificateGenerator`), keeps them in the platform's encrypted `TakCertificateStore`, and only accepts the client certificate it issued. The exported ATAK Data Package carries that install's `client.p12` plus a CA-only `truststore.p12`, so a package from one install never authenticates against another. `TakCertificateProvider.regenerate()` issues a fresh set (and invalidates every exported package).
 
 ### `TAKServerManager` (interface)
 
