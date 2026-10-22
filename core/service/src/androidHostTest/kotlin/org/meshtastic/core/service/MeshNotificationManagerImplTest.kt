@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.withContext
 import org.junit.After
@@ -53,7 +54,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.firmware_update_in_progress
+import org.meshtastic.core.resources.formatDurationSuspend
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.live_update_heard_now
 import org.meshtastic.core.resources.live_update_nodes_online
 import org.meshtastic.core.resources.live_update_unread
 import org.meshtastic.core.resources.local_stats_nodes
@@ -73,6 +76,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.DurationUnit
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
@@ -394,6 +399,35 @@ class MeshNotificationManagerImplTest {
             }
             assertEquals(getString(Res.string.disconnected), serviceTitle())
         }
+
+    @Test
+    fun `a tracked node's heard time keeps aging while it sends nothing`() = runWithRenderScope { renderScope ->
+        val heardAt = 1_700_000_000L
+        var clock = heardAt + 10
+        val tracked =
+            Node(
+                num = TRACKED_NUM,
+                user = User.Builder().also { wb -> wb.long_name = "Base camp" }.build(),
+                lastHeard = heardAt.toInt(),
+            )
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(TRACKED_NUM to tracked))
+        every { nodeRepository.ourNodeInfo } returns MutableStateFlow<Node?>(null)
+        val notifications = createManager(renderScope).apply { clockSeconds = { clock } }
+        notifications.initChannels()
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
+        liveUpdatePrefs.setMode(LiveUpdateMode.TrackNode(TRACKED_NUM))
+        runUntilSettled { serviceTitle() == "Base camp" }
+
+        val heardNow = getString(Res.string.live_update_heard_now)
+        assertTrue(serviceBigText().orEmpty().contains(heardNow))
+        assertNull(serviceExtras()?.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT))
+
+        clock = heardAt + 120
+        advanceTimeBy(1.minutes)
+        val aged = formatDurationSuspend(120, DurationUnit.MINUTES)
+        runUntilSettled { serviceExtras()?.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT) == aged }
+        assertFalse(serviceBigText().orEmpty().contains(heardNow))
+    }
 
     private fun stubMeshStatus(online: Int, total: Int, unread: Int) {
         every { nodeRepository.onlineNodeCount } returns flowOf(online)

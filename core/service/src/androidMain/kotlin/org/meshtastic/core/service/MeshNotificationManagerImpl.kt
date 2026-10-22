@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
@@ -206,6 +207,7 @@ class MeshNotificationManagerImpl(
         private const val CONNECTIONS_REQUEST_CODE = 0x4C55
         private const val LIVE_UPDATE_SEPARATOR = " · "
         private val LIVE_UPDATE_MIN_INTERVAL = 2.seconds
+        private val TRACK_NODE_TICK = 1.minutes
         private const val SECONDS_PER_MINUTE = 60L
         private const val SECONDS_PER_HOUR = 3_600L
         private const val SECONDS_PER_DAY = 86_400L
@@ -228,7 +230,8 @@ class MeshNotificationManagerImpl(
         data class MeshStatus(val nodesOnline: Int, val nodesTotal: Int, val unread: Int, val radioBattery: Int?) :
             LiveUpdateReading
 
-        data class TrackNode(val node: Node, val ourNode: Node?) : LiveUpdateReading
+        /** [tick] changes once a minute so the elapsed "heard" text and chip age without a node update. */
+        data class TrackNode(val node: Node, val ourNode: Node?, val tick: Int) : LiveUpdateReading
     }
 
     /** [message] is the stats text to fall back on later; a firmware-progress render keeps the previous one. */
@@ -340,6 +343,9 @@ class MeshNotificationManagerImpl(
     private var cachedMessage: String? = null
     private var cachedServiceNotification: Notification? = null
     private var cachedLiveUpdate: LiveUpdateReading? = null
+
+    /** Test seam for the wall clock the tracked node's elapsed time is measured against. */
+    internal var clockSeconds: () -> Long = { nowSeconds }
     private val serviceNotificationSnapshots =
         MutableSharedFlow<ServiceNotificationSnapshot>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
@@ -401,11 +407,12 @@ class MeshNotificationManagerImpl(
 
         is LiveUpdateMode.TrackNode -> {
             val nodes = nodeRepository.value
-            combine(nodes.nodeDBbyNum.map { it[mode.nodeNum] }.distinctUntilChanged(), nodes.ourNodeInfo) {
-                    node,
-                    ourNode,
-                ->
-                node?.let { LiveUpdateReading.TrackNode(it, ourNode) }
+            combine(
+                nodes.nodeDBbyNum.map { it[mode.nodeNum] }.distinctUntilChanged(),
+                nodes.ourNodeInfo,
+                ticks(TRACK_NODE_TICK),
+            ) { node, ourNode, tick ->
+                node?.let { LiveUpdateReading.TrackNode(it, ourNode, tick) }
             }
                 .throttleLatest(LIVE_UPDATE_MIN_INTERVAL)
         }
@@ -953,7 +960,7 @@ class MeshNotificationManagerImpl(
     ): Notification {
         val node = reading.node
         val battery = node.deviceMetrics.battery_level
-        val heardSecondsAgo = (nowSeconds - node.lastHeard).coerceAtLeast(0).takeIf { node.lastHeard > 0 }
+        val heardSecondsAgo = (clockSeconds() - node.lastHeard).coerceAtLeast(0).takeIf { node.lastHeard > 0 }
         val lines = buildList {
             battery?.let { add(batteryText(it)) }
             if (node.snrOrNull != null || node.rssiOrNull != null) {
@@ -1507,6 +1514,15 @@ internal fun Set<RadioOperation>.notificationTitleResource(): StringResource? = 
         Res.string.firmware_update_in_progress
 
     else -> Res.string.discovery_scan_in_progress
+}
+
+/** Emits 0 at once, then the next count every [period]. */
+private fun ticks(period: Duration): Flow<Int> = flow {
+    var tick = 0
+    while (true) {
+        emit(tick++)
+        delay(period)
+    }
 }
 
 /** Passes the first value at once, then at most one per [period], always the latest. */
