@@ -272,7 +272,7 @@ private fun CompactNameRow(
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // Wrapping with box, that limits the display size, but not touch area
         Box(
