@@ -77,6 +77,8 @@ replay_pid*.log
 /coil/
 /kable/
 .opencode/
+# feature/docs bundles its docs under build/; anything here is a stale generated copy
+feature/docs/src/commonMain/composeResources/
 
 /desktop/bin/
 /build-logic/convention/bin/
