@@ -19,6 +19,7 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Embedded
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
@@ -165,6 +166,7 @@ data class ContactSettings(
      */
     @ColumnInfo(name = "display_name", defaultValue = "''") val displayName: String = "",
 ) {
+    @Ignore
     val isMuted
         get() = nowMillis <= muteUntil
 }

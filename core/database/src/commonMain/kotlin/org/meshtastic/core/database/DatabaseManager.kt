@@ -72,6 +72,8 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.di.DatabaseDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 internal const val MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES = 3
@@ -89,11 +91,14 @@ internal const val POOL_RECOVERY_WINDOW_MS = 10 * 60 * 1_000L
 /** Bounds Flow-triggered replacements per [POOL_RECOVERY_WINDOW_MS]. */
 internal const val MAX_FLOW_POOL_RECOVERIES_PER_WINDOW = MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES * 2
 
+/** How long Room's pool waits for a connection before it logs the timeout and waits again; set in `configureCommon`. */
+internal val ROOM_POOL_ACQUIRE_TIMEOUT: Duration = 30.seconds
+
 /**
  * Deadline for the first emission of a re-latched DAO Flow. Comfortably above any legitimate cold-open, migration, or
- * backfill-contended first query (Room's own acquire timeout is 30s) so a healthy database never trips it.
+ * backfill-contended first query, and above one full [ROOM_POOL_ACQUIRE_TIMEOUT], so a healthy database never trips it.
  */
-internal const val FLOW_FIRST_EMISSION_TIMEOUT_MS = 45_000L
+internal val FLOW_FIRST_EMISSION_TIMEOUT_MS = (ROOM_POOL_ACQUIRE_TIMEOUT + 15.seconds).inWholeMilliseconds
 
 /**
  * Bounds wedge-triggered replacements (a `withDb` block that never returned) per [POOL_RECOVERY_WINDOW_MS]. Lower than

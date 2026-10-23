@@ -19,6 +19,7 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Embedded
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
@@ -164,24 +165,32 @@ data class NodeEntity(
      */
     @ColumnInfo(name = "new_public_key") var newPublicKey: ByteString? = null,
 ) {
+    // Room 3.1 maps a property without a backing field as a column, so each derived value here must be ignored.
+    @Ignore
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
 
+    @Ignore
     val environmentMetrics: org.meshtastic.proto.EnvironmentMetrics?
         get() = environmentTelemetry.environment_metrics
 
+    @Ignore
     val powerMetrics: org.meshtastic.proto.PowerMetrics?
         get() = powerTelemetry.power_metrics
 
+    @Ignore
     val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
         get() = airQualityTelemetry.air_quality_metrics
 
+    @Ignore
     val soilWaterMetrics: org.meshtastic.proto.SoilWaterMetrics?
         get() = soilWaterTelemetry.soil_water_metrics
 
+    @Ignore
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
 
+    @Ignore
     val hasPKC
         get() = (publicKey ?: user.public_key).size > 0
 
@@ -192,6 +201,7 @@ data class NodeEntity(
     }
 
     /** true if the device was heard from recently */
+    @Ignore
     val isOnline: Boolean
         get() {
             return lastHeard > onlineTimeThreshold()

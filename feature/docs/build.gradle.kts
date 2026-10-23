@@ -49,90 +49,48 @@ kotlin {
 }
 
 /**
- * Sync task: copies markdown docs from the canonical `docs/` source directory into the CMP composeResources location.
- * This eliminates manual content duplication and ensures the in-app bundled docs always reflect the source-of-truth.
- *
- * Usage: ./gradlew :feature:docs:syncDocsToComposeResources
- *
- * This task runs automatically before resource generation tasks.
+ * Builds this module's whole commonMain compose-resources tree from the canonical `docs/` directory: English pages and
+ * the shared screenshots under `files/docs/`, Crowdin translations under `files/{locale}/docs/` (CMP has no qualifiers
+ * on `files/`, so the locale is a directory).
  */
+val docsComposeResources = layout.buildDirectory.dir("generated/docsComposeResources")
+
 val syncDocsToComposeResources =
     tasks.register<Sync>("syncDocsToComposeResources") {
-        description = "Syncs docs/en/ markdown source into composeResources for in-app bundling"
+        description = "Bundles docs/ markdown, screenshots and translations as compose resources for the in-app reader."
         group = "docs"
 
         // isolated.rootProject: Isolated Projects forbids reaching through rootProject.layout.
-        val docsEnDir = isolated.rootProject.projectDirectory.dir("docs/en")
-        val screenshotsDir = isolated.rootProject.projectDirectory.dir("docs/assets/screenshots")
-        val composeResourcesTarget = layout.projectDirectory.dir("src/commonMain/composeResources/files/docs")
+        val docsDir = isolated.rootProject.projectDirectory.dir("docs")
 
-        from(docsEnDir) {
+        from(docsDir.dir("en")) {
             include("user/**/*.md")
             include("developer/**/*.md")
+            into("files/docs")
         }
 
-        // FR-038: Bundle screenshots into assets/screenshots/ to match markdown image paths.
-        // docs/assets/screenshots/ is the tracked, semantically-named screenshot set shared with the
-        // Jekyll site; copyDocsScreenshots refreshes it from the CST reference images, so the site and
-        // the in-app reader always serve identical images (and raw CST renders never reach the bundle).
-        from(screenshotsDir) {
+        // FR-038: docs/assets/screenshots/ is the tracked screenshot set shared with the Jekyll site, refreshed from
+        // the CST references by copyDocsScreenshots, so the site and the in-app reader serve identical images.
+        from(docsDir.dir("assets/screenshots")) {
             include("**/*.png")
-            into("assets/screenshots")
+            into("files/docs/assets/screenshots")
         }
 
-        into(composeResourcesTarget)
-
-        // Preserve timestamps for up-to-date checks
-        preserve { include("**/.gitkeep") }
-    }
-
-// Wire sync task to run before any resource generation
-tasks
-    .matching {
-        it.name.contains("generateComposeResClass") ||
-            it.name.contains("copyNonXmlValueResources") ||
-            it.name.contains("convertXmlValueResources")
-    }
-    .configureEach { dependsOn(syncDocsToComposeResources) }
-
-val syncTranslatedDocsToComposeResources =
-    tasks.register<Copy>("syncTranslatedDocsToComposeResources") {
-        description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
-        group = "docs"
-
-        val docsDir = isolated.rootProject.projectDirectory.dir("docs")
-        val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources/files")
-
+        // Crowdin names these like the values-* dirs (fr, pt-rBR, b+sr+Latn).
         from(docsDir) {
-            // Crowdin names these like the values-* dirs (fr, pt-rBR, b+sr+Latn)
             include("*/user/**/*.md")
             exclude("en/**")
             exclude("_*/**")
             exclude("assets/**")
             exclude("screenshots/**")
-        }
-
-        into(targetBase)
-
-        // Locale goes as a subdirectory *inside* files/ (CMP doesn't support qualifiers on files/).
-        eachFile {
-            val segments = relativePath.segments
-            if (segments.size >= 3) {
-                val qualifier = segments[0]
-                val rest = segments.drop(1).joinToString("/")
-                // Output: files/{locale}/docs/user/page.md
-                // English source lives at: docs/en/$rest
-                path = "$qualifier/docs/$rest"
+            eachFile {
+                path = "files/${relativePath.segments[0]}/docs/${relativePath.segments.drop(1).joinToString("/")}"
             }
         }
+
         includeEmptyDirs = false
+        into(docsComposeResources)
     }
 
-// Wire translated docs sync to resource generation alongside the primary sync
-tasks
-    .matching {
-        it.name.contains("generateComposeResClass") ||
-            it.name.contains("copyNonXmlValueResources") ||
-            it.name.contains("convertXmlValueResources")
-    }
-    .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
+// Mapping the task provider carries the task dependency into every compose-resources task that reads the directory.
+compose.resources { customDirectory("commonMain", syncDocsToComposeResources.map { docsComposeResources.get() }) }

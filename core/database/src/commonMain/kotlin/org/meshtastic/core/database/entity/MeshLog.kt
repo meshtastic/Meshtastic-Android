@@ -19,6 +19,7 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Embedded
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import co.touchlab.kermit.Logger
@@ -59,15 +60,19 @@ data class MeshLog(
     val fromRadio: FromRadio = FromRadio.Builder().build(),
 ) {
 
+    @Ignore
     val meshPacket: MeshPacket?
         get() = fromRadio.packet
 
+    @Ignore
     val nodeInfo: NodeInfo?
         get() = fromRadio.node_info
 
+    @Ignore
     val myNodeInfo: MyNodeInfo?
         get() = fromRadio.my_info
 
+    @Ignore
     val position: Position?
         get() =
             fromRadio.packet?.decoded?.payload?.let {

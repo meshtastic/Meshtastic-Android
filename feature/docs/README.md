@@ -111,14 +111,18 @@ data class ChirpyMessage(
 
 ## Gradle Tasks
 
-This module registers two tasks that copy the docs into its Compose resources:
+`syncDocsToComposeResources` builds this module's commonMain compose-resources directory under
+`build/generated/docsComposeResources/` and registers it with `compose.resources { customDirectory(...) }`, so every
+Compose resource task depends on it and a normal build needs no manual invocation:
 
-| Task | Description |
+| Source | Resource path |
 |---|---|
-| `syncDocsToComposeResources` | Copies `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` into `src/commonMain/composeResources/files/docs/`, plus `docs/assets/screenshots/**/*.png` into `.../files/docs/assets/screenshots/`. |
-| `syncTranslatedDocsToComposeResources` | Copies Crowdin-translated user pages from `docs/{locale}/user/**/*.md` into `src/commonMain/composeResources/files/{locale}/docs/user/`. The `{locale}` directory keeps Crowdin's name, which already matches the `values-*` qualifiers (for example `pt-rBR`, `b+sr+Latn`). |
+| `docs/en/user/**/*.md`, `docs/en/developer/**/*.md` | `files/docs/` |
+| `docs/assets/screenshots/**/*.png` | `files/docs/assets/screenshots/` |
+| `docs/{locale}/user/**/*.md` | `files/{locale}/docs/user/` |
 
-Both run before every Compose resource generation task, so a normal build needs no manual invocation. The copied files are git-ignored.
+The `{locale}` directory keeps Crowdin's name, which already matches the `values-*` qualifiers (for example `pt-rBR`,
+`b+sr+Latn`).
 
 The root project's `meshtastic.docs` convention plugin (`DocsTasks.kt` in `build-logic`) adds three tasks for the published site. They don't feed the in-app bundle:
 

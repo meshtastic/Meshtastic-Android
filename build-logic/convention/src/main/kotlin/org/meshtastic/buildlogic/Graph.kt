@@ -112,6 +112,8 @@ fun Project.configureGraphTasks() {
 
     val dumpTask =
         tasks.register<GraphDumpTask>("graphDump") {
+            group = "documentation"
+            description = "Writes this module's dependency graph as Mermaid to build/mermaid."
             projectPath.set(targetProjectPath)
 
             dependenciesData.set(
@@ -163,6 +165,8 @@ fun Project.configureGraphTasks() {
         }
 
     tasks.register<GraphUpdateTask>("graphUpdate") {
+        group = "documentation"
+        description = "Rewrites the dependency graph in this module's README.md."
         projectPath.set(targetProjectPath)
         input.set(dumpTask.flatMap { it.output })
         legend.set(dumpTask.flatMap { it.legend })

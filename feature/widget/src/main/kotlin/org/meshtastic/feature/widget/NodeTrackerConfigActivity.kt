@@ -23,7 +23,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -39,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.lifecycle.lifecycleScope
@@ -109,7 +110,7 @@ class NodeTrackerConfigActivity :
             return
         }
 
-        enableEdgeToEdge()
+        WindowCompat.enableEdgeToEdge(window)
         setContent {
             val theme by uiPrefs.theme.collectAsState()
             // UiPrefs.theme holds AppCompatDelegate night modes, whose values UiModeManager shares.
@@ -119,6 +120,12 @@ class NodeTrackerConfigActivity :
                     UiModeManager.MODE_NIGHT_NO -> false
                     else -> isSystemInDarkTheme()
                 }
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !dark
+                    isAppearanceLightNavigationBars = !dark
+                }
+            }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
                 // One snapshot: a live list re-sorts by last heard under the user's finger on a busy mesh. Read the DB
                 // directly, since the repository's flow opens on an empty map; an empty DB waits for its first nodes.

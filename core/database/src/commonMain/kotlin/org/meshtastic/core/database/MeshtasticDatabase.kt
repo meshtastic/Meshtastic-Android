@@ -283,6 +283,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
             this.fallbackToDestructiveMigration(dropAllTables = false)
                 .addMigrations(MIGRATION_52_53, MIGRATION_63_64)
                 .setSingleConnectionPool()
+                .setConnectionPoolTimeout(ROOM_POOL_ACQUIRE_TIMEOUT)
                 .setQueryCoroutineContext(
                     // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
                     // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
@@ -293,19 +294,19 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
 @DeleteTable(tableName = "NodeInfo")
 @DeleteTable(tableName = "MyNodeInfo")
-class AutoMigration12to13 : AutoMigrationSpec
+object AutoMigration12to13 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "reply_id")
-class AutoMigration29to30 : AutoMigrationSpec
+object AutoMigration29to30 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
-class AutoMigration33to34 : AutoMigrationSpec
+object AutoMigration33to34 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
-class AutoMigration34to35 : AutoMigrationSpec
+object AutoMigration34to35 : AutoMigrationSpec
 
 /** Device links moved from the bundled `urls.json` to the resolved API; `original_url` is no longer stored. */
 @DeleteColumn(tableName = "device_link", columnName = "original_url")
-class AutoMigration42to43 : AutoMigrationSpec
+object AutoMigration42to43 : AutoMigrationSpec

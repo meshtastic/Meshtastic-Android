@@ -2,12 +2,12 @@
 xmlutil = "1.0.2.1"
 
 # Android
-agp = "9.4.1"
+agp = "9.5.0-alpha10"
 appcompat = "1.8.0"
 appfunctions = "1.0.0-beta01"
 
 # androidx
-androidx-sqlite-bundled = "2.7.1"
+androidx-sqlite-bundled = "2.8.0-alpha01"
 androidx-work = "2.12.0"
 datastore = "1.3.0"
 glance = "1.2.0"
@@ -20,7 +20,7 @@ navigation3 = "1.2.0-rc01"
 navigation3-runtime = "1.2.0"
 navigationevent = "1.1.0"
 paging = "3.5.3"
-room = "3.0.3"
+room = "3.1.0-alpha01"
 koin = "4.2.2"
 koin-plugin = "1.2.1"
 
@@ -45,7 +45,7 @@ compose-screenshot = "0.0.1-alpha16"
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
 # Gradle plugin (same coordinates/version). The stable 1.4.x line predates AGP 9 support.
-benchmark = "1.5.0"
+benchmark = "1.6.0-alpha01"
 profileinstaller = "1.4.1"
 androidx-uiautomator = "2.4.0"
 
@@ -80,7 +80,7 @@ mlkit-language-id = "17.0.6"
 mlkit-translate = "17.0.3"
 
 # CameraX
-camerax = "1.6.2"
+camerax = "1.7.0-alpha03"
 
 # Networking
 ktor = "3.6.0"
@@ -92,7 +92,7 @@ coil = "3.6.3"
 datadog-gradle = "1.31.0"
 dd-sdk-android = "3.15.0"
 detekt = "2.0.0-alpha.6"
-dokka = "2.2.0"
+dokka = "2.3.0-Beta"
 devtools-ksp = "2.3.12"
 firebase-crashlytics-gradle = "3.0.8"
 google-services-gradle = "4.5.0"
@@ -123,7 +123,7 @@ xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlu
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 
 # AndroidX
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.14.0-alpha03" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.11.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
@@ -131,10 +131,8 @@ androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
-androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-effects = { module = "androidx.camera:camera-effects", version.ref = "camerax" }
-androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.2" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.1" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.1" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
@@ -274,10 +272,10 @@ ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 # Testing
-androidx-test-core = { module = "androidx.test:core", version = "1.7.0" }
-androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.3.0" }
-androidx-test-runner = { module = "androidx.test:runner", version = "1.7.0" }
-androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
+androidx-test-core = { module = "androidx.test:core", version = "1.8.0-alpha01" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.4.0-alpha01" }
+androidx-test-runner = { module = "androidx.test:runner", version = "1.8.0-alpha01" }
+androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.8.0-alpha01" }
 junit = { module = "junit:junit", version = "4.13.2" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
@@ -325,8 +323,8 @@ bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref 
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
 # core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
-# tooling is meant to catch going forward. Stable release (not the 3.0-alpha line).
-leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "2.14" }
+# tooling is meant to catch going forward.
+leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "3.0-alpha-9" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.11.0" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
@@ -337,7 +335,7 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.4.1" }
+android-tools-common = { module = "com.android.tools:common", version = "32.5.0-alpha10" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

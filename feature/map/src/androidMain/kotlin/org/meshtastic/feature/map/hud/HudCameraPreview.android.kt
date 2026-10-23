@@ -19,8 +19,7 @@ package org.meshtastic.feature.map.hud
 import android.hardware.camera2.CameraCharacteristics
 import android.util.Rational
 import android.view.Surface
-import androidx.camera.camera2.interop.Camera2CameraInfo
-import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -164,24 +163,20 @@ actual fun HudCameraPreview(
     }
 }
 
-/**
- * Focal length and the active sensor area in millimeters, or null when the camera does not report them. CameraX 1.7
- * replaces Camera2CameraInfo with CameraInfo.cameraCharacteristics.
- */
-@androidx.annotation.OptIn(ExperimentalCamera2Interop::class)
+/** Focal length and the active sensor area in millimeters, or null when the camera does not report them. */
 private fun Camera.intrinsics(): CameraIntrinsics? {
-    val info = Camera2CameraInfo.from(cameraInfo)
-    val focal = info.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
-    val physical = info.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)
-    val pixels = info.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
-    val active = info.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+    val info = Camera2Interop.getCameraCharacteristics(cameraInfo)
+    val focal = info.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
+    val physical = info.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)
+    val pixels = info.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+    val active = info.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
     if (focal == null || physical == null || pixels == null || active == null) return null
     // The physical size covers the whole pixel array; the preview streams only the active area.
     val width = physical.width * active.width() / pixels.width
     val height = physical.height * active.height() / pixels.height
     // A calibrated focal length, in pre-correction active-array pixels, beats the nominal one when the camera has it:
     // on a logical multi-camera the first listed focal length need not be the lens in use.
-    val calibratedFx = info.getCameraCharacteristic(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)?.firstOrNull()
+    val calibratedFx = info.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)?.firstOrNull()
     // Pixels to millimeters by the sensor's pixel pitch.
     val nominalOrCalibrated = calibratedFx?.takeIf { it > 0f }?.let { it * physical.width / pixels.width } ?: focal
     val zoom = cameraInfo.zoomState.value?.zoomRatio ?: 1f

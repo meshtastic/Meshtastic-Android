@@ -52,7 +52,7 @@ docs/
 2. Volunteers translate via the Crowdin web UI
 3. Crowdin PRs land translated files at `docs/{locale}/user/*.md` and `docs/{locale}/index.md`, named like
    the app's `values-*` directories (`fr`, `pt-rBR`, `b+sr+Latn`)
-4. At build time, the Gradle `syncTranslatedDocsToComposeResources` task bundles them into
+4. At build time, the Gradle `syncDocsToComposeResources` task bundles them into
    locale-qualified Compose Resources for the in-app reader
 5. The in-app `DocBundleLoader` tries the user's locale first, then falls back to English
 

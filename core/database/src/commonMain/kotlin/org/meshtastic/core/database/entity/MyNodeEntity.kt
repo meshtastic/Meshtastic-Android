@@ -17,6 +17,7 @@
 package org.meshtastic.core.database.entity
 
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.PrimaryKey
 import org.meshtastic.core.model.MyNodeInfo
 
@@ -42,6 +43,7 @@ open class MyNodeEntity(
     }
 
     /** A human readable description of the software/hardware version */
+    @Ignore
     val firmwareString: String
         get() = "$model $firmwareVersion"
 
