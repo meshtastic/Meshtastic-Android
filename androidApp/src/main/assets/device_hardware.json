@@ -1675,7 +1675,7 @@
     "hwModelSlug": "HELTEC_RC32",
     "platformioTarget": "heltec-rc32",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RC32",
     "tags": [
@@ -1692,7 +1692,7 @@
     "hwModelSlug": "HELTEC_RC52",
     "platformioTarget": "heltec-rc52",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RC52",
     "tags": [
@@ -1708,7 +1708,7 @@
     "hwModelSlug": "HELTEC_RCC6",
     "platformioTarget": "heltec-rcc6",
     "architecture": "esp32-c6",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RCC6",
     "tags": [
