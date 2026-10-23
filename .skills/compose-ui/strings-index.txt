@@ -391,6 +391,9 @@ device_metrics_log
 device_metrics_numeric_value
 device_metrics_percent_value
 device_metrics_voltage_value
+device_model_ar_camera_unavailable
+device_model_ar_failed
+device_model_ar_restart_phone
 device_model_capture
 device_model_capture_failed
 device_model_capture_saved

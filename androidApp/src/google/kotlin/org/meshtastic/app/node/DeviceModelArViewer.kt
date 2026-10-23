@@ -32,6 +32,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,10 +52,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,9 +72,13 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
@@ -81,11 +88,14 @@ import com.google.ar.core.Session
 import com.google.ar.core.TrackingFailureReason
 import com.google.ar.core.TrackingState
 import io.github.sceneview.ar.ARCoachingOverlay
+import io.github.sceneview.ar.ARMotionSensorHealth
 import io.github.sceneview.ar.ARSceneView
+import io.github.sceneview.ar.ARSessionFailure
 import io.github.sceneview.ar.PlacementReticleVisual
 import io.github.sceneview.ar.ReticlePhase
 import io.github.sceneview.ar.arcore.rememberDetectedPlanes
 import io.github.sceneview.ar.placementHit
+import io.github.sceneview.ar.probeARMotionSensors
 import io.github.sceneview.ar.rememberArGuidanceState
 import io.github.sceneview.ar.reticlePhaseFor
 import io.github.sceneview.ar.scene.SceneUnderstanding
@@ -96,6 +106,7 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberOnGestureListener
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -103,6 +114,9 @@ import org.koin.compose.koinInject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.device_model_ar_camera_unavailable
+import org.meshtastic.core.resources.device_model_ar_failed
+import org.meshtastic.core.resources.device_model_ar_restart_phone
 import org.meshtastic.core.resources.device_model_capture
 import org.meshtastic.core.resources.device_model_capture_failed
 import org.meshtastic.core.resources.device_model_capture_saved
@@ -122,6 +136,9 @@ import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
+
+// Darker than the chrome's scrim: a sentence over a live camera image needs the contrast.
+private const val NOTICE_ALPHA = 0.7f
 private const val YAW_DEGREES_PER_PX = 0.4f
 
 val deviceModelArViewer: DeviceModelArViewer? = GoogleDeviceModelArViewer
@@ -198,6 +215,8 @@ private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
     var isTracking by remember { mutableStateOf(false) }
     var surfaceFound by remember { mutableStateOf(false) }
     var trackingFailure by remember { mutableStateOf<TrackingFailureReason?>(null) }
+    var everTracked by remember { mutableStateOf(false) }
+    var sessionFailure by remember { mutableStateOf<ARSessionFailure?>(null) }
     val placed = anchor != null
     Box(modifier = Modifier.fillMaxSize()) {
         ARSceneView(
@@ -219,12 +238,16 @@ private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
                 if (session !== updated) session = updated
                 cameraReady = true
                 isTracking = frame.camera.trackingState == TrackingState.TRACKING
+                if (isTracking) everTracked = true
                 if (!surfaceFound) {
                     surfaceFound =
                         updated.getAllTrackables(Plane::class.java).any { it.trackingState == TrackingState.TRACKING }
                 }
             },
             onTrackingFailureChanged = { trackingFailure = it },
+            // A refused resume (camera held by another app) leaves the session paused; the next resume tries again.
+            onSessionResumed = { sessionFailure = null },
+            onSessionFailure = { sessionFailure = it },
             onGestureListener =
             rememberOnGestureListener(
                 onSingleTapConfirmed = { event, node ->
@@ -283,7 +306,9 @@ private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
                 surfaceFound = surfaceFound,
                 trackingFailureReason = trackingFailure,
             )
-        ARCoachingOverlay(guidance)
+        val stalled = arStartupStalled(cameraReady, everTracked, trackingFailure)
+        val notice = arNotice(sessionFailure, stalled, rememberMotionSensorHealth(stalled))
+        if (notice == ArNotice.NONE) ARCoachingOverlay(guidance) else ArNoticeCard(notice)
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -293,6 +318,53 @@ private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
             onCapture?.let { ShutterButton(it) }
         }
     }
+}
+
+/**
+ * A gyroscope that delivers nothing leaves ARCore paused with no reason and no failure over a live camera image, and
+ * only a restart fixes it. Listens once the session has shown frames for ten seconds without tracking, in the
+ * foreground only: a paused session is not a stalled one, and a backgrounded app gets no sensor events.
+ */
+@Composable
+private fun rememberMotionSensorHealth(stalled: Boolean): ARMotionSensorHealth? {
+    val context = LocalContext.current
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val resumed = lifecycleState.isAtLeast(Lifecycle.State.RESUMED)
+    var probes by remember { mutableIntStateOf(0) }
+    var health by remember { mutableStateOf<ARMotionSensorHealth?>(null) }
+    LaunchedEffect(stalled, resumed, probes) {
+        if (!resumed || !arMotionProbeDue(stalled, probes, health)) return@LaunchedEffect
+        delay(AR_NEVER_TRACKED_MS)
+        val sample = probeARMotionSensors(context)
+        health = sample?.health
+        // A phone with no gyroscope is final too: nothing left to measure.
+        probes = if (sample == null) AR_MOTION_PROBES_MAX else probes + 1
+    }
+    return health.takeIf { stalled }
+}
+
+/** Takes the coaching card's place over the camera while the session cannot start. */
+@Composable
+private fun BoxScope.ArNoticeCard(notice: ArNotice) {
+    val text =
+        when (notice) {
+            ArNotice.CAMERA_UNAVAILABLE -> Res.string.device_model_ar_camera_unavailable
+            ArNotice.SESSION_FAILED -> Res.string.device_model_ar_failed
+            ArNotice.RESTART_PHONE -> Res.string.device_model_ar_restart_phone
+            ArNotice.NONE -> return
+        }
+    Text(
+        text = stringResource(text),
+        style = MaterialTheme.typography.bodyLarge,
+        color = Color.White,
+        textAlign = TextAlign.Center,
+        modifier =
+        Modifier.align(Alignment.Center)
+            .padding(horizontal = 32.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.Black.copy(alpha = NOTICE_ALPHA))
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    )
 }
 
 /** Which face of the device lies on the surface. */

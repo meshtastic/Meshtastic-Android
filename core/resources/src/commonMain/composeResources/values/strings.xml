@@ -424,6 +424,9 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
+    <string name="device_model_ar_camera_unavailable">Another app is using the camera. Close it and come back.</string>
+    <string name="device_model_ar_failed">AR couldn't start</string>
+    <string name="device_model_ar_restart_phone">Restart your phone. Its motion sensor isn't responding, and AR can't start without it.</string>
     <string name="device_model_capture">Take a picture</string>
     <string name="device_model_capture_failed">Couldn't save the picture</string>
     <string name="device_model_capture_saved">Saved to Pictures</string>
