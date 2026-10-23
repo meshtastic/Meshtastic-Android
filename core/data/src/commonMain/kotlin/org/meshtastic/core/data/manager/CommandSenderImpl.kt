@@ -271,7 +271,7 @@ class CommandSenderImpl(
         }
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {
         // Firmware coarsens a phone-originated position to the channel precision, so an explicit 0,0 goes out as a
         // real-looking coordinate. Leave the fields absent when we have none.
         val meshPosition =
@@ -288,6 +288,7 @@ class CommandSenderImpl(
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
+                id = requestId.nonZeroRequestId(),
                 channel = getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
@@ -317,12 +318,13 @@ class CommandSenderImpl(
         }
     }
 
-    override suspend fun requestUserInfo(destNum: Int) {
+    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("User-info request")
         val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: throw LocalNodeUnavailableException("User-info request")
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
+                id = requestId.nonZeroRequestId(),
                 channel = getChannelIndex(destNum),
                 decoded =
                 Data.Builder()

@@ -1799,6 +1799,7 @@
     <string name="request_power_metrics">Power Metrics</string>
     <string name="request_telemetry">Request Telemetry</string>
     <string name="request_user_info">Request User Info</string>
+    <string name="request_failed_from">%1$s from %2$s failed: %3$s</string>
     <string name="requesting_from">Requesting %1$s from %2$s</string>
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>

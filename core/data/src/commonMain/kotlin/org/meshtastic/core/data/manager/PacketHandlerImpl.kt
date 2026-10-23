@@ -41,6 +41,7 @@ import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
@@ -425,9 +426,11 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean) {
+    override suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean, from: Int?) {
         responseMutex.withLock {
             val pending = queueResponse[dataRequestId]?.takeIf { it.wasDispatched } ?: return@withLock
+            val to = pending.packet.to
+            if (complete && from != null && from != to && to != NodeAddress.NODENUM_BROADCAST) return@withLock
             pending.completeRouting(complete.toAwaitedSendStatus())
             removePendingIfTerminalLocked(dataRequestId, pending)
         }

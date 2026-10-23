@@ -188,6 +188,7 @@ class NodeDetailCompassLifecycleTest {
             ensureRemoteAdminSession = mock<EnsureRemoteAdminSessionUseCase>(),
             observeRemoteAdminSessionStatus = observeSessionStatus,
             snackbarManager = SnackbarManager(),
+            nakWatcher = testNakWatcher(),
         )
     }
 

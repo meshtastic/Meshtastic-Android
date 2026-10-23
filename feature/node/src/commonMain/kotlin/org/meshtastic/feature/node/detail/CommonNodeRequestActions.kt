@@ -52,6 +52,7 @@ constructor(
     private val radioController: RadioController,
     private val snackbarManager: SnackbarManager,
     private val analytics: PlatformAnalytics,
+    private val nakWatcher: RequestNakWatcher,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : NodeRequestActions {
 
@@ -82,32 +83,27 @@ constructor(
 
     override suspend fun requestUserInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting UserInfo for '$destNum'" }
-        radioController.requestUserInfo(destNum)
+        nakWatcher.watch(Res.string.user_info, longName) { id -> radioController.requestUserInfo(destNum, id) }
         analytics.trackAction("user_info_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
     }
 
     override suspend fun requestNeighborInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting NeighborInfo for '$destNum'" }
-        val packetId = radioController.generatePacketId()
-        radioController.requestNeighborInfo(packetId, destNum)
+        nakWatcher.watch(Res.string.neighbor_info, longName) { id -> radioController.requestNeighborInfo(id, destNum) }
         _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
     }
 
     override suspend fun requestPosition(destNum: Int, longName: String, position: Position) = runRequest {
         Logger.i { "Requesting position for '$destNum'" }
-        radioController.requestPosition(destNum, position)
+        nakWatcher.watch(Res.string.position, longName) { id -> radioController.requestPosition(destNum, position, id) }
         analytics.trackAction("position_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
     }
 
     override suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) = runRequest {
         Logger.i { "Requesting telemetry for '$destNum'" }
-        val packetId = radioController.generatePacketId()
-        radioController.requestTelemetry(packetId, destNum, type.ordinal)
-        analytics.trackAction("telemetry_request", mapOf("telemetry_type" to type.name))
-
         val typeRes =
             when (type) {
                 TelemetryType.DEVICE -> Res.string.request_device_metrics
@@ -118,6 +114,8 @@ constructor(
                 TelemetryType.HOST -> Res.string.request_host_metrics
                 TelemetryType.PAX -> Res.string.request_pax_metrics
             }
+        nakWatcher.watch(typeRes, longName) { id -> radioController.requestTelemetry(id, destNum, type.ordinal) }
+        analytics.trackAction("telemetry_request", mapOf("telemetry_type" to type.name))
 
         showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
     }
@@ -137,8 +135,7 @@ constructor(
         Logger.i { "Requesting traceroute for '$destNum'" }
         var sent = false
         try {
-            val packetId = radioController.generatePacketId()
-            radioController.requestTraceroute(packetId, destNum)
+            nakWatcher.watch(Res.string.traceroute, longName) { id -> radioController.requestTraceroute(id, destNum) }
             sent = true
         } finally {
             // A failed or canceled send must not start the cooldown; only undo our own claim.

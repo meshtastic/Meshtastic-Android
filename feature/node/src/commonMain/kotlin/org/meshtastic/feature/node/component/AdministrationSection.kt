@@ -133,7 +133,7 @@ fun AdministrationSection(
                         leadingIcon = MeshtasticIcons.Memory,
                         trailingIcon = null,
                         enabled = !isEnsuringSession,
-                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num)) },
+                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num, node.user.long_name)) },
                     )
                 }
             }
