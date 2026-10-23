@@ -13,6 +13,12 @@ $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/all/#/Poi
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/delete/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/delete.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/get/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/get.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/save/#kotlin.Int#kotlin.String#kotlin.String#kotlin.Long#kotlin.String?/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/save.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl///PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/index.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/TakCertificateStoreImpl/#android.app.Application/PointingToDeclaration/core-service/org.meshtastic.core.service/[android]-tak-certificate-store-impl/-tak-certificate-store-impl.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/TakCertificateStoreImpl/#java.io.File/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/-tak-certificate-store-impl.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/clear/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/clear.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/load/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/load.html
+$dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/save/#org.meshtastic.core.repository.TakCertificateMaterial/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/save.html
 module:core-ble
 org.meshtastic.core.ble
 org.meshtastic.core.ble.di
@@ -57,6 +63,7 @@ org.meshtastic.core.navigation
 module:core-network
 org.meshtastic.core.network
 org.meshtastic.core.network.di
+org.meshtastic.core.network.mqtt
 org.meshtastic.core.network.radio
 org.meshtastic.core.network.repository
 org.meshtastic.core.network.service
