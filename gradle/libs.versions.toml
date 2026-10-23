@@ -80,7 +80,7 @@ mlkit-language-id = "17.0.6"
 mlkit-translate = "17.0.3"
 
 # CameraX
-camerax = "1.7.0-alpha03"
+camerax = "1.7.0-rc01"
 
 # Networking
 ktor = "3.6.0"
