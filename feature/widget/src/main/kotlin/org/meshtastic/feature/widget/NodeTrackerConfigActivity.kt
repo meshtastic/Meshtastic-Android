@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -119,6 +120,12 @@ class NodeTrackerConfigActivity :
                     UiModeManager.MODE_NIGHT_NO -> false
                     else -> isSystemInDarkTheme()
                 }
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !dark
+                    isAppearanceLightNavigationBars = !dark
+                }
+            }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
                 // One snapshot: a live list re-sorts by last heard under the user's finger on a busy mesh. Read the DB
                 // directly, since the repository's flow opens on an empty map; an empty DB waits for its first nodes.
