@@ -323,7 +323,7 @@ bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref 
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
 # core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
-# tooling is meant to catch going forward. Stable release (not the 3.0-alpha line).
+# tooling is meant to catch going forward.
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "3.0-alpha-9" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.11.0" }
