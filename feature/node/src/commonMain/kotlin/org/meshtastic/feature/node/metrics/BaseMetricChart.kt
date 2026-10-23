@@ -196,9 +196,8 @@ fun MetricChartScaffold(
 
 /**
  * An adaptive layout for metric screens. Splits side-by-side when [calculatePaneScaffoldDirective] allows more than one
- * horizontal partition, and stacks otherwise. The directive follows the window size class and posture, so hinges and
- * multi-window are honored instead of a hardcoded width. When [isChartExpanded] is true, the card list is hidden and
- * the chart fills the available space.
+ * horizontal partition, and stacks otherwise. When [isChartExpanded] is true, the card list is hidden and the chart
+ * fills the available space.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
