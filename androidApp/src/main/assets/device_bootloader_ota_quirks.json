@@ -187,7 +187,8 @@
       "hwModel": 105,
       "hwModelSlug": "WISMESH_TAG",
       "platformioTargets": [
-        "rak_wismeshtag"
+        "rak_wismeshtag",
+        "rak_wismesh_pod"
       ],
       "softDevice": "6.1.1"
     },
