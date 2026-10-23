@@ -20,7 +20,7 @@ navigation3 = "1.2.0"
 navigation3-runtime = "1.2.0"
 navigationevent = "1.1.0"
 paging = "3.5.3"
-room = "3.1.0-alpha01"
+room = "3.1.0-alpha03"
 koin = "4.2.2"
 koin-plugin = "1.2.1"
 
