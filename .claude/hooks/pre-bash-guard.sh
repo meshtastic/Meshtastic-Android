@@ -51,6 +51,13 @@ export_android_home() {
   done
 }
 
+# Same probe as the gradle-runner agent: the machine-local queue wrapper when
+# installed, so hook builds don't race other sessions' builds.
+gradle() {
+  local gq="$HOME/.claude/bin/gradle-queue"
+  if [ -x "$gq" ]; then "$gq" -- "$@"; else ./gradlew "$@"; fi
+}
+
 # --- 2. Destructive-op confirmation (cheap checks first) --------------------
 if printf '%s' "$cmd" | grep -q 'git push' \
    && printf '%s' "$cmd" | grep -Eq -- '(--force([^-]|$)|[[:space:]]-f([[:space:]]|$))'; then
@@ -68,8 +75,13 @@ if printf '%s' "$cmd" | grep -q 'git push'; then
   repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
   is_this_repo "$repo_root" || exit 0
   export_android_home
-  out=$( (cd "$repo_root" && ./gradlew detekt --console=plain -q) 2>&1 )
-  if [ $? -ne 0 ]; then
+  out=$( (cd "$repo_root" && gradle detekt --console=plain -q) 2>&1 )
+  rc=$?
+  if [ "$rc" -eq 75 ]; then
+    printf '%s\n' "detekt never started (gradle-queue wait timed out) - allowing the push; run detekt before relying on CI." >&2
+    exit 0
+  fi
+  if [ "$rc" -ne 0 ]; then
     {
       printf '%s\n' "detekt failed — blocking the push (it's a blocking CI gate). Last lines:"
       printf '%s\n' "$out" | tail -n 30
@@ -106,7 +118,7 @@ staged=$(git -C "$repo_root" diff --cached --name-only --diff-filter=ACMR -- '*.
 [ -z "$staged" ] && exit 0
 
 export_android_home
-out=$( (cd "$repo_root" && ./gradlew spotlessApply --console=plain -q) 2>&1 )
+out=$( (cd "$repo_root" && gradle spotlessApply --console=plain -q) 2>&1 )
 if [ $? -ne 0 ]; then
   {
     printf '%s\n' "spotless-precommit: spotlessApply failed — allowing the commit anyway (fail-open)."
