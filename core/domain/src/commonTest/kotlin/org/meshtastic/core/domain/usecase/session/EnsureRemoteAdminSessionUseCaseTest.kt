@@ -36,12 +36,18 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.RoutingNak
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Routing
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
@@ -63,10 +69,32 @@ class EnsureRemoteAdminSessionUseCaseTest {
         return mgr
     }
 
-    private fun connectedRepo(state: ConnectionState = ConnectionState.Connected): ServiceRepository {
+    private fun connectedRepo(
+        state: ConnectionState = ConnectionState.Connected,
+        packets: MutableSharedFlow<MeshPacket> = MutableSharedFlow(extraBufferCapacity = 8),
+    ): ServiceRepository {
         val repo = mock<ServiceRepository>(MockMode.autofill)
         every { repo.connectionState } returns MutableStateFlow(state)
+        every { repo.meshPacketFlow } returns packets
         return repo
+    }
+
+    private fun routingNak(requestId: Int, error: Routing.Error): MeshPacket {
+        val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
+        val data =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = PortNum.ROUTING_APP
+                    wb.request_id = requestId
+                    wb.payload = routing.encode().toByteString()
+                }
+                .build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = destNum
+                wb.decoded = data
+            }
+            .build()
     }
 
     @Test
@@ -105,7 +133,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         // Simulate the radio responding by emitting on the refresh flow when the metadata request fires.
-        everySuspend { controller.refreshMetadata(any()) } calls { refresh.tryEmit(destNum) }
+        everySuspend { controller.refreshMetadata(any(), any()) } calls { refresh.tryEmit(destNum) }
 
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
@@ -113,7 +141,54 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val result = useCase(destNum)
 
         assertEquals(EnsureSessionResult.Refreshed, result)
-        verifySuspend { controller.refreshMetadata(destNum) }
+        verifySuspend { controller.refreshMetadata(destNum, any()) }
+    }
+
+    @Test
+    fun `returns Rejected when a routing nak answers the metadata request`() = runTest {
+        val packets = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 8)
+        val controller = mock<RadioController>(MockMode.autofill)
+        every { controller.generatePacketId() } returns REQUEST_ID
+        everySuspend { controller.refreshMetadata(any(), any()) } calls
+            {
+                packets.tryEmit(routingNak(REQUEST_ID, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED))
+            }
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(
+                stubSessionManager(),
+                controller,
+                connectedRepo(packets = packets),
+                this.asServiceScope(),
+            )
+
+        val result = useCase(destNum)
+
+        val expected = RoutingNak(REQUEST_ID, destNum, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value)
+        assertEquals(EnsureSessionResult.Rejected(expected), result)
+        verifySuspend { controller.refreshMetadata(destNum, REQUEST_ID) }
+    }
+
+    @Test
+    fun `ignores a nak for another request and a plain ack`() = runTest {
+        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        val packets = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 8)
+        val controller = mock<RadioController>(MockMode.autofill)
+        every { controller.generatePacketId() } returns REQUEST_ID
+        everySuspend { controller.refreshMetadata(any(), any()) } calls
+            {
+                packets.tryEmit(routingNak(REQUEST_ID + 1, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED))
+                packets.tryEmit(routingNak(REQUEST_ID, Routing.Error.NONE))
+                refresh.tryEmit(destNum)
+            }
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(
+                stubSessionManager(refreshFlow = refresh),
+                controller,
+                connectedRepo(packets = packets),
+                this.asServiceScope(),
+            )
+
+        assertEquals(EnsureSessionResult.Refreshed, useCase(destNum))
     }
 
     @Test
@@ -121,7 +196,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
-        everySuspend { controller.refreshMetadata(any()) } returns Unit
+        everySuspend { controller.refreshMetadata(any(), any()) } returns Unit
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
@@ -135,7 +210,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         job.join()
 
         assertEquals(EnsureSessionResult.Refreshed, observed)
-        verifySuspend { controller.refreshMetadata(destNum) }
+        verifySuspend { controller.refreshMetadata(destNum, any()) }
     }
 
     @Test
@@ -143,7 +218,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
-        everySuspend { controller.refreshMetadata(any()) } returns Unit
+        everySuspend { controller.refreshMetadata(any(), any()) } returns Unit
 
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
@@ -163,7 +238,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
+        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
@@ -187,7 +262,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
+        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
@@ -212,10 +287,11 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
+        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
         val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
         val repository = mock<ServiceRepository>(MockMode.autofill)
         every { repository.connectionState } returns connectionState
+        every { repository.meshPacketFlow } returns MutableSharedFlow()
         val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, controller, repository, this.asServiceScope())
 
         val departed = async { useCase(destNum) }
@@ -233,5 +309,9 @@ class EnsureRemoteAdminSessionUseCaseTest {
         runCurrent()
 
         assertEquals(EnsureSessionResult.Refreshed, reconnected.await())
+    }
+
+    private companion object {
+        const val REQUEST_ID = 0x1234
     }
 }

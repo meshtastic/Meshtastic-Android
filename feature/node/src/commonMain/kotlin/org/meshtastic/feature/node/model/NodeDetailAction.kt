@@ -33,7 +33,7 @@ sealed interface NodeDetailAction {
     data class OpenRemoteShell(val nodeNum: Int) : NodeDetailAction
 
     /** Force-refresh device metadata (firmware version, edition, role) for the given node. */
-    data class RefreshMetadata(val nodeNum: Int) : NodeDetailAction
+    data class RefreshMetadata(val nodeNum: Int, val longName: String) : NodeDetailAction
 
     data object ShareContact : NodeDetailAction
 

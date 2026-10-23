@@ -274,7 +274,7 @@ class FakeRadioController :
 
     override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
 
-    override suspend fun refreshMetadata(destNum: Int) {}
+    override suspend fun refreshMetadata(destNum: Int, requestId: Int) {}
 
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
@@ -420,9 +420,9 @@ class FakeRadioController :
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {}
 
-    override suspend fun requestUserInfo(destNum: Int) {}
+    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {}
 
     override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
 

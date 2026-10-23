@@ -1127,6 +1127,38 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `a relay ack leaves the wait open for the destination nak`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 830
+                    wb.to = 500
+                }
+                .build()
+        val result = async { handler.sendToRadioAndAwaitResult(packet) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 830
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
+        testScheduler.runCurrent()
+
+        handler.completeDispatchedResponse(dataRequestId = 830, complete = true, from = 123)
+        testScheduler.runCurrent()
+        assertFalse(result.isCompleted)
+
+        handler.completeDispatchedResponse(dataRequestId = 830, complete = false, from = 500)
+        testScheduler.runCurrent()
+        assertEquals(AwaitedSendStatus.RADIO_REJECTED, result.await().status)
+    }
+
+    @Test
     fun `late queue status cannot replace an already completed response`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         val result = async {

@@ -48,6 +48,7 @@ class CommonNodeRequestActionsTest {
             radioController = radioController,
             snackbarManager = snackbarManager,
             analytics = mock<PlatformAnalytics>(),
+            nakWatcher = testNakWatcher(radioController),
             resolveUiText = resolveNodeRequestFailureUiText,
         )
 
@@ -58,7 +59,8 @@ class CommonNodeRequestActionsTest {
 
     @Test
     fun `missing local identity uses the same localized request feedback`() = runTest {
-        everySuspend { radioController.requestUserInfo(1234) } throws LocalNodeUnavailableException("local node")
+        every { radioController.generatePacketId() } returns 41
+        everySuspend { radioController.requestUserInfo(1234, 41) } throws LocalNodeUnavailableException("local node")
 
         actions.requestUserInfo(destNum = 1234, longName = "Test Node")
 
@@ -93,6 +95,7 @@ class CommonNodeRequestActionsTest {
         radioController = radioController,
         snackbarManager = snackbarManager,
         analytics = mock<PlatformAnalytics>(MockMode.autofill),
+        nakWatcher = testNakWatcher(radioController),
         resolveUiText = { "feedback" },
     )
 

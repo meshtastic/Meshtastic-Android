@@ -1792,6 +1792,7 @@
     <string name="request_air_quality_metrics">Air-Quality Metrics</string>
     <string name="request_device_metrics">Device Metrics</string>
     <string name="request_environment_metrics">Environment Metrics</string>
+    <string name="request_failed_from">%1$s from %2$s failed: %3$s</string>
     <string name="request_host_metrics">Host Metrics</string>
     <string name="request_local_stats">Local Stats</string>
     <string name="request_metadata">Metadata</string>

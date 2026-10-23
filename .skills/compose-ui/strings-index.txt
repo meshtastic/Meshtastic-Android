@@ -1726,6 +1726,7 @@ request
 request_air_quality_metrics
 request_device_metrics
 request_environment_metrics
+request_failed_from
 request_host_metrics
 request_local_stats
 request_metadata

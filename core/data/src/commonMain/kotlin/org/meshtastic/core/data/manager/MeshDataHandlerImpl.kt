@@ -389,7 +389,7 @@ class MeshDataHandlerImpl(
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
-            nodeManager.toNodeID(packet.from),
+            packet.from,
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
             session,
@@ -400,12 +400,13 @@ class MeshDataHandlerImpl(
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun handleAckNak(
         requestId: Int,
-        fromId: String,
+        fromNum: Int,
         routingError: Int,
         relayNode: Int?,
         session: RadioSessionContext,
         ackProofStatus: Int = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value,
     ) {
+        val fromId = nodeManager.toNodeID(fromNum)
         radioInterfaceService.launchSessionWork(scope, session) {
             val isAck = routingError == Routing.Error.NONE.value
             val absentAckProof = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value
@@ -471,7 +472,7 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(settled.copy(ackProofStatus = provenAckProof))
                 }
             }
-            packetHandler.completeDispatchedResponse(requestId, complete = isAck)
+            packetHandler.completeDispatchedResponse(requestId, complete = isAck, from = fromNum)
         }
     }
 

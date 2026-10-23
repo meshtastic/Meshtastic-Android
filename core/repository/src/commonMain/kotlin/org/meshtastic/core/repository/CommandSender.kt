@@ -109,13 +109,13 @@ interface CommandSender {
     suspend fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false)
 
     /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestPosition(destNum: Int, currentPosition: ModelPosition)
+    suspend fun requestPosition(destNum: Int, currentPosition: ModelPosition, requestId: Int = 0)
 
     /** Sets a fixed position for a node, or throws if the outbound queue rejects the admin command. */
     suspend fun setFixedPosition(destNum: Int, pos: ModelPosition)
 
     /** Requests user info from a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestUserInfo(destNum: Int)
+    suspend fun requestUserInfo(destNum: Int, requestId: Int = 0)
 
     /** Requests a traceroute to a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTraceroute(requestId: Int, destNum: Int)
