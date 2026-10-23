@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-21T18:31:45.000Z",
+  "generatedAt": "2026-10-23T15:29:21.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -4140,6 +4140,34 @@
       ],
       "hwModels": [
         142
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "axiometa-genesis-mini",
+      "url": "https://msh.to/axiometa-genesis-mini",
+      "description": "Axiometa Genesis Mini",
+      "type": "vendor",
+      "targets": [
+        "axiometa-genesis-mini"
+      ],
+      "hwModels": [
+        148
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak_wismesh_pod",
+      "url": "https://msh.to/rak_wismesh_pod",
+      "description": "WisMesh Pod",
+      "type": "vendor",
+      "targets": [
+        "rak_wismesh_pod"
+      ],
+      "hwModels": [
+        105
       ],
       "marketplace": null,
       "regions": null
