@@ -173,7 +173,7 @@ fun MapLibreNodeTrackMap(
                 ?.let { selected -> positions.firstOrNull { it.time == selected } },
             displayUnits = displayUnits,
             // Clear of the wordmark and attribution button along the bottom edge, which every map shows.
-            // See MeshMapOrnaments.
+            // See meshMapOrnaments.
             modifier =
             Modifier.align(Alignment.BottomStart)
                 .padding(start = CARD_INSET.dp, end = CARD_INSET.dp, bottom = ORNAMENT_CLEARANCE.dp),

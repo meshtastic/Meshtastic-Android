@@ -97,9 +97,10 @@ internal fun TerrainLayers(viewportBounds: BoundingBox?, zoom: Double, displayUn
  * both tiers rather than only the always-present global one is harmless). The contour
  * [org.maplibre.compose.sources.GeoJsonSource] below has no attribution field of its own to carry this on —
  * [org.maplibre.compose.sources.GeoJsonOptions] doesn't have one — but contours only ever render alongside hillshade
- * (see [TerrainLayers]'s shared gate), so this covers both.
+ * (see [TerrainLayers]'s shared gate), so this covers both. A coverage estimate's [CustomLayer.attributionHtml] uses
+ * the same string, so the map shows it once when both draw.
  */
-private const val MAPTERHORN_ATTRIBUTION_HTML =
+internal const val MAPTERHORN_ATTRIBUTION_HTML =
     "&copy; <a href=\"${MapterhornEndpoints.ATTRIBUTION_URL}\">Mapterhorn</a>"
 
 /**

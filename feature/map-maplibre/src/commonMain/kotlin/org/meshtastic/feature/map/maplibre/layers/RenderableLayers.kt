@@ -78,7 +78,15 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
     val renderable = layers.mapNotNull { layer ->
         when {
             layer.layerType != LayerType.KML ->
-                layer.uri?.let { CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken) }
+                layer.uri?.let {
+                    CustomLayer(
+                        id = layer.id,
+                        uri = it,
+                        refreshToken = layer.refreshToken,
+                        // An estimate is computed from Mapterhorn terrain.
+                        attributionHtml = MAPTERHORN_ATTRIBUTION_HTML.takeIf { layer.layerType == LayerType.COVERAGE },
+                    )
+                }
 
             else ->
                 converted[layer.conversionKey()]?.let { conversion ->

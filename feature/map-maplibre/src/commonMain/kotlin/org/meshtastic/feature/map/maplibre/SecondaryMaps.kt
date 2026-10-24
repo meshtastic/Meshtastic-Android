@@ -449,7 +449,7 @@ internal const val CARD_INSET = 8
 /**
  * Height to leave for the map's wordmark and attribution button, which every map shows.
  *
- * See [org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments].
+ * See [org.meshtastic.feature.map.maplibre.component.meshMapOrnaments].
  */
 internal const val ORNAMENT_CLEARANCE = 40
 private const val CARD_PADDING = 8

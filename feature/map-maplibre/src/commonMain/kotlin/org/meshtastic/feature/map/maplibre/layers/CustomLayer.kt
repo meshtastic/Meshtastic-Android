@@ -38,6 +38,8 @@ data class CustomLayer(
     val refreshToken: Int = 0,
     val icons: Set<String> = emptySet(),
     val groundOverlays: List<LayerGroundOverlay> = emptyList(),
+    /** Credit the map shows while this layer is, for data the GeoJSON itself has no field to carry. */
+    val attributionHtml: String? = null,
 )
 
 /**

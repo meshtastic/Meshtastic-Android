@@ -47,6 +47,7 @@ import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.overlay.AttributionDefaults
 import org.maplibre.compose.overlay.AttributionLinks
 import org.maplibre.compose.overlay.DisappearingScaleBar
+import org.maplibre.compose.overlay.ExpandingAttributionButton
 import org.maplibre.compose.overlay.LocalViewportInsets
 import org.maplibre.compose.overlay.MaplibreLogo
 import org.maplibre.compose.overlay.attributions
@@ -69,8 +70,11 @@ import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
  *
  * Scale-bar units are left to the library, which picks them by region — the same locale-driven approach the rest of the
  * app takes through `localeUnitsProvider`.
+ *
+ * [extraCredits] are HTML credits for data no style source carries, such as the terrain under a coverage estimate,
+ * which is drawn from a GeoJSON source that has no attribution field. They join the style's own, deduplicated.
  */
-internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
+internal fun meshMapOrnaments(extraCredits: List<String>): MaplibreOverlay = MaplibreOverlay {
     val mapState = checkNotNull(LocalMapState.current)
     val viewportInsets = LocalViewportInsets.current
 
@@ -89,10 +93,24 @@ internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
             zoom = { mapState.cameraPosition.zoom },
             modifier = Modifier.align(Alignment.TopStart),
         )
+        if (extraCredits.isNotEmpty()) {
+            // `AttributionOnly` as the library composes it, with the extra credits added to what the button shows.
+            MaplibreLogo(Modifier.align(Alignment.BottomStart))
+            ExpandingAttributionButton(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                contentAlignment = Alignment.BottomEnd,
+                toggleButton = AttributionDefaults.button,
+                expandedContent = { credits, style -> AttributionDefaults.content((credits + extraCredits).distinct(), style) },
+                expandedStyle = AttributionDefaults.expandedStyle(),
+                collapsedStyle = AttributionDefaults.collapsedStyle(),
+                expand = AttributionDefaults.expand,
+                collapse = AttributionDefaults.collapse,
+            )
+        }
     }
 
     // The logo and the attribution button, in the places `MapOverlay.Default` puts them.
-    include(MaplibreOverlay.AttributionOnly)
+    if (extraCredits.isEmpty()) include(MaplibreOverlay.AttributionOnly)
 }
 
 /**
