@@ -108,6 +108,15 @@ import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
 import org.meshtastic.proto.ExcludedModules
 
+internal fun ownNodeMenuItems(node: Node, ourNode: Node?, connectionState: ConnectionState): OwnNodeMenuItems {
+    val connected = node.num == ourNode?.num && connectionState == ConnectionState.Connected
+    return OwnNodeMenuItems(
+        updateStatus = canEditStatusMessage(node, ourNode, connectionState),
+        editName = connected,
+        shareContact = connected && ourNode.capabilities.supportsQrCodeSharing,
+    )
+}
+
 /**
  * design#115: status message editing is offered on the connected local node only, and only where the firmware has the
  * module — absent, never disabled, everywhere else.
@@ -117,6 +126,12 @@ internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: C
         connectionState == ConnectionState.Connected &&
         node.capabilities.supportsStatusMessage &&
         !node.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
+
+/** Which actions our own node's long-press menu offers; the menu opens only when [any] is true. */
+internal data class OwnNodeMenuItems(val updateStatus: Boolean, val editName: Boolean, val shareContact: Boolean) {
+    val any: Boolean
+        get() = updateStatus || editName || shareContact
+}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)
@@ -133,6 +148,7 @@ fun NodeListScreen(
     onEditStatusMessage: () -> Unit = {},
     navigateToMeshView: (Int) -> Unit = {},
     navigateToCompass: (Int) -> Unit = {},
+    onEditName: () -> Unit = {},
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -215,10 +231,10 @@ fun NodeListScreen(
 
         Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             val isThisNode = node.num == ourNode?.num
-            val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
+            val ownItems = ownNodeMenuItems(node, ourNode, connectionState)
             // Our own node only earns a long press while it has something to offer, or it opens an empty menu.
             val longClick =
-                if (!isThisNode || canEditStatus) {
+                if (!isThisNode || ownItems.any) {
                     { expanded = true }
                 } else {
                     null
@@ -265,13 +281,15 @@ fun NodeListScreen(
                         deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                     )
             }
-            if (canEditStatus) {
+            if (isThisNode) {
                 LocalNodeContextMenu(
-                    expanded = expanded,
-                    onUpdateStatus = onEditStatusMessage,
+                    expanded = expanded && ownItems.any,
                     onDismiss = { expanded = false },
+                    onUpdateStatus = onEditStatusMessage.takeIf { ownItems.updateStatus },
+                    onEditName = onEditName.takeIf { ownItems.editName },
+                    onShareContact = { showShareContact = true }.takeIf { ownItems.shareContact },
                 )
-            } else if (!isThisNode) {
+            } else {
                 NodeContextMenu(
                     expanded = expanded,
                     node = node,
