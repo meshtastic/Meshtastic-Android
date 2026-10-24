@@ -37,9 +37,9 @@ internal fun TileIndex.bounds(): GeoBounds {
 }
 
 /** Whether the two overlap. A box whose west is east of its east crosses the antimeridian. */
-internal fun GeoBounds.intersects(other: GeoBounds): Boolean =
-    south < other.north && other.south < north &&
-        longitudeSpans().any { (w, e) -> other.longitudeSpans().any { (ow, oe) -> w < oe && ow < e } }
+internal fun GeoBounds.intersects(other: GeoBounds): Boolean = south < other.north &&
+    other.south < north &&
+    longitudeSpans().any { (w, e) -> other.longitudeSpans().any { (ow, oe) -> w < oe && ow < e } }
 
 private fun GeoBounds.longitudeSpans(): List<Pair<Double, Double>> =
     if (west <= east) listOf(west to east) else listOf(west to MAX_LONGITUDE, -MAX_LONGITUDE to east)

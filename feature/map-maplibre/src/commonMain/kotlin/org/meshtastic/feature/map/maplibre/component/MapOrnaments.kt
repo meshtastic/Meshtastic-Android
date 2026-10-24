@@ -100,7 +100,9 @@ internal fun meshMapOrnaments(extraCredits: List<String>): MaplibreOverlay = Map
                 modifier = Modifier.align(Alignment.BottomEnd),
                 contentAlignment = Alignment.BottomEnd,
                 toggleButton = AttributionDefaults.button,
-                expandedContent = { credits, style -> AttributionDefaults.content((credits + extraCredits).distinct(), style) },
+                expandedContent = { credits, style ->
+                    AttributionDefaults.content((credits + extraCredits).distinct(), style)
+                },
                 expandedStyle = AttributionDefaults.expandedStyle(),
                 collapsedStyle = AttributionDefaults.collapsedStyle(),
                 expand = AttributionDefaults.expand,
