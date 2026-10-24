@@ -61,6 +61,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -218,7 +219,11 @@ private fun ColumnScope.CandidateList(nodes: List<Node>, onPick: (Node) -> Unit)
                 modifier = Modifier.clickable { onPick(node) },
                 leadingContent = { NodeChip(node = node) },
                 headlineContent = {
-                    Text(node.user.long_name.ifEmpty { node.user.id }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        node.effectiveLongName.ifEmpty { node.user.id },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 },
                 supportingContent = { Text(formatAgo(node.lastHeard)) },
             )

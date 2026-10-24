@@ -379,6 +379,12 @@ class MessageViewModel(
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 
+    /** Name to show for a node: its local display name when set, else the broadcast long name. */
+    fun getLongName(userId: String?): String {
+        val id = userId ?: NodeAddress.ID_BROADCAST
+        return nodeRepository.getNode(id).displayName.ifBlank { nodeRepository.getUser(id).long_name }
+    }
+
     /**
      * Sends a message to a contact or channel.
      *

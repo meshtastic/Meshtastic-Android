@@ -149,6 +149,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.model.isLocked
@@ -1329,7 +1330,7 @@ internal fun rememberNodeClusterItems(
                 node = node,
                 nodePosition = latLng,
                 nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
-                nodeSnippet = node.user.long_name,
+                nodeSnippet = node.effectiveLongName,
                 myNodeNum = myNodeNum,
             )
         }

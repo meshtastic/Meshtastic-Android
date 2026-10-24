@@ -133,7 +133,7 @@ class ContactsViewModel(
                         toBroadcast ->
                             channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
 
-                        else -> user.long_name
+                        else -> node.displayName.ifBlank { user.long_name }
                     }
 
                 Contact(

@@ -48,6 +48,7 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
@@ -114,7 +115,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
         titleRes = Res.string.env_metrics_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = filteredTelemetries,
         timeProvider = { it.time.toDouble() },
         infoData = listOf(InfoDialogData(Res.string.iaq, Res.string.iaq_definition, Environment.IAQ.color)),

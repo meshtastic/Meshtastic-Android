@@ -18,6 +18,7 @@ package org.meshtastic.core.data.ai
 
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 
@@ -38,8 +39,8 @@ class FuzzyNameResolver(
         val nodes = nodeRepository.nodeDBbyNum.value
         val candidates =
             nodes.values
-                .filter { it.user.long_name.isNotBlank() }
-                .map { NameCandidate(it.user.long_name, it.num, it.user.id) }
+                .filter { it.effectiveLongName.isNotBlank() }
+                .map { NameCandidate(it.effectiveLongName, it.num, it.user.id) }
 
         return matchName(query, candidates)
     }

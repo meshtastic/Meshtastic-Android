@@ -57,6 +57,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.rxTimeOrNull
@@ -176,7 +177,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
         onNavigateUp = onNavigateUp,
         telemetryType = null,
         titleRes = Res.string.signal_quality,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = data,
         timeProvider = { it.timeSeconds.toDouble() },
         modifier = modifier,

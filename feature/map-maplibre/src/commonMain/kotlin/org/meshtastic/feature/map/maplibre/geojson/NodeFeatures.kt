@@ -24,6 +24,7 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 
 /** Formats an `@ColorInt` ARGB value as the `#rrggbb` string MapLibre expressions parse. */
@@ -50,7 +51,7 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                 buildJsonObject {
                     put(NodeFeatureKeys.NODE_NUM, node.num)
                     put(NodeFeatureKeys.SHORT_NAME, node.user.short_name)
-                    put(NodeFeatureKeys.LONG_NAME, node.user.long_name)
+                    put(NodeFeatureKeys.LONG_NAME, node.effectiveLongName)
                     put(NodeFeatureKeys.IS_FAVORITE, node.isFavorite)
                     put(NodeFeatureKeys.IS_ONLINE, node.isOnline)
                     put(NodeFeatureKeys.IS_SELF, myNodeNum != null && node.num == myNodeNum)

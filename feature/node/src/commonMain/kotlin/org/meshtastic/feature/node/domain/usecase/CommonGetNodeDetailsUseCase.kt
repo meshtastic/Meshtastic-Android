@@ -34,6 +34,7 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
@@ -261,7 +262,7 @@ constructor(
 
             @Suppress("MagicNumber")
             val nodeName =
-                node.user.long_name.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                node.effectiveLongName.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
                     ?: UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
 
             NodeDetailUiState(

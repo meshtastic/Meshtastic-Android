@@ -27,6 +27,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.normalizeDisplayName
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -50,6 +52,7 @@ import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.SnackbarManager
 
+@Suppress("TooManyFunctions") // One method per node action.
 @Single
 open class NodeManagementActions
 constructor(
@@ -91,7 +94,10 @@ constructor(
     open fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add, node.user.long_name)
+                getString(
+                    if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
+                    node.effectiveLongName,
+                )
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
@@ -107,7 +113,7 @@ constructor(
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.long_name)
+                getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.effectiveLongName)
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
@@ -125,7 +131,7 @@ constructor(
             val message =
                 getString(
                     if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
-                    node.user.long_name,
+                    node.effectiveLongName,
                 )
             alertManager.showAlert(
                 titleRes = Res.string.favorite,
@@ -177,5 +183,13 @@ constructor(
     open suspend fun setNodeNotes(nodeNum: Int, notes: String) {
         val failure = safeCatching { nodeRepository.setNodeNotes(nodeNum, notes) }.exceptionOrNull()
         if (failure != null) Logger.e(failure) { "Set node notes error" }
+    }
+
+    open suspend fun setNodeDisplayName(nodeNum: Int, displayName: String) {
+        val failure = safeCatching {
+            nodeRepository.setNodeDisplayName(nodeNum, normalizeDisplayName(displayName))
+        }
+            .exceptionOrNull()
+        if (failure != null) Logger.e(failure) { "Set node display name error" }
     }
 }

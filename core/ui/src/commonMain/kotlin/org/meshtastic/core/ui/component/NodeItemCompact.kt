@@ -57,6 +57,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
@@ -121,7 +122,7 @@ fun NodeItemCompact(
     tempInFahrenheit: Boolean = false,
     deviceImageUrl: String? = null,
 ) {
-    val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
+    val longName = thatNode.effectiveLongName.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
     val isThisNode = remember(thisNode, thatNode) { thisNode?.num == thatNode.num }

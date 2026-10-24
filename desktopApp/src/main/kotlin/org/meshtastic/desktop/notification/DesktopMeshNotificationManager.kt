@@ -20,6 +20,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -132,7 +133,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         notificationManager.dispatch(
             Notification(
                 title = title,
-                message = node.user.long_name,
+                message = node.effectiveLongName,
                 category = Notification.Category.NodeEvent,
                 id = node.num,
             ),
@@ -154,7 +155,11 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 Notification(
                     title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
                     message =
-                    getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                    getStringSuspend(
+                        Res.string.low_battery_message,
+                        node.effectiveLongName,
+                        node.batteryLevel ?: 0,
+                    ),
                     category = Notification.Category.Battery,
                     id = node.num,
                 )

@@ -56,6 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.AirQualityIndex
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.UnitConversions.toTempString
@@ -136,12 +137,11 @@ internal fun withNowCastAqi(telemetries: List<Telemetry>): List<AirQualitySample
     val ascending = telemetries.sortedBy { it.time }
     // Keep each PM2.5 reading tied to its position in `ascending` so the returned AQI series can be mapped back onto
     // the full sample list, gaps included.
-    val pm25Readings =
-        ascending.mapIndexedNotNull { index, telemetry ->
-            telemetry.air_quality_metrics?.pm25_standard?.let { pm25 ->
-                index to (telemetry.time.toLong() to pm25.toDouble())
-            }
+    val pm25Readings = ascending.mapIndexedNotNull { index, telemetry ->
+        telemetry.air_quality_metrics?.pm25_standard?.let { pm25 ->
+            index to (telemetry.time.toLong() to pm25.toDouble())
         }
+    }
     val aqiSeries = AirQualityIndex.nowCastAqiSeries(pm25Readings.map { it.second })
     val aqiByIndex = pm25Readings.mapIndexed { position, (index, _) -> index to aqiSeries[position] }.toMap()
     return ascending.mapIndexed { index, telemetry -> AirQualitySample(telemetry, aqiByIndex[index]) }
@@ -153,7 +153,9 @@ internal fun withNowCastAqi(telemetries: List<Telemetry>): List<AirQualitySample
  * on nodes that never report it (issue #5873). Internal so it can be unit-tested.
  */
 internal fun metricsWithData(candidates: List<AirQuality>, samples: List<AirQualitySample>): List<AirQuality> =
-    candidates.filter { metric -> samples.any { metric.getValue(it) != null } }
+    candidates.filter { metric ->
+        samples.any { metric.getValue(it) != null }
+    }
 
 private val LEGEND_DATA =
     AirQuality.entries.map { metric -> LegendData(nameRes = metric.labelRes, color = metric.color, isLine = true) }
@@ -182,7 +184,7 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.AIR_QUALITY,
         titleRes = Res.string.air_quality_metrics_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = data,
         timeProvider = { it.time.toDouble() },
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.AIR_QUALITY) },
@@ -312,17 +314,16 @@ private fun AirQualityChart(
                 }
             }
 
-        val chartLayers =
-            layers.map { (metric, _) ->
-                rememberConditionalLayer(
-                    hasData = true,
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createStyledLine(metric.color, ChartStyling.THIN_LINE_WIDTH_DP),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                )
-            }
+        val chartLayers = layers.map { (metric, _) ->
+            rememberConditionalLayer(
+                hasData = true,
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createStyledLine(metric.color, ChartStyling.THIN_LINE_WIDTH_DP),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            )
+        }
 
         val nonNullLayers = remember(chartLayers) { chartLayers.filterNotNull() }
 

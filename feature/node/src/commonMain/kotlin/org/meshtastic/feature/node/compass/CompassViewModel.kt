@@ -34,6 +34,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.model.util.uncertaintyRadiusMetersOrNull
 import org.meshtastic.core.repository.MagneticFieldProvider
@@ -71,7 +72,7 @@ class CompassViewModel(
         targetPosition = targetPos
         targetPositionProto = node.position
         val targetColor = Color(node.colors.second)
-        val targetName = node.user.long_name.ifBlank { node.user.short_name.ifBlank { node.num.toString() } }
+        val targetName = node.effectiveLongName.ifBlank { node.user.short_name.ifBlank { node.num.toString() } }
         targetPositionTimeSec =
             node.position.timestamp.takeIf { it > 0 }?.toLong() ?: node.position.time.takeIf { it > 0 }?.toLong()
 

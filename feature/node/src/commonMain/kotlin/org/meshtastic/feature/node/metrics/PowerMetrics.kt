@@ -63,6 +63,7 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
@@ -129,7 +130,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.POWER,
         titleRes = Res.string.power_metrics_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = data,
         timeProvider = { it.time.toDouble() },
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.POWER) },

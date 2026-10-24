@@ -69,6 +69,7 @@ import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -871,7 +872,7 @@ class MeshNotificationManagerImpl(
             val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
             val peer = nodeRepository.value.nodeDBbyNum.value.values.find { it.user.id == userId }
             conversationName =
-                peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: getStringSuspend(Res.string.unknown_username)
+                peer?.effectiveLongName?.takeIf { it.isNotBlank() } ?: getStringSuspend(Res.string.unknown_username)
         }
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }
@@ -992,7 +993,9 @@ class MeshNotificationManagerImpl(
                     ?.let { formatDurationSuspend(it, largestUnit(it)) }
         return createLiveUpdateNotification(
             title =
-            node.user.long_name.ifBlank { node.user.short_name }.ifBlank { NodeAddress.numToDefaultId(node.num) },
+            node.effectiveLongName
+                .ifBlank { node.user.short_name }
+                .ifBlank { NodeAddress.numToDefaultId(node.num) },
             subText = connectionTitle.takeIf { state !is ConnectionState.Connected },
             lines = lines,
             chip = chip,
@@ -1065,7 +1068,7 @@ class MeshNotificationManagerImpl(
         }
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getStringSuspend(Res.string.you)
+        val meName = ourNode?.effectiveLongName ?: getStringSuspend(Res.string.you)
         val me =
             Person.Builder()
                 .setName(meName)
@@ -1093,7 +1096,7 @@ class MeshNotificationManagerImpl(
             // Use the node attached to the message directly to ensure correct identification
             val person =
                 Person.Builder()
-                    .setName(msg.node.user.long_name)
+                    .setName(msg.node.effectiveLongName)
                     .setKey(msg.node.user.id)
                     // Favorite nodes feed the system's conversation-priority ranking (shade ordering, suggestions).
                     .setImportant(msg.node.isFavorite)
@@ -1123,7 +1126,7 @@ class MeshNotificationManagerImpl(
                 val reactorNode = nodeRepository.value.getNode(reaction.user.id)
                 val reactor =
                     Person.Builder()
-                        .setName(reaction.user.long_name)
+                        .setName(reactorNode.displayName.ifBlank { reaction.user.long_name })
                         .setKey(reaction.user.id)
                         .setIcon(
                             cachedPersonIcon(
@@ -1162,7 +1165,7 @@ class MeshNotificationManagerImpl(
             // notification's own person list, so the counterpart is added here too.
             .addPerson(
                 Person.Builder()
-                    .setName(bubbleNode.user.long_name.ifEmpty { bubbleNode.user.short_name })
+                    .setName(bubbleNode.effectiveLongName.ifEmpty { bubbleNode.user.short_name })
                     .setKey(bubbleNode.user.id)
                     .setIcon(bubbleIcon)
                     .build(),
@@ -1232,7 +1235,7 @@ class MeshNotificationManagerImpl(
             .build()
 
     private fun createNewNodeSeenNotification(title: String, node: Node): Notification {
-        val message = node.user.long_name
+        val message = node.effectiveLongName
         return commonBuilder(NotificationChannelSpec.NewNodes, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
             .setAutoCancel(true)
@@ -1248,7 +1251,7 @@ class MeshNotificationManagerImpl(
         val type = if (isRemote) NotificationChannelSpec.LowBatteryRemote else NotificationChannelSpec.LowBattery
         val title = getStringSuspend(Res.string.low_battery_title, node.user.short_name)
         val batteryLevel = node.deviceMetrics.battery_level ?: 0
-        val message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, batteryLevel)
+        val message = getStringSuspend(Res.string.low_battery_message, node.effectiveLongName, batteryLevel)
 
         // Not ongoing: an ongoing notification never bridges to a watch, and recovery cancels this one anyway.
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))

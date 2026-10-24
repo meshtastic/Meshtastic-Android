@@ -37,6 +37,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.NodeRepository
@@ -171,7 +172,7 @@ class ConversationShortcutPublisher(
         // the raw contactKey is a user-traceable identifier and must stay confined to internal ids and deep-link
         // metadata (privacy-first convention).
         val shortName = node?.user?.short_name?.takeIf { it.isNotBlank() }
-        val longName = node?.user?.long_name?.takeIf { it.isNotBlank() }
+        val longName = node?.effectiveLongName?.takeIf { it.isNotBlank() }
         val label = longName ?: shortName ?: getStringSuspend(Res.string.unknown_username)
 
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.

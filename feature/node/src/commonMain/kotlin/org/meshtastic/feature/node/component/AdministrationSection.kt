@@ -40,6 +40,7 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.asDeviceVersion
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
@@ -133,7 +134,7 @@ fun AdministrationSection(
                         leadingIcon = MeshtasticIcons.Memory,
                         trailingIcon = null,
                         enabled = !isEnsuringSession,
-                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num, node.user.long_name)) },
+                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num, node.effectiveLongName)) },
                     )
                 }
             }

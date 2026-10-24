@@ -97,6 +97,7 @@ import org.meshtastic.core.model.MENTION_TOKEN_REGEX
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.QuickChatAction
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.archived_channel_read_only
@@ -164,7 +165,7 @@ fun MessageScreen(
     val mentionCandidates by remember {
         derivedStateOf {
             nodes
-                .associate { it.user.id to MentionCandidate(it.user.id, it.user.long_name, it.user.short_name) }
+                .associate { it.user.id to MentionCandidate(it.user.id, it.effectiveLongName, it.user.short_name) }
                 .toPersistentMap()
         }
     }
@@ -240,10 +241,10 @@ fun MessageScreen(
     val channelName = rawChannelName ?: retiredName.ifEmpty { unknownChannelText }
 
     val title =
-        remember(nodeId, channelName, viewModel) {
+        remember(nodeId, channelName, viewModel, nodes) {
             when (nodeId) {
                 NodeAddress.ID_BROADCAST -> channelName
-                else -> viewModel.getUser(nodeId).long_name
+                else -> viewModel.getLongName(nodeId)
             }
         }
 
@@ -327,10 +328,10 @@ fun MessageScreen(
                     pagedMessages.itemSnapshotList
                         .firstOrNull { it != null && !it.fromLocal && !it.read }
                         ?.node
-                        ?.user
                         // Blank, not just empty: a name of only spaces would render an empty pill.
-                        ?.let { user ->
-                            user.long_name.takeIf { it.isNotBlank() } ?: user.short_name.takeIf { it.isNotBlank() }
+                        ?.let { node ->
+                            node.effectiveLongName.takeIf { it.isNotBlank() }
+                                ?: node.user.short_name.takeIf { it.isNotBlank() }
                         }
                 }
             }

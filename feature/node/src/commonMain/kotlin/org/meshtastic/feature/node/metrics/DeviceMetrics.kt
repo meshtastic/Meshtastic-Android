@@ -61,6 +61,7 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_util_definition
@@ -166,7 +167,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.DEVICE,
         titleRes = Res.string.device_metrics_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = data,
         timeProvider = { it.time.toDouble() },
         infoData = infoItems,
