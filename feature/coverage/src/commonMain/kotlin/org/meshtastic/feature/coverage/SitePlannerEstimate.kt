@@ -22,8 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
-import org.koin.compose.koinInject
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.terrain.TerrainTileStore
 import kotlin.math.log10
@@ -47,17 +45,14 @@ suspend fun estimateCoverageGeoJson(
     }
 }
 
-/** [estimateCoverageGeoJson] bound to the app's compute dispatcher and its coverage terrain cache. */
+/** [estimateCoverageGeoJson] bound to the coverage compute dispatcher and its coverage terrain cache. */
 @Composable
-fun rememberCoverageEstimate(): suspend (SitePlannerParams) -> String {
-    val dispatchers: CoroutineDispatchers = koinInject()
-    return remember(dispatchers) {
-        val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
-        val estimate: suspend (SitePlannerParams) -> String = { params ->
-            estimateCoverageGeoJson(params, store, dispatchers.default)
-        }
-        estimate
+fun rememberCoverageEstimate(): suspend (SitePlannerParams) -> String = remember {
+    val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
+    val estimate: suspend (SitePlannerParams) -> String = { params ->
+        estimateCoverageGeoJson(params, store, coverageComputeDispatcher)
     }
+    estimate
 }
 
 /**

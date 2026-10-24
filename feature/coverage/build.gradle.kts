@@ -36,7 +36,6 @@ kotlin {
             implementation(projects.feature.map)
             implementation(projects.feature.mapTerrain)
             implementation(projects.core.common)
-            implementation(projects.core.di)
             implementation(libs.okio)
             implementation(libs.ktor.client.core)
         }

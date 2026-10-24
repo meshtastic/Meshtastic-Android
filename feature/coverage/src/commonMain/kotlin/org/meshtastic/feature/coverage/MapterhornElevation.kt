@@ -18,7 +18,6 @@ package org.meshtastic.feature.coverage
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -64,8 +63,7 @@ class MapterhornElevation(
     // Shared, and never closed here: a caller's client is theirs, and the shared one outlives us.
     private val tiles = MapterhornTiles(http ?: SharedTerrain.http, store)
 
-    @Suppress("InjectDispatcher") // tile decoding is CPU work, and callers build this outside DI
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(SupervisorJob() + coverageComputeDispatcher)
 
     // Decoded terrain outlives this instance - see TerrainCache. Memoised after the first suspend
     // acquisition; two callers racing here both get the same cache, so the race is harmless.
