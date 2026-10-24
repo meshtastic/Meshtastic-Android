@@ -1031,9 +1031,10 @@ fun MapView(
         val attributionCoveringRegion =
             cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
         val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
-        val terrainActive =
-            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled) ||
-                mapLayers.any { it.layerType == LayerType.COVERAGE && it.isVisible }
+        val terrainDrawn =
+            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
+        val coverageShown = mapLayers.any { it.layerType == LayerType.COVERAGE && it.isVisible }
+        val terrainActive = terrainDrawn || coverageShown
         val attributionText =
             remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
                 val baseAttribution =
