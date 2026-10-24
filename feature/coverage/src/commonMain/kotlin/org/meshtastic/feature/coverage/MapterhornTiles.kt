@@ -40,24 +40,40 @@ import org.meshtastic.feature.map.terrain.TileIndex
  * many we choose to have in flight.
  *
  * Anything fetched is written back to [store] when there is one, so the next run (or the next launch) pays nothing for
- * the same ground.
+ * the same ground. [offline] are downloaded map regions' terrain, read after [store] and before the network but never
+ * written: they belong to their regions.
  */
 internal class MapterhornTiles(
     private val http: HttpClient,
     private val store: TerrainTileStore?,
+    private val offline: List<RegionTerrain> = emptyList(),
     concurrency: Int = DEFAULT_CONCURRENCY,
 ) {
     private val gate = Semaphore(concurrency)
 
     /**
      * Raw Terrarium WebP for one tile, or null where the endpoint has no data (ocean, out of range). [fresh] skips the
-     * stored copy and overwrites it, for a stored tile that didn't decode.
+     * stored copies and overwrites the cached one, for a stored tile that didn't decode.
      */
     suspend fun bytes(zoom: Int, x: Int, y: Int, fresh: Boolean = false): ByteArray? {
         val tile = TileIndex(zoom, x, y)
         val source = sourceFor(zoom)
-        val stored = if (fresh) null else readLocal(source, tile)
+        val stored = if (fresh) null else readLocal(source, tile) ?: offlineBytes(tile, tile)
         return stored ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
+    }
+
+    /**
+     * [tile] from a downloaded region whose bounds reach [needed], or null when none does. A region keeps every
+     * low-zoom tile it touches, and one of those spans far more ground than the region, so a tile is only taken from a
+     * region for ground that region was downloaded for.
+     */
+    suspend fun offlineBytes(tile: TileIndex, needed: TileIndex): ByteArray? {
+        val holders = offline.filter { it.bounds.intersects(needed.bounds()) }
+        if (holders.isEmpty()) return null
+        val source = sourceFor(tile.zoom)
+        return withContext(ioDispatcher) {
+            holders.firstNotNullOfOrNull { region -> runCatching { region.store.readTile(source, tile) }.getOrNull() }
+        }
     }
 
     /**

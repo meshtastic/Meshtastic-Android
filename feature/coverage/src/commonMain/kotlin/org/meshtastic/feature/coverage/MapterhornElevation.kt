@@ -17,18 +17,21 @@
 package org.meshtastic.feature.coverage
 
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.meshtastic.feature.map.terrain.ElevationTile
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.terrain.TerrainTileMath
 import org.meshtastic.feature.map.terrain.TerrainTileStore
+import org.meshtastic.feature.map.terrain.TileIndex
 import org.meshtastic.feature.map.terrain.decodeTerrariumTile
 import kotlin.concurrent.Volatile
 import kotlin.math.PI
@@ -56,16 +59,22 @@ class MapterhornElevation(
     store: TerrainTileStore? = null,
     zoom: Int = DEFAULT_ZOOM,
     http: HttpClient? = null,
+    /** Downloaded map regions' terrain, used when the network can't supply a tile. */
+    offline: List<RegionTerrain> = emptyList(),
 ) : ElevationSource,
     AutoCloseable {
 
     private val zoom = zoomFitting(zoom.coerceAtMost(MapterhornEndpoints.TILES_MAX_ZOOM), bounds)
 
     // Shared, and never closed here: a caller's client is theirs, and the shared one outlives us.
-    private val tiles = MapterhornTiles(http ?: SharedTerrain.http, store)
+    private val tiles = MapterhornTiles(http ?: SharedTerrain.http, store, offline)
 
-    @Suppress("InjectDispatcher") // tile decoding is CPU work, and callers build this outside DI
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(SupervisorJob() + coverageComputeDispatcher)
+
+    // Tiles cut from a coarser region tile. Good enough for this estimate, but the cache is shared, so they are
+    // dropped by forgetStandIns() rather than served to a later estimate that could download the real one.
+    private val standInLock = Mutex()
+    private val standIns = mutableSetOf<Long>()
 
     // Decoded terrain outlives this instance - see TerrainCache. Memoised after the first suspend
     // acquisition; two callers racing here both get the same cache, so the race is harmless.
@@ -138,12 +147,51 @@ class MapterhornElevation(
     private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? =
         cache().getOrFetch(key) { scope.async { decode(x, y) } }
 
+    // Offline, or the endpoint failed: a region downloaded to a shallower zoom may still hold this ground.
+    @Suppress("TooGenericExceptionCaught") // whatever the fetch threw is rethrown when no region holds the ground
+    private suspend fun decode(x: Int, y: Int): ElevationTile? =
+        try {
+            fetchAndDecode(x, y)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            fromCoarserRegionTile(x, y) ?: throw e
+        }
+
     // Null means the endpoint has no tile there, so it must never stand in for a failed decode: a corrupt cached
     // tile gets one fresh download, and bytes that still don't decode fail the estimate.
-    private suspend fun decode(x: Int, y: Int): ElevationTile? {
+    private suspend fun fetchAndDecode(x: Int, y: Int): ElevationTile? {
         val cached = tiles.bytes(zoom, x, y) ?: return null
         return runCatching { decodeTerrariumTile(cached) }.getOrNull()
             ?: tiles.bytes(zoom, x, y, fresh = true)?.let { decodeTerrariumTile(it) }
+    }
+
+    /**
+     * The nearest ancestor a downloaded region holds, cut down to this tile's quarter of it at each level. Stops at
+     * [MIN_ZOOM]: every region holds the planet's lowest zooms, so without a floor any site anywhere would estimate
+     * over terrain a few pixels wide instead of failing.
+     */
+    private suspend fun fromCoarserRegionTile(x: Int, y: Int): ElevationTile? {
+        for (levels in 1..(zoom - MIN_ZOOM)) {
+            val parent =
+                tiles.offlineBytes(TileIndex(zoom - levels, x shr levels, y shr levels), TileIndex(zoom, x, y))?.let {
+                    runCatching { decodeTerrariumTile(it) }.getOrNull()
+                }
+            if (parent != null) {
+                standInLock.withLock { standIns += tileKey(x, y) }
+                return parent.descendant(levels, x, y)
+            }
+        }
+        return null
+    }
+
+    /**
+     * Drop every stand-in tile from the shared cache. Call after [close], once no decode can still complete and add
+     * one.
+     */
+    suspend fun forgetStandIns() {
+        val keys = standInLock.withLock { standIns.toList().also { standIns.clear() } }
+        cache?.forget(keys)
     }
 
     override fun close() = scope.cancel()
@@ -168,6 +216,21 @@ class MapterhornElevation(
 
 /** The cache is keyed by endpoint, so a second terrain source wouldn't collide with this one. */
 private const val ARCHIVE = "tiles.mapterhorn.com"
+
+/**
+ * The part of this tile that covers its descendant [levels] zooms down at tile [x], [y].
+ *
+ * Not resampled: a sampler scales its fractional position by the tile's own size, so a 128-pixel quarter reads the same
+ * ground as a 512-pixel tile would, at the coarser spacing it actually has.
+ */
+internal fun ElevationTile.descendant(levels: Int, x: Int, y: Int): ElevationTile {
+    val n = 1 shl levels
+    val w = (width / n).coerceAtLeast(1)
+    val h = (height / n).coerceAtLeast(1)
+    val left = (x and (n - 1)) * width / n
+    val top = (y and (n - 1)) * height / n
+    return ElevationTile(w, h, FloatArray(w * h) { i -> elevationAt(left + i % w, top + i / w) })
+}
 
 /** Pack a tile's coordinates into one cache key. */
 private fun tileKey(x: Int, y: Int): Long = (x.toLong() shl TILE_KEY_SHIFT) or y.toLong()

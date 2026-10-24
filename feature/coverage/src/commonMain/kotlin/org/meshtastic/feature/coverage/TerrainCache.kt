@@ -98,6 +98,13 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
         }
     }
 
+    /** Drop [keys], so the next reader decodes them afresh. */
+    suspend fun forget(keys: Collection<Long>) = lock.withLock {
+        if (keys.isEmpty()) return@withLock
+        resolved = resolved - keys.toSet()
+        keys.forEach { inFlight.remove(it) }
+    }
+
     /** Record tiles fetched in bulk, as a prefetch does. */
     suspend fun publish(entries: List<Pair<Long, ElevationTile?>>) = lock.withLock {
         val merged = LinkedHashMap(resolved)

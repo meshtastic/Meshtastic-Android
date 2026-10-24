@@ -17,17 +17,21 @@
 package org.meshtastic.desktop.map
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
+import org.meshtastic.feature.coverage.RegionTerrain
 import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
+import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
 
 /** Runs the Site Planner for the desktop map; the estimate becomes a GeoJSON map layer and the map moves to it. */
 @Composable
@@ -42,9 +46,15 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     // A deep link names the node to plan for; a toolbar launch plans for whatever we are connected to.
     val subject = session.nodeNum?.let { num -> nodes.firstOrNull { it.num == num } } ?: ourNode
 
+    val terrain = OfflineTerrainRepository.default
+    LaunchedEffect(terrain) { terrain.refresh() }
+    val terrainRegion by terrain.region.collectAsStateWithLifecycle()
+    val offlineTerrain =
+        remember(terrainRegion) { listOfNotNull(terrainRegion?.let { RegionTerrain(terrain.tileStore, it.bounds) }) }
+
     SitePlannerHost(
         initialParams = subject.toSitePlannerParams(channelSet),
-        estimate = rememberCoverageEstimate(),
+        estimate = rememberCoverageEstimate(offlineTerrain),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->
             layersManager.addGeoJsonLayer(name, geoJson)

@@ -97,6 +97,7 @@ import org.meshtastic.core.resources.site_planner_section_receiver
 import org.meshtastic.core.resources.site_planner_section_simulation
 import org.meshtastic.core.resources.site_planner_section_transmitter
 import org.meshtastic.core.resources.site_planner_subtitle
+import org.meshtastic.core.resources.site_planner_terrain_credit
 import org.meshtastic.core.resources.site_planner_tx_power_watts
 import org.meshtastic.core.resources.site_planner_use_current_location
 import org.meshtastic.core.resources.site_planner_use_map_center
@@ -264,6 +265,11 @@ private fun SiteFormContent(
         ) {
             Text(stringResource(Res.string.site_planner_estimate))
         }
+        Text(
+            text = stringResource(Res.string.site_planner_terrain_credit),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -489,7 +495,5 @@ private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams):
     rxSensitivityDbm = NumberFormatter.parseDecimalOrNull(state.rxSensitivity) ?: initial.rxSensitivityDbm,
     rxHeightMeters = NumberFormatter.parseDecimalOrNull(state.rxHeight) ?: initial.rxHeightMeters,
     maxRangeKm = NumberFormatter.parseDecimalOrNull(state.maxRange) ?: initial.maxRangeKm,
-    minDbm = initial.minDbm,
-    maxDbm = initial.maxDbm,
     overlayTransparency = initial.overlayTransparency,
 )

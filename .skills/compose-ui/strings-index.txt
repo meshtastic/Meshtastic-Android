@@ -1914,6 +1914,7 @@ site_planner_section_receiver
 site_planner_section_simulation
 site_planner_section_transmitter
 site_planner_subtitle
+site_planner_terrain_credit
 site_planner_tx_power_watts
 site_planner_use_current_location
 site_planner_use_map_center

@@ -193,6 +193,7 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.coverage.RegionTerrain
 import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
@@ -225,6 +226,7 @@ import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -1027,12 +1029,14 @@ fun MapView(
         // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
         // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer. The offline
         // terrain layer's own credit (Mapterhorn) is folded in the same way, whenever hillshade or contours are
-        // actually rendering.
+        // actually rendering, or a coverage estimate built from that terrain is shown.
         val attributionCoveringRegion =
             cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
         val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
-        val terrainActive =
+        val terrainDrawn =
             attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
+        val coverageShown = mapLayers.any { it.layerType == LayerType.COVERAGE && it.isVisible }
+        val terrainActive = terrainDrawn || coverageShown
         val attributionText =
             remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
                 val baseAttribution =
@@ -1234,9 +1238,21 @@ fun MapView(
         // Route launches retain the selected node; manual map launches continue following our connected node.
         val onUseNodeLocation: (() -> Pair<Double, Double>)? =
             launch.nodeLocation(ourNodeInfo)?.let { location -> { location } }
+        val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+        val offlineTerrain =
+            remember(offlineRegions) {
+                offlineRegions
+                    .filter { it.hasTerrain }
+                    .map { region ->
+                        RegionTerrain(
+                            store = mapViewModel.terrainStoreForRegion(region.id),
+                            bounds = GeoBounds(region.southLat, region.westLon, region.northLat, region.eastLon),
+                        )
+                    }
+            }
         SitePlannerHost(
             initialParams = launch.initialParams,
-            estimate = rememberCoverageEstimate(),
+            estimate = rememberCoverageEstimate(offlineTerrain),
             onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
