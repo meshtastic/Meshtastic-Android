@@ -28,6 +28,7 @@ import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
+import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
 
 /** Runs the Site Planner for the desktop map; the estimate becomes a GeoJSON map layer and the map moves to it. */
 @Composable
@@ -44,7 +45,7 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
 
     SitePlannerHost(
         initialParams = subject.toSitePlannerParams(channelSet),
-        estimate = rememberCoverageEstimate(),
+        estimate = rememberCoverageEstimate(listOf(OfflineTerrainRepository.default.tileStore)),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->
             layersManager.addGeoJsonLayer(name, geoJson)

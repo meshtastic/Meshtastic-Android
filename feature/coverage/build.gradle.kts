@@ -34,7 +34,8 @@ kotlin {
             implementation(libs.kp1812)
             implementation(libs.kotlinx.coroutines.core)
             implementation(projects.feature.map)
-            implementation(projects.feature.mapTerrain)
+            // api: the estimate's public signatures take a TerrainTileStore.
+            api(projects.feature.mapTerrain)
             implementation(projects.core.common)
             implementation(libs.okio)
             implementation(libs.ktor.client.core)
@@ -43,7 +44,11 @@ kotlin {
         jvmMain.dependencies { implementation(libs.ktor.client.java) }
         androidMain.dependencies { implementation(libs.ktor.client.okhttp) }
 
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.okio.fakefilesystem)
+        }
         jvmTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

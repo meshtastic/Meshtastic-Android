@@ -1234,9 +1234,14 @@ fun MapView(
         // Route launches retain the selected node; manual map launches continue following our connected node.
         val onUseNodeLocation: (() -> Pair<Double, Double>)? =
             launch.nodeLocation(ourNodeInfo)?.let { location -> { location } }
+        val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+        val offlineTerrain =
+            remember(offlineRegions) {
+                offlineRegions.filter { it.hasTerrain }.map { mapViewModel.terrainStoreForRegion(it.id) }
+            }
         SitePlannerHost(
             initialParams = launch.initialParams,
-            estimate = rememberCoverageEstimate(),
+            estimate = rememberCoverageEstimate(offlineTerrain),
             onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)

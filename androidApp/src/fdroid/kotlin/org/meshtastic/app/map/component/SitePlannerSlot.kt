@@ -27,6 +27,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
+import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
 
 /**
  * Runs the Site Planner for the F-Droid map. The estimate becomes a GeoJSON map layer and the map moves to the
@@ -50,7 +51,7 @@ fun SitePlannerSlot(session: SitePlannerSession) {
 
     SitePlannerHost(
         initialParams = subject.toSitePlannerParams(channelSet),
-        estimate = rememberCoverageEstimate(),
+        estimate = rememberCoverageEstimate(listOf(OfflineTerrainRepository.default.tileStore)),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->
             mapViewModel.addGeoJsonLayer(name, geoJson)

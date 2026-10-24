@@ -40,24 +40,36 @@ import org.meshtastic.feature.map.terrain.TileIndex
  * many we choose to have in flight.
  *
  * Anything fetched is written back to [store] when there is one, so the next run (or the next launch) pays nothing for
- * the same ground.
+ * the same ground. [offline] are downloaded map regions' terrain, read after [store] and before the network but never
+ * written: they belong to their regions.
  */
 internal class MapterhornTiles(
     private val http: HttpClient,
     private val store: TerrainTileStore?,
+    private val offline: List<TerrainTileStore> = emptyList(),
     concurrency: Int = DEFAULT_CONCURRENCY,
 ) {
     private val gate = Semaphore(concurrency)
 
     /**
      * Raw Terrarium WebP for one tile, or null where the endpoint has no data (ocean, out of range). [fresh] skips the
-     * stored copy and overwrites it, for a stored tile that didn't decode.
+     * stored copies and overwrites the cached one, for a stored tile that didn't decode.
      */
     suspend fun bytes(zoom: Int, x: Int, y: Int, fresh: Boolean = false): ByteArray? {
         val tile = TileIndex(zoom, x, y)
         val source = sourceFor(zoom)
-        val stored = if (fresh) null else readLocal(source, tile)
+        val stored = if (fresh) null else readLocal(source, tile) ?: offlineBytes(zoom, x, y)
         return stored ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
+    }
+
+    /** One tile from the downloaded regions alone, or null when none of them holds it. */
+    suspend fun offlineBytes(zoom: Int, x: Int, y: Int): ByteArray? {
+        if (offline.isEmpty()) return null
+        val tile = TileIndex(zoom, x, y)
+        val source = sourceFor(zoom)
+        return withContext(ioDispatcher) {
+            offline.firstNotNullOfOrNull { region -> runCatching { region.readTile(source, tile) }.getOrNull() }
+        }
     }
 
     /**
