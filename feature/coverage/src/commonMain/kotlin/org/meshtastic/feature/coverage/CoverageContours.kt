@@ -38,21 +38,21 @@ internal fun CoverageGrid.bands(ranges: List<ClosedFloatingPointRange<Double>>):
         // Greedily merge horizontal runs of in-band cells into rectangles: far fewer polygons than
         // one per cell, and the map renders a handful of rings rather than thousands.
         val taken = BooleanArray(width * height)
-        for (y in 0 until height - 1) {
+        for (y in 0 until height) {
             var x = 0
-            while (x < width - 1) {
+            while (x < width) {
                 if (taken[y * width + x] || !inBand(x, y, range)) {
                     x++
                     continue
                 }
                 var runEnd = x
-                while (runEnd + 1 < width - 1 && !taken[y * width + runEnd + 1] && inBand(runEnd + 1, y, range)) {
+                while (runEnd + 1 < width && !taken[y * width + runEnd + 1] && inBand(runEnd + 1, y, range)) {
                     runEnd++
                 }
                 // Extend downwards while the whole run stays in band.
                 var runBottom = y
                 while (
-                    runBottom + 1 < height - 1 &&
+                    runBottom + 1 < height &&
                     (x..runEnd).all { inBand(it, runBottom + 1, range) } &&
                     (x..runEnd).none { taken[(runBottom + 1) * width + it] }
                 ) {
@@ -63,11 +63,11 @@ internal fun CoverageGrid.bands(ranges: List<ClosedFloatingPointRange<Double>>):
                 }
                 rings.add(
                     listOf(
-                        lonAt(x.toDouble()) to latAt(y.toDouble()),
-                        lonAt(runEnd + 1.0) to latAt(y.toDouble()),
-                        lonAt(runEnd + 1.0) to latAt(runBottom + 1.0),
-                        lonAt(x.toDouble()) to latAt(runBottom + 1.0),
-                        lonAt(x.toDouble()) to latAt(y.toDouble()),
+                        lonAt(x - HALF_CELL) to latAt(y - HALF_CELL),
+                        lonAt(runEnd + HALF_CELL) to latAt(y - HALF_CELL),
+                        lonAt(runEnd + HALF_CELL) to latAt(runBottom + HALF_CELL),
+                        lonAt(x - HALF_CELL) to latAt(runBottom + HALF_CELL),
+                        lonAt(x - HALF_CELL) to latAt(y - HALF_CELL),
                     ),
                 )
                 x = runEnd + 1
@@ -142,6 +142,7 @@ $features
 """
 }
 
+private const val HALF_CELL = 0.5
 private const val DEFAULT_BANDS = 6
 private const val EMPTY_FEATURE_COLLECTION =
     """{"type":"FeatureCollection","properties":{"generator":"meshtastic-kp1812"},"features":[]}"""
