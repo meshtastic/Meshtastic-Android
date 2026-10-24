@@ -375,7 +375,7 @@ meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "mes
 
 
 # SPIKE: unpublished; resolved from mavenLocal via -PuseMavenLocal.
-kp1812 = { module = "org.meshtastic:kp1812", version = "0.1.0" }
+kp1812 = { module = "org.meshtastic:kp1812", version = "0.2.0" }
 
 [bundles]
 # Datadog RUM/telemetry stack — always consumed together (androidApp google flavor)
