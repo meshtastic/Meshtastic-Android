@@ -111,7 +111,10 @@ jmdns = "3.6.4"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.3"
-meshtastic-protobufs = "2.8.1.20-g569a2b3-SNAPSHOT"
+# PoC: DisplayFrame screen mirroring, locally published from protobufs@screen-mirror-poc.
+# Revert to main's pin once protobufs#1054 lands. main pins 2.8.1.20-g569a2b3-SNAPSHOT.
+# (requires -PuseMavenLocal or the gradle.properties flag on this branch)
+meshtastic-protobufs = "2.99.0-screen-mirror-poc-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
