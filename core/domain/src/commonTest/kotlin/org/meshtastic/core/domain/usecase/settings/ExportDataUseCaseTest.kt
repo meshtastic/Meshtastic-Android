@@ -96,7 +96,7 @@ class ExportDataUseCaseTest {
     }
 
     @Test
-    fun `invoke names the sender by broadcast name, never the local display name`() = runTest {
+    fun `invoke names the sender by broadcast name and never the local display name`() = runTest {
         nodeRepository.setNodes(
             listOf(
                 Node(

@@ -347,7 +347,7 @@ interface NodeInfoDao {
     END,
     CASE
         WHEN :sort = 'last_heard' THEN last_heard * -1
-        WHEN :sort = 'alpha' THEN UPPER(long_name)
+        WHEN :sort = 'alpha' THEN UPPER(CASE WHEN TRIM(display_name) <> '' THEN display_name ELSE long_name END)
         WHEN :sort = 'distance' THEN
             CASE
                 WHEN latitude IS NULL OR longitude IS NULL OR

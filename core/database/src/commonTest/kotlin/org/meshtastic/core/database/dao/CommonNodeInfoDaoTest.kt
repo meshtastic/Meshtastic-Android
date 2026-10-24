@@ -129,6 +129,27 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun `alpha sort orders by the display name when one is set`() = runTest {
+        createDb()
+        fun entity(num: Int, longName: String, displayName: String = "") = NodeEntity(
+            num = num,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!$num"
+                    wb.long_name = longName
+                    wb.short_name = "n$num"
+                }
+                .build(),
+            displayName = displayName,
+        )
+        dao.putAll(listOf(entity(1, "Alpha", displayName = "Zulu"), entity(2, "Bravo"), entity(3, "Charlie")))
+
+        val order = dao.getNodes("alpha", true, false, -1).first().map { it.node.num }
+        assertEquals(listOf(2, 3, 1), order)
+    }
+
+    @Test
     fun `an incoming node without a display name keeps the stored one`() = runTest {
         createDb()
         val user =

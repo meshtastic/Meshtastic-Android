@@ -205,6 +205,8 @@ internal fun ReactionDialog(
     reactions: List<Reaction>,
     onDismiss: () -> Unit = {},
     myId: String? = null,
+    /** Reactor id to local display name, for reactors the user has renamed. */
+    reactorNames: Map<String, String> = emptyMap(),
     /** False for an archived conversation: a failed reaction cannot be retried there. */
     canReact: Boolean = true,
     onResend: (Reaction) -> Unit = {},
@@ -283,11 +285,12 @@ internal fun ReactionDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val isLocal = reaction.user.id == myId || reaction.user.id == NodeAddress.ID_LOCAL
+                    val name = reactorNames[reaction.user.id] ?: reaction.user.long_name
                     val displayName =
                         if (isLocal) {
-                            "${reaction.user.long_name} (${stringResource(Res.string.you)})"
+                            "$name (${stringResource(Res.string.you)})"
                         } else {
-                            reaction.user.long_name
+                            name
                         }
                     Row(
                         modifier = Modifier.weight(1f, fill = false),
