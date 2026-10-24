@@ -1027,12 +1027,13 @@ fun MapView(
         // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
         // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer. The offline
         // terrain layer's own credit (Mapterhorn) is folded in the same way, whenever hillshade or contours are
-        // actually rendering.
+        // actually rendering, or a coverage estimate built from that terrain is shown.
         val attributionCoveringRegion =
             cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
         val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
         val terrainActive =
-            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
+            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled) ||
+                mapLayers.any { it.layerType == LayerType.COVERAGE && it.isVisible }
         val attributionText =
             remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
                 val baseAttribution =

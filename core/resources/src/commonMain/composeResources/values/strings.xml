@@ -1980,6 +1980,7 @@
     <string name="site_planner_section_simulation">Simulation Options</string>
     <string name="site_planner_section_transmitter">Site / Transmitter</string>
     <string name="site_planner_subtitle">Estimate RF coverage for a transmitter</string>
+    <string name="site_planner_terrain_credit">Terrain data © Mapterhorn</string>
     <string name="site_planner_tx_power_watts">TX power (W)</string>
     <string name="site_planner_use_current_location">Use current location</string>
     <string name="site_planner_use_map_center">Use map center</string>
