@@ -161,6 +161,16 @@ class RouteDiscoveryTest {
     }
 
     @Test
+    fun hopName_prefersLocalDisplayName_overBroadcastLongName() {
+        val known = user("!a1b2c3d4", "Base Station", "BASE", HardwareModel.TBEAM)
+
+        assertEquals(
+            "My Base (BASE)",
+            tracerouteHopName(0xa1b2c3d4.toInt(), known, UNKNOWN_HOP, displayName = "My Base"),
+        )
+    }
+
+    @Test
     fun tracerouteResponse_namesUnknownHopById_andKnownHopByName() {
         val users =
             mapOf(

@@ -60,7 +60,8 @@ fun PositionLogScreen(
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
     val nodeName = state.node?.effectiveLongName.orEmpty()
-    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
+    val gpxTrackName = gpxTrackName(state.node)
+    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, gpxTrackName) }
     val hasTrackPoint = remember(positions) { positions.any { it.hasFix() } }
 
     val trackMap = LocalNodeTrackMapProvider.current

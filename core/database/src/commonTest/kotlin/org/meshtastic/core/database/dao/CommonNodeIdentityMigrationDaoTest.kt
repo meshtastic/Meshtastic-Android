@@ -176,7 +176,7 @@ abstract class CommonNodeIdentityMigrationDaoTest {
     }
 
     @Test
-    fun renumberCarriesDisplayNameWithoutOverwritingDestinationOne() = runTest {
+    fun renumberCarriesDisplayNameToTheNewRow() = runTest {
         createDb(myNodeEntity(oldNum, deviceId = deviceIdA))
         dao.upsert(nodeEntity(oldNum, keyA, displayName = "old name"))
 

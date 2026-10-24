@@ -201,6 +201,8 @@ open class MetricsViewModel(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
+    fun getDisplayName(nodeNum: Int): String = nodeRepository.nodeDBbyNum.value[nodeNum]?.displayName.orEmpty()
+
     /** Persists a user-editable label (e.g. "Solar", "Battery") for a power-metrics channel (0-based index). */
     fun setPowerChannelLabel(nodeNum: Int, channelIndex: Int, label: String) =
         safeLaunch(context = dispatchers.io, tag = "setPowerChannelLabel") {
@@ -610,6 +612,9 @@ internal fun positionCsvRow(pos: org.meshtastic.proto.Position): String {
         pos.ground_track?.let { NumberFormatter.formatInvariant(it * GeoConstants.HEADING_DEG, HEADING_DECIMALS) }
     return "\"$lat\",\"$lon\",\"$altitude\",\"${pos.sats_in_view}\",\"$speed\",\"${heading.orEmpty()}\""
 }
+
+/** The exported file leaves the device, so it carries the broadcast name, never the local display name. */
+internal fun gpxTrackName(node: Node?): String = node?.user?.long_name.orEmpty()
 
 /**
  * Coordinates are formatted invariantly: GPX is XML another program parses, and a comma decimal makes

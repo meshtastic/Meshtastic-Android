@@ -306,7 +306,7 @@ val Node.effectiveLongName: String
 val Node.hiddenLongName: String?
     get() = user.long_name.takeIf { hasDisplayName && it.isNotBlank() }
 
-/** Longest local display name, matching the `User.long_name` cap in UTF-8 bytes. */
+/** Longest local display name in UTF-8 bytes. A cross-client limit shared with Apple, not the `User.long_name` cap. */
 const val MAX_DISPLAY_NAME_BYTES = 36
 
 /** Trims and clips [input] to [MAX_DISPLAY_NAME_BYTES]; blank input becomes the empty string, which means unset. */

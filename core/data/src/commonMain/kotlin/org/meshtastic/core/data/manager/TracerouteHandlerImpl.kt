@@ -57,7 +57,14 @@ class TracerouteHandlerImpl(
     internal var renderResponse: suspend (RouteDiscovery) -> String = { routeDiscovery ->
         val unknownHopLabel = getStringSuspend(Res.string.traceroute_unknown_hop)
         routeDiscovery.getTracerouteResponse(
-            getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num), unknownHopLabel) },
+            getUser = { num ->
+                tracerouteHopName(
+                    num,
+                    nodeRepository.getUser(num),
+                    unknownHopLabel,
+                    nodeRepository.nodeDBbyNum.value[num]?.displayName.orEmpty(),
+                )
+            },
             headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
             headerBack = getStringSuspend(Res.string.traceroute_route_back_to_us),
         )

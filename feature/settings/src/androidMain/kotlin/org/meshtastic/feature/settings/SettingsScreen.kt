@@ -47,6 +47,7 @@ import org.koin.core.qualifier.named
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -216,7 +217,7 @@ fun SettingsScreen(
                 isLocal = state.isLocal,
                 destNode = destNode,
                 onNavigateUp = { onBack?.invoke() },
-                localSubtitle = ourNode?.user?.long_name,
+                localSubtitle = ourNode?.effectiveLongName,
                 ourNode = ourNode,
                 onClickChip = { node -> onClickNodeChip(node.num) },
                 showNodeChip = ourNode != null && isConnected && state.isLocal,

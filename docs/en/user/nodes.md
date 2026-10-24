@@ -129,7 +129,7 @@ To add someone else's contact, use the import button on the node list and choose
 
 ## Display names
 
-You can give any node a local display name that replaces its long name in the node list, node details, messages, notifications, maps and the node tracker widget. Set it from the node's long-press menu (**Set display name**) or from the **Display name** card in node details. Saving an empty name clears it. Names are limited to 36 bytes of UTF-8.
+You can give any node a local display name that replaces its long name in the node list, node details, messages, notifications, maps and the node tracker widget. Set it from the node's long-press menu (**Set display name**) or from the **Display name** card in node details. Saving an empty name clears it. Names are limited to 36 bytes of UTF-8, the same limit as the Apple app.
 
 The avatar always shows the node's broadcast short name. While a display name is set, node details shows the node's broadcast long name in a **Long Name** row under the name, so the real name stays readable.
 

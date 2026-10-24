@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.send
@@ -51,7 +52,7 @@ fun ShutdownConfirmationDialog(
     warning: StringResource? = null,
     onConfirm: () -> Unit,
 ) {
-    val nodeLongName = node?.user?.long_name ?: "Unknown Node"
+    val nodeLongName = node?.effectiveLongName ?: "Unknown Node"
     val resolvedIcon = icon ?: MeshtasticIcons.Warning
     val resolvedWarning = warning ?: Res.string.shutdown_warning.takeIf { isShutdown }
 

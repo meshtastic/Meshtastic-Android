@@ -121,7 +121,8 @@ fun TracerouteLogScreen(
 
     val unknownHopLabel = stringResource(Res.string.traceroute_unknown_hop)
 
-    fun getUsername(nodeNum: Int): String = tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel)
+    fun getUsername(nodeNum: Int): String =
+        tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel, viewModel.getDisplayName(nodeNum))
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow

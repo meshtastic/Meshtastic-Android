@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
@@ -496,7 +497,7 @@ class GeminiNanoDocAssistant(
 
                 """
             |- Node Battery Status: $batteryStr ($voltStr)
-            |- User Identity: ${ourNode.user.short_name} (${ourNode.user.long_name})
+            |- User Identity: ${ourNode.user.short_name} (${ourNode.effectiveLongName})
             |- Position: ${if (ourNode.isUnknownUser) "Unknown user" else "Valid user profile synced"}
             """
                     .trimIndent()

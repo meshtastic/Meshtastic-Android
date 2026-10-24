@@ -24,6 +24,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -200,14 +201,24 @@ class NodeManagementActionsTest {
     fun setNodeDisplayName_clamps_to_the_long_name_byte_cap() = runTest {
         nodeRepository.setNodes(listOf(Node(num = 123)))
 
-        actions.setNodeDisplayName(123, "é".repeat(40))
+        actions.setNodeDisplayName(123, "a".repeat(MAX_DISPLAY_NAME_BYTES + 10))
 
         val stored = nodeRepository.nodeDBbyNum.value[123]?.displayName.orEmpty()
         assertEquals(MAX_DISPLAY_NAME_BYTES, stored.encodeToByteArray().size)
     }
 
     @Test
-    fun setNodeDisplayName_swallows_repository_failure() = runTest {
+    fun setNodeDisplayName_never_splits_a_multibyte_character_at_the_cap() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123)))
+
+        actions.setNodeDisplayName(123, "é".repeat(MAX_DISPLAY_NAME_BYTES))
+
+        val stored = nodeRepository.nodeDBbyNum.value[123]?.displayName.orEmpty()
+        assertEquals("é".repeat(MAX_DISPLAY_NAME_BYTES / 2), stored)
+    }
+
+    @Test
+    fun setNodeDisplayName_attempts_the_write_and_swallows_repository_failure() = runTest {
         val failing = mock<NodeRepository>(MockMode.autofill)
         everySuspend { failing.setNodeDisplayName(any(), any()) } throws IllegalStateException("db closed")
         val failingActions =
@@ -222,6 +233,6 @@ class NodeManagementActionsTest {
 
         failingActions.setNodeDisplayName(123, "Mine")
 
-        assertTrue(snackbarManager.messages.isEmpty())
+        verifySuspend { failing.setNodeDisplayName(123, "Mine") }
     }
 }
