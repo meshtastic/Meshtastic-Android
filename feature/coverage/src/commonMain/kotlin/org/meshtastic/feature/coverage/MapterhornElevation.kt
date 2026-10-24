@@ -148,13 +148,14 @@ class MapterhornElevation(
 
     // Offline, or the endpoint failed: a region downloaded to a shallower zoom may still hold this ground.
     @Suppress("TooGenericExceptionCaught") // whatever the fetch threw is rethrown when no region holds the ground
-    private suspend fun decode(x: Int, y: Int): ElevationTile? = try {
-        fetchAndDecode(x, y)
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        fromCoarserRegionTile(x, y) ?: throw e
-    }
+    private suspend fun decode(x: Int, y: Int): ElevationTile? =
+        try {
+            fetchAndDecode(x, y)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            fromCoarserRegionTile(x, y) ?: throw e
+        }
 
     // Null means the endpoint has no tile there, so it must never stand in for a failed decode: a corrupt cached
     // tile gets one fresh download, and bytes that still don't decode fail the estimate.
