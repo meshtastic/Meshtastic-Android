@@ -532,6 +532,8 @@
     <string name="disk_free_indexed">Disk Free %1$d</string>
     <string name="display">Display</string>
     <string name="display_config">Device Display</string>
+    <string name="display_name">Display name</string>
+    <string name="display_name_hint">Only shown on this device. Sharing and export use the node's real name.</string>
     <string name="dissolved_oxygen">Dissolved O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Distance</string>
@@ -1917,6 +1919,7 @@
     <string name="serial_config">Serial Config</string>
     <string name="session_active">Session active</string>
     <string name="session_refresh_required">Refresh required</string>
+    <string name="set_display_name">Set display name</string>
     <string name="set_time">Set time</string>
     <string name="set_up_connection">Set up connection</string>
     <string name="set_your_region">Set your region</string>

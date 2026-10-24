@@ -46,6 +46,7 @@ import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.set_display_name
 import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
@@ -53,6 +54,7 @@ import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
+import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
@@ -87,6 +89,7 @@ fun NodeContextMenu(
     onDismiss: () -> Unit,
     onOpenMeshView: () -> Unit = {},
     onOpenCompass: () -> Unit = {},
+    onSetDisplayName: () -> Unit = {},
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
@@ -95,6 +98,12 @@ fun NodeContextMenu(
                 MuteMenuItem(node, onMute, onDismiss)
             }
             MessageMenuItem(node, onMessage, onDismiss)
+            MenuItem(
+                MeshtasticIcons.Edit,
+                stringResource(Res.string.set_display_name),
+                onSetDisplayName,
+                onDismiss,
+            )
             TraceRouteMenuItem(node, lastTracerouteTime, onTraceRoute, onDismiss)
             if (node.validPosition != null) {
                 MenuItem(MeshtasticIcons.Compass, stringResource(Res.string.open_compass), onOpenCompass, onDismiss)

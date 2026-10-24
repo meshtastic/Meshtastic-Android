@@ -496,6 +496,8 @@ discovery_view_map
 disk_free_indexed
 display
 display_config
+display_name
+display_name_hint
 dissolved_oxygen
 ### DISTANCE ###
 distance
@@ -1851,6 +1853,7 @@ serial
 serial_config
 session_active
 session_refresh_required
+set_display_name
 set_time
 set_up_connection
 set_your_region

@@ -98,6 +98,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.SignalOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
+import org.meshtastic.feature.node.component.DisplayNameDialog
 import org.meshtastic.feature.node.component.LocalNodeContextMenu
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeCountSummary
@@ -202,6 +203,15 @@ fun NodeListScreen(
     // It stays a LazyItemScope lambda rather than a composable of its own because animateItem() needs that receiver.
     val nodeRow: @Composable LazyItemScope.(Node) -> Unit = { node ->
         var expanded by remember { mutableStateOf(false) }
+        var showDisplayNameDialog by remember { mutableStateOf(false) }
+
+        if (showDisplayNameDialog) {
+            DisplayNameDialog(
+                node = node,
+                onSave = viewModel::setNodeDisplayName,
+                onDismiss = { showDisplayNameDialog = false },
+            )
+        }
 
         Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             val isThisNode = node.num == ourNode?.num
@@ -279,6 +289,7 @@ fun NodeListScreen(
                     onDismiss = { expanded = false },
                     onOpenMeshView = { navigateToMeshView(node.num) },
                     onOpenCompass = { navigateToCompass(node.num) },
+                    onSetDisplayName = { showDisplayNameDialog = true },
                 )
             }
         }
