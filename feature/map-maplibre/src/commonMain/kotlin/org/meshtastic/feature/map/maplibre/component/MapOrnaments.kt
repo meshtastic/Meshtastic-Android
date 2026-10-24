@@ -69,8 +69,11 @@ import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
  *
  * Scale-bar units are left to the library, which picks them by region — the same locale-driven approach the rest of the
  * app takes through `localeUnitsProvider`.
+ *
+ * [extraCredits] are HTML credits for data no style source carries, such as the terrain under a coverage estimate,
+ * which is drawn from a GeoJSON source that has no attribution field. They join the style's own, deduplicated.
  */
-internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
+internal fun meshMapOrnaments(extraCredits: List<String>): MaplibreOverlay = MaplibreOverlay {
     val mapState = checkNotNull(LocalMapState.current)
     val viewportInsets = LocalViewportInsets.current
 
@@ -89,18 +92,24 @@ internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
             zoom = { mapState.cameraPosition.zoom },
             modifier = Modifier.align(Alignment.TopStart),
         )
+        if (extraCredits.isNotEmpty()) {
+            // Ours rather than the library's button, which draws nothing when the style itself credits nobody, as a
+            // custom raster basemap may not.
+            MaplibreLogo(Modifier.align(Alignment.BottomStart))
+            CreditButton(Modifier.align(Alignment.BottomEnd), extraCredits = extraCredits, startExpanded = true)
+        }
     }
 
     // The logo and the attribution button, in the places `MapOverlay.Default` puts them.
-    include(MaplibreOverlay.AttributionOnly)
+    if (extraCredits.isEmpty()) include(MaplibreOverlay.AttributionOnly)
 }
 
 /**
  * `MapOverlay.Default` with the credit collapsed, for a map too small to host the credit without it overflowing: the
  * scale bar, the wordmark and the button all stay, and the button is what reveals the text.
  *
- * Composed rather than reached for because the library cannot be asked for it — [CollapsedAttributionButton] says why —
- * and the insets are spelled out because its `DefaultControls` is internal to it.
+ * Composed rather than reached for because the library cannot be asked for it — [CreditButton] says why — and the
+ * insets are spelled out because its `DefaultControls` is internal to it.
  */
 internal val CollapsedAttributionOrnaments: MaplibreOverlay = MaplibreOverlay {
     val mapState = checkNotNull(LocalMapState.current)
@@ -119,7 +128,7 @@ internal val CollapsedAttributionOrnaments: MaplibreOverlay = MaplibreOverlay {
             modifier = Modifier.align(Alignment.TopStart),
         )
         MaplibreLogo(Modifier.align(Alignment.BottomStart))
-        CollapsedAttributionButton(Modifier.align(Alignment.BottomEnd))
+        CreditButton(Modifier.align(Alignment.BottomEnd))
     }
 }
 
@@ -130,22 +139,28 @@ internal val CollapsedAttributionOrnaments: MaplibreOverlay = MaplibreOverlay {
 private const val CREDIT_WIDTH_FRACTION = 0.55f
 
 /**
- * The library's attribution button, starting collapsed.
+ * The library's attribution button, with the expanded state and the credit list held here.
  *
  * `ExpandingAttributionButton` holds its own `expanded` flag, initialised to `true` and not settable from outside, so
  * `collapsedStyle` only styles the branch it is already in and the credit still opens. Holding the flag here is what
- * makes it start shut; everything else — icon, label, links — still comes from the library.
+ * lets it start shut; everything else — icon, label, links — still comes from the library. It also returns before
+ * drawing anything when the style credits nobody, which would drop [extraCredits] with it.
  */
 @Composable
-private fun CollapsedAttributionButton(modifier: Modifier = Modifier) {
+private fun CreditButton(
+    modifier: Modifier = Modifier,
+    extraCredits: List<String> = emptyList(),
+    startExpanded: Boolean = false,
+) {
     val mapState = checkNotNull(LocalMapState.current)
     val mapStyle = mapState.style
     // Derived, not remembered: a basemap arrives as a style URL, so its sources are still empty on the first
     // composition and a remembered list would never re-read. As in the library's own button.
-    val attributions by remember(mapStyle) { derivedStateOf { mapStyle.attributions() } }
+    val attributions by
+        remember(mapStyle, extraCredits) { derivedStateOf { (mapStyle.attributions() + extraCredits).distinct() } }
     if (attributions.isEmpty()) return
 
-    var expanded by remember(mapStyle) { mutableStateOf(false) }
+    var expanded by remember(mapStyle) { mutableStateOf(startExpanded) }
 
     // As the library's button: a gesture closes the credit, so it does not sit over a short map after a pan. Narrowed
     // to gestures, or the programmatic moves our own zoom controls make would fold it away mid-animation.

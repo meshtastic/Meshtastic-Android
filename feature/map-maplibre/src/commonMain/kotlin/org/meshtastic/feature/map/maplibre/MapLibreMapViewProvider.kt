@@ -147,6 +147,7 @@ class MapLibreMapViewProvider(
         val location = rememberLocationControls()
         val waypoints = rememberWaypointEditing()
         val screen = rememberMapScreenState(waypointId = waypointId, sitePlannerNodeNum = sitePlannerNodeNum)
+        val layers = customLayers()
 
         val mapState =
             rememberMapScreenMapState(
@@ -155,7 +156,7 @@ class MapLibreMapViewProvider(
                 screen = screen,
                 waypoints = waypoints,
                 location = location,
-                customLayers = customLayers(),
+                customLayers = layers,
                 navigateToNodeDetails = navigateToNodeDetails,
             )
 
@@ -170,6 +171,7 @@ class MapLibreMapViewProvider(
                 mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
+                extraCredits = layers.mapNotNull { it.attributionHtml },
                 onMapLongClick = waypoints.onLongPress,
                 onMapClick = waypoints.onMapTap,
             )
