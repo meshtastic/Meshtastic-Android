@@ -18,6 +18,7 @@ package org.meshtastic.feature.coverage
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class CoverageContoursTest {
@@ -67,5 +68,21 @@ class CoverageContoursTest {
         val ring = grid.bands(listOf(-130.0..-80.0)).single().rings.single()
 
         assertEquals(listOf(14.0 to 14.0, 38.0 to 14.0, 38.0 to 6.0, 14.0 to 6.0, 14.0 to 14.0), ring)
+    }
+
+    @Test
+    fun aGridOneSampleWideIsRejected() {
+        assertFailsWith<IllegalArgumentException> {
+            CoverageGrid(
+                site = Site("Test", 10.0, 26.0, 915.0, 30.0, -130.0),
+                width = 1,
+                height = 3,
+                north = 12.0,
+                south = 8.0,
+                east = 26.0,
+                west = 26.0,
+                dbm = DoubleArray(3) { -90.0 },
+            )
+        }
     }
 }
