@@ -193,6 +193,7 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.coverage.RegionTerrain
 import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
@@ -225,6 +226,7 @@ import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -1239,7 +1241,14 @@ fun MapView(
         val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
         val offlineTerrain =
             remember(offlineRegions) {
-                offlineRegions.filter { it.hasTerrain }.map { mapViewModel.terrainStoreForRegion(it.id) }
+                offlineRegions
+                    .filter { it.hasTerrain }
+                    .map { region ->
+                        RegionTerrain(
+                            store = mapViewModel.terrainStoreForRegion(region.id),
+                            bounds = GeoBounds(region.southLat, region.westLon, region.northLat, region.eastLon),
+                        )
+                    }
             }
         SitePlannerHost(
             initialParams = launch.initialParams,

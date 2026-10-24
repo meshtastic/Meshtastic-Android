@@ -42,12 +42,16 @@ class OfflineTerrainTest {
                 respondError(HttpStatusCode.NotFound)
             },
         )
-    private val region = TerrainTileStore(FakeFileSystem(), "/region".toPath())
+    private val store = TerrainTileStore(FakeFileSystem(), "/region".toPath())
+
+    // A region exactly one z12 tile in size.
+    private val tile = TileIndex(12, 655, 1430)
+    private val region = RegionTerrain(store, tile.bounds())
 
     @Test
     fun aRegionTileIsReadWithoutTheNetwork() = runTest {
         val bytes = byteArrayOf(1, 2, 3)
-        region.writeTile(TerrainSource.GLOBAL, TileIndex(12, 655, 1430), bytes)
+        store.writeTile(TerrainSource.GLOBAL, tile, bytes)
 
         val read = MapterhornTiles(notFound, store = null, offline = listOf(region)).bytes(12, 655, 1430)
 
@@ -61,6 +65,20 @@ class OfflineTerrainTest {
 
         assertNull(read)
         assertEquals(1, requests)
+    }
+
+    @Test
+    fun aRegionsCoarseTileIsOnlyUsedForGroundTheRegionCovers() = runTest {
+        val parent = TileIndex(6, 655 shr 6, 1430 shr 6)
+        store.writeTile(TerrainSource.GLOBAL, parent, byteArrayOf(9))
+        val tiles = MapterhornTiles(notFound, store = null, offline = listOf(region))
+
+        val inside = tiles.offlineBytes(parent, needed = tile)
+        // Same z6 parent, but a z12 tile across it from the region.
+        val outside = tiles.offlineBytes(parent, needed = TileIndex(12, (655 shr 6 shl 6) + 63, 1430))
+
+        assertContentEquals(byteArrayOf(9), inside)
+        assertNull(outside)
     }
 
     @Test

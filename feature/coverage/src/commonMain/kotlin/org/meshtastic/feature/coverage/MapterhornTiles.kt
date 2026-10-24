@@ -46,7 +46,7 @@ import org.meshtastic.feature.map.terrain.TileIndex
 internal class MapterhornTiles(
     private val http: HttpClient,
     private val store: TerrainTileStore?,
-    private val offline: List<TerrainTileStore> = emptyList(),
+    private val offline: List<RegionTerrain> = emptyList(),
     concurrency: Int = DEFAULT_CONCURRENCY,
 ) {
     private val gate = Semaphore(concurrency)
@@ -58,17 +58,21 @@ internal class MapterhornTiles(
     suspend fun bytes(zoom: Int, x: Int, y: Int, fresh: Boolean = false): ByteArray? {
         val tile = TileIndex(zoom, x, y)
         val source = sourceFor(zoom)
-        val stored = if (fresh) null else readLocal(source, tile) ?: offlineBytes(zoom, x, y)
+        val stored = if (fresh) null else readLocal(source, tile) ?: offlineBytes(tile, tile)
         return stored ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
     }
 
-    /** One tile from the downloaded regions alone, or null when none of them holds it. */
-    suspend fun offlineBytes(zoom: Int, x: Int, y: Int): ByteArray? {
-        if (offline.isEmpty()) return null
-        val tile = TileIndex(zoom, x, y)
-        val source = sourceFor(zoom)
+    /**
+     * [tile] from a downloaded region whose bounds reach [needed], or null when none does. A region keeps every
+     * low-zoom tile it touches, and one of those spans far more ground than the region, so a tile is only taken from a
+     * region for ground that region was downloaded for.
+     */
+    suspend fun offlineBytes(tile: TileIndex, needed: TileIndex): ByteArray? {
+        val holders = offline.filter { it.bounds.intersects(needed.bounds()) }
+        if (holders.isEmpty()) return null
+        val source = sourceFor(tile.zoom)
         return withContext(ioDispatcher) {
-            offline.firstNotNullOfOrNull { region -> runCatching { region.readTile(source, tile) }.getOrNull() }
+            holders.firstNotNullOfOrNull { region -> runCatching { region.store.readTile(source, tile) }.getOrNull() }
         }
     }
 

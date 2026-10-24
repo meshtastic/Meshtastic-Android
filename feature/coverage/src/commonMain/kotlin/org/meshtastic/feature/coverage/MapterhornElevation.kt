@@ -31,6 +31,7 @@ import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.terrain.TerrainTileMath
 import org.meshtastic.feature.map.terrain.TerrainTileStore
+import org.meshtastic.feature.map.terrain.TileIndex
 import org.meshtastic.feature.map.terrain.decodeTerrariumTile
 import kotlin.concurrent.Volatile
 import kotlin.math.PI
@@ -59,7 +60,7 @@ class MapterhornElevation(
     zoom: Int = DEFAULT_ZOOM,
     http: HttpClient? = null,
     /** Downloaded map regions' terrain, used when the network can't supply a tile. */
-    offline: List<TerrainTileStore> = emptyList(),
+    offline: List<RegionTerrain> = emptyList(),
 ) : ElevationSource,
     AutoCloseable {
 
@@ -173,7 +174,7 @@ class MapterhornElevation(
     private suspend fun fromCoarserRegionTile(x: Int, y: Int): ElevationTile? {
         for (levels in 1..(zoom - MIN_ZOOM)) {
             val parent =
-                tiles.offlineBytes(zoom - levels, x shr levels, y shr levels)?.let {
+                tiles.offlineBytes(TileIndex(zoom - levels, x shr levels, y shr levels), TileIndex(zoom, x, y))?.let {
                     runCatching { decodeTerrariumTile(it) }.getOrNull()
                 }
             if (parent != null) {
