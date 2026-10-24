@@ -163,9 +163,13 @@ class MapterhornElevation(
             ?: tiles.bytes(zoom, x, y, fresh = true)?.let { decodeTerrariumTile(it) }
     }
 
-    /** The nearest ancestor a downloaded region holds, cut down to this tile's quarter of it at each level. */
+    /**
+     * The nearest ancestor a downloaded region holds, cut down to this tile's quarter of it at each level. Stops at
+     * [MIN_ZOOM]: every region holds the planet's lowest zooms, so without a floor any site anywhere would estimate
+     * over terrain a few pixels wide instead of failing.
+     */
     private suspend fun fromCoarserRegionTile(x: Int, y: Int): ElevationTile? {
-        for (levels in 1..zoom) {
+        for (levels in 1..(zoom - MIN_ZOOM)) {
             val bytes = tiles.offlineBytes(zoom - levels, x shr levels, y shr levels) ?: continue
             val parent = runCatching { decodeTerrariumTile(bytes) }.getOrNull() ?: continue
             standInLock.withLock { standIns += tileKey(x, y) }
@@ -174,7 +178,10 @@ class MapterhornElevation(
         return null
     }
 
-    /** Drop every stand-in tile from the shared cache. Call once the estimate that needed them is done. */
+    /**
+     * Drop every stand-in tile from the shared cache. Call after [close], once no decode can still complete and add
+     * one.
+     */
     suspend fun forgetStandIns() {
         val keys = standInLock.withLock { standIns.toList().also { standIns.clear() } }
         cache?.forget(keys)
