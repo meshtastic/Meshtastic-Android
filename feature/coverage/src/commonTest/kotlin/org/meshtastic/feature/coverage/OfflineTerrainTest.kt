@@ -35,7 +35,13 @@ import kotlin.test.assertNull
 class OfflineTerrainTest {
 
     private var requests = 0
-    private val notFound = HttpClient(MockEngine { requests++; respondError(HttpStatusCode.NotFound) })
+    private val notFound =
+        HttpClient(
+            MockEngine {
+                requests++
+                respondError(HttpStatusCode.NotFound)
+            },
+        )
     private val region = TerrainTileStore(FakeFileSystem(), "/region".toPath())
 
     @Test

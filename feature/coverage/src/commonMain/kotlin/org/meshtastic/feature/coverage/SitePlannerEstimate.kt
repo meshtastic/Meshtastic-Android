@@ -31,8 +31,8 @@ import kotlin.math.log10
  * Computes a Site Planner estimate on this device: Mapterhorn terrain for the coverage disc, cached under [store], then
  * the ITU-R P.1812 sweep, returned as the styled GeoJSON iso-bands a map layer takes.
  *
- * Terrain the network can't supply is read from [offlineTerrain], the downloaded map regions' own stores, so an estimate
- * inside a region works without a connection.
+ * Terrain the network can't supply is read from [offlineTerrain], the downloaded map regions' own stores, so an
+ * estimate inside a region works without a connection.
  *
  * Throws when terrain can't be fetched or a value is outside what P.1812 accepts. Cancellation propagates.
  */
@@ -59,14 +59,15 @@ suspend fun estimateCoverageGeoJson(
  * [offlineTerrain] when offline.
  */
 @Composable
-fun rememberCoverageEstimate(offlineTerrain: List<TerrainTileStore> = emptyList()): suspend (SitePlannerParams) -> String =
-    remember(offlineTerrain) {
-        val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
-        val estimate: suspend (SitePlannerParams) -> String = { params ->
-            estimateCoverageGeoJson(params, store, coverageComputeDispatcher, offlineTerrain)
-        }
-        estimate
+fun rememberCoverageEstimate(
+    offlineTerrain: List<TerrainTileStore> = emptyList(),
+): suspend (SitePlannerParams) -> String = remember(offlineTerrain) {
+    val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
+    val estimate: suspend (SitePlannerParams) -> String = { params ->
+        estimateCoverageGeoJson(params, store, coverageComputeDispatcher, offlineTerrain)
     }
+    estimate
+}
 
 /**
  * Where coverage terrain is cached between launches. It's kept apart from downloaded offline map regions so a coverage

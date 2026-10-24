@@ -146,19 +146,20 @@ class MapterhornElevation(
     private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? =
         cache().getOrFetch(key) { scope.async { decode(x, y) } }
 
+    // Offline, or the endpoint failed: a region downloaded to a shallower zoom may still hold this ground.
+    @Suppress("TooGenericExceptionCaught") // whatever the fetch threw is rethrown when no region holds the ground
+    private suspend fun decode(x: Int, y: Int): ElevationTile? = try {
+        fetchAndDecode(x, y)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        fromCoarserRegionTile(x, y) ?: throw e
+    }
+
     // Null means the endpoint has no tile there, so it must never stand in for a failed decode: a corrupt cached
     // tile gets one fresh download, and bytes that still don't decode fail the estimate.
-    @Suppress("TooGenericExceptionCaught") // whatever the download threw is rethrown when no region holds the ground
-    private suspend fun decode(x: Int, y: Int): ElevationTile? {
-        val cached =
-            try {
-                tiles.bytes(zoom, x, y)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                // Offline, or the endpoint failed. A region downloaded to a shallower zoom still holds this ground.
-                return fromCoarserRegionTile(x, y) ?: throw e
-            } ?: return null
+    private suspend fun fetchAndDecode(x: Int, y: Int): ElevationTile? {
+        val cached = tiles.bytes(zoom, x, y) ?: return null
         return runCatching { decodeTerrariumTile(cached) }.getOrNull()
             ?: tiles.bytes(zoom, x, y, fresh = true)?.let { decodeTerrariumTile(it) }
     }
@@ -170,10 +171,14 @@ class MapterhornElevation(
      */
     private suspend fun fromCoarserRegionTile(x: Int, y: Int): ElevationTile? {
         for (levels in 1..(zoom - MIN_ZOOM)) {
-            val bytes = tiles.offlineBytes(zoom - levels, x shr levels, y shr levels) ?: continue
-            val parent = runCatching { decodeTerrariumTile(bytes) }.getOrNull() ?: continue
-            standInLock.withLock { standIns += tileKey(x, y) }
-            return parent.descendant(levels, x, y)
+            val parent =
+                tiles.offlineBytes(zoom - levels, x shr levels, y shr levels)?.let {
+                    runCatching { decodeTerrariumTile(it) }.getOrNull()
+                }
+            if (parent != null) {
+                standInLock.withLock { standIns += tileKey(x, y) }
+                return parent.descendant(levels, x, y)
+            }
         }
         return null
     }
@@ -213,8 +218,8 @@ private const val ARCHIVE = "tiles.mapterhorn.com"
 /**
  * The part of this tile that covers its descendant [levels] zooms down at tile [x], [y].
  *
- * Not resampled: a sampler scales its fractional position by the tile's own size, so a 128-pixel quarter reads the
- * same ground as a 512-pixel tile would, at the coarser spacing it actually has.
+ * Not resampled: a sampler scales its fractional position by the tile's own size, so a 128-pixel quarter reads the same
+ * ground as a 512-pixel tile would, at the coarser spacing it actually has.
  */
 internal fun ElevationTile.descendant(levels: Int, x: Int, y: Int): ElevationTile {
     val n = 1 shl levels

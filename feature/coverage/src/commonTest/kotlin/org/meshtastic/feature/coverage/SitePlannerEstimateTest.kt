@@ -24,8 +24,9 @@ class SitePlannerEstimateTest {
 
     @Test
     fun bandsStartAtTheReceiverSensitivity() {
-        val style = SitePlannerParams(name = "Test", latitude = 0.0, longitude = 0.0, rxSensitivityDbm = -139.0)
-            .toCoverageStyle()
+        val style =
+            SitePlannerParams(name = "Test", latitude = 0.0, longitude = 0.0, rxSensitivityDbm = -139.0)
+                .toCoverageStyle()
 
         assertEquals(-139.0, style.minDbm)
         assertEquals(-89.0, style.maxDbm)
