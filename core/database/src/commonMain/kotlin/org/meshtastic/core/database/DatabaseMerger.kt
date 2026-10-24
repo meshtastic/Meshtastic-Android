@@ -124,8 +124,8 @@ object DatabaseMerger {
     /**
      * Bring over every node the destination has never seen (so its last-known identity/telemetry/position shows
      * immediately, including offline nodes the radio may not re-report). For overlapping nodes, keep the destination's
-     * row — the same radio re-dumps it on connect — but fill in a user note where the destination has none, never
-     * clobbering one the user already wrote on the canonical DB.
+     * row — the same radio re-dumps it on connect — but fill in a user note or display name where the destination has
+     * none, never clobbering one the user already wrote on the canonical DB.
      */
     private suspend fun mergeNodes(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
         val destNums = dest.nodeInfoDao().getAllNodesSnapshot().mapTo(mutableSetOf()) { it.num }
@@ -133,10 +133,15 @@ object DatabaseMerger {
             when {
                 node.num !in destNums -> dest.nodeInfoDao().upsert(node)
 
-                node.notes.isNotBlank() -> {
-                    val existing = dest.nodeInfoDao().getNodeByNum(node.num)
-                    if (existing != null && existing.node.notes.isBlank()) {
-                        dest.nodeInfoDao().setNodeNotes(node.num, node.notes)
+                node.notes.isNotBlank() || node.displayName.isNotBlank() -> {
+                    val existing = dest.nodeInfoDao().getNodeByNum(node.num)?.node
+                    if (existing != null) {
+                        if (node.notes.isNotBlank() && existing.notes.isBlank()) {
+                            dest.nodeInfoDao().setNodeNotes(node.num, node.notes)
+                        }
+                        if (node.displayName.isNotBlank() && existing.displayName.isBlank()) {
+                            dest.nodeInfoDao().setNodeDisplayName(node.num, node.displayName)
+                        }
                     }
                 }
             }

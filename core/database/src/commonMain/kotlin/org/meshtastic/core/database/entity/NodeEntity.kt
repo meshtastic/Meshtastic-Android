@@ -69,6 +69,7 @@ fun Node.toEntity() = NodeEntity(
     paxcounter = paxcounter,
     publicKey = publicKey,
     notes = notes,
+    displayName = displayName,
     powerChannelLabels = powerChannelLabels,
     manuallyVerified = manuallyVerified,
     nodeStatus = nodeStatus,
@@ -130,6 +131,7 @@ data class NodeEntity(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
+    @ColumnInfo(name = "display_name", defaultValue = "") var displayName: String = "",
     @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
@@ -241,6 +243,7 @@ data class NodeEntity(
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
+        displayName = displayName,
         powerChannelLabels = powerChannelLabels,
         manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,

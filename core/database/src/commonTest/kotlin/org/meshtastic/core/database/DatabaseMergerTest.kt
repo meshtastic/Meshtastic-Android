@@ -94,7 +94,7 @@ class DatabaseMergerTest {
         messageText = text, // FTS indexes this column
     )
 
-    private fun node(num: Int, notes: String = "") = NodeEntity(
+    private fun node(num: Int, notes: String = "", displayName: String = "") = NodeEntity(
         num = num,
         user =
         User.Builder()
@@ -105,6 +105,7 @@ class DatabaseMergerTest {
             }
             .build(),
         notes = notes,
+        displayName = displayName,
     )
 
     private fun logEntry(uuid: String, portNum: Int, time: Long) = MeshLog(
@@ -123,6 +124,8 @@ class DatabaseMergerTest {
         dest.packetDao().insert(textPacket("0!broadcast", "destmsg", time = 100))
         dest.nodeInfoDao().upsert(node(10, notes = "keep me"))
         dest.nodeInfoDao().upsert(node(20)) // no notes yet
+        dest.nodeInfoDao().upsert(node(50, displayName = "dest name"))
+        dest.nodeInfoDao().upsert(node(60))
         dest.packetDao().upsertContactSettings(listOf(ContactSettings(contact_key = "0!broadcast", muteUntil = 999)))
         dest
             .packetDao()
@@ -141,6 +144,8 @@ class DatabaseMergerTest {
         source.packetDao().insert(textPacket("0!broadcast", "srcmsgtwo", time = 300))
         source.nodeInfoDao().upsert(node(20, notes = "src note"))
         source.nodeInfoDao().upsert(node(30, notes = "src-only note"))
+        source.nodeInfoDao().upsert(node(50, displayName = "src name"))
+        source.nodeInfoDao().upsert(node(60, displayName = "src name"))
         source.packetDao().upsertContactSettings(listOf(ContactSettings(contact_key = "0!broadcast", muteUntil = 1)))
         source
             .packetDao()
@@ -203,6 +208,10 @@ class DatabaseMergerTest {
         assertEquals("keep me", dest.nodeInfoDao().getNodeByNum(10)?.node?.notes)
         assertEquals("src note", dest.nodeInfoDao().getNodeByNum(20)?.node?.notes)
         assertNotNull(dest.nodeInfoDao().getNodeByNum(30), "source-only noted node inserted")
+
+        // Display names follow the same rule: dest's kept, blank filled from source.
+        assertEquals("dest name", dest.nodeInfoDao().getNodeByNum(50)?.node?.displayName)
+        assertEquals("src name", dest.nodeInfoDao().getNodeByNum(60)?.node?.displayName)
 
         // Reactions dedupe on composite PK: R1 (already in dest) + R2 (new) = 2.
         assertEquals(2, dest.packetDao().getAllReactionsSnapshot().size)
