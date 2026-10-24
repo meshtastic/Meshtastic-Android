@@ -489,7 +489,5 @@ private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams):
     rxSensitivityDbm = NumberFormatter.parseDecimalOrNull(state.rxSensitivity) ?: initial.rxSensitivityDbm,
     rxHeightMeters = NumberFormatter.parseDecimalOrNull(state.rxHeight) ?: initial.rxHeightMeters,
     maxRangeKm = NumberFormatter.parseDecimalOrNull(state.maxRange) ?: initial.maxRangeKm,
-    minDbm = initial.minDbm,
-    maxDbm = initial.maxDbm,
     overlayTransparency = initial.overlayTransparency,
 )
