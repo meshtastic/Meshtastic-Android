@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-ui</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ui.util</a><span class="delimiter">/</span><span class="current">PermissionGateAction</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Permission</span><wbr><span>Gate</span><wbr><span><span>Action</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">PermissionGateAction</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/PermissionStatus.kt#L67">source</a>)</span></span></div><p class="paragraph">The step a feature should take when the user asks for something a runtime permission gates.</p><p class="paragraph">This is the decision tree from the Android permissions guidance (https://developer.android.com/training/permissions/requesting) expressed as data, so a call site can honour it with an exhaustive <code class="lang-kotlin">when</code> instead of an ad-hoc boolean check. The branch that is easiest to miss — and the one this type exists to make unmissable — is <a href="-s-h-o-w_-r-a-t-i-o-n-a-l-e/index.html">SHOW_RATIONALE</a>: the guidance requires an educational UI <i>before</i> a re-request, and that request is the one that can turn a recoverable denial into a permanent one.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum class </span><a href="index.html">PermissionGateAction</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/PermissionStatus.kt#L67">source</a>)</span></span></div><p class="paragraph">The step a feature should take when the user asks for something a runtime permission gates.</p><p class="paragraph">This is the decision tree from the Android permissions guidance (https://developer.android.com/training/permissions/requesting) expressed as data, so a call site can honour it with an exhaustive <code class="lang-kotlin">when</code> instead of an ad-hoc boolean check. The branch that is easiest to miss — and the one this type exists to make unmissable — is <a href="-s-h-o-w_-r-a-t-i-o-n-a-l-e/index.html">SHOW_RATIONALE</a>: the guidance requires an educational UI <em>before</em> a re-request, and that request is the one that can turn a recoverable denial into a permanent one.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
@@ -163,23 +163,61 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="929554457%2FProperties%2F-920980536" anchor-label="entries" id="929554457%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+        <h2 class="tableheader">Companion properties</h2>
+        <div class="table"><a data-name="-1845466692%2FProperties%2F-920980536" anchor-label="entries" id="-1845466692%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="entries.html"><span><span>entries</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="929554457%2FProperties%2F-920980536"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1845466692%2FProperties%2F-920980536"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a representation of an immutable list of all enum entries, in the order they're declared.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an immutable <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">kotlin.enums.EnumEntries</a> list containing the constants of this enum type, in the order they're declared.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-372974862%2FProperties%2F-920980536" anchor-label="name" id="-372974862%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Companion functions</h2>
+        <div class="table"><a data-name="-1942572218%2FFunctions%2F-920980536" anchor-label="valueOf" id="-1942572218%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="value-of.html"><span>value</span><wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1942572218%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PermissionGateAction</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1631074962%2FFunctions%2F-920980536" anchor-label="values" id="1631074962%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="values.html"><span><span>values</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1631074962%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-372974862%2FProperties%2F-920980536" anchor-label="name" id="-372974862%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -205,40 +243,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="../../org.meshtastic.core.ui.viewmodel/-connection-status/-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html#-739389684%2FProperties%2F-920980536">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div data-togglable="FUNCTION">
-        <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1691921955%2FFunctions%2F-920980536" anchor-label="valueOf" id="1691921955%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="value-of.html"><span>value</span><wbr><span><span>Of</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1691921955%2FFunctions%2F-920980536"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PermissionGateAction</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1292852113%2FFunctions%2F-920980536" anchor-label="values" id="-1292852113%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="values.html"><span><span>values</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1292852113%2FFunctions%2F-920980536"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">PermissionGateAction</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
                 </div>
               </div>
             </div>
