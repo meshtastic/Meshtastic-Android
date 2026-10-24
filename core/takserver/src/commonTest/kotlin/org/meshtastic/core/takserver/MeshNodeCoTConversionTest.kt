@@ -79,7 +79,7 @@ class MeshNodeCoTConversionTest {
     }
 
     @Test
-    fun `callsign uses the broadcast name, never the local display name`() {
+    fun `callsign uses the broadcast name and never the local display name`() {
         assertEquals("WOLF - Wolf Ridge Relay", meshNode().copy(displayName = "Secret").cotCallsign())
     }
 
