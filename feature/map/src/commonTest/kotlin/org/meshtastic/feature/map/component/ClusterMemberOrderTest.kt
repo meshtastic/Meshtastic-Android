@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.component
 
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.User
+import kotlin.math.sign
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -70,5 +71,15 @@ class ClusterMemberOrderTest {
         assertTrue(naturalCompare("N007", "N10") < 0)
         assertTrue(naturalCompare("N99999999999999999999", "N100000000000000000000") < 0)
         assertEquals(0, naturalCompare("abc", "ABC"))
+    }
+
+    @Test
+    fun `digits from other scripts sort as text and keep the order consistent`() {
+        val names = listOf("N٣", "N12", "N2", "N١٢")
+
+        names.forEach { a ->
+            names.forEach { b -> assertEquals(-naturalCompare(b, a).sign, naturalCompare(a, b).sign) }
+        }
+        assertTrue(naturalCompare("N2", "N12") < 0)
     }
 }

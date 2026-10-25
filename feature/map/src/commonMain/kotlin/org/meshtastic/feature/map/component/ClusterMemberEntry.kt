@@ -40,7 +40,9 @@ internal fun List<ClusterMemberEntry>.inDialogOrder(): List<ClusterMemberEntry> 
 // The Google map's title carries a heard-ago suffix, so the long name, where known, is what both maps sort on.
 private fun ClusterMemberEntry.sortName(): String = node?.user?.long_name?.ifBlank { null } ?: title
 
-private val nameRuns = Regex("""\d+|\D+""")
+// ASCII digits only, in the split and in the test alike: Char.isDigit also accepts other scripts' digits, which the
+// split would leave inside a text run, and the two disagreeing breaks the comparator's ordering.
+private val nameRuns = Regex("""[0-9]+|[^0-9]+""")
 
 internal fun naturalCompare(a: String, b: String): Int {
     val x = nameRuns.findAll(a.lowercase()).map { it.value }.toList()
@@ -48,7 +50,7 @@ internal fun naturalCompare(a: String, b: String): Int {
     for (i in 0 until minOf(x.size, y.size)) {
         val (p, q) = x[i] to y[i]
         val order =
-            if (p[0].isDigit() && q[0].isDigit()) {
+            if (p[0] in '0'..'9' && q[0] in '0'..'9') {
                 compareValuesBy(p.trimStart('0'), q.trimStart('0'), { it.length }, { it })
             } else {
                 p.compareTo(q)
