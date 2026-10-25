@@ -123,6 +123,19 @@ class MeshLogDaoTest {
     }
 
     @Test
+    fun testGetLogsOnPortSpansNodesAndSkipsExcludedNode() = runTest {
+        val traceroute = PortNum.TRACEROUTE_APP.value
+        meshLogDao.insert(logEntry("ours", portNum = traceroute, time = 100).copy(fromNum = 0))
+        meshLogDao.insert(logEntry("node-a", portNum = traceroute, time = 200))
+        meshLogDao.insert(logEntry("node-b", portNum = traceroute, time = 300).copy(fromNum = 999))
+        meshLogDao.insert(logEntry("other-port", time = 400))
+
+        val logs = meshLogDao.getLogsOnPort(traceroute, excludeFromNum = 0, maxItem = Int.MAX_VALUE).first()
+
+        assertEquals(listOf("node-b", "node-a"), logs.map { it.uuid })
+    }
+
+    @Test
     fun testDeleteLogsByUuidAtomicRollsBackEarlierChunkWhenLaterChunkFails() = runTest {
         val firstUuid = "first-chunk"
         val secondUuid = "failing-second-chunk"

@@ -60,7 +60,8 @@ class TracerouteHistoryUseCaseTest {
     // The fake maps every node to the local log id; the real repository does that only for our own node.
     private val nodeRepository =
         object : NodeRepository by fakeNodeRepository {
-            override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = flowOf(nodeNum)
+            override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> =
+                flowOf(if (nodeNum == OUR_NODE) MeshLog.NODE_NUM_LOCAL else nodeNum)
         }
     private val meshLogRepository = FakeMeshLogRepository()
     private val nodeRequestActions =
@@ -146,6 +147,27 @@ class TracerouteHistoryUseCaseTest {
 
         assertEquals(emptyList(), metrics.history())
         assertFalse(metrics.hasTracerouteLogs())
+    }
+
+    @Test
+    fun `our own history gathers the traces every node ran to us`() = runTest {
+        meshLogRepository.setLogs(
+            listOf(
+                inboundRequest(from = NODE_X, to = OUR_NODE, receivedDate = 2_000L),
+                inboundRequest(from = OTHER_NODE, to = OUR_NODE, receivedDate = 3_000L),
+                inboundRequest(from = NODE_X, to = OTHER_NODE, receivedDate = 4_000L),
+            ),
+        )
+
+        val state =
+            useCase(OUR_NODE).first {
+                it.metricsState.node?.num == OUR_NODE && it.metricsState.tracerouteTracedBy.isNotEmpty()
+            }
+        val history = state.metricsState.history()
+
+        assertTrue(history.all { it.kind == TracerouteKind.TRACED_BY })
+        assertEquals(listOf(OTHER_NODE, NODE_X), history.map { it.result?.fromRadio?.packet?.from })
+        assertTrue(LogsType.TRACEROUTE in state.availableLogs)
     }
 
     private fun log(uuid: String, fromNum: Int, receivedDate: Long, packet: MeshPacket) = MeshLog(

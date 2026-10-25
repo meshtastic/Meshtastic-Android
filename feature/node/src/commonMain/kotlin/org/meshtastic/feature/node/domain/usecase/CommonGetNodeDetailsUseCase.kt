@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
@@ -105,6 +106,12 @@ constructor(
                 meshLogRepository.getLogsFrom(effectiveNodeId, PortNum.NEIGHBORINFO_APP.value).onStart {
                     emit(emptyList())
                 },
+                // Traceroutes other nodes ran to us are logged under each tracer, so our own page gathers them all.
+                if (effectiveNodeId == MeshLog.NODE_NUM_LOCAL) {
+                    meshLogRepository.getInboundRequestLogs(PortNum.TRACEROUTE_APP).onStart { emit(emptyList()) }
+                } else {
+                    flowOf(emptyList())
+                },
             ) { args: Array<List<Any?>> ->
                 @Suppress("UNCHECKED_CAST")
                 LogsGroup(
@@ -114,6 +121,7 @@ constructor(
                     pax = args[3] as List<MeshLog>,
                     trRes = args[4] as List<MeshLog>,
                     niRes = args[5] as List<MeshLog>,
+                    trInbound = args[6] as List<MeshLog>,
                 )
             }
 
@@ -234,7 +242,8 @@ constructor(
                     tracerouteRequests = trReqs,
                     tracerouteResults = logs.trRes,
                     tracerouteObserved = observedTracerouteResponses(trReqs, logs.trRes),
-                    tracerouteTracedBy = tracedByTracerouteRequests(logs.trRes, identity.ourNode?.num),
+                    tracerouteTracedBy =
+                    tracedByTracerouteRequests(if (isLocal) logs.trInbound else logs.trRes, identity.ourNode?.num),
                     neighborInfoRequests = niReqs,
                     neighborInfoResults = logs.niRes,
                     firmwareEdition = metadata.edition,
@@ -289,6 +298,7 @@ constructor(
         val pax: List<MeshLog>,
         val trRes: List<MeshLog>,
         val niRes: List<MeshLog>,
+        val trInbound: List<MeshLog>,
     )
 
     private data class IdentityGroup(val ourNode: Node?, val myInfo: MyNodeInfo?, val profile: DeviceProfile)
