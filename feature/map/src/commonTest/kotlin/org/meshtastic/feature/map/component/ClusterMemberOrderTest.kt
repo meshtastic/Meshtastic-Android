@@ -81,5 +81,7 @@ class ClusterMemberOrderTest {
             names.forEach { b -> assertEquals(-naturalCompare(b, a).sign, naturalCompare(a, b).sign) }
         }
         assertTrue(naturalCompare("N2", "N12") < 0)
+        // A run that starts with a non-ASCII digit is text, so it sorts after a number rather than as the number 3.
+        assertTrue(naturalCompare("٣", "10") > 0)
     }
 }
