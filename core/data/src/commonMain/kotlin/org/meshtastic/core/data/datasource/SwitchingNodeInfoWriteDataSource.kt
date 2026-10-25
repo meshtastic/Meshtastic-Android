@@ -24,6 +24,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 
+@Suppress("TooManyFunctions") // One method per persisted node field; the count tracks the schema.
 @Single
 class SwitchingNodeInfoWriteDataSource(
     private val dbManager: DatabaseProvider,
@@ -65,6 +66,10 @@ class SwitchingNodeInfoWriteDataSource(
 
     override suspend fun setNodeNotes(num: Int, notes: String) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
+    }
+
+    override suspend fun setNodeDisplayName(num: Int, displayName: String) {
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeDisplayName(num, displayName) } }
     }
 
     override suspend fun markAllHeardOnCurrentLora() {

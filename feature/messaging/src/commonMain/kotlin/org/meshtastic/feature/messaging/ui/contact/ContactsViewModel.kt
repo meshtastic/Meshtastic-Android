@@ -30,6 +30,7 @@ import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.getChannel
@@ -88,6 +89,13 @@ class ContactsViewModel(
             .map { db -> db.values.filter { it.hasPKC }.mapTo(mutableSetOf()) { node -> node.num } }
             .distinctUntilChanged()
 
+    /** Local display names by node number, so a rename recomputes the list without observing the whole node DB. */
+    private val displayNames: Flow<Map<Int, String>> =
+        nodeRepository.nodeDBbyNum.map { db -> db.mapValues { (_, node) -> node.displayName } }.distinctUntilChanged()
+
+    private val nodeProjection: Flow<Pair<Set<Int>, Map<Int, String>>> =
+        combine(keyedNodeNums, displayNames) { keyed, names -> keyed to names }
+
     /**
      * Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and
      * ShareScreen. ContactsScreen groups it into collapsible Channels/DirectMessages sections at render time.
@@ -98,8 +106,9 @@ class ContactsViewModel(
             packetRepository.getContacts(),
             channels,
             packetRepository.getContactSettings(),
-            keyedNodeNums,
-        ) { identity, contacts, channelSet, settings, keyedNodes ->
+            nodeProjection,
+        ) { identity, contacts, channelSet, settings, projection ->
+            val keyedNodes = projection.first
             val (myNodeInfo, _) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
@@ -133,7 +142,7 @@ class ContactsViewModel(
                         toBroadcast ->
                             channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
 
-                        else -> user.long_name
+                        else -> node.effectiveLongName
                     }
 
                 Contact(

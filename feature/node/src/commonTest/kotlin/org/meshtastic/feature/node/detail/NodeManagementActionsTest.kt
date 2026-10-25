@@ -24,12 +24,16 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.MAX_DISPLAY_NAME_BYTES
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
@@ -173,5 +177,62 @@ class NodeManagementActionsTest {
         assertFalse(afterRemoveCalled)
         assertEquals(node, nodeRepository.nodeDBbyNum.value[123])
         assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+    }
+
+    @Test
+    fun setNodeDisplayName_trims_and_stores_the_name() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123)))
+
+        actions.setNodeDisplayName(123, "  Mine  ")
+
+        assertEquals("Mine", nodeRepository.nodeDBbyNum.value[123]?.displayName)
+    }
+
+    @Test
+    fun setNodeDisplayName_blank_input_clears_the_name() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123, displayName = "Mine")))
+
+        actions.setNodeDisplayName(123, "   ")
+
+        assertEquals("", nodeRepository.nodeDBbyNum.value[123]?.displayName)
+    }
+
+    @Test
+    fun setNodeDisplayName_clamps_to_the_long_name_byte_cap() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123)))
+
+        actions.setNodeDisplayName(123, "a".repeat(MAX_DISPLAY_NAME_BYTES + 10))
+
+        val stored = nodeRepository.nodeDBbyNum.value[123]?.displayName.orEmpty()
+        assertEquals(MAX_DISPLAY_NAME_BYTES, stored.encodeToByteArray().size)
+    }
+
+    @Test
+    fun setNodeDisplayName_never_splits_a_multibyte_character_at_the_cap() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123)))
+
+        actions.setNodeDisplayName(123, "é".repeat(MAX_DISPLAY_NAME_BYTES))
+
+        val stored = nodeRepository.nodeDBbyNum.value[123]?.displayName.orEmpty()
+        assertEquals("é".repeat(MAX_DISPLAY_NAME_BYTES / 2), stored)
+    }
+
+    @Test
+    fun setNodeDisplayName_attempts_the_write_and_swallows_repository_failure() = runTest {
+        val failing = mock<NodeRepository>(MockMode.autofill)
+        everySuspend { failing.setNodeDisplayName(any(), any()) } throws IllegalStateException("db closed")
+        val failingActions =
+            NodeManagementActions(
+                nodeRepository = failing,
+                radioController = radioController,
+                alertManager = alertManager,
+                analytics = analytics,
+                snackbarManager = snackbarManager,
+                resolveUiText = resolveUiText,
+            )
+
+        failingActions.setNodeDisplayName(123, "Mine")
+
+        verifySuspend { failing.setNodeDisplayName(123, "Mine") }
     }
 }

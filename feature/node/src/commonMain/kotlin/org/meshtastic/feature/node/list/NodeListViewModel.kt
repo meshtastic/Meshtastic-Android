@@ -36,6 +36,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -51,7 +52,7 @@ import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -243,6 +244,10 @@ class NodeListViewModel(
 
     fun ignoreNode(node: Node) = nodeManagementActions.requestIgnoreNode(viewModelScope, node)
 
+    fun setNodeDisplayName(nodeNum: Int, displayName: String) {
+        safeLaunch(tag = "setNodeDisplayName") { nodeManagementActions.setNodeDisplayName(nodeNum, displayName) }
+    }
+
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
     fun removeNodes(nodes: List<Node>) = nodeManagementActions.requestRemoveNodes(viewModelScope, nodes)
@@ -260,7 +265,7 @@ class NodeListViewModel(
 
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
-        safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
+        safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.effectiveLongName) }
     }
 
     companion object {

@@ -34,6 +34,7 @@ import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -103,7 +104,7 @@ private fun trackingOf(node: Node, inputs: NodeTrackerInputs, onlineThreshold: I
     return NodeTrackerWidgetState.Tracking(
         nodeNum = node.num,
         shortName = node.user.short_name.ifEmpty { "???" },
-        longName = node.user.long_name.ifEmpty { NodeAddress.numToDefaultId(node.num) },
+        longName = node.effectiveLongName.ifEmpty { NodeAddress.numToDefaultId(node.num) },
         colors = node.colors,
         batteryLevel = node.batteryLevel?.takeIf { it > 0 },
         snr = if (direct) node.snrOrNull else null,

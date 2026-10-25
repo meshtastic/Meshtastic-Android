@@ -117,6 +117,86 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun `setNodeDisplayName writes and clears the local name`() = runTest {
+        createDb()
+        dao.upsert(NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build()))
+
+        dao.setNodeDisplayName(1, "Mine")
+        assertEquals("Mine", dao.getNodeByNum(1)?.node?.displayName)
+
+        dao.setNodeDisplayName(1, "")
+        assertEquals("", dao.getNodeByNum(1)?.node?.displayName)
+    }
+
+    @Test
+    fun `alpha sort orders by the display name when one is set`() = runTest {
+        createDb()
+        fun entity(num: Int, longName: String, displayName: String = "") = NodeEntity(
+            num = num,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!$num"
+                    wb.long_name = longName
+                    wb.short_name = "n$num"
+                }
+                .build(),
+            displayName = displayName,
+        )
+        dao.putAll(listOf(entity(1, "Alpha", displayName = "Zulu"), entity(2, "Bravo"), entity(3, "Charlie")))
+
+        val order = dao.getNodes("alpha", true, false, -1).first().map { it.node.num }
+        assertEquals(listOf(2, 3, 1), order)
+    }
+
+    @Test
+    fun `an incoming node without a display name keeps the stored one`() = runTest {
+        createDb()
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!1"
+                    wb.long_name = "Broadcast"
+                    wb.hw_model = org.meshtastic.proto.HardwareModel.TBEAM
+                }
+                .build()
+        dao.upsert(NodeEntity(num = 1, user = user, displayName = "Mine"))
+
+        dao.upsert(NodeEntity(num = 1, user = user.newBuilder().also { wb -> wb.long_name = "Renamed" }.build()))
+
+        val stored = dao.getNodeByNum(1)?.node
+        assertEquals("Renamed", stored?.longName)
+        assertEquals("Mine", stored?.displayName)
+    }
+
+    @Test
+    fun `a placeholder upsert keeps the stored display name`() = runTest {
+        createDb()
+        val known =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!1"
+                    wb.long_name = "Broadcast"
+                    wb.hw_model = org.meshtastic.proto.HardwareModel.TBEAM
+                }
+                .build()
+        dao.upsert(NodeEntity(num = 1, user = known, displayName = "Mine"))
+
+        val placeholder =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!1"
+                    wb.long_name = "Meshtastic 0001"
+                }
+                .build()
+        dao.upsert(NodeEntity(num = 1, user = placeholder))
+
+        val stored = dao.getNodeByNum(1)?.node
+        assertEquals("Broadcast", stored?.longName)
+        assertEquals("Mine", stored?.displayName)
+    }
+
+    @Test
     fun `an update that does not carry verification keeps a stored verified contact verified`() = runTest {
         createDb()
         val user =

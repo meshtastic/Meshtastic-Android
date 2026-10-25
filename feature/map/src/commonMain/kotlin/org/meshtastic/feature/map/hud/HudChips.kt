@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
@@ -88,7 +89,7 @@ internal fun clockHour(bearingDeg: Double, headingDeg: Double): Int {
  */
 internal fun HudSubject.spokenName(): String = when (this) {
     is HudSubject.NodeSubject ->
-        node.user.long_name.ifBlank { node.user.short_name.ifBlank { NodeAddress.numToDefaultId(node.num) } }
+        node.effectiveLongName.ifBlank { node.user.short_name.ifBlank { NodeAddress.numToDefaultId(node.num) } }
 
     is HudSubject.WaypointSubject ->
         waypoint.name.ifBlank { waypoint.icon.waypointIconOrDefault().toCodePointString() }

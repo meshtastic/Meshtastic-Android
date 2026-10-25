@@ -50,6 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
@@ -136,7 +137,7 @@ fun LiveUpdateCard(
             is LiveUpdateMode.TrackNode ->
                 stringResource(
                     Res.string.live_update_tracking,
-                    trackedNode?.displayName() ?: NodeAddress.numToDefaultId(mode.nodeNum),
+                    trackedNode?.listName() ?: NodeAddress.numToDefaultId(mode.nodeNum),
                 )
         }
     Card(modifier = modifier.fillMaxWidth()) {
@@ -296,7 +297,7 @@ private fun NodeChoiceRow(node: Node, selected: Boolean, onSelect: () -> Unit) {
     ) {
         RadioButton(selected = selected, onClick = null)
         Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-            Text(text = node.displayName(), style = MaterialTheme.typography.bodyLarge)
+            Text(text = node.listName(), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = formatAgo(node.lastHeard),
                 style = MaterialTheme.typography.bodySmall,
@@ -313,4 +314,4 @@ private fun NodeChoiceRow(node: Node, selected: Boolean, onSelect: () -> Unit) {
     }
 }
 
-private fun Node.displayName(): String = user.long_name.ifBlank { user.short_name }.ifBlank { user.id }
+private fun Node.listName(): String = effectiveLongName.ifBlank { user.short_name }.ifBlank { user.id }

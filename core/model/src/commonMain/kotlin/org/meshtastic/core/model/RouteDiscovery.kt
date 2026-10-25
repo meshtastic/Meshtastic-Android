@@ -85,14 +85,16 @@ val MeshPacket.inboundRouteDiscovery: RouteDiscovery?
  * Display name for a traceroute hop. A node missing from the node DB comes back from the repository as a placeholder
  * user with no hardware model and a generated "Meshtastic xxxx" name; that case is named by its full node id. Firmware
  * fills a relay that did not add itself with the broadcast address, which is not a node, so it gets [unknownHopLabel].
+ * A non-blank local [displayName] replaces the broadcast long name.
  */
-fun tracerouteHopName(nodeNum: Int, user: User, unknownHopLabel: String): String {
+fun tracerouteHopName(nodeNum: Int, user: User, unknownHopLabel: String, displayName: String = ""): String {
     if (nodeNum == NodeAddress.NODENUM_BROADCAST) return unknownHopLabel
     val id = NodeAddress.numToDefaultId(nodeNum)
     val placeholder =
-        user.hw_model == HardwareModel.UNSET &&
+        displayName.isBlank() &&
+            user.hw_model == HardwareModel.UNSET &&
             (user.long_name.isBlank() || user.long_name == "Meshtastic ${id.takeLast(PLACEHOLDER_SUFFIX_LENGTH)}")
-    return if (placeholder) id else "${user.long_name} (${user.short_name})"
+    return if (placeholder) id else "${displayName.ifBlank { user.long_name }} (${user.short_name})"
 }
 
 private const val PLACEHOLDER_SUFFIX_LENGTH = 4

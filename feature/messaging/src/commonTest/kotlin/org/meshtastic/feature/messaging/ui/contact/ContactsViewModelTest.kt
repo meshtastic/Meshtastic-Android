@@ -29,13 +29,18 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -136,6 +141,66 @@ class ContactsViewModelTest {
 
         viewModel.collapsedSections.test {
             assertEquals(setOf(ContactSection.DIRECT_MESSAGES.key), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `contact name follows a display name change`() = runTest(testDispatcher) {
+        val peer =
+            Node(
+                num = 2,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000002"
+                        wb.long_name = "Broadcast"
+                        wb.short_name = "BC"
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(peer))
+        nodeRepository.setMyNodeInfo(
+            MyNodeInfo(
+                myNodeNum = 1,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = null,
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0L,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            ),
+        )
+        nodeRepository.setMyId("!00000001")
+        val dm = DataPacket(to = "!00000001", from = "!00000002", bytes = "hi".encodeUtf8(), dataType = 1)
+        every { packetRepository.getContacts() } returns MutableStateFlow(mapOf("0!00000002" to dm))
+        every { packetRepository.getContactSettings() } returns MutableStateFlow(emptyMap())
+        viewModel =
+            ContactsViewModel(
+                SavedStateHandle(),
+                nodeRepository,
+                packetRepository,
+                SnackbarManager(),
+                radioConfigRepository,
+                connectionStateProvider,
+            )
+
+        viewModel.contactList.test {
+            var latest = awaitItem()
+            while (latest.none { it.contactKey == "0!00000002" }) latest = awaitItem()
+            assertEquals("Broadcast", latest.single { it.contactKey == "0!00000002" }.longName)
+
+            nodeRepository.setNodeDisplayName(2, "Nickname")
+
+            var renamed = awaitItem()
+            while (renamed.single { it.contactKey == "0!00000002" }.longName != "Nickname") renamed = awaitItem()
             cancelAndIgnoreRemainingEvents()
         }
     }

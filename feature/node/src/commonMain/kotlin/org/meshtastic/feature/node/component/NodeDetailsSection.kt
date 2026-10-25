@@ -61,6 +61,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeSecurityIndicator
+import org.meshtastic.core.model.hiddenLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_label_value
 import org.meshtastic.core.resources.copy
@@ -70,6 +71,7 @@ import org.meshtastic.core.resources.encryption_error_text
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.hops_away
+import org.meshtastic.core.resources.long_name
 import org.meshtastic.core.resources.no_public_key
 import org.meshtastic.core.resources.no_public_key_text
 import org.meshtastic.core.resources.node_id
@@ -181,6 +183,15 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 private fun MainNodeDetails(node: Node, isLocal: Boolean, onRequestUserInfo: (() -> Unit)?) {
     Column {
         NameAndRoleRow(node)
+        node.hiddenLongName?.let { broadcastName ->
+            SectionDivider()
+            InfoItem(
+                label = stringResource(Res.string.long_name),
+                value = broadcastName,
+                icon = MeshtasticIcons.Person,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         node.nodeStatus?.let { status ->
             SectionDivider()
             StatusMessageRow(status)

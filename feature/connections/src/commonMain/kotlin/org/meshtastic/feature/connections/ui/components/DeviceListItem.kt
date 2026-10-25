@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
@@ -183,7 +184,7 @@ private fun DeviceHeadline(device: DeviceListEntry) {
     if (node != null) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NodeChip(node = node)
-            DeviceName(text = node.user.long_name.ifBlank { device.name }, modifier = Modifier.weight(1f))
+            DeviceName(text = node.effectiveLongName.ifBlank { device.name }, modifier = Modifier.weight(1f))
         }
     } else {
         DeviceName(text = device.name)

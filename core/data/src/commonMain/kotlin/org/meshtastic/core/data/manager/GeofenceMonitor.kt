@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.geofence.geofencesToMonitor
 import org.meshtastic.core.model.geofence.toGeofence
@@ -171,7 +172,7 @@ class GeofenceMonitor(
 
         try {
             val nodeName =
-                nodeManager.nodeDBbyNodeNum[nodeNum]?.user?.long_name?.takeIf { it.isNotBlank() }
+                nodeManager.nodeDBbyNodeNum[nodeNum]?.effectiveLongName?.takeIf { it.isNotBlank() }
                     ?: getStringSuspend(Res.string.unknown_username)
             val waypointName = waypoint.name.takeIf { it.isNotBlank() } ?: getStringSuspend(Res.string.geofence)
             val title =

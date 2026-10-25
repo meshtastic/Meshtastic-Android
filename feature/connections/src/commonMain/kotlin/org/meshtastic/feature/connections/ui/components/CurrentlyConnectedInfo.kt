@@ -50,6 +50,7 @@ import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.rssi
@@ -154,7 +155,7 @@ fun CurrentlyConnectedInfo(
             NodeChip(node = node, onClick = { onNavigateToNodeDetails(it.num) })
 
             Column(modifier = Modifier.weight(1f, fill = true)) {
-                Text(text = node.user.long_name, style = MaterialTheme.typography.titleMediumEmphasized)
+                Text(text = node.effectiveLongName, style = MaterialTheme.typography.titleMediumEmphasized)
 
                 text.firmwareVersion?.let { firmwareVersion ->
                     Text(

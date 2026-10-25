@@ -61,6 +61,7 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.tracerouteHopName
@@ -120,7 +121,8 @@ fun TracerouteLogScreen(
 
     val unknownHopLabel = stringResource(Res.string.traceroute_unknown_hop)
 
-    fun getUsername(nodeNum: Int): String = tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel)
+    fun getUsername(nodeNum: Int): String =
+        tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel, viewModel.getDisplayName(nodeNum))
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
@@ -154,7 +156,7 @@ fun TracerouteLogScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = null,
         titleRes = Res.string.traceroute_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = points,
         timeProvider = { it.timeSeconds },
         infoData = TRACEROUTE_INFO_DATA,

@@ -496,6 +496,8 @@ discovery_view_map
 disk_free_indexed
 display
 display_config
+display_name
+display_name_hint
 dissolved_oxygen
 ### DISTANCE ###
 distance
@@ -581,6 +583,7 @@ dynamic
 easily_set_up_private_mesh_networks
 edit
 edit_custom_tile_source
+edit_name
 eight_hours
 electrical_conductivity
 elevation_suffix
@@ -1851,6 +1854,7 @@ serial
 serial_config
 session_active
 session_refresh_required
+set_display_name
 set_time
 set_up_connection
 set_your_region

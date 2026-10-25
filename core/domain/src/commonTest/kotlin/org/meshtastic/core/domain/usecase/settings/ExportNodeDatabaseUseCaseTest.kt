@@ -93,6 +93,26 @@ class ExportNodeDatabaseUseCaseTest {
     }
 
     @Test
+    fun `the export carries the broadcast name and never the local display name`() = runTest {
+        nodeRepository.setNodes(
+            listOf(
+                Node(
+                    num = 5,
+                    user = User.Builder().also { wb -> wb.long_name = "Broadcast" }.build(),
+                    displayName = "Secret",
+                ),
+            ),
+        )
+
+        val buffer = Buffer()
+        useCase(buffer)
+        val text = buffer.readUtf8()
+
+        assertTrue("Broadcast" in text)
+        assertFalse("Secret" in text)
+    }
+
+    @Test
     fun `lightning readings export from environment metrics`() = runTest {
         val env =
             EnvironmentMetrics.Builder()

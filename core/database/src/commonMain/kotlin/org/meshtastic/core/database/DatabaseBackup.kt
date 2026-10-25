@@ -26,7 +26,7 @@ import kotlin.time.Instant
 /** Pure rules for backing up and restoring the app database: file naming, header validation and staging paths. */
 object DatabaseBackup {
     /** Must equal `@Database(version)` on [MeshtasticDatabase]; a jvmTest opens a real database and checks it. */
-    const val SCHEMA_VERSION: Int = 65
+    const val SCHEMA_VERSION: Int = 66
 
     const val FILE_NAME_PREFIX: String = "meshtastic_backup"
     const val FILE_EXTENSION: String = "db"

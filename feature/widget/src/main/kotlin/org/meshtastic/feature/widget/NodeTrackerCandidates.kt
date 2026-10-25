@@ -31,6 +31,7 @@ internal fun trackerCandidates(nodes: Collection<Node>, query: String, ourNodeNu
         .filter { node ->
             needle.isEmpty() ||
                 node.user.long_name.contains(needle, ignoreCase = true) ||
+                node.displayName.contains(needle, ignoreCase = true) ||
                 node.user.short_name.contains(needle, ignoreCase = true) ||
                 node.user.id.contains(needle, ignoreCase = true)
         }

@@ -39,6 +39,9 @@ class NeighborInfoHandlerImpl(
 
     override fun recordStartTime(requestId: Int) = requestTimer.start(requestId)
 
+    private fun neighborLongName(nodeNum: Int, broadcastName: String): String =
+        nodeRepository.nodeDBbyNum.value[nodeNum]?.displayName?.takeIf { it.isNotBlank() } ?: broadcastName
+
     override fun handleNeighborInfo(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
         val ni = NeighborInfo.ADAPTER.decode(payload)
@@ -56,12 +59,12 @@ class NeighborInfoHandlerImpl(
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
                 val user = nodeRepository.getUser(n.node_id)
-                val name = "${user.long_name} (${user.short_name})"
+                val name = "${neighborLongName(n.node_id, user.long_name)} (${user.short_name})"
                 "• $name (SNR: ${MetricFormatter.snr(n.snr)})"
             }
 
         val fromUser = nodeRepository.getUser(from)
-        val formatted = "Neighbors of ${fromUser.long_name}:\n$neighbors"
+        val formatted = "Neighbors of ${neighborLongName(from, fromUser.long_name)}:\n$neighbors"
 
         val responseText = requestTimer.appendDuration(requestId, formatted, "Neighbor info")
 

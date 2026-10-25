@@ -33,11 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
+import org.meshtastic.core.resources.edit_name
 import org.meshtastic.core.resources.ignore
 import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.message
@@ -46,6 +48,8 @@ import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.set_display_name
+import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
@@ -53,12 +57,14 @@ import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
+import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Route
+import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -87,6 +93,7 @@ fun NodeContextMenu(
     onDismiss: () -> Unit,
     onOpenMeshView: () -> Unit = {},
     onOpenCompass: () -> Unit = {},
+    onSetDisplayName: () -> Unit = {},
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
@@ -95,6 +102,12 @@ fun NodeContextMenu(
                 MuteMenuItem(node, onMute, onDismiss)
             }
             MessageMenuItem(node, onMessage, onDismiss)
+            MenuItem(
+                MeshtasticIcons.Edit,
+                stringResource(Res.string.set_display_name),
+                onSetDisplayName,
+                onDismiss,
+            )
             TraceRouteMenuItem(node, lastTracerouteTime, onTraceRoute, onDismiss)
             if (node.validPosition != null) {
                 MenuItem(MeshtasticIcons.Compass, stringResource(Res.string.open_compass), onOpenCompass, onDismiss)
@@ -115,21 +128,38 @@ fun NodeContextMenu(
     }
 }
 
-/** A menu of its own: favoriting, muting, messaging or removing yourself is meaningless (design#115). */
+/**
+ * A menu of its own: favoriting, muting, messaging or removing yourself is meaningless (design#115). Each action is
+ * absent, never disabled, when its callback is null: update status, edit the broadcast name in device settings, and
+ * share our contact.
+ */
 @Composable
-fun LocalNodeContextMenu(expanded: Boolean, onUpdateStatus: () -> Unit, onDismiss: () -> Unit) {
+fun LocalNodeContextMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onUpdateStatus: (() -> Unit)? = null,
+    onEditName: (() -> Unit)? = null,
+    onShareContact: (() -> Unit)? = null,
+) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-            DropdownMenuItem(
-                onClick = {
-                    onUpdateStatus()
-                    onDismiss()
-                },
-                leadingIcon = { Icon(imageVector = MeshtasticIcons.Notes, contentDescription = null) },
-                text = { Text(text = stringResource(Res.string.update_status)) },
-            )
+            onUpdateStatus?.let { LocalMenuItem(MeshtasticIcons.Notes, Res.string.update_status, it, onDismiss) }
+            onEditName?.let { LocalMenuItem(MeshtasticIcons.Edit, Res.string.edit_name, it, onDismiss) }
+            onShareContact?.let { LocalMenuItem(MeshtasticIcons.Share, Res.string.share_contact, it, onDismiss) }
         }
     }
+}
+
+@Composable
+private fun LocalMenuItem(icon: ImageVector, label: StringResource, onClick: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onClick()
+            onDismiss()
+        },
+        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
+        text = { Text(text = stringResource(label)) },
+    )
 }
 
 @Composable

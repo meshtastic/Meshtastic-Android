@@ -40,6 +40,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.RoutingNak
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.getMessageRoutingErrorDetailResFrom
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.navigation.NodeDetailRoute
@@ -199,27 +200,27 @@ class NodeDetailViewModel(
 
             is NodeMenuAction.RequestUserInfo ->
                 safeLaunch(tag = "requestUserInfo") {
-                    nodeRequestActions.requestUserInfo(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestUserInfo(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestNeighborInfo ->
                 safeLaunch(tag = "requestNeighborInfo") {
-                    nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestNeighborInfo(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestPosition ->
                 safeLaunch(tag = "requestPosition") {
-                    nodeRequestActions.requestPosition(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestPosition(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestTelemetry ->
                 safeLaunch(tag = "requestTelemetry") {
-                    nodeRequestActions.requestTelemetry(action.node.num, action.node.user.long_name, action.type)
+                    nodeRequestActions.requestTelemetry(action.node.num, action.node.effectiveLongName, action.type)
                 }
 
             is NodeMenuAction.TraceRoute ->
                 safeLaunch(tag = "requestTraceroute") {
-                    nodeRequestActions.requestTraceroute(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestTraceroute(action.node.num, action.node.effectiveLongName)
                 }
 
             else -> {}
@@ -293,6 +294,10 @@ class NodeDetailViewModel(
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
         safeLaunch(tag = "setNodeNotes") { nodeManagementActions.setNodeNotes(nodeNum, notes) }
+    }
+
+    fun setNodeDisplayName(nodeNum: Int, displayName: String) {
+        safeLaunch(tag = "setNodeDisplayName") { nodeManagementActions.setNodeDisplayName(nodeNum, displayName) }
     }
 
     /** Returns the type-safe navigation route for a direct message to this node. */

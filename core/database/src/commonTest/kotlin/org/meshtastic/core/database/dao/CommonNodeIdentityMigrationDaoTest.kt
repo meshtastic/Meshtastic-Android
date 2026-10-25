@@ -82,6 +82,7 @@ abstract class CommonNodeIdentityMigrationDaoTest {
         key: ByteString,
         longName: String = "Node $num",
         notes: String = "",
+        displayName: String = "",
         isFavorite: Boolean = false,
     ) = NodeEntity(
         num = num,
@@ -96,6 +97,7 @@ abstract class CommonNodeIdentityMigrationDaoTest {
             }
             .build(),
         notes = notes,
+        displayName = displayName,
         isFavorite = isFavorite,
         lastHeard = 1000,
     )
@@ -171,6 +173,29 @@ abstract class CommonNodeIdentityMigrationDaoTest {
         assertEquals(listOf(oldNum), removed)
         assertNull(dao.getNodeByNum(oldNum), "old identity in the same batch must not be resurrected")
         assertNotNull(dao.getNodeByNum(newNum))
+    }
+
+    @Test
+    fun renumberCarriesDisplayNameToTheNewRow() = runTest {
+        createDb(myNodeEntity(oldNum, deviceId = deviceIdA))
+        dao.upsert(nodeEntity(oldNum, keyA, displayName = "old name"))
+
+        val newNum = 300
+        dao.installConfig(myNodeEntity(newNum, deviceId = deviceIdA), listOf(nodeEntity(newNum, keyB)))
+        assertEquals("old name", assertNotNull(dao.getNodeByNum(newNum)).node.displayName)
+    }
+
+    @Test
+    fun renumberKeepsDestinationDisplayNameWhenSet() = runTest {
+        createDb(myNodeEntity(oldNum, deviceId = deviceIdA))
+        dao.upsert(nodeEntity(oldNum, keyA, displayName = "old name"))
+
+        val newNum = 300
+        dao.installConfig(
+            myNodeEntity(newNum, deviceId = deviceIdA),
+            listOf(nodeEntity(newNum, keyB, displayName = "fresh")),
+        )
+        assertEquals("fresh", assertNotNull(dao.getNodeByNum(newNum)).node.displayName)
     }
 
     @Test

@@ -20,15 +20,18 @@ import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ExportDataUseCaseTest {
@@ -90,6 +93,52 @@ class ExportDataUseCaseTest {
         val output = buffer.readUtf8()
         assertTrue(output.contains("\"1234\""))
         assertTrue(output.contains("Hello"))
+    }
+
+    @Test
+    fun `invoke names the sender by broadcast name and never the local display name`() = runTest {
+        nodeRepository.setNodes(
+            listOf(
+                Node(
+                    num = 1234,
+                    user = User.Builder().also { wb -> wb.long_name = "Broadcast" }.build(),
+                    displayName = "Secret",
+                ),
+            ),
+        )
+        val log =
+            MeshLog(
+                uuid = "1",
+                message_type = "TEXT",
+                received_date = 1000000000L,
+                raw_message = "",
+                fromRadio =
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { pb ->
+                                    pb.from = 1234
+                                    pb.decoded =
+                                        Data.Builder()
+                                            .also { db ->
+                                                db.portnum = PortNum.TEXT_MESSAGE_APP
+                                                db.payload = "Hello".encodeUtf8()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+        meshLogRepository.setLogs(listOf(log))
+        val buffer = Buffer()
+
+        useCase(buffer, 1)
+
+        val output = buffer.readUtf8()
+        assertTrue(output.contains("Broadcast"))
+        assertFalse(output.contains("Secret"))
     }
 
     @Test

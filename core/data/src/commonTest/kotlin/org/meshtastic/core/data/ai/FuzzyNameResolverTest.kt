@@ -218,6 +218,46 @@ class FuzzyNameResolverTest {
     }
 
     @Test
+    fun resolveNodeName_exact_name_shared_by_a_display_name_is_ambiguous() {
+        val nodeRepository: NodeRepository = mock(MockMode.autofill)
+        val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+        val nodes =
+            mapOf(
+                1 to
+                    Node(
+                        num = 1,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000001"
+                                wb.long_name = "Base Camp"
+                                wb.short_name = "BC"
+                            }
+                            .build(),
+                    ),
+                2 to
+                    Node(
+                        num = 2,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000002"
+                                wb.long_name = "Hilltop"
+                                wb.short_name = "HT"
+                            }
+                            .build(),
+                        displayName = "Base Camp",
+                    ),
+            )
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
+
+        val result = FuzzyNameResolver(nodeRepository, radioConfigRepository).resolveNodeName("base camp")
+
+        assertIs<NodeNameResult.Ambiguous>(result)
+        assertEquals(2, result.candidates.size)
+    }
+
+    @Test
     fun resolveNodeName_not_found_when_no_nodes() {
         val nodeRepository: NodeRepository = mock(MockMode.autofill)
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)

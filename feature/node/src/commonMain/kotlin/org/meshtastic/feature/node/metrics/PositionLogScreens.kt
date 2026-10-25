@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
@@ -58,8 +59,9 @@ fun PositionLogScreen(
     val positions = state.positionLogs
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
-    val nodeName = state.node?.user?.long_name ?: ""
-    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
+    val nodeName = state.node?.effectiveLongName.orEmpty()
+    val gpxTrackName = gpxTrackName(state.node)
+    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, gpxTrackName) }
     val hasTrackPoint = remember(positions) { positions.any { it.hasFix() } }
 
     val trackMap = LocalNodeTrackMapProvider.current

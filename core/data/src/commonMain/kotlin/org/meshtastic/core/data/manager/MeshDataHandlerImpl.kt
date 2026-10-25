@@ -35,6 +35,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.destination
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
@@ -588,9 +589,9 @@ class MeshDataHandlerImpl(
     private suspend fun getSenderName(packet: DataPacket): String {
         if (packet.source is NodeAddress.Local) {
             val myId = nodeManager.getMyId()
-            return nodeManager.getNodeById(myId)?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+            return nodeManager.getNodeById(myId)?.effectiveLongName ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeManager.getNodeById(packet.from.orEmpty())?.user?.long_name
+        return nodeManager.getNodeById(packet.from.orEmpty())?.effectiveLongName
             ?: getStringSuspend(Res.string.unknown_username)
     }
 

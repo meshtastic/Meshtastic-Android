@@ -48,6 +48,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.fixOrNull
 import org.meshtastic.core.model.noiseFloorOrNull
@@ -200,6 +201,8 @@ open class MetricsViewModel(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
+    fun getDisplayName(nodeNum: Int): String = nodeRepository.nodeDBbyNum.value[nodeNum]?.displayName.orEmpty()
+
     /** Persists a user-editable label (e.g. "Solar", "Battery") for a power-metrics channel (0-based index). */
     fun setPowerChannelLabel(nodeNum: Int, channelIndex: Int, label: String) =
         safeLaunch(context = dispatchers.io, tag = "setPowerChannelLabel") {
@@ -273,7 +276,7 @@ open class MetricsViewModel(
     fun requestPosition() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             safeLaunch(tag = "requestPosition") {
-                nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "")
+                nodeRequestActions.requestPosition(it, state.value.node?.effectiveLongName.orEmpty())
             }
         }
     }
@@ -281,7 +284,7 @@ open class MetricsViewModel(
     fun requestTelemetry(type: TelemetryType) {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             safeLaunch(tag = "requestTelemetry") {
-                nodeRequestActions.requestTelemetry(it, state.value.node?.user?.long_name ?: "", type)
+                nodeRequestActions.requestTelemetry(it, state.value.node?.effectiveLongName.orEmpty(), type)
             }
         }
     }
@@ -289,7 +292,7 @@ open class MetricsViewModel(
     fun requestTraceroute() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             safeLaunch(tag = "requestTraceroute") {
-                nodeRequestActions.requestTraceroute(it, state.value.node?.user?.long_name ?: "")
+                nodeRequestActions.requestTraceroute(it, state.value.node?.effectiveLongName.orEmpty())
             }
         }
     }
@@ -297,7 +300,7 @@ open class MetricsViewModel(
     fun requestNeighborInfo() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             safeLaunch(tag = "requestNeighborInfo") {
-                nodeRequestActions.requestNeighborInfo(it, state.value.node?.user?.long_name ?: "")
+                nodeRequestActions.requestNeighborInfo(it, state.value.node?.effectiveLongName.orEmpty())
             }
         }
     }
@@ -609,6 +612,9 @@ internal fun positionCsvRow(pos: org.meshtastic.proto.Position): String {
         pos.ground_track?.let { NumberFormatter.formatInvariant(it * GeoConstants.HEADING_DEG, HEADING_DECIMALS) }
     return "\"$lat\",\"$lon\",\"$altitude\",\"${pos.sats_in_view}\",\"$speed\",\"${heading.orEmpty()}\""
 }
+
+/** The exported file leaves the device, so it carries the broadcast name, never the local display name. */
+internal fun gpxTrackName(node: Node?): String = node?.user?.long_name.orEmpty()
 
 /**
  * Coordinates are formatted invariantly: GPX is XML another program parses, and a comma decimal makes

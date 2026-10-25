@@ -52,12 +52,13 @@ fun liveUpdateCandidates(nodes: Collection<Node>, ourNodeNum: Int?): List<Node> 
     .filter { it.num != ourNodeNum && !it.isIgnored }
     .sortedWith(compareByDescending<Node> { it.isFavorite }.thenByDescending { it.lastHeard }.thenBy { it.num })
 
-/** [candidates] whose long name, short name or node id contains [query], ignoring case. */
+/** [candidates] whose long name, display name, short name or node id contains [query], ignoring case. */
 fun filterLiveUpdateCandidates(candidates: List<Node>, query: String): List<Node> {
     val needle = query.trim()
     if (needle.isEmpty()) return candidates
     return candidates.filter { node ->
         node.user.long_name.contains(needle, ignoreCase = true) ||
+            node.displayName.contains(needle, ignoreCase = true) ||
             node.user.short_name.contains(needle, ignoreCase = true) ||
             node.user.id.contains(needle, ignoreCase = true)
     }

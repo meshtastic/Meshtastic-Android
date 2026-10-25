@@ -51,6 +51,7 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ble_devices
@@ -190,7 +191,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.PAX,
         titleRes = Res.string.pax_metrics_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = state.node?.effectiveLongName.orEmpty(),
         data = paxMetrics,
         timeProvider = { (it.first.received_date / MS_PER_SEC).toDouble() },
         onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },

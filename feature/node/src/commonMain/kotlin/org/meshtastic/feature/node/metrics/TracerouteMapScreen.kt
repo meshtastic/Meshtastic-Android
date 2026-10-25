@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.mesh_hud_open
@@ -90,7 +91,7 @@ fun TracerouteMapScreen(
     LaunchedEffect(Unit) { metricsViewModel.clearTracerouteResponse() }
 
     TracerouteMapScaffold(
-        title = state.node?.user?.long_name ?: stringResource(Res.string.traceroute),
+        title = state.node?.effectiveLongName ?: stringResource(Res.string.traceroute),
         overlay = overlay,
         snapshotPositions = snapshotPositions,
         onNavigateUp = onNavigateUp,

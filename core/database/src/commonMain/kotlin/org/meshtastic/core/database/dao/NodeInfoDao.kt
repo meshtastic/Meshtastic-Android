@@ -120,6 +120,7 @@ interface NodeInfoDao {
      */
     private suspend fun migrateNodeIdentity(from: NodeEntity, to: NodeEntity) {
         if (to.notes.isBlank()) to.notes = from.notes
+        if (to.displayName.isBlank()) to.displayName = from.displayName
         if (to.powerChannelLabels.isEmpty()) to.powerChannelLabels = from.powerChannelLabels
         to.manuallyVerified = to.manuallyVerified || from.manuallyVerified
         to.isFavorite = to.isFavorite || from.isFavorite
@@ -232,6 +233,7 @@ interface NodeInfoDao {
         trustIncomingKey: Boolean = false,
     ): NodeEntity {
         val resolvedNotes = incomingNode.notes.ifBlank { existingNode.notes }
+        val resolvedDisplayName = incomingNode.displayName.ifBlank { existingNode.displayName }
         val resolvedPowerChannelLabels = incomingNode.powerChannelLabels.ifEmpty { existingNode.powerChannelLabels }
 
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
@@ -248,6 +250,7 @@ interface NodeInfoDao {
                 shortName = existingNode.shortName,
                 manuallyVerified = incomingNode.manuallyVerified || existingNode.manuallyVerified,
                 notes = resolvedNotes,
+                displayName = resolvedDisplayName,
                 powerChannelLabels = resolvedPowerChannelLabels,
             )
         }
@@ -268,6 +271,7 @@ interface NodeInfoDao {
             newPublicKey = resolved.newPublicKey,
             manuallyVerified = incomingNode.manuallyVerified || existingNode.manuallyVerified,
             notes = resolvedNotes,
+            displayName = resolvedDisplayName,
             powerChannelLabels = resolvedPowerChannelLabels,
         )
     }
@@ -343,7 +347,7 @@ interface NodeInfoDao {
     END,
     CASE
         WHEN :sort = 'last_heard' THEN last_heard * -1
-        WHEN :sort = 'alpha' THEN UPPER(long_name)
+        WHEN :sort = 'alpha' THEN UPPER(CASE WHEN TRIM(display_name) <> '' THEN display_name ELSE long_name END)
         WHEN :sort = 'distance' THEN
             CASE
                 WHEN latitude IS NULL OR longitude IS NULL OR
@@ -467,6 +471,9 @@ interface NodeInfoDao {
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    @Query("UPDATE nodes SET display_name = :displayName WHERE num = :num")
+    suspend fun setNodeDisplayName(num: Int, displayName: String)
 
     @Query("UPDATE nodes SET power_channel_labels = :labels WHERE num = :num")
     suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
