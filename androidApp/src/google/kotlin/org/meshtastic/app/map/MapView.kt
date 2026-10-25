@@ -227,6 +227,7 @@ import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.feature.map.stackCoincident
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
@@ -243,6 +244,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 import kotlin.coroutines.resume
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.roundToInt
 import android.graphics.Color as AndroidColor
@@ -317,6 +319,21 @@ private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 
 /** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
 private const val OVERLAY_Z_INDEX = -0.5f
+
+// A tapped cluster opens to at least this span, about street level, matching the Apple map's floor.
+private const val CLUSTER_FIT_MIN_SPAN_METERS = 140.0
+private val CLUSTER_FIT_PADDING = 64.dp
+private const val METERS_PER_DEGREE = 111_320.0
+
+/** These bounds grown, about their center, to at least [meters] across. */
+private fun LatLngBounds.atLeastSpan(meters: Double): LatLngBounds {
+    val halfLatitude = meters / 2 / METERS_PER_DEGREE
+    val halfLongitude = halfLatitude / cos(Math.toRadians(center.latitude)).coerceAtLeast(MIN_COS_LATITUDE)
+    return including(LatLng(center.latitude + halfLatitude, center.longitude + halfLongitude))
+        .including(LatLng(center.latitude - halfLatitude, center.longitude - halfLongitude))
+}
+
+private const val MIN_COS_LATITUDE = 0.01
 
 /** Below the offline vector layer's own water/roads/boundaries (-0.75f) so those still draw on top of the shading. */
 private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
@@ -1270,14 +1287,16 @@ fun MapView(
     showClusterItemsDialog?.let { items ->
         ClusterMembersDialog(
             members =
-            items.map {
-                ClusterMemberEntry(
-                    nodeNum = it.node.num,
-                    title = it.nodeTitle,
-                    subtitle = it.nodeSnippet,
-                    node = it.node,
-                )
-            },
+            items
+                .flatMap { it.stackMembers.ifEmpty { listOf(it) } }
+                .map {
+                    ClusterMemberEntry(
+                        nodeNum = it.node.num,
+                        title = it.nodeTitle,
+                        subtitle = it.nodeSnippet,
+                        node = it.node,
+                    )
+                },
             onMemberClick = { nodeNum ->
                 navigateToNodeDetails(nodeNum)
                 showClusterItemsDialog = null
@@ -1324,15 +1343,19 @@ internal fun rememberNodeClusterItems(
     val unknownText = stringResource(Res.string.unknown)
     val nowText = stringResource(Res.string.now)
     return remember(nodes, myNodeNum, relativeTimeBucket, unknownText, nowText) {
-        nodes.map { node ->
+        fun itemFor(node: Node): NodeClusterItem {
             val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
-            NodeClusterItem(
+            return NodeClusterItem(
                 node = node,
                 nodePosition = latLng,
                 nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
                 nodeSnippet = node.effectiveLongName,
                 myNodeNum = myNodeNum,
             )
+        }
+        stackCoincident(nodes, myNodeNum).map { stack ->
+            val members = if (stack.count > 1) stack.members.map(::itemFor) else emptyList()
+            itemFor(stack.top).copy(stackMembers = members)
         }
     }
 }
@@ -1359,10 +1382,12 @@ private fun MainMapContent(
     coroutineScope: CoroutineScope,
     onShowClusterItemsDialog: (List<NodeClusterItem>?) -> Unit,
 ) {
+    val clusterFitPaddingPx = with(LocalDensity.current) { CLUSTER_FIT_PADDING.roundToPx() }
     NodeClusterMarkers(
         nodeClusterItems = nodeClusterItems,
         mapFilterState = mapFilterState,
         navigateToNodeDetails = navigateToNodeDetails,
+        onStackClick = { onShowClusterItemsDialog(it) },
         onClusterClick = { cluster ->
             val items = cluster.items.toList()
             val allSameLocation = items.size > 1 && items.all { it.position == items.first().position }
@@ -1371,15 +1396,11 @@ private fun MainMapContent(
             } else {
                 val bounds = LatLngBounds.builder()
                 cluster.items.forEach { bounds.include(it.position) }
+                // Fit the members, as the Apple map does, rather than step one zoom level and leave a tight cluster
+                // needing several taps to break.
+                val fitted = bounds.build().atLeastSpan(CLUSTER_FIT_MIN_SPAN_METERS)
                 coroutineScope.launch {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newCameraPosition(
-                            CameraPosition.Builder()
-                                .target(bounds.build().center)
-                                .zoom(cameraPositionState.position.zoom + 1)
-                                .build(),
-                        ),
-                    )
+                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(fitted, clusterFitPaddingPx))
                 }
                 Logger.d { "Cluster clicked! $cluster" }
             }

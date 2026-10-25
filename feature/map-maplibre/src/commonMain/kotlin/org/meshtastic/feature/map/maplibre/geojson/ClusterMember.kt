@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.maplibre.geojson
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -29,11 +31,19 @@ data class ClusterMember(val nodeNum: Int, val longName: String, val shortName: 
 /**
  * Reads the members of a cluster out of its leaf features.
  *
- * The names travel on the features themselves — see [nodesToFeatureCollection] — so listing a cluster needs no second
- * lookup against the node database.
+ * The names travel on the features themselves — see [stacksToFeatureCollection] — so listing a cluster needs no second
+ * lookup against the node database, and a stack inside a cluster lists every node at its spot.
  */
-internal fun FeatureCollection<*, *>.toClusterMembers(): List<ClusterMember> =
-    features.mapNotNull { feature -> (feature.properties as? JsonObject)?.toClusterMember() }
+internal fun FeatureCollection<*, *>.toClusterMembers(): List<ClusterMember> = features.flatMap { feature ->
+    (feature.properties as? JsonObject)?.stackMembers().orEmpty()
+}
+
+/** Every node a feature stands for: its stack's members, or the one node when it is not a stack. */
+internal fun JsonObject.stackMembers(): List<ClusterMember> {
+    val stacked = this[NodeFeatureKeys.STACK_MEMBERS]?.jsonPrimitive?.contentOrNull
+    val members = stacked?.let { runCatching { Json.parseToJsonElement(it) as? JsonArray }.getOrNull() }
+    return members?.mapNotNull { (it as? JsonObject)?.toClusterMember() } ?: listOfNotNull(toClusterMember())
+}
 
 private fun JsonObject.toClusterMember(): ClusterMember? {
     val nodeNum = this[NodeFeatureKeys.NODE_NUM].asInt() ?: return null

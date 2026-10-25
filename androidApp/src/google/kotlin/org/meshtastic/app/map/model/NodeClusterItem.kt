@@ -28,6 +28,8 @@ data class NodeClusterItem(
     val nodeTitle: String,
     val nodeSnippet: String,
     val myNodeNum: Int? = null,
+    /** Every node at this spot, this one included, when more than one is; empty otherwise. */
+    val stackMembers: List<NodeClusterItem> = emptyList(),
 ) : ClusterItem {
     override val position: LatLng
         get() = nodePosition

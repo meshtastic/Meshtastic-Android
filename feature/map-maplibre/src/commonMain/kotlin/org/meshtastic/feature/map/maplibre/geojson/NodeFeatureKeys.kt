@@ -32,6 +32,12 @@ object NodeFeatureKeys {
     const val LAST_HEARD = "lastHeard"
     const val PRECISION_METERS = "precisionMeters"
 
+    /** How many nodes share this feature's spot, as a label. Written only when more than one does. */
+    const val STACK_COUNT = "stackCount"
+
+    /** The nodes sharing this spot, as a JSON string so a cluster leaf query hands it back intact. */
+    const val STACK_MEMBERS = "stackMembers"
+
     /** Which rasterized chip image this node's marker should use. See NodeChipLayer. */
     const val CHIP = "chip"
 }

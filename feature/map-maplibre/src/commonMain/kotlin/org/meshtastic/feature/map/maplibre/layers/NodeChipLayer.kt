@@ -64,10 +64,12 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.map.MapNodePolicy
+import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
+import org.meshtastic.feature.map.maplibre.geojson.stackMembers
 import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
 
 /**
@@ -95,6 +97,7 @@ internal fun NodeChipLayer(
     nodes: List<Node>,
     onNodeClick: ((Int) -> Unit)? = null,
     chipFilter: Expression<BooleanValue>? = null,
+    onStackClick: ((List<ClusterMember>) -> Unit)? = null,
 ) = MapChipLayer(
     id = id,
     source = source,
@@ -107,14 +110,17 @@ internal fun NodeChipLayer(
         { features ->
             // The chip the user sees on top is the one they meant. Query order is not that order, so pick
             // by the rank [chipSortKey] draws by — on the Google map the highest zIndex marker takes the tap.
-            features
-                .maxByOrNull { it.properties.chipRank() }
-                ?.properties
-                ?.get(NodeFeatureKeys.NODE_NUM)
-                ?.let { nodeNum ->
+            val tapped = features.maxByOrNull { it.properties.chipRank() }?.properties
+            val stack = tapped?.stackMembers().orEmpty()
+            if (onStackClick != null && stack.size > 1) {
+                onStackClick(stack)
+                ClickResult.Consume
+            } else {
+                tapped?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
                     click(nodeNum.jsonPrimitive.int)
                     ClickResult.Consume
                 } ?: ClickResult.Pass
+            }
         }
     },
 )
