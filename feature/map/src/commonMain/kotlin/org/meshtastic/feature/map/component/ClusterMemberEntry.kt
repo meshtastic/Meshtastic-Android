@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.component
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 
 /**
  * One node in a cluster the map cannot zoom apart.
@@ -38,7 +39,7 @@ internal fun List<ClusterMemberEntry>.inDialogOrder(): List<ClusterMemberEntry> 
 )
 
 // The Google map's title carries a heard-ago suffix, so the long name, where known, is what both maps sort on.
-private fun ClusterMemberEntry.sortName(): String = node?.user?.long_name?.ifBlank { null } ?: title
+private fun ClusterMemberEntry.sortName(): String = node?.effectiveLongName?.ifBlank { null } ?: title
 
 // ASCII digits only, in the split and in the test alike: Char.isDigit also accepts other scripts' digits, which the
 // split would leave inside a text run, and the two disagreeing breaks the comparator's ordering.

@@ -48,6 +48,25 @@ class ClusterMemberOrderTest {
     }
 
     @Test
+    fun `a local display name decides the order over the broadcast long name`() {
+        val renamed =
+            ClusterMemberEntry(
+                nodeNum = 1,
+                title = "",
+                subtitle = "",
+                node =
+                Node(
+                    num = 1,
+                    displayName = "Alpha",
+                    user = User.Builder().also { wb -> wb.long_name = "Zulu" }.build(),
+                ),
+            )
+        val plain = entry(2, "", longName = "Mike")
+
+        assertEquals(listOf(1, 2), listOf(plain, renamed).inDialogOrder().map { it.nodeNum })
+    }
+
+    @Test
     fun `favorites come first`() {
         val ordered = listOf(entry(1, "Alpha"), entry(2, "Zulu", favorite = true)).inDialogOrder()
 
