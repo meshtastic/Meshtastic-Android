@@ -32,7 +32,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.toElevationString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.copy
@@ -80,7 +79,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: MeasurementSystem = Measurem
         leadingIcon = MeshtasticIcons.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
         trailingContent = MeshtasticIcons.ChevronRight.icon(),
-        onClick = { openMap(node.latitude, node.longitude, node.effectiveLongName) },
+        onClick = { openMap(node.latitude, node.longitude, node.user.long_name) },
         onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(coordinates, copyLabel)) } },
     )
 }

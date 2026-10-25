@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -89,11 +90,20 @@ class ConversationShortcutPublisher(
                 // Combine the message DB (recency + DM peers) with the channel config (names). Ranking both by
                 // last-activity time lets launchers / Android Auto surface the *recently active* conversations first
                 // (the shortcut display cap is small), instead of an arbitrary slice of stale channels.
-                combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow) { contacts, channelSet ->
-                    rankConversationsByRecency(contacts, channelSet)
+                // DM labels come from the node's display name, so a rename alone has to republish too.
+                val displayNames =
+                    nodeRepository.nodeDBbyNum
+                        .map { db -> db.mapValues { it.value.displayName } }
+                        .distinctUntilChanged()
+                combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow, displayNames) {
+                        contacts,
+                        channelSet,
+                        names,
+                    ->
+                    rankConversationsByRecency(contacts, channelSet) to names
                 }
                     .distinctUntilChanged()
-                    .collect { conversations -> publishShortcuts(conversations) }
+                    .collect { (conversations, _) -> publishShortcuts(conversations) }
             }
     }
 

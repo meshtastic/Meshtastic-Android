@@ -69,13 +69,13 @@ fun DisplayNameSection(node: Node, onSaveDisplayName: (Int, String) -> Unit, mod
 
             Spacer(Modifier.height(16.dp))
 
-            var name by remember(node.displayName) { mutableStateOf(node.displayName) }
+            var name by remember(node.num, node.displayName) { mutableStateOf(node.displayName) }
             val edited = name.trim() != node.displayName.trim()
             val keyboardController = LocalSoftwareKeyboardController.current
 
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it.limitToBytes(MAX_DISPLAY_NAME_BYTES) },
+                onValueChange = { name = it.trimStart().limitToBytes(MAX_DISPLAY_NAME_BYTES) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 placeholder = { Text(node.user.long_name) },

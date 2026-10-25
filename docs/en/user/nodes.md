@@ -133,7 +133,9 @@ You can give any node a local display name that replaces its long name in the no
 
 The avatar always shows the node's broadcast short name. While a display name is set, node details shows the node's broadcast long name in a **Long Name** row under the name, so the real name stays readable.
 
-Display names are stored only on this device. They are never sent over the mesh, shared, or exported, so QR codes, contact sharing, message export and the node database export all use the node's real name. Removing a node also removes its display name. Your own node's name is set in [Settings - Radio & User](settings-radio-user).
+Display names are stored only on this device. They are never sent over the mesh or handed to another app, so QR codes, contact sharing, opening a position in a maps app, and the message, node database and GPX exports all use the node's real name. App backups do include display names, the same as notes. Removing a node also removes its display name.
+
+Your own node can have a display name too, from its **Display name** card. The **Edit name** item in your own node's long-press menu does something different: it opens [Settings - Radio & User](settings-radio-user), where you change the name your node broadcasts to everyone.
 
 ## Filtering & sorting
 

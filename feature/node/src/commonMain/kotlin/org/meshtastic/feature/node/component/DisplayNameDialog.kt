@@ -52,7 +52,7 @@ fun DisplayNameDialog(node: Node, onSave: (Int, String) -> Unit, onDismiss: () -
         text = {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it.limitToBytes(MAX_DISPLAY_NAME_BYTES) },
+                onValueChange = { name = it.trimStart().limitToBytes(MAX_DISPLAY_NAME_BYTES) },
                 singleLine = true,
                 placeholder = { Text(node.user.long_name) },
                 supportingText = { Text(stringResource(Res.string.display_name_hint)) },

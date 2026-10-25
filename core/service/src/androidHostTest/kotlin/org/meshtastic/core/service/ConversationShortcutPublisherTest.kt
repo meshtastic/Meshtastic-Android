@@ -120,7 +120,7 @@ class ConversationShortcutPublisherTest {
                 ),
             )
 
-        publisher.startObserving(this)
+        publisher.startObserving(backgroundScope)
         advanceUntilIdle()
 
         val ranks = shortcutManager.dynamicShortcuts.associate { it.id to it.rank }
@@ -134,7 +134,7 @@ class ConversationShortcutPublisherTest {
         every { packetRepository.getContacts() } returns
             flowOf(mapOf("0!00000007" to contact(from = "!00000007", time = 1_000)))
 
-        publisher.startObserving(this)
+        publisher.startObserving(backgroundScope)
         advanceUntilIdle()
 
         val byId = shortcutManager.dynamicShortcuts.associateBy { it.id }
@@ -145,6 +145,22 @@ class ConversationShortcutPublisherTest {
     }
 
     @Test
+    fun `a display name change alone republishes the dm shortcut label`() = runTest {
+        val nodes = MutableStateFlow(mapOf(7 to hawk))
+        every { nodeRepository.nodeDBbyNum } returns nodes
+        every { packetRepository.getContacts() } returns
+            flowOf(mapOf("0!00000007" to contact(from = "!00000007", time = 1_000)))
+
+        publisher.startObserving(backgroundScope)
+        advanceUntilIdle()
+        nodes.value = mapOf(7 to hawk.copy(displayName = "Ridge Base"))
+        advanceUntilIdle()
+
+        val shortcut = shortcutManager.dynamicShortcuts.single { it.id == "0!00000007" }
+        assertEquals("Ridge Base", shortcut.shortLabel)
+    }
+
+    @Test
     fun `dm shortcut for a node missing from the node db is titled with the unknown-user name`() = runTest {
         every { packetRepository.getContacts() } returns
             flowOf(mapOf("0!000000fe" to contact(from = "!000000fe", time = 1_000)))
@@ -152,7 +168,7 @@ class ConversationShortcutPublisherTest {
         // advanceUntilIdle does not wait for.
         val expected = getStringSuspend(Res.string.unknown_username)
 
-        publisher.startObserving(this)
+        publisher.startObserving(backgroundScope)
         advanceUntilIdle()
 
         val published = shortcutManager.dynamicShortcuts.first { it.id == "0!000000fe" }
@@ -168,7 +184,7 @@ class ConversationShortcutPublisherTest {
 
         every { packetRepository.getContacts() } returns flowOf(emptyMap())
 
-        publisher.startObserving(this)
+        publisher.startObserving(backgroundScope)
         advanceUntilIdle()
 
         assertNull(shortcutManager.dynamicShortcuts.find { it.id == "9^all" }, "stale shortcut should be pruned")
@@ -182,7 +198,7 @@ class ConversationShortcutPublisherTest {
 
         every { packetRepository.getContacts() } returns flowOf(emptyMap())
 
-        publisher.startObserving(this)
+        publisher.startObserving(backgroundScope)
         advanceUntilIdle()
 
         assertTrue(
