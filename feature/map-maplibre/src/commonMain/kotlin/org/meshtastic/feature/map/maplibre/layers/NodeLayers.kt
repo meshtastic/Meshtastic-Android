@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
+import org.maplibre.compose.expressions.dsl.and
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
@@ -43,17 +44,19 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
-import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionCirclesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
+import org.meshtastic.feature.map.maplibre.geojson.stackMembers
+import org.meshtastic.feature.map.maplibre.geojson.stacksToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.toClusterMembers
 import org.meshtastic.feature.map.maplibre.nodesByIsolation
 import org.meshtastic.feature.map.maplibre.nodesInView
 import org.meshtastic.feature.map.maplibre.style.MapColors
-import org.meshtastic.feature.map.maplibre.unclusteredNodes
+import org.meshtastic.feature.map.stackBadgeLabel
+import org.meshtastic.feature.map.stackCoincident
 
-// GeoJsonSource.NO_EXPANSION_ZOOM says the same thing, but its companion is private. A cluster that cannot be
-// expanded answers with a sentinel: 0 on Android and desktop, -1 on iOS.
+// GeoJsonSource.NO_EXPANSION_ZOOM says the same thing, but its companion is private. A query that cannot answer
+// returns a sentinel: 0 on Android and desktop, -1 on iOS.
 private const val NO_EXPANSION_ZOOM = 0.0
 private const val CLUSTER_LEAF_LIMIT = 100
 private const val CLUSTER_LEAF_OFFSET = 0
@@ -98,25 +101,17 @@ fun NodeLayers(
     visibleBounds: BoundingBox? = null,
     zoom: Int = 0,
 ) {
-    // What clustering will leave standing on its own. Both the precision circles and the chips are only wanted for
-    // these: a node folded into a cluster is not drawn, so decorating it paints something nobody asked about — at
-    // event density 2,500 translucent circles stack into one opaque disc over the whole venue.
-    val unclustered =
-        remember(nodes, zoom) {
-            unclusteredNodes(
-                nodes = nodes,
-                zoom = zoom,
-                radiusPx = CLUSTER_RADIUS,
-                minPoints = CLUSTER_MIN_POINTS,
-                maxClusterZoom = CLUSTER_MAX_ZOOM,
-            )
-        }
+    // Nodes at one spot draw as one marker, so the source, the chips and the circles all see a stack's top node.
+    val stacks = remember(nodes, myNodeNum) { stackCoincident(nodes, myNodeNum) }
+    val tops = remember(stacks) { stacks.map { it.top } }
+
     if (showPrecisionCircles) {
-        // Narrowed to the viewport as well, for the reason the chips are: a circle is a 64-vertex polygon, and zoomed
-        // in far enough that nothing clusters, every node in the mesh is "unclustered" — so the whole mesh was being
-        // tessellated to draw the handful of circles actually on screen.
-        val visibleUnclustered = remember(unclustered, visibleBounds) { nodesInView(unclustered, visibleBounds) }
-        NodePrecisionLayer(id = "node-precision", nodes = visibleUnclustered)
+        // One circle per stack, drawn whether or not the stack sits inside a cluster bubble, as the Apple map does: the
+        // circle says where the nodes could be, which a count bubble does not. Only reduced-precision positions have
+        // one, and a stack already merges every node truncated to the same point, so circles overlap only their
+        // neighbors. Narrowed to the viewport because each circle is a 64-vertex polygon.
+        val visibleTops = remember(tops, visibleBounds) { nodesInView(tops, visibleBounds) }
+        NodePrecisionLayer(id = "node-precision", nodes = visibleTops)
     }
 
     // Every node the source draws on its own needs an image, or it falls through to a bare dot. Which nodes those are
@@ -129,7 +124,7 @@ fun NodeLayers(
     // spatial property, so a node at the edge of the viewport with neighbours just outside it is not in fact alone;
     // and this keeps the O(n) grid pass keyed on the zoom rather than on the viewport, which changes every frame of
     // a pan. Narrowing afterwards is an order-preserving filter.
-    val rankedNodes = remember(nodes, zoom) { nodesByIsolation(nodes, zoom, CLUSTER_RADIUS) }
+    val rankedNodes = remember(tops, zoom) { nodesByIsolation(tops, zoom, CLUSTER_RADIUS) }
     val chipNodes = remember(rankedNodes, visibleBounds) { nodesInView(rankedNodes, visibleBounds) }
 
     // getClusterExpansionZoom became a suspend function in maplibre-compose 0.15.0 (feature queries
@@ -142,7 +137,7 @@ fun NodeLayers(
 
     val nodeSource =
         rememberFeatureSource(
-            nodes,
+            stacks,
             myNodeNum,
             options =
             GeoJsonOptions {
@@ -152,7 +147,7 @@ fun NodeLayers(
                 clusterMinPoints = CLUSTER_MIN_POINTS
             },
         ) {
-            nodesToFeatureCollection(nodes, myNodeNum)
+            stacksToFeatureCollection(stacks, myNodeNum)
         }
 
     CircleLayer(
@@ -186,7 +181,7 @@ fun NodeLayers(
                             // nodes sitting on the same spot, so zooming would do nothing — list them instead.
                             // Null is a query that lost a race with a style change; the handle is stale, so stop.
                             val expansionZoom = handle.getClusterExpansionZoom(clusterFeature) ?: return@launch
-                            if (expansionZoom <= NO_EXPANSION_ZOOM) {
+                            if (clusterCannotSplit(expansionZoom)) {
                                 val leaves =
                                     handle.getClusterLeaves(clusterFeature, CLUSTER_LEAF_LIMIT, CLUSTER_LEAF_OFFSET)
                                         ?: return@launch
@@ -211,7 +206,7 @@ fun NodeLayers(
     )
 
     // Under the chips, so a pulse reads as a halo around the node rather than covering it.
-    NodePulseLayer(nodes = nodes, source = nodeSource)
+    NodePulseLayer(nodes = tops, source = nodeSource)
 
     // Under the chips, and normally invisible behind them: a chip is 64x28dp and covers this entirely. It exists for
     // the node whose chip image did not fit under NodeChipLayer's ceiling — without it such a node resolves to a
@@ -225,10 +220,17 @@ fun NodeLayers(
         strokeColor = const(Color.White),
         strokeWidth = const(2.dp),
         onClick = { features ->
-            features.firstOrNull()?.properties?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
-                onNodeClick(nodeNum.jsonPrimitive.int)
+            val tapped = features.firstOrNull()?.properties
+            val stack = tapped?.stackMembers().orEmpty()
+            if (stack.size > 1) {
+                onClusterMembers(stack)
                 ClickResult.Consume
-            } ?: ClickResult.Pass
+            } else {
+                tapped?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
+                    onNodeClick(nodeNum.jsonPrimitive.int)
+                    ClickResult.Consume
+                } ?: ClickResult.Pass
+            }
         },
     )
 
@@ -238,8 +240,26 @@ fun NodeLayers(
         nodes = chipNodes,
         onNodeClick = onNodeClick,
         chipFilter = !feature.has("point_count"),
+        onStackClick = onClusterMembers,
+    )
+
+    val badgeLabels = remember(stacks) { stacks.filter { it.count > 1 }.map { stackBadgeLabel(it.count) }.distinct() }
+    StackBadgeLayer(
+        id = "node-stack-badge",
+        source = nodeSource,
+        labels = badgeLabels,
+        filter = feature.has(NodeFeatureKeys.STACK_COUNT) and !feature.has("point_count"),
     )
 }
+
+/**
+ * Whether a tapped cluster should be listed rather than zoomed into.
+ *
+ * Supercluster answers `clusterMaxZoom + 1` for points that never split, which is past where the source clusters at
+ * all, so zooming there changes nothing. A sentinel at or below [NO_EXPANSION_ZOOM] is a query that could not answer.
+ */
+internal fun clusterCannotSplit(expansionZoom: Double): Boolean =
+    expansionZoom <= NO_EXPANSION_ZOOM || expansionZoom > CLUSTER_MAX_ZOOM
 
 /** Small enough that a chip drawn over it hides it completely. */
 private const val NODE_DOT_RADIUS = 12

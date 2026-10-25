@@ -39,54 +39,15 @@ private fun MapBounds.toBoundingBox(): BoundingBox = BoundingBox(
 )
 
 /**
- * The nodes clustering will leave standing on their own at [zoom].
+ * [nodes] ordered by how alone each one is: fewest neighbours within [radiusPx] first.
  *
- * Both the chips and the precision circles are only wanted for these. Clustering decides the split inside the source at
- * render time, and there is no API that reports it back, so this applies the same rule supercluster does: a point joins
- * a cluster when at least [minPoints] points fall within [radiusPx] of each other in tile pixels. Its own indexes are
- * built per whole zoom level, which is why the caller should pass a floored zoom — it also keeps this off the recompose
- * path for the fractional zoom of a pinch.
+ * This is the order to rasterize chips in. Clustering decides inside the source which nodes stand alone and there is no
+ * API that reports it back, but a node the source draws on its own has, by definition, few neighbours, so the ones that
+ * need a chip most sort to the front and the ones just past the cluster threshold come next rather than last. That
+ * makes the image budget run out on nodes buried mid-cluster, which are never drawn anyway.
  *
  * Distances are measured in Web Mercator world pixels, the space clustering itself works in, rather than in degrees — a
  * degree of longitude is a very different distance at the top of the map than at the equator.
- */
-fun unclusteredNodes(nodes: List<Node>, zoom: Int, radiusPx: Int, minPoints: Int, maxClusterZoom: Int): List<Node> {
-    // Past its ceiling the source stops clustering entirely, so everything stands alone.
-    if (zoom > maxClusterZoom || nodes.size < minPoints) return nodes
-
-    val worldSize = TILE_SIZE * 2.0.pow(zoom)
-    val pixels = nodes.map { it.worldPixel(worldSize) }
-    val cells = mutableMapOf<Pair<Int, Int>, MutableList<Int>>()
-    pixels.forEachIndexed { index, pixel -> cells.getOrPut(pixel.cell(radiusPx)) { mutableListOf() }.add(index) }
-
-    // Supercluster assigns greedily rather than counting neighbours: it walks the points, and the first one to claim a
-    // neighbourhood takes it. Counting instead called a node clustered whenever enough others were nearby, even where
-    // those others had already been taken by someone else and the node would in fact be drawn on its own — which left
-    // it with a bare dot and no chip.
-    val taken = BooleanArray(nodes.size)
-    val alone = mutableListOf<Node>()
-    pixels.indices.forEach { index ->
-        if (taken[index]) return@forEach
-        val neighbours = neighboursWithin(index, pixels, cells, radiusPx, taken)
-        if (neighbours.size >= minPoints) {
-            neighbours.forEach { taken[it] = true }
-        } else {
-            // Marked taken too: supercluster excludes every visited point from later neighbourhoods, clustered
-            // or not — a node already standing alone must not pad a later cluster up to the minimum.
-            taken[index] = true
-            alone += nodes[index]
-        }
-    }
-    return alone
-}
-
-/**
- * [nodes] ordered by how alone each one is: fewest neighbours within [radiusPx] first.
- *
- * This is the order to rasterize chips in. A node the source draws on its own has, by definition, few neighbours, so
- * the ones that need a chip most sort to the front — and the ones just past the cluster threshold, where
- * [unclusteredNodes] is most likely to have guessed wrong, come next rather than last. That makes the image budget run
- * out on nodes buried mid-cluster, which are never drawn anyway.
  */
 fun nodesByIsolation(nodes: List<Node>, zoom: Int, radiusPx: Int): List<Node> {
     val worldSize = TILE_SIZE * 2.0.pow(zoom)
