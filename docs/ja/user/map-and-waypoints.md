@@ -1,7 +1,7 @@
 ---
 title: マップとウェイポイント
 nav_order: 6
-last_updated: 2026-10-21
+last_updated: 2026-10-24
 description: マップ上でノードの位置を確認し、ウェイポイントの作成・共有、マップレイヤーとサイトプランナーの管理、位置共有とプライバシーの制御を行います。
 aliases:
   - map
@@ -28,7 +28,9 @@ aliases:
 
 ### ノードのマーカー
 
-位置を報告している各ノードは、そのノードの短縮名を表示する**ノードチップ**マーカーとして表示されます。チップは、そのノード固有のアイデンティティカラー（ノード番号から導かれる一定の色）で色付けされます。ノードリストで使われるのと同じチップなので、どこでも同じ見た目になります。マーカーの色は、オンライン／オフラインの状態を**表しません**。ノードの位置がライブで更新されると、そのマーカーが短く脈打つように点滅します。縮小すると、近くのマーカーはまとめて表示（クラスタリング）されます。 Tapping a cluster zooms in on it, and a cluster whose nodes all share one spot lists them instead.
+位置を報告している各ノードは、そのノードの短縮名を表示する**ノードチップ**マーカーとして表示されます。チップは、そのノード固有のアイデンティティカラー（ノード番号から導かれる一定の色）で色付けされます。ノードリストで使われるのと同じチップなので、どこでも同じ見た目になります。マーカーの色は、オンライン／オフラインの状態を**表しません**。ノードの位置がライブで更新されると、そのマーカーが短く脈打つように点滅します。 Tapping a chip opens that node's details.
+
+Nodes within 5 m of each other, which is common when they share a reduced position precision or sit at one site, are drawn as one chip with a count on its corner, showing a favorite or your own node when one is there. Tapping it lists every node at that spot, favorites first. 縮小すると、近くのマーカーはまとめて表示（クラスタリング）されます。 Tapping a cluster zooms in to fit its nodes, and a cluster whose nodes all share one spot lists them instead. With **Show Precision Circles** on, each spot's circle stays visible inside a cluster too.
 
 ### マップの操作
 

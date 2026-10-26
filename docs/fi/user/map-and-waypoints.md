@@ -1,7 +1,7 @@
 ---
 title: Kartta ja reittipisteet
 nav_order: 6
-last_updated: 2026-10-21
+last_updated: 2026-10-24
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -28,7 +28,9 @@ Kartta näyttää:
 
 ### Radioiden merkinnät
 
-Jokainen sijaintinsa raportoiva radio näytetään **radiotunnisteena**, jossa näkyy radion lyhyt nimi. Tunniste väritetään radion oman tunnistevärin mukaan (pysyvä väri, joka muodostetaan radion numerosta) — sama radiotunniste näkyy myös radioluettelossa, joten radio näyttää kaikkialla samalta. Merkin väri **ei** ilmaise, onko radio verkossa vai poissa verkosta. Kun radion sijainti päivittyy reaaliajassa, sen merkki sykkii hetken. Lähekkäiset merkit ryhmitellään, kun loitonnat karttaa. Tapping a cluster zooms in on it, and a cluster whose nodes all share one spot lists them instead.
+Jokainen sijaintinsa raportoiva radio näytetään **radiotunnisteena**, jossa näkyy radion lyhyt nimi. Tunniste väritetään radion oman tunnistevärin mukaan (pysyvä väri, joka muodostetaan radion numerosta) — sama radiotunniste näkyy myös radioluettelossa, joten radio näyttää kaikkialla samalta. Merkin väri **ei** ilmaise, onko radio verkossa vai poissa verkosta. Kun radion sijainti päivittyy reaaliajassa, sen merkki sykkii hetken. Tapping a chip opens that node's details.
+
+Nodes within 5 m of each other, which is common when they share a reduced position precision or sit at one site, are drawn as one chip with a count on its corner, showing a favorite or your own node when one is there. Tapping it lists every node at that spot, favorites first. Lähekkäiset merkit ryhmitellään, kun loitonnat karttaa. Tapping a cluster zooms in to fit its nodes, and a cluster whose nodes all share one spot lists them instead. With **Show Precision Circles** on, each spot's circle stays visible inside a cluster too.
 
 ### Kartan hallinta
 

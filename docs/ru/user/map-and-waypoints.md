@@ -1,7 +1,7 @@
 ---
 title: Карта и путевые точки
 nav_order: 6
-last_updated: 2026-10-21
+last_updated: 2026-10-24
 description: Просматривайте расположение нод на карте, создавайте и делитесь путевыми точками, управляйте слоями карты и планировщиком участков, а также контролируйте передачу геоданных и приватность.
 aliases:
   - map
@@ -28,7 +28,9 @@ aliases:
 
 ### Маркеры нод
 
-Каждая нода, передающая своё местоположение, отображается в виде **маркера-бирки** с коротким именем ноды. Цвет бирки определяется собственным цветом идентификации ноды (постоянным цветом, получаемым из её номера) — тем же самым, что используется в списке нод, поэтому нода везде выглядит одинаково. Цвет маркера **не** отображает статус в сети/не в сети. Когда местоположение ноды обновляется в реальном времени, её маркер ненадолго подсвечивается пульсацией. Близко расположенные маркеры группируются в кластеры при уменьшении масштаба. Tapping a cluster zooms in on it, and a cluster whose nodes all share one spot lists them instead.
+Каждая нода, передающая своё местоположение, отображается в виде **маркера-бирки** с коротким именем ноды. Цвет бирки определяется собственным цветом идентификации ноды (постоянным цветом, получаемым из её номера) — тем же самым, что используется в списке нод, поэтому нода везде выглядит одинаково. Цвет маркера **не** отображает статус в сети/не в сети. Когда местоположение ноды обновляется в реальном времени, её маркер ненадолго подсвечивается пульсацией. Tapping a chip opens that node's details.
+
+Nodes within 5 m of each other, which is common when they share a reduced position precision or sit at one site, are drawn as one chip with a count on its corner, showing a favorite or your own node when one is there. Tapping it lists every node at that spot, favorites first. Близко расположенные маркеры группируются в кластеры при уменьшении масштаба. Tapping a cluster zooms in to fit its nodes, and a cluster whose nodes all share one spot lists them instead. With **Show Precision Circles** on, each spot's circle stays visible inside a cluster too.
 
 ### Управление картой
 
