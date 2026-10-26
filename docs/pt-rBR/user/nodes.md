@@ -1,7 +1,7 @@
 ---
 title: Nós
 nav_order: 4
-last_updated: 2026-10-21
+last_updated: 2026-10-24
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -20,7 +20,7 @@ The Nodes screen lists every node visible on your mesh.
 
 The node list shows every node your node has heard, including:
 
-- **Node name** — user-configured long name
+- **Node name** — the node's long name, or the display name you gave it (see [Display names](#display-names))
 - **Short name** — 4-character identifier
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Last heard** — time since last communication
@@ -127,6 +127,16 @@ On a node's detail screen, tap **Share Contact** to produce a link and a QR code
 Sharing your own contact this way marks it as verified in person, so whoever imports it sees the **Verified contact** icon rather than the signed one. Relaying someone else's contact passes on only what your app had already recorded about them.
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
+
+## Display names
+
+You can give any node a local display name that replaces its long name in the node list, node details, messages, notifications, maps and the node tracker widget. Set it from the node's long-press menu (**Set display name**) or from the **Display name** card in node details. Saving an empty name clears it. Names are limited to 36 bytes of UTF-8, the same limit as the Apple app.
+
+The avatar always shows the node's broadcast short name. While a display name is set, node details shows the node's broadcast long name in a **Long Name** row under the name, so the real name stays readable.
+
+Display names are stored only on this device. They are never sent over the mesh or handed to another app, so QR codes, contact sharing, opening a position in a maps app, and the message, node database and GPX exports all use the node's real name. App backups do include display names, the same as notes. Removing a node also removes its display name.
+
+Your own node can have a display name too, from its **Display name** card. The **Edit name** item in your own node's long-press menu does something different: it opens [Settings - Radio & User](settings-radio-user), where you change the name your node broadcasts to everyone.
 
 ## Filtering & sorting
 
