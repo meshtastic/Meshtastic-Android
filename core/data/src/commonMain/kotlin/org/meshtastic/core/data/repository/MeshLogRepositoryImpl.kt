@@ -137,6 +137,14 @@ open class MeshLogRepositoryImpl(
         .distinctUntilChanged()
         .conflate()
 
+    override fun getInboundRequestLogs(portNum: PortNum): Flow<List<MeshLog>> = dbManager
+        .observeCurrentDb { it.meshLogDao().getLogsOnPort(portNum.value, MeshLog.NODE_NUM_LOCAL, DEFAULT_MAX_LOGS) }
+        .map { list ->
+            list.map { it.asExternalModel() }.filter { it.fromRadio.packet?.decoded?.want_response == true }
+        }
+        .distinctUntilChanged()
+        .flowOn(dispatchers.io)
+
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         val decoded = log.fromRadio.packet?.decoded ?: return@runCatching null
         // Requests for telemetry (want_response = true) should not be logged as data points.

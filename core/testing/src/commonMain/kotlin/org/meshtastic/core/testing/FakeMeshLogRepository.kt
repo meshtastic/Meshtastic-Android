@@ -88,6 +88,14 @@ class FakeMeshLogRepository :
         }
     }
 
+    override fun getInboundRequestLogs(portNum: PortNum): Flow<List<MeshLog>> = logsFlow.map {
+        it.filter { log ->
+            log.fromNum != MeshLog.NODE_NUM_LOCAL &&
+                log.portNum == portNum.value &&
+                log.fromRadio.packet?.decoded?.want_response == true
+        }
+    }
+
     override fun getMyNodeInfo(): Flow<MyNodeInfo?> = MutableStateFlow(null)
 
     override suspend fun insert(log: MeshLog) {
