@@ -166,6 +166,9 @@ abstract class DatabaseManagerTestFixture {
         /** In-memory databases never share a file, so no other connection can hold one's write lock. */
         override suspend fun isWriteLockHeldElsewhere(database: MeshtasticDatabase): Boolean = false
 
+        /** In-memory databases have no file to be corrupt, and probing would hop to Room's real query threads. */
+        override suspend fun probeDatabaseOpen(database: MeshtasticDatabase) = Unit
+
         /** Drives the pool-recovery rate window without relying on wall-clock or virtual-time advancement. */
         var recoveryClockMillis: Long = 0L
 

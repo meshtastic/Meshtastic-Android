@@ -58,4 +58,36 @@ class DatabaseManagerPoolTimeoutClassifierTest {
         val e = Exception("database is locked")
         assertFalse(DatabaseManager.isDbPoolAcquireTimeoutException(e))
     }
+
+    @Test
+    fun `treats a malformed database image as corrupt`() {
+        val e = Exception("Error code: 11, message: database disk image is malformed")
+        assertTrue(DatabaseManager.isDbCorruptException(RuntimeException("migration failed", e)))
+    }
+
+    @Test
+    fun `treats a file that is not a database as corrupt`() {
+        assertTrue(DatabaseManager.isDbCorruptException(Exception("Error code: 26, message: file is not a database")))
+    }
+
+    @Test
+    fun `does not treat an FTS5 index desync as corrupt`() {
+        val e = Exception("Error code: 267, message: database disk image is malformed")
+        assertFalse(DatabaseManager.isDbCorruptException(e))
+    }
+
+    @Test
+    fun `lists main database files only`() {
+        assertTrue(DatabaseManager.isDatabaseFileName("meshtastic_database_abc"))
+        assertTrue(DatabaseManager.isDatabaseFileName("meshtastic_database_abc.db"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc-wal"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc.corrupt-1700000000000"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc-wal.corrupt-1700000000000"))
+        assertFalse(DatabaseManager.isDatabaseFileName("other.db"))
+    }
+
+    @Test
+    fun `does not treat a locked database as corrupt`() {
+        assertFalse(DatabaseManager.isDbCorruptException(Exception("Error code: 5, message: database is locked")))
+    }
 }
