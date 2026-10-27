@@ -524,19 +524,20 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      */
     private suspend fun openVerifiedDatabase(dbName: String): MeshtasticDatabase {
         val cached = dbCache[dbName]
-        val db = cached ?: withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
         val isNewDevicePool = cached == null && dbName != DatabaseConstants.DEFAULT_DB_NAME
         var probeFinished = false
         val failure =
             try {
-                (if (isNewDevicePool) corruptionOnOpen(db) else null).also { probeFinished = true }
+                val opened = cached ?: withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
+                (if (isNewDevicePool) corruptionOnOpen(opened) else null).also { probeFinished = true }
             } finally {
-                // A cancelled probe leaves the pool unpublished: evict it so the next switch probes a fresh one.
-                if (!probeFinished) {
-                    dbCache.remove(dbName)
-                    closeUnpublishedDatabase(dbName, db)
+                // A cancelled open or probe leaves an unprobed, unpublished pool cached: evict it so the next switch
+                // probes again. Only a pool this call created, so a published one is never closed here.
+                if (isNewDevicePool && !probeFinished) {
+                    dbCache.remove(dbName)?.let { closeUnpublishedDatabase(dbName, it) }
                 }
             }
+        val db = dbCache.getValue(dbName)
         if (failure == null) return db
 
         dbCache.remove(dbName)

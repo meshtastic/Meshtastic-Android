@@ -20,10 +20,12 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room3.Room
 import androidx.room3.useReaderConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -94,6 +96,31 @@ class DatabaseManagerCorruptDatabaseJvmTest {
         assertRecoversOnSwitch(dbFile)
     }
 
+    @Test
+    fun aSwitchCancelledDuringTheProbeLeavesNoUnprobedPoolCached() = runTest(testDispatcher) {
+        val manager = FilePersistentManager(datastore, dispatchers, persistentDir)
+        try {
+            val gate = CompletableDeferred<Unit>()
+            manager.probeGate = gate
+            val switch = launch { manager.switchActiveDatabase(ADDRESS) }
+            runCurrent()
+            assertEquals(1, manager.probeCount)
+            switch.cancelAndJoin()
+
+            manager.probeGate = null
+            manager.switchActiveDatabase(ADDRESS)
+
+            assertEquals(
+                2,
+                manager.probeCount,
+                "the second switch must probe a fresh pool, not reuse the cached one",
+            )
+        } finally {
+            manager.close()
+            runCurrent()
+        }
+    }
+
     private suspend fun TestScope.createDeviceDatabase(): Path {
         val manager = FilePersistentManager(datastore, dispatchers, persistentDir)
         manager.switchActiveDatabase(ADDRESS)
@@ -139,6 +166,14 @@ class DatabaseManagerCorruptDatabaseJvmTest {
         private val persistentDir: Path,
     ) : DatabaseManager(datastore, testDispatchers) {
         val builtNames = mutableListOf<String>()
+        var probeGate: CompletableDeferred<Unit>? = null
+        var probeCount = 0
+
+        override suspend fun probeDatabaseOpen(database: MeshtasticDatabase) {
+            probeCount++
+            probeGate?.await()
+            super.probeDatabaseOpen(database)
+        }
 
         override fun buildDatabase(dbName: String): MeshtasticDatabase {
             builtNames += dbName
