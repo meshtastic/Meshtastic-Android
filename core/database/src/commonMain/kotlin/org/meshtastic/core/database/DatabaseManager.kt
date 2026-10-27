@@ -77,6 +77,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 internal const val MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES = 3
@@ -1346,28 +1347,39 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      */
     @Suppress("ReturnCount")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        val queuedAt = nowMillis
+        val timing = DbCallTiming()
         currentCoroutineContext().ensureActive()
         val admission = beginWrite()
         val blockStarted = CompletableDeferred<Unit>()
-        val execution = launchDbBlock(admission, blockStarted, block)
+        val execution = launchDbBlock(admission, blockStarted, timing, block)
         val timeoutMillis = withDbTimeoutMillis
         val completed =
             if (timeoutMillis <= 0) execution.join() else withTimeoutOrNull(timeoutMillis) { execution.join() }
-        if (completed == null) abandonWedgedDbBlock(admission, blockStarted, execution, timeoutMillis)
+        if (completed == null) abandonWedgedDbBlock(admission, blockStarted, execution, timeoutMillis, callerOf(block))
 
         // Re-check cancellation so a stale caller does not continue after the DB releases.
         currentCoroutineContext().ensureActive()
-        val elapsedMillis = nowMillis - queuedAt
-        if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
+        val elapsed = timing.queued.elapsedNow()
+        if (elapsed.inWholeMilliseconds >= WITH_DB_SLOW_OPERATION_MS) {
+            val started = timing.started
+            val finished = timing.finished
+            val waited = started?.let { it - timing.queued } ?: elapsed
+            val held = if (started != null && finished != null) finished - started else Duration.ZERO
             Logger.w {
-                "withDb took ${elapsedMillis}ms including lane wait; persistent slow logs indicate the DB access " +
-                    "path should be revisited"
+                "withDb took ${elapsed.inWholeMilliseconds}ms (waited ${waited.inWholeMilliseconds}ms, held " +
+                    "${held.inWholeMilliseconds}ms) in ${callerOf(block)}"
             }
         }
         val failure = execution.getCompletionExceptionOrNull() ?: return execution.getCompleted()
         handleDbBlockFailure(admission, failure)
     }
+
+    /**
+     * Names the code that passed [block], from its compiled lambda class (`Owner$method$N`). R8 keeps these names (see
+     * `proguard-rules.pro`); a platform without class names reports `unnamed`.
+     */
+    private fun callerOf(block: Any): String =
+        block::class.toString().removePrefix("class ").takeUnless { it.isBlank() || it == "null" } ?: "unnamed"
 
     /**
      * Starts [block] on the admitted pool's lane.
@@ -1382,13 +1394,19 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private fun <T> launchDbBlock(
         admission: AdmittedDatabase,
         blockStarted: CompletableDeferred<Unit>,
+        timing: DbCallTiming,
         block: suspend (MeshtasticDatabase) -> T,
     ): Deferred<T> = managerScope.async(admission.lane, start = CoroutineStart.ATOMIC) {
         val db = admission.database
         try {
             currentCoroutineContext().ensureActive()
+            timing.started = TimeSource.Monotonic.markNow()
             blockStarted.complete(Unit)
-            withContext(NonCancellable) { block(db) }
+            try {
+                withContext(NonCancellable) { block(db) }
+            } finally {
+                timing.finished = TimeSource.Monotonic.markNow()
+            }
         } finally {
             withContext(NonCancellable) { endWrite(db) }
         }
@@ -1437,15 +1455,17 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         blockStarted: CompletableDeferred<Unit>,
         execution: Deferred<*>,
         timeoutMillis: Long,
+        caller: String,
     ): Nothing {
         if (!blockStarted.isCompleted) {
             execution.cancel()
             // Re-check: the block may have acquired the lane between the timeout and the cancellation, in which case it
             // is inside NonCancellable and must be abandoned instead of reported as never started.
             if (!blockStarted.isCompleted) {
-                Logger.w { "withDb waited ${timeoutMillis}ms for the DB lane; its callback never started" }
+                Logger.w { "withDb waited ${timeoutMillis}ms for the DB lane; its callback never started in $caller" }
                 throw DatabaseOperationTimeoutException(
-                    "withDb did not start within ${timeoutMillis}ms; an earlier block is wedged on this database",
+                    "withDb did not start within ${timeoutMillis}ms in $caller; an earlier block is wedged on this " +
+                        "database",
                 )
             }
         }
@@ -1462,19 +1482,21 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         Logger.w {
             when (reopened) {
                 is ReopenResult.Replaced ->
-                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it and reopened the active DB so later " +
-                        "calls run on a fresh connection pool"
+                    "withDb callback exceeded ${timeoutMillis}ms in $caller; abandoned it and reopened the active DB " +
+                        "so later calls run on a fresh connection pool"
 
                 ReopenResult.WriteLockHeld ->
-                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it and kept the active DB because " +
-                        "another connection still holds its write lock"
+                    "withDb callback exceeded ${timeoutMillis}ms in $caller; abandoned it and kept the active DB " +
+                        "because another connection still holds its write lock"
 
                 ReopenResult.NotReplaced ->
-                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it but the active DB was not reopened"
+                    "withDb callback exceeded ${timeoutMillis}ms in $caller; abandoned it but the active DB was not " +
+                        "reopened"
             }
         }
         throw DatabaseOperationTimeoutException(
-            "withDb callback did not finish within ${timeoutMillis}ms and was abandoned without being replayed",
+            "withDb callback did not finish within ${timeoutMillis}ms in $caller and was abandoned without being " +
+                "replayed",
         )
     }
 
@@ -2202,3 +2224,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
  * to; the active pool is reopened so subsequent operations proceed.
  */
 class DatabaseOperationTimeoutException(message: String) : IllegalStateException(message)
+
+/** Monotonic marks for one [DatabaseManager.withDb] call; the lane coroutine writes them, the caller reads them. */
+private class DbCallTiming {
+    val queued: TimeSource.Monotonic.ValueTimeMark = TimeSource.Monotonic.markNow()
+
+    @Volatile var started: TimeSource.Monotonic.ValueTimeMark? = null
+
+    @Volatile var finished: TimeSource.Monotonic.ValueTimeMark? = null
+}
