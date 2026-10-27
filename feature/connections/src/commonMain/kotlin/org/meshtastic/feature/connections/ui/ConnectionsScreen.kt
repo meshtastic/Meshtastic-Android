@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,6 +55,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.ResourceEnvironment
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.rememberResourceEnvironment
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
@@ -146,6 +150,7 @@ import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.loraSummary
+import org.meshtastic.proto.Config
 
 /**
  * Fixed minimum height for the "connected device" card at the top of the Connections screen. Shared across the three UI
@@ -411,23 +416,19 @@ fun ConnectionsScreen(
     // Work around CMP-6615 in Compose Multiplatform 1.11.1: Android stringResource enters a blocking resource state.
     // Keep these stable slots outside AnimatedContent so connection-state transitions do not re-enter resource loading
     // while the main thread is applying an animation frame.
-    val firmwareVersion =
-        ourNode
-            ?.metadata
-            ?.firmware_version
-            ?.takeIf { it.isNotBlank() }
-            ?.let { stringResource(Res.string.firmware_version, it) }
+    // Labels that first appear on connect load with suspend getString: a first-time stringResource load parks the main
+    // thread until Dispatchers.Default is free, and the handshake keeps it busy.
+    val resourceEnvironment = rememberResourceEnvironment()
+    val rawFirmwareVersion = ourNode?.metadata?.firmware_version?.takeIf { it.isNotBlank() }
+    val firmwareVersion by
+        produceState<String?>(null, rawFirmwareVersion, resourceEnvironment) {
+            value = rawFirmwareVersion?.let { getString(resourceEnvironment, Res.string.firmware_version, it) }
+        }
     val lora = localConfig.lora
-    val loraSummaryText =
-        loraSummary(
-            lora = lora,
-            presetLabel = lora?.modem_preset?.schemaLabelRes()?.let { stringResource(it) },
-            regionLabel = lora?.region?.schemaLabelRes()?.let { stringResource(it) },
-            customLabel = stringResource(Res.string.lora_preset_custom),
-        )
-            ?.let { parts ->
-                parts.region?.let { stringResource(Res.string.lora_preset_region, parts.preset, it) } ?: parts.preset
-            }
+    val loraSummaryText by
+        produceState<String?>(null, lora, resourceEnvironment) {
+            value = lora?.let { loraSummaryText(resourceEnvironment, it) }
+        }
     val currentlyConnectedText =
         CurrentlyConnectedText(
             unknownLabel = stringResource(Res.string.unknown),
@@ -969,4 +970,15 @@ private enum class ConnectionUiState {
 
     /** Connected with node info available. */
     CONNECTED_WITH_NODE,
+}
+
+private suspend fun loraSummaryText(environment: ResourceEnvironment, lora: Config.LoRaConfig): String? {
+    val parts =
+        loraSummary(
+            lora = lora,
+            presetLabel = lora.modem_preset.schemaLabelRes()?.let { getString(environment, it) },
+            regionLabel = lora.region.schemaLabelRes()?.let { getString(environment, it) },
+            customLabel = getString(environment, Res.string.lora_preset_custom),
+        ) ?: return null
+    return parts.region?.let { getString(environment, Res.string.lora_preset_region, parts.preset, it) } ?: parts.preset
 }
