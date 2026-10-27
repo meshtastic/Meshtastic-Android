@@ -77,6 +77,16 @@ class DatabaseManagerPoolTimeoutClassifierTest {
     }
 
     @Test
+    fun `lists main database files only`() {
+        assertTrue(DatabaseManager.isDatabaseFileName("meshtastic_database_abc"))
+        assertTrue(DatabaseManager.isDatabaseFileName("meshtastic_database_abc.db"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc-wal"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc.corrupt-1700000000000"))
+        assertFalse(DatabaseManager.isDatabaseFileName("meshtastic_database_abc-wal.corrupt-1700000000000"))
+        assertFalse(DatabaseManager.isDatabaseFileName("other.db"))
+    }
+
+    @Test
     fun `does not treat a locked database as corrupt`() {
         assertFalse(DatabaseManager.isDbCorruptException(Exception("Error code: 5, message: database is locked")))
     }

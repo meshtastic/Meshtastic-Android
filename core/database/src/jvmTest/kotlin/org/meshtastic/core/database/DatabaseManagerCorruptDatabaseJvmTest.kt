@@ -97,6 +97,25 @@ class DatabaseManagerCorruptDatabaseJvmTest {
     }
 
     @Test
+    fun aCorruptDatabaseWhosePoolFailsToCloseStaysInPlace() = runTest(testDispatcher) {
+        val dbFile = createDeviceDatabase()
+        FileSystem.SYSTEM.write(dbFile) { writeUtf8("not a database ".repeat(PAGE_BYTES)) }
+        val damaged = FileSystem.SYSTEM.read(dbFile) { readByteArray() }
+        val manager = FilePersistentManager(datastore, dispatchers, persistentDir)
+        manager.failDeviceClose = true
+        try {
+            assertTrue(runCatching { manager.switchActiveDatabase(ADDRESS) }.isFailure)
+
+            assertTrue(FileSystem.SYSTEM.list(persistentDir).none { ".corrupt-" in it.name })
+            assertTrue(FileSystem.SYSTEM.read(dbFile) { readByteArray() }.contentEquals(damaged))
+        } finally {
+            manager.failDeviceClose = false
+            manager.close()
+            runCurrent()
+        }
+    }
+
+    @Test
     fun aSwitchCancelledDuringTheProbeLeavesNoUnprobedPoolCached() = runTest(testDispatcher) {
         val manager = FilePersistentManager(datastore, dispatchers, persistentDir)
         try {
@@ -186,11 +205,13 @@ class DatabaseManagerCorruptDatabaseJvmTest {
                 .build()
         }
 
-        override fun moveDatabaseFilesAside(dbName: String, suffix: String) {
-            for (name in listOf("$dbName.db", "$dbName.db-wal", "$dbName.db-shm", "$dbName.db-journal")) {
-                val file = persistentDir / name
-                if (FileSystem.SYSTEM.exists(file)) FileSystem.SYSTEM.atomicMove(file, persistentDir / "$name$suffix")
-            }
+        override fun databaseFileFor(dbName: String): Path = persistentDir / "$dbName.db"
+
+        var failDeviceClose = false
+
+        override fun closeDatabase(database: MeshtasticDatabase) {
+            if (failDeviceClose) throw IllegalStateException("forced close failure")
+            super.closeDatabase(database)
         }
 
         override fun createPoolLane(): kotlinx.coroutines.CoroutineDispatcher = testDispatchers.io
