@@ -272,9 +272,10 @@ abstract class MeshtasticDatabase : RoomDatabase() {
          * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
          * databases, and under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`) the reader-pool
          * permit semaphore can wedge: all reader connections report `Free` but `permits=0`, so every read acquisition
-         * times out indefinitely ("Error code: 5, Timed out attempting to acquire a reader connection"). Android hit
-         * this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs, so JVM/iOS were moved
-         * off the multi-reader pool too. Single-connection eliminates the separate reader permit pool entirely.
+         * waits indefinitely (Room logs "Timed out attempting to acquire a reader connection" and retries; nothing is
+         * thrown). Android hit this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs,
+         * so JVM/iOS were moved off the multi-reader pool too. Single-connection eliminates the separate reader permit
+         * pool entirely.
          *
          * For in-memory databases (tests) this is a no-op for pooling — Room already serves `name == null` databases
          * from a single connection — it just serializes the query dispatcher.

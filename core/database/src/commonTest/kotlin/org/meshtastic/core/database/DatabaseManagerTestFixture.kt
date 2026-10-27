@@ -264,8 +264,7 @@ abstract class DatabaseManagerTestFixture {
 
     protected class TestError(message: String) : Error(message)
 
-    protected fun roomPoolTimeout() =
-        IllegalStateException("Timed out attempting to acquire a reader connection from the database pool")
+    protected fun stalledFlow() = DbFlowStalledException("no first emission")
 
     /** Builds a minimal [MyNodeEntity] carrying only [num] for association/merge write-leak checks. */
     protected fun myNode(num: Int) = MyNodeEntity(

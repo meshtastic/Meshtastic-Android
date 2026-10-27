@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.DbFlowStalledException
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import kotlin.test.AfterTest
@@ -38,11 +39,11 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 
 /**
- * Regression for #6608. A Room permit leak surfaces as an endless acquire-timeout storm, and
- * `DatabaseProvider.observeCurrentDb` recovery is budgeted — once the budget is spent, the DAO flow terminates. Before
- * this hardening, a terminated upstream under `stateIn(..., SharingStarted.Eagerly, ...)` left the node list empty for
- * the rest of the process. These tests poison the pool for more failures than any recovery budget allows and assert the
- * node flows still reach a value.
+ * Regression for #6608. A Room permit leak surfaces as an endless stall storm, and `DatabaseProvider.observeCurrentDb`
+ * recovery is budgeted — once the budget is spent, the DAO flow terminates. Before this hardening, a terminated
+ * upstream under `stateIn(..., SharingStarted.Eagerly, ...)` left the node list empty for the rest of the process.
+ * These tests poison the pool for more failures than any recovery budget allows and assert the node flows still reach a
+ * value.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PoisonedPoolNodeFlowRecoveryTest {
@@ -94,8 +95,8 @@ class PoisonedPoolNodeFlowRecoveryTest {
 
     /**
      * Models a leaked-permit pool with an exhausted recovery budget: the first [failuresBeforeRecovery] collections
-     * throw Room's acquire-timeout message and no in-place pool replacement happens, exactly as when
-     * `DatabaseManager`'s Flow-recovery budget refuses another reopen.
+     * throw [DbFlowStalledException] and no in-place pool replacement happens, exactly as when `DatabaseManager`'s
+     * Flow-recovery budget refuses another reopen.
      */
     private class PoisonedPoolProvider(database: MeshtasticDatabase, private val failuresBeforeRecovery: Int) :
         DatabaseProvider {
@@ -110,9 +111,7 @@ class PoisonedPoolNodeFlowRecoveryTest {
                 flow {
                     observedQueries += 1
                     if (observedQueries <= failuresBeforeRecovery) {
-                        throw IllegalStateException(
-                            "Error code: 5, message: Timed out attempting to acquire a reader connection",
-                        )
+                        throw DbFlowStalledException("no first emission")
                     }
                     emitAll(query(database))
                 }
