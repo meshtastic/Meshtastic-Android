@@ -157,7 +157,11 @@ class DatabaseManagerAbandonedWriterJvmTest {
             }
         }
         blockStarted.await()
-        assertIs<DatabaseOperationTimeoutException>(abandoned.await().exceptionOrNull())
+        val timeout = assertIs<DatabaseOperationTimeoutException>(abandoned.await().exceptionOrNull())
+        assertTrue(
+            "DatabaseManagerAbandonedWriterJvmTest" in timeout.message.orEmpty(),
+            "the timeout must name the code that passed the callback: ${timeout.message}",
+        )
         manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
 
         val replacement = manager.currentDb.value
