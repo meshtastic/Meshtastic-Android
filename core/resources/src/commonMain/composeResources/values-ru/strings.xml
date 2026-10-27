@@ -24,6 +24,12 @@
     <string name="a11y_node_channel">Канал %1$d</string>
     <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="one">%1$d хоп</item>
+        <item quantity="few">%1$d хопа</item>
+        <item quantity="many">%1$d хопов</item>
+        <item quantity="other">%1$d хопов</item>
+    </plurals>
     <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
@@ -86,6 +92,14 @@
     <string name="analytics_platforms">Платформы для аналитики:</string>
     <string name="any">Любой</string>
     <!-- APP -->
+    <string name="app_database_backup_disconnect_confirmation">Сначала будет отключено радио. Когда закончишь, снова подключись через экран «Подключения».</string>
+    <string name="app_database_backup_failed">Не удалось записать резервную копию.</string>
+    <string name="app_database_backup_no_device">Сначала подключись к радио. Нет данных для резервного копирования или восстановления.</string>
+    <string name="app_database_backup_saved">Резервная копия сохранена.</string>
+    <string name="app_database_restore_corrupt">Эта резервная копия повреждена или неполна.</string>
+    <string name="app_database_restore_failed">Не удалось прочитать резервную копию.</string>
+    <string name="app_database_restore_not_backup">Этот файл не является резервной копией данных.</string>
+    <string name="app_database_restore_staged">Резервное копирование принято. Перезапусти приложение и подключись к этому радио для завершения восстановления.</string>
     <string name="app_functions_get_channel_info">Получить сведения о канале</string>
     <string name="app_functions_get_device_status">Получить состояние устройства</string>
     <string name="app_functions_get_mesh_metrics">Получить метрики сети</string>
@@ -124,6 +138,7 @@
     <string name="audio_config">Настройка звука</string>
     <string name="available_pins">Доступные контакты</string>
     <string name="back">Назад</string>
+    <string name="backup_app_database">Резервное копирование данных</string>
     <string name="backup_keys">Резервное копирование</string>
     <string name="backup_keys_confirmation">Сохранить публичные и приватные ключи в безопасном зашифрованном хранилище на этом устройстве.</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
@@ -222,10 +237,12 @@
     <string name="chirpy_error_unsupported_flavor">Я работаю на ограниченной частоте в этой версии приложения! 🔌 Попробуй использовать версию с полной интеграцией ИИ-ядра.</string>
     <string name="chirpy_error_unsupported_platform">О нет! Похоже, моя антенна не может установить соединение на этой платформе. 📡 Пожалуйста, дважды проверь совместимость своего оборудования!</string>
     <string name="chirpy_fallback_unavailable">ИИ-помощник недоступен на этой платформе. Вот страницы, которые могут помочь:</string>
+    <string name="chirpy_hop">Chirpy Hop</string>
     <string name="chirpy_hop_back_to_update">Вернуться к обновлению</string>
     <string name="chirpy_hop_best">HI %1$s</string>
     <string name="chirpy_hop_controls">Коснитесь, чтобы прыгнуть, проведите вниз для прокрутки</string>
     <string name="chirpy_hop_game_over">ИГРА ОКОНЧЕНА</string>
+    <string name="chirpy_hop_play">Воспроизвести Chirpy Hop</string>
     <string name="chirpy_hop_play_again">Играть снова</string>
     <string name="chirpy_hop_tap_to_start">НАЖМИТЕ ДЛЯ НАЧАЛА</string>
     <string name="chirpy_hop_update_complete">Обновление завершено</string>
@@ -259,6 +276,8 @@
     <string name="co2_temperature">Темп CO₂</string>
     <string name="collapse_chart">Свернуть диаграмму</string>
     <string name="collapsed">Развален</string>
+    <string name="color_picker_presets">Предустановленные цвета</string>
+    <string name="color_rgb_description">Красный %1$d, зеленый %2$d, синий %3$d</string>
     <string name="communicate_off_the_grid">Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Азимут: %1$s</string>
@@ -298,6 +317,7 @@
     <string name="configure_notification_permissions">Настроить права доступа для уведомлений</string>
     <string name="connect">Подключить</string>
     <string name="connect_radio_for_remote_admin">Подключись к ноде для управления удалёнными нодами.</string>
+    <string name="connect_radio_to_change_settings">Подключись к радио, чтобы изменить эти настройки.</string>
     <string name="connected">Подключено</string>
     <string name="connected_device">Подключённые устройства</string>
     <string name="connected_sleeping">Подключен к ноде, но она спит</string>
@@ -408,6 +428,8 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s В</string>
+    <string name="device_model_ar_failed">AR не удалось начать</string>
+    <string name="device_model_capture">Сделать снимок</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="device_storage_ui_title">Хранилище устройства и UI (только для чтения)</string>
     <string name="device_theme_language">Тема: %1$s, Язык: %2$s</string>
@@ -494,10 +516,17 @@
     <string name="discovery_stop_scan">Остановить сканирование</string>
     <string name="discovery_summary_not_available">Анализ ИИ недоступен</string>
     <string name="discovery_time_remaining">Осталось %1$s</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="one">%1$d уникальная нода</item>
+        <item quantity="few">%1$d уникальных ноды</item>
+        <item quantity="many">%1$d уникальных нод</item>
+        <item quantity="other">%1$d уникальных нод</item>
+    </plurals>
     <string name="discovery_view_map">Посмотреть карту</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
     <string name="display">Дисплей</string>
     <string name="display_config">Дисплей устройства</string>
+    <string name="display_name">Отображаемое имя</string>
     <string name="dissolved_oxygen">Растворённый O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Расстояние</string>
@@ -582,6 +611,7 @@
     <string name="easily_set_up_private_mesh_networks">Легко создать частные сети для защищённой и надежной связи в удаленных районах.</string>
     <string name="edit">Редактировать</string>
     <string name="edit_custom_tile_source">Редактировать источник сетевых плиток</string>
+    <string name="edit_name">Изменить имя</string>
     <string name="eight_hours">8 часов</string>
     <string name="electrical_conductivity">Электропроводность</string>
     <!-- EMOJI -->
@@ -838,6 +868,8 @@
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
     <string name="iaq_level_excellent">Отлично</string>
     <string name="iaq_level_good">Хороший</string>
+    <string name="iaq_level_range">%1$s (%2$d-%3$d)</string>
+    <string name="iaq_level_range_open">%1$s (%2$d+)</string>
     <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Обозначение значков</string>
     <string name="ignore">Игнорировать</string>
@@ -908,8 +940,17 @@
     <string name="lightning_distance">Расстояние до грозы</string>
     <string name="lightning_strikes_1h">Молнии (за 1 ч)</string>
     <!-- LIVE -->
+    <string name="live_update">Онлайн обновление</string>
     <string name="live_update_direct">Прямой</string>
     <string name="live_update_distance">%1$s отсюда</string>
+    <string name="live_update_hops">Хопов: %1$d</string>
+    <string name="live_update_mesh_status">Статус сети</string>
+    <string name="live_update_search_nodes">Поиск нод</string>
+    <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
+    <string name="live_update_start">Запуск</string>
+    <string name="live_update_stop">Остановка</string>
+    <string name="live_update_switch">Переключатель</string>
+    <string name="live_update_tracking">Отслеживание %1$s</string>
     <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
@@ -1005,6 +1046,8 @@
     <string name="lora_config">LoRa</string>
     <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="lora_config_changes">Изменения настроек LoRa:</string>
+    <string name="lora_preset_custom">Пользовательский</string>
+    <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Низкий заряд батареи</string>
     <string name="low_battery_message">У узла %1$s низкий заряд (%2$d%)</string>
     <string name="low_battery_title">Низкий заряд батареи: %1$s</string>
@@ -1112,12 +1155,19 @@
     <string name="mesh_beacon_preset_indicator">Рекламируется ближайшим маяком</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
     <string name="mesh_beacon_region_label">Регион / Страна</string>
+    <string name="mesh_beacon_region_required">Укажи регион твоего радио перед настройкой маяка.</string>
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Канал</string>
     <string name="mesh_beacon_target_default">По умолчанию</string>
     <string name="mesh_beacon_target_remove">Удалить цель</string>
     <string name="mesh_beacon_targets">Цели передачи</string>
+    <string name="mesh_hud_camera_rationale">Разрешить доступ к камере для просмотра нод через камерой.</string>
+    <string name="mesh_hud_camera_unavailable">Камера недоступна. Вид всё ещё работает как компас.</string>
+    <string name="mesh_hud_cardinal_east">В</string>
+    <string name="mesh_hud_cardinal_north">С</string>
+    <string name="mesh_hud_cardinal_south">Ю</string>
+    <string name="mesh_hud_cardinal_west">З</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->
