@@ -21,7 +21,7 @@ import kotlin.math.pow
 import kotlin.math.round
 
 /** Half the circumference of the Web Mercator world in metres — the projection's origin shift. */
-private const val ORIGIN_SHIFT_METERS = 20_037_508.342789244
+internal const val ORIGIN_SHIFT_METERS = 20_037_508.342789244
 
 /** Millimetre precision is far finer than any tile boundary; it just keeps the bbox free of exponent notation. */
 private const val BBOX_DECIMALS = 3
@@ -70,7 +70,7 @@ internal fun webMercatorTileBbox(x: Int, y: Int, zoom: Int): String {
 /** `Int.mod` rather than `%` so a negative coordinate still lands on a valid index instead of throwing. */
 private fun rotation(x: Int, y: Int, size: Int): Int = (x.mod(size) + y.mod(size)).mod(size)
 
-private fun Double.toPlainDecimal(): String {
+internal fun Double.toPlainDecimal(): String {
     val scaled = round(abs(this) * BBOX_SCALE).toLong()
     val sign = if (this < 0 && scaled != 0L) "-" else ""
     return "$sign${scaled / BBOX_SCALE}.${(scaled % BBOX_SCALE).toString().padStart(BBOX_DECIMALS, '0')}"

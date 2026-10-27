@@ -46,6 +46,7 @@ import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
+import org.meshtastic.feature.map.maplibre.tiles.InstallRadarSmoothing
 import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
 
 /**
@@ -72,11 +73,13 @@ internal fun rememberSecondaryMapState(
     basemaps: BasemapSelection,
     initialCameraPosition: CameraPosition = CameraPosition(),
     content: @Composable () -> Unit,
-): MapState =
-    rememberMapState(baseStyle = basemaps.current.toBaseStyle(), initialCameraPosition = initialCameraPosition) {
+): MapState {
+    InstallRadarSmoothing()
+    return rememberMapState(baseStyle = basemaps.current.toBaseStyle(), initialCameraPosition = initialCameraPosition) {
         (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
         content()
     }
+}
 
 /**
  * The map surface the maps outside the main one all draw on.
