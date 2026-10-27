@@ -526,7 +526,17 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         val cached = dbCache[dbName]
         val db = cached ?: withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
         val isNewDevicePool = cached == null && dbName != DatabaseConstants.DEFAULT_DB_NAME
-        val failure = if (isNewDevicePool) corruptionOnOpen(db) else null
+        var probeFinished = false
+        val failure =
+            try {
+                (if (isNewDevicePool) corruptionOnOpen(db) else null).also { probeFinished = true }
+            } finally {
+                // A cancelled probe leaves the pool unpublished: evict it so the next switch probes a fresh one.
+                if (!probeFinished) {
+                    dbCache.remove(dbName)
+                    closeUnpublishedDatabase(dbName, db)
+                }
+            }
         if (failure == null) return db
 
         dbCache.remove(dbName)
