@@ -231,6 +231,8 @@ class DatabaseManagerAbandonedWriterJvmTest {
         dispatchers: CoroutineDispatchers,
         private val dir: Path,
     ) : DatabaseManager(datastore, dispatchers) {
+        override fun applyPendingRestore(dbName: String) = Unit
+
         var withDbTimeoutMillisForTest: Long = DatabaseManager.WITH_DB_TIMEOUT_MS
 
         override val withDbTimeoutMillis: Long

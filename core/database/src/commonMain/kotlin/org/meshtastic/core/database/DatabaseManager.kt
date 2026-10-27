@@ -345,7 +345,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             return it
         }
         checkOpen()
-        val database = buildDatabase(DatabaseConstants.DEFAULT_DB_NAME)
+        val database = newDatabase(DatabaseConstants.DEFAULT_DB_NAME)
         if (lifecycleState != LifecycleState.OPEN) {
             runCatching { closeDatabase(database) }
                 .onFailure {
@@ -511,7 +511,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     /** Returns a cached database or builds one. Every caller must hold [mutex]. */
     private fun getOrOpenDatabase(dbName: String): MeshtasticDatabase = dbCache.getOrPut(dbName) {
-        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) getOrCreateDefaultDatabase() else buildDatabase(dbName)
+        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) getOrCreateDefaultDatabase() else newDatabase(dbName)
     }
 
     /**
@@ -620,9 +620,27 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * Builds a new [MeshtasticDatabase] for [dbName]. Tests override this to control file placement (temp directory
      * instead of the platform data dir). Production delegates to the platform-specific [getDatabaseBuilder].
      */
-    protected open fun buildDatabase(dbName: String): MeshtasticDatabase {
+    protected open fun buildDatabase(dbName: String): MeshtasticDatabase = getDatabaseBuilder(dbName).build()
+
+    /** Guarded by [builtDbNamesLock]. Every database name this manager has built a pool for. */
+    private val builtDbNames = mutableSetOf<String>()
+    private val builtDbNamesLock = SynchronizedObject()
+
+    /**
+     * Builds a pool for [dbName], first applying a staged restore if this is the first pool for that name in the
+     * process. A later build (wedge recovery, a rebuild after eviction) may run while an older pool still holds the
+     * files, and swapping files under an open connection corrupts the database; the restore waits for the restart the
+     * user is told to do.
+     */
+    private fun newDatabase(dbName: String): MeshtasticDatabase {
+        val isFirstBuild = synchronized(builtDbNamesLock) { builtDbNames.add(dbName) }
+        if (isFirstBuild) applyPendingRestore(dbName)
+        return buildDatabase(dbName)
+    }
+
+    /** Swaps a staged restore into place for [dbName]. Tests override it: in-memory databases have no files. */
+    protected open fun applyPendingRestore(dbName: String) {
         applyStagedRestore(dbName, getDatabaseFile(dbName), getFileSystem())
-        return getDatabaseBuilder(dbName).build()
     }
 
     /**
@@ -1200,7 +1218,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
             // Build a fresh instance directly (not through getOrPut) before touching the cache,
             // so a failed or cancelled build leaves the existing cache entry and _currentDb consistent.
-            val reopened = withContext(dispatchers.io) { buildDatabase(expectedDbName) }
+            val reopened = withContext(dispatchers.io) { newDatabase(expectedDbName) }
             if (!isPublishableReplacement(expectedDbName, reopened)) {
                 return@withManagerOperation ReopenResult.WriteLockHeld
             }

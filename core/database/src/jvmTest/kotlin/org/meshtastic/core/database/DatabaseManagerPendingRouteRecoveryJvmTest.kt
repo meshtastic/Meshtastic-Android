@@ -181,6 +181,8 @@ class DatabaseManagerPendingRouteRecoveryJvmTest {
         private val testDispatchers: CoroutineDispatchers,
         private val persistentDir: Path,
     ) : DatabaseManager(datastore, testDispatchers) {
+        override fun applyPendingRestore(dbName: String) = Unit
+
         override fun buildDatabase(dbName: String): MeshtasticDatabase = Room.databaseBuilder<MeshtasticDatabase>(
             name = (persistentDir / "$dbName.db").toString(),
             factory = { MeshtasticDatabaseConstructor.initialize() },

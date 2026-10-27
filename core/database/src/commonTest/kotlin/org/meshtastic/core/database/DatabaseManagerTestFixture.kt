@@ -142,6 +142,13 @@ abstract class DatabaseManagerTestFixture {
         datastore: DatabaseDataStore,
         private val testDispatchers: CoroutineDispatchers,
     ) : DatabaseManager(datastore, testDispatchers) {
+        /** Names a staged restore was applied for; in-memory databases have no files to swap. */
+        val restoredDbNames = mutableListOf<String>()
+
+        override fun applyPendingRestore(dbName: String) {
+            restoredDbNames += dbName
+        }
+
         val builtDatabases = mutableListOf<MeshtasticDatabase>()
         val closedDatabases = mutableListOf<MeshtasticDatabase>()
         val closeAttempts = mutableListOf<MeshtasticDatabase>()
