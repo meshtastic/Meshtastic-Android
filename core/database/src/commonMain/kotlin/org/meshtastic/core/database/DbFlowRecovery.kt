@@ -29,8 +29,8 @@ private const val MAX_DB_RETRY_DELAY_MS = 30_000L
 private const val MAX_DB_RETRY_BACKOFF_SHIFT = 5
 
 /**
- * Restarts a database-backed Flow after the Room pool wedge behind #6608 — an acquire timeout or a stall — with capped
- * exponential backoff. The backoff resets after a successful emission; every other failure propagates.
+ * Restarts a database-backed Flow after the Room pool wedge behind #6608 surfaces as a [DbFlowStalledException], with
+ * capped exponential backoff. The backoff resets after a successful emission; every other failure propagates.
  *
  * [DatabaseManager.observeCurrentDb] recovers a wedged pool in place, but its per-collector and per-window budgets can
  * exhaust while a leaked-permit storm is still active; a `stateIn(..., SharingStarted.Eagerly, ...)` upstream that then
@@ -48,10 +48,7 @@ fun <T> Flow<T>.retryOnDbPoolFailure(label: String): Flow<T> = flow {
     emitAll(
         onEach { consecutiveFailures = 0 }
             .retryWhen { cause, _ ->
-                val recoverable =
-                    cause is DbFlowStalledException ||
-                        (cause is Exception && DatabaseManager.isDbPoolAcquireTimeoutException(cause))
-                if (!recoverable) return@retryWhen false
+                if (cause !is DbFlowStalledException) return@retryWhen false
                 consecutiveFailures += 1
                 val delayMs =
                     (INITIAL_DB_RETRY_DELAY_MS shl (consecutiveFailures - 1).coerceAtMost(MAX_DB_RETRY_BACKOFF_SHIFT))
