@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.room3.executeSQL
 import androidx.room3.immediateTransaction
+import androidx.room3.useReaderConnection
 import androidx.room3.useWriterConnection
 import androidx.sqlite.SQLiteException
 import co.touchlab.kermit.Logger
@@ -67,6 +68,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.Exceptions
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.di.DatabaseDataStore
@@ -511,6 +513,55 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         if (dbName == DatabaseConstants.DEFAULT_DB_NAME) getOrCreateDefaultDatabase() else buildDatabase(dbName)
     }
 
+    /**
+     * Opens [dbName] for a switch, moving a corrupt device database aside instead of publishing it. Caller holds
+     * [mutex].
+     *
+     * Room runs migrations on a pool's first connection, so a corrupt file otherwise fails the first query after every
+     * launch and the app never gets past it. Only a pool built here is probed: nothing else holds it yet, so it can be
+     * closed before its files move, and a live connection never reopens `-wal`/`-shm` by path under the new file. The
+     * default database is published before any switch and is left alone.
+     */
+    private suspend fun openVerifiedDatabase(dbName: String): MeshtasticDatabase {
+        val cached = dbCache[dbName]
+        val db = cached ?: withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
+        val isNewDevicePool = cached == null && dbName != DatabaseConstants.DEFAULT_DB_NAME
+        val failure = if (isNewDevicePool) corruptionOnOpen(db) else null
+        if (failure == null) return db
+
+        dbCache.remove(dbName)
+        closeUnpublishedDatabase(dbName, db)
+        val asideSuffix = ".corrupt-$nowMillis"
+        withContext(dispatchers.io) { moveDatabaseFilesAside(dbName, asideSuffix) }
+        Exceptions.report(failure, "database-corrupt", "Moved a corrupt device database aside and started a new one")
+        return withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
+    }
+
+    /** The corruption failure from opening [database], or null when it opens or fails for any other reason. */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun corruptionOnOpen(database: MeshtasticDatabase): Exception? = try {
+        withContext(dispatchers.io) { probeDatabaseOpen(database) }
+        null
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        e.takeIf { isDbCorruptException(it) }
+    }
+
+    /** Opens [database]'s first connection, which runs any pending migrations. */
+    protected open suspend fun probeDatabaseOpen(database: MeshtasticDatabase) {
+        database.useReaderConnection { connection -> connection.usePrepared("SELECT 1") { it.step() } }
+    }
+
+    /** Renames [dbName]'s database, `-wal`, `-shm` and `-journal` files to the same name plus [suffix]. */
+    protected open fun moveDatabaseFilesAside(dbName: String, suffix: String) {
+        val fileSystem = getFileSystem()
+        val dbFile = getDatabaseFile(dbName)
+        for (file in DatabaseBackup.databaseFiles(dbFile) + DatabaseBackup.sibling(dbFile, "-journal")) {
+            if (fileSystem.exists(file)) fileSystem.atomicMove(file, DatabaseBackup.sibling(file, suffix))
+        }
+    }
+
     private fun checkOpen() {
         check(lifecycleState == LifecycleState.OPEN) { "DatabaseManager is closing or closed" }
     }
@@ -649,7 +700,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             }
 
             // Build/open Room DB off the main thread
-            val db = withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
+            val db = openVerifiedDatabase(dbName)
             if (dbName != DatabaseConstants.DEFAULT_DB_NAME) hasOpenedDeviceDatabase = true
 
             // Emit the new DB BEFORE closing the old ones. flatMapLatest collectors on
@@ -1727,6 +1778,20 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     val hasDbContext = DB_TERMS.any { it in msg }
                     ("closed" in msg && hasDbContext) || SQLITE_BUSY_PHRASE in msg || "sqlite_busy" in msg
                 }
+
+        private val SQLITE_ERROR_CODE = Regex("""error code: (\d+)\b""")
+        private const val SQLITE_CORRUPT = 11
+        private const val SQLITE_NOTADB = 26
+
+        /**
+         * A damaged or non-SQLite file. Matches the primary codes exactly, so `SQLITE_CORRUPT_VTAB` (267), the FTS5
+         * desync an index rebuild heals, never counts.
+         */
+        fun isDbCorruptException(e: Throwable): Boolean = generateSequence(e) { it.cause }
+            .any { throwable ->
+                val code = throwable.message?.lowercase()?.let { SQLITE_ERROR_CODE.find(it) }?.groupValues?.get(1)
+                code?.toIntOrNull() in setOf(SQLITE_CORRUPT, SQLITE_NOTADB)
+            }
 
         private fun isDbLockedException(e: Throwable): Boolean =
             e.message?.contains(SQLITE_BUSY_PHRASE, ignoreCase = true) == true
