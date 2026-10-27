@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -115,8 +116,9 @@ class NodeRepositoryImpl(
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
     init {
-        // Backfill denormalized name columns for existing nodes on startup
-        processLifecycle.coroutineScope.launch {
+        // Backfill denormalized name columns for existing nodes on startup. A withDb timeout or SQL failure here is
+        // reported, not fatal: this scope has no exception handler.
+        processLifecycle.coroutineScope.handledLaunch {
             processLifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
             }
