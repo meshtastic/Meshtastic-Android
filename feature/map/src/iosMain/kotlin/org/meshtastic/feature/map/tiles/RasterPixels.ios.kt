@@ -29,15 +29,21 @@ private const val RED_SHIFT = 16
 private const val ALPHA_SHIFT = 24
 private const val ALPHA_BYTE = 3
 
+// Skia's Image, Bitmap and Data own native memory, so each is closed as soon as its bytes are copied out.
 @Suppress("ReturnCount")
 internal actual fun decodePngPixels(bytes: ByteArray): RasterPixels? {
     val image = runCatching { Image.makeFromEncoded(bytes) }.getOrNull() ?: return null
-    // UNPREMUL: the smoothing premultiplies itself, and a premultiplied read would round faint pixels twice.
     val bitmap = Bitmap()
-    if (!bitmap.allocPixels(ImageInfo(image.width, image.height, ColorType.N32, ColorAlphaType.UNPREMUL))) return null
-    if (!image.readPixels(bitmap)) return null
-    val pixels = IntArray(image.width * image.height) { bitmap.getColor(it % image.width, it / image.width) }
-    return RasterPixels(image.width, image.height, pixels)
+    try {
+        // UNPREMUL: the smoothing premultiplies itself, and a premultiplied read would round faint pixels twice.
+        val info = ImageInfo(image.width, image.height, ColorType.N32, ColorAlphaType.UNPREMUL)
+        if (!bitmap.allocPixels(info) || !image.readPixels(bitmap)) return null
+        val pixels = IntArray(image.width * image.height) { bitmap.getColor(it % image.width, it / image.width) }
+        return RasterPixels(image.width, image.height, pixels)
+    } finally {
+        bitmap.close()
+        image.close()
+    }
 }
 
 internal actual fun encodePngPixels(pixels: RasterPixels): ByteArray {
@@ -50,7 +56,23 @@ internal actual fun encodePngPixels(pixels: RasterPixels): ByteArray {
         raw[index * BYTES_PER_PIXEL + ALPHA_BYTE] = (argb ushr ALPHA_SHIFT).toByte()
     }
     val bitmap = Bitmap()
-    val info = ImageInfo(pixels.width, pixels.height, ColorType.BGRA_8888, ColorAlphaType.UNPREMUL)
-    check(bitmap.installPixels(info, raw, pixels.width * BYTES_PER_PIXEL)) { "Could not wrap the radar tile pixels" }
-    return checkNotNull(Image.makeFromBitmap(bitmap).encodeToData(EncodedImageFormat.PNG)) { "PNG encode failed" }.bytes
+    try {
+        val info = ImageInfo(pixels.width, pixels.height, ColorType.BGRA_8888, ColorAlphaType.UNPREMUL)
+        check(bitmap.installPixels(info, raw, pixels.width * BYTES_PER_PIXEL)) {
+            "Could not wrap the radar tile pixels"
+        }
+        val image = Image.makeFromBitmap(bitmap)
+        try {
+            val data = checkNotNull(image.encodeToData(EncodedImageFormat.PNG)) { "PNG encode failed" }
+            try {
+                return data.bytes
+            } finally {
+                data.close()
+            }
+        } finally {
+            image.close()
+        }
+    } finally {
+        bitmap.close()
+    }
 }

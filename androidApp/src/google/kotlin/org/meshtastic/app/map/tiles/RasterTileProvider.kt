@@ -19,6 +19,7 @@ package org.meshtastic.app.map.tiles
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.Tile
 import com.google.android.gms.maps.model.TileProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -53,7 +54,14 @@ class RasterTileProvider(private val spec: RasterTileSpec, private val client: O
 
     // Google calls this off the main thread, so blocking on the render is the same wait the plain fetch below has.
     private fun smoothed(request: RadarSmoothRequest): Tile? = runBlocking {
-        request.render(EmptyCoroutineContext, ::fetchBytes)
+        try {
+            request.render(EmptyCoroutineContext, ::fetchBytes)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            logger.d(e) { "Radar tile render failed" }
+            null
+        }
     }
         ?.let { Tile(smoothedRadarTileSize(spec.tileSize), smoothedRadarTileSize(spec.tileSize), it) }
 
