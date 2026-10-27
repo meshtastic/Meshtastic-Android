@@ -77,6 +77,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 internal const val MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES = 3
@@ -1353,11 +1354,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      */
     @Suppress("ReturnCount")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        val queuedAt = nowMillis
+        val timing = DbCallTiming()
         currentCoroutineContext().ensureActive()
         val admission = beginWrite()
-        val blockStarted = CompletableDeferred<Long>()
-        val execution = launchDbBlock(admission, blockStarted, block)
+        val blockStarted = CompletableDeferred<Unit>()
+        val execution = launchDbBlock(admission, blockStarted, timing, block)
         val timeoutMillis = withDbTimeoutMillis
         val completed =
             if (timeoutMillis <= 0) execution.join() else withTimeoutOrNull(timeoutMillis) { execution.join() }
@@ -1365,13 +1366,15 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
         // Re-check cancellation so a stale caller does not continue after the DB releases.
         currentCoroutineContext().ensureActive()
-        val finishedAt = nowMillis
-        val elapsedMillis = finishedAt - queuedAt
-        if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
-            val startedAt = if (blockStarted.isCompleted) blockStarted.getCompleted() else finishedAt
+        val elapsed = timing.queued.elapsedNow()
+        if (elapsed.inWholeMilliseconds >= WITH_DB_SLOW_OPERATION_MS) {
+            val started = timing.started
+            val finished = timing.finished
+            val waited = started?.let { it - timing.queued } ?: elapsed
+            val held = if (started != null && finished != null) finished - started else Duration.ZERO
             Logger.w {
-                "withDb took ${elapsedMillis}ms (waited ${startedAt - queuedAt}ms, held ${finishedAt - startedAt}ms) " +
-                    "in ${callerOf(block)}"
+                "withDb took ${elapsed.inWholeMilliseconds}ms (waited ${waited.inWholeMilliseconds}ms, held " +
+                    "${held.inWholeMilliseconds}ms) in ${callerOf(block)}"
             }
         }
         val failure = execution.getCompletionExceptionOrNull() ?: return execution.getCompleted()
@@ -1397,14 +1400,20 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     @OptIn(DelicateCoroutinesApi::class)
     private fun <T> launchDbBlock(
         admission: AdmittedDatabase,
-        blockStarted: CompletableDeferred<Long>,
+        blockStarted: CompletableDeferred<Unit>,
+        timing: DbCallTiming,
         block: suspend (MeshtasticDatabase) -> T,
     ): Deferred<T> = managerScope.async(admission.lane, start = CoroutineStart.ATOMIC) {
         val db = admission.database
         try {
             currentCoroutineContext().ensureActive()
-            blockStarted.complete(nowMillis)
-            withContext(NonCancellable) { block(db) }
+            timing.started = TimeSource.Monotonic.markNow()
+            blockStarted.complete(Unit)
+            try {
+                withContext(NonCancellable) { block(db) }
+            } finally {
+                timing.finished = TimeSource.Monotonic.markNow()
+            }
         } finally {
             withContext(NonCancellable) { endWrite(db) }
         }
@@ -1450,7 +1459,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     private suspend fun abandonWedgedDbBlock(
         admission: AdmittedDatabase,
-        blockStarted: CompletableDeferred<Long>,
+        blockStarted: CompletableDeferred<Unit>,
         execution: Deferred<*>,
         timeoutMillis: Long,
         caller: String,
@@ -2267,3 +2276,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
  * to; the active pool is reopened so subsequent operations proceed.
  */
 class DatabaseOperationTimeoutException(message: String) : IllegalStateException(message)
+
+/** Monotonic marks for one [DatabaseManager.withDb] call; the lane coroutine writes them, the caller reads them. */
+private class DbCallTiming {
+    val queued: TimeSource.Monotonic.ValueTimeMark = TimeSource.Monotonic.markNow()
+
+    @Volatile var started: TimeSource.Monotonic.ValueTimeMark? = null
+
+    @Volatile var finished: TimeSource.Monotonic.ValueTimeMark? = null
+}
