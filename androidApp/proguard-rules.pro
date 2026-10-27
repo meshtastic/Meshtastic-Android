@@ -60,6 +60,9 @@
 -keepnames class org.meshtastic.app.analytics.GooglePlatformAnalytics*
 -keepnames class co.touchlab.kermit.**
 
+# A stable name keeps withDb timeouts in one Crashlytics/Datadog issue across builds.
+-keepnames class org.meshtastic.core.database.DatabaseOperationTimeoutException
+
 # ---- Networking (transitive references from Ktor on Android) ----------------
 
 -dontwarn org.conscrypt.**
