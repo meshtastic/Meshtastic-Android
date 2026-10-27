@@ -72,11 +72,10 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
 
         // The lane is per pool, so this call is admitted against the replacement and never queues behind the wedge.
         var laterDb: MeshtasticDatabase? = null
-        val later =
-            manager.withDb { db ->
-                laterDb = db
-                LATER_RESULT
-            }
+        val later = manager.withDb { db ->
+            laterDb = db
+            LATER_RESULT
+        }
         assertEquals(LATER_RESULT, later, "a later withDb call must complete while the earlier one is still wedged")
         assertTrue(laterDb === replacement, "later calls must run on the replacement pool")
 
@@ -89,6 +88,37 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
             manager.debugWriterCounts(),
             "an abandoned block must still deregister when it returns",
         )
+    }
+
+    @Test
+    fun wedgeRecoveryDoesNotApplyAStagedRestoreUnderTheOpenPool() = runTest(testDispatcher) {
+        manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
+        manager.switchActiveDatabase("addrA")
+        val wedgedPool = manager.currentDb.value
+        val restoresBeforeWedge = manager.restoredDbNames.toList()
+        val wedgeStarted = CompletableDeferred<Unit>()
+        val releaseWedge = CompletableDeferred<Unit>()
+        val wedged = async {
+            runCatching {
+                manager.withDb {
+                    wedgeStarted.complete(Unit)
+                    releaseWedge.await()
+                }
+            }
+        }
+        wedgeStarted.await()
+
+        advanceTimeBy(DatabaseManager.WITH_DB_TIMEOUT_MS + 1)
+        wedged.await()
+
+        assertTrue(manager.currentDb.value !== wedgedPool, "wedge recovery must build a replacement pool")
+        assertEquals(
+            restoresBeforeWedge,
+            manager.restoredDbNames,
+            "the replacement pool must not swap in a staged restore while the wedged pool holds the files",
+        )
+        releaseWedge.complete(Unit)
+        runCurrent()
     }
 
     @Test
@@ -160,11 +190,10 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
         parkedStarted.await()
 
         var concurrentDb: MeshtasticDatabase? = null
-        val concurrent =
-            manager.withDb { db ->
-                concurrentDb = db
-                LATER_RESULT
-            }
+        val concurrent = manager.withDb { db ->
+            concurrentDb = db
+            LATER_RESULT
+        }
         assertEquals(LATER_RESULT, concurrent, "a concurrent call must not wait for a suspended callback")
         assertTrue(concurrentDb === pool, "both calls are admitted against the same active pool")
         assertTrue(manager.currentDb.value === pool, "no recovery was needed, so the pool must not be replaced")
