@@ -302,6 +302,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         deviceHardware = deviceHardware,
         currentVersion = currentVersion,
         selectedRelease = selectedRelease,
+        bootloaderFault = bootloaderFault,
     )
 }
 
@@ -359,6 +360,7 @@ private fun FirmwareUpdateScaffold(
     deviceHardware: DeviceHardware?,
     currentVersion: String?,
     selectedRelease: FirmwareRelease?,
+    bootloaderFault: BootloaderFault?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
