@@ -32,6 +32,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.ServiceScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
@@ -39,6 +40,7 @@ import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -122,6 +124,8 @@ class RadioControllerImpl(
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshNotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
+    meshConfigFlowManager: Lazy<MeshConfigFlowManager>,
+    radioOperationLock: RadioOperationLock,
     radioConfigRepository: RadioConfigRepository,
     scope: ServiceScope,
     private val deviceAddressChangeHook: DeviceAddressChangeHook,
@@ -131,6 +135,15 @@ class RadioControllerImpl(
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         connectionStateProvider = serviceRepository,
+        heardOnCurrentLoraRefresher =
+        HeardOnCurrentLoraRefresher(
+            nodeManager = nodeManager,
+            meshConfigFlowManager = meshConfigFlowManager,
+            serviceRepository = serviceRepository,
+            radioConfigRepository = radioConfigRepository,
+            radioOperationLock = radioOperationLock,
+            scope = scope,
+        ),
         scope = scope,
     ),
     MessagingController by MessagingControllerImpl(

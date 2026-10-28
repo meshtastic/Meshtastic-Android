@@ -833,6 +833,23 @@ class MeshConfigFlowManagerImplTest {
         }
 
     @Test
+    fun `refreshNodeInfo during a node info download runs again once it completes`() = testScope.runTest {
+        completeHandshake()
+        manager.refreshNodeInfo()
+
+        assertTrue(manager.refreshNodeInfo())
+        verify(VerifyMode.exactly(2)) { connectionManager.startNodeInfoOnly() }
+
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+        verify(VerifyMode.exactly(1)) { connectionManager.startNodeInfoOnly() }
+
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+        verify(VerifyMode.not) { connectionManager.startNodeInfoOnly() }
+    }
+
+    @Test
     fun `refreshNodeInfo is ignored when the session is no longer active`() = testScope.runTest {
         completeHandshake()
         activeSessionFlow.value = null

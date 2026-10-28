@@ -80,6 +80,7 @@ internal class AdminControllerImpl(
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val connectionStateProvider: ConnectionStateProvider,
+    private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
     private val scope: CoroutineScope,
 ) : AdminController {
 
@@ -135,15 +136,21 @@ internal class AdminControllerImpl(
     // ── Configuration ─────────────────────────────────────────────────────────
 
     override suspend fun setLocalConfig(config: Config) {
-        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb -> wb.set_config = config }.build() }
+        val packetId = commandSender.generatePacketId()
+        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
+        commandSender.sendAdmin(myNodeNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
+        }
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
+        val isLocal = destNum == nodeManager.myNodeNum.value
+        if (isLocal) heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
         commandSender.sendAdmin(destNum, packetId) {
             AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
         }
-        if (destNum == nodeManager.myNodeNum.value) {
+        if (isLocal) {
             scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
         }
     }
@@ -181,15 +188,21 @@ internal class AdminControllerImpl(
     // ── Channels ────────────────────────────────────────────────────────────
 
     override suspend fun setLocalChannel(channel: Channel) {
-        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build() }
+        val packetId = commandSender.generatePacketId()
+        heardOnCurrentLoraRefresher.beforeLocalWrite(channel, packetId)
+        commandSender.sendAdmin(myNodeNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
+        }
         scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
     }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
+        val isLocal = destNum == nodeManager.myNodeNum.value
+        if (isLocal) heardOnCurrentLoraRefresher.beforeLocalWrite(channel, packetId)
         commandSender.sendAdmin(destNum, packetId) {
             AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
         }
-        if (destNum == nodeManager.myNodeNum.value) {
+        if (isLocal) {
             scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
         }
     }

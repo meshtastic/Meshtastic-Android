@@ -68,7 +68,6 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
-import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
@@ -77,7 +76,6 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoredSecurityKeys
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -414,7 +412,6 @@ class RadioConfigViewModelTest {
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
-    private val meshConfigFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val trackerScope = CoroutineScope(SupervisorJob())
     private val nodeRestartTracker = NodeRestartTracker(trackerScope)
 
@@ -489,8 +486,6 @@ class RadioConfigViewModelTest {
         snackbarManager = snackbarManager,
         nodeRestartTracker = nodeRestartTracker,
         connectionManager = connectionManager,
-        meshConfigFlowManager = meshConfigFlowManager,
-        applicationScope = FakeApplicationCoroutineScope(testDispatcher),
         installProfileUseCase = installProfileUseCase,
         radioConfigUseCase = radioConfigUseCase,
         adminActionsUseCase = adminActionsUseCase,
@@ -2902,116 +2897,6 @@ class RadioConfigViewModelTest {
         deviceId = null,
         pioEnv = pioEnv,
     )
-
-    private fun loraSave(region: Config.LoRaConfig.RegionCode = Config.LoRaConfig.RegionCode.US) = Config.Builder()
-        .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.region = region }.build() }
-        .build()
-
-    private suspend fun TestScope.saveLoraAndAck(
-        connFlow: MutableStateFlow<ConnectionState>,
-        firmwareVersion: String?,
-        config: Config = loraSave(),
-        clearViewModelBeforeAck: Boolean = false,
-        ack: Boolean = true,
-    ) {
-        nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())))
-        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123, firmwareVersion = firmwareVersion))
-        val packetFlow = MutableSharedFlow<MeshPacket>()
-        every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { serviceRepository.connectionState } returns connFlow
-        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
-            {
-                it.args.onRequestIdArg()(77)
-                77
-            }
-        viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
-        runCurrent()
-
-        viewModel.setConfig(config)
-        runCurrent()
-        if (clearViewModelBeforeAck) viewModel.viewModelScope.cancel()
-        if (ack) packetFlow.emit(routingAck(requestId = 77, from = 123))
-        runCurrent()
-    }
-
-    @Test
-    fun `acked local LoRa save that does not reboot refreshes the node info exactly once`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1")
-
-        advanceTimeBy(30_000)
-        runCurrent()
-
-        verify(exactly(1)) { meshConfigFlowManager.refreshNodeInfo() }
-        verify(exactly(0)) { connectionManager.startConfigOnly() }
-    }
-
-    @Test
-    fun `LoRa save acked after the ViewModel is cleared still refreshes the node info exactly once`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1", clearViewModelBeforeAck = true)
-
-        advanceTimeBy(30_000)
-        runCurrent()
-
-        verify(exactly(1)) { meshConfigFlowManager.refreshNodeInfo() }
-    }
-
-    @Test
-    fun `LoRa save never acked does not refresh the node info`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1", clearViewModelBeforeAck = true, ack = false)
-
-        advanceTimeBy(10 * 60_000L)
-        runCurrent()
-
-        verify(exactly(0)) { meshConfigFlowManager.refreshNodeInfo() }
-    }
-
-    @Test
-    fun `acked local LoRa save followed by a reboot does not refresh the node info`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1")
-
-        advanceTimeBy(2_000)
-        connFlow.value = ConnectionState.Disconnected
-        advanceTimeBy(30_000)
-        runCurrent()
-
-        verify(exactly(0)) { meshConfigFlowManager.refreshNodeInfo() }
-    }
-
-    @Test
-    fun `LoRa save on firmware that does not report heard flags does not refresh the node info`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.8.0")
-
-        advanceTimeBy(30_000)
-        runCurrent()
-
-        verify(exactly(0)) { meshConfigFlowManager.refreshNodeInfo() }
-    }
-
-    @Test
-    fun `non-LoRa config save does not refresh the node info`() = runTest {
-        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(
-            connFlow,
-            firmwareVersion = "2.8.1",
-            config =
-            Config.Builder()
-                .also { wb ->
-                    wb.device =
-                        Config.DeviceConfig.Builder().also { wb -> wb.led_heartbeat_disabled = true }.build()
-                }
-                .build(),
-        )
-
-        advanceTimeBy(30_000)
-        runCurrent()
-
-        verify(exactly(0)) { meshConfigFlowManager.refreshNodeInfo() }
-    }
 
     @Test
     fun `local reboot-applying config save opens the restart window`() = runTest {

@@ -112,6 +112,9 @@ class MeshConfigFlowManagerImpl(
 
     private val handshakeState = atomic<HandshakeState>(HandshakeState.Idle)
 
+    /** A [refreshNodeInfo] that arrived mid-dump; nodes already sent in that dump answered for the old settings. */
+    private val queuedRefresh = atomic<RadioSessionContext?>(null)
+
     private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
         radioInterfaceService.runIfSessionActive(session, block)
 
@@ -256,6 +259,7 @@ class MeshConfigFlowManagerImpl(
         connectionManager.value.onHandshakeComplete()
 
         scope.handledLaunch { finishNodeInfoInstall(state) }
+        if (queuedRefresh.compareAndSet(state.session, null)) refreshNodeInfo()
         // Note: onHandshakeProgress() is intentionally NOT called here. By this point the
         // handshake has reached HandshakeState.Complete and the synchronous onHandshakeComplete()
         // call above has already cancelled the watchdog. Re-arming via onHandshakeProgress()
@@ -479,15 +483,26 @@ class MeshConfigFlowManagerImpl(
         var requested = false
         runForSession(session) {
             val state = handshakeState.value
-            if (state is HandshakeState.Complete && state.belongsTo(session)) {
-                handshakeState.value =
-                    HandshakeState.ReceivingNodeInfo(
-                        session = session,
-                        myNodeInfo = state.myNodeInfo,
-                        refresh = true,
-                    )
-                connectionManager.value.startNodeInfoOnly()
-                requested = true
+            if (state.belongsTo(session)) {
+                when (state) {
+                    is HandshakeState.Complete -> {
+                        handshakeState.value =
+                            HandshakeState.ReceivingNodeInfo(
+                                session = session,
+                                myNodeInfo = state.myNodeInfo,
+                                refresh = true,
+                            )
+                        connectionManager.value.startNodeInfoOnly()
+                        requested = true
+                    }
+
+                    is HandshakeState.ReceivingNodeInfo -> {
+                        queuedRefresh.value = session
+                        requested = true
+                    }
+
+                    else -> Unit
+                }
             }
         }
         return requested

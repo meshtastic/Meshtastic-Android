@@ -52,7 +52,8 @@ interface MeshConfigFlowManager {
     /**
      * Re-requests the node database on the live transport after a config change the firmware applied without a reboot,
      * so per-node flags it only reports during the handshake are re-delivered. Leaves config, channels and the
-     * connection state untouched. Returns false when no completed handshake owns the active session.
+     * connection state untouched. A request during a node database download runs again once it completes. Returns false
+     * when no handshake past its config stage owns the active session.
      */
     fun refreshNodeInfo(): Boolean
 }

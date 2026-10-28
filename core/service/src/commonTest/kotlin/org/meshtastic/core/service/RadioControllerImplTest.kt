@@ -43,6 +43,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -56,6 +57,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -74,6 +76,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -107,6 +110,7 @@ class RadioControllerImplTest {
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
+    private val meshConfigFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
 
     private fun createController(
@@ -121,6 +125,9 @@ class RadioControllerImplTest {
     ): RadioControllerImpl {
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
         every { nodeManager.myDeviceId } returns MutableStateFlow(null)
+        every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(false)
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
         every { nodeManager.connectionIdentity } returns connectionIdentity
         every { radioInterfaceService.sessionGeneration } returns sessionGeneration
         val resolvedActiveSession =
@@ -176,6 +183,8 @@ class RadioControllerImplTest {
             databaseManager = databaseManager,
             serviceNotifications = serviceNotifications,
             messageProcessor = lazy { messageProcessor },
+            meshConfigFlowManager = lazy { meshConfigFlowManager },
+            radioOperationLock = RadioOperationLock(),
             radioConfigRepository = radioConfigRepository,
             scope = scope.asServiceScope(),
             deviceAddressChangeHook = { onDeviceAddressChanged?.invoke() },
