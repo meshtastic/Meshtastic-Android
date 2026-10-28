@@ -1328,7 +1328,7 @@
     <string name="mirror_active">Mirroring</string>
     <string name="mirror_back">Back</string>
     <string name="mirror_device_screen">Device screen</string>
-    <string name="mirror_eink_hint">E-ink display: refresh is slow — prefer one-shot Refresh over continuous mirroring.</string>
+    <string name="mirror_eink_hint">E-ink display: refresh is slow, so prefer one-shot Refresh over continuous mirroring.</string>
     <string name="mirror_frame_info">%1$d×%2$d · frame #%3$d</string>
     <string name="mirror_hint_keyboard_active">Arrows · Enter = OK · Esc = back</string>
     <string name="mirror_hint_tap_keyboard">Click the screen for keyboard control, or swipe it to navigate</string>
@@ -1339,9 +1339,11 @@
     <string name="mirror_key_right">Right</string>
     <string name="mirror_key_up">Up</string>
     <string name="mirror_keyboard">Keyboard</string>
-    <string name="mirror_no_frame">No frame received yet — enable mirroring or tap Refresh.</string>
+    <string name="mirror_no_frame">No frame received yet. Enable mirroring or tap Refresh.</string>
     <string name="mirror_not_connected">Not connected to a device.</string>
     <string name="mirror_off">Mirror off</string>
+    <string name="mirror_unsupported">Screen mirroring needs newer firmware</string>
+    <string name="mirror_unsupported_hint">This device does not report a display to mirror. The D-pad still sends keys.</string>
     <string name="modem_preset">Presets</string>
     <string name="module_settings">Module configuration</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>

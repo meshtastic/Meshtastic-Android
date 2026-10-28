@@ -76,7 +76,12 @@ import org.meshtastic.core.resources.mirror_keyboard
 import org.meshtastic.core.resources.mirror_no_frame
 import org.meshtastic.core.resources.mirror_not_connected
 import org.meshtastic.core.resources.mirror_off
+import org.meshtastic.core.resources.mirror_unsupported
+import org.meshtastic.core.resources.mirror_unsupported_hint
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.ui.component.EmptyState
+import org.meshtastic.core.ui.icon.Device
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.input.RemoteKey
 import org.meshtastic.core.ui.input.RemoteKeyHandler
 import org.meshtastic.core.ui.input.RemoteKeyboardSink
@@ -128,7 +133,11 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
     val mirroring by viewModel.mirroring.collectAsStateWithLifecycle()
     val connected by viewModel.connected.collectAsStateWithLifecycle()
     val displayInfo by viewModel.displayInfo.collectAsStateWithLifecycle()
-    val active = connected && !viewModel.managed.collectAsStateWithLifecycle().value
+    val supported by viewModel.supported.collectAsStateWithLifecycle()
+    val managed by viewModel.managed.collectAsStateWithLifecycle()
+    // Keys predate mirroring, so the D-pad stays live on firmware that cannot stream frames.
+    val keysActive = connected && !managed
+    val active = keysActive && supported
 
     // Don't leave the device streaming to a hidden tab or abandoned screen.
     DisposableEffect(Unit) { onDispose { viewModel.stopMirroring() } }
@@ -155,6 +164,15 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
             !connected -> {
                 Text(text = stringResource(Res.string.mirror_not_connected))
                 DpadCluster(enabled = false, onEvent = viewModel::sendKey)
+            }
+
+            !supported -> {
+                EmptyState(
+                    icon = MeshtasticIcons.Device,
+                    title = stringResource(Res.string.mirror_unsupported),
+                    supportingText = stringResource(Res.string.mirror_unsupported_hint),
+                )
+                DpadCluster(enabled = keysActive, onEvent = viewModel::sendKey)
             }
 
             currentFrame == null -> {

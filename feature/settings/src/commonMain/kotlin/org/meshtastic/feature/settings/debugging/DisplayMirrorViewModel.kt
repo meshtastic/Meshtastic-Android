@@ -59,6 +59,13 @@ class DisplayMirrorViewModel(
         nodeRepository.ourNodeInfo.map { it?.metadata?.display }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
+     * Only firmware that can stream the display reports one in its metadata, so a missing [displayInfo] means arming
+     * the mirror or asking for a frame would go unanswered. Input events predate mirroring and stay allowed.
+     */
+    val supported: StateFlow<Boolean> =
+        displayInfo.map { it != null }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    /**
      * Managed mode locks the device out of configuration, and the mirror is not a read-only view: arming it is an admin
      * write and the controls inject input. The Debug Panel route it lives on is deliberately exempt from the gate every
      * other settings route carries, so the restriction has to be enforced here.
@@ -90,13 +97,13 @@ class DisplayMirrorViewModel(
 
     fun setMirror(enabled: Boolean) {
         // Disarming is always allowed - it is how a live stream is torn down when managed mode arrives.
-        if (enabled && managed.value) return
+        if (enabled && (managed.value || !supported.value)) return
         adminController.setDisplayMirror(enabled)
         _mirroring.value = enabled
     }
 
     fun requestFrame() {
-        if (managed.value) return
+        if (managed.value || !supported.value) return
         adminController.requestDisplayFrame()
     }
 
