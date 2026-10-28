@@ -170,6 +170,8 @@ internal fun otafixSupportsTarget(manifest: MaintenanceUf2Manifest, platformioTa
  *
  * When the row carries a [OtafixAssetEntry.targetOverrides] entry for [platformioTarget], that image wins: a stock Wio
  * Tracker L1 Pro 1W reports the plain L1's `TRACKER L1`, and the L1 image would leave it identifying as an L1.
+ * [platformioTarget] comes from the USB-connected node and [boardId] from the drive the user picked; the gate requires
+ * [FirmwareUpdateMethod.Usb], so they are normally the same board.
  */
 internal fun otafixUf2ForBoardId(
     manifest: MaintenanceUf2Manifest,
