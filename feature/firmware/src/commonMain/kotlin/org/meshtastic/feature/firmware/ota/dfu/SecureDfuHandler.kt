@@ -426,7 +426,7 @@ internal suspend fun runDfuRetryLoop(
  * True for a mid-stream drop on a bootloader known to predate [BOOTLOADER_RESTARTS_AFTER_DROP], which refuses the next
  * START with INVALID_STATE until it is reset. An unknown version is false, so it takes the reactive stale-session path.
  */
-private fun Throwable.keepsDroppedSession(): Boolean = this is LegacyDfuException.MidStreamDisconnect &&
+internal fun Throwable.keepsDroppedSession(): Boolean = this is LegacyDfuException.MidStreamDisconnect &&
     bootloaderVersion?.let { it < BOOTLOADER_RESTARTS_AFTER_DROP } == true
 
 /**

@@ -16,12 +16,12 @@
  */
 package org.meshtastic.feature.firmware.ota.dfu
 
+import org.meshtastic.core.ble.BleConnectionState
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class LegacyDfuProtocolTest {
 
@@ -139,10 +139,28 @@ class LegacyDfuProtocolTest {
         assertNull(parseBootloaderVersion("2.6.999 s140 6.1.1"))
     }
 
+    private fun dropOnBootloader(firmwareRevision: String) = LegacyDfuException.MidStreamDisconnect(
+        20,
+        200,
+        BleConnectionState.Disconnected(),
+        lastConfirmedBytes = -1,
+        bootloaderVersion = parseBootloaderVersion(firmwareRevision),
+    )
+
     @Test
-    fun `only 2_6_0 and later restart after a drop`() {
-        assertTrue(KotlinVersion(2, 6, 0) >= BOOTLOADER_RESTARTS_AFTER_DROP)
-        assertTrue(KotlinVersion(0, 11, 0) < BOOTLOADER_RESTARTS_AFTER_DROP)
-        assertTrue(KotlinVersion(0, 9, 2) < BOOTLOADER_RESTARTS_AFTER_DROP)
+    fun `a drop keeps the session only on a bootloader known to predate 2_6_0`() {
+        val expected =
+            mapOf(
+                "0.9.2-OTAFIX2.5 s140 6.1.1" to true,
+                "0.9.2-OTAFIX2.5-34-gabc1234 s140 6.1.1" to true,
+                "0.11.0 s140 6.1.1" to true,
+                "2.6.0" to false,
+                "2.6.0-3-gabc1234-dirty s140 7.3.0" to false,
+                "2.6.0 s140 6.1.1" to false,
+                "abc1234 s140 6.1.1" to false,
+            )
+        for ((revision, keeps) in expected) {
+            assertEquals(keeps, dropOnBootloader(revision).keepsDroppedSession(), revision)
+        }
     }
 }
