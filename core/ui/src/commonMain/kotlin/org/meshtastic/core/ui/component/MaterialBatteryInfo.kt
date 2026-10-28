@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -52,11 +53,11 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 private const val SIZE_ICON = 16
 
-@Suppress("MagicNumber", "LongMethod")
+@Suppress("MagicNumber")
 @Composable
 fun MaterialBatteryInfo(
-    modifier: Modifier = Modifier,
     level: Int?,
+    modifier: Modifier = Modifier,
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     unknownLabel: String = stringResource(Res.string.unknown),
@@ -68,76 +69,121 @@ fun MaterialBatteryInfo(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        if (level == null || level < 0) {
-            Icon(
-                modifier = Modifier.size(SIZE_ICON.dp),
-                imageVector = MeshtasticIcons.BatteryUnknown,
-                tint = contentColor.copy(alpha = 0.65f),
-                contentDescription = unknownLabel,
-            )
-        } else if (level > 100) {
-            Icon(
-                modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
-                imageVector = MeshtasticIcons.PowerSupply,
-                tint = contentColor.copy(alpha = 0.65f),
-                contentDescription = levelString,
-            )
+        Percents(level, contentColor, unknownLabel, levelString)
+        Volts(voltage, contentColor)
+    }
+}
 
+@Suppress("MagicNumber")
+@Composable
+fun MaterialBatteryCompactInfo(
+    level: Int?,
+    modifier: Modifier = Modifier,
+    voltage: Float? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    unknownLabel: String = stringResource(Res.string.unknown),
+) {
+    val levelString = level?.let { MetricFormatter.percent(it) } ?: unknownLabel
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        Row {
+            Percents(level, contentColor, unknownLabel, levelString)
+        }
+        Row {
+            Volts(voltage, contentColor)
+        }
+    }
+}
+
+@Composable
+@Suppress("MagicNumber", "MultipleEmitters")
+private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, levelString: String) {
+    if (level == null || level < 0) {
+        Icon(
+            modifier = Modifier.size(SIZE_ICON.dp),
+            imageVector = MeshtasticIcons.BatteryUnknown,
+            tint = contentColor.copy(alpha = 0.65f),
+            contentDescription = unknownLabel,
+        )
+    } else if (level > 100) {
+        Icon(
+            modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
+            imageVector = MeshtasticIcons.PowerSupply,
+            tint = contentColor.copy(alpha = 0.65f),
+            contentDescription = levelString,
+        )
+
+        Text(
+            text = stringResource(Res.string.external_power_short),
+            color = contentColor.copy(alpha = 0.95f),
+            style =
+            MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+            ),
+        )
+    } else {
+        // Map battery percentage to color
+        val fillColor =
+            when (level) {
+                in 0..19 -> MaterialTheme.colorScheme.StatusRed
+                in 20..39 -> MaterialTheme.colorScheme.StatusOrange
+                else -> MaterialTheme.colorScheme.StatusGreen
+            }
+
+        Icon(
+            modifier =
+            Modifier.size(SIZE_ICON.dp).drawBehind {
+                val insetVertical = size.height * .375f
+                val insetLeft = size.width * .25f
+                val insetRight = size.width * .167f
+
+                val availableWidth = size.width - (insetLeft + insetRight)
+                val availableHeight = size.height - (insetVertical * 2)
+
+                // Fill grows from right (flat end) toward left (terminal)
+                val fillWidth = availableWidth * (level / 100f)
+                val fillX = insetLeft + availableWidth - fillWidth
+
+                drawRect(
+                    color = fillColor,
+                    topLeft = Offset(fillX, insetVertical),
+                    size = Size(fillWidth, availableHeight),
+                )
+            },
+            imageVector = MeshtasticIcons.BatteryEmpty,
+            tint = contentColor.copy(alpha = 0.65f),
+            contentDescription = levelString,
+        )
+
+        Text(
+            text = levelString,
+            color = contentColor.copy(alpha = 0.95f),
+            style =
+            MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+            ),
+        )
+    }
+}
+
+@Composable
+@Suppress("MagicNumber", "MultipleEmitters")
+private fun Volts(voltage: Float?, contentColor: Color) {
+    voltage
+        ?.takeIf { it > 0 }
+        ?.let {
             Text(
-                text = stringResource(Res.string.external_power_short),
-                color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
-            )
-        } else {
-            // Map battery percentage to color
-            val fillColor =
-                when (level) {
-                    in 0..19 -> MaterialTheme.colorScheme.StatusRed
-                    in 20..39 -> MaterialTheme.colorScheme.StatusOrange
-                    else -> MaterialTheme.colorScheme.StatusGreen
-                }
-
-            Icon(
-                modifier =
-                Modifier.size(SIZE_ICON.dp).drawBehind {
-                    val insetVertical = size.height * .375f
-                    val insetLeft = size.width * .25f
-                    val insetRight = size.width * .167f
-
-                    val availableWidth = size.width - (insetLeft + insetRight)
-                    val availableHeight = size.height - (insetVertical * 2)
-
-                    // Fill grows from right (flat end) toward left (terminal)
-                    val fillWidth = availableWidth * (level / 100f)
-                    val fillX = insetLeft + availableWidth - fillWidth
-
-                    drawRect(
-                        color = fillColor,
-                        topLeft = Offset(fillX, insetVertical),
-                        size = Size(fillWidth, availableHeight),
-                    )
-                },
-                imageVector = MeshtasticIcons.BatteryEmpty,
-                tint = contentColor.copy(alpha = 0.65f),
-                contentDescription = levelString,
-            )
-
-            Text(
-                text = levelString,
-                color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                text = MetricFormatter.voltage(it),
+                color = contentColor.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
             )
         }
-        voltage
-            ?.takeIf { it > 0 }
-            ?.let {
-                Text(
-                    text = MetricFormatter.voltage(it),
-                    color = contentColor.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                )
-            }
-    }
 }
 
 class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
@@ -157,6 +203,16 @@ class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, 
 
 @PreviewLightDark
 @Composable
-fun MaterialBatteryInfoPreview(@PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>) {
+private fun MaterialBatteryInfoPreview(
+    @PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>,
+) {
     AppTheme { MaterialBatteryInfo(level = info.first, voltage = info.second) }
+}
+
+@PreviewLightDark
+@Composable
+private fun MaterialBatteryCompactInfoPreview(
+    @PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>,
+) {
+    AppTheme { MaterialBatteryCompactInfo(level = info.first, voltage = info.second) }
 }
