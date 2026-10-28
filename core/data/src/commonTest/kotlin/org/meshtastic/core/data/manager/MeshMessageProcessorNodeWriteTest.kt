@@ -48,6 +48,7 @@ import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import kotlin.test.Test
@@ -239,6 +240,82 @@ class MeshMessageProcessorNodeWriteTest {
 
         assertTrue(teardown.isCompleted)
         assertNotNull(nodeRepository.persisted(SENDER))
+    }
+
+    private suspend fun Fixture.installUnheard(num: Int) {
+        nodeManager.setFirmwareVersion("2.8.1")
+        nodeManager.installNodeInfo(
+            NodeInfo.Builder()
+                .also { wb ->
+                    wb.num = num
+                    wb.heard_on_current_lora = false
+                }
+                .build(),
+        )
+        assertFalse(checkNotNull(nodeManager.nodeDBbyNodeNum[num]).heardOnCurrentLora)
+    }
+
+    private fun MeshPacket.over(
+        transport: MeshPacket.TransportMechanism,
+        rxRssi: Int? = null,
+        viaMqtt: Boolean = false,
+    ) = newBuilder()
+        .also { wb ->
+            wb.transport_mechanism = transport
+            wb.rx_rssi = rxRssi
+            wb.via_mqtt = viaMqtt
+        }
+        .build()
+
+    @Test
+    fun `a packet received over our own LoRa radio marks its sender heard on the current settings`() =
+        testScope.runTest {
+            val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+            fixture.installUnheard(SENDER)
+
+            launch {
+                fixture.receive(
+                    packetFrom(SENDER, id = 1).over(MeshPacket.TransportMechanism.TRANSPORT_LORA, rxRssi = -80),
+                )
+            }
+            runCurrent()
+
+            assertTrue(checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER]).heardOnCurrentLora)
+            nodeRepository.releaseWrites.complete(Unit)
+        }
+
+    @Test
+    fun `a stored packet the radio replays after a node DB dump leaves its sender unheard`() = testScope.runTest {
+        val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+        fixture.installUnheard(SENDER)
+
+        launch { fixture.receive(packetFrom(SENDER, id = 1).over(MeshPacket.TransportMechanism.TRANSPORT_LORA)) }
+        runCurrent()
+
+        assertFalse(checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER]).heardOnCurrentLora)
+        nodeRepository.releaseWrites.complete(Unit)
+    }
+
+    @Test
+    fun `a packet that did not come over our own LoRa radio leaves its sender unheard`() = testScope.runTest {
+        val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+        fixture.installUnheard(SENDER)
+
+        launch { fixture.receive(packetFrom(SENDER, id = 1).over(MeshPacket.TransportMechanism.TRANSPORT_MQTT)) }
+        launch {
+            fixture.receive(
+                packetFrom(SENDER, id = 2)
+                    .over(
+                        MeshPacket.TransportMechanism.TRANSPORT_LORA,
+                        rxRssi = -80,
+                        viaMqtt = true,
+                    ),
+            )
+        }
+        runCurrent()
+
+        assertFalse(checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER]).heardOnCurrentLora)
+        nodeRepository.releaseWrites.complete(Unit)
     }
 
     private companion object {

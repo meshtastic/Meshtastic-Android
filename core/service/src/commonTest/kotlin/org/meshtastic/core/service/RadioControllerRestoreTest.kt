@@ -34,8 +34,10 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -82,6 +84,7 @@ class RadioControllerRestoreTest {
         ): RadioControllerImpl {
             every { nodeManager.myNodeNum } returns MutableStateFlow(1234)
             every { nodeManager.myDeviceId } returns MutableStateFlow(null)
+            every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(false)
             every { nodeManager.connectionIdentity } returns MutableStateFlow(null)
             every { radioInterfaceService.sessionGeneration } returns MutableStateFlow(0L)
             every { radioInterfaceService.activeSession } returns MutableStateFlow(null)
@@ -102,6 +105,8 @@ class RadioControllerRestoreTest {
                 databaseManager = databaseManager,
                 serviceNotifications = serviceNotifications,
                 messageProcessor = lazy { messageProcessor },
+                meshConfigFlowManager = lazy { mock<MeshConfigFlowManager>(MockMode.autofill) },
+                radioOperationLock = RadioOperationLock(),
                 radioConfigRepository = radioConfigRepository,
                 scope = scope.asServiceScope(),
                 deviceAddressChangeHook = {},
