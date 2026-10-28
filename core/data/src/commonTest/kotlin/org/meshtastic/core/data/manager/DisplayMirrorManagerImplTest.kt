@@ -377,6 +377,56 @@ class DisplayMirrorManagerImplTest {
         assertEquals(5, manager.palette.value?.signature)
     }
 
+    @Test
+    fun `continuation that lowers region total does not complete the palette`() {
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 0, regionTotal = 3, regions = listOf(region)),
+        )
+        manager.handleIncomingPalette(palette(signature = 5, regionOffset = 1, regionTotal = 1, regions = emptyList()))
+        assertNull(manager.palette.value)
+
+        // Poisoned until an offset-0 chunk restarts; the honest remainder no longer completes it either.
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 1, regionTotal = 3, regions = listOf(region, region)),
+        )
+        assertNull(manager.palette.value)
+
+        manager.handleIncomingPalette(
+            palette(signature = 6, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
+        )
+        assertEquals(6, manager.palette.value?.signature)
+    }
+
+    @Test
+    fun `chunk that overshoots the declared region total is rejected`() {
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region, region)),
+        )
+        assertNull(manager.palette.value)
+
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 0, regionTotal = 2, regions = listOf(region)),
+        )
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 1, regionTotal = 2, regions = listOf(region, region)),
+        )
+        assertNull(manager.palette.value)
+    }
+
     private companion object {
         const val WIDTH = 128
         const val HEIGHT = 64

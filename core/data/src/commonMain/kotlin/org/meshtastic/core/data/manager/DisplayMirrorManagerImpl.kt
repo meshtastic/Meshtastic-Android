@@ -54,6 +54,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
 
     private val paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
     private var paletteSignature = 0
+    private var paletteTotal = 0
     private var paletteReceived = 0
     private var paletteDefaultOn = 0
     private var paletteDefaultOff = 0
@@ -108,6 +109,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         if (chunk.region_offset == 0 && chunk.region_total <= MAX_PALETTE_REGIONS) {
             paletteRegions.clear()
             paletteSignature = chunk.signature
+            paletteTotal = chunk.region_total
             paletteReceived = 0
             // Defaults are authoritative on the first chunk; later chunks may omit them.
             paletteDefaultOn = chunk.default_on_color
@@ -121,7 +123,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         paletteRegions.addAll(chunk.regions)
         paletteReceived += chunk.regions.size
 
-        if (paletteReceived >= chunk.region_total) {
+        if (paletteReceived == paletteTotal) {
             _palette.value =
                 MirrorPalette(
                     signature = chunk.signature,
@@ -139,14 +141,18 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         return inSequence && geometryStable
     }
 
-    /** Sequenced continuation of the current palette, within the region cap; logs and rejects anything else. */
+    /**
+     * Sequenced continuation of the current palette that keeps the offset-0 chunk's region_total and stays within it;
+     * logs and rejects anything else. The total is fixed per palette, so a continuation cannot shorten or extend what
+     * the first chunk declared.
+     */
     private fun isAcceptablePaletteChunk(chunk: DisplayPalette): Boolean {
-        val withinCap =
-            chunk.region_total <= MAX_PALETTE_REGIONS &&
+        val withinTotal =
+            chunk.region_total == paletteTotal &&
                 paletteReceived >= 0 &&
-                paletteReceived + chunk.regions.size <= MAX_PALETTE_REGIONS
+                paletteReceived + chunk.regions.size <= paletteTotal
         val inSequence = chunk.signature == paletteSignature && chunk.region_offset == paletteReceived
-        val acceptable = withinCap && inSequence
+        val acceptable = withinTotal && inSequence
         if (!acceptable) {
             Logger.w { "DisplayMirror: bad palette chunk ${chunk.signature}@${chunk.region_offset}" }
         }
@@ -197,6 +203,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         paletteRegions.clear()
         paletteReceived = 0
         paletteSignature = 0
+        paletteTotal = 0
         _frame.value = null
         _palette.value = null
     }
