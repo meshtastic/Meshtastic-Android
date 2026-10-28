@@ -59,20 +59,20 @@ class DocsTasks : Plugin<Project> {
         val docsDir = project.isolated.rootProject.projectDirectory.dir("docs")
         val outputDir = project.layout.buildDirectory.dir("generated/docs")
 
-        project.tasks.register<GenerateDocsBundleTask>("generateDocsBundle") {
-            group = "documentation"
-            description = "Generate packaged docs artifacts and keyword index from markdown source."
-            sourceDir.set(docsDir)
-            generatedOutputDir.set(outputDir.map { it.dir("common") })
-            channel.set(project.providers.gradleProperty("docs.channel").orElse("beta"))
-            version.set(project.providers.gradleProperty("docs.version").orElse("beta"))
-        }
+        val generateDocsTask =
+            project.tasks.register<GenerateDocsBundleTask>("generateDocsBundle") {
+                group = "documentation"
+                description = "Generate packaged docs artifacts and keyword index from markdown source."
+                sourceDir.set(docsDir)
+                generatedOutputDir.set(outputDir.map { it.dir("common") })
+                channel.set(project.providers.gradleProperty("docs.channel").orElse("beta"))
+                version.set(project.providers.gradleProperty("docs.version").orElse("beta"))
+            }
 
         project.tasks.register<ValidateDocsBundleTask>("validateDocsBundle") {
             group = "documentation"
             description = "Validate keyword index schema, bundle size, and asset references."
-            dependsOn("generateDocsBundle")
-            bundleDir.set(outputDir.map { it.dir("common") })
+            bundleDir.set(generateDocsTask.flatMap { it.generatedOutputDir })
             schemaFile.set(
                 project.isolated.rootProject.projectDirectory.file(
                     "specs/20260507-161858-app-docs-markdown/contracts/keyword-index-schema.json",
