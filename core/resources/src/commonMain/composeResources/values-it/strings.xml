@@ -615,7 +615,6 @@
     <string name="firmware_update_save_dfu_file">Salva il file .uf2 sull'unità DFU del dispositivo.</string>
     <string name="firmware_update_searching_device">Ricerca del dispositivo OTA sulla rete...</string>
     <string name="firmware_update_select_file">Seleziona File Locale</string>
-    <string name="firmware_update_slow_bootloader_hint">Gli aggiornamenti sono lenti con il bootloader di questo dispositivo. Installare il bootloader OTAFIX consente aggiornamenti BLE molto più veloci.</string>
     <string name="firmware_update_source_local">Origine: file locale</string>
     <string name="firmware_update_stable">Stabile</string>
     <string name="firmware_update_starting_dfu">Avvio modalità DFU...</string>
