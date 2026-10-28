@@ -96,6 +96,7 @@ import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_available
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_installed
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_last_fault
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_latest_hint
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date_hint
@@ -199,6 +200,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     val selectedReleaseType by viewModel.selectedReleaseType.collectAsStateWithLifecycle()
     val deviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle()
     val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
+    val bootloaderFault by viewModel.bootloaderFault.collectAsStateWithLifecycle()
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
     val pendingLocalFirmwareFile by viewModel.pendingLocalFirmwareFile.collectAsStateWithLifecycle()
     val nightlyUnlocked by viewModel.nightlyUnlocked.collectAsStateWithLifecycle()
@@ -409,6 +411,13 @@ private fun FirmwareUpdateScaffold(
             Box(contentAlignment = Alignment.TopCenter) {
                 FirmwareUpdateContent(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
             }
+            bootloaderFault
+                ?.takeUnless {
+                    state is FirmwareUpdateState.Idle ||
+                        state is FirmwareUpdateState.Checking ||
+                        state is FirmwareUpdateState.Ready
+                }
+                ?.let { BootloaderFaultLine(it) }
         }
     }
 }
@@ -978,6 +987,19 @@ internal fun UsbMaintenanceCard(deviceName: String, latestBootloader: String?, o
             }
         }
     }
+}
+
+/** The `Last-Fault:` line a USB maintenance drive reported, in the bootloader's own format so it can be quoted. */
+@Composable
+internal fun BootloaderFaultLine(fault: BootloaderFault) {
+    Spacer(Modifier.height(16.dp))
+    Text(
+        stringResource(Res.string.firmware_maintenance_bootloader_last_fault, fault.toString()),
+        style = MaterialTheme.typography.bodySmall,
+        fontFamily = FontFamily.Monospace,
+        color = MaterialTheme.colorScheme.error,
+        textAlign = TextAlign.Center,
+    )
 }
 
 /**

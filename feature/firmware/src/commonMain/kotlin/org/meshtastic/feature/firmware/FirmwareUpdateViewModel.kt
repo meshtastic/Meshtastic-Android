@@ -171,6 +171,13 @@ class FirmwareUpdateViewModel(
     private val _currentFirmwareVersion = MutableStateFlow<String?>(null)
     val currentFirmwareVersion = _currentFirmwareVersion.asStateFlow()
 
+    /**
+     * The `Last-Fault:` a drive reported during the current USB maintenance sequence. The bootloader prints the record
+     * once, so the first one read is kept for the rest of the sequence, past the reboot that drops it from the drive.
+     */
+    private val _bootloaderFault = MutableStateFlow<BootloaderFault?>(null)
+    val bootloaderFault: StateFlow<BootloaderFault?> = _bootloaderFault.asStateFlow()
+
     private val _pendingLocalFirmwareFile = MutableStateFlow<PendingLocalFirmwareFile?>(null)
     val pendingLocalFirmwareFile: StateFlow<PendingLocalFirmwareFile?> = _pendingLocalFirmwareFile.asStateFlow()
 
@@ -276,6 +283,7 @@ class FirmwareUpdateViewModel(
             endMaintenanceSequence()
         }
         clearPendingLocalFirmwareFile()
+        _bootloaderFault.value = null
         _state.value = FirmwareUpdateState.Idle
         checkForUpdates()
     }
@@ -659,6 +667,7 @@ class FirmwareUpdateViewModel(
         originalDeviceAddress = radioPrefs.devAddr.value
         maintenanceHardware = currentState.deviceHardware
         destructiveWriteDone = false
+        _bootloaderFault.value = null
 
         viewModelScope.launch {
             // Battery check comes first: an abort here has touched nothing, and acquiring before it would leak
@@ -839,7 +848,15 @@ class FirmwareUpdateViewModel(
             withTimeoutOrNull(timeout) { usbManager.deviceDetachFlow().first() } != null
         },
         unblockCdc = { wait, hold -> usbManager.unblockCdcPort(portsBefore, wait, hold) },
+        onVolumeRead = ::latchBootloaderFault,
     )
+
+    private fun latchBootloaderFault(volume: MaintenanceVolume) {
+        val fault = volume.lastFault ?: return
+        if (_bootloaderFault.value != null) return
+        _bootloaderFault.value = fault
+        Logger.w { "Bootloader ${volume.bootloaderVersion} on ${volume.boardId} reported Last-Fault: $fault" }
+    }
 
     fun saveDfuFile(uri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return

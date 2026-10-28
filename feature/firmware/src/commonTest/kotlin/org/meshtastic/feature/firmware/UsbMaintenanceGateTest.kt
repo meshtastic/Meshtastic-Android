@@ -768,6 +768,47 @@ class UsbMaintenanceGateTest {
     }
 
     @Test
+    fun `last fault is parsed from the line ghostfat prints`() {
+        assertEquals(
+            BootloaderFault(id = 0x1001, pc = 0x26a1c, info = 0x8),
+            parseUf2LastFault(rakOtafixEraseInfo + "Last-Fault: id=0x1001 pc=0x26a1c info=0x8\r\n"),
+        )
+    }
+
+    @Test
+    fun `last fault keeps zero and full width words as readings`() {
+        assertEquals(
+            BootloaderFault(id = 0x0, pc = 0xFFFFFFFFL, info = 0x0),
+            parseUf2LastFault("Last-Fault: id=0x0 pc=0xffffffff info=0x0"),
+        )
+    }
+
+    @Test
+    fun `last fault parsing tolerates case and leading whitespace like its siblings`() {
+        assertEquals(
+            BootloaderFault(id = 0xAB, pc = 0xCD, info = 0xEF),
+            parseUf2LastFault("  last-fault: ID=0XAB PC=0xcd Info=0xEF\r\n"),
+        )
+    }
+
+    @Test
+    fun `last fault prints back in the bootloader's own form`() {
+        val line = "id=0x1001 pc=0x26a1c info=0x0"
+
+        assertEquals(line, parseUf2LastFault("Last-Fault: $line")?.toString())
+    }
+
+    @Test
+    fun `an absent or malformed last fault line yields no fault`() {
+        assertNull(parseUf2LastFault(rakOtafixEraseInfo), "A healthy drive or a pre-2.6.0 bootloader omits the line")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0x2\r\n"), "Missing info")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=2 info=0x3\r\n"), "Not 0x-prefixed")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0xZZ info=0x3\r\n"), "Not hex")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0x100000000 info=0x3\r\n"), "Wider than 32 bits")
+        assertNull(parseUf2LastFault(""), "Empty payload")
+    }
+
+    @Test
     fun `an absent or malformed factory erase line yields no family`() {
         assertNull(parseUf2FactoryEraseFamily(rak4631OtafixInfo), "Every bootloader before PR #41 omits the line")
         assertNull(parseUf2FactoryEraseFamily("Factory-Erase: UF2 family\r\n"), "No token at all")
