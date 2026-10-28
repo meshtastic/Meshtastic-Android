@@ -30,12 +30,11 @@ import org.meshtastic.buildlogic.libs
  *
  * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the UTC timezone pin on the render
  * JVM, the test-retry opt-out (CST's custom runner is incompatible with test retry), and the Compose Multiplatform +
- * screenshot-validation dependencies.
- * Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and `com.android.compose.screenshot`,
- * which the module declares itself. It also owns the image-difference tolerance, which used to live in the module
- * scripts as `testOptions { screenshotTests { imageDifferenceThreshold } }` — alpha16 deleted that DSL and
- * conventions the engine threshold to 0f (pixel-exact), which fails 33 of our references. The task property the
- * DSL used to feed is still public, so the same tolerance is set directly on it here.
+ * screenshot-validation dependencies. Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and
+ * `com.android.compose.screenshot`, which the module declares itself. It also owns the image-difference tolerance,
+ * which used to live in the module scripts as `testOptions { screenshotTests { imageDifferenceThreshold } }` — alpha16
+ * deleted that DSL and conventions the engine threshold to 0f (pixel-exact), which fails 33 of our references. The task
+ * property the DSL used to feed is still public, so the same tolerance is set directly on it here.
  */
 class AndroidScreenshotConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
