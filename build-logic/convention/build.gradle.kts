@@ -63,6 +63,11 @@ dependencies {
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
+
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks {
@@ -70,6 +75,7 @@ tasks {
         enableStricterValidation = true
         failOnWarning = true
     }
+    test { useJUnitPlatform() }
 }
 
 // Isolated Projects forbids reaching into another project; ".." escapes the included build
