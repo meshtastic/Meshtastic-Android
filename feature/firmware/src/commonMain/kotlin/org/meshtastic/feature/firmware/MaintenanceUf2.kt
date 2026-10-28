@@ -259,16 +259,16 @@ internal fun parseUf2FactoryEraseFamily(infoUf2Text: String): Long? {
  */
 data class BootloaderFault(val id: Long, val pc: Long, val info: Long) {
     /** The line's own `id=0x.. pc=0x.. info=0x..` form, so a report can be matched against the bootloader source. */
-    override fun toString(): String = "id=0x${id.toString(HEX_RADIX)} pc=0x${pc.toString(HEX_RADIX)} " +
-        "info=0x${info.toString(HEX_RADIX)}"
+    override fun toString(): String =
+        "id=0x${id.toString(HEX_RADIX)} pc=0x${pc.toString(HEX_RADIX)} " + "info=0x${info.toString(HEX_RADIX)}"
 }
 
 /**
  * Extracts the `Last-Fault: id=0x<hex> pc=0x<hex> info=0x<hex>` line the Meshtastic nRF52 Bootloader 2.6.0 onwards
  * appends after recording a fault. `ghostfat.c` prints each word with `utoa(x, str, 16)`: lowercase and unpadded.
  *
- * The bootloader prints the record once and clears it, so the line is present only on the first drive session after
- * the fault. Returns `null` when the line is absent or any of the three fields is missing or not hex.
+ * The bootloader prints the record once and clears it, so the line is present only on the first drive session after the
+ * fault. Returns `null` when the line is absent or any of the three fields is missing or not hex.
  */
 @Suppress("ReturnCount") // guard clauses; an unparseable line must yield null rather than a guess
 internal fun parseUf2LastFault(infoUf2Text: String): BootloaderFault? {
