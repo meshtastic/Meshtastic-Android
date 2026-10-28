@@ -727,16 +727,16 @@ class FirmwareUpdateViewModel(
     private fun writeFirmwareToVolume(currentState: FirmwareUpdateState.AwaitingFileSave, treeUri: CommonUri) {
         val artifact = currentState.uf2Artifact ?: return
         val hardware = _deviceHardware.value ?: return
-        val pass =
-            UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, currentState.fileName ?: "firmware.uf2")
+        val pass = UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, currentState.fileName ?: "firmware.uf2")
 
         viewModelScope.launch {
             // The same hold saveDfuFile takes: the copy, the flash and the detach wait need the foreground service.
             radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
                 try {
-                    val result = usbPassWriter(portsBefore = emptySet()).write(pass, treeUri, hardware) {
-                        _state.value = it
-                    }
+                    val result =
+                        usbPassWriter(portsBefore = emptySet()).write(pass, treeUri, hardware) {
+                            _state.value = it
+                        }
                     val failure = result.failureMessage()
                     if (failure != null) {
                         _state.value = currentState.copy(retryMessage = failure)
