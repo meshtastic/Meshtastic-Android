@@ -267,6 +267,7 @@ internal class UsbPassWriter(
     suspend fun review(treeUri: CommonUri): BootloaderReview =
         when (val inspection = inspectMaintenanceVolume(treeUri, fileHandler)) {
             is VolumeInspection.Rejected -> BootloaderReview.Refused(inspection.reason)
+
             is VolumeInspection.Accepted -> {
                 onVolumeRead(inspection.volume)
                 reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)

@@ -992,9 +992,9 @@ internal fun UsbMaintenanceCard(deviceName: String, latestBootloader: String?, o
 /** The `Last-Fault:` line a USB maintenance drive reported, in the bootloader's own format so it can be quoted. */
 @Composable
 internal fun BootloaderFaultLine(fault: BootloaderFault) {
-    Spacer(Modifier.height(16.dp))
     Text(
         stringResource(Res.string.firmware_maintenance_bootloader_last_fault, fault.toString()),
+        modifier = Modifier.padding(top = 16.dp),
         style = MaterialTheme.typography.bodySmall,
         fontFamily = FontFamily.Monospace,
         color = MaterialTheme.colorScheme.error,
