@@ -776,7 +776,6 @@
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
-    <string name="firmware_update_slow_bootloader_hint">Обновление загрузчика этого устройства идёт медленно. Прошивка загрузчика OTAFIX позволяет намного быстрее обновлять через BLE.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>

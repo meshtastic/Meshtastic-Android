@@ -617,7 +617,6 @@
     <string name="firmware_update_save_dfu_file">.uf2 ファイルをデバイスの DFU ドライブに保存してください。</string>
     <string name="firmware_update_searching_device">ネットワーク上で OTA デバイスを検索しています…</string>
     <string name="firmware_update_select_file">ローカルファイルを選択</string>
-    <string name="firmware_update_slow_bootloader_hint">このデバイスのブートローダーでは更新が遅くなります。OTAFIX ブートローダーを書き込むと、BLE 更新が大幅に高速化します。</string>
     <string name="firmware_update_source_local">ソース：ローカルファイル</string>
     <string name="firmware_update_stable">安定版</string>
     <string name="firmware_update_starting_dfu">DFU を開始しています…</string>

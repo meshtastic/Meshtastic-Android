@@ -636,7 +636,6 @@
     <string name="firmware_update_save_dfu_file">Uložte soubor .uf2 na DFU jednotku svého zařízení.</string>
     <string name="firmware_update_searching_device">Vyhledávám zařízení podporující OTA v síti...</string>
     <string name="firmware_update_select_file">Vybrat soubor</string>
-    <string name="firmware_update_slow_bootloader_hint">Aktualizace jsou s bootloaderem tohoto zařízení pomalé. Nahráním bootloaderu OTAFIX výrazně urychlíte aktualizace přes Bluetooth (BLE).</string>
     <string name="firmware_update_source_local">Zdroj: lokální soubor</string>
     <string name="firmware_update_stable">Stabilní</string>
     <string name="firmware_update_starting_dfu">Spouštění DFU...</string>

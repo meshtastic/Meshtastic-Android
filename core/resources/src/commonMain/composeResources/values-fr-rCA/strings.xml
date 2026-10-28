@@ -594,7 +594,6 @@
     <string name="firmware_update_save_dfu_file">Veuillez enregistrer le fichier .uf2 sur le lecteur DFU de votre appareil.</string>
     <string name="firmware_update_searching_device">Recherche de périphérique OTA sur le réseau...</string>
     <string name="firmware_update_select_file">Sélectionnez le fichier local</string>
-    <string name="firmware_update_slow_bootloader_hint">Les mises à jour sont lentes sur le chargeur d'amorçage de cet appareil. Flasher le chargeur d'amorçage OTAFIX permet des mises à jour BLE plus rapides.</string>
     <string name="firmware_update_source_local">Source : Fichier local</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_starting_dfu">Démarrage du mode DFU...</string>

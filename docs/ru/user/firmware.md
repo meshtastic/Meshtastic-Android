@@ -50,7 +50,7 @@ While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop**
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
 
-Some boards ship with a bootloader that cannot take a Bluetooth update. For these, the screen shows a warning card before you start, with a hint for the board where one exists. **Don't show again for this device** hides it for that node. When a stock nRF bootloader limits how fast the upload can run, the screen says so during the upload, and again on the success screen, with a link to the OTAFIX bootloader that makes Bluetooth updates much faster.
+Some boards ship with a bootloader that cannot take a Bluetooth update. For these, the screen shows a warning card before you start, with a hint for the board where one exists. **Don't show again for this device** hides it for that node. When a stock nRF bootloader limits how fast the upload can run, the screen says so during the upload, and again on the success screen, with a link to the Meshtastic nRF52 Bootloader, which makes Bluetooth updates much faster.
 
 #### Очистить устройство при обновлении
 

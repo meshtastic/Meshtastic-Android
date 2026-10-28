@@ -629,7 +629,6 @@
     <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存复制到您设备的 DFU 驱动器中。</string>
     <string name="firmware_update_searching_device">正在网络上搜索 OTA 设备……</string>
     <string name="firmware_update_select_file">选择本地文件</string>
-    <string name="firmware_update_slow_bootloader_hint">此设备当前的 Bootloader引导程序更新速度较慢。刷入 OTAFIX Bootloader 可以大幅提升 蓝牙更新的速度。</string>
     <string name="firmware_update_source_local">来源: 本地文件</string>
     <string name="firmware_update_stable">稳定版本</string>
     <string name="firmware_update_starting_dfu">正在启动 DFU...</string>

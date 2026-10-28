@@ -687,7 +687,6 @@
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_searching_device">Etsitään OTA-laitetta verkosta...</string>
     <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
-    <string name="firmware_update_slow_bootloader_hint">Päivitykset ovat hitaita tämän laitteen käynnistyslataimella. OTAFIX-käynnistyslataimen asentaminen mahdollistaa huomattavasti nopeammat bluetooth-päivitykset.</string>
     <string name="firmware_update_source_local">Lähde: Paikallinen tiedosto</string>
     <string name="firmware_update_stable">Vakaa</string>
     <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
