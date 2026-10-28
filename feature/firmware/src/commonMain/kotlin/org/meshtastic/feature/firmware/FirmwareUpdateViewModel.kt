@@ -178,6 +178,13 @@ class FirmwareUpdateViewModel(
     private val _bootloaderFault = MutableStateFlow<BootloaderFault?>(null)
     val bootloaderFault: StateFlow<BootloaderFault?> = _bootloaderFault.asStateFlow()
 
+    /**
+     * True where the USB firmware pass is written by picking the device's drive, so `INFO_UF2.TXT` is read and the
+     * drive vetted first. Elsewhere the image is saved through a file picker, which grants access to that file only.
+     */
+    val picksUsbVolume: Boolean
+        get() = usbManager.supportsUf2Maintenance
+
     private val _pendingLocalFirmwareFile = MutableStateFlow<PendingLocalFirmwareFile?>(null)
     val pendingLocalFirmwareFile: StateFlow<PendingLocalFirmwareFile?> = _pendingLocalFirmwareFile.asStateFlow()
 
@@ -475,6 +482,7 @@ class FirmwareUpdateViewModel(
         val release = currentState.release ?: return
         // Every update starts from a clean slate: an opt-in from an earlier, failed attempt must not carry over.
         pendingFactoryResetAfterUpdate = false
+        _bootloaderFault.value = null
         trackUpdateStart(currentState, release.id, wipeDevice)
         when {
             currentState.isRecovery -> startRecoveryUpdate(currentState, release)
@@ -705,6 +713,49 @@ class FirmwareUpdateViewModel(
         }
     }
 
+    /** Writes the pending USB pass to the drive the user picked: the next maintenance pass, or a plain update. */
+    fun writeToVolume(treeUri: CommonUri) {
+        val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
+        if (pendingUsbPasses.isEmpty()) writeFirmwareToVolume(currentState, treeUri) else writeMaintenancePass(treeUri)
+    }
+
+    /**
+     * The plain single-pass USB update, written through [UsbPassWriter] so the drive is vetted and its `INFO_UF2.TXT`
+     * read before anything is copied. Nothing destructive has happened yet, so a refused drive re-offers the pick.
+     */
+    @Suppress("ReturnCount") // preconditions guarding a write to the device
+    private fun writeFirmwareToVolume(currentState: FirmwareUpdateState.AwaitingFileSave, treeUri: CommonUri) {
+        val artifact = currentState.uf2Artifact ?: return
+        val hardware = _deviceHardware.value ?: return
+        val pass =
+            UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, currentState.fileName ?: "firmware.uf2")
+
+        viewModelScope.launch {
+            // The same hold saveDfuFile takes: the copy, the flash and the detach wait need the foreground service.
+            radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
+                try {
+                    val result = usbPassWriter(portsBefore = emptySet()).write(pass, treeUri, hardware) {
+                        _state.value = it
+                    }
+                    val failure = result.failureMessage()
+                    if (failure != null) {
+                        _state.value = currentState.copy(retryMessage = failure)
+                        return@withOperation
+                    }
+                    verifyUpdateResult(originalDeviceAddress)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.e(e) { "Writing the firmware to the update drive failed" }
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                }
+                if (_state.value !is FirmwareUpdateState.AwaitingFileSave) {
+                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                }
+            }
+        }
+    }
+
     /**
      * Resumes a maintenance sequence once the user has pointed at the device's UF2 volume.
      *
@@ -789,22 +840,9 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) = when (result) {
-        UsbPassResult.Written -> advancePastPass(pass)
-
-        is UsbPassResult.Refused -> reofferOrFail(pass, usbMaintenanceRefusalMessage(result.reason))
-
-        UsbPassResult.ImageDownloadFailed ->
-            reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_retrieval_failed))
-
-        UsbPassResult.CopyFailed ->
-            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_copy_failed))
-
-        UsbPassResult.WriteDidNotLand ->
-            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_wrong_destination))
-
-        UsbPassResult.CdcUnblockFailed ->
-            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_cdc_unblock_failed))
+    private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) {
+        val failure = result.failureMessage()
+        if (failure == null) advancePastPass(pass) else reofferOrFail(pass, failure)
     }
 
     private suspend fun advancePastPass(pass: UsbFileSavePass, written: Boolean = true) {
@@ -815,7 +853,9 @@ class FirmwareUpdateViewModel(
         if (next == null) {
             // Sequence complete: hand the device back before verifying, so the normal reconnect can run.
             releaseMaintenanceLease()
+            maintenanceHardware = null
             verifyUpdateResult(originalDeviceAddress)
+            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         } else {
             _state.value = next.toAwaitingFileSave()
         }
@@ -1403,6 +1443,16 @@ private fun shouldTryLocalFirmwareBundle(fileName: String, reason: LocalFirmware
             LocalFirmwareFileValidationReason.UnsupportedUpdateMethod,
             -> false
         }
+}
+
+/** Why a USB pass did not write, for the re-offered pick; `null` when it did. */
+private fun UsbPassResult.failureMessage(): UiText? = when (this) {
+    UsbPassResult.Written -> null
+    is UsbPassResult.Refused -> usbMaintenanceRefusalMessage(reason)
+    UsbPassResult.ImageDownloadFailed -> UiText.Resource(Res.string.firmware_update_retrieval_failed)
+    UsbPassResult.CopyFailed -> UiText.Resource(Res.string.firmware_maintenance_copy_failed)
+    UsbPassResult.WriteDidNotLand -> UiText.Resource(Res.string.firmware_maintenance_wrong_destination)
+    UsbPassResult.CdcUnblockFailed -> UiText.Resource(Res.string.firmware_maintenance_cdc_unblock_failed)
 }
 
 private suspend fun cleanupTemporaryFiles(

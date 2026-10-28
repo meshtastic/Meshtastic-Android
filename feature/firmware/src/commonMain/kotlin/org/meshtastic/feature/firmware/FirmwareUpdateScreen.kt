@@ -215,10 +215,10 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
-    // Maintenance passes pick the whole volume, not a filename, so the app can read INFO_UF2.TXT and confirm it really
-    // is the device's update drive before writing anything to it.
+    // USB passes pick the whole volume, not a filename, so the app can read INFO_UF2.TXT and confirm it really is the
+    // device's update drive before writing anything to it.
     val volumePickerLauncher = rememberOpenDocumentTreeLauncher { uri ->
-        uri?.let { viewModel.writeMaintenancePass(it) }
+        uri?.let { viewModel.writeToVolume(it) }
     }
 
     val actions =
@@ -231,7 +231,9 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                         filePickerLauncher("*/*")
                     }
                 },
-                onSaveFile = { fileName -> saveFileLauncher(fileName, UF2_MIME_TYPE) },
+                onSaveFile = { fileName ->
+                    if (viewModel.picksUsbVolume) volumePickerLauncher() else saveFileLauncher(fileName, UF2_MIME_TYPE)
+                },
                 onPickVolume = volumePickerLauncher,
                 onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
                 onConfirmBootloaderUpgrade = viewModel::confirmBootloaderUpgrade,

@@ -200,6 +200,30 @@ abstract class CommonUsbPassWriterTest {
     }
 
     @Test
+    fun `a prepared firmware pass reads the drive and fetches nothing`() = runTest {
+        val h = harness(sketchInfo + "Last-Fault: id=0x1 pc=0x2b5f4 info=0x0\r\n")
+        val artifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
+        val pass = UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, "firmware.uf2")
+
+        assertEquals(UsbPassResult.Written, h.writer.write(pass, treeUri, rak) {})
+        assertEquals(listOf(BootloaderFault(id = 0x1, pc = 0x2b5f4, info = 0x0)), h.volumesRead.map { it.lastFault })
+        assertTrue(h.written.isEmpty(), "the firmware image was downloaded before the device rebooted")
+        assertTrue(h.unblockCalls.isEmpty())
+    }
+
+    @Test
+    fun `a prepared firmware pass refuses a drive that is not the update drive`() = runTest {
+        val h = harness("Model: Something\r\n")
+        val artifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
+        val pass = UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, "firmware.uf2")
+
+        assertEquals(
+            UsbPassResult.Refused(UsbMaintenanceRefusal.NotABootloaderVolume),
+            h.writer.write(pass, treeUri, rak) {},
+        )
+    }
+
+    @Test
     fun `a refused drive reports no volume`() = runTest {
         val h = harness("Model: Something\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
 
