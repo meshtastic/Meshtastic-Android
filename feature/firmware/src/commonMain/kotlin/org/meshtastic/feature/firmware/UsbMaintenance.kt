@@ -335,6 +335,7 @@ internal fun chooseMaintenanceImage(
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(manifest, volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
-            ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
+        otafixUf2ForBoardId(manifest, volume.boardId, hardware.effectiveTarget)?.let {
+            MaintenanceImageChoice.Resolved(it)
+        } ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

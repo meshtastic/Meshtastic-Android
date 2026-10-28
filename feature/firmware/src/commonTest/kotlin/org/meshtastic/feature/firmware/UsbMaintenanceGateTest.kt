@@ -537,6 +537,80 @@ class UsbMaintenanceGateTest {
         assertNull(otafixUf2ForBoardId(testManifest, ""))
     }
 
+    // ── Target overrides under a shared Board-ID ─────────────────────────────
+
+    private val overrideManifest =
+        manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+            """
+            {
+              "otafixReleaseTag": "2.6.0",
+              "otafixBase": "https://github.com/meshtastic/nRF52_Bootloader/releases/download/2.6.0",
+              "otafixByBoardId": {
+                "TRACKER L1": {
+                  "otafixBoardSlug": "wio_tracker_l1",
+                  "sha256": "aa",
+                  "targetOverrides": {
+                    "seeed_wio_tracker_L1_Pro_1W": { "otafixBoardSlug": "wio_tracker_l1_pro_1w", "sha256": "bb" }
+                  }
+                },
+                "nRF52840-WioTracker-L1-Pro-1W": { "otafixBoardSlug": "wio_tracker_l1_pro_1w", "sha256": "bb" }
+              }
+            }
+            """
+                .trimIndent(),
+        )
+
+    @Test
+    fun `a target override wins over the shared board id row`() {
+        val image = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_L1_Pro_1W"))
+
+        assertEquals("update-wio_tracker_l1_pro_1w_bootloader-2.6.0_nosd.uf2", image.fileName)
+        assertEquals("bb", image.sha256)
+    }
+
+    @Test
+    fun `a target override matches the target case-insensitively`() {
+        val image = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_l1_pro_1w"))
+
+        assertEquals("bb", image.sha256)
+    }
+
+    @Test
+    fun `a target with no override on the row gets the board id image`() {
+        val l1 = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_L1"))
+        val noTarget = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1"))
+
+        assertEquals("update-wio_tracker_l1_bootloader-2.6.0_nosd.uf2", l1.fileName)
+        assertEquals(l1, noTarget)
+    }
+
+    @Test
+    fun `a target override never resolves an unrecognized board id`() {
+        assertNull(otafixUf2ForBoardId(overrideManifest, "SomeOtherBoard-v9", "seeed_wio_tracker_L1_Pro_1W"))
+    }
+
+    @Test
+    fun `a manifest without target overrides resolves as before`() {
+        assertEquals(
+            otafixUf2ForBoardId(testManifest, "TRACKER L1"),
+            otafixUf2ForBoardId(testManifest, "TRACKER L1", "seeed_wio_tracker_L1_Pro_1W"),
+        )
+    }
+
+    @Test
+    fun `the bootloader upgrade writes the override image for the connected target`() {
+        val choice =
+            chooseMaintenanceImage(
+                overrideManifest,
+                UsbMaintenanceRequest.BootloaderUpgrade,
+                nrf(target = "seeed_wio_tracker_L1_Pro_1W", slug = "SEEED_WIO_TRACKER_L1_PRO_1W"),
+                MaintenanceVolume(boardId = "TRACKER L1", softDevice = SoftDeviceVariant.S140_7_3_0),
+            )
+
+        val resolved = assertIs<MaintenanceImageChoice.Resolved>(choice)
+        assertEquals("update-wio_tracker_l1_pro_1w_bootloader-2.6.0_nosd.uf2", resolved.asset.fileName)
+    }
+
     @Test
     fun `board id is parsed from an INFO_UF2 payload and tolerates surrounding lines`() {
         val info =

@@ -73,9 +73,20 @@ data class EraseImageEntry(
  * @property otafixBoardSlug OTAFIX's own release-asset board slug (e.g. "wiscore_rak4631_board") — deliberately NOT
  *   named the same as [DeviceHardware.platformioTarget] (e.g. "rak4631"): the two vocabularies differ per board, and a
  *   shared name here would invite exactly the confusion this class's callers already have to spell out in prose.
+ * @property targetOverrides Images for boards that ship a bootloader reporting this row's Board-ID but have their own
+ *   bootloader build, keyed by [DeviceHardware.platformioTarget]. Nested under the Board-ID so a target alone never
+ *   resolves an image: the drive must still report a Board-ID this manifest knows.
  */
 @Serializable
 data class OtafixAssetEntry(
+    @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
+    @SerialName("sha256") val sha256: String,
+    @SerialName("targetOverrides") val targetOverrides: Map<String, OtafixTargetOverride> = emptyMap(),
+)
+
+/** One [OtafixAssetEntry.targetOverrides] image, named and pinned the same way as its parent row. */
+@Serializable
+data class OtafixTargetOverride(
     @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
     @SerialName("sha256") val sha256: String,
 )

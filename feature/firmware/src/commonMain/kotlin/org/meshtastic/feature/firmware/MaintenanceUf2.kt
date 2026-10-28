@@ -167,11 +167,27 @@ internal fun otafixSupportsTarget(manifest: MaintenanceUf2Manifest, platformioTa
  * `null` refuses the upgrade. That is the correct outcome even for a board OTAFIX supports: an unrecognized Board-ID
  * means the installed bootloader is not one we have a verified pairing for, and writing a bootloader built for other
  * hardware is unrecoverable without SWD.
+ *
+ * When the row carries a [OtafixAssetEntry.targetOverrides] entry for [platformioTarget], that image wins: a stock Wio
+ * Tracker L1 Pro 1W reports the plain L1's `TRACKER L1`, and the L1 image would leave it identifying as an L1.
  */
-internal fun otafixUf2ForBoardId(manifest: MaintenanceUf2Manifest, boardId: String): MaintenanceUf2? =
-    manifest.otafixByBoardId[boardId.trim()]?.let {
-        manifest.otafixAssetOrNull(otafixBoardSlug = it.otafixBoardSlug, sha256 = it.sha256)
+internal fun otafixUf2ForBoardId(
+    manifest: MaintenanceUf2Manifest,
+    boardId: String,
+    platformioTarget: String? = null,
+): MaintenanceUf2? {
+    val row = manifest.otafixByBoardId[boardId.trim()] ?: return null
+    val override =
+        platformioTarget
+            ?.takeIf { it.isNotBlank() }
+            ?.let { target -> row.targetOverrides.entries.firstOrNull { it.key.equals(target, ignoreCase = true) } }
+            ?.value
+    return if (override != null) {
+        manifest.otafixAssetOrNull(otafixBoardSlug = override.otafixBoardSlug, sha256 = override.sha256)
+    } else {
+        manifest.otafixAssetOrNull(otafixBoardSlug = row.otafixBoardSlug, sha256 = row.sha256)
     }
+}
 
 /**
  * Extracts the `Board-ID:` value from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
