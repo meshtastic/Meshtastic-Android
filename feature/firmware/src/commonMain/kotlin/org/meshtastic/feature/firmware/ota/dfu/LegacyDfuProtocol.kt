@@ -36,6 +36,30 @@ internal val LEGACY_DFU_PACKET_UUID: Uuid = Uuid.parse("00001532-1212-EFDE-1523-
  */
 internal val LEGACY_DFU_VERSION_UUID: Uuid = Uuid.parse("00001534-1212-EFDE-1523-785FEABCD123")
 
+/** Device Information service, which the Adafruit-lineage bootloaders expose in DFU mode. */
+internal val DEVICE_INFORMATION_SERVICE_UUID: Uuid = Uuid.parse("0000180A-0000-1000-8000-00805F9B34FB")
+
+/** DIS Firmware Revision String: `<git describe> <softdevice> <softdevice version>`, e.g. `2.6.0 s140 6.1.1`. */
+internal val FIRMWARE_REVISION_UUID: Uuid = Uuid.parse("00002A26-0000-1000-8000-00805F9B34FB")
+
+/**
+ * First Meshtastic nRF52 Bootloader whose BLE DFU returns to idle when the central disconnects, so a reconnecting
+ * central's START_DFU starts over instead of being refused with INVALID_STATE until the board is reset.
+ */
+internal val BOOTLOADER_RESTARTS_AFTER_DROP = KotlinVersion(2, 6, 0)
+
+/**
+ * The bootloader version at the front of a DIS Firmware Revision String, or null when it does not start with `x.y.z`.
+ * Anything after the first `-` is ignored, so `0.9.2-OTAFIX2.5` reads as 0.9.2 and an untagged build reads as the tag
+ * it descends from.
+ */
+internal fun parseBootloaderVersion(firmwareRevision: String): KotlinVersion? {
+    val numbers =
+        firmwareRevision.trim().substringBefore(' ').substringBefore('-').split('.').map { it.toIntOrNull() ?: -1 }
+    val valid = numbers.size == 3 && numbers.all { it in 0..KotlinVersion.MAX_COMPONENT_VALUE }
+    return if (valid) KotlinVersion(numbers[0], numbers[1], numbers[2]) else null
+}
+
 // ---------------------------------------------------------------------------
 // Protocol opcodes (Nordic SDK 11/12 / Adafruit BLEDfu)
 // ---------------------------------------------------------------------------
@@ -266,6 +290,9 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
      * failed BLE write on an already-disconnected link. Watcher-originated disconnects (where the state-flow watcher
      * detected the drop independently) may have no cause.
      *
+     * [bootloaderVersion] is the version read from the bootloader's DIS Firmware Revision on this connection, or null
+     * when it could not be read or parsed.
+     *
      * Typed — callers must NOT parse the message to detect a mid-stream drop.
      */
     class MidStreamDisconnect(
@@ -274,6 +301,7 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
         val connectionState: BleConnectionState,
         val lastConfirmedBytes: Int,
         cause: Throwable? = null,
+        val bootloaderVersion: KotlinVersion? = null,
     ) : LegacyDfuException(
         "BLE link dropped mid-upload at host in-flight offset $bytesSent/$totalBytes " +
             "(lastConfirmed=$lastConfirmedBytes, state=$connectionState)",

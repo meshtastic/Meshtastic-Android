@@ -282,6 +282,9 @@ internal fun dfuUploadPhaseState(phase: DfuUploadPhase, uploadMsg: UiText, slowH
  *   cycle never tried to upload.
  * - After the first [LegacyDfuException.MidStreamDisconnect] on Legacy, every subsequent Legacy attempt uses
  *   [LegacyDfuStreamProfile.RECOVERY]; a stale-session alone never switches the profile.
+ * - A mid-stream drop on a bootloader known to predate [BOOTLOADER_RESTARTS_AFTER_DROP] runs a reset-prime cleanup
+ *   (from the [maxStaleResets] budget) before the retry instead of the inter-attempt delay, since that START would be
+ *   refused with INVALID_STATE. A 2.6.0 or later bootloader, or an unknown version, retries directly.
  * - All exit paths are bounded: the loop stops when the upload-attempt budget is exhausted or the stale-response budget
  *   is exceeded. Up to [maxStaleResets] reset-prime cleanups run; the next stale response terminates without another
  *   cleanup.
@@ -393,7 +396,16 @@ internal suspend fun runDfuRetryLoop(
 
                     if (uploadAttempts < activeAttempts) {
                         onRetryScheduled(uploadAttempts + 1, activeAttempts)
-                        interAttemptDelay()
+                        if (error.keepsDroppedSession() && staleResets < maxStaleResets) {
+                            staleResets++
+                            Logger.i {
+                                "DFU: bootloader predates $BOOTLOADER_RESTARTS_AFTER_DROP and keeps a dropped " +
+                                    "session; reset-priming before the retry ($staleResets/$maxStaleResets) ($protocol)"
+                            }
+                            resetStaleBootloader()
+                        } else {
+                            interAttemptDelay()
+                        }
                     }
                 }
             }
@@ -409,6 +421,13 @@ internal suspend fun runDfuRetryLoop(
     }
     return DfuUploadResult.Failure(error, protocolEngaged)
 }
+
+/**
+ * True for a mid-stream drop on a bootloader known to predate [BOOTLOADER_RESTARTS_AFTER_DROP], which refuses the next
+ * START with INVALID_STATE until it is reset. An unknown version is false, so it takes the reactive stale-session path.
+ */
+private fun Throwable.keepsDroppedSession(): Boolean = this is LegacyDfuException.MidStreamDisconnect &&
+    bootloaderVersion?.let { it < BOOTLOADER_RESTARTS_AFTER_DROP } == true
 
 /**
  * Cleanup policy for a DFU upload session's transport. Extracted from [SecureDfuHandler.runUploadSession]'s finally

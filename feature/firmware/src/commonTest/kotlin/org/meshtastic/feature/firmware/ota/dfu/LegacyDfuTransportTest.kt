@@ -51,6 +51,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration
@@ -382,9 +383,11 @@ class LegacyDfuTransportTest {
         mtu: Int? = null,
         profile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
         suppressDisconnectEmissions: Boolean = false,
+        firmwareRevision: String? = null,
     ): TestEnv {
         val scanner = FakeBleScanner()
         val fakeConnection = FakeBleConnection().apply { maxWriteValueLength = mtu }
+        firmwareRevision?.let { fakeConnection.service.enqueueRead(FIRMWARE_REVISION_UUID, it.encodeToByteArray()) }
         val autoService = AutoRespondingLegacyService(fakeConnection.service)
         val factory =
             object : BleConnectionFactory {
@@ -811,6 +814,30 @@ class LegacyDfuTransportTest {
         // No PRN was received before the drop (first PRN would be at byte 200), so lastConfirmedBytes is -1.
         assertEquals(-1, error.lastConfirmedBytes)
         assertIs<BleConnectionState.Disconnected>(error.connectionState)
+        assertNull(error.bootloaderVersion, "an empty DIS firmware revision leaves the version unknown")
+    }
+
+    @Test
+    fun `mid-stream disconnect carries the bootloader version read from DIS`() = runTest {
+        val env = createConnectedTransport(firmwareRevision = "2.6.0 s140 6.1.1")
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+        val firstPacketWriteInFlight = CompletableDeferred<Unit>()
+        env.responder.onFirmwarePacketWrite = { bytes ->
+            if (bytes >= 20L) {
+                firstPacketWriteInFlight.complete(Unit)
+                awaitCancellation()
+            }
+        }
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+
+        val transferDeferred = async { env.transport.transferFirmware(ByteArray(200)) {} }
+        firstPacketWriteInFlight.await()
+        runCurrent()
+        env.connection.simulateRemoteDisconnect()
+        runCurrent()
+
+        val error = assertIs<LegacyDfuException.MidStreamDisconnect>(transferDeferred.await().exceptionOrNull())
+        assertEquals(KotlinVersion(2, 6, 0), error.bootloaderVersion)
     }
 
     /**

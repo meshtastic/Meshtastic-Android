@@ -181,7 +181,25 @@ internal constructor(
 
             Logger.i { "Legacy DFU: Connected and ready (${device.address.anonymize()})" }
         }
+
+        // Best-effort: a bootloader without DIS, or a read that stalls, leaves the version unknown.
+        val firmwareRevision =
+            withTimeoutOrNull(DIS_READ_TIMEOUT) {
+                safeCatching {
+                    bleConnection.profile(DEVICE_INFORMATION_SERVICE_UUID) { service ->
+                        service.read(service.characteristic(FIRMWARE_REVISION_UUID)).decodeToString()
+                    }
+                }
+                    .getOrNull()
+            }
+        bootloaderVersion = firmwareRevision?.let(::parseBootloaderVersion)
+        Logger.i { "Legacy DFU: DIS firmware revision = '${firmwareRevision ?: "?"}' (version=$bootloaderVersion)" }
     }
+
+    /**
+     * Bootloader version from the DIS Firmware Revision, read in [connectToDfuMode]; null when absent or unparseable.
+     */
+    private var bootloaderVersion: KotlinVersion? = null
 
     // ---------------------------------------------------------------------------
     // Phase 3: Init packet transfer (.dat)
@@ -366,6 +384,7 @@ internal constructor(
                     totalBytes = firmware.size,
                     connectionState = state,
                     lastConfirmedBytes = streamLastPrnOffset,
+                    bootloaderVersion = bootloaderVersion,
                 )
             },
         ) {
@@ -403,6 +422,7 @@ internal constructor(
                                 connectionState = state,
                                 lastConfirmedBytes = streamLastPrnOffset,
                                 cause = e,
+                                bootloaderVersion = bootloaderVersion,
                             )
                         }
                         Logger.w(e) {
@@ -665,6 +685,7 @@ internal constructor(
         private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
+        private val DIS_READ_TIMEOUT = 5.seconds
 
         /**
          * Wall-clock budget for a full firmware streaming session. Must comfortably exceed the upload duration for the
