@@ -1097,7 +1097,25 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
-    fun `a new update clears the fault an earlier one read`() = runTest {
+    fun `starting a new update clears the fault an earlier one read`() = runTest {
+        awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        // No radio reconnects in this fixture, so the first update ends at VerificationFailed.
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.VerificationFailed }
+
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertNotNull(viewModel.bootloaderFault.value, "returning to Ready keeps the fault on screen data")
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertNull(viewModel.bootloaderFault.value)
+    }
+
+    @Test
+    fun `cancelling clears the fault an earlier update read`() = runTest {
         awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
         viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
         runUntilSettled { viewModel.bootloaderFault.value != null }
