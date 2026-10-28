@@ -110,7 +110,7 @@ internal fun bootloaderEraseUf2For(manifest: MaintenanceUf2Manifest, volumeFamil
         ?.toMaintenanceUf2OrNull()
 
 /**
- * OTAFIX bootloader self-update images stay hosted on `Adafruit_nRF52_Bootloader_OTAFIX`'s own GitHub releases — only
+ * Bootloader self-update images stay hosted on `nRF52_Bootloader`'s own GitHub releases — only
  * [MaintenanceUf2Manifest.otafixBase]/[MaintenanceUf2Manifest.otafixReleaseTag] (and the per-board digest) now come
  * from the fetched manifest instead of being hardcoded.
  *
