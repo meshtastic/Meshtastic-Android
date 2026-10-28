@@ -51,7 +51,7 @@ While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop**
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
-Some boards ship with a bootloader that cannot take a Bluetooth update. For these, the screen shows a warning card before you start, with a hint for the board where one exists. **Don't show again for this device** hides it for that node. When a stock nRF bootloader limits how fast the upload can run, the screen says so during the upload, and again on the success screen, with a link to the Meshtastic nRF52 Bootloader, which makes Bluetooth updates much faster.
+Some boards ship with a bootloader that cannot take a Bluetooth update. For these, the screen shows a warning card before you start, with a hint for the board where one exists. **Don't show again for this device** hides it for that node. When a stock nRF bootloader limits how fast the upload can run, the screen says so during the upload, and again on the success screen, with a link to the Meshtastic nRF52 Bootloader (formerly OTAFIX), which makes Bluetooth updates much faster.
 
 #### Erase device during update
 
@@ -82,7 +82,7 @@ A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to 
 
 ### Factory Erase and Bootloader Upgrade
 
-On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it. The upgrade installs the [Meshtastic nRF52 Bootloader](https://github.com/meshtastic/nRF52_Bootloader) (formerly OTAFIX). The card names the release it installs, and the app only offers it for a board it has a verified image for.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it. The upgrade installs the [Meshtastic nRF52 Bootloader](https://github.com/meshtastic/nRF52_Bootloader). The card names the release it installs, and the app only offers it for a board it has a verified image for.
 
 Both are Android-only. They depend on Android's update-drive checks, so the desktop app does not show them — use the [Web Flasher](https://flasher.meshtastic.org) there instead.
 
@@ -108,8 +108,8 @@ The app picks the path from what the drive reports; you don't choose it.
 A node running the Meshtastic nRF52 Bootloader behaves like this while its update drive is up. Behavior marked 2.6.0 and later needs a bootloader from that release; the app's bootloader upgrade card names the release it installs.
 
 - **Backup.** `CURRENT.UF2` on the drive is a copy of the installed firmware. Copy it off to keep a backup, and copy it back onto the drive to reinstall that firmware.
-- **Screen.** On a node with a screen the bootloader drives, the title reads BOOTLOADER during a bootloader upgrade, ERASE during a factory erase, WRONG FILE for a file the board cannot take, and NO FIRMWARE when no firmware is installed. A progress bar shows the copy (2.6.0 and later).
-- **Wrong file.** A firmware file built for the other Bluetooth stack is refused as WRONG FILE and nothing is written (2.6.0 and later). Earlier bootloaders accept it.
+- **Screen.** On a node with a screen the bootloader drives (2.6.0 and later), the title reads BOOTLOADER during a bootloader upgrade, ERASE during a factory erase, WRONG FILE for a file the board cannot take, and NO FIRMWARE when no firmware is installed, and a progress bar shows the copy.
+- **Wrong file.** A firmware file whose data would land on the installed Bluetooth stack is refused as WRONG FILE (2.6.0 and later). Earlier bootloaders write it.
 - **Interrupted copy.** Pulling the cable mid-copy leaves the node with no firmware instead of a broken one (2.6.0 and later). Plugged into a computer again it comes back as the update drive; copy the firmware once more.
 - **Idle.** A node with firmware installed that sits in update mode for 6 minutes with no update activity boots that firmware (2.6.0 and later). A node with no firmware keeps waiting.
 - **Single-button boards.** The T1000-E and the MeshTracker X1 have no reset button to double-press. From OTAFIX 2.5, hold the button while the node powers on, for about 3 seconds, to enter update mode. To leave it without copying a file, eject the drive from the computer; unplugging does not leave it. The app's own USB update does not need the button, because it restarts the node into update mode itself.
@@ -172,7 +172,7 @@ If the app told you the Bluetooth update could not be finished, follow the instr
 
 On the Meshtastic nRF52 Bootloader 2.6.0 and later, a Bluetooth update that dropped partway can start over without resetting the node, and where the node waits depends on its power:
 
-- On battery, or on a charger or power bank, it waits for the Bluetooth update, so **Resume firmware update** can reach it.
+- On battery, it waits for the Bluetooth update, so **Resume firmware update** can reach it.
 - Plugged into a computer, it comes up as its update drive instead, with NO FIRMWARE on its screen, and does not advertise over Bluetooth. Copy the firmware `.uf2` for your board onto the drive, or use the [Web Flasher](https://flasher.meshtastic.org). Unplug it to resume over Bluetooth. The app's USB update cannot start here, because there is no running firmware for it to talk to.
 
 Otherwise, if your node fails to boot:
