@@ -185,6 +185,8 @@ androidComponents {
             tasks.register<GenerateLocaleConfigTask>(
                 "generate${variant.name.replaceFirstChar { it.uppercase() }}LocaleConfig",
             ) {
+                group = "build"
+                description = "Generate locale configuration resources."
                 resourcesDir.set(appResourcesDir)
             }
         variant.sources.res?.addGeneratedSourceDirectory(generateLocaleConfig, GenerateLocaleConfigTask::outputDir)

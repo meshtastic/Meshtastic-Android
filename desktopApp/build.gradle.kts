@@ -82,6 +82,8 @@ val buildConfigOutputDir = layout.buildDirectory.dir("generated/buildconfig")
 
 val generateBuildConfig =
     tasks.register<GenerateBuildConfigTask>("generateDesktopBuildConfig") {
+        group = "build"
+        description = "Generate Meshtastic Desktop build configuration."
         content.set(
             """
             |package org.meshtastic.desktop
