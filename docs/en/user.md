@@ -17,7 +17,7 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
-**October 2026** — [Firmware Updates](user/firmware) — What the Meshtastic nRF52 Bootloader (formerly OTAFIX) does while the update drive is up, and where a node with no firmware waits after a dropped Bluetooth update.
+**October 2026** — [Firmware Updates](user/firmware) — What the Meshtastic nRF52 Bootloader does while the update drive is up, and where a node waits after a dropped Bluetooth update.
 
 **October 2026** — [Settings — Radio & User](user/settings-radio-user) — Each configuration screen has its own section, settings use the app's exact labels, and every table lists the default value.
 
