@@ -37,6 +37,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
+import org.meshtastic.core.resources.firmware_update_left_dfu_mode
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
 import org.meshtastic.core.resources.firmware_update_preparing_flash
@@ -529,6 +530,7 @@ class SecureDfuHandler(
                 } finally {
                     withContext(NonCancellable) { triggerTransport.close() }
                 }
+                val preStart = PreStartBudget(PRE_START_BUDGET)
                 delay(DFU_REBOOT_WAIT_MS)
 
                 // ── 4. Service detection: which DFU service does the bootloader advertise? ─
@@ -552,12 +554,16 @@ class SecureDfuHandler(
                 // DfuFallbackCoordinator resolves the detection into an ordered protocol list; whether the alternate
                 // is tried depends on detection-specific engagement rules (shouldTryAlternateAfterFailure).
                 DfuFallbackCoordinator(detection).execute { protocol, budget ->
-                    runDfuUploadWithRetry(protocol, target, pkg, budget, updateState)
+                    runDfuUploadWithRetry(protocol, target, pkg, budget, preStart, updateState)
                 }
                 zipFile
             }
         } catch (e: CancellationException) {
             throw e
+        } catch (e: DfuException.LeftUpdateMode) {
+            Logger.w(e) { "DFU: pre-START budget spent" }
+            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_left_dfu_mode)))
+            cleanupArtifact
         } catch (e: DfuException) {
             Logger.e(e) { "DFU: Protocol error" }
             updateState(
@@ -668,13 +674,14 @@ class SecureDfuHandler(
         target: String,
         pkg: DfuZipPackage,
         budget: DfuAttemptBudget,
+        preStart: PreStartBudget,
         updateState: (FirmwareUpdateState) -> Unit,
     ): DfuUploadResult = runDfuRetryLoop(
         protocol = protocol,
         budget = budget,
         maxStaleResets = MAX_LEGACY_STALE_RESETS,
-        runUploadSession = { profile -> runUploadSession(protocol, target, pkg, profile, updateState) },
-        resetStaleBootloader = { resetStaleBootloader(protocol, target) },
+        runUploadSession = { profile -> runUploadSession(protocol, target, pkg, profile, preStart, updateState) },
+        resetStaleBootloader = { resetStaleBootloader(protocol, target, preStart) },
         interAttemptDelay = { delay(SESSION_RETRY_DELAY_MS) },
         onRetryScheduled = { next, total ->
             updateState(
@@ -705,17 +712,19 @@ class SecureDfuHandler(
      * abort are best-effort (swallowed by [DfuUploadTransport.abort]); structured-concurrency cancellation and [Error]
      * subtypes propagate per the abort contract.
      */
-    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String) {
+    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String, preStart: PreStartBudget) {
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
         val transport = createTransport(protocol, target)
         try {
-            transport
-                .connectToDfuMode()
-                .onSuccess {
-                    transport.abort()
-                    Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
-                }
-                .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
+            preStart.bounded {
+                transport
+                    .connectToDfuMode()
+                    .onSuccess {
+                        transport.abort()
+                        Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
+                    }
+                    .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
+            }
         } finally {
             withContext(NonCancellable) { transport.close() }
         }
@@ -728,6 +737,7 @@ class SecureDfuHandler(
         target: String,
         pkg: DfuZipPackage,
         legacyProfile: LegacyDfuStreamProfile,
+        preStart: PreStartBudget,
         updateState: (FirmwareUpdateState) -> Unit,
     ): DfuUploadResult {
         val transport: DfuUploadTransport = createTransport(protocol, target, legacyProfile)
@@ -735,7 +745,7 @@ class SecureDfuHandler(
         var protocolEngaged = false
         var sessionFailure: Throwable? = null
         try {
-            connectWithRetry(transport, protocol, updateState)
+            preStart.bounded { connectWithRetry(transport, protocol, updateState) }
             protocolEngaged = true
 
             updateState(
@@ -761,8 +771,14 @@ class SecureDfuHandler(
             transport
                 .transferFirmware(
                     pkg.firmware,
-                    onPhase = { phase -> updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint)) },
+                    onPhase = { phase ->
+                        if (phase == DfuUploadPhase.STREAMING) preStart.markStarted()
+                        updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint))
+                    },
                 ) { progress ->
+                    // Secure DFU reports no phases; its first progress callback comes after the bootloader accepted
+                    // the start.
+                    preStart.markStarted()
                     val bytesSent = (progress * firmwareSize).toLong()
                     throughputTracker.record(bytesSent)
                     val details = formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
@@ -780,6 +796,10 @@ class SecureDfuHandler(
             updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
             return DfuUploadResult.Success
         } catch (e: CancellationException) {
+            throw e
+        } catch (e: DfuException.LeftUpdateMode) {
+            // Ends the whole run, not just this session: no retry or alternate protocol can reach the board now.
+            sessionFailure = e
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sessionFailure = e
