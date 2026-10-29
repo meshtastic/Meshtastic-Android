@@ -1211,8 +1211,14 @@
     <string name="mesh_hud_rise_above">▲ %1$s</string>
     <string name="mesh_hud_rise_below">▼ %1$s</string>
     <string name="mesh_hud_snr">%1$s дБ</string>
+    <string name="mesh_hud_thermal_critical">Телефон слишком горячий. Камера приостановлена.</string>
+    <string name="mesh_hud_thermal_hot">Телефон горячий. Реже обновляется.</string>
     <string name="mesh_hud_track_empty">В окне трека нет позиций</string>
     <string name="mesh_hud_track_newest">%1$s · новейшая %2$s</string>
+    <string name="mesh_hud_turn_left">Поверни налево %1$d°</string>
+    <string name="mesh_hud_turn_right">Поверни направо %1$d°</string>
+    <string name="mesh_hud_waiting_sensor">Ожидание датчика ориентации</string>
+    <string name="mesh_hud_watch_step">Смотри куда идёшь</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->
@@ -1235,8 +1241,13 @@
     <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
     <string name="meshtastic_messages_notifications_description">Сообщения, отправленные тебе напрямую.</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых нодах</string>
+    <string name="meshtastic_new_nodes_notifications_description">Узлы услышанные впервые.</string>
+    <string name="meshtastic_reactions_notifications">Уведомления о реакции</string>
+    <string name="meshtastic_reactions_notifications_description">Эмодзи реакции на сообщения.</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
+    <string name="meshtastic_service_notifications_description">Показывает соединение с твоим радио, пока Meshtastic работает в фоне.</string>
     <string name="meshtastic_waypoints_notifications">Уведомления о путевых точках</string>
+    <string name="meshtastic_waypoints_notifications_description">Путевые точки распределялись по сети, и географическим перекрёсткам.</string>
     <!-- MESSAGE -->
     <string name="message">Сообщение</string>
     <string name="message_delivery_status">Статус доставки сообщения</string>
@@ -1290,12 +1301,24 @@
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимальное время бодрствования</string>
     <!-- MIRROR -->
+    <string name="mirror_active">Зеркалирование</string>
     <string name="mirror_back">Назад</string>
+    <string name="mirror_device_screen">Экран устройства</string>
+    <string name="mirror_eink_hint">E-ink дисплей: обновляется медленно, поэтому предпочитай обновлять через непрерывное зеркалирование.</string>
+    <string name="mirror_hint_keyboard_active">Стрелки · Enter = OK · Esc = обратно</string>
+    <string name="mirror_hint_tap_keyboard">Нажмите на экран для управления клавиатурой или проведи по нему для навигации</string>
+    <string name="mirror_hint_tap_touch">Нажми на экран, чтобы прикоснуться к устройству или проведи пальцем для навигации</string>
     <string name="mirror_key_down">Вниз</string>
     <string name="mirror_key_left">Влево</string>
     <string name="mirror_key_ok">Лады</string>
     <string name="mirror_key_right">Вправо</string>
     <string name="mirror_key_up">Вверх</string>
+    <string name="mirror_keyboard">Клавиатура</string>
+    <string name="mirror_no_frame">Рамка пока не получена. Включи зеркалирование или нажми Обновить</string>
+    <string name="mirror_not_connected">Не подключено к устройству</string>
+    <string name="mirror_off">Зеркало выкл</string>
+    <string name="mirror_unsupported">Зеркалирование экрана требует более новой прошивки</string>
+    <string name="mirror_unsupported_hint">Это устройство не сообщает об отображении зеркалу. D-pad все еще отправляет клавиши.</string>
     <string name="modem_preset">Шаблоны</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="modules_already_unlocked">Модули уже разблокированы</string>
@@ -1317,6 +1340,16 @@
     <string name="mqtt_probe_tcp_failure">Не удается подключиться к брокеру (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
     <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
+    <string name="mqtt_proxy_local">MQTT-прокси в этом приложении</string>
+    <string name="mqtt_root_problem_empty">Введи тему</string>
+    <string name="mqtt_root_problem_empty_segment">Темы не могут содержать два слэша в строке.</string>
+    <string name="mqtt_root_problem_ends_with_version">Темы не могут заканчиваться на /2.</string>
+    <string name="mqtt_root_problem_leading_slash">Темы не могут начинаться со слэша.</string>
+    <string name="mqtt_root_problem_non_ascii">Темы должны использовать символы ASCII.</string>
+    <string name="mqtt_root_problem_too_long">Темы ограничиваются 31 символом.</string>
+    <string name="mqtt_root_problem_trailing_slash">Темы не могут заканчиваться слэшем.</string>
+    <string name="mqtt_root_problem_whitespace">Темы не могут содержать пробелы или управляющие символы.</string>
+    <string name="mqtt_root_problem_wildcard">Темы не могут содержать + или #.</string>
     <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_status_connecting">Подключение…</string>
     <string name="mqtt_status_disconnected">Отключено</string>
@@ -1327,8 +1360,23 @@
     <string name="mqtt_status_topics_refused_all">Подключено, но брокер отклонил все темы: %1$s</string>
     <string name="mqtt_status_topics_refused_some">Подключено, но брокер отказал %1$s</string>
     <string name="mqtt_test_connection">Проверить соединение</string>
+    <string name="mqtt_topic_finder">Найти темы рядом с тобой</string>
+    <string name="mqtt_topic_finder_active">Активные темы</string>
     <string name="mqtt_topic_finder_connecting">Подключение…</string>
+    <string name="mqtt_topic_finder_custom">Пользовательская тема</string>
+    <string name="mqtt_topic_finder_failed_closed">Брокер закрыл соединение.</string>
+    <string name="mqtt_topic_finder_failed_connect">Не удалось подключиться к брокеру.</string>
+    <string name="mqtt_topic_finder_geocode_failed">Не удалось найти название места для твоего местоположения.</string>
+    <string name="mqtt_topic_finder_level_city">Город</string>
+    <string name="mqtt_topic_finder_level_community">Сообщества</string>
+    <string name="mqtt_topic_finder_level_country">Страна</string>
     <string name="mqtt_topic_finder_level_region">Регион / Страна</string>
+    <string name="mqtt_topic_finder_level_subdivision">Область или район</string>
+    <string name="mqtt_topic_finder_listening">Слушаю…</string>
+    <string name="mqtt_topic_finder_near_you">Рядом с тобой</string>
+    <string name="mqtt_topic_finder_nearby">Поблизости</string>
+    <string name="mqtt_topic_finder_nearest">ближайший %1$s</string>
+    <string name="mqtt_topic_finder_no_location">Нет местоположения. Подключи радио к месту или разреши точное местоположение чтобы увидеть страну, область и город.</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <!-- MUTE -->
