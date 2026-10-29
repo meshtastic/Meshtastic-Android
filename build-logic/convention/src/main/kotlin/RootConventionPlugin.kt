@@ -47,6 +47,22 @@ class RootConventionPlugin : Plugin<Project> {
             // Register graph tasks on the root project itself
             configureGraphTasks()
             registerKmpSmokeCompileTask()
+            registerBuildLogicLintTasks()
+        }
+    }
+}
+
+/**
+ * Registers root `spotlessApply`, `spotlessCheck` and `detekt` tasks that run the included build-logic build's, which
+ * the per-module tasks those names select never reach.
+ */
+private fun Project.registerBuildLogicLintTasks() {
+    val buildLogic = gradle.includedBuild("build-logic")
+    listOf("spotlessApply", "spotlessCheck", "detekt").forEach { name ->
+        tasks.register(name) {
+            group = "verification"
+            description = "Runs $name on the included build-logic build."
+            dependsOn(buildLogic.task(":convention:$name"))
         }
     }
 }

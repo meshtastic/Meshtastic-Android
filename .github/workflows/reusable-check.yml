@@ -98,9 +98,9 @@ jobs:
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
 
       - name: Spotless, Detekt & Android Lint
-        # The root spotlessCheck and detekt do not reach the included build-logic build.
+        # meshtastic.root routes spotlessCheck and detekt into the included build-logic build; validatePlugins and its TestKit tests it does not.
         # detektTypeResolved runs the rules that need a classpath, which plain detekt skips.
-        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:spotlessCheck :build-logic:convention:detekt :build-logic:convention:validatePlugins androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
+        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:validatePlugins :build-logic:convention:test androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
