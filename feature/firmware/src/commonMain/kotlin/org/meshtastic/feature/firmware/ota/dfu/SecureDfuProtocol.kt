@@ -20,6 +20,7 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
 // ---------------------------------------------------------------------------
@@ -313,4 +314,7 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
 
     /** Data transfer to the device failed for a non-protocol reason (e.g. BLE write error). */
     class TransferFailed(message: String, cause: Throwable? = null) : DfuException(message, cause)
+
+    /** START was not accepted within the [PreStartBudget]; retrying longer could outlast the bootloader's idle boot. */
+    class StartTimedOut(budget: Duration) : DfuException("START not accepted within $budget of entering DFU mode")
 }
