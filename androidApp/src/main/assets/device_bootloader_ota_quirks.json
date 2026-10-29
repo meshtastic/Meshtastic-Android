@@ -262,7 +262,8 @@
       "hwModelSlug": "THINKNODE_M8",
       "platformioTargets": [
         "thinknode_m8"
-      ]
+      ],
+      "softDevice": "6.1.1"
     },
     {
       "hwModel": 133,
