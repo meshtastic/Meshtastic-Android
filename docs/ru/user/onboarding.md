@@ -54,7 +54,7 @@ Meshtastic также использует местоположение для:
 - Вычисление расстояний до других нод
 - Обмен GPS-координатами с другими участниками сети (если включено)
 
-On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
+На Android 12 и более новых версиях выберите **Точное**, чтобы поделиться своим местоположением с навигационной сеткой: приблизительные данные по-прежнему отображаются на карте, но для обмена данными о местоположении требуется точное определение координат.
 
 Предоставьте **"При использовании приложения"**. Приложение не запрашивает фоновое определение местоположения — в его манифесте нет параметра `ACCESS_BACKGROUND_LOCATION` — поэтому Android не предлагает опцию "Всегда", и обновление местоположения происходит, когда приложение находится на переднем плане или выполняет функцию службы переднего плана.
 
@@ -68,19 +68,19 @@ On Android 12 and newer, choose **Precise** to share your position with the mesh
 - Новые ноды, присоединившиеся к сети
 - Низкий заряд на удаленной ноде
 
-Notification preferences can be fine-tuned later in Android system settings — the app creates a separate notification channel per category (plus a few internal ones, like the background service), so you can enable or silence them individually.
+Настройки уведомлений можно изменить позже в системных настройках Android. Приложение создает отдельный канал уведомлений для каждой категории (плюс несколько внутренних, например для фоновой службы), поэтому вы можете включать и отключать их по отдельности.
 
 ### Разрешение на критические уведомления
 
 Критические оповещения — это уведомления с высоким приоритетом, которые проходят через режим «Не беспокоить» и предназначены для экстренных вызовов и срочных сообщений.
 
-Этот шаг не является запросом на разрешение запуска. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alert notifications** channel, where you turn the breakthrough behavior on yourself. Tap **Configure Critical Alerts** to open that page, or **Skip** to move on — you can reach the same page later from Android's notification settings for Meshtastic. This step appears only if you granted notifications on the previous screen — skip or decline them and setup ends there.
+Этот шаг не является запросом на разрешение запуска. Диалога разрешить/запретить нет: кнопка открывает страницу настроек системы Android для канала **Уведомления об оповещениях** приложения, где ты сам включаешь режим «Прорыв». Нажми **Настроить критические оповещения**, чтобы открыть эту страницу, или нажми **Пропустить**, чтобы перейти дальше. Ты сможешь вернуться на эту страницу позже в настройках уведомлений Meshtastic для Android. Этот шаг появится только в том случае, если ты разрешил уведомления на предыдущем экране. Пропусти его или отклони, и на этом настройка будет завершена.
 
 ### Пересмотреть разрешения позже
 
-The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel and contact QR codes) and **Local network permission** (finding and reaching nodes on your Wi-Fi network). On hardware with no Bluetooth LE the **Nearby devices permission** row is left out. On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
+В разделе **Разрешения** в **Настройках** представлена информация о каждом разрешении во время выполнения. В Android 12 и более новых версиях их пять: **разрешение на доступ к устройствам поблизости** (Bluetooth), **разрешение на определение местоположения**, **разрешение на уведомления приложений**, **разрешение на доступ к камере** (для сканирования QR-кодов и связи с ними) и **разрешение на доступ к локальной сети** (для поиска и подключения к нодам в твоей сети Wi-Fi). На устройствах без Bluetooth LE строка **Разрешение на доступ к устройствам поблизости** отсутствует. В Android 11 и более ранних версиях одна строка с **разрешением на определение местоположения** охватывает и Bluetooth, и определение местоположения, поэтому таких строк четыре. Последние два параметра никогда не запрашиваются при настройке, только тогда, когда они нужны для работы какой-либо функции.
 
-The section reads _All allowed_ when every permission is granted, _Nothing needs your attention_ when some have never been asked for, and names a count when one is denied — in which case it expands itself. Нажми на строку, чтобы расширить или свернуть её в любое время:
+В разделе будет указано _Все разрешено_, когда все разрешения предоставлены, _Ничто не требует вашего внимания_, когда о чем-то не просили, и указано количество случаев, когда в чем-то было отказано — в этом случае раздел расширяется. Нажми на строку, чтобы расширить или свернуть её в любое время:
 
 | Состояние                                                    | Что делает нажатие на строку                                                                                                                                                                                             |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
