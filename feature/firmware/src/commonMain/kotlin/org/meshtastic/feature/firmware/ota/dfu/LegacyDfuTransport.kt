@@ -183,6 +183,30 @@ internal constructor(
         }
     }
 
+    /**
+     * Bootloader version from the DIS Firmware Revision, read in [transferFirmware]; null when absent or unparseable.
+     */
+    private var bootloaderVersion: KotlinVersion? = null
+
+    /**
+     * Best-effort DIS read: a bootloader without DIS, or a read that stalls, leaves the version unknown. The outer
+     * [withTimeoutOrNull] is deliberate: a timeout inside `profile()` is a [CancellationException] that [safeCatching]
+     * rethrows, which would surface as cancellation of the upload.
+     */
+    private suspend fun readBootloaderVersion() {
+        val firmwareRevision =
+            withTimeoutOrNull(DIS_READ_TIMEOUT) {
+                safeCatching {
+                    bleConnection.profile(DEVICE_INFORMATION_SERVICE_UUID) { service ->
+                        service.read(service.characteristic(FIRMWARE_REVISION_UUID)).decodeToString()
+                    }
+                }
+                    .getOrNull()
+            }
+        bootloaderVersion = firmwareRevision?.let(::parseBootloaderVersion)
+        Logger.i { "Legacy DFU: DIS firmware revision = '${firmwareRevision ?: "?"}' (version=$bootloaderVersion)" }
+    }
+
     // ---------------------------------------------------------------------------
     // Phase 3: Init packet transfer (.dat)
     // ---------------------------------------------------------------------------
@@ -251,6 +275,8 @@ internal constructor(
             pendingInitPacket
                 ?: throw DfuException.TransferFailed("transferInitPacket must be called before transferFirmware")
         Logger.i { "Legacy DFU: Starting upload (init=${initPacket.size}B, firmware=${firmware.size}B)..." }
+        // Only upload sessions need the version (it gates the retry after a drop); reset-prime connects skip it.
+        readBootloaderVersion()
 
         // ── 1. START_DFU + image sizes on Packet, then response ─────────────
         // The bootloader erases the application region before it answers; without lazy erase that is tens of
@@ -259,6 +285,7 @@ internal constructor(
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
         writePacket(legacyImageSizesPayload(appSize = firmware.size))
         handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
+        onPhase(DfuUploadPhase.STARTED)
 
         // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
@@ -366,6 +393,7 @@ internal constructor(
                     totalBytes = firmware.size,
                     connectionState = state,
                     lastConfirmedBytes = streamLastPrnOffset,
+                    bootloaderVersion = bootloaderVersion,
                 )
             },
         ) {
@@ -403,6 +431,7 @@ internal constructor(
                                 connectionState = state,
                                 lastConfirmedBytes = streamLastPrnOffset,
                                 cause = e,
+                                bootloaderVersion = bootloaderVersion,
                             )
                         }
                         Logger.w(e) {
@@ -665,6 +694,7 @@ internal constructor(
         private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
+        private val DIS_READ_TIMEOUT = 5.seconds
 
         /**
          * Wall-clock budget for a full firmware streaming session. Must comfortably exceed the upload duration for the

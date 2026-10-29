@@ -537,6 +537,80 @@ class UsbMaintenanceGateTest {
         assertNull(otafixUf2ForBoardId(testManifest, ""))
     }
 
+    // ── Target overrides under a shared Board-ID ─────────────────────────────
+
+    private val overrideManifest =
+        manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+            """
+            {
+              "otafixReleaseTag": "2.6.0",
+              "otafixBase": "https://github.com/meshtastic/nRF52_Bootloader/releases/download/2.6.0",
+              "otafixByBoardId": {
+                "TRACKER L1": {
+                  "otafixBoardSlug": "wio_tracker_l1",
+                  "sha256": "aa",
+                  "targetOverrides": {
+                    "seeed_wio_tracker_L1_Pro_1W": { "otafixBoardSlug": "wio_tracker_l1_pro_1w", "sha256": "bb" }
+                  }
+                },
+                "nRF52840-WioTracker-L1-Pro-1W": { "otafixBoardSlug": "wio_tracker_l1_pro_1w", "sha256": "bb" }
+              }
+            }
+            """
+                .trimIndent(),
+        )
+
+    @Test
+    fun `a target override wins over the shared board id row`() {
+        val image = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_L1_Pro_1W"))
+
+        assertEquals("update-wio_tracker_l1_pro_1w_bootloader-2.6.0_nosd.uf2", image.fileName)
+        assertEquals("bb", image.sha256)
+    }
+
+    @Test
+    fun `a target override matches the target case-insensitively`() {
+        val image = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_l1_pro_1w"))
+
+        assertEquals("bb", image.sha256)
+    }
+
+    @Test
+    fun `a target with no override on the row gets the board id image`() {
+        val l1 = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1", "seeed_wio_tracker_L1"))
+        val noTarget = assertNotNull(otafixUf2ForBoardId(overrideManifest, "TRACKER L1"))
+
+        assertEquals("update-wio_tracker_l1_bootloader-2.6.0_nosd.uf2", l1.fileName)
+        assertEquals(l1, noTarget)
+    }
+
+    @Test
+    fun `a target override never resolves an unrecognized board id`() {
+        assertNull(otafixUf2ForBoardId(overrideManifest, "SomeOtherBoard-v9", "seeed_wio_tracker_L1_Pro_1W"))
+    }
+
+    @Test
+    fun `a manifest without target overrides resolves as before`() {
+        assertEquals(
+            otafixUf2ForBoardId(testManifest, "TRACKER L1"),
+            otafixUf2ForBoardId(testManifest, "TRACKER L1", "seeed_wio_tracker_L1_Pro_1W"),
+        )
+    }
+
+    @Test
+    fun `the bootloader upgrade writes the override image for the connected target`() {
+        val choice =
+            chooseMaintenanceImage(
+                overrideManifest,
+                UsbMaintenanceRequest.BootloaderUpgrade,
+                nrf(target = "seeed_wio_tracker_L1_Pro_1W", slug = "SEEED_WIO_TRACKER_L1_PRO_1W"),
+                MaintenanceVolume(boardId = "TRACKER L1", softDevice = SoftDeviceVariant.S140_7_3_0),
+            )
+
+        val resolved = assertIs<MaintenanceImageChoice.Resolved>(choice)
+        assertEquals("update-wio_tracker_l1_pro_1w_bootloader-2.6.0_nosd.uf2", resolved.asset.fileName)
+    }
+
     @Test
     fun `board id is parsed from an INFO_UF2 payload and tolerates surrounding lines`() {
         val info =
@@ -765,6 +839,47 @@ class UsbMaintenanceGateTest {
     @Test
     fun `a different factory erase family still parses so the resolver can refuse it`() {
         assertEquals(0xDEADBEEFL, parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 0xDEADBEEF\r\n"))
+    }
+
+    @Test
+    fun `last fault is parsed from the line ghostfat prints`() {
+        assertEquals(
+            BootloaderFault(id = 0x1001, pc = 0x26a1c, info = 0x8),
+            parseUf2LastFault(rakOtafixEraseInfo + "Last-Fault: id=0x1001 pc=0x26a1c info=0x8\r\n"),
+        )
+    }
+
+    @Test
+    fun `last fault keeps zero and full width words as readings`() {
+        assertEquals(
+            BootloaderFault(id = 0x0, pc = 0xFFFFFFFFL, info = 0x0),
+            parseUf2LastFault("Last-Fault: id=0x0 pc=0xffffffff info=0x0"),
+        )
+    }
+
+    @Test
+    fun `last fault parsing tolerates case and leading whitespace like its siblings`() {
+        assertEquals(
+            BootloaderFault(id = 0xAB, pc = 0xCD, info = 0xEF),
+            parseUf2LastFault("  last-fault: ID=0XAB PC=0xcd Info=0xEF\r\n"),
+        )
+    }
+
+    @Test
+    fun `last fault prints back in the bootloader's own form`() {
+        val line = "id=0x1001 pc=0x26a1c info=0x0"
+
+        assertEquals(line, parseUf2LastFault("Last-Fault: $line")?.toString())
+    }
+
+    @Test
+    fun `an absent or malformed last fault line yields no fault`() {
+        assertNull(parseUf2LastFault(rakOtafixEraseInfo), "A healthy drive or a pre-2.6.0 bootloader omits the line")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0x2\r\n"), "Missing info")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=2 info=0x3\r\n"), "Not 0x-prefixed")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0xZZ info=0x3\r\n"), "Not hex")
+        assertNull(parseUf2LastFault("Last-Fault: id=0x1 pc=0x100000000 info=0x3\r\n"), "Wider than 32 bits")
+        assertNull(parseUf2LastFault(""), "Empty payload")
     }
 
     @Test

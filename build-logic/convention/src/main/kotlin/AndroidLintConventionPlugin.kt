@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class AndroidLintConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -35,10 +36,15 @@ class AndroidLintConventionPlugin : Plugin<Project> {
                     configure<LibraryExtension> { lint { configure(project) } }
 
                 pluginManager.hasPlugin("com.android.kotlin.multiplatform.library") -> {
-                    extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
-                        @Suppress("UnstableApiUsage")
-                        lint { configure(project) }
-                    }
+                    // The android target is registered on the kotlin extension, not the project.
+                    extensions
+                        .findByType<KotlinMultiplatformExtension>()
+                        ?.extensions
+                        ?.findByType<KotlinMultiplatformAndroidLibraryTarget>()
+                        ?.apply {
+                            @Suppress("UnstableApiUsage")
+                            lint { configure(project) }
+                        }
                 }
 
                 else -> {

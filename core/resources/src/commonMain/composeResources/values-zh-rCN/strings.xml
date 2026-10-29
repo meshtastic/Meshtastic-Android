@@ -954,6 +954,13 @@
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
     <string name="minimum_wake_time_seconds">最小唤醒时间</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">后退</string>
+    <string name="mirror_key_down">下</string>
+    <string name="mirror_key_left">左</string>
+    <string name="mirror_key_ok">确定</string>
+    <string name="mirror_key_right">右</string>
+    <string name="mirror_key_up">上</string>
     <string name="modem_preset">预设</string>
     <string name="module_settings">模块设定</string>
     <string name="modules_already_unlocked">已解锁的模块</string>

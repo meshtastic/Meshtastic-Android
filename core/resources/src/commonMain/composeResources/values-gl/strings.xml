@@ -135,6 +135,8 @@
     <string name="message">Mensaxe</string>
     <string name="message_delivery_status">Estado de envío de mensaxe</string>
     <string name="message_input_label">Mensaxe</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">OK</string>
     <string name="module_settings">Configuración de módulo</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Desconectado</string>

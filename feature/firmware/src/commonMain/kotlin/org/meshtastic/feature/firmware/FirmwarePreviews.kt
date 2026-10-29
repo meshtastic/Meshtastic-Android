@@ -123,6 +123,23 @@ internal fun BootloaderReviewPreview() {
 
 @PreviewLightDark
 @Composable
+internal fun BootloaderLastFaultPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                BootloaderReviewState(
+                    versions = BootloaderVersions(installed = "2.6.0", available = "2.6.0"),
+                    onUpgrade = {},
+                    onSkip = {},
+                )
+                BootloaderFaultLine(BootloaderFault(id = 0x1, pc = 0x2b5f4, info = 0x0))
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 internal fun BootloaderUpToDatePreview() {
     AppTheme {
         Surface {

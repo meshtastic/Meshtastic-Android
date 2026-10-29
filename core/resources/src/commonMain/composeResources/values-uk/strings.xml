@@ -623,6 +623,9 @@
     <string name="micrograms_per_cubic_meter">мкг/м³</string>
     <string name="min">Мінімум</string>
     <string name="minimum_wake_time_seconds">Мінімальний час в робочому режимі</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_ok">Гаразд</string>
     <string name="modem_preset">Пресети</string>
     <string name="module_settings">Налаштування модуля</string>
     <string name="modules_already_unlocked">Модулі вже розблоковано</string>

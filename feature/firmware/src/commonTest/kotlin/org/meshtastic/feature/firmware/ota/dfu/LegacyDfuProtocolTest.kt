@@ -16,10 +16,12 @@
  */
 package org.meshtastic.feature.firmware.ota.dfu
 
+import org.meshtastic.core.ble.BleConnectionState
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 class LegacyDfuProtocolTest {
 
@@ -118,5 +120,47 @@ class LegacyDfuProtocolTest {
     fun `legacyPrnRequestPayload over 256 spans both bytes`() {
         val payload = legacyPrnRequestPayload(packets = 0x1234)
         assertContentEquals(byteArrayOf(LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ, 0x34, 0x12), payload)
+    }
+
+    @Test
+    fun `parseBootloaderVersion reads the version ahead of the SoftDevice`() {
+        assertEquals(KotlinVersion(2, 6, 0), parseBootloaderVersion("2.6.0 s140 7.3.0"))
+        assertEquals(KotlinVersion(2, 6, 0), parseBootloaderVersion("2.6.0-3-gabc1234-dirty s140 6.1.1"))
+        assertEquals(KotlinVersion(0, 9, 2), parseBootloaderVersion("0.9.2-OTAFIX2.5 s140 6.1.1"))
+        assertEquals(KotlinVersion(0, 9, 2), parseBootloaderVersion("0.9.2-OTAFIX2.3-BP1.6 s140 6.1.1"))
+        assertEquals(KotlinVersion(0, 11, 0), parseBootloaderVersion("0.11.0 s140 6.1.1"))
+    }
+
+    @Test
+    fun `parseBootloaderVersion is null without a version`() {
+        assertNull(parseBootloaderVersion(""))
+        assertNull(parseBootloaderVersion("a1b2c3d s140 6.1.1"))
+        assertNull(parseBootloaderVersion("2.6 s140 6.1.1"))
+        assertNull(parseBootloaderVersion("2.6.999 s140 6.1.1"))
+    }
+
+    private fun dropOnBootloader(firmwareRevision: String) = LegacyDfuException.MidStreamDisconnect(
+        20,
+        200,
+        BleConnectionState.Disconnected(),
+        lastConfirmedBytes = -1,
+        bootloaderVersion = parseBootloaderVersion(firmwareRevision),
+    )
+
+    @Test
+    fun `a drop keeps the session only on a bootloader known to predate 2_6_0`() {
+        val expected =
+            mapOf(
+                "0.9.2-OTAFIX2.5 s140 6.1.1" to true,
+                "0.9.2-OTAFIX2.5-34-gabc1234 s140 6.1.1" to true,
+                "0.11.0 s140 6.1.1" to true,
+                "2.6.0" to false,
+                "2.6.0-3-gabc1234-dirty s140 7.3.0" to false,
+                "2.6.0 s140 6.1.1" to false,
+                "abc1234 s140 6.1.1" to false,
+            )
+        for ((revision, keeps) in expected) {
+            assertEquals(keeps, dropOnBootloader(revision).keepsDroppedSession(), revision)
+        }
     }
 }

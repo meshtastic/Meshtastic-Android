@@ -669,6 +669,66 @@ class LegacyDfuRetryPolicyTest {
         assertTrue(transport.closeCalled, "close must always run")
     }
 
+    private fun dropOn(version: KotlinVersion?) = DfuUploadResult.Failure(
+        LegacyDfuException.MidStreamDisconnect(
+            20,
+            200,
+            BleConnectionState.Disconnected(),
+            lastConfirmedBytes = -1,
+            bootloaderVersion = version,
+        ),
+        true,
+    )
+
+    private suspend fun runDropThenSuccess(version: KotlinVersion?): Pair<Int, Int> {
+        var sessions = 0
+        var staleResets = 0
+        var delays = 0
+        val outcome =
+            runDfuRetryLoop(
+                protocol = DfuProtocolKind.LEGACY,
+                budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS),
+                maxStaleResets = MAX_LEGACY_STALE_RESETS,
+                runUploadSession = { if (++sessions == 1) dropOn(version) else DfuUploadResult.Success },
+                resetStaleBootloader = { staleResets++ },
+                interAttemptDelay = { delays++ },
+            )
+        assertEquals(DfuUploadResult.Success, outcome)
+        assertEquals(2, sessions)
+        return staleResets to delays
+    }
+
+    @Test
+    fun `drop on a bootloader before 2_6_0 reset-primes before the retry`() = runTest {
+        assertEquals(1 to 0, runDropThenSuccess(KotlinVersion(0, 9, 2)))
+    }
+
+    @Test
+    fun `drop on bootloader 2_6_0 retries without a reset-prime`() = runTest {
+        assertEquals(0 to 1, runDropThenSuccess(KotlinVersion(2, 6, 0)))
+    }
+
+    @Test
+    fun `drop on an unknown bootloader retries without a reset-prime`() = runTest {
+        assertEquals(0 to 1, runDropThenSuccess(null))
+    }
+
+    @Test
+    fun `proactive reset-primes stop at the stale budget`() = runTest {
+        var staleResets = 0
+        val outcome =
+            runDfuRetryLoop(
+                protocol = DfuProtocolKind.LEGACY,
+                budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS),
+                maxStaleResets = 1,
+                runUploadSession = { dropOn(KotlinVersion(0, 9, 2)) },
+                resetStaleBootloader = { staleResets++ },
+                interAttemptDelay = {},
+            )
+        assertIs<DfuUploadResult.Failure>(outcome)
+        assertEquals(1, staleResets)
+    }
+
     @Test
     fun `cleanup skips abort after MidStreamDisconnect but always closes`() = runTest {
         val transport = FakeCleanupTransport()

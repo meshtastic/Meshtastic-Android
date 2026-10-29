@@ -419,6 +419,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="message_status_queued">En cola para enviar</string>
     <string name="message_status_unknown">Desconocido</string>
     <string name="messages">Mensajes</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Vale</string>
     <string name="modem_preset">Predefinidos</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="modules_already_unlocked">Módulos ya desbloqueados</string>

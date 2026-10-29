@@ -561,6 +561,9 @@
     <string name="message_status_unknown">Necunoscut</string>
     <string name="messages">Mesaje</string>
     <string name="minimum_wake_time_seconds">Durata minimă a trezirii</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Înapoi</string>
+    <string name="mirror_key_ok">Ok</string>
     <string name="modem_preset">Presetări</string>
     <string name="module_settings">Configurare modul</string>
     <string name="modules_already_unlocked">Modulele sunt deja deblocate</string>

@@ -225,12 +225,14 @@ internal fun usbMaintenanceGate(
  *   silently ignore the file, so `null` means "use the SoftDevice-specific sketch", never "refuse".
  * @property bootloaderVersion The installed bootloader's version, from the `UF2 Bootloader` line. The running firmware
  *   cannot report it, so this drive is the only place the app learns it.
+ * @property lastFault The fault the bootloader recorded since its last drive session, from its `Last-Fault:` line.
  */
 internal data class MaintenanceVolume(
     val boardId: String,
     val softDevice: SoftDeviceVariant?,
     val factoryEraseFamily: Long? = null,
     val bootloaderVersion: String? = null,
+    val lastFault: BootloaderFault? = null,
 )
 
 /** Outcome of vetting a user-picked volume before anything is written to it. */
@@ -264,6 +266,7 @@ internal suspend fun inspectMaintenanceVolume(treeUri: CommonUri, fileHandler: F
             softDevice = parseUf2SoftDevice(info),
             factoryEraseFamily = parseUf2FactoryEraseFamily(info),
             bootloaderVersion = parseUf2BootloaderVersion(info),
+            lastFault = parseUf2LastFault(info),
         ),
     )
 }
@@ -335,6 +338,7 @@ internal fun chooseMaintenanceImage(
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(manifest, volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
-            ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
+        otafixUf2ForBoardId(manifest, volume.boardId, hardware.effectiveTarget)?.let {
+            MaintenanceImageChoice.Resolved(it)
+        } ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

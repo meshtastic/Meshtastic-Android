@@ -62,7 +62,7 @@ When testing long-lived coroutines (e.g., `Flow.collect` loops launched in `back
 - `worker/service/background` changes: Broad tests, targeted WorkManager checks.
 - `BLE/networking/core repository`: `spotlessCheck`, `detekt`, `detektTypeResolved`, `assembleDebug`, `test allTests`.
 - Any Kotlin change: CI compiles with `-PwarningsAsErrors=true` (see CI Conventions), so add it to the compile or test tasks you run.
-- `build-logic/` changes: also `:build-logic:convention:spotlessCheck :build-logic:convention:detekt`, which the root `spotlessCheck detekt` do not reach.
+- `build-logic/` changes: also `:build-logic:convention:test :build-logic:convention:validatePlugins`; the root `spotlessCheck detekt` already reach build-logic.
 
 ## 3) Flavor checks
 
@@ -86,7 +86,7 @@ Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules —
 ./gradlew :screenshot-tests:copyDocsScreenshots         # copy doc images from BOTH modules → docs/assets
 ```
 
-Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. **Exception — color emoji: do NOT gate CI on them.** Layoutlib bundles the text fonts but resolves color emoji through the host's emoji font, so glyph edges rasterize differently on macOS than on the Linux runner. Layout, text and vectors still match exactly; only the emoji anti-aliasing moves, which is enough to blow the 0.0005 `imageDifferenceThreshold` on an emoji-dense composition and cannot be fixed by re-running `update` locally. Assert the layout rule in a unit test instead — see `core/ui/src/commonTest/.../emoji/EmojiCellSizeTest.kt` — or put the composition in generate-only `:docs-screenshots`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run; restore it with `git restore --source=HEAD --staged --worktree -- docs/assets/screenshots/nodes_detail_local.png`. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
+Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. The convention plugin pins the render JVM to `user.timezone=UTC` (CST itself pins only the locale), so a preview that formats an absolute date records the same day on every host. **Exception — color emoji: do NOT gate CI on them.** Layoutlib bundles the text fonts but resolves color emoji through the host's emoji font, so glyph edges rasterize differently on macOS than on the Linux runner. Layout, text and vectors still match exactly; only the emoji anti-aliasing moves, which is enough to blow the 0.0005 `imageDifferenceThreshold` on an emoji-dense composition and cannot be fixed by re-running `update` locally. Assert the layout rule in a unit test instead — see `core/ui/src/commonTest/.../emoji/EmojiCellSizeTest.kt` — or put the composition in generate-only `:docs-screenshots`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run; restore it with `git restore --source=HEAD --staged --worktree -- docs/assets/screenshots/nodes_detail_local.png`. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
 
 ## 3c) Fresh-install manual/agent testing: skip onboarding
 
@@ -108,7 +108,7 @@ Use this whenever driving the app from a fresh install/uninstall (screenshot tes
 
 CI is defined in `.github/workflows/reusable-check.yml` as parallel job groups. No job `needs:` another, so every one queues for a runner as soon as the run starts:
 
-1. **`lint-check`** runs `spotlessCheck`, `detekt`, `detektTypeResolved` and Android lint for both flavors of `:androidApp` and `:core:barcode` in a single Gradle invocation (avoids 3x cold-start overhead), plus `:build-logic:convention:spotlessCheck`, `:build-logic:convention:detekt` and `:build-logic:convention:validatePlugins`, because the root tasks do not reach the included build. It checks out full history (`fetch-depth: 0`) because spotless ratchets against `origin/main`, and it has no outputs.
+1. **`lint-check`** runs `spotlessCheck`, `detekt`, `detektTypeResolved` and Android lint for both flavors of `:androidApp` and `:core:barcode` in a single Gradle invocation (avoids 3x cold-start overhead), plus `:build-logic:convention:validatePlugins` and `:build-logic:convention:test`, which no root task reaches; `meshtastic.root` routes the root `spotlessCheck` and `detekt` into build-logic. It checks out full history (`fetch-depth: 0`) because spotless ratchets against `origin/main`, and it has no outputs.
 2. **`test-shards`** is a 3-shard matrix that runs unit tests in parallel. Shard membership is a load-balancing detail, not a taxonomy: heavy modules are moved between shards to even out wall time, so read the matrix rather than inferring it:
    - `shard-core`: `allTests` for the remaining `core:*` KMP modules, plus `kmpSmokeCompile`, the only iOS compile in CI (the shards pass `-x iosSimulatorArm64Test`).
    - `shard-feature`: `allTests` for the remaining `feature:*` KMP modules **plus `:core:service`**.

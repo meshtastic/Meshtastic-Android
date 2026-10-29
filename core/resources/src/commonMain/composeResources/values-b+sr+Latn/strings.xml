@@ -266,6 +266,13 @@
     <string name="message_status_queued">U redu za slanje</string>
     <string name="message_status_unknown">Непознато</string>
     <string name="messages">Поруке</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_down">Доле</string>
+    <string name="mirror_key_left">Лево</string>
+    <string name="mirror_key_ok">Океј</string>
+    <string name="mirror_key_right">Десно</string>
+    <string name="mirror_key_up">Горе</string>
     <string name="modem_preset">Унапред подешено</string>
     <string name="module_settings">Конфигурација модула</string>
     <!-- MQTT -->

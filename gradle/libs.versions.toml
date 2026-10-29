@@ -111,7 +111,7 @@ jmdns = "3.6.4"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.3"
-meshtastic-protobufs = "2.8.1.21-gf4c4ff9-SNAPSHOT"
+meshtastic-protobufs = "2.8.1.29-gffd5ad4-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
@@ -277,6 +277,7 @@ androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.4.0
 androidx-test-runner = { module = "androidx.test:runner", version = "1.8.0-alpha01" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.8.0-alpha01" }
 junit = { module = "junit:junit", version = "4.13.2" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }

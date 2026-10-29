@@ -96,10 +96,12 @@
     <string name="app_database_backup_failed">Не удалось записать резервную копию.</string>
     <string name="app_database_backup_no_device">Сначала подключись к радио. Нет данных для резервного копирования или восстановления.</string>
     <string name="app_database_backup_saved">Резервная копия сохранена.</string>
+    <string name="app_database_restore_confirmation">При восстановлении сообщений и нод этого радиоприемника, хранящихся в приложении, заменяются содержимым резервной копии. Изменения вступят в силу после перезапуска приложения и повторного подключения к этому радиоприемнику.</string>
     <string name="app_database_restore_corrupt">Эта резервная копия повреждена или неполна.</string>
     <string name="app_database_restore_failed">Не удалось прочитать резервную копию.</string>
     <string name="app_database_restore_not_backup">Этот файл не является резервной копией данных.</string>
     <string name="app_database_restore_staged">Резервное копирование принято. Перезапусти приложение и подключись к этому радио для завершения восстановления.</string>
+    <string name="app_database_restore_wrong_version">Эта резервная копия взята из другой версии приложения (версия базы данных %1$d, в этом приложении используется %2$d).</string>
     <string name="app_functions_get_channel_info">Получить сведения о канале</string>
     <string name="app_functions_get_device_status">Получить состояние устройства</string>
     <string name="app_functions_get_mesh_metrics">Получить метрики сети</string>
@@ -374,6 +376,7 @@
     <string name="debug_store_logs_summary">Выключить запись сетевых журналов на диск</string>
     <string name="debug_store_logs_title">Хранить журналы mesh-сети</string>
     <string name="debug_tab_app_logs">Журналы приложения</string>
+    <string name="debug_tab_mirror">Зеркало</string>
     <string name="debug_tab_packets">Пакеты</string>
     <string name="deep_link_connect_message">Ссылка запрашивает у этого приложения подключение к устройству по адресу %1$s. Продолжай только если доверяешь источнику ссылки.</string>
     <string name="deep_link_connect_title">Подключиться к этому устройству?</string>
@@ -428,8 +431,17 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s В</string>
+    <string name="device_model_ar_camera_unavailable">Другое приложение использует камеру. Закрой и вернись.</string>
     <string name="device_model_ar_failed">AR не удалось начать</string>
+    <string name="device_model_ar_restart_phone">Перезагрузи телефон. Датчик движения не отвечает, а без него дополненная реальность не запустится.</string>
     <string name="device_model_capture">Сделать снимок</string>
+    <string name="device_model_capture_failed">Невозможно сохранить изображение</string>
+    <string name="device_model_capture_saved">Сохранено в изображениях</string>
+    <string name="device_model_load_failed">Не удалось загрузить 3D модель</string>
+    <string name="device_model_rest_left_side">Левая сторона</string>
+    <string name="device_model_rest_right_side">Правая сторона</string>
+    <string name="device_model_view">Просмотр 3D-модели</string>
+    <string name="device_model_view_in_space">Просмотреть в твоём пространстве</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="device_storage_ui_title">Хранилище устройства и UI (только для чтения)</string>
     <string name="device_theme_language">Тема: %1$s, Язык: %2$s</string>
@@ -527,6 +539,7 @@
     <string name="display">Дисплей</string>
     <string name="display_config">Дисплей устройства</string>
     <string name="display_name">Отображаемое имя</string>
+    <string name="display_name_hint">Доступно только на этом устройстве. При публикации и экспорте используется настоящее имя ноды.</string>
     <string name="dissolved_oxygen">Растворённый O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Расстояние</string>
@@ -560,6 +573,7 @@
     <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
+    <string name="doc_keywords_widget">виджет, домашний экран, локальная статистика, трекер нод, беглый взгляд, батарея, использование</string>
     <string name="doc_loading">Загрузка документации…</string>
     <string name="doc_no_content">Содержимое недоступно</string>
     <string name="doc_no_documentation">Документация недоступна</string>
@@ -685,10 +699,12 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_event_ended_banner">%1$s завершен. Вернитесь к стандартной Meshtastic прошивке, чтобы восстановить нормальные функции.</string>
     <string name="firmware_event_ended_button">Обновление прошивки</string>
+    <string name="firmware_gate_message">Прошивка радио (%1$s) старше минимальной поддерживаемой версии (%2$s). Обнови прошивку, чтобы продолжать использовать приложение. Последняя стабильная версия прошивки: %3$s</string>
     <string name="firmware_gate_title">Требуется обновление прошивки</string>
     <string name="firmware_gate_update">Обновление прошивки</string>
     <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
+    <string name="firmware_maintenance_bootloader_last_fault">Загрузчик сообщил об ошибке: %1$s</string>
     <string name="firmware_maintenance_bootloader_latest_hint">Последняя версия: %1$s. Установленная версия отображается после перезагрузки устройства в режиме обновления.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Загрузчик обновлён</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Обновлять нечего. Далее переустанавливается прошивка, что приведёт к перезагрузке устройства.</string>
@@ -865,10 +881,16 @@
     <!-- IAQ -->
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
+    <string name="iaq_level_dangerously_polluted">Опасно загрязнённый</string>
     <string name="iaq_level_excellent">Отлично</string>
+    <string name="iaq_level_extremely_polluted">Чрезвычайно загрязненный</string>
     <string name="iaq_level_good">Хороший</string>
+    <string name="iaq_level_heavily_polluted">Сильно загрязнённый</string>
+    <string name="iaq_level_lightly_polluted">Слегка загрязненный</string>
+    <string name="iaq_level_moderately_polluted">Умеренно загрязненный</string>
     <string name="iaq_level_range">%1$s (%2$d-%3$d)</string>
     <string name="iaq_level_range_open">%1$s (%2$d+)</string>
+    <string name="iaq_level_severely_polluted">Сильно загрязнённый</string>
     <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Обозначение значков</string>
     <string name="ignore">Игнорировать</string>
@@ -944,11 +966,15 @@
     <string name="live_update_distance">%1$s отсюда</string>
     <string name="live_update_hops">Хопов: %1$d</string>
     <string name="live_update_mesh_status">Статус сети</string>
+    <string name="live_update_mesh_status_summary">Подключение, ноды онлайн, непрочитанные сообщения и батареи радиоустройства</string>
+    <string name="live_update_no_nodes">Нет нод для отслеживания</string>
+    <string name="live_update_nodes_online">%1$d из %2$d нод онлайн</string>
     <string name="live_update_search_nodes">Поиск нод</string>
     <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
     <string name="live_update_start">Запуск</string>
     <string name="live_update_stop">Остановка</string>
     <string name="live_update_switch">Переключатель</string>
+    <string name="live_update_track_in">Отслеживать в Live Update</string>
     <string name="live_update_tracking">Отслеживание %1$s</string>
     <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
@@ -1167,6 +1193,26 @@
     <string name="mesh_hud_cardinal_north">С</string>
     <string name="mesh_hud_cardinal_south">Ю</string>
     <string name="mesh_hud_cardinal_west">З</string>
+    <string name="mesh_hud_chip_description">%1$s, %2$s, в %3$d часов</string>
+    <string name="mesh_hud_coach_dismiss">Понял</string>
+    <string name="mesh_hud_find">Поиск</string>
+    <string name="mesh_hud_finding">Поиск %1$s · %2$s</string>
+    <string name="mesh_hud_inside_geofence">Внутри %1$s</string>
+    <string name="mesh_hud_inside_unnamed_geofence">Внутри геозоны</string>
+    <string name="mesh_hud_joined">%1$s · %2$s</string>
+    <string name="mesh_hud_more">+%1$d</string>
+    <string name="mesh_hud_nearby">Поблизости</string>
+    <string name="mesh_hud_no_nodes">Нет узлов с позицией</string>
+    <string name="mesh_hud_on_target">На цель</string>
+    <string name="mesh_hud_open">Открыть вид сети</string>
+    <string name="mesh_hud_open_node">Открыть ноду</string>
+    <string name="mesh_hud_open_waypoint">Открыть путевую точку</string>
+    <string name="mesh_hud_own_accuracy">Ты ± %1$s</string>
+    <string name="mesh_hud_rise_above">▲ %1$s</string>
+    <string name="mesh_hud_rise_below">▼ %1$s</string>
+    <string name="mesh_hud_snr">%1$s дБ</string>
+    <string name="mesh_hud_track_empty">В окне трека нет позиций</string>
+    <string name="mesh_hud_track_newest">%1$s · новейшая %2$s</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->
@@ -1243,6 +1289,13 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимальное время бодрствования</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_down">Вниз</string>
+    <string name="mirror_key_left">Влево</string>
+    <string name="mirror_key_ok">Лады</string>
+    <string name="mirror_key_right">Вправо</string>
+    <string name="mirror_key_up">Вверх</string>
     <string name="modem_preset">Шаблоны</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="modules_already_unlocked">Модули уже разблокированы</string>

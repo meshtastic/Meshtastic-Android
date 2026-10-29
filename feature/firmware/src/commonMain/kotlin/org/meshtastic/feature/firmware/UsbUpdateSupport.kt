@@ -178,6 +178,7 @@ private const val CDC_DTR_HOLD_MS = 2_000L
  *
  * @property unblockCdc Opens the erase firmware's CDC port with DTR asserted so it stops waiting and formats. Returns
  *   false when no port could be claimed.
+ * @property onVolumeRead Called with what every accepted volume reports, before anything is written to it.
  */
 internal class UsbPassWriter(
     private val fileHandler: FirmwareFileHandler,
@@ -185,6 +186,7 @@ internal class UsbPassWriter(
     private val retrieveMaintenanceUf2: suspend (MaintenanceUf2, (Float) -> Unit) -> FirmwareArtifact?,
     private val awaitDeviceDetach: suspend (Long) -> Boolean,
     private val unblockCdc: suspend (waitMillis: Long, holdMillis: Long) -> Boolean,
+    private val onVolumeRead: (MaintenanceVolume) -> Unit = {},
 ) {
 
     /**
@@ -204,7 +206,7 @@ internal class UsbPassWriter(
         val volume =
             when (inspection) {
                 is VolumeInspection.Rejected -> return UsbPassResult.Refused(inspection.reason)
-                is VolumeInspection.Accepted -> inspection.volume
+                is VolumeInspection.Accepted -> inspection.volume.also(onVolumeRead)
             }
 
         val resolved =
@@ -265,7 +267,11 @@ internal class UsbPassWriter(
     suspend fun review(treeUri: CommonUri): BootloaderReview =
         when (val inspection = inspectMaintenanceVolume(treeUri, fileHandler)) {
             is VolumeInspection.Rejected -> BootloaderReview.Refused(inspection.reason)
-            is VolumeInspection.Accepted -> reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)
+
+            is VolumeInspection.Accepted -> {
+                onVolumeRead(inspection.volume)
+                reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)
+            }
         }
 
     /** Either the image to write, or the result to return instead. */

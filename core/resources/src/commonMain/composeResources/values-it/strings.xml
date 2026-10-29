@@ -942,6 +942,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Tempo minimo di risveglio</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Indietro</string>
+    <string name="mirror_key_ok">Ok</string>
     <string name="modem_preset">Preset</string>
     <string name="module_settings">Impostazioni moduli</string>
     <string name="modules_already_unlocked">Moduli già sbloccati</string>

@@ -661,6 +661,9 @@
     <string name="messages">Meddelanden</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Tillbaka</string>
+    <string name="mirror_key_ok">Okej</string>
     <string name="modem_preset">Förval</string>
     <string name="module_settings">Modul konfiguration</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
