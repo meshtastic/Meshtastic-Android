@@ -90,90 +90,95 @@ fun MaterialBatteryCompactInfo(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             Percents(level, contentColor, unknownLabel, levelString)
         }
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             Volts(voltage, contentColor)
         }
     }
 }
 
 @Composable
-@Suppress("MagicNumber", "MultipleEmitters")
+@Suppress("MagicNumber")
 private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, levelString: String) {
-    if (level == null || level < 0) {
-        Icon(
-            modifier = Modifier.size(SIZE_ICON.dp),
-            imageVector = MeshtasticIcons.BatteryUnknown,
-            tint = contentColor.copy(alpha = 0.65f),
-            contentDescription = unknownLabel,
-        )
-    } else if (level > 100) {
-        Icon(
-            modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
-            imageVector = MeshtasticIcons.PowerSupply,
-            tint = contentColor.copy(alpha = 0.65f),
-            contentDescription = levelString,
-        )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        if (level == null || level < 0) {
+            Icon(
+                modifier = Modifier.size(SIZE_ICON.dp),
+                imageVector = MeshtasticIcons.BatteryUnknown,
+                tint = contentColor.copy(alpha = 0.65f),
+                contentDescription = unknownLabel,
+            )
+        } else if (level > 100) {
+            Icon(
+                modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
+                imageVector = MeshtasticIcons.PowerSupply,
+                tint = contentColor.copy(alpha = 0.65f),
+                contentDescription = levelString,
+            )
 
-        Text(
-            text = stringResource(Res.string.external_power_short),
-            color = contentColor.copy(alpha = 0.95f),
-            style =
-            MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-            ),
-        )
-    } else {
-        // Map battery percentage to color
-        val fillColor =
-            when (level) {
-                in 0..19 -> MaterialTheme.colorScheme.StatusRed
-                in 20..39 -> MaterialTheme.colorScheme.StatusOrange
-                else -> MaterialTheme.colorScheme.StatusGreen
-            }
+            Text(
+                text = stringResource(Res.string.external_power_short),
+                color = contentColor.copy(alpha = 0.95f),
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp,
+                    ),
+            )
+        } else {
+            // Map battery percentage to color
+            val fillColor =
+                when (level) {
+                    in 0..19 -> MaterialTheme.colorScheme.StatusRed
+                    in 20..39 -> MaterialTheme.colorScheme.StatusOrange
+                    else -> MaterialTheme.colorScheme.StatusGreen
+                }
 
-        Icon(
-            modifier =
-            Modifier.size(SIZE_ICON.dp).drawBehind {
-                val insetVertical = size.height * .375f
-                val insetLeft = size.width * .25f
-                val insetRight = size.width * .167f
+            Icon(
+                modifier =
+                    Modifier.size(SIZE_ICON.dp).drawBehind {
+                        val insetVertical = size.height * .375f
+                        val insetLeft = size.width * .25f
+                        val insetRight = size.width * .167f
 
-                val availableWidth = size.width - (insetLeft + insetRight)
-                val availableHeight = size.height - (insetVertical * 2)
+                        val availableWidth = size.width - (insetLeft + insetRight)
+                        val availableHeight = size.height - (insetVertical * 2)
 
-                // Fill grows from right (flat end) toward left (terminal)
-                val fillWidth = availableWidth * (level / 100f)
-                val fillX = insetLeft + availableWidth - fillWidth
+                        // Fill grows from right (flat end) toward left (terminal)
+                        val fillWidth = availableWidth * (level / 100f)
+                        val fillX = insetLeft + availableWidth - fillWidth
 
-                drawRect(
-                    color = fillColor,
-                    topLeft = Offset(fillX, insetVertical),
-                    size = Size(fillWidth, availableHeight),
-                )
-            },
-            imageVector = MeshtasticIcons.BatteryEmpty,
-            tint = contentColor.copy(alpha = 0.65f),
-            contentDescription = levelString,
-        )
+                        drawRect(
+                            color = fillColor,
+                            topLeft = Offset(fillX, insetVertical),
+                            size = Size(fillWidth, availableHeight),
+                        )
+                    },
+                imageVector = MeshtasticIcons.BatteryEmpty,
+                tint = contentColor.copy(alpha = 0.65f),
+                contentDescription = levelString,
+            )
 
-        Text(
-            text = levelString,
-            color = contentColor.copy(alpha = 0.95f),
-            style =
-            MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-            ),
-        )
+            Text(
+                text = levelString,
+                color = contentColor.copy(alpha = 0.95f),
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp,
+                    ),
+            )
+        }
     }
 }
 
 @Composable
-@Suppress("MagicNumber", "MultipleEmitters")
+@Suppress("MagicNumber")
 private fun Volts(voltage: Float?, contentColor: Color) {
     voltage
         ?.takeIf { it > 0 }

@@ -186,7 +186,7 @@ fun NodeItemCompact(
                 onLongClick = onLongClick,
             )
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 0.dp),
+                .padding(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top,
         ) {
