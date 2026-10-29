@@ -16,7 +16,6 @@
  */
 package org.meshtastic.buildlogic
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.Test
@@ -60,9 +59,6 @@ class AndroidLintConventionTest {
         assertEquals(EXPECTED, values["lint"])
     }
 
-    @Disabled(
-        "KMP branch is a no-op: findByType on the project never sees the android target, which lives on the kotlin extension",
-    )
     @Test
     fun `kotlin multiplatform android library modules get the shared lint settings`(@TempDir projectDir: File) {
         val values =
