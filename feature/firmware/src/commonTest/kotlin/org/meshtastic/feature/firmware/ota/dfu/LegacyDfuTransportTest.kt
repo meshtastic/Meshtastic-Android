@@ -285,6 +285,23 @@ class LegacyDfuTransportTest {
     }
 
     @Test
+    fun `STARTED is reported only once the bootloader accepts START`() = runTest {
+        val env = createConnectedTransport()
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val phases = mutableListOf<DfuUploadPhase>()
+        env.transport.transferFirmware(ByteArray(40), onPhase = { phases.add(it) }, onProgress = {}).getOrThrow()
+        assertEquals(listOf(DfuUploadPhase.PREPARING, DfuUploadPhase.STARTED, DfuUploadPhase.STREAMING), phases)
+
+        val refused = createConnectedTransport()
+        refused.responder.scheme = LegacyResponderScheme.RejectStartInvalidState
+        refused.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val refusedPhases = mutableListOf<DfuUploadPhase>()
+        refused.transport.transferFirmware(ByteArray(40), onPhase = { refusedPhases.add(it) }, onProgress = {})
+        assertEquals(listOf(DfuUploadPhase.PREPARING), refusedPhases)
+    }
+
+    @Test
     fun `transferFirmware fails with ProtocolError when device rejects INIT_DFU_PARAMS`() = runTest {
         val env = createConnectedTransport()
         env.responder.scheme = LegacyResponderScheme.RejectInit

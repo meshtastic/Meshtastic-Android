@@ -41,15 +41,15 @@ internal class PreStartBudget(private val budget: Duration, timeSource: TimeSour
         started = true
     }
 
-    /** Throws [DfuException.LeftUpdateMode] once the budget is spent before START. */
+    /** Throws [DfuException.StartTimedOut] once the budget is spent before START. */
     fun check() {
-        if (!started && entered.elapsedNow() >= budget) throw DfuException.LeftUpdateMode(budget)
+        if (!started && entered.elapsedNow() >= budget) throw DfuException.StartTimedOut(budget)
     }
 
     /** Runs [block], cut off at the remaining budget while START has not been accepted. */
     suspend fun bounded(block: suspend () -> Unit) {
         check()
         if (started) return block()
-        withTimeoutOrNull(budget - entered.elapsedNow()) { block() } ?: throw DfuException.LeftUpdateMode(budget)
+        withTimeoutOrNull(budget - entered.elapsedNow()) { block() } ?: throw DfuException.StartTimedOut(budget)
     }
 }

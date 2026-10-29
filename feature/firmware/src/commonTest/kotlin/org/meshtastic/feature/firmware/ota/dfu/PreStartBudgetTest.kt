@@ -48,10 +48,10 @@ class PreStartBudgetTest {
     }
 
     @Test
-    fun `a connect still running when the budget ends fails as LeftUpdateMode`() = runTest {
+    fun `a connect still running when the budget ends fails as StartTimedOut`() = runTest {
         val budget = PreStartBudget(5.minutes, testTimeSource)
         delay(4.minutes)
-        assertFailsWith<DfuException.LeftUpdateMode> { budget.bounded { delay(2.minutes) } }
+        assertFailsWith<DfuException.StartTimedOut> { budget.bounded { delay(2.minutes) } }
         assertEquals(5.minutes.inWholeMilliseconds, currentTime, "cut off at the budget, not after the connect")
     }
 
@@ -60,8 +60,8 @@ class PreStartBudgetTest {
         val budget = PreStartBudget(5.minutes, testTimeSource)
         delay(5.minutes + 1.seconds)
         var attempted = false
-        assertFailsWith<DfuException.LeftUpdateMode> { budget.bounded { attempted = true } }
-        assertFailsWith<DfuException.LeftUpdateMode> { budget.check() }
+        assertFailsWith<DfuException.StartTimedOut> { budget.bounded { attempted = true } }
+        assertFailsWith<DfuException.StartTimedOut> { budget.check() }
         assertTrue(!attempted)
     }
 

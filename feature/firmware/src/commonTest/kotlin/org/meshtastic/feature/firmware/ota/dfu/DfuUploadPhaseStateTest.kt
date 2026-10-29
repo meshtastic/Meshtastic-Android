@@ -33,6 +33,13 @@ class DfuUploadPhaseStateTest {
     }
 
     @Test
+    fun `STARTED leaves the erase wait for Uploading at zero`() {
+        val state = dfuUploadPhaseState(DfuUploadPhase.STARTED, uploadMsg, hint)
+        assertIs<FirmwareUpdateState.Updating>(state)
+        assertEquals(0f, state.progressState.progress)
+    }
+
+    @Test
     fun `STREAMING returns to Uploading at zero with the slow hint preserved`() {
         val state = dfuUploadPhaseState(DfuUploadPhase.STREAMING, uploadMsg, hint)
         assertIs<FirmwareUpdateState.Updating>(state)

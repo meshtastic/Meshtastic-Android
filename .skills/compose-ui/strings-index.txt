@@ -724,7 +724,6 @@ firmware_update_in_progress
 firmware_update_invalid_local_file_detail
 firmware_update_keep_device_close
 firmware_update_latest
-firmware_update_left_dfu_mode
 firmware_update_local_file
 firmware_update_method_ble
 firmware_update_method_detail
@@ -757,6 +756,7 @@ firmware_update_select_file
 firmware_update_slow_bootloader_hint
 firmware_update_source_local
 firmware_update_stable
+firmware_update_start_timed_out
 firmware_update_starting_dfu
 firmware_update_starting_ota
 firmware_update_success

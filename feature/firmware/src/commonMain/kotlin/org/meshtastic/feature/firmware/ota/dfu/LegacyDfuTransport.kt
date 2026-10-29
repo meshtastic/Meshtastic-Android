@@ -285,6 +285,7 @@ internal constructor(
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
         writePacket(legacyImageSizesPayload(appSize = firmware.size))
         handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
+        onPhase(DfuUploadPhase.STARTED)
 
         // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))

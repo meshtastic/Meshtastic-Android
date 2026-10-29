@@ -37,12 +37,12 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
-import org.meshtastic.core.resources.firmware_update_left_dfu_mode
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
 import org.meshtastic.core.resources.firmware_update_preparing_flash
 import org.meshtastic.core.resources.firmware_update_retrying_upload
 import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
+import org.meshtastic.core.resources.firmware_update_start_timed_out
 import org.meshtastic.core.resources.firmware_update_starting_dfu
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_validating
@@ -265,7 +265,9 @@ internal fun dfuUploadPhaseState(phase: DfuUploadPhase, uploadMsg: UiText, slowH
         DfuUploadPhase.PREPARING ->
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_preparing_flash)))
 
-        DfuUploadPhase.STREAMING -> FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint))
+        DfuUploadPhase.STARTED,
+        DfuUploadPhase.STREAMING,
+        -> FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint))
     }
 
 /**
@@ -560,9 +562,9 @@ class SecureDfuHandler(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DfuException.LeftUpdateMode) {
+        } catch (e: DfuException.StartTimedOut) {
             Logger.w(e) { "DFU: pre-START budget spent" }
-            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_left_dfu_mode)))
+            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_start_timed_out)))
             cleanupArtifact
         } catch (e: DfuException) {
             Logger.e(e) { "DFU: Protocol error" }
@@ -772,7 +774,7 @@ class SecureDfuHandler(
                 .transferFirmware(
                     pkg.firmware,
                     onPhase = { phase ->
-                        if (phase == DfuUploadPhase.STREAMING) preStart.markStarted()
+                        if (phase != DfuUploadPhase.PREPARING) preStart.markStarted()
                         updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint))
                     },
                 ) { progress ->
@@ -797,7 +799,7 @@ class SecureDfuHandler(
             return DfuUploadResult.Success
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DfuException.LeftUpdateMode) {
+        } catch (e: DfuException.StartTimedOut) {
             // Ends the whole run, not just this session: no retry or alternate protocol can reach the board now.
             sessionFailure = e
             throw e
