@@ -31,10 +31,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.DeviceModelRepository
-import org.meshtastic.core.resources.Res
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.resources.Res
 import org.meshtastic.feature.node.model.GlbBounds
 import kotlin.time.Duration.Companion.seconds
 
@@ -64,6 +65,7 @@ class DeviceModelViewModel(
     private val repository: DeviceModelRepository,
     private val displayMirrorManager: DisplayMirrorManager,
     private val adminController: AdminController,
+    nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow<DeviceModelState>(DeviceModelState.Loading)
@@ -71,6 +73,15 @@ class DeviceModelViewModel(
 
     /** The connected device's live screen while [setMirror] has it armed. */
     val screenFrame: StateFlow<MirrorFrame?> = displayMirrorManager.frame
+
+    /**
+     * Only firmware that can stream the display reports one in its metadata, so without it arming the mirror would go
+     * unanswered and the model's screen would stay blank.
+     */
+    val supported: StateFlow<Boolean> =
+        nodeRepository.ourNodeInfo
+            .map { it?.metadata?.display != null }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     // Arming is an admin write, which managed mode forbids.
     private val managed: StateFlow<Boolean> =
@@ -123,11 +134,6 @@ class DeviceModelViewModel(
         _state.value = DeviceModelState.Failed
     }
 
-    companion object {
-        internal const val CHIRPY_MODEL = "files/models/chirpy.glb"
-        private const val CHIRPY_KEY = "chirpy"
-    }
-
     fun setMirror(enabled: Boolean) {
         if (enabled) {
             pendingDisarm?.cancel()
@@ -144,7 +150,7 @@ class DeviceModelViewModel(
     }
 
     private fun arm() {
-        if (mirroring || managed.value) return
+        if (mirroring || managed.value || !supported.value) return
         displayMirrorManager.reset()
         adminController.setDisplayMirror(true)
         mirroring = true
@@ -160,6 +166,11 @@ class DeviceModelViewModel(
     override fun onCleared() {
         pendingDisarm?.cancel()
         disarm()
+    }
+
+    companion object {
+        internal const val CHIRPY_MODEL = "files/models/chirpy.glb"
+        private const val CHIRPY_KEY = "chirpy"
     }
 }
 
