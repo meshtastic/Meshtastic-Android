@@ -86,27 +86,30 @@ data class GlbBounds(val min: FloatArray, val max: FloatArray) {
         }
 
         /**
-         * Bounds of the display glass: primitives of a mesh named `screen`, or using a material named `screen`. Null
-         * when the model does not mark its display.
+         * Bounds of the display glass: primitives of a mesh named `screen`, or using a material named `screen`, else
+         * the same for `display`, the name most of the generated models use. Null when the model does not mark its
+         * display.
          */
         fun screen(glb: ByteArray): GlbBounds? = jsonChunk(glb)?.let { chunk ->
             runCatching {
                 val root = json.parseToJsonElement(chunk).jsonObject
                 val materials =
                     root["materials"]?.jsonArray.orEmpty().map { it.jsonObject["name"]?.jsonPrimitive?.content }
-                boundsOf(root) { mesh, primitive ->
-                    mesh["name"]?.jsonPrimitive?.content.equals(SCREEN, ignoreCase = true) ||
-                        primitive["material"]
-                            ?.jsonPrimitive
-                            ?.int
-                            ?.let { materials.getOrNull(it) }
-                            .equals(SCREEN, ignoreCase = true)
+                SCREEN_NAMES.firstNotNullOfOrNull { name ->
+                    boundsOf(root) { mesh, primitive ->
+                        mesh["name"]?.jsonPrimitive?.content.equals(name, ignoreCase = true) ||
+                            primitive["material"]
+                                ?.jsonPrimitive
+                                ?.int
+                                ?.let { materials.getOrNull(it) }
+                                .equals(name, ignoreCase = true)
+                    }
                 }
             }
                 .getOrNull()
         }
 
-        private const val SCREEN = "screen"
+        private val SCREEN_NAMES = listOf("screen", "display")
 
         private fun boundsOf(
             root: JsonObject,

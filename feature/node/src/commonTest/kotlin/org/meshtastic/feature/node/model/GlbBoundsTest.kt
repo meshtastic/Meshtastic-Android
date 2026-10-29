@@ -88,6 +88,53 @@ class GlbBoundsTest {
     }
 
     @Test
+    fun displayNamesTheScreenWhenNothingIsNamedScreen() {
+        val glb =
+            glb(
+                """
+                {"accessors":[
+                  {"min":[-0.026,0,-0.015],"max":[0.026,0.138,0.017]},
+                  {"min":[-0.015,0.032,0.0158],"max":[0.015,0.047,0.016]},
+                  {"min":[-0.012,0.035,0.016],"max":[0.012,0.045,0.0162]}
+                ],
+                "materials":[{"name":"c_0c0c0e"}],
+                "meshes":[
+                  {"name":"Body","primitives":[{"attributes":{"POSITION":0},"material":0}]},
+                  {"name":"Glass","primitives":[{"attributes":{"POSITION":1},"material":0}]},
+                  {"name":"Display","primitives":[{"attributes":{"POSITION":2},"material":0}]}
+                ]}
+                """,
+            )
+
+        val screen = assertNotNull(GlbBounds.screen(glb))
+
+        assertContentEquals(floatArrayOf(-0.012f, 0.035f, 0.016f), screen.min)
+        assertContentEquals(floatArrayOf(0.012f, 0.045f, 0.0162f), screen.max)
+    }
+
+    @Test
+    fun screenOutranksDisplayWhenAModelNamesBoth() {
+        val glb =
+            glb(
+                """
+                {"accessors":[
+                  {"min":[0,0,0],"max":[0.05,0.05,0.003]},
+                  {"min":[0.01,0.01,0.003],"max":[0.04,0.04,0.0032]}
+                ],
+                "meshes":[
+                  {"name":"Display","primitives":[{"attributes":{"POSITION":0}}]},
+                  {"name":"Screen","primitives":[{"attributes":{"POSITION":1}}]}
+                ]}
+                """,
+            )
+
+        val screen = assertNotNull(GlbBounds.screen(glb))
+
+        assertContentEquals(floatArrayOf(0.01f, 0.01f, 0.003f), screen.min)
+        assertContentEquals(floatArrayOf(0.04f, 0.04f, 0.0032f), screen.max)
+    }
+
+    @Test
     fun noScreenWhenNothingIsNamedScreen() {
         val glb =
             glb(
