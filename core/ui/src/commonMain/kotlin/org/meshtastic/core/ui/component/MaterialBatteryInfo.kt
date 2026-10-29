@@ -125,10 +125,10 @@ private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, lev
                 text = stringResource(Res.string.external_power_short),
                 color = contentColor.copy(alpha = 0.95f),
                 style =
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp,
-                    ),
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                ),
             )
         } else {
             // Map battery percentage to color
@@ -141,24 +141,24 @@ private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, lev
 
             Icon(
                 modifier =
-                    Modifier.size(SIZE_ICON.dp).drawBehind {
-                        val insetVertical = size.height * .375f
-                        val insetLeft = size.width * .25f
-                        val insetRight = size.width * .167f
+                Modifier.size(SIZE_ICON.dp).drawBehind {
+                    val insetVertical = size.height * .375f
+                    val insetLeft = size.width * .25f
+                    val insetRight = size.width * .167f
 
-                        val availableWidth = size.width - (insetLeft + insetRight)
-                        val availableHeight = size.height - (insetVertical * 2)
+                    val availableWidth = size.width - (insetLeft + insetRight)
+                    val availableHeight = size.height - (insetVertical * 2)
 
-                        // Fill grows from right (flat end) toward left (terminal)
-                        val fillWidth = availableWidth * (level / 100f)
-                        val fillX = insetLeft + availableWidth - fillWidth
+                    // Fill grows from right (flat end) toward left (terminal)
+                    val fillWidth = availableWidth * (level / 100f)
+                    val fillX = insetLeft + availableWidth - fillWidth
 
-                        drawRect(
-                            color = fillColor,
-                            topLeft = Offset(fillX, insetVertical),
-                            size = Size(fillWidth, availableHeight),
-                        )
-                    },
+                    drawRect(
+                        color = fillColor,
+                        topLeft = Offset(fillX, insetVertical),
+                        size = Size(fillWidth, availableHeight),
+                    )
+                },
                 imageVector = MeshtasticIcons.BatteryEmpty,
                 tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = levelString,
@@ -168,10 +168,10 @@ private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, lev
                 text = levelString,
                 color = contentColor.copy(alpha = 0.95f),
                 style =
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp,
-                    ),
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                ),
             )
         }
     }
