@@ -204,10 +204,11 @@ class FirmwareUpdateViewModel(
     private var maintenanceHardware: DeviceHardware? = null
 
     /**
-     * The in-flight USB maintenance pass, which runs on its own job rather than [updateJob].
+     * The in-flight USB write to a picked drive (a maintenance pass or a plain update), which runs on its own job
+     * rather than [updateJob].
      *
-     * Tracked so cancellation can stop the write before the sequence's hold on the radio is handed back — releasing
-     * while the write is still running would re-enable transport recovery mid-write.
+     * Tracked so cancellation can stop the write before the hold on the radio is handed back — releasing while the
+     * write is still running would re-enable transport recovery mid-write.
      */
     private var maintenanceWriteJob: Job? = null
 
@@ -729,7 +730,8 @@ class FirmwareUpdateViewModel(
         val hardware = _deviceHardware.value ?: return
         val pass = UsbFileSavePass.Prepared(UsbFileSaveStep.Firmware, artifact, currentState.fileName ?: "firmware.uf2")
 
-        viewModelScope.launch {
+        // Tracked so cancelUpdate() stops the write; the hold is released only once it has.
+        maintenanceWriteJob = viewModelScope.launch {
             // The same hold saveDfuFile takes: the copy, the flash and the detach wait need the foreground service.
             radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
                 try {
@@ -748,9 +750,13 @@ class FirmwareUpdateViewModel(
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Writing the firmware to the update drive failed" }
                     _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
-                }
-                if (_state.value !is FirmwareUpdateState.AwaitingFileSave) {
-                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                } finally {
+                    // A re-offered pick still needs the firmware; any other end, cancellation included, does not.
+                    if (_state.value !is FirmwareUpdateState.AwaitingFileSave) {
+                        withContext(NonCancellable) {
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
+                    }
                 }
             }
         }
@@ -1167,6 +1173,7 @@ class FirmwareUpdateViewModel(
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         // Local-file installs never wipe; drop any opt-in left over from an earlier, failed attempt.
         pendingFactoryResetAfterUpdate = false
+        _bootloaderFault.value = null
         if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
             cleanupPendingLocalFirmwareArtifact(pendingArtifact)

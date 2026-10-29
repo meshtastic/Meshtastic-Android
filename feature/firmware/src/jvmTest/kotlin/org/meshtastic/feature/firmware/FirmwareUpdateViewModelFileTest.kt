@@ -1115,6 +1115,50 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
+    fun `a local file update clears the fault an earlier one read`() = runTest {
+        awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.VerificationFailed }
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+        assertNotNull(viewModel.bootloaderFault.value)
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) } returns null
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        assertNull(viewModel.bootloaderFault.value)
+    }
+
+    @Test
+    fun `cancelling a plain usb write stops it before the copy and releases the hold`() = runTest {
+        val inspecting = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<String>()
+        awaitPlainUsbDrivePick("")
+        everySuspend { fileHandler.readSiblingText(any(), any()) } calls
+            {
+                inspecting.complete(Unit)
+                release.await()
+            }
+
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runCurrent()
+        assertTrue(inspecting.isCompleted, "the write is parked reading the drive")
+        assertTrue(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareUpdate))
+
+        viewModel.cancelUpdate()
+        release.complete("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { fileHandler.copyToUri(any(), any()) }
+        assertFalse(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareUpdate))
+        assertNull(viewModel.bootloaderFault.value, "a cancelled write latches nothing")
+        verifySuspend { fileHandler.deleteFile(any()) }
+    }
+
+    @Test
     fun `cancelling clears the fault an earlier update read`() = runTest {
         awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
         viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
