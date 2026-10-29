@@ -407,6 +407,8 @@
     <string name="message_status_unknown">Ismeretlen</string>
     <string name="messages">Üzenetek</string>
     <string name="minimum_wake_time_seconds">Minimális ébrenléti idő</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Előbeállítások</string>
     <string name="module_settings">Modul beállítások</string>
     <string name="modules_already_unlocked">A modulok már fel vannak oldva</string>

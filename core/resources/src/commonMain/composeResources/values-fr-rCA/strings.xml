@@ -856,6 +856,13 @@
     <string name="messages">Messages</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Durée minimale de réveil</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Retour</string>
+    <string name="mirror_key_down">Bas</string>
+    <string name="mirror_key_left">Gauche</string>
+    <string name="mirror_key_ok">D'accord</string>
+    <string name="mirror_key_right">Droite</string>
+    <string name="mirror_key_up">Haut</string>
     <string name="modem_preset">Préréglages</string>
     <string name="module_settings">Réglages du module</string>
     <string name="modules_already_unlocked">Modules déjà déverrouillés</string>

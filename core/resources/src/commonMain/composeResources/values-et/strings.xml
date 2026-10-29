@@ -1053,6 +1053,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Minimaalne ärkveloleku aeg</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Tagasi</string>
+    <string name="mirror_key_ok">Olgu</string>
     <string name="modem_preset">Eelseadistused</string>
     <string name="module_settings">Mooduli sätted</string>
     <string name="modules_already_unlocked">Moodulid juba avatud</string>

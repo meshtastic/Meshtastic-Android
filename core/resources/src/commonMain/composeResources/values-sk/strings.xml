@@ -256,6 +256,7 @@
     <string name="message_input_label">Správa</string>
     <string name="message_status_queued">Vo fronte na odoslanie</string>
     <string name="messages">Správy</string>
+    <!-- MIRROR -->
     <string name="module_settings">Konfigurácia modulu</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>

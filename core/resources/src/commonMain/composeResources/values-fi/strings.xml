@@ -1083,6 +1083,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimi</string>
     <string name="minimum_wake_time_seconds">Vähimmäisherätyksen kesto</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Edellinen</string>
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Esiasetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
     <string name="modules_already_unlocked">Moduulit ovat jo käytettävissä</string>

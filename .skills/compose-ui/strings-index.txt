@@ -1297,6 +1297,8 @@ mirror_keyboard
 mirror_no_frame
 mirror_not_connected
 mirror_off
+mirror_unsupported
+mirror_unsupported_hint
 modem_preset
 module_settings
 modules_already_unlocked

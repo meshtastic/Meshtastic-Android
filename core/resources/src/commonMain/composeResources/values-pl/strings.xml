@@ -414,6 +414,13 @@
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
     <string name="message_status_unknown">Nieznany</string>
     <string name="messages">Wiadomości</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Wstecz</string>
+    <string name="mirror_key_down">W Dół</string>
+    <string name="mirror_key_left">W Lewo</string>
+    <string name="mirror_key_ok">OK</string>
+    <string name="mirror_key_right">W Prawo</string>
+    <string name="mirror_key_up">W Górę</string>
     <string name="modem_preset">Presety</string>
     <string name="module_settings">Ustawienia modułu</string>
     <!-- MQTT -->

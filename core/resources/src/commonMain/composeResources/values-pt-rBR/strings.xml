@@ -383,6 +383,9 @@
     <string name="message_status_queued">Programado para envio</string>
     <string name="message_status_unknown">Desconhecido</string>
     <string name="messages">Mensagens</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Voltar</string>
+    <string name="mirror_key_ok">Ok</string>
     <string name="module_settings">Configuração de módulos</string>
     <string name="modules_unlocked">Módulos desbloqueados</string>
     <!-- MQTT -->

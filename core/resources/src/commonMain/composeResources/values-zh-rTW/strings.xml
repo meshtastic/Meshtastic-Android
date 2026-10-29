@@ -736,6 +736,9 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="messages">訊息</string>
     <string name="min">最小</string>
     <string name="minimum_wake_time_seconds">最小喚醒時間</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">返回</string>
+    <string name="mirror_key_ok">好的</string>
     <string name="modem_preset">預設值</string>
     <string name="module_settings">模組設定</string>
     <string name="modules_already_unlocked">模組已解鎖</string>

@@ -786,6 +786,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимално време за събуждане</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_ok">Добре</string>
     <string name="modem_preset">Предварително зададени</string>
     <string name="module_settings">Конфигуриране на модулите</string>
     <string name="modules_already_unlocked">Модулите вече са отключени</string>

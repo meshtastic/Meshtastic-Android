@@ -141,6 +141,8 @@
     <string name="message">Poruka</string>
     <string name="message_delivery_status">Status isporuke poruke</string>
     <string name="message_input_label">Poruka</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">U redu</string>
     <string name="module_settings">Konfiguracija modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Odspojeno</string>

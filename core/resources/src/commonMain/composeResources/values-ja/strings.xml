@@ -938,6 +938,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
     <string name="minimum_wake_time_seconds">最小起動時間</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">戻る</string>
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">プリセット</string>
     <string name="module_settings">追加機能の設定</string>
     <string name="modules_already_unlocked">モジュールはすでにロック解除されています</string>
