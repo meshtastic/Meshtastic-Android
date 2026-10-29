@@ -265,6 +265,8 @@
     <string name="message_input_label">Mensagem</string>
     <string name="message_status_queued">Na fila de envio</string>
     <string name="messages">Mensagens</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Okay</string>
     <string name="module_settings">Configurações dos módulos</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>

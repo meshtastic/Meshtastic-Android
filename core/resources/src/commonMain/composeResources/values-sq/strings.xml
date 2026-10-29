@@ -160,6 +160,8 @@
     <string name="message_input_label">Mesazh</string>
     <string name="message_status_queued">Në radhë për dërgim</string>
     <string name="messages">訊息</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Mirë</string>
     <string name="module_settings">Konfigurimi i modulit</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">I shkëputur</string>

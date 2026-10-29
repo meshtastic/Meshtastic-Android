@@ -148,6 +148,8 @@
     <string name="message_input_label">رسالة</string>
     <string name="message_status_queued">في دور الإرسال</string>
     <string name="messages">الرسائل</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">حسنا</string>
     <string name="module_settings">إعدادات الجهاز</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>

@@ -293,6 +293,8 @@
     <string name="message_status_queued">Gönderilmek üzere sırada</string>
     <string name="message_status_unknown">Bilinmeyen</string>
     <string name="messages">Mesajlar</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Tamam</string>
     <string name="module_settings">Modül ayarları</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>

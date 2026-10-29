@@ -123,6 +123,8 @@
     <string name="message">Skilaboð</string>
     <string name="message_delivery_status">Staða sends skilaboðs</string>
     <string name="message_input_label">Skilaboð</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Í lagi</string>
     <string name="module_settings">Stillingar aukaeininga</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Aftengd</string>

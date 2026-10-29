@@ -158,6 +158,8 @@
     <string name="message_delivery_status">Žinutės pristatymo statusas</string>
     <string name="message_input_label">Žinutė</string>
     <string name="message_status_queued">Eilėje išsiuntimui</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Gerai</string>
     <string name="module_settings">Modulio konfigūracija</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Atsijungta</string>

@@ -278,6 +278,8 @@
     <string name="message_status_queued">전송 대기 열에 추가됨</string>
     <string name="message_status_unknown">알 수 없는</string>
     <string name="messages">메시지기기</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">확인</string>
     <string name="module_settings">모듈 설정</string>
     <string name="modules_unlocked">모듈 잠금해제</string>
     <!-- MQTT -->

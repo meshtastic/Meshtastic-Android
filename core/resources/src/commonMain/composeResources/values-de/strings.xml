@@ -850,6 +850,13 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimum</string>
     <string name="minimum_wake_time_seconds">Minimale Aufwachzeit</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Zurück</string>
+    <string name="mirror_key_down">Runter</string>
+    <string name="mirror_key_left">Links</string>
+    <string name="mirror_key_ok">Ok</string>
+    <string name="mirror_key_right">Rechts</string>
+    <string name="mirror_key_up">Hoch</string>
     <string name="modem_preset">Voreinstellungen</string>
     <string name="module_settings">Moduleinstellungen</string>
     <string name="modules_already_unlocked">Module sind bereits freigeschaltet</string>

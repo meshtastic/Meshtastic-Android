@@ -161,6 +161,8 @@
     <string name="message_delivery_status">Stanje poslanega sporočila</string>
     <string name="message_input_label">Sporočilo</string>
     <string name="message_status_queued">V čakalni vrsti za pošiljanje</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">V redu</string>
     <string name="module_settings">Nastavitev modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Prekinjeno</string>

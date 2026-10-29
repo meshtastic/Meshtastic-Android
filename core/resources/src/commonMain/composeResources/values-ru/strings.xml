@@ -1243,6 +1243,13 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимальное время бодрствования</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_down">Вниз</string>
+    <string name="mirror_key_left">Влево</string>
+    <string name="mirror_key_ok">Лады</string>
+    <string name="mirror_key_right">Вправо</string>
+    <string name="mirror_key_up">Вверх</string>
     <string name="modem_preset">Шаблоны</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="modules_already_unlocked">Модули уже разблокированы</string>
