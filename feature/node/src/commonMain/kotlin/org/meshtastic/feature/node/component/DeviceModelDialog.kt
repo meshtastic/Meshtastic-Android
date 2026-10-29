@@ -83,7 +83,7 @@ fun DeviceModelDialog(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val screenFrame =
         rememberMirroredScreen(viewModel, mirrorScreen && (state as? DeviceModelState.Ready)?.screen != null)
-    val imageFile = modelImageFile(deviceHardware)
+    val imageFile = deviceHardware.heroImageFile
     var chirpy by rememberSaveable { mutableStateOf(false) }
     // Once per open: a failed load clears the view model's key, so a later open retries.
     DisposableEffect(imageFile, chirpy) {
@@ -208,14 +208,6 @@ private fun rememberMirroredScreen(viewModel: DeviceModelViewModel, enabled: Boo
     }
     return frame.takeIf { enabled }
 }
-
-// SPIKE: the hardware list gives the Pocket the bare RAK4631 board's image; the flasher has its own model.
-private fun modelImageFile(deviceHardware: DeviceHardware): String? =
-    if (deviceHardware.platformioTarget == "rak_wismesh_pocket") {
-        "rak_wismesh_pocket.svg"
-    } else {
-        deviceHardware.heroImageFile
-    }
 
 /**
  * The model file's own copyright notice behind an info button, shut until tapped, as the maps carry their credit. The
