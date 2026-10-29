@@ -193,6 +193,16 @@ abstract class CommonMaintenanceVolumeTest {
         assertEquals("WisBlock-RAK4631-Board", accepted.volume.boardId)
         assertEquals(SoftDeviceVariant.S140_6_1_1, accepted.volume.softDevice)
         assertEquals("0.4.3", accepted.volume.bootloaderVersion)
+        assertEquals(null, accepted.volume.lastFault, "a healthy drive prints no Last-Fault line")
+    }
+
+    @Test
+    fun `a volume reporting a last fault carries it`() = runTest {
+        val info = rakInfo + "Last-Fault: id=0x1001 pc=0x26a1c info=0x8\r\n"
+
+        val accepted = assertIs<VolumeInspection.Accepted>(inspectMaintenanceVolume(treeUri, FakeVolume(info = info)))
+
+        assertEquals(BootloaderFault(id = 0x1001, pc = 0x26a1c, info = 0x8), accepted.volume.lastFault)
     }
 
     @Test

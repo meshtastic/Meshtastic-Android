@@ -701,6 +701,7 @@
     <string name="firmware_gate_update">Update firmware</string>
     <string name="firmware_maintenance_bootloader_available">Latest: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Installed: %1$s</string>
+    <string name="firmware_maintenance_bootloader_last_fault">Bootloader reported a fault: %1$s</string>
     <string name="firmware_maintenance_bootloader_latest_hint">Latest version: %1$s. The installed version is shown once the device restarts into update mode.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Bootloader is up to date</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Nothing to upgrade. The firmware is reinstalled next, which restarts the device.</string>

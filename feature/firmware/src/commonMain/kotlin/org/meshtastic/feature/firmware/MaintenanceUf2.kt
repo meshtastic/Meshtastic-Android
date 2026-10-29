@@ -271,6 +271,50 @@ internal fun parseUf2FactoryEraseFamily(infoUf2Text: String): Long? {
 }
 
 /**
+ * A SoftDevice or SDK fault the nRF52 bootloader recorded, from the `Last-Fault:` line of its `INFO_UF2.TXT`.
+ *
+ * For an SDK error [info] is the error code. Every field is a 32-bit word, and 0 is a valid value for each.
+ */
+data class BootloaderFault(val id: Long, val pc: Long, val info: Long) {
+    /** The line's own `id=0x.. pc=0x.. info=0x..` form, so a report can be matched against the bootloader source. */
+    override fun toString(): String =
+        "id=0x${id.toString(HEX_RADIX)} pc=0x${pc.toString(HEX_RADIX)} " + "info=0x${info.toString(HEX_RADIX)}"
+}
+
+/**
+ * Extracts the `Last-Fault: id=0x<hex> pc=0x<hex> info=0x<hex>` line the Meshtastic nRF52 Bootloader 2.6.0 onwards
+ * appends after recording a fault. `ghostfat.c` prints each word with `utoa(x, str, 16)`: lowercase and unpadded.
+ *
+ * The bootloader prints the record once and clears it, so the line is present only on the first drive session after the
+ * fault. Returns `null` when the line is absent or any of the three fields is missing or not hex.
+ */
+@Suppress("ReturnCount") // guard clauses; an unparseable line must yield null rather than a guess
+internal fun parseUf2LastFault(infoUf2Text: String): BootloaderFault? {
+    val value =
+        infoUf2Text
+            .lineSequence()
+            .firstOrNull { it.trimStart().startsWith(UF2_LAST_FAULT_PREFIX, ignoreCase = true) }
+            ?.substringAfter(':') ?: return null
+    val fields =
+        value
+            .split(' ')
+            .filter { it.contains('=') }
+            .associate { it.substringBefore('=').trim().lowercase() to it.substringAfter('=').trim() }
+
+    fun word(key: String): Long? = fields[key]
+        ?.takeIf { it.startsWith(HEX_PREFIX, ignoreCase = true) }
+        ?.drop(HEX_PREFIX.length)
+        ?.toLongOrNull(HEX_RADIX)
+        ?.takeIf { it in 0..UINT32_MAX }
+
+    return BootloaderFault(
+        id = word("id") ?: return null,
+        pc = word("pc") ?: return null,
+        info = word("info") ?: return null,
+    )
+}
+
+/**
  * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
  * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or partial
  * manifest), or when that row names an unsafe file — never a guess at a substitute image.
@@ -337,9 +381,13 @@ private const val UF2_SOFTDEVICE_PREFIX = "SoftDevice:"
 
 private const val UF2_FACTORY_ERASE_PREFIX = "Factory-Erase:"
 
+private const val UF2_LAST_FAULT_PREFIX = "Last-Fault:"
+
 private const val HEX_PREFIX = "0x"
 
 private const val HEX_RADIX = 16
+
+private const val UINT32_MAX = 0xFFFF_FFFFL
 
 /** All Meshtastic nRF52840 boards run the S140 SoftDevice; anything else is out of scope and refuses. */
 private const val SUPPORTED_SOFTDEVICE_ID = "S140"
