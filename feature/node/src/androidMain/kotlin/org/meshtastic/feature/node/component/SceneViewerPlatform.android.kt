@@ -49,6 +49,8 @@ import org.meshtastic.feature.node.model.GlbBounds
 import java.nio.ByteBuffer
 import io.github.sceneview.node.ImageNode as ImageNodeImpl
 
+internal actual val deviceModelDrawsScreen: Boolean = true
+
 /**
  * SceneView directly rather than the multiplatform SceneViewer, whose Android HDR path swaps out and frees its
  * placeholder environment while the scene still renders it, a native crash. The probe loads before the scene exists, so

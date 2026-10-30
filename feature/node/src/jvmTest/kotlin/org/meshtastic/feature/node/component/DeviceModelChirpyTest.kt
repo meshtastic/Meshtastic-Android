@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.DeviceModelRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -51,11 +52,14 @@ class DeviceModelChirpyTest {
         adminController = FakeRadioController(),
         nodeRepository = FakeNodeRepository(),
         radioConfigRepository = FakeRadioConfigRepository(),
+        dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
     )
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+        Dispatchers.setMain(testDispatcher)
     }
 
     @AfterTest

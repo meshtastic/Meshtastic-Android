@@ -33,3 +33,5 @@ internal actual fun DeviceModelScene(
 ) {
     if (visible) SceneViewerModelScene(glb, bounds, onError, modifier)
 }
+
+internal actual val deviceModelDrawsScreen: Boolean = false

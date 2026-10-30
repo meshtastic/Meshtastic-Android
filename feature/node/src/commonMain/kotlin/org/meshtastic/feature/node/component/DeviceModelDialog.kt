@@ -82,7 +82,10 @@ fun DeviceModelDialog(
     val viewModel = koinViewModel<DeviceModelViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val screenFrame =
-        rememberMirroredScreen(viewModel, mirrorScreen && (state as? DeviceModelState.Ready)?.screen != null)
+        rememberMirroredScreen(
+            viewModel,
+            mirrorScreen && deviceModelDrawsScreen && (state as? DeviceModelState.Ready)?.screen != null,
+        )
     val imageFile = deviceHardware.heroImageFile
     var chirpy by rememberSaveable { mutableStateOf(false) }
     // Once per open: a failed load clears the view model's key, so a later open retries.

@@ -21,6 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.DeviceModelRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -53,9 +54,11 @@ class DeviceModelViewModelMirrorTest {
             override suspend fun getModel(imageFile: String): ByteArray? = null
         }
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+        Dispatchers.setMain(testDispatcher)
     }
 
     @AfterTest
@@ -69,6 +72,7 @@ class DeviceModelViewModelMirrorTest {
         adminController = radioController,
         nodeRepository = nodeRepository,
         radioConfigRepository = radioConfigRepository,
+        dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
     )
 
     private fun ourNode(display: DisplayInfo?) =
@@ -100,16 +104,27 @@ class DeviceModelViewModelMirrorTest {
     }
 
     @Test
-    fun `display info arriving after the handshake unlocks the mirror`() {
+    fun `display info arriving after the handshake arms a pending mirror`() {
         nodeRepository.setOurNode(ourNode(display = null))
         val viewModel = viewModel()
         viewModel.setMirror(true)
         assertTrue(radioController.displayMirrorCalls.isEmpty())
 
         nodeRepository.setOurNode(ourNode(display = DisplayInfo.Builder().build()))
-        viewModel.setMirror(true)
 
         assertEquals(listOf(true), radioController.displayMirrorCalls)
+    }
+
+    @Test
+    fun `display info arriving after the dialog closed arms nothing`() {
+        nodeRepository.setOurNode(ourNode(display = null))
+        val viewModel = viewModel()
+        viewModel.setMirror(true)
+        viewModel.setMirror(false)
+
+        nodeRepository.setOurNode(ourNode(display = DisplayInfo.Builder().build()))
+
+        assertTrue(radioController.displayMirrorCalls.isEmpty())
     }
 
     @Test

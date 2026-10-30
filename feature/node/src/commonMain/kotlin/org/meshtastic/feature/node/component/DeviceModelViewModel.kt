@@ -28,7 +28,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.DeviceModelRepository
 import org.meshtastic.core.repository.DisplayMirrorManager
@@ -67,6 +69,7 @@ class DeviceModelViewModel(
     private val adminController: AdminController,
     nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
+    private val dispatchers: CoroutineDispatchers,
 ) : ViewModel() {
     private val _state = MutableStateFlow<DeviceModelState>(DeviceModelState.Loading)
     val state: StateFlow<DeviceModelState> = _state.asStateFlow()
@@ -90,9 +93,15 @@ class DeviceModelViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private var mirroring = false
+    private var wanted = false
     private var pendingDisarm: Job? = null
     private var loading: Job? = null
     private var loadedImageFile: String? = null
+
+    init {
+        // The dialog can open before the handshake has delivered the display; arm once it does.
+        viewModelScope.launch { supported.collect { if (it) arm() } }
+    }
 
     fun load(imageFile: String) = loadModel(imageFile) { repository.getModel(imageFile) }
 
@@ -114,10 +123,23 @@ class DeviceModelViewModel(
         _state.value = DeviceModelState.Loading
         loading = viewModelScope.launch {
             val glb = fetch()
-            val bounds = glb?.let(GlbBounds::parse)
+            // Parsing walks the whole file, screen detection every triangle of it: off the main thread.
+            val parsed = glb?.let { bytes ->
+                withContext(dispatchers.default) {
+                    GlbBounds.parse(bytes)?.let { bounds ->
+                        DeviceModelState.Ready(
+                            key,
+                            bytes,
+                            bounds,
+                            GlbBounds.copyright(bytes),
+                            GlbBounds.screen(bytes),
+                        )
+                    }
+                }
+            }
             _state.value =
-                if (glb != null && bounds != null) {
-                    DeviceModelState.Ready(key, glb, bounds, GlbBounds.copyright(glb), GlbBounds.screen(glb))
+                if (parsed != null) {
+                    parsed
                 } else {
                     // Lets the next open retry rather than replay the failure.
                     loadedImageFile = null
@@ -135,6 +157,7 @@ class DeviceModelViewModel(
     }
 
     fun setMirror(enabled: Boolean) {
+        wanted = enabled
         if (enabled) {
             pendingDisarm?.cancel()
             pendingDisarm = null
@@ -150,7 +173,7 @@ class DeviceModelViewModel(
     }
 
     private fun arm() {
-        if (mirroring || managed.value || !supported.value) return
+        if (!wanted || mirroring || managed.value || !supported.value) return
         displayMirrorManager.reset()
         adminController.setDisplayMirror(true)
         mirroring = true

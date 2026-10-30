@@ -49,6 +49,9 @@ internal fun orbitEyeOffset(bounds: GlbBounds): FloatArray {
     return floatArrayOf(horizontal * sin(azimuth), distance * sin(elevation), horizontal * cos(azimuth))
 }
 
+/** Whether this platform's [DeviceModelScene] draws [MirrorFrame]s on the glass; where it does not, nothing arms. */
+internal expect val deviceModelDrawsScreen: Boolean
+
 /**
  * The orbitable model, lit by the studio probe over a transparent backdrop so the theme shows behind it. When both
  * [screen] and [screenFrame] are present, the frame is drawn on the model's display glass.
