@@ -1,7 +1,7 @@
 ---
 title: Sätted - moodulid & admin
 nav_order: 8
-last_updated: 2026-10-21
+last_updated: 2026-10-28
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -277,14 +277,14 @@ Remote administration changes another node's settings over the mesh. The target 
 
 **Settings → Administration** holds one-shot actions, each behind a confirmation dialog:
 
-| Action               | What it does                                                                                                                                                     |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Määra aeg            | Sends your phone's clock to the node                                                                                                                             |
-| Taaskäivita          | Restarts the node                                                                                                                                                |
-| Reboot into DFU mode | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. Shown only for nRF52 nodes |
-| Lülita välja         | Powers the node down                                                                                                                                             |
-| Tehasesätted         | Returns every setting to its factory default                                                                                                                     |
-| NodeDB lähtestamine  | Clears the node database. This dialog carries a **Preserve Favorites?** switch                                                                   |
+| Action               | What it does                                                                                                                                                                                                                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Määra aeg            | Sends your phone's clock to the node                                                                                                                                                                                                                                                                                    |
+| Taaskäivita          | Restarts the node                                                                                                                                                                                                                                                                                                       |
+| Reboot into DFU mode | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. On bootloader 2.6.0 and later it boots the installed firmware after 6 minutes with no update activity. Shown only for nRF52 nodes |
+| Lülita välja         | Powers the node down                                                                                                                                                                                                                                                                                                    |
+| Tehasesätted         | Returns every setting to its factory default                                                                                                                                                                                                                                                                            |
+| NodeDB lähtestamine  | Clears the node database. This dialog carries a **Preserve Favorites?** switch                                                                                                                                                                                                                          |
 
 > ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
