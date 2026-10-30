@@ -213,7 +213,7 @@ private fun NodeDetailScaffold(
     }
     uiState.metricsState.deviceHardware
         ?.takeIf { deviceModelOpen }
-        ?.let { DeviceModelDialog(it, onDismiss = { deviceModelOpen = false }) }
+        ?.let { DeviceModelDialog(it, onDismiss = { deviceModelOpen = false }, mirrorScreen = isLocalNode) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

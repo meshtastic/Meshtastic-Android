@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.heroImageFile
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.close
@@ -72,9 +73,19 @@ import org.meshtastic.core.ui.util.LocalDeviceModelArViewer
 
 /** The hardware's real-size 3D model, orbitable, over the whole window; the illustration when it cannot be shown. */
 @Composable
-fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+fun DeviceModelDialog(
+    deviceHardware: DeviceHardware,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    mirrorScreen: Boolean = false,
+) {
     val viewModel = koinViewModel<DeviceModelViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val screenFrame =
+        rememberMirroredScreen(
+            viewModel,
+            mirrorScreen && deviceModelDrawsScreen && (state as? DeviceModelState.Ready)?.screen != null,
+        )
     val imageFile = deviceHardware.heroImageFile
     var chirpy by rememberSaveable { mutableStateOf(false) }
     // Once per open: a failed load clears the view model's key, so a later open retries.
@@ -99,13 +110,24 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
                 deviceHardware = deviceHardware,
                 title = title,
                 state = state,
+                screenFrame = screenFrame,
                 onError = viewModel::markFailed,
                 onDismiss = onDismiss,
                 onOpenAr = if (arViewer != null) ({ inAr = true }) else null,
                 onToggleChirpy = { chirpy = !chirpy },
                 visible = arModel == null,
             )
-            arModel?.let { arViewer?.Content(it.glb, title, it.copyright) { inAr = false } }
+            arModel?.let {
+                arViewer?.Content(
+                    glb = it.glb,
+                    title = title,
+                    notice = it.copyright,
+                    onDismiss = { inAr = false },
+                    screenMin = it.screen?.min,
+                    screenMax = it.screen?.max,
+                    screenFrame = screenFrame,
+                )
+            }
         }
     }
 }
@@ -115,6 +137,7 @@ private fun OrbitContent(
     deviceHardware: DeviceHardware,
     title: String,
     state: DeviceModelState,
+    screenFrame: MirrorFrame?,
     onError: () -> Unit,
     onDismiss: () -> Unit,
     onOpenAr: (() -> Unit)?,
@@ -165,6 +188,8 @@ private fun OrbitContent(
                                 onError = onError,
                                 modifier = Modifier.fillMaxSize(),
                                 visible = visible,
+                                screen = current.screen,
+                                screenFrame = screenFrame,
                             )
                             current.copyright?.let {
                                 ModelNotice(it, Modifier.align(Alignment.BottomEnd).padding(16.dp))
@@ -174,6 +199,17 @@ private fun OrbitContent(
             }
         }
     }
+}
+
+/** Arms the connected device's screen mirror while [enabled]; null when it is off. */
+@Composable
+private fun rememberMirroredScreen(viewModel: DeviceModelViewModel, enabled: Boolean): MirrorFrame? {
+    val frame by viewModel.screenFrame.collectAsStateWithLifecycle()
+    DisposableEffect(enabled) {
+        viewModel.setMirror(enabled)
+        onDispose { viewModel.setMirror(false) }
+    }
+    return frame.takeIf { enabled }
 }
 
 /**

@@ -16,29 +16,40 @@
  */
 package org.meshtastic.feature.node.component
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.google.android.filament.Engine
+import io.github.sceneview.SceneScope
 import io.github.sceneview.SceneView
 import io.github.sceneview.createDefaultCameraManipulator
 import io.github.sceneview.environment.Environment
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.EnvironmentLoader
 import io.github.sceneview.loaders.ModelLoader
+import io.github.sceneview.math.Direction
 import io.github.sceneview.math.Position
+import io.github.sceneview.math.Size
 import io.github.sceneview.model.model
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.repository.MirrorFormat
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.feature.node.model.GlbBounds
 import java.nio.ByteBuffer
+import io.github.sceneview.node.ImageNode as ImageNodeImpl
+
+internal actual val deviceModelDrawsScreen: Boolean = true
 
 /**
  * SceneView directly rather than the multiplatform SceneViewer, whose Android HDR path swaps out and frees its
@@ -52,6 +63,8 @@ internal actual fun DeviceModelScene(
     onError: () -> Unit,
     modifier: Modifier,
     visible: Boolean,
+    screen: GlbBounds?,
+    screenFrame: MirrorFrame?,
 ) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
@@ -74,7 +87,18 @@ internal actual fun DeviceModelScene(
     // Hidden, only the scene goes: the engine, its compiled materials, the probe and the camera stay for when it shows
     // again.
     if (visible && loadedEnvironment != null) {
-        OrbitScene(glb, engine, modelLoader, environmentLoader, loadedEnvironment, cameraManipulator, onError, modifier)
+        OrbitScene(
+            glb,
+            engine,
+            modelLoader,
+            environmentLoader,
+            loadedEnvironment,
+            cameraManipulator,
+            onError,
+            modifier,
+        ) {
+            if (screen != null && screenFrame != null) DeviceScreenNode(screen.min, screen.max, screenFrame)
+        }
     }
 }
 
@@ -92,6 +116,7 @@ private fun OrbitScene(
     cameraManipulator: CameraGestureDetector.CameraManipulator,
     onError: () -> Unit,
     modifier: Modifier = Modifier,
+    overlay: @Composable SceneScope.() -> Unit = {},
 ) {
     val currentOnError by rememberUpdatedState(onError)
     val instance =
@@ -111,7 +136,56 @@ private fun OrbitScene(
         cameraManipulator = cameraManipulator,
     ) {
         ModelNode(modelInstance = instance)
+        overlay()
     }
+}
+
+/**
+ * The frame on a plane just proud of the display glass, facing +Z like the flasher's models. The node is created once
+ * and fed new bitmaps: replacing it would make SceneView re-center the whole scene on every frame.
+ */
+@Composable
+fun SceneScope.DeviceScreenNode(screenMin: FloatArray, screenMax: FloatArray, frame: MirrorFrame) {
+    val screen = GlbBounds(screenMin, screenMax)
+    val bitmap = remember(frame) { frame.toBitmap() } ?: return
+    var node by remember { mutableStateOf<ImageNodeImpl?>(null) }
+    val first = remember { bitmap }
+    ImageNode(
+        bitmap = first,
+        size = Size(screen.max[0] - screen.min[0], screen.max[1] - screen.min[1]),
+        center = Position(screen.center[0], screen.center[1], screen.max[2] + SCREEN_LIFT_METERS),
+        normal = Direction(0f, 0f, 1f),
+        apply = { node = this },
+    )
+    // A swapped texture is invisible to SceneView's on-demand loop until something asks for a frame.
+    SideEffect {
+        node
+            ?.takeIf { it.bitmap !== bitmap }
+            ?.let {
+                it.bitmap = bitmap
+                it.requestRender()
+            }
+    }
+}
+
+private const val SCREEN_LIFT_METERS = 0.0001f
+private const val PIXELS_PER_PAGE = 8
+private const val PIXEL_ON = 0xFFE8F4FF.toInt()
+private const val PIXEL_OFF = 0xFF05070A.toInt()
+
+/** MONO_VLSB only: byte `(y / 8) * width + x`, bit `y % 8`. */
+private fun MirrorFrame.toBitmap(): Bitmap? {
+    if (format != MirrorFormat.MONO_VLSB || pixels.size < (height + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE * width) {
+        return null
+    }
+    val argb =
+        IntArray(width * height) { i ->
+            val x = i % width
+            val y = i / width
+            val set = pixels[(y / PIXELS_PER_PAGE) * width + x].toInt() and (1 shl (y % PIXELS_PER_PAGE)) != 0
+            if (set) PIXEL_ON else PIXEL_OFF
+        }
+    return Bitmap.createBitmap(argb, width, height, Bitmap.Config.ARGB_8888)
 }
 
 private fun orbitEye(bounds: GlbBounds): Position {

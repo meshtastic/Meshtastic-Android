@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.feature.node.model.GlbBounds
 
 @Composable
@@ -27,6 +28,10 @@ internal actual fun DeviceModelScene(
     onError: () -> Unit,
     modifier: Modifier,
     visible: Boolean,
+    screen: GlbBounds?,
+    screenFrame: MirrorFrame?,
 ) {
     if (visible) SceneViewerModelScene(glb, bounds, onError, modifier)
 }
+
+internal actual val deviceModelDrawsScreen: Boolean = false

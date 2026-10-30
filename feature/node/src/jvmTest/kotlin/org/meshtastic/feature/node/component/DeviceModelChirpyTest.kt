@@ -23,7 +23,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.DeviceModelRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioController
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -42,9 +46,20 @@ class DeviceModelChirpyTest {
             override suspend fun getModel(imageFile: String) = error("Chirpy must not be fetched")
         }
 
+    private fun viewModel() = DeviceModelViewModel(
+        repository = noNetwork,
+        displayMirrorManager = FakeDisplayMirrorManager(),
+        adminController = FakeRadioController(),
+        nodeRepository = FakeNodeRepository(),
+        radioConfigRepository = FakeRadioConfigRepository(),
+        dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+    )
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+        Dispatchers.setMain(testDispatcher)
     }
 
     @AfterTest
@@ -54,7 +69,7 @@ class DeviceModelChirpyTest {
 
     @Test
     fun `the bundled Chirpy loads as a framable model with his own notice`() = runTest {
-        val viewModel = DeviceModelViewModel(noNetwork)
+        val viewModel = viewModel()
 
         viewModel.showChirpy()
 
@@ -65,7 +80,7 @@ class DeviceModelChirpyTest {
 
     @Test
     fun `Chirpy comes back after the viewer fell back to the illustration`() = runTest {
-        val viewModel = DeviceModelViewModel(noNetwork)
+        val viewModel = viewModel()
         viewModel.showChirpy()
         viewModel.state.first { it is DeviceModelState.Ready }
 

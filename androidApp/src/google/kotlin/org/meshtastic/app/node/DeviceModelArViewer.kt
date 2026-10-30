@@ -112,6 +112,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.device_model_ar_camera_unavailable
@@ -131,6 +132,7 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.util.DeviceModelArViewer
+import org.meshtastic.feature.node.component.DeviceScreenNode
 import org.meshtastic.feature.node.model.GlbBounds
 import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
@@ -155,8 +157,15 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
     }
 
     @Composable
-    override fun Content(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit) =
-        DeviceModelAr(glb, title, notice, onDismiss)
+    override fun Content(
+        glb: ByteArray,
+        title: String,
+        notice: String?,
+        onDismiss: () -> Unit,
+        screenMin: FloatArray?,
+        screenMax: FloatArray?,
+        screenFrame: MirrorFrame?,
+    ) = DeviceModelAr(glb, title, notice, onDismiss, ArScreen(screenMin, screenMax, screenFrame))
 }
 
 /**
@@ -164,7 +173,7 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
  * is scaled. A later tap moves it rather than adding another, and a twist turns it.
  */
 @Composable
-private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit) {
+private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit, screen: ArScreen) {
     BackHandler(onBack = onDismiss)
     LockOrientationWhileShown()
     // Asked here rather than left to the AR view, whose own request never appears from inside a dialog.
@@ -186,7 +195,7 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        if (cameraGranted) DeviceModelArScene(glb, onCapture = rememberArCapture(title))
+        if (cameraGranted) DeviceModelArScene(glb, screen, onCapture = rememberArCapture(title))
         ArHeader(title, notice, onDismiss)
     }
 }
@@ -197,7 +206,7 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
  */
 @Composable
 @Suppress("LongMethod")
-private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
+private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, onCapture: (() -> Unit)?) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
@@ -293,7 +302,14 @@ private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
                                 modelInstance = instance,
                                 position = Position(offset[0], offset[1], offset[2]),
                                 rotation = Rotation(x = pose.pitchDegrees, z = pose.rollDegrees),
-                            )
+                            ) {
+                                val glassMin = screen.glassMin
+                                val glassMax = screen.glassMax
+                                val frame = screen.frame
+                                if (glassMin != null && glassMax != null && frame != null) {
+                                    DeviceScreenNode(glassMin, glassMax, frame)
+                                }
+                            }
                         }
                     }
                 }
@@ -492,3 +508,6 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> null
 }
+
+/** The display glass in model coordinates and the live frame to draw on it; all null when there is nothing to show. */
+private class ArScreen(val glassMin: FloatArray?, val glassMax: FloatArray?, val frame: MirrorFrame?)
