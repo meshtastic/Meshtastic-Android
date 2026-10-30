@@ -1,7 +1,7 @@
 ---
 title: Ажурирања фирмвера
 nav_order: 13
-last_updated: 2026-10-21
+last_updated: 2026-10-28
 description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -81,7 +81,7 @@ A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to 
 
 ### Factory Erase and Bootloader Upgrade
 
-On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it. The upgrade installs the [Meshtastic nRF52 Bootloader](https://github.com/meshtastic/nRF52_Bootloader) release named on the card.
 
 Both are Android-only. They depend on Android's update-drive checks, so the desktop app does not show them — use the [Web Flasher](https://flasher.meshtastic.org) there instead.
 
@@ -101,6 +101,17 @@ Once the drive is readable, how an nRF52 device is erased depends on its bootloa
 - **Older bootloaders need a Bluetooth-stack-specific erase.** On these the app writes a small erase program matched to your device's Bluetooth stack, then starts it over the serial port. If the drive reports a different stack than expected, the app refuses rather than guessing.
 
 The app picks the path from what the drive reports; you don't choose it.
+
+### What the nRF52 bootloader does
+
+Version 2.6.0 and later of the Meshtastic nRF52 Bootloader does the following while the update drive is up.
+
+- **Backup.** `CURRENT.UF2` on the drive is a copy of the installed firmware. Copy it off to back up, or back onto the drive to reinstall.
+- **Screen.** On a node with a screen, the title reads BOOTLOADER, ERASE, WRONG FILE or NO FIRMWARE, and a progress bar shows the copy.
+- **Wrong file.** A firmware file the board cannot take is refused as WRONG FILE.
+- **Interrupted copy.** If the cable is pulled mid-copy, the node has no firmware. Plug it in again and copy the firmware once more.
+- **Idle.** After 6 minutes with no update activity, a node with firmware boots it. A node with no firmware keeps waiting.
+- **Single-button boards.** The T1000-E and the MeshTracker X1 have no reset button. Hold the button for about 3 seconds while the node powers on to enter update mode. Eject the drive from the computer to leave without copying a file. The app's USB update needs no button.
 
 ### Other Flashing Options
 
@@ -161,6 +172,11 @@ The message **Verification timed out. Device did not reconnect in time.** means 
 A Bluetooth update that stops partway can leave the node waiting in bootloader mode. While the app is disconnected, the **Connect** tab then shows a **Finish updating** card naming the node. Tap **Resume firmware update** and keep the node nearby so the app can re-flash it, or dismiss the card if the update can't be finished from the phone.
 
 If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the node to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+On the Meshtastic nRF52 Bootloader 2.6.0 and later, a dropped Bluetooth update can start over, and where the node waits depends on its power:
+
+- On battery, it waits for the Bluetooth update, so **Resume firmware update** can reach it.
+- Plugged into a computer, it shows NO FIRMWARE and comes up as its update drive, not over Bluetooth. Copy your board's firmware `.uf2` onto the drive, or use the [Web Flasher](https://flasher.meshtastic.org). Unplug it to resume over Bluetooth. The app's USB update cannot start here.
 
 Otherwise, if your node fails to boot:
 
