@@ -28,13 +28,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -374,7 +377,40 @@ class ScannerViewModelTest {
         viewModel.dismissRecovery()
         testScheduler.advanceUntilIdle()
 
-        verifySuspend { harness.firmwareRecoveryDataSource.clear() }
+        verifySuspend { harness.firmwareRecoveryDataSource.dismiss() }
+    }
+
+    @Test
+    fun `a bootloader at the last BLE node MAC plus one is offered for recovery`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:02")
+
+        verifySuspend { harness.firmwareRecoveryDataSource.promoteLastBleNode() }
+        harness.clearViewModel(viewModel)
+    }
+
+    @Test
+    fun `a DFU advert at another address is not offered for recovery`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09")
+
+        verifySuspend(mode = VerifyMode.exactly(0)) { harness.firmwareRecoveryDataSource.promoteLastBleNode() }
+        harness.clearViewModel(viewModel)
+    }
+
+    private fun buildWithStrandedScan(advertisedAt: String): ScannerViewModel {
+        every { harness.firmwareRecoveryDataSource.lastBleNode } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "xAA:BB:CC:00:00:01",
+                    hwModel = 9,
+                    pioEnv = "rak4631",
+                    releaseType = "STABLE",
+                    deviceName = "Base",
+                ),
+            )
+        every { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) } returns
+            flowOf(FakeBleDevice(address = advertisedAt, name = "4631_DFU"))
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        return harness.buildBase()
     }
 
     @Test

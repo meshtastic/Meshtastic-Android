@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -43,6 +44,7 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
+import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -73,6 +75,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
+
+internal val STRANDED_BOOTLOADER_SCAN_TIMEOUT = 15.seconds
 
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
@@ -247,10 +251,9 @@ open class ScannerViewModel(
      * `NsdManager.discoverServices()` is never triggered. Android 15+ shows a system consent dialog the first time
      * `resolvedList` is subscribed, so the gate ensures NSD only runs when the user explicitly requests it.
      */
-    private val gatedResolvedList =
-        _isNetworkScanning.flatMapLatest { scanning ->
-            if (scanning) networkRepository.resolvedList else flowOf(emptyList())
-        }
+    private val gatedResolvedList = _isNetworkScanning.flatMapLatest { scanning ->
+        if (scanning) networkRepository.resolvedList else flowOf(emptyList())
+    }
 
     private val discoveredDevicesFlow: StateFlow<DiscoveredDevices> =
         combine(showMockTransport, showReplayTransport, ::Pair)
@@ -271,6 +274,11 @@ open class ScannerViewModel(
                     clearRecoveryIfConnectedDeviceReturned()
                 }
             }
+            .launchIn(viewModelScope)
+        serviceRepository.connectionState
+            .map { it is ConnectionState.Disconnected }
+            .distinctUntilChanged()
+            .onEach { disconnected -> if (disconnected) lookForStrandedBootloader() }
             .launchIn(viewModelScope)
         Logger.d { "ScannerViewModel created" }
     }
@@ -588,17 +596,16 @@ open class ScannerViewModel(
         val generation = ++scanStartFailureCooldownGeneration
         scanStartFailureCooldownActive.value = true
         scanStartFailureCooldownJob?.cancel()
-        scanStartFailureCooldownJob =
-            viewModelScope.launch {
-                try {
-                    delay(cooldown)
-                } finally {
-                    if (scanStartFailureCooldownGeneration == generation) {
-                        scanStartFailureCooldownActive.value = false
-                        scanStartFailureCooldownJob = null
-                    }
+        scanStartFailureCooldownJob = viewModelScope.launch {
+            try {
+                delay(cooldown)
+            } finally {
+                if (scanStartFailureCooldownGeneration == generation) {
+                    scanStartFailureCooldownActive.value = false
+                    scanStartFailureCooldownJob = null
                 }
             }
+        }
     }
 
     /**
@@ -786,7 +793,35 @@ open class ScannerViewModel(
      * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
      */
     fun dismissRecovery() {
-        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.clear() }
+        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.dismiss() }
+    }
+
+    /**
+     * Looks once for the last BLE node's bootloader, which advertises the legacy DFU service at the node's MAC + 1
+     * while it waits for a BLE OTA, and offers recovery when it is there. This covers a node stranded by a flash this
+     * app did not start, which leaves no pending record. The address is matched here rather than passed to the scanner:
+     * an address filter would skip the service check, and an ESP32 in OTA mode also advertises at MAC + 1.
+     */
+    private fun lookForStrandedBootloader() {
+        val scanner = bleScanner ?: return
+        if (!bluetoothSupported) return
+        safeLaunch(tag = "strandedBootloaderScan") {
+            if (firmwareRecoveryDataSource.pending.first() != null) return@safeLaunch
+            val node = firmwareRecoveryDataSource.lastBleNode.first() ?: return@safeLaunch
+            val bootloaderAddress = NordicDfu.bootloaderAddress(node.fullAddress.drop(1))
+            val seen = safeCatchingAll {
+                scanner
+                    .scan(timeout = STRANDED_BOOTLOADER_SCAN_TIMEOUT, serviceUuid = NordicDfu.LEGACY_SERVICE_UUID)
+                    .flowOn(dispatchers.io)
+                    .firstOrNull { it.address.equals(bootloaderAddress, ignoreCase = true) }
+            }
+                .onFailure { Logger.d { "Stranded-bootloader scan did not run (${it::class.simpleName})" } }
+                .getOrNull()
+            if (seen != null) {
+                Logger.i { "Last BLE node's bootloader is advertising; offering recovery" }
+                firmwareRecoveryDataSource.promoteLastBleNode()
+            }
+        }
     }
 
     /**

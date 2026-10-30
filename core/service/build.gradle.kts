@@ -28,6 +28,7 @@ kotlin {
             api(projects.core.repository)
             implementation(projects.core.common)
             implementation(projects.core.database)
+            implementation(projects.core.datastore)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
