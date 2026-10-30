@@ -54,6 +54,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvi
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
@@ -314,6 +315,11 @@ private fun DeviceMetricsChart(
         }
 
         val percentRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0) }
+        val voltageRangeProvider = remember {
+            object : CartesianLayerRangeProvider {
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double = minOf(3.0, minY)
+            }
+        }
         val leftLayer =
             rememberConditionalLayer(
                 hasData = leftLayerSeriesStyles.isNotEmpty(),
@@ -328,6 +334,7 @@ private fun DeviceMetricsChart(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(lineColor = voltageColor)),
                 verticalAxisPosition = Axis.Position.Vertical.End,
+                rangeProvider = voltageRangeProvider,
             )
 
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
