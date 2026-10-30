@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-10-21
+last_updated: 2026-10-28
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -282,7 +282,7 @@ Remote administration changes another node's settings over the mesh. The target 
 |---|---|
 | Set time | Sends your phone's clock to the node |
 | Reboot | Restarts the node |
-| Reboot into DFU mode | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. Shown only for nRF52 nodes |
+| Reboot into DFU mode | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. On bootloader 2.6.0 and later it boots the installed firmware after 6 minutes with no update activity. Shown only for nRF52 nodes |
 | Shutdown | Powers the node down |
 | Factory reset | Returns every setting to its factory default |
 | NodeDB reset | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
