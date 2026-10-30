@@ -34,12 +34,16 @@ reviews:
     ignore_usernames:
       - renovate
       - renovate[bot]
-      # Workflow-authored PRs (changelog updates, scheduled firmware/hardware/
-      # translation bumps) — machine-generated content, nothing to review.
       - github-actions
       - github-actions[bot]
+    # Workflow-authored PRs open under a maintainer's PAT (`.github/actions/bot-pr`),
+    # so only their titles identify them.
     ignore_title_keywords:
       - "chore: Scheduled updates"
+      - "docs: update CHANGELOG.md"
+      - "docs: release CHANGELOG.md for v"
+      - "chore(store): refresh the committed screenshots"
+      - "chore: bump VERSION_NAME_BASE"
   # Stop reviewing once a PR is closed.
   abort_on_close: true
 
