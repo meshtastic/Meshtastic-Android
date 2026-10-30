@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -52,11 +53,11 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 private const val SIZE_ICON = 16
 
-@Suppress("MagicNumber", "LongMethod")
+@Suppress("MagicNumber")
 @Composable
 fun MaterialBatteryInfo(
-    modifier: Modifier = Modifier,
     level: Int?,
+    modifier: Modifier = Modifier,
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     unknownLabel: String = stringResource(Res.string.unknown),
@@ -65,6 +66,43 @@ fun MaterialBatteryInfo(
 
     Row(
         modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        Percents(level, contentColor, unknownLabel, levelString)
+        Volts(voltage, contentColor)
+    }
+}
+
+@Suppress("MagicNumber")
+@Composable
+fun MaterialBatteryCompactInfo(
+    level: Int?,
+    modifier: Modifier = Modifier,
+    voltage: Float? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    unknownLabel: String = stringResource(Res.string.unknown),
+) {
+    val levelString = level?.let { MetricFormatter.percent(it) } ?: unknownLabel
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+            Percents(level, contentColor, unknownLabel, levelString)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+            Volts(voltage, contentColor)
+        }
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun Percents(level: Int?, contentColor: Color, unknownLabel: String, levelString: String) {
+    Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
@@ -86,7 +124,11 @@ fun MaterialBatteryInfo(
             Text(
                 text = stringResource(Res.string.external_power_short),
                 color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                style =
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                ),
             )
         } else {
             // Map battery percentage to color
@@ -125,19 +167,28 @@ fun MaterialBatteryInfo(
             Text(
                 text = levelString,
                 color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                style =
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                ),
             )
         }
-        voltage
-            ?.takeIf { it > 0 }
-            ?.let {
-                Text(
-                    text = MetricFormatter.voltage(it),
-                    color = contentColor.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                )
-            }
     }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun Volts(voltage: Float?, contentColor: Color) {
+    voltage
+        ?.takeIf { it > 0 }
+        ?.let {
+            Text(
+                text = MetricFormatter.voltage(it),
+                color = contentColor.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+            )
+        }
 }
 
 class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
@@ -157,6 +208,16 @@ class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, 
 
 @PreviewLightDark
 @Composable
-fun MaterialBatteryInfoPreview(@PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>) {
+private fun MaterialBatteryInfoPreview(
+    @PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>,
+) {
     AppTheme { MaterialBatteryInfo(level = info.first, voltage = info.second) }
+}
+
+@PreviewLightDark
+@Composable
+private fun MaterialBatteryCompactInfoPreview(
+    @PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>,
+) {
+    AppTheme { MaterialBatteryCompactInfo(level = info.first, voltage = info.second) }
 }
