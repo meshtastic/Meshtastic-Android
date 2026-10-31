@@ -286,6 +286,7 @@ class MeshConnectionManagerImplTest {
         verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
+        verify { adminRequestRegistry.clearAll() }
         assertEquals(true, lockdownCoordinator.disconnectCalled)
     }
 

@@ -27,6 +27,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProcessRadioResponseUseCaseTest {
@@ -332,10 +333,10 @@ class ProcessRadioResponseUseCaseTest {
     )
 
     @Test
-    fun `remote admin response without pki or admin channel is rejected`() {
+    fun `remote admin response without pki or admin channel is dropped`() {
         val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false))
 
-        assertIs<RadioResponseResult.Error>(result)
+        assertNull(result)
     }
 
     @Test
@@ -353,10 +354,10 @@ class ProcessRadioResponseUseCaseTest {
     }
 
     @Test
-    fun `remote admin response on another channel is rejected even when an admin channel exists`() {
+    fun `remote admin response on another channel is dropped even when an admin channel exists`() {
         val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false, channel = 0), adminChannelIndex = 2)
 
-        assertIs<RadioResponseResult.Error>(result)
+        assertNull(result)
     }
 
     @Test
