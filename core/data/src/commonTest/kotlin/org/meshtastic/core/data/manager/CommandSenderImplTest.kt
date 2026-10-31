@@ -73,6 +73,7 @@ class CommandSenderImplTest {
     private val tracerouteHandler = mock<TracerouteHandler>(MockMode.autofill)
     private val neighborInfoHandler = mock<NeighborInfoHandler>(MockMode.autofill)
     private val sessionManager = mock<SessionManager>(MockMode.autofill)
+    private val adminRequestRegistry = AdminRequestRegistryImpl()
 
     private lateinit var commandSender: CommandSenderImpl
 
@@ -92,6 +93,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
+                adminRequestRegistry = adminRequestRegistry,
                 scope = TestScope().asServiceScope(),
             )
     }
@@ -141,6 +143,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
+                adminRequestRegistry = adminRequestRegistry,
                 scope = TestScope().asServiceScope(),
             )
         assertEquals(0, commandSender.resolveNodeNum(NodeAddress.Local))
@@ -240,6 +243,31 @@ class CommandSenderImplTest {
         }
 
         assertNotEquals(0, packets.single().id)
+    }
+
+    @Test
+    fun sendAdmin_registersTheSentPacketIdAsOutstanding() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
+
+        commandSender.sendAdmin(DEST_NODE, requestId = 0, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
+
+        assertTrue(adminRequestRegistry.consume(packets.single().id))
+        assertFalse(adminRequestRegistry.consume(packets.single().id))
+    }
+
+    @Test
+    fun sendAdminImmediate_registersTheSentPacketIdAsOutstanding() {
+        val packets = mutableListOf<ToRadio>()
+        every { packetHandler.sendToRadio(capture(packets)) } returns Unit
+
+        commandSender.sendAdminImmediate(DEST_NODE) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
+
+        assertTrue(adminRequestRegistry.consume(requireNotNull(packets.single().packet).id))
     }
 
     @Test
@@ -642,6 +670,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
+                adminRequestRegistry = adminRequestRegistry,
                 scope = testScope.asServiceScope(),
             )
         testScope.testScheduler.advanceUntilIdle()

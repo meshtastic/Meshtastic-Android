@@ -20,6 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -45,6 +46,7 @@ class AdminPacketHandlerImplTest {
     private val configHandler = mock<MeshConfigHandler>(MockMode.autofill)
     private val configFlowManager = mock<MeshConfigFlowManager>(MockMode.autofill)
     private val sessionManager = mock<SessionManager>(MockMode.autofill)
+    private val adminRequestRegistry = AdminRequestRegistryImpl()
 
     private lateinit var handler: AdminPacketHandlerImpl
 
@@ -59,10 +61,13 @@ class AdminPacketHandlerImplTest {
                 configHandler = lazy { configHandler },
                 configFlowManager = lazy { configFlowManager },
                 sessionManager = sessionManager,
+                adminRequestRegistry = adminRequestRegistry,
             )
     }
 
-    private fun makePacket(from: Int, adminMessage: AdminMessage): MeshPacket {
+    /** Builds a response to a request this app sent unless [requestId] names one it did not. */
+    private fun makePacket(from: Int, adminMessage: AdminMessage, requestId: Int = SENT_REQUEST_ID): MeshPacket {
+        if (requestId == SENT_REQUEST_ID) adminRequestRegistry.register(requestId)
         val payload = adminMessage.encode().toByteString()
         return MeshPacket.Builder()
             .also { wb ->
@@ -72,6 +77,7 @@ class AdminPacketHandlerImplTest {
                         .also { wb ->
                             wb.portnum = PortNum.ADMIN_APP
                             wb.payload = payload
+                            wb.request_id = requestId
                         }
                         .build()
             }
@@ -79,6 +85,61 @@ class AdminPacketHandlerImplTest {
     }
 
     private fun handle(packet: MeshPacket) = handler.handleAdminMessage(packet, myNodeNum, session)
+
+    // ---------- Request correlation ----------
+
+    @Test
+    fun `config response claiming own node without an outstanding request is ignored`() {
+        val config = Config.Builder().also { wb -> wb.security = Config.SecurityConfig.Builder().build() }.build()
+        val adminMsg =
+            AdminMessage.Builder()
+                .also { wb ->
+                    wb.get_config_response = config
+                    wb.session_passkey = ByteString.of(9, 9, 9, 9)
+                }
+                .build()
+        val packet = makePacket(myNodeNum, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
+
+        handle(packet)
+
+        verify(VerifyMode.not) { configHandler.handleDeviceConfig(any(), any()) }
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+    }
+
+    @Test
+    fun `channel response claiming own node without an outstanding request is ignored`() {
+        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_channel_response = channel }.build()
+        val packet = makePacket(myNodeNum, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
+
+        handle(packet)
+
+        verify(VerifyMode.not) { configHandler.handleChannel(any(), any()) }
+    }
+
+    @Test
+    fun `metadata from a remote node without an outstanding request is ignored`() {
+        val metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "9.9.9" }.build()
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_device_metadata_response = metadata }.build()
+        val packet = makePacket(99999, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
+
+        handle(packet)
+
+        verify(VerifyMode.not) { nodeManager.insertMetadata(any(), any(), any()) }
+    }
+
+    @Test
+    fun `a request id answers once`() {
+        val config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_config_response = config }.build()
+
+        val packet = makePacket(myNodeNum, adminMsg)
+
+        handle(packet)
+        handle(packet)
+
+        verify(VerifyMode.exactly(1)) { configHandler.handleDeviceConfig(config, session) }
+    }
 
     // ---------- Session passkey ----------
 
@@ -289,5 +350,10 @@ class AdminPacketHandlerImplTest {
 
         verify { sessionManager.recordSession(myNodeNum, passkey) }
         verify { configHandler.handleDeviceConfig(config, session) }
+    }
+
+    private companion object {
+        const val SENT_REQUEST_ID = 4242
+        const val UNSOLICITED_REQUEST_ID = 777
     }
 }

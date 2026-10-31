@@ -33,6 +33,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isWithinSizeLimit
+import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LocalNodeUnavailableException
@@ -77,6 +78,7 @@ class CommandSenderImpl(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val sessionManager: SessionManager,
+    private val adminRequestRegistry: AdminRequestRegistry,
     private val scope: ServiceScope,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
@@ -629,6 +631,7 @@ class CommandSenderImpl(
                 }
                 .build(),
         )
+            .also { adminRequestRegistry.register(it.id) }
 
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL
