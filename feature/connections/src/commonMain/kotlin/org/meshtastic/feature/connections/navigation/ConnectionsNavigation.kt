@@ -20,12 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -42,6 +45,7 @@ import org.meshtastic.core.resources.deep_link_disconnect_message
 import org.meshtastic.core.resources.deep_link_disconnect_title
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.blePairingPinFor
@@ -60,6 +64,9 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
             rememberSaveable(key.address, key.pin) { mutableStateOf(key.address?.takeIf(String::isNotBlank)) }
         val pendingPin = blePairingPinFor(key.address, key.pin)
         val launchOptions = koinInject<LaunchOptions>()
+        // Not the prompt's own scope: the prompt leaves composition as soon as it is answered.
+        val clipboard = LocalClipboard.current
+        val scope = rememberCoroutineScope()
 
         pendingAddress?.let { address ->
             DeepLinkConnectPrompt(
@@ -70,6 +77,13 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
                     if (it == NO_DEVICE_SELECTED) {
                         scanModel.disconnect()
                     } else {
+                        // Where the OS will not let the app answer the PIN request itself (setPin needs
+                        // BLUETOOTH_PRIVILEGED on Android 17 at targetSdk 37), the system dialog becomes a paste.
+                        pendingPin?.let { pin ->
+                            scope.launch {
+                                clipboard.setClipEntry(createClipEntry(pin, label = "PIN", sensitive = true))
+                            }
+                        }
                         scanModel.connectToLinkedAddress(it, pendingPin)
                     }
                 },
