@@ -112,8 +112,6 @@ class AndroidBluetoothRepository(
                 withTimeoutOrNull(BOND_TIMEOUT) {
                     val result = CompletableDeferred<Unit>()
                     val receiver = createBondReceiver(macAddress, result)
-                    // Registered before createBond() so the pairing request it triggers cannot slip past.
-                    val pinReceiver = pin?.let { registerPairingPinReceiver(macAddress, it) }
 
                     val filter =
                         android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
@@ -121,7 +119,11 @@ class AndroidBluetoothRepository(
                     // protected broadcast, so exporting admits no other sender.
                     ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
 
+                    var pinReceiver: android.content.BroadcastReceiver? = null
                     try {
+                        // Registered before createBond() so the pairing request it triggers cannot slip past, and
+                        // inside the try so the PIN never outlives this bond attempt.
+                        pinReceiver = pin?.let { registerPairingPinReceiver(macAddress, it) }
                         val start = startOrObserveBond(remoteDevice, result)
                         awaitBondResult(remoteDevice, result, start)
                     } finally {
