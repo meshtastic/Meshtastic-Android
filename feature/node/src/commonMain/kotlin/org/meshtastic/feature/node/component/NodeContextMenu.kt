@@ -69,6 +69,7 @@ import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
+import org.meshtastic.feature.node.model.canDirectMessage
 
 /** Mute is `toggle_muted_node` sent to our own node, so our firmware, not the muted node's, must support it. */
 internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true
@@ -230,7 +231,7 @@ private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> 
             onMessage()
             onDismiss()
         },
-        enabled = !node.isIgnored,
+        enabled = !node.isIgnored && node.canDirectMessage,
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Message, contentDescription = null) },
         text = { Text(text = stringResource(Res.string.message)) },
     )
