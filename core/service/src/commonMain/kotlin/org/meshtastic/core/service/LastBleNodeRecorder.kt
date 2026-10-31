@@ -20,9 +20,13 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
@@ -55,14 +59,24 @@ class DefaultLastBleNodeRecorder(
     private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
 ) : LastBleNodeRecorder {
     override fun start(scope: CoroutineScope) {
-        combine(
-            serviceRepository.connectionState,
-            radioPrefs.devAddr,
-            nodeRepository.myNodeInfo,
-            nodeRepository.ourNodeInfo,
-        ) { state, address, myNode, ourNode ->
-            // Connected is reached only after the handshake, so the node records describe this address's node.
-            val bleAddress = address?.takeIf { state is ConnectionState.Connected && it.isBle() }
+        serviceRepository.connectionState
+            .map { it is ConnectionState.Connected }
+            .distinctUntilChanged()
+            .flatMapLatest { connected -> if (connected) firstCompleteRecord() else emptyFlow() }
+            .onEach { node ->
+                safeCatching { firmwareRecoveryDataSource.setLastBleNode(node) }
+                    .onFailure { Logger.w { "Could not record the last BLE node (${it::class.simpleName})" } }
+            }
+            .launchIn(scope)
+    }
+
+    /**
+     * One record per connection, taken once the handshake has filled in the node. An address switch can reach
+     * [RadioPrefs] before the old connection is reported gone, so later changes within one connection are ignored.
+     */
+    private fun firstCompleteRecord() =
+        combine(radioPrefs.devAddr, nodeRepository.myNodeInfo, nodeRepository.ourNodeInfo) { address, myNode, ourNode ->
+            val bleAddress = address?.takeIf { it.isBle() }
             val hwModel = ourNode?.user?.hw_model?.takeIf { it != HardwareModel.UNSET }
             val pioEnv = myNode?.pioEnv?.takeIf { it.isNotEmpty() }
             if (bleAddress == null || hwModel == null || pioEnv == null) {
@@ -77,15 +91,8 @@ class DefaultLastBleNodeRecorder(
                 )
             }
         }
-            // Deduplicate before dropping nulls, so a reconnect to the same node writes it again after a dismiss.
-            .distinctUntilChanged()
             .filterNotNull()
-            .onEach { node ->
-                safeCatching { firmwareRecoveryDataSource.setLastBleNode(node) }
-                    .onFailure { Logger.w { "Could not record the last BLE node (${it::class.simpleName})" } }
-            }
-            .launchIn(scope)
-    }
+            .take(1)
 
     private fun String.isBle() = DeviceType.fromAddress(this) == DeviceType.BLE
 
