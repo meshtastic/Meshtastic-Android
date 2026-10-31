@@ -48,10 +48,20 @@ class LastBleNodeRecorderTest {
 
     private fun handshake(address: String, pioEnv: String? = "rak4631") {
         radioPrefs.setDevAddr(address)
-        radioPrefs.setDevName("Base")
+        // A name the scanner set for a different device must not leak into this node's record.
+        radioPrefs.setDevName("Other")
         nodeRepository.setMyNodeInfo(myNodeInfo(pioEnv))
         nodeRepository.setOurNode(
-            Node(num = 1, user = User.Builder().also { it.hw_model = HardwareModel.RAK4631 }.build()),
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also {
+                        it.hw_model = HardwareModel.RAK4631
+                        it.long_name = "Base"
+                    }
+                    .build(),
+            ),
         )
         serviceRepository.setConnectionState(ConnectionState.Connected)
     }

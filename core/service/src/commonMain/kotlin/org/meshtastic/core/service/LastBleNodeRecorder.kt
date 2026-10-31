@@ -58,10 +58,9 @@ class DefaultLastBleNodeRecorder(
         combine(
             serviceRepository.connectionState,
             radioPrefs.devAddr,
-            radioPrefs.devName,
             nodeRepository.myNodeInfo,
             nodeRepository.ourNodeInfo,
-        ) { state, address, name, myNode, ourNode ->
+        ) { state, address, myNode, ourNode ->
             // Connected is reached only after the handshake, so the node records describe this address's node.
             val bleAddress = address?.takeIf { state is ConnectionState.Connected && it.isBle() }
             val hwModel = ourNode?.user?.hw_model?.takeIf { it != HardwareModel.UNSET }
@@ -74,7 +73,7 @@ class DefaultLastBleNodeRecorder(
                     hwModel = hwModel.value,
                     pioEnv = pioEnv,
                     releaseType = STABLE_RELEASE,
-                    deviceName = name ?: ourNode.user.long_name,
+                    deviceName = ourNode.user.long_name,
                 )
             }
         }
