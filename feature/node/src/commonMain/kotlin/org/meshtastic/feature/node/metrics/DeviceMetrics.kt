@@ -317,7 +317,12 @@ private fun DeviceMetricsChart(
         val percentRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0) }
         val voltageRangeProvider = remember {
             object : CartesianLayerRangeProvider {
-                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double = minOf(3.0, minY)
+                private fun effectiveMinY(minY: Double): Double = minOf(3.0, minY)
+
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double = effectiveMinY(minY)
+
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
+                    if (maxY <= effectiveMinY(minY)) maxY + 1.0 else maxY
             }
         }
         val leftLayer =
