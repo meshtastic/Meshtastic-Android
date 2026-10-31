@@ -304,7 +304,10 @@ class AndroidBluetoothRepository(
      */
     private fun createPairingPinReceiver(macAddress: String, pin: String): android.content.BroadcastReceiver =
         object : android.content.BroadcastReceiver() {
+            // setPin is deprecated as of compileSdk 37. If it is refused or stops working, the system dialog still
+            // asks for the PIN, so the link degrades to manual pairing rather than failing.
             @SuppressLint("MissingPermission")
+            @Suppress("DEPRECATION")
             override fun onReceive(c: Context, intent: android.content.Intent) {
                 val d = pinEntryRequestFor(macAddress, intent) ?: return
                 val accepted =
