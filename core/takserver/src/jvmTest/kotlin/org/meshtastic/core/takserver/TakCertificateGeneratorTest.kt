@@ -31,12 +31,17 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * The generated `.p12` containers must stay encoded with legacy PKCS#12 algorithms (SHA1/3DES bags, SHA1 MAC). Android
  * 9 and older cannot parse PBES2/AES-encrypted containers, which breaks ATAK data package import (#6567).
  */
 class TakCertificateGeneratorTest {
+
+    // Each manager test runs two or three 2048-bit RSA keygens; under a loaded full baseline they outrun runTest's
+    // 1-minute default.
+    private val keygenTimeout = 5.minutes
 
     // DER encoding of OID 1.2.840.113549.1.5.13 (PBES2): must NOT appear in the containers.
     private val pbes2Oid =
@@ -119,7 +124,7 @@ class TakCertificateGeneratorTest {
     }
 
     @Test
-    fun `manager persists generated material and reloads it`() = runTest {
+    fun `manager persists generated material and reloads it`() = runTest(timeout = keygenTimeout) {
         val store = InMemoryStore()
         var generations = 0
         val manager =
@@ -149,7 +154,7 @@ class TakCertificateGeneratorTest {
     }
 
     @Test
-    fun `manager replaces corrupt material and pins only the current client`() = runTest {
+    fun `manager replaces corrupt material and pins only the current client`() = runTest(timeout = keygenTimeout) {
         val store = InMemoryStore()
         store.save(TakCertificateMaterial(byteArrayOf(1), byteArrayOf(2), byteArrayOf(3), "bad"))
         val manager = TakCertificateManager(store)
@@ -164,7 +169,7 @@ class TakCertificateGeneratorTest {
     }
 
     @Test
-    fun `manager treats a throwing store as empty`() = runTest {
+    fun `manager treats a throwing store as empty`() = runTest(timeout = keygenTimeout) {
         val store =
             object : TakCertificateStore {
                 var saved: TakCertificateMaterial? = null
