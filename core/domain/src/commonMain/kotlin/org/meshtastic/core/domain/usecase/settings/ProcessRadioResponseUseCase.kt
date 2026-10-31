@@ -69,10 +69,18 @@ open class ProcessRadioResponseUseCase {
      * @param packet The mesh packet received from the radio.
      * @param destNum The node number that the response is expected from.
      * @param requestIds The set of active request IDs.
+     * @param myNodeNum The connected node, whose responses never leave the local link.
+     * @param adminChannelIndex The index of the legacy `admin` channel, or null when there is none.
      * @return A [RadioResponseResult] if the packet matches a request, or null otherwise.
      */
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    open operator fun invoke(packet: MeshPacket, destNum: Int, requestIds: Set<Int>): RadioResponseResult? {
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongParameterList")
+    open operator fun invoke(
+        packet: MeshPacket,
+        destNum: Int,
+        requestIds: Set<Int>,
+        myNodeNum: Int?,
+        adminChannelIndex: Int?,
+    ): RadioResponseResult? {
         val data = packet.decoded
         if (data == null || data.request_id !in requestIds) {
             return null
@@ -80,7 +88,7 @@ open class ProcessRadioResponseUseCase {
 
         return when (data.portnum) {
             PortNum.ROUTING_APP -> processRoutingResponse(packet, data, destNum)
-            PortNum.ADMIN_APP -> processAdminResponse(packet, data, destNum)
+            PortNum.ADMIN_APP -> processAdminResponse(packet, data, destNum, myNodeNum, adminChannelIndex)
             else -> null
         }
     }
@@ -101,15 +109,31 @@ open class ProcessRadioResponseUseCase {
         }
     }
 
-    private fun processAdminResponse(packet: MeshPacket, data: Data, destNum: Int): RadioResponseResult {
-        if (destNum != packet.from) {
-            return RadioResponseResult.Error(
-                UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."),
-            )
-        }
+    private fun processAdminResponse(
+        packet: MeshPacket,
+        data: Data,
+        destNum: Int,
+        myNodeNum: Int?,
+        adminChannelIndex: Int?,
+    ): RadioResponseResult? {
+        // `from` and `request_id` travel in the clear, so a remote response is only as trustworthy as its
+        // encryption: PKI, or the admin channel's PSK when the request went out on it. Dropping it, rather than
+        // reporting an error, keeps the request id live for the genuine response.
+        val isRemote = destNum != myNodeNum
+        val legacyAdmin = adminChannelIndex != null && packet.channel == adminChannelIndex
+        return when {
+            destNum != packet.from ->
+                RadioResponseResult.Error(
+                    UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."),
+                )
 
-        val parsed = AdminMessage.ADAPTER.decode(data.payload)
-        return processAdminMessage(parsed)
+            isRemote && !packet.pki_encrypted && !legacyAdmin -> {
+                Logger.w { "Ignored unauthenticated admin response from ${packet.from.toUInt()}" }
+                null
+            }
+
+            else -> processAdminMessage(AdminMessage.ADAPTER.decode(data.payload))
+        }
     }
 
     private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult =

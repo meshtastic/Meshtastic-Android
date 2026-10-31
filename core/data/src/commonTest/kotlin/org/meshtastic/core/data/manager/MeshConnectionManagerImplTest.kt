@@ -43,6 +43,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateHolder
@@ -93,6 +94,7 @@ class MeshConnectionManagerImplTest {
     private lateinit var radioConfigRepository: RadioConfigRepository
     private lateinit var commandSender: CommandSender
     private lateinit var sessionManager: SessionManager
+    private lateinit var adminRequestRegistry: AdminRequestRegistry
     private lateinit var nodeManager: NodeManager
     private lateinit var analytics: PlatformAnalytics
     private lateinit var packetRepository: PacketRepository
@@ -125,6 +127,7 @@ class MeshConnectionManagerImplTest {
         radioConfigRepository = mock(MockMode.autofill)
         commandSender = mock(MockMode.autofill)
         sessionManager = mock(MockMode.autofill)
+        adminRequestRegistry = mock(MockMode.autofill)
         nodeManager = mock(MockMode.autofill)
         analytics = mock(MockMode.autofill)
         packetRepository = mock(MockMode.autofill)
@@ -170,6 +173,7 @@ class MeshConnectionManagerImplTest {
         radioConfigRepository,
         commandSender,
         sessionManager,
+        adminRequestRegistry,
         nodeManager,
         analytics,
         packetRepository,
@@ -282,6 +286,7 @@ class MeshConnectionManagerImplTest {
         verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
+        verify { adminRequestRegistry.clearAll() }
         assertEquals(true, lockdownCoordinator.disconnectCalled)
     }
 
