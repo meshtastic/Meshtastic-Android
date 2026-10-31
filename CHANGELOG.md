@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.4-internal.2)
+### Internal (v2.8.4-internal.3)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
 #### 🏗️ Features
@@ -54,12 +54,16 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(nodes): keep heard_on_current_lora current between handshakes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7785
 * fix(logging): write app logs to logcat on google release builds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7809
 * fix(test): THINKNODE_M8 now carries SoftDevice 6.1.1 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7811
+* fix(usb): add Seeed XIAO nRF52840 Kit (239a:810b) to device filter by @koshiro in https://github.com/meshtastic/Meshtastic-Android/pull/7838
+* fix(usb): add remaining firmware USB IDs to device filter by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7841
+* fix(admin): accept admin responses only for requests the app sent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7847
 #### 📝 Other Changes
 * refactor(database): drop dead pool-timeout recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7782
 
 ## New Contributors
 * @mvanhorn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7698
 * @vpolevikoff made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7802
+* @koshiro made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7838
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
