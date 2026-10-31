@@ -110,7 +110,7 @@ jmdns = "3.6.5"
 # Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "0.9.3"
+takpacket-sdk = "0.10.0"
 meshtastic-protobufs = "2.8.2"
 
 # Gradle Plugins
