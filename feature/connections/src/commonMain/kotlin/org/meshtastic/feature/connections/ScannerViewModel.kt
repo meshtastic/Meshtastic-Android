@@ -824,7 +824,7 @@ open class ScannerViewModel(
                     .getOrNull()
                 if (seen != null) {
                     Logger.i { "Last BLE node's bootloader is advertising; offering recovery" }
-                    firmwareRecoveryDataSource.promoteLastBleNode()
+                    firmwareRecoveryDataSource.promoteLastBleNode(node.fullAddress)
                 }
             }
     }

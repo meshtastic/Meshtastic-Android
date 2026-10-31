@@ -87,7 +87,7 @@ class FirmwareRecoveryDataSourceTest {
         dataSource.setLastBleNode(node)
         assertNull(dataSource.pending.first())
 
-        dataSource.promoteLastBleNode()
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
 
         assertEquals(node, dataSource.pending.first())
     }
@@ -98,25 +98,34 @@ class FirmwareRecoveryDataSourceTest {
         dataSource.set(interrupted)
         dataSource.setLastBleNode(recovery(name = "Other"))
 
-        dataSource.promoteLastBleNode()
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
 
         assertEquals(interrupted, dataSource.pending.first())
     }
 
     @Test
+    fun `promoting skips a last BLE node at another address`() = testScope.runTest {
+        dataSource.setLastBleNode(recovery(name = "Newer", address = "xAA:BB:CC:00:00:05"))
+
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        assertNull(dataSource.pending.first())
+    }
+
+    @Test
     fun `dismiss clears the last BLE node too so it is not promoted again`() = testScope.runTest {
         dataSource.setLastBleNode(recovery(name = "Base"))
-        dataSource.promoteLastBleNode()
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
 
         dataSource.dismiss()
-        dataSource.promoteLastBleNode()
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
 
         assertNull(dataSource.pending.first())
         assertNull(dataSource.lastBleNode.first())
     }
 
-    private fun recovery(name: String) = PendingFirmwareRecovery(
-        fullAddress = "xAA:BB:CC:00:00:01",
+    private fun recovery(name: String, address: String = BASE_ADDRESS) = PendingFirmwareRecovery(
+        fullAddress = address,
         hwModel = 9,
         pioEnv = "rak4631",
         releaseType = "STABLE",
@@ -130,5 +139,9 @@ class FirmwareRecoveryDataSourceTest {
 
         assertNull(dataSource.pending.first())
         logs.assertNotLogged("AA:BB:CC:11:22:33", "CabinBase")
+    }
+
+    private companion object {
+        const val BASE_ADDRESS = "xAA:BB:CC:00:00:01"
     }
 }

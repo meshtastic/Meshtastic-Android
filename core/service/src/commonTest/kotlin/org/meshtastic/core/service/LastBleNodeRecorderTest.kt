@@ -86,7 +86,19 @@ class LastBleNodeRecorderTest {
     }
 
     @Test
-    fun `a USB node is not recorded`() = runTest(UnconfinedTestDispatcher()) {
+    fun `a reconnect to the same node records it again`() = runTest(UnconfinedTestDispatcher()) {
+        recorder().start(backgroundScope)
+        handshake("xAA:BB:CC:00:00:01")
+
+        // A dismiss in between deletes the record, so the reconnect must write it back.
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        verifySuspend(mode = VerifyMode.exactly(2)) { dataSource.setLastBleNode(any()) }
+    }
+
+    @Test
+    fun `a USB node is not recorded`()= runTest(UnconfinedTestDispatcher()) {
         recorder().start(backgroundScope)
 
         handshake("s/dev/ttyACM0")
