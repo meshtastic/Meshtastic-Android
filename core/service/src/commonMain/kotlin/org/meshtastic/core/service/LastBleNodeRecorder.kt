@@ -77,8 +77,9 @@ class DefaultLastBleNodeRecorder(
                 )
             }
         }
-            .filterNotNull()
+            // Deduplicate before dropping nulls, so a reconnect to the same node writes it again after a dismiss.
             .distinctUntilChanged()
+            .filterNotNull()
             .onEach { node ->
                 safeCatching { firmwareRecoveryDataSource.setLastBleNode(node) }
                     .onFailure { Logger.w { "Could not record the last BLE node (${it::class.simpleName})" } }

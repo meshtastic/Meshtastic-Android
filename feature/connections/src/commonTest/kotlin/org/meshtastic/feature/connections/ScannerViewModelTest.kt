@@ -384,7 +384,7 @@ class ScannerViewModelTest {
     fun `a bootloader at the last BLE node MAC plus one is offered for recovery`() = runTest {
         val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:02")
 
-        verifySuspend { harness.firmwareRecoveryDataSource.promoteLastBleNode() }
+        verifySuspend { harness.firmwareRecoveryDataSource.promoteLastBleNode("xAA:BB:CC:00:00:01") }
         harness.clearViewModel(viewModel)
     }
 
@@ -392,7 +392,7 @@ class ScannerViewModelTest {
     fun `a DFU advert at another address is not offered for recovery`() = runTest {
         val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09")
 
-        verifySuspend(mode = VerifyMode.exactly(0)) { harness.firmwareRecoveryDataSource.promoteLastBleNode() }
+        verifySuspend(mode = VerifyMode.exactly(0)) { harness.firmwareRecoveryDataSource.promoteLastBleNode(any()) }
         harness.clearViewModel(viewModel)
     }
 
