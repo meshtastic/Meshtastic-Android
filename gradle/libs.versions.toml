@@ -106,7 +106,7 @@ sceneview = "4.63.0"
 vico = "3.4.0-next.1"
 kable = "0.45.0"
 mqttastic = "0.9.0"
-jmdns = "3.6.4"
+jmdns = "3.6.5"
 # Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
