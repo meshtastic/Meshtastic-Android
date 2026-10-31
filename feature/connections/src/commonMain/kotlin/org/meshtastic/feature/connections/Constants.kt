@@ -28,3 +28,15 @@ const val TCP_DEVICE_PREFIX: String = "t"
 
 /** One-char prefix marking a BLE device's `fullAddress`. See [DeviceListEntry.Ble]. */
 const val BLE_DEVICE_PREFIX: String = "x"
+
+private const val BLE_PAIRING_PIN_LENGTH = 6
+
+/**
+ * The pairing PIN a link supplies for [address], or `null` when it is missing, is not exactly six digits (the
+ * firmware's passkey format), or [address] is not a BLE device, so the link falls back to pairing by hand.
+ */
+fun blePairingPinFor(address: String?, pin: String?): String? = pin?.takeIf {
+    address?.startsWith(BLE_DEVICE_PREFIX) == true &&
+        it.length == BLE_PAIRING_PIN_LENGTH &&
+        it.all { c -> c in '0'..'9' }
+}

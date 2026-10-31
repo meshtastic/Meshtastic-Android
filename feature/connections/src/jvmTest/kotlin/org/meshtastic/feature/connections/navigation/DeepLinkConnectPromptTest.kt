@@ -26,7 +26,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.connect
+import org.meshtastic.core.resources.deep_link_connect_message
 import org.meshtastic.core.resources.deep_link_connect_title
+import org.meshtastic.core.resources.deep_link_connect_with_pin_message
 import org.meshtastic.core.resources.getString
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,14 +75,37 @@ class DeepLinkConnectPromptTest {
         assertEquals(1, done)
     }
 
-    private fun ComposeUiTest.setPrompt(skipConfirmation: Boolean) {
+    @Test
+    fun `a link PIN is shown in the prompt before the user confirms`() = runComposeUiTest {
+        setPrompt(skipConfirmation = false, address = BLE_ADDRESS, pin = PIN)
+
+        onNodeWithText(getString(Res.string.deep_link_connect_with_pin_message, BLE_ADDRESS, PIN)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.deep_link_connect_message, BLE_ADDRESS)).assertDoesNotExist()
+        assertTrue(applied.isEmpty())
+
+        onNodeWithText(getString(Res.string.connect)).performClick()
+        waitForIdle()
+
+        assertEquals(listOf(BLE_ADDRESS), applied)
+        assertEquals(1, done)
+    }
+
+    @Test
+    fun `a link without a PIN keeps the plain connect message`() = runComposeUiTest {
+        setPrompt(skipConfirmation = false, address = BLE_ADDRESS)
+
+        onNodeWithText(getString(Res.string.deep_link_connect_message, BLE_ADDRESS)).assertIsDisplayed()
+    }
+
+    private fun ComposeUiTest.setPrompt(skipConfirmation: Boolean, address: String = ADDRESS, pin: String? = null) {
         setContent {
             MaterialTheme {
                 DeepLinkConnectPrompt(
-                    address = ADDRESS,
+                    address = address,
                     skipConfirmation = skipConfirmation,
                     onApply = { applied += it },
                     onDone = { done++ },
+                    pin = pin,
                 )
             }
         }
@@ -88,5 +113,7 @@ class DeepLinkConnectPromptTest {
 
     private companion object {
         const val ADDRESS = "t10.0.2.2:4403"
+        const val BLE_ADDRESS = "xAA:BB:CC:DD:EE:FF"
+        const val PIN = "123456"
     }
 }

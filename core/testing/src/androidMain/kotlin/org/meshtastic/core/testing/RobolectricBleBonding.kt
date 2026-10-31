@@ -95,4 +95,18 @@ object RobolectricBleBonding {
         application.sendBroadcast(intent)
         shadowOf(Looper.getMainLooper()).idle()
     }
+
+    /**
+     * Send `ACTION_PAIRING_REQUEST` for [mac] the way the Bluetooth app does — as an ordered broadcast, so a
+     * higher-priority receiver can answer and abort it — and pump the main looper so it is delivered synchronously.
+     */
+    fun sendPairingRequest(mac: String, variant: Int = BluetoothDevice.PAIRING_VARIANT_PIN) {
+        val intent =
+            Intent(BluetoothDevice.ACTION_PAIRING_REQUEST).apply {
+                putExtra(BluetoothDevice.EXTRA_DEVICE, adapter.getRemoteDevice(mac))
+                putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, variant)
+            }
+        application.sendOrderedBroadcast(intent, null)
+        shadowOf(Looper.getMainLooper()).idle()
+    }
 }

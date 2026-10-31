@@ -56,7 +56,7 @@ private typealias DeepLinkArgs = Map<String, List<String>>
  * - `/wifi-provision?address={mac}` -> WiFi provisioning targeting a specific device MAC address
  * - `/connections?address={prefixedAddress}` -> Connections screen, auto-connecting to a prefixed device address (e.g.
  *   `t192.168.1.1:4403` for TCP, `xAA:BB:CC:DD:EE:FF` for BLE) — lets external tooling trigger a connection.
- *   `address=n` disconnects instead of connecting.
+ *   `address=n` disconnects instead of connecting. A BLE address may add `&pin={pin}`, the node's fixed pairing PIN.
  */
 object DeepLinkRouter {
     /**
@@ -143,7 +143,7 @@ object DeepLinkRouter {
                 conversation(key)
             },
             pattern("messages", ContactsRoute.Contacts.serializer()) { key, _ -> listOf(key) },
-            pattern("connections?address={address}", ConnectionsRoute.Connections.serializer()) { key, _ ->
+            pattern("connections?address={address}&pin={pin}", ConnectionsRoute.Connections.serializer()) { key, _ ->
                 listOf(key)
             },
             pattern("discovery", DiscoveryRoute.DiscoveryGraph.serializer()) { key, _ -> listOf(key) },

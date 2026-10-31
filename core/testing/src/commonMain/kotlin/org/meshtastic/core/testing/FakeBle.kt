@@ -359,6 +359,9 @@ class FakeBluetoothRepository :
     /** Every device passed to [bond], in call order — lets tests assert that bonding was (or was not) attempted. */
     val bondCalls = mutableListOf<BleDevice>()
 
+    /** The PIN passed with each [bond] call, index-aligned with [bondCalls]. */
+    val bondPins = mutableListOf<String?>()
+
     /** Set false to model hardware with no Bluetooth LE, such as an Android XR headset. */
     override var isSupported: Boolean = true
 
@@ -366,6 +369,7 @@ class FakeBluetoothRepository :
         registerResetAction {
             bondOutcome = BondOutcome.Success
             bondCalls.clear()
+            bondPins.clear()
             isSupported = true
         }
     }
@@ -376,8 +380,9 @@ class FakeBluetoothRepository :
 
     override fun isBonded(address: String): Boolean = _state.value.bondedDevices.any { it.address == address }
 
-    override suspend fun bond(device: BleDevice) {
+    override suspend fun bond(device: BleDevice, pin: String?) {
         bondCalls += device
+        bondPins += pin
         val error =
             when (val outcome = bondOutcome) {
                 is BondOutcome.Security -> outcome.error

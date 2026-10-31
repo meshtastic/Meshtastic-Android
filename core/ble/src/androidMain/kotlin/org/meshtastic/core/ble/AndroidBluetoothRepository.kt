@@ -96,7 +96,7 @@ class AndroidBluetoothRepository(
 
     @Suppress("TooGenericExceptionThrown", "TooGenericExceptionCaught", "SwallowedException")
     @SuppressLint("MissingPermission")
-    override suspend fun bond(device: BleDevice) {
+    override suspend fun bond(device: BleDevice, pin: String?) {
         val macAddress = device.address
         bondEvents.watch(macAddress)
         val remoteDevice =
@@ -112,6 +112,8 @@ class AndroidBluetoothRepository(
                 withTimeoutOrNull(BOND_TIMEOUT) {
                     val result = CompletableDeferred<Unit>()
                     val receiver = createBondReceiver(macAddress, result)
+                    // Registered before createBond() so the pairing request it triggers cannot slip past.
+                    val pinReceiver = pin?.let { registerPairingPinReceiver(macAddress, it) }
 
                     val filter =
                         android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
@@ -124,6 +126,7 @@ class AndroidBluetoothRepository(
                         awaitBondResult(remoteDevice, result, start)
                     } finally {
                         unregisterBondReceiver(receiver)
+                        pinReceiver?.let(::unregisterBondReceiver)
                     }
                     // Reaching here means the suspended bond wait completed before BOND_TIMEOUT.
                     true
@@ -280,6 +283,71 @@ class AndroidBluetoothRepository(
                 result.completeExceptionally(Exception(BOND_FAILED_OR_REJECTED_MESSAGE))
             }
         }
+    }
+
+    private fun registerPairingPinReceiver(macAddress: String, pin: String): android.content.BroadcastReceiver {
+        val receiver = createPairingPinReceiver(macAddress, pin)
+        val filter =
+            android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_PAIRING_REQUEST).apply {
+                // The request is an ordered broadcast: outrank the Settings pairing dialog so we answer it first.
+                priority = android.content.IntentFilter.SYSTEM_HIGH_PRIORITY - 1
+            }
+        // Sent by the Bluetooth app under its own uid, like ACTION_BOND_STATE_CHANGED.
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+        return receiver
+    }
+
+    /**
+     * Answers the PIN-entry pairing request for [macAddress] with [pin]. Meshtastic nodes are display-only, so Android
+     * asks the phone side to type the passkey shown on the node; a supplied PIN types it for the user. Any other
+     * pairing variant, or a rejected PIN, is left to the system dialog.
+     */
+    private fun createPairingPinReceiver(macAddress: String, pin: String): android.content.BroadcastReceiver =
+        object : android.content.BroadcastReceiver() {
+            @SuppressLint("MissingPermission")
+            override fun onReceive(c: Context, intent: android.content.Intent) {
+                val d = pinEntryRequestFor(macAddress, intent) ?: return
+                val accepted =
+                    try {
+                        d.setPin(pin.encodeToByteArray())
+                    } catch (e: SecurityException) {
+                        Logger.w(e) { "setPin refused. Missing BLUETOOTH_CONNECT?" }
+                        false
+                    }
+                if (accepted) {
+                    Logger.i { "Answered the pairing request with the supplied PIN" }
+                    // The system dialog would only ask for the PIN we just gave.
+                    if (isOrderedBroadcast) abortBroadcast()
+                } else {
+                    Logger.w { "setPin was not accepted; the system pairing dialog will ask for the PIN" }
+                }
+            }
+        }
+
+    /** The device in [intent] when it is a PIN-entry pairing request for [macAddress], else `null`. */
+    private fun pinEntryRequestFor(
+        macAddress: String,
+        intent: android.content.Intent,
+    ): android.bluetooth.BluetoothDevice? {
+        val device =
+            androidx.core.content.IntentCompat.getParcelableExtra(
+                intent,
+                android.bluetooth.BluetoothDevice.EXTRA_DEVICE,
+                android.bluetooth.BluetoothDevice::class.java,
+            )
+        val variant =
+            intent.getIntExtra(
+                android.bluetooth.BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                android.bluetooth.BluetoothDevice.ERROR,
+            )
+        val forThisNode =
+            intent.action == android.bluetooth.BluetoothDevice.ACTION_PAIRING_REQUEST &&
+                device?.address.equals(macAddress, ignoreCase = true)
+        val takesPin = variant == android.bluetooth.BluetoothDevice.PAIRING_VARIANT_PIN
+        if (forThisNode && !takesPin) {
+            Logger.i { "Pairing request variant $variant does not take a PIN; leaving it to the system" }
+        }
+        return device?.takeIf { forThisNode && takesPin }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")

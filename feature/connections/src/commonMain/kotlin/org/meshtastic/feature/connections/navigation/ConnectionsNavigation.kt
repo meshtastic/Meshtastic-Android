@@ -37,12 +37,14 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.connect
 import org.meshtastic.core.resources.deep_link_connect_message
 import org.meshtastic.core.resources.deep_link_connect_title
+import org.meshtastic.core.resources.deep_link_connect_with_pin_message
 import org.meshtastic.core.resources.deep_link_disconnect_message
 import org.meshtastic.core.resources.deep_link_disconnect_title
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
+import org.meshtastic.feature.connections.blePairingPinFor
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoute.Connections]. */
@@ -50,18 +52,26 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
     entry<ConnectionsRoute.Connections> { key ->
         val scanModel = koinViewModel<ScannerViewModel>()
 
-        // A deep link (e.g. from AI/automation tooling) may name a device address, or `n` to disconnect. The
-        // `connections` path is a verified https://meshtastic.org app link, so any web page can fire one at us —
-        // confirm before re-pointing or dropping the radio connection. Only a debug launch switch skips it.
-        var pendingAddress by rememberSaveable(key.address) { mutableStateOf(key.address?.takeIf(String::isNotBlank)) }
+        // A deep link (e.g. from AI/automation tooling, or a QR code shipped with a node) may name a device address,
+        // or `n` to disconnect, and a BLE address may carry the node's pairing PIN. The `connections` path is a
+        // verified https://meshtastic.org app link, so any web page can fire one at us — confirm before re-pointing or
+        // dropping the radio connection. Only a debug launch switch skips it.
+        var pendingAddress by
+            rememberSaveable(key.address, key.pin) { mutableStateOf(key.address?.takeIf(String::isNotBlank)) }
+        val pendingPin = blePairingPinFor(key.address, key.pin)
         val launchOptions = koinInject<LaunchOptions>()
 
         pendingAddress?.let { address ->
             DeepLinkConnectPrompt(
                 address = address,
+                pin = pendingPin,
                 skipConfirmation = launchOptions.skipDeepLinkConfirmation,
                 onApply = {
-                    if (it == NO_DEVICE_SELECTED) scanModel.disconnect() else scanModel.changeDeviceAddress(it)
+                    if (it == NO_DEVICE_SELECTED) {
+                        scanModel.disconnect()
+                    } else {
+                        scanModel.connectToLinkedAddress(it, pendingPin)
+                    }
                 },
                 onDone = { pendingAddress = null },
             )
@@ -78,7 +88,8 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
 
 /**
  * The trust step for a `connections` deep link. The address is applied only once the user confirms, unless
- * [skipConfirmation], a debug launch switch, says to apply it straight away.
+ * [skipConfirmation], a debug launch switch, says to apply it straight away. A [pin] the link carries is shown, so the
+ * user sees the PIN they are approving before the app types it into the pairing request.
  */
 @Composable
 internal fun DeepLinkConnectPrompt(
@@ -86,6 +97,7 @@ internal fun DeepLinkConnectPrompt(
     skipConfirmation: Boolean,
     onApply: (String) -> Unit,
     onDone: () -> Unit,
+    pin: String? = null,
 ) {
     if (skipConfirmation) {
         val apply by rememberUpdatedState(onApply)
@@ -99,10 +111,10 @@ internal fun DeepLinkConnectPrompt(
         MeshtasticDialog(
             titleRes = if (isDisconnect) Res.string.deep_link_disconnect_title else Res.string.deep_link_connect_title,
             message =
-            if (isDisconnect) {
-                stringResource(Res.string.deep_link_disconnect_message)
-            } else {
-                stringResource(Res.string.deep_link_connect_message, address)
+            when {
+                isDisconnect -> stringResource(Res.string.deep_link_disconnect_message)
+                pin != null -> stringResource(Res.string.deep_link_connect_with_pin_message, address, pin)
+                else -> stringResource(Res.string.deep_link_connect_message, address)
             },
             confirmTextRes = if (isDisconnect) Res.string.disconnect else Res.string.connect,
             onConfirm = {

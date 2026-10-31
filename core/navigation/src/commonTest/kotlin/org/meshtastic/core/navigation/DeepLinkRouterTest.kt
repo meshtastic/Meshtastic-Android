@@ -141,6 +141,41 @@ class DeepLinkRouterTest {
         assertEquals(listOf(ConnectionsRoute.Connections("n")), route("/connections?address=n"))
     }
 
+    @Test
+    fun `connections with a BLE address and pin carries both`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            route("/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"),
+        )
+    }
+
+    @Test
+    fun `connections pin matches in either query order`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            route("/connections?pin=123456&address=xAA:BB:CC:DD:EE:FF"),
+        )
+    }
+
+    @Test
+    fun `connections https link with a pin routes like the custom scheme`() {
+        // The manufacturer QR code form: a verified meshtastic.org app link.
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            DeepLinkRouter.route(
+                CommonUri.parse("https://meshtastic.org/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"),
+            ),
+        )
+    }
+
+    @Test
+    fun `connections without a pin leaves it null`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = null)),
+            route("/connections?address=xAA:BB:CC:DD:EE:FF"),
+        )
+    }
+
     // endregion
 
     // region map
