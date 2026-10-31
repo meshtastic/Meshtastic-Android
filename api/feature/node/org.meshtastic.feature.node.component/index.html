@@ -42,6 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:node/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:node/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -51,6 +52,13 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:node/androidMain" data-filter=":feature:node/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":feature:node/commonMain" data-filter=":feature:node/commonMain">
@@ -89,7 +97,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="feature-node::org.meshtastic.feature.node.component////PointingToDeclaration//1906246353">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-node::org.meshtastic.feature.node.component////PointingToDeclaration//-1217137874">
   <div class="breadcrumbs"><a href="../index.html">feature-node</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.node.component</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -124,7 +132,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-device-model-view-model/index.html">DeviceModelViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">repository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-model-repository/index.html">DeviceModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">Fetches a device's GLB and the bounds the viewer frames it with; one model at a time, the last request wins.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-device-model-view-model/index.html">DeviceModelViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">repository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-model-repository/index.html">DeviceModelRepository</a><span class="token punctuation">, </span></span><span class="parameter ">displayMirrorManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-display-mirror-manager/index.html">DisplayMirrorManager</a><span class="token punctuation">, </span></span><span class="parameter ">adminController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-admin-controller/index.html">AdminController</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">Fetches a device's GLB and the bounds the viewer frames it with; one model at a time, the last request wins.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -347,17 +355,34 @@
               </div>
             </div>
           </div>
-<a data-name="-1724375663%2FFunctions%2F1906246353" anchor-label="DeviceModelDialog" id="-1724375663%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+<a data-name="-85622317%2FFunctions%2F1906246353" anchor-label="DeviceModelDialog" id="-85622317%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-device-model-dialog.html"><span>Device</span><wbr><span>Model</span><wbr><span><span>Dialog</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1724375663%2FFunctions%2F1906246353"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-85622317%2FFunctions%2F1906246353"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-device-model-dialog.html"><span class="token function">DeviceModelDialog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceHardware<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-device-hardware/index.html">DeviceHardware</a><span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The hardware's real-size 3D model, orbitable, over the whole window; the illustration when it cannot be shown.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-device-model-dialog.html"><span class="token function">DeviceModelDialog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceHardware<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-device-hardware/index.html">DeviceHardware</a><span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">mirrorScreen<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The hardware's real-size 3D model, orbitable, over the whole window; the illustration when it cannot be shown.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1754488883%2FFunctions%2F1596539113" anchor-label="DeviceScreenNode" id="-1754488883%2FFunctions%2F1596539113" data-filterable-set=":feature:node/androidMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:node/androidMain" data-filterable-set=":feature:node/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-screen-node.html"><span>Device</span><wbr><span>Screen</span><wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754488883%2FFunctions%2F1596539113"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:node/androidMain" data-filterable-set=":feature:node/androidMain" data-active="" data-toggle=":feature:node/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><span data-unresolved-link="io.github.sceneview/SceneScope///PointingToDeclaration/">SceneScope</span><span class="token punctuation">.</span><a href="-device-screen-node.html"><span class="token function">DeviceScreenNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">screenMin<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float-array/index.html">FloatArray</a><span class="token punctuation">, </span></span><span class="parameter ">screenMax<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float-array/index.html">FloatArray</a><span class="token punctuation">, </span></span><span class="parameter ">frame<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mirror-frame/index.html">MirrorFrame</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The frame on a plane just proud of the display glass, facing +Z like the flasher's models. The node is created once and fed new bitmaps: replacing it would make SceneView re-center the whole scene on every frame.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
