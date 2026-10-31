@@ -98,7 +98,19 @@ class LastBleNodeRecorderTest {
     }
 
     @Test
-    fun `a USB node is not recorded`()= runTest(UnconfinedTestDispatcher()) {
+    fun `an address switch before the disconnect is reported is not recorded`() = runTest(UnconfinedTestDispatcher()) {
+        recorder().start(backgroundScope)
+        handshake("xAA:BB:CC:00:00:01")
+
+        // The old node's records are still current, so this pairing would name the new address with the old
+        // hardware.
+        radioPrefs.setDevAddr("xAA:BB:CC:00:00:05")
+
+        verifySuspend(mode = VerifyMode.exactly(1)) { dataSource.setLastBleNode(any()) }
+    }
+
+    @Test
+    fun `a USB node is not recorded`() = runTest(UnconfinedTestDispatcher()) {
         recorder().start(backgroundScope)
 
         handshake("s/dev/ttyACM0")

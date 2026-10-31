@@ -75,10 +75,14 @@ import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
 
 internal val STRANDED_BOOTLOADER_SCAN_TIMEOUT = 15.seconds
+
+private val STRANDED_BOOTLOADER_SCAN_COOLDOWN = 60.seconds
 
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
@@ -208,6 +212,7 @@ open class ScannerViewModel(
     private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
     private var strandedScanJob: Job? = null
+    private var lastStrandedScan: TimeMark? = null
     private var scanStartFailureCooldownJob: Job? = null
     private val scanStartFailureCooldownActive = MutableStateFlow(false)
     private var scanStartFailureCooldownGeneration = 0
@@ -811,7 +816,8 @@ open class ScannerViewModel(
      * Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader
      * can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point
      * — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful
-     * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
+     * reconnect or re-flash). A new record comes from the next DFU update, or from a bootloader seen at a node
+     * connected since.
      */
     fun dismissRecovery() {
         safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.dismiss() }
@@ -824,8 +830,8 @@ open class ScannerViewModel(
      * an address filter would skip the service check, and an ESP32 in OTA mode also advertises at MAC + 1.
      */
     private fun lookForStrandedBootloader() {
-        val scanner = bleScanner ?: return
-        if (!bluetoothSupported) return
+        val scanner = bleScanner?.takeIf { bluetoothSupported && strandedScanMayStart() } ?: return
+        lastStrandedScan = TimeSource.Monotonic.markNow()
         strandedScanJob?.cancel()
         strandedScanJob =
             safeLaunch(tag = "strandedBootloaderScan") {
@@ -845,6 +851,15 @@ open class ScannerViewModel(
                     firmwareRecoveryDataSource.promoteLastBleNode(node.fullAddress)
                 }
             }
+    }
+
+    /**
+     * Scan starts share one process-wide Android quota, so the bootloader scan never competes with the user's own scan
+     * and runs at most once per cooldown however often the link flaps.
+     */
+    private fun strandedScanMayStart(): Boolean {
+        val coolingDown = lastStrandedScan?.let { it.elapsedNow() < STRANDED_BOOTLOADER_SCAN_COOLDOWN } == true
+        return !_isBleScanning.value && !scanStartFailureCooldownActive.value && !coolingDown
     }
 
     /**

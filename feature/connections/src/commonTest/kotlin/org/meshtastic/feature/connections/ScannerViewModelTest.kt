@@ -396,6 +396,18 @@ class ScannerViewModelTest {
         harness.clearViewModel(viewModel)
     }
 
+    @Test
+    fun `a flapping link starts one bootloader scan per cooldown`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09")
+
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        testScheduler.advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) }
+        harness.clearViewModel(viewModel)
+    }
+
     private fun buildWithStrandedScan(advertisedAt: String): ScannerViewModel {
         every { harness.firmwareRecoveryDataSource.lastBleNode } returns
             flowOf(

@@ -28,8 +28,9 @@ import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 
 /**
- * Persists a single [PendingFirmwareRecovery] record for a firmware update that may have left a device stranded in
- * bootloader mode. Only the most recent trigger is retained (updates are one-device-at-a-time in practice).
+ * Persists the [PendingFirmwareRecovery] record for a firmware update that may have left a device stranded in
+ * bootloader mode, plus the last BLE node as a candidate for one. Only the most recent of each is retained (updates are
+ * one-device-at-a-time in practice).
  */
 @Single
 open class FirmwareRecoveryDataSource(private val dataStore: CorePreferencesDataStore) {
