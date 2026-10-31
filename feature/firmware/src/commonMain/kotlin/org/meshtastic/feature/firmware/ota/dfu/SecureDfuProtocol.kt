@@ -20,6 +20,7 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.ble.NordicDfu
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -51,7 +52,7 @@ internal object SecureDfuUuids {
  */
 internal object LegacyDfuUuids {
     /** Legacy DFU service — exposed by app firmware to trigger reboot into the bootloader. */
-    val SERVICE: Uuid = Uuid.parse("00001530-1212-EFDE-1523-785FEABCD123")
+    val SERVICE: Uuid = NordicDfu.LEGACY_SERVICE_UUID
 
     /**
      * Control Point: NOTIFY + WRITE. Notifications must be subscribed before writing or the device returns
