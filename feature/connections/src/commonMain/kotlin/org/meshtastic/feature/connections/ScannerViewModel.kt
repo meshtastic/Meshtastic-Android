@@ -205,6 +205,7 @@ open class ScannerViewModel(
     private val scannedBleDevices = MutableStateFlow<Map<String, BleDevice>>(emptyMap())
     private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
+    private var strandedScanJob: Job? = null
     private var scanStartFailureCooldownJob: Job? = null
     private val scanStartFailureCooldownActive = MutableStateFlow(false)
     private var scanStartFailureCooldownGeneration = 0
@@ -634,6 +635,8 @@ open class ScannerViewModel(
 
     /** Stops both BLE and network scans. Idempotent — safe to call when neither scan is active. */
     private fun stopAllScans() {
+        strandedScanJob?.cancel()
+        strandedScanJob = null
         stopBleScan()
         stopNetworkScan()
     }
@@ -805,23 +808,25 @@ open class ScannerViewModel(
     private fun lookForStrandedBootloader() {
         val scanner = bleScanner ?: return
         if (!bluetoothSupported) return
-        safeLaunch(tag = "strandedBootloaderScan") {
-            if (firmwareRecoveryDataSource.pending.first() != null) return@safeLaunch
-            val node = firmwareRecoveryDataSource.lastBleNode.first() ?: return@safeLaunch
-            val bootloaderAddress = NordicDfu.bootloaderAddress(node.fullAddress.drop(1))
-            val seen = safeCatchingAll {
-                scanner
-                    .scan(timeout = STRANDED_BOOTLOADER_SCAN_TIMEOUT, serviceUuid = NordicDfu.LEGACY_SERVICE_UUID)
-                    .flowOn(dispatchers.io)
-                    .firstOrNull { it.address.equals(bootloaderAddress, ignoreCase = true) }
+        strandedScanJob?.cancel()
+        strandedScanJob =
+            safeLaunch(tag = "strandedBootloaderScan") {
+                if (firmwareRecoveryDataSource.pending.first() != null) return@safeLaunch
+                val node = firmwareRecoveryDataSource.lastBleNode.first() ?: return@safeLaunch
+                val bootloaderAddress = NordicDfu.bootloaderAddress(node.fullAddress.drop(1))
+                val seen = safeCatchingAll {
+                    scanner
+                        .scan(timeout = STRANDED_BOOTLOADER_SCAN_TIMEOUT, serviceUuid = NordicDfu.LEGACY_SERVICE_UUID)
+                        .flowOn(dispatchers.io)
+                        .firstOrNull { it.address.equals(bootloaderAddress, ignoreCase = true) }
+                }
+                    .onFailure { Logger.d { "Stranded-bootloader scan did not run (${it::class.simpleName})" } }
+                    .getOrNull()
+                if (seen != null) {
+                    Logger.i { "Last BLE node's bootloader is advertising; offering recovery" }
+                    firmwareRecoveryDataSource.promoteLastBleNode()
+                }
             }
-                .onFailure { Logger.d { "Stranded-bootloader scan did not run (${it::class.simpleName})" } }
-                .getOrNull()
-            if (seen != null) {
-                Logger.i { "Last BLE node's bootloader is advertising; offering recovery" }
-                firmwareRecoveryDataSource.promoteLastBleNode()
-            }
-        }
     }
 
     /**
