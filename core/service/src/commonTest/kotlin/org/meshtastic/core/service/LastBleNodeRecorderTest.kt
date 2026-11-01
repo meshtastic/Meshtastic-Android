@@ -18,11 +18,13 @@ package org.meshtastic.core.service
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
@@ -30,8 +32,9 @@ import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User
@@ -40,16 +43,16 @@ import kotlin.test.Test
 class LastBleNodeRecorderTest {
     private val serviceRepository = FakeServiceRepository()
     private val nodeRepository = FakeNodeRepository()
-    private val radioPrefs = FakeRadioPrefs()
+    private val identity = MutableStateFlow<ConnectionIdentity?>(null)
+    private val nodeManager: NodeManager = mock(MockMode.autofill) { every { connectionIdentity } returns identity }
     private val dataSource: FirmwareRecoveryDataSource =
         mock(MockMode.autofill) { everySuspend { setLastBleNode(any()) } returns Unit }
 
-    private fun recorder() = DefaultLastBleNodeRecorder(serviceRepository, nodeRepository, radioPrefs, dataSource)
+    private fun recorder() = DefaultLastBleNodeRecorder(serviceRepository, nodeRepository, nodeManager, dataSource)
 
-    private fun handshake(address: String, pioEnv: String? = "rak4631") {
-        radioPrefs.setDevAddr(address)
-        // A name the scanner set for a different device must not leak into this node's record.
-        radioPrefs.setDevName("Other")
+    private fun handshake(address: String, pioEnv: String? = "rak4631", identityNodeNum: Int = 1) {
+        identity.value =
+            ConnectionIdentity(sessionGeneration = 1, address = address, nodeNum = identityNodeNum, deviceId = null)
         nodeRepository.setMyNodeInfo(myNodeInfo(pioEnv))
         nodeRepository.setOurNode(
             Node(
@@ -98,15 +101,24 @@ class LastBleNodeRecorderTest {
     }
 
     @Test
-    fun `an address switch before the disconnect is reported is not recorded`() = runTest(UnconfinedTestDispatcher()) {
+    fun `an identity change within one connection is not recorded`() = runTest(UnconfinedTestDispatcher()) {
         recorder().start(backgroundScope)
         handshake("xAA:BB:CC:00:00:01")
 
-        // The old node's records are still current, so this pairing would name the new address with the old
-        // hardware.
-        radioPrefs.setDevAddr("xAA:BB:CC:00:00:05")
+        identity.value =
+            ConnectionIdentity(sessionGeneration = 2, address = "xAA:BB:CC:00:00:05", nodeNum = 1, deviceId = null)
 
         verifySuspend(mode = VerifyMode.exactly(1)) { dataSource.setLastBleNode(any()) }
+    }
+
+    @Test
+    fun `cached records from another node are not recorded`() = runTest(UnconfinedTestDispatcher()) {
+        recorder().start(backgroundScope)
+
+        // The handshake is with node 2 while the repository still holds node 1 from an earlier device.
+        handshake("xAA:BB:CC:00:00:05", identityNodeNum = 2)
+
+        verifySuspend(mode = VerifyMode.exactly(0)) { dataSource.setLastBleNode(any()) }
     }
 
     @Test

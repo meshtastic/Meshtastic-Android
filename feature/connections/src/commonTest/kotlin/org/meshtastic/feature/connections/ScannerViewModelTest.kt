@@ -24,6 +24,7 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -408,17 +409,36 @@ class ScannerViewModelTest {
         harness.clearViewModel(viewModel)
     }
 
-    private fun buildWithStrandedScan(advertisedAt: String): ScannerViewModel {
-        every { harness.firmwareRecoveryDataSource.lastBleNode } returns
-            flowOf(
-                PendingFirmwareRecovery(
-                    fullAddress = "xAA:BB:CC:00:00:01",
-                    hwModel = 9,
-                    pioEnv = "rak4631",
-                    releaseType = "STABLE",
-                    deviceName = "Base",
-                ),
-            )
+    @Test
+    fun `a disconnect with no saved node does not hold off the next bootloader scan`() = runTest {
+        val lastBleNode = MutableStateFlow<PendingFirmwareRecovery?>(null)
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09", lastBleNode = lastBleNode)
+
+        lastBleNode.value = savedNode
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        testScheduler.advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) }
+        harness.clearViewModel(viewModel)
+    }
+
+    private val savedNode =
+        PendingFirmwareRecovery(
+            fullAddress = "xAA:BB:CC:00:00:01",
+            hwModel = 9,
+            pioEnv = "rak4631",
+            releaseType = "STABLE",
+            deviceName = "Base",
+        )
+
+    private fun buildWithStrandedScan(
+        advertisedAt: String,
+        lastBleNode: Flow<PendingFirmwareRecovery?> = flowOf(savedNode),
+    ): ScannerViewModel {
+        // The setUp ViewModel shares the scanner and connection state, so it would run bootloader scans of its own.
+        harness.clearViewModel(viewModel)
+        every { harness.firmwareRecoveryDataSource.lastBleNode } returns lastBleNode
         every { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) } returns
             flowOf(FakeBleDevice(address = advertisedAt, name = "4631_DFU"))
         serviceRepository.setConnectionState(ConnectionState.Disconnected)

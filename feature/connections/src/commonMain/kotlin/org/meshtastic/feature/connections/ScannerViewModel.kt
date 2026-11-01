@@ -45,7 +45,6 @@ import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.ble.MeshtasticBleDevice
-
 import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
@@ -831,13 +830,13 @@ open class ScannerViewModel(
      */
     private fun lookForStrandedBootloader() {
         val scanner = bleScanner?.takeIf { bluetoothSupported && strandedScanMayStart() } ?: return
-        lastStrandedScan = TimeSource.Monotonic.markNow()
         strandedScanJob?.cancel()
         strandedScanJob =
             safeLaunch(tag = "strandedBootloaderScan") {
                 if (firmwareRecoveryDataSource.pending.first() != null) return@safeLaunch
                 val node = firmwareRecoveryDataSource.lastBleNode.first() ?: return@safeLaunch
                 val bootloaderAddress = NordicDfu.bootloaderAddress(node.fullAddress.drop(1))
+                lastStrandedScan = TimeSource.Monotonic.markNow()
                 val seen = safeCatchingAll {
                     scanner
                         .scan(timeout = STRANDED_BOOTLOADER_SCAN_TIMEOUT, serviceUuid = NordicDfu.LEGACY_SERVICE_UUID)

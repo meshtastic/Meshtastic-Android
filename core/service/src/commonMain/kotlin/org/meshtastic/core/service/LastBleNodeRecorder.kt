@@ -33,8 +33,8 @@ import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.HardwareModel
 
@@ -55,7 +55,7 @@ fun interface LastBleNodeRecorder {
 class DefaultLastBleNodeRecorder(
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
-    private val radioPrefs: RadioPrefs,
+    private val nodeManager: NodeManager,
     private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
 ) : LastBleNodeRecorder {
     override fun start(scope: CoroutineScope) {
@@ -71,14 +71,21 @@ class DefaultLastBleNodeRecorder(
     }
 
     /**
-     * One record per connection, taken once the handshake has filled in the node. An address switch can reach
-     * [RadioPrefs] before the old connection is reported gone, so later changes within one connection are ignored.
+     * One record per connection, taken once the handshake has filled in the node. The address comes from the
+     * handshake's [NodeManager.connectionIdentity], and the node records count only when they carry that handshake's
+     * node number, since cached records from an earlier device can outlive a transport switch.
      */
     private fun firstCompleteRecord() =
-        combine(radioPrefs.devAddr, nodeRepository.myNodeInfo, nodeRepository.ourNodeInfo) { address, myNode, ourNode ->
-            val bleAddress = address?.takeIf { it.isBle() }
-            val hwModel = ourNode?.user?.hw_model?.takeIf { it != HardwareModel.UNSET }
-            val pioEnv = myNode?.pioEnv?.takeIf { it.isNotEmpty() }
+        combine(nodeManager.connectionIdentity, nodeRepository.myNodeInfo, nodeRepository.ourNodeInfo) {
+                identity,
+                myNode,
+                ourNode,
+            ->
+            val nodeNum = identity?.nodeNum
+            val bleAddress = identity?.address?.takeIf { it.isBle() }
+            val node = ourNode?.takeIf { it.num == nodeNum }
+            val hwModel = node?.user?.hw_model?.takeIf { it != HardwareModel.UNSET }
+            val pioEnv = myNode?.takeIf { it.myNodeNum == nodeNum }?.pioEnv?.takeIf { it.isNotEmpty() }
             if (bleAddress == null || hwModel == null || pioEnv == null) {
                 null
             } else {
@@ -87,7 +94,7 @@ class DefaultLastBleNodeRecorder(
                     hwModel = hwModel.value,
                     pioEnv = pioEnv,
                     releaseType = STABLE_RELEASE,
-                    deviceName = ourNode.user.long_name,
+                    deviceName = node.user.long_name,
                 )
             }
         }
