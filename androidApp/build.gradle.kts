@@ -178,7 +178,7 @@ configurations
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
-        variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
+        variant.flavorName?.let { flavor -> variant.applicationId.set("org.estudiodaw.tacticalmesh.$flavor.debug") }
     }
     onVariants { variant ->
         val generateLocaleConfig =
