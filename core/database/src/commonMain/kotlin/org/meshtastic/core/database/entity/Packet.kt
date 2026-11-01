@@ -198,6 +198,9 @@ data class ReactionEntity(
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "xeddsa_signed", defaultValue = "0") val xeddsaSigned: Boolean = false,
     @ColumnInfo(name = "ack_proof_status", defaultValue = "0") val ackProofStatus: Int = 0,
+    /** Rows written before schema 67 read as not via MQTT, with a null transport. */
+    @ColumnInfo(name = "via_mqtt", defaultValue = "0") val viaMqtt: Boolean = false,
+    @ColumnInfo(name = "transport_mechanism") val transportMechanism: Int? = null,
 )
 
 suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node?): Reaction {
@@ -220,6 +223,8 @@ suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node
         sfppHash = sfpp_hash,
         xeddsaSigned = xeddsaSigned,
         ackProofStatus = ackProofStatus,
+        viaMqtt = viaMqtt,
+        transportMechanism = transportMechanism,
     )
 }
 
