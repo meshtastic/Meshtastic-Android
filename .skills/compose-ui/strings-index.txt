@@ -343,8 +343,10 @@ debug_store_logs_title
 debug_tab_app_logs
 debug_tab_mirror
 debug_tab_packets
+### DEEP ###
 deep_link_connect_message
 deep_link_connect_title
+deep_link_connect_with_pin_message
 deep_link_disconnect_message
 deep_link_disconnect_title
 default_

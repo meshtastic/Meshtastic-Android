@@ -35,8 +35,10 @@ sealed interface ConnectionsRoute : Route {
     /**
      * @param address Optional prefixed device address (e.g. `t192.168.1.1:4403`, `xAA:BB:CC:DD:EE:FF`) to auto-connect
      *   to when this route is deep-linked into, e.g. `/connections?address=t192.168.1.1:4403`.
+     * @param pin Optional pairing PIN for a BLE [address], e.g. `/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456`,
+     *   so a node shipped with a fixed PIN can be paired from one link or QR code.
      */
-    @Serializable data class Connections(val address: String? = null) :
+    @Serializable data class Connections(val address: String? = null, val pin: String? = null) :
         ConnectionsRoute,
         Graph
 }

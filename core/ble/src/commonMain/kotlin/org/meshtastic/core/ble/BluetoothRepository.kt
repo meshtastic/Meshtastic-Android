@@ -36,8 +36,13 @@ interface BluetoothRepository {
     /** Returns true if the given address is bonded. */
     fun isBonded(address: String): Boolean
 
-    /** Initiates bonding with the given device. */
-    suspend fun bond(device: BleDevice)
+    /**
+     * Initiates bonding with the given device.
+     *
+     * @param pin The node's 6-digit pairing PIN, if known. Where the platform allows it, the PIN request is answered
+     *   with it instead of asking the user; otherwise it is ignored and the OS asks as usual.
+     */
+    suspend fun bond(device: BleDevice, pin: String? = null)
 }
 
 /** Represents the state of Bluetooth on the device. */

@@ -373,8 +373,10 @@
     <string name="debug_tab_app_logs">App logs</string>
     <string name="debug_tab_mirror">Mirror</string>
     <string name="debug_tab_packets">Packets</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">A link is asking this app to connect to the device at %1$s. Only continue if you trust where the link came from.</string>
     <string name="deep_link_connect_title">Connect to this device?</string>
+    <string name="deep_link_connect_with_pin_message">A link is asking this app to pair with the device at %1$s using PIN %2$s, then connect to it. The PIN is copied so you can paste it if asked. Only continue if you trust where the link came from.</string>
     <string name="deep_link_disconnect_message">A link is asking this app to disconnect from your device. Only continue if you trust where the link came from.</string>
     <string name="deep_link_disconnect_title">Disconnect from your device?</string>
     <string name="default_">Default</string>

@@ -43,6 +43,7 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
+import org.meshtastic.core.ble.MeshtasticBleDevice
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -247,10 +248,9 @@ open class ScannerViewModel(
      * `NsdManager.discoverServices()` is never triggered. Android 15+ shows a system consent dialog the first time
      * `resolvedList` is subscribed, so the gate ensures NSD only runs when the user explicitly requests it.
      */
-    private val gatedResolvedList =
-        _isNetworkScanning.flatMapLatest { scanning ->
-            if (scanning) networkRepository.resolvedList else flowOf(emptyList())
-        }
+    private val gatedResolvedList = _isNetworkScanning.flatMapLatest { scanning ->
+        if (scanning) networkRepository.resolvedList else flowOf(emptyList())
+    }
 
     private val discoveredDevicesFlow: StateFlow<DiscoveredDevices> =
         combine(showMockTransport, showReplayTransport, ::Pair)
@@ -588,17 +588,16 @@ open class ScannerViewModel(
         val generation = ++scanStartFailureCooldownGeneration
         scanStartFailureCooldownActive.value = true
         scanStartFailureCooldownJob?.cancel()
-        scanStartFailureCooldownJob =
-            viewModelScope.launch {
-                try {
-                    delay(cooldown)
-                } finally {
-                    if (scanStartFailureCooldownGeneration == generation) {
-                        scanStartFailureCooldownActive.value = false
-                        scanStartFailureCooldownJob = null
-                    }
+        scanStartFailureCooldownJob = viewModelScope.launch {
+            try {
+                delay(cooldown)
+            } finally {
+                if (scanStartFailureCooldownGeneration == generation) {
+                    scanStartFailureCooldownActive.value = false
+                    scanStartFailureCooldownJob = null
                 }
             }
+        }
     }
 
     /**
@@ -708,6 +707,22 @@ open class ScannerViewModel(
     }
 
     /**
+     * Connects to an [address] named by a confirmed deep link. A BLE address with a [pin] pairs first and answers the
+     * pairing request with [pin] (see [blePairingPinFor]); every other address connects directly.
+     */
+    fun connectToLinkedAddress(address: String, pin: String?) {
+        val linkPin = blePairingPinFor(address, pin)
+        if (linkPin == null) {
+            changeDeviceAddress(address)
+            return
+        }
+        stopAllScans()
+        recordSelectedTransport(address)
+        val device = MeshtasticBleDevice(address.removePrefix(BLE_DEVICE_PREFIX))
+        requestBonding(DeviceListEntry.Ble(device, bonded = false), linkPin)
+    }
+
+    /**
      * Called by the UI when a device has been tapped. BLE and USB entries may still need bonding/permission — the
      * concrete return value tells the caller whether the connection was initiated immediately.
      *
@@ -763,10 +778,10 @@ open class ScannerViewModel(
      * Initiates the bonding process and connects to the device upon success.
      *
      * The default implementation connects directly without explicit bonding, which is correct for Desktop/JVM where the
-     * OS Bluetooth stack handles pairing during the GATT connection. Android overrides this to call `createBond()`
-     * first.
+     * OS Bluetooth stack handles pairing during the GATT connection (and asks for any [pin] itself). Android overrides
+     * this to call `createBond()` first, answering the pairing request with [pin] when one is given.
      */
-    protected open fun requestBonding(entry: DeviceListEntry.Ble) {
+    protected open fun requestBonding(entry: DeviceListEntry.Ble, pin: String? = null) {
         changeDeviceAddress(entry.fullAddress)
     }
 

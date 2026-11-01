@@ -74,13 +74,13 @@ class AndroidScannerViewModel(
     bluetoothSupported = bluetoothRepository.isSupported,
     usbSupported = usbRepository.isSupported,
 ) {
-    override fun requestBonding(entry: DeviceListEntry.Ble) {
+    override fun requestBonding(entry: DeviceListEntry.Ble, pin: String?) {
         Logger.i { "Starting bonding for ${entry.device.address.anonymize}" }
         viewModelScope.launch {
             @Suppress("TooGenericExceptionCaught")
             val armTransport =
                 try {
-                    bluetoothRepository.bond(entry.device)
+                    bluetoothRepository.bond(entry.device, pin)
                     Logger.i { "Bonding complete for ${entry.device.address.anonymize}, selecting device..." }
                     true
                 } catch (ex: SecurityException) {

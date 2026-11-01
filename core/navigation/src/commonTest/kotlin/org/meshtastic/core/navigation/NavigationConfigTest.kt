@@ -42,6 +42,7 @@ class NavigationConfigTest {
             // ConnectionsRoute
             ConnectionsRoute.Connections(),
             ConnectionsRoute.Connections(address = "t192.168.1.1:4403"),
+            ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456"),
             // ContactsRoute
             ContactsRoute.Contacts,
             ContactsRoute.Messages(contactKey = "test-contact", message = "hello"),

@@ -134,7 +134,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
 }
 ```
 
-Route: `ConnectionsRoute.Connections(address: String? = null)`. A deep link to `connections?address=<prefixed address>` fills `address` and prompts to connect to that device.
+Route: `ConnectionsRoute.Connections(address: String? = null, pin: String? = null)`. A deep link to `connections?address=<prefixed address>` fills `address` and prompts to connect to that device. A BLE address may add `&pin=<6 digits>`: the prompt shows the PIN, Connect copies it to the clipboard (marked sensitive), and on Android the app pairs first, answering the PIN request itself where the OS allows (not on Android 17, where the system dialog asks and the PIN can be pasted).
 
 ## Dependency Graph
 
