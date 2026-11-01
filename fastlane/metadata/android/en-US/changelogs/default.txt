@@ -1,3 +1,3 @@
-Stability and reliability fixes.
+See a node's 3D model with its live screen, and the mesh in AR. A Quick Settings tile, Live Update notifications and a Node Tracker widget. Local display names for nodes. Nodes at one spot draw as one counted chip. Traceroutes other nodes ran to you. MQTT root topics near you. Per-install TAK certificates. No crash loop on a corrupt database. Many stability fixes.
 
 Full release notes: https://github.com/meshtastic/Meshtastic-Android/releases
