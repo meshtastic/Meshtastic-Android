@@ -76,7 +76,8 @@ jobs:
 
           // Path-based labels from changed files. `repo` and `build` are changelog
           // exclusions, so they only label a PR with no user-facing type.
-          const userFacing = labels.has('enhancement') || labels.has('bugfix');
+          const current = new Set(context.payload.pull_request.labels.map(l => l.name));
+          const userFacing = ['enhancement', 'bugfix'].some(l => labels.has(l) || current.has(l));
           const pathLabels = [
             { prefix: '.github/', label: 'repo', excluded: true },
             { prefix: 'build-logic/', label: 'build', excluded: true },
