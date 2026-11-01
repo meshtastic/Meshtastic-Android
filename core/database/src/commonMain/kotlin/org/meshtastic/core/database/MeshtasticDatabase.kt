@@ -157,8 +157,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         // 63 -> 64 is the manual MIGRATION_63_64 (log index added in place), applied via configureCommon().
         AutoMigration(from = 64, to = 65),
         AutoMigration(from = 65, to = 66),
+        AutoMigration(from = 66, to = 67),
     ],
-    version = 66,
+    version = 67,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)

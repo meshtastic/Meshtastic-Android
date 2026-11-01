@@ -1304,6 +1304,55 @@ class MeshDataHandlerTest {
     }
 
     @Test
+    fun `a reaction received via MQTT is persisted with its transport`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 98
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.via_mqtt = true
+                    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 98,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                viaMqtt = true,
+                transportMechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT.value,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(98) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        val reaction = assertNotNull(persistedReaction)
+        assertEquals(true, reaction.viaMqtt)
+        assertEquals(MeshPacket.TransportMechanism.TRANSPORT_MQTT.value, reaction.transportMechanism)
+    }
+
+    @Test
     fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
         val emoji = "+1"
         val packet =

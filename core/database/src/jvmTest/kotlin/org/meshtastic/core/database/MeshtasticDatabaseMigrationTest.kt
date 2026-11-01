@@ -137,23 +137,25 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            MAINTENANCE_UF2_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            assertEquals(
-                listOf("[{\"target\":\"rak4631\",\"variant\":\"7.3.0\"}]"),
-                queryColumn(connection, "SELECT soft_device_variants_json FROM bootloader_ota_quirks_cache"),
+        helper
+            .runMigrationsAndValidate(
+                MAINTENANCE_UF2_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            assertEquals(
-                listOf("[{\"hwModel\":\"HELTEC_V3\"}]"),
-                queryColumn(connection, "SELECT devices_json FROM bootloader_ota_quirks_cache"),
-            )
-            // The new table exists, is empty, and accepts the single row the repository writes.
-            assertTrue(queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache").isEmpty())
-            connection.execSQL("INSERT INTO maintenance_uf2_cache (id, manifest_json) VALUES (0, '{}')")
-            assertEquals(listOf("{}"), queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache"))
-        }
+            .use { connection ->
+                assertEquals(
+                    listOf("[{\"target\":\"rak4631\",\"variant\":\"7.3.0\"}]"),
+                    queryColumn(connection, "SELECT soft_device_variants_json FROM bootloader_ota_quirks_cache"),
+                )
+                assertEquals(
+                    listOf("[{\"hwModel\":\"HELTEC_V3\"}]"),
+                    queryColumn(connection, "SELECT devices_json FROM bootloader_ota_quirks_cache"),
+                )
+                // The new table exists, is empty, and accepts the single row the repository writes.
+                assertTrue(queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache").isEmpty())
+                connection.execSQL("INSERT INTO maintenance_uf2_cache (id, manifest_json) VALUES (0, '{}')")
+                assertEquals(listOf("{}"), queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache"))
+            }
     }
 
     /**
@@ -173,50 +175,52 @@ class MeshtasticDatabaseMigrationTest {
             connection.execSQL("INSERT INTO contact_settings (contact_key, muteUntil) VALUES ('0!abcdef01', 0)")
         }
 
-        helper.runMigrationsAndValidate(
-            DRAFT_COLUMN_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            assertEquals(
-                listOf("0!abcdef01", "0^all"),
-                queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+        helper
+            .runMigrationsAndValidate(
+                DRAFT_COLUMN_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            assertEquals(
-                listOf("9999"),
-                queryColumn(connection, "SELECT muteUntil FROM contact_settings " + "WHERE contact_key = '0^all'"),
-            )
-            assertEquals(
-                listOf("7"),
-                queryColumn(
-                    connection,
-                    "SELECT last_read_message_uuid FROM contact_settings " + "WHERE contact_key = '0^all'",
-                ),
-            )
-            assertEquals(
-                listOf("5000"),
-                queryColumn(
-                    connection,
-                    "SELECT last_read_message_timestamp FROM contact_settings " + "WHERE contact_key = '0^all'",
-                ),
-            )
-            assertEquals(
-                listOf("1"),
-                queryColumn(
-                    connection,
-                    "SELECT filtering_disabled FROM contact_settings " + "WHERE contact_key = '0^all'",
-                ),
-            )
-            // Empty, never NULL — blank is what the UI reads as "no draft".
-            assertEquals(
-                listOf("", ""),
-                queryColumn(connection, "SELECT draft FROM contact_settings ORDER BY contact_key"),
-            )
-            connection.execSQL("UPDATE contact_settings SET draft = 'half typed' WHERE contact_key = '0^all'")
-            assertEquals(
-                listOf("half typed"),
-                queryColumn(connection, "SELECT draft FROM contact_settings WHERE contact_key = '0^all'"),
-            )
-        }
+            .use { connection ->
+                assertEquals(
+                    listOf("0!abcdef01", "0^all"),
+                    queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+                )
+                assertEquals(
+                    listOf("9999"),
+                    queryColumn(connection, "SELECT muteUntil FROM contact_settings " + "WHERE contact_key = '0^all'"),
+                )
+                assertEquals(
+                    listOf("7"),
+                    queryColumn(
+                        connection,
+                        "SELECT last_read_message_uuid FROM contact_settings " + "WHERE contact_key = '0^all'",
+                    ),
+                )
+                assertEquals(
+                    listOf("5000"),
+                    queryColumn(
+                        connection,
+                        "SELECT last_read_message_timestamp FROM contact_settings " + "WHERE contact_key = '0^all'",
+                    ),
+                )
+                assertEquals(
+                    listOf("1"),
+                    queryColumn(
+                        connection,
+                        "SELECT filtering_disabled FROM contact_settings " + "WHERE contact_key = '0^all'",
+                    ),
+                )
+                // Empty, never NULL — blank is what the UI reads as "no draft".
+                assertEquals(
+                    listOf("", ""),
+                    queryColumn(connection, "SELECT draft FROM contact_settings ORDER BY contact_key"),
+                )
+                connection.execSQL("UPDATE contact_settings SET draft = 'half typed' WHERE contact_key = '0^all'")
+                assertEquals(
+                    listOf("half typed"),
+                    queryColumn(connection, "SELECT draft FROM contact_settings WHERE contact_key = '0^all'"),
+                )
+            }
     }
 
     /**
@@ -236,40 +240,42 @@ class MeshtasticDatabaseMigrationTest {
             connection.execSQL("INSERT INTO contact_settings (contact_key, muteUntil) VALUES ('0!abcdef01', 0)")
         }
 
-        helper.runMigrationsAndValidate(
-            PINNED_COLUMN_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            assertEquals(
-                listOf("0!abcdef01", "0^all"),
-                queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+        helper
+            .runMigrationsAndValidate(
+                PINNED_COLUMN_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            assertEquals(
-                listOf("9999"),
-                queryColumn(connection, "SELECT muteUntil FROM contact_settings WHERE contact_key = '0^all'"),
-            )
-            assertEquals(
-                listOf("5000"),
-                queryColumn(
-                    connection,
-                    "SELECT last_read_message_timestamp FROM contact_settings WHERE contact_key = '0^all'",
-                ),
-            )
-            assertEquals(
-                listOf("half typed"),
-                queryColumn(connection, "SELECT draft FROM contact_settings WHERE contact_key = '0^all'"),
-            )
-            // Nothing is pinned by upgrading; the list order users had is the order they keep.
-            assertEquals(
-                listOf("0", "0"),
-                queryColumn(connection, "SELECT pinned FROM contact_settings ORDER BY contact_key"),
-            )
-            connection.execSQL("UPDATE contact_settings SET pinned = 1 WHERE contact_key = '0^all'")
-            assertEquals(
-                listOf("1"),
-                queryColumn(connection, "SELECT pinned FROM contact_settings WHERE contact_key = '0^all'"),
-            )
-        }
+            .use { connection ->
+                assertEquals(
+                    listOf("0!abcdef01", "0^all"),
+                    queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+                )
+                assertEquals(
+                    listOf("9999"),
+                    queryColumn(connection, "SELECT muteUntil FROM contact_settings WHERE contact_key = '0^all'"),
+                )
+                assertEquals(
+                    listOf("5000"),
+                    queryColumn(
+                        connection,
+                        "SELECT last_read_message_timestamp FROM contact_settings WHERE contact_key = '0^all'",
+                    ),
+                )
+                assertEquals(
+                    listOf("half typed"),
+                    queryColumn(connection, "SELECT draft FROM contact_settings WHERE contact_key = '0^all'"),
+                )
+                // Nothing is pinned by upgrading; the list order users had is the order they keep.
+                assertEquals(
+                    listOf("0", "0"),
+                    queryColumn(connection, "SELECT pinned FROM contact_settings ORDER BY contact_key"),
+                )
+                connection.execSQL("UPDATE contact_settings SET pinned = 1 WHERE contact_key = '0^all'")
+                assertEquals(
+                    listOf("1"),
+                    queryColumn(connection, "SELECT pinned FROM contact_settings WHERE contact_key = '0^all'"),
+                )
+            }
     }
 
     /**
@@ -336,8 +342,6 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
-    /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
-
     /**
      * 57→58 adds `nodes.heard_on_current_lora`, which gates whether a node is shown as unreachable and offered for
      * removal. It defaults to 1 precisely so rows written before the column existed are never flagged: a default of 0
@@ -362,22 +366,27 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            HEARD_ON_LORA_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            // Both rows survive, and neither reads as unheard.
-            assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
-            assertEquals(
-                listOf("1", "1"),
-                queryColumn(connection, "SELECT heard_on_current_lora FROM nodes ORDER BY num"),
+        helper
+            .runMigrationsAndValidate(
+                HEARD_ON_LORA_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            // Pre-existing values are untouched by the column addition.
-            assertEquals(listOf("Minnie Mouse"), queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"))
-            assertEquals(listOf("keep me"), queryColumn(connection, "SELECT notes FROM nodes WHERE num = 42"))
-            assertEquals(listOf("1"), queryColumn(connection, "SELECT is_favorite FROM nodes WHERE num = 42"))
-            assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
-        }
+            .use { connection ->
+                // Both rows survive, and neither reads as unheard.
+                assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
+                assertEquals(
+                    listOf("1", "1"),
+                    queryColumn(connection, "SELECT heard_on_current_lora FROM nodes ORDER BY num"),
+                )
+                // Pre-existing values are untouched by the column addition.
+                assertEquals(
+                    listOf("Minnie Mouse"),
+                    queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"),
+                )
+                assertEquals(listOf("keep me"), queryColumn(connection, "SELECT notes FROM nodes WHERE num = 42"))
+                assertEquals(listOf("1"), queryColumn(connection, "SELECT is_favorite FROM nodes WHERE num = 42"))
+                assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
+            }
     }
 
     /**
@@ -406,25 +415,30 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            KEY_MATCH_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            // Both rows survive; neither reads as a mismatch, and neither has a refused key to report.
-            assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
-            assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT key_match FROM nodes ORDER BY num"))
-            assertEquals(
-                listOf<String?>(null, null),
-                queryColumn(connection, "SELECT new_public_key FROM nodes ORDER BY num"),
+        helper
+            .runMigrationsAndValidate(
+                KEY_MATCH_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            // The stored key is exactly what was written; the column addition touched nothing.
-            assertEquals(
-                listOf(storedKeyHex.uppercase()),
-                queryColumn(connection, "SELECT hex(public_key) FROM nodes WHERE num = 42"),
-            )
-            assertEquals(listOf("Minnie Mouse"), queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"))
-            assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
-        }
+            .use { connection ->
+                // Both rows survive; neither reads as a mismatch, and neither has a refused key to report.
+                assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
+                assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT key_match FROM nodes ORDER BY num"))
+                assertEquals(
+                    listOf<String?>(null, null),
+                    queryColumn(connection, "SELECT new_public_key FROM nodes ORDER BY num"),
+                )
+                // The stored key is exactly what was written; the column addition touched nothing.
+                assertEquals(
+                    listOf(storedKeyHex.uppercase()),
+                    queryColumn(connection, "SELECT hex(public_key) FROM nodes WHERE num = 42"),
+                )
+                assertEquals(
+                    listOf("Minnie Mouse"),
+                    queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"),
+                )
+                assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
+            }
     }
 
     /**
@@ -528,41 +542,46 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            IS_MAKER_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
-            assertEquals(
-                listOf("heltec-v3", "rak4631"),
-                queryColumn(connection, "SELECT platformio_target FROM device_hardware ORDER BY platformio_target"),
+        helper
+            .runMigrationsAndValidate(
+                IS_MAKER_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
             )
-            assertEquals(
-                listOf("1", "0"),
-                queryColumn(connection, "SELECT actively_supported FROM device_hardware ORDER BY platformio_target"),
-            )
-            assertEquals(
-                listOf("1", null),
-                queryColumn(connection, "SELECT support_level FROM device_hardware ORDER BY platformio_target"),
-            )
-            assertEquals(
-                listOf("[\"Heltec\"]", null),
-                queryColumn(connection, "SELECT tags FROM device_hardware ORDER BY platformio_target"),
-            )
-            assertEquals(
-                listOf(null, "1"),
-                queryColumn(connection, "SELECT requires_dfu FROM device_hardware ORDER BY platformio_target"),
-            )
-            // 0, never NULL - the resolver reads an absent flag as not maker.
-            assertEquals(
-                listOf("0", "0"),
-                queryColumn(connection, "SELECT is_maker FROM device_hardware ORDER BY platformio_target"),
-            )
-            connection.execSQL("UPDATE device_hardware SET is_maker = 1 WHERE platformio_target = 'rak4631'")
-            assertEquals(
-                listOf("1"),
-                queryColumn(connection, "SELECT is_maker FROM device_hardware WHERE platformio_target = 'rak4631'"),
-            )
-        }
+            .use { connection ->
+                assertEquals(
+                    listOf("heltec-v3", "rak4631"),
+                    queryColumn(connection, "SELECT platformio_target FROM device_hardware ORDER BY platformio_target"),
+                )
+                assertEquals(
+                    listOf("1", "0"),
+                    queryColumn(
+                        connection,
+                        "SELECT actively_supported FROM device_hardware ORDER BY platformio_target",
+                    ),
+                )
+                assertEquals(
+                    listOf("1", null),
+                    queryColumn(connection, "SELECT support_level FROM device_hardware ORDER BY platformio_target"),
+                )
+                assertEquals(
+                    listOf("[\"Heltec\"]", null),
+                    queryColumn(connection, "SELECT tags FROM device_hardware ORDER BY platformio_target"),
+                )
+                assertEquals(
+                    listOf(null, "1"),
+                    queryColumn(connection, "SELECT requires_dfu FROM device_hardware ORDER BY platformio_target"),
+                )
+                // 0, never NULL - the resolver reads an absent flag as not maker.
+                assertEquals(
+                    listOf("0", "0"),
+                    queryColumn(connection, "SELECT is_maker FROM device_hardware ORDER BY platformio_target"),
+                )
+                connection.execSQL("UPDATE device_hardware SET is_maker = 1 WHERE platformio_target = 'rak4631'")
+                assertEquals(
+                    listOf("1"),
+                    queryColumn(connection, "SELECT is_maker FROM device_hardware WHERE platformio_target = 'rak4631'"),
+                )
+            }
     }
 
     /**
@@ -578,17 +597,41 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            REACTION_AUTH_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_52_53),
-        ).use { connection ->
+        helper
+            .runMigrationsAndValidate(
+                REACTION_AUTH_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_52_53),
+            )
+            .use { connection ->
+                val row = "FROM reactions WHERE reply_id = 1001"
+                assertEquals(listOf("2002"), queryColumn(connection, "SELECT packet_id $row"))
+                assertEquals(listOf("3"), queryColumn(connection, "SELECT status $row"))
+                assertEquals(listOf("1"), queryColumn(connection, "SELECT relays $row"))
+                assertEquals(listOf("!0000beef"), queryColumn(connection, "SELECT `to` $row"))
+                assertEquals(listOf("0"), queryColumn(connection, "SELECT xeddsa_signed $row"))
+                assertEquals(listOf("0"), queryColumn(connection, "SELECT ack_proof_status $row"))
+            }
+    }
+
+    /**
+     * 66→67 adds `reactions.via_mqtt` and `reactions.transport_mechanism`. A stored reaction reads as not via MQTT with
+     * a NULL transport, so it gets no transport badge rather than TRANSPORT_INTERNAL's.
+     */
+    @Test
+    fun reactionTransportColumnsAddedWithoutDisturbingReactions() = runTest {
+        helper.createDatabase(REACTION_TRANSPORT_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO reactions (myNodeNum, reply_id, user_id, emoji, timestamp, packet_id, hopsAway) " +
+                    "VALUES (7, 1001, '!0000abcd', '👍', 5000, 2002, 2)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(REACTION_TRANSPORT_TO_VERSION, MANUAL_MIGRATIONS).use { connection ->
             val row = "FROM reactions WHERE reply_id = 1001"
             assertEquals(listOf("2002"), queryColumn(connection, "SELECT packet_id $row"))
-            assertEquals(listOf("3"), queryColumn(connection, "SELECT status $row"))
-            assertEquals(listOf("1"), queryColumn(connection, "SELECT relays $row"))
-            assertEquals(listOf("!0000beef"), queryColumn(connection, "SELECT `to` $row"))
-            assertEquals(listOf("0"), queryColumn(connection, "SELECT xeddsa_signed $row"))
-            assertEquals(listOf("0"), queryColumn(connection, "SELECT ack_proof_status $row"))
+            assertEquals(listOf("2"), queryColumn(connection, "SELECT hopsAway $row"))
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT via_mqtt $row"))
+            assertEquals(listOf(null), queryColumn(connection, "SELECT transport_mechanism $row"))
         }
     }
 
@@ -632,47 +675,49 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(
-            SCHEMA_64_TO_VERSION,
-            listOf(MeshtasticDatabase.MIGRATION_63_64),
-        ).use { connection ->
-            val logs = "FROM log ORDER BY received_date"
-            assertEquals(listOf("40", "7"), queryColumn(connection, "SELECT rowid $logs"))
-            assertEquals(listOf("log-a", "log-b"), queryColumn(connection, "SELECT uuid $logs"))
-            assertEquals(listOf("Packet", "LogRecord"), queryColumn(connection, "SELECT type $logs"))
-            assertEquals(listOf("1000", "2000"), queryColumn(connection, "SELECT received_date $logs"))
-            assertEquals(listOf("first", "second"), queryColumn(connection, "SELECT message $logs"))
-            assertEquals(listOf("42", "0"), queryColumn(connection, "SELECT from_num $logs"))
-            assertEquals(listOf("3", "0"), queryColumn(connection, "SELECT port_num $logs"))
-            val positions = "FROM traceroute_node_position WHERE log_uuid = 'log-a'"
-            assertEquals(listOf("77"), queryColumn(connection, "SELECT node_num $positions"))
-            assertEquals(listOf("0801"), queryColumn(connection, "SELECT hex(position) $positions"))
-            assertTrue(
-                "index_log_received_date" in queryColumn(connection, "SELECT name FROM pragma_index_list('log')"),
+        helper
+            .runMigrationsAndValidate(
+                SCHEMA_64_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_63_64),
             )
-            assertEquals(
-                listOf("received_date"),
-                queryColumn(connection, "SELECT name FROM pragma_index_info('index_log_received_date')"),
-            )
-            val deletePlan =
-                queryPlan(
-                    connection,
-                    "DELETE FROM log WHERE rowid IN (SELECT rowid FROM log WHERE received_date < 1500 LIMIT 100)",
+            .use { connection ->
+                val logs = "FROM log ORDER BY received_date"
+                assertEquals(listOf("40", "7"), queryColumn(connection, "SELECT rowid $logs"))
+                assertEquals(listOf("log-a", "log-b"), queryColumn(connection, "SELECT uuid $logs"))
+                assertEquals(listOf("Packet", "LogRecord"), queryColumn(connection, "SELECT type $logs"))
+                assertEquals(listOf("1000", "2000"), queryColumn(connection, "SELECT received_date $logs"))
+                assertEquals(listOf("first", "second"), queryColumn(connection, "SELECT message $logs"))
+                assertEquals(listOf("42", "0"), queryColumn(connection, "SELECT from_num $logs"))
+                assertEquals(listOf("3", "0"), queryColumn(connection, "SELECT port_num $logs"))
+                val positions = "FROM traceroute_node_position WHERE log_uuid = 'log-a'"
+                assertEquals(listOf("77"), queryColumn(connection, "SELECT node_num $positions"))
+                assertEquals(listOf("0801"), queryColumn(connection, "SELECT hex(position) $positions"))
+                assertTrue(
+                    "index_log_received_date" in queryColumn(connection, "SELECT name FROM pragma_index_list('log')"),
                 )
-            assertTrue(deletePlan.any { "index_log_received_date" in it }, deletePlan.toString())
+                assertEquals(
+                    listOf("received_date"),
+                    queryColumn(connection, "SELECT name FROM pragma_index_info('index_log_received_date')"),
+                )
+                val deletePlan =
+                    queryPlan(
+                        connection,
+                        "DELETE FROM log WHERE rowid IN (SELECT rowid FROM log WHERE received_date < 1500 LIMIT 100)",
+                    )
+                assertTrue(deletePlan.any { "index_log_received_date" in it }, deletePlan.toString())
 
-            val byId = "FROM discovered_node ORDER BY id"
-            assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT id $byId"))
-            assertEquals(listOf("99", "100"), queryColumn(connection, "SELECT node_num $byId"))
-            assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT preset_result_id $byId"))
-            assertEquals(listOf("0.0", "-7.5"), queryColumn(connection, "SELECT snr $byId"))
-            assertEquals(listOf(null, "-80"), queryColumn(connection, "SELECT rssi $byId"))
-            assertEquals(listOf("mesh", "direct"), queryColumn(connection, "SELECT neighbor_type $byId"))
-            assertEquals(listOf(null, "Relay"), queryColumn(connection, "SELECT long_name $byId"))
-            assertEquals(listOf("0", "3"), queryColumn(connection, "SELECT message_count $byId"))
-            connection.execSQL("UPDATE discovered_node SET snr = NULL WHERE id = 1")
-            assertEquals(listOf(null), queryColumn(connection, "SELECT snr FROM discovered_node WHERE id = 1"))
-        }
+                val byId = "FROM discovered_node ORDER BY id"
+                assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT id $byId"))
+                assertEquals(listOf("99", "100"), queryColumn(connection, "SELECT node_num $byId"))
+                assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT preset_result_id $byId"))
+                assertEquals(listOf("0.0", "-7.5"), queryColumn(connection, "SELECT snr $byId"))
+                assertEquals(listOf(null, "-80"), queryColumn(connection, "SELECT rssi $byId"))
+                assertEquals(listOf("mesh", "direct"), queryColumn(connection, "SELECT neighbor_type $byId"))
+                assertEquals(listOf(null, "Relay"), queryColumn(connection, "SELECT long_name $byId"))
+                assertEquals(listOf("0", "3"), queryColumn(connection, "SELECT message_count $byId"))
+                connection.execSQL("UPDATE discovered_node SET snr = NULL WHERE id = 1")
+                assertEquals(listOf(null), queryColumn(connection, "SELECT snr FROM discovered_node WHERE id = 1"))
+            }
     }
 
     /** The `detail` column of `EXPLAIN QUERY PLAN` for [sql], one entry per plan step. */
@@ -685,6 +730,7 @@ class MeshtasticDatabaseMigrationTest {
             }
         }
 
+    /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -725,6 +771,8 @@ class MeshtasticDatabaseMigrationTest {
         const val REACTION_AUTH_TO_VERSION = 63
         const val SCHEMA_64_FROM_VERSION = 63
         const val SCHEMA_64_TO_VERSION = 64
+        const val REACTION_TRANSPORT_FROM_VERSION = 66
+        const val REACTION_TRANSPORT_TO_VERSION = 67
         const val QUERY_PLAN_DETAIL_COLUMN = 3
 
         /** Every hand-written migration, which a walk across 52→53 or 63→64 must be given. */

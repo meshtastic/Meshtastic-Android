@@ -659,6 +659,8 @@ class MeshDataHandlerImpl(
                     to = toId,
                     channel = dataPacket.channel,
                     xeddsaSigned = packet.xeddsa_signed,
+                    viaMqtt = dataPacket.viaMqtt,
+                    transportMechanism = dataPacket.transportMechanism,
                 )
 
             // Check for duplicates before inserting

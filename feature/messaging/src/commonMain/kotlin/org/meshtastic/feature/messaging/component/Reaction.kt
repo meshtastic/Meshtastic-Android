@@ -70,6 +70,7 @@ import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.HopCount
@@ -332,8 +333,16 @@ internal fun ReactionDialog(
                     // Local reactions now carry a null rssi; pre-schema-51 rows stored 0, so a legacy
                     // 0 dBm reading stays indistinguishable from "no reading" and remains hidden.
                     val isLocalOrPreDbUpdateReaction = reaction.rssi == null || reaction.rssi == 0
+                    reaction.transportMechanism?.let { transport ->
+                        TransportIcon(
+                            transport = transport,
+                            viaMqtt = reaction.viaMqtt,
+                            modifier = Modifier.padding(end = 6.dp).size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     if (!isLocalOrPreDbUpdateReaction) {
-                        if (reaction.hopsAway == 0) {
+                        if (reaction.hopsAway == 0 && !reaction.viaMqtt) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Snr(reaction.snr)
                                 Rssi(reaction.rssi)

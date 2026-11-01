@@ -567,6 +567,8 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         sfpp_hash = sfppHash,
         xeddsaSigned = xeddsaSigned,
         ackProofStatus = ackProofStatus,
+        viaMqtt = viaMqtt,
+        transportMechanism = transportMechanism,
     )
 
     override fun searchMessages(query: String, contactKey: String?, getNode: (String?) -> Node): Flow<List<Message>> {
