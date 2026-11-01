@@ -49,7 +49,6 @@ data class LocalStatsWidgetUiState(
     // Battery
     val batteryLevel: Int = 0,
     val hasBattery: Boolean = false,
-    val batteryProgress: Float = 0f,
 
     // Utilization
     val channelUtilization: Float = 0f,
@@ -134,7 +133,6 @@ class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, connectionSt
             nodeColors = localNode?.colors,
             batteryLevel = batteryLevel,
             hasBattery = metrics?.battery_level != null,
-            batteryProgress = (batteryLevel / 100f).coerceIn(0f, 1f),
             channelUtilization = channelUtil,
             channelUtilizationProgress = (channelUtil / 100f).coerceIn(0f, 1f),
             airUtilization = airUtilTx,

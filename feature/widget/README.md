@@ -20,9 +20,10 @@ The `:feature:widget` module holds the **Android-only Jetpack Glance home-screen
 
 ```text
 src/main/kotlin/org/meshtastic/feature/widget/
-├── WidgetSizes.kt                   ← responsive breakpoints shared by both widgets
-├── LocalStatsWidget.kt              ← GlanceAppWidget, title bar and full layout
-├── LocalStatsLayouts.kt             ← one-row and square layouts, shared rows
+├── WidgetSizes.kt                   ← responsive breakpoints and type scale shared by both widgets
+├── WidgetComponents.kt              ← brand header, identity row, stat and bar rows, status body
+├── LocalStatsWidget.kt              ← GlanceAppWidget, header and refresh
+├── LocalStatsLayouts.kt             ← one layout per breakpoint
 ├── LocalStatsWidgetReceiver.kt      ← GlanceAppWidgetReceiver
 ├── LocalStatsWidgetState.kt         ← LocalStatsWidgetUiState + StateProvider
 ├── NodeTrackerWidget.kt             ← GlanceAppWidget, readings, not-found state
@@ -45,9 +46,9 @@ Each instance stores its node number under `TRACKED_NODE_NUM_KEY` in its Glance 
 
 | Size | Data shown |
 |---|---|
-| Under 100 dp tall (2x1 on a Pixel) | Node chip, battery, long name, last heard; wide adds the labels |
-| 100 to 180 dp tall, narrow | Node chip, long name, battery, last heard |
-| Tall or wide | Adds SNR and RSSI (direct, non-MQTT nodes only), hops away, distance (only while connected); larger text at two rows |
+| One row (2x1 on a Pixel) | Mark, node chip, battery, long name, last heard; wide adds hops |
+| 100 to 180 dp tall | Header, chip and battery, long name, last heard; wide adds hops |
+| Two rows and up | Header, chip and battery, long name, then the first four of last heard, hops, distance (only while connected), SNR and RSSI (direct, non-MQTT nodes only); three rows show all five |
 
 `nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window renders dimmed; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
 
@@ -59,15 +60,16 @@ The widget shows the following information when connected:
 
 | Section | Data shown |
 |---|---|
-| Node identity | Short name chip with node colors |
-| Battery | Level percentage + progress bar |
+| Node identity | Short name chip with node colors, battery as the hero value |
 | Channel utilization | Percentage + progress bar |
 | Air utilization | Percentage + progress bar |
-| Traffic | TX / RX packet counts, duplicates, relay TX, relay canceled, dropped, bad RX |
-| Diagnostics | Noise floor (dBm), free heap / total heap |
-| Footer | Online nodes / total nodes, device uptime, last-updated timestamp |
+| Nodes and uptime | Online nodes / total nodes, device uptime to the minute |
+| Traffic | TX / RX, noise floor; relays / canceled at three rows |
+| Diagnostics | Bad / dropped, free memory, last-updated time (three rows, wide) |
 
-Smaller sizes drop sections from the bottom of that list. One row shows the chip, battery, channel utilization and nodes online. Below two rows there is no refresh button, traffic or diagnostics. Heap needs three rows. There is no title bar; the refresh button sits at the end of the chip row.
+Smaller sizes drop rows from the bottom of that list. One row shows the mark, chip, battery and channel utilization, plus nodes online when wide. The refresh button sits in the header only at two rows and two-plus cells wide, where the title leaves room for it; elsewhere tapping the widget opens the app.
+
+Both widgets share one design: a header with the theme-tinted Meshtastic mark and the widget's name (one-row sizes lead their row with the mark instead), the node chip with battery beside it, and the same stat rows and type scale (`WidgetSizes.Type`). A stale tracked node keeps its chip colors and greys its values.
 
 When not connected, the widget shows the app icon (a progress spinner while connecting) and the connection status: **Disconnected**, **Connecting**, or **Device sleeping**.
 
@@ -86,7 +88,6 @@ data class LocalStatsWidgetUiState(
     // Battery
     val batteryLevel: Int,
     val hasBattery: Boolean,
-    val batteryProgress: Float,
     // Utilization
     val channelUtilization: Float, val channelUtilizationProgress: Float,
     val airUtilization: Float, val airUtilizationProgress: Float,
@@ -96,7 +97,7 @@ data class LocalStatsWidgetUiState(
     val numRxDupe: Int, val numTxRelay: Int, val numTxRelayCanceled: Int,
     val numTxDropped: Int, val numPacketsRxBad: Int,
     // Diagnostics
-    val noiseFloor: Int,
+    val noiseFloor: Int?,
     val heapFreeBytes: Int, val heapTotalBytes: Int,
     // Footer
     val totalNodes: Int, val onlineNodes: Int,

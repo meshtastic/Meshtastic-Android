@@ -23,21 +23,16 @@ import android.net.Uri
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
@@ -53,40 +48,22 @@ import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.currentState
-import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
-import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
-import androidx.glance.layout.width
-import androidx.glance.semantics.semantics
-import androidx.glance.semantics.testTag
-import androidx.glance.text.FontWeight
-import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.meshtastic.core.common.util.DateFormatter
-import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.node_sort_last_heard
-import org.meshtastic.core.resources.powered
-import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_error
 import org.meshtastic.core.resources.widget_node_tracker_not_found
+import org.meshtastic.core.resources.widget_node_tracker_title
 
 /** Tracks one node the user picked: battery, signal, last heard, hops away and distance from our radio. */
 class NodeTrackerWidget :
@@ -138,6 +115,8 @@ class NodeTrackerWidget :
     @Composable
     internal fun WidgetContent(state: NodeTrackerWidgetState, appWidgetId: Int) {
         val context = LocalContext.current
+        val size = LocalSize.current
+        val oneRow = size.height < WidgetSizes.SQUARE.height
         val onClick =
             when (state) {
                 is NodeTrackerWidgetState.Tracking -> openNodeDetail(context, state.nodeNum)
@@ -147,9 +126,24 @@ class NodeTrackerWidget :
         WidgetResourceEnvironment {
             GlanceTheme {
                 Scaffold(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
-                    when (state) {
-                        NodeTrackerWidgetState.NodeNotFound -> NotFound()
-                        is NodeTrackerWidgetState.Tracking -> TrackerContent(state)
+                    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 6.dp)) {
+                        if (!oneRow) {
+                            WidgetHeader(
+                                title = stringResource(Res.string.widget_node_tracker_title),
+                                compact = size.height < WidgetSizes.TALL.height,
+                            )
+                            Spacer(GlanceModifier.height(4.dp))
+                        }
+                        when (state) {
+                            NodeTrackerWidgetState.NodeNotFound ->
+                                StatusBody(
+                                    text = stringResource(Res.string.widget_node_tracker_not_found),
+                                    connecting = false,
+                                    oneRow = oneRow,
+                                )
+
+                            is NodeTrackerWidgetState.Tracking -> TrackerContent(state)
+                        }
                     }
                 }
             }
@@ -173,126 +167,6 @@ class NodeTrackerWidget :
         private const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
     }
 }
-
-private const val MAX_BATTERY_PERCENT = 100
-
-@Composable
-internal fun Identity(
-    state: NodeTrackerWidgetState.Tracking,
-    modifier: GlanceModifier = GlanceModifier,
-    nameGap: Dp = 4.dp,
-) {
-    Column(modifier = modifier) {
-        WidgetNodeChip(shortName = state.shortName, colors = state.colors, dimmed = state.isStale)
-        Spacer(GlanceModifier.height(nameGap))
-        Text(
-            text = state.longName,
-            maxLines = 1,
-            style = TextStyle(color = valueColor(state.isStale), fontSize = 13.sp, fontWeight = FontWeight.Bold),
-        )
-    }
-}
-
-@Composable
-internal fun BatteryLine(state: NodeTrackerWidgetState.Tracking, large: Boolean = false) {
-    val value = batteryValue(state) ?: return
-    StatLine(stringResource(Res.string.battery), value, state.isStale, large)
-}
-
-@Composable
-internal fun batteryValue(state: NodeTrackerWidgetState.Tracking): String? {
-    val level = state.batteryLevel ?: return null
-    return if (level > MAX_BATTERY_PERCENT) stringResource(Res.string.powered) else MetricFormatter.percent(level)
-}
-
-@Composable
-internal fun LastHeardLine(state: NodeTrackerWidgetState.Tracking, large: Boolean = false) {
-    StatLine(stringResource(Res.string.node_sort_last_heard), lastHeardValue(state), state.isStale, large)
-}
-
-// An absolute time, because a relative "5 min ago" would freeze between widget updates and go on reading fresh.
-@Composable
-internal fun lastHeardValue(state: NodeTrackerWidgetState.Tracking): String = if (state.lastHeard > 0) {
-    DateFormatter.formatShortDate(state.lastHeard.toLong() * TimeConstants.MS_PER_SEC)
-} else {
-    stringResource(Res.string.unknown)
-}
-
-@Composable
-internal fun StatLine(label: String, value: String, isStale: Boolean, large: Boolean = false) {
-    Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(vertical = if (large) 2.dp else 1.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            maxLines = 1,
-            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = if (large) 12.sp else 11.sp),
-            modifier = GlanceModifier.defaultWeight(),
-        )
-        Text(
-            text = value,
-            maxLines = 1,
-            style =
-            TextStyle(
-                color = valueColor(isStale),
-                fontSize = if (large) 14.sp else 12.sp,
-                fontWeight = FontWeight.Medium,
-            ),
-        )
-    }
-}
-
-@Composable
-private fun NotFound() {
-    val label = stringResource(Res.string.widget_node_tracker_not_found)
-    if (LocalSize.current.height < WidgetSizes.SQUARE.height) {
-        Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                provider = ImageProvider(R.drawable.widget_app_icon),
-                contentDescription = null,
-                modifier = GlanceModifier.size(24.dp),
-            )
-            Spacer(GlanceModifier.width(8.dp))
-            Text(
-                text = label,
-                maxLines = 2,
-                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 11.sp),
-            )
-        }
-        return
-    }
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(
-            provider = ImageProvider(R.drawable.widget_app_icon),
-            contentDescription = null,
-            modifier = GlanceModifier.size(32.dp),
-        )
-        Spacer(GlanceModifier.height(6.dp))
-        Text(
-            text = label,
-            style =
-            TextStyle(
-                color = GlanceTheme.colors.onSurfaceVariant,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-            ),
-        )
-    }
-}
-
-@Composable
-@ReadOnlyComposable
-internal fun valueColor(isStale: Boolean): ColorProvider =
-    if (isStale) GlanceTheme.colors.outline else GlanceTheme.colors.onSurface
-
-internal fun GlanceModifier.staleTag(state: NodeTrackerWidgetState.Tracking): GlanceModifier =
-    if (state.isStale) semantics { testTag = NodeTrackerWidget.STALE_TEST_TAG } else this
 
 @Suppress("MagicNumber")
 internal fun createMockTrackerState() = NodeTrackerWidgetState.Tracking(

@@ -18,6 +18,7 @@ package org.meshtastic.feature.widget
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.SizeMode
 
 /**
@@ -26,14 +27,25 @@ import androidx.glance.appwidget.SizeMode
  * smallest cell span it has to catch: one row is 51dp tall in landscape, two cells 130dp wide in portrait.
  */
 internal object WidgetSizes {
-    val ROW = DpSize(110.dp, 48.dp)
+    val ROW = DpSize(130.dp, 48.dp)
     val WIDE_ROW = DpSize(200.dp, 48.dp)
-    val SQUARE = DpSize(110.dp, 100.dp)
+    val SQUARE = DpSize(130.dp, 100.dp)
     val WIDE = DpSize(200.dp, 100.dp)
-    val TALL = DpSize(110.dp, 180.dp)
+    val TALL = DpSize(130.dp, 180.dp)
     val BIG = DpSize(200.dp, 180.dp)
-    val EXTRA_TALL = DpSize(110.dp, 260.dp)
+    val EXTRA_TALL = DpSize(130.dp, 260.dp)
     val EXTRA_BIG = DpSize(200.dp, 260.dp)
+
+    /** The type scale both widgets share, so the same reading is the same size in either widget. */
+    object Type {
+        val title = 14.sp
+        val compactTitle = 12.sp
+        val label = 12.sp
+        val value = 13.sp
+        val hero = 22.sp
+        val heroWord = 16.sp
+        val footnote = 11.sp
+    }
 
     val responsive = SizeMode.Responsive(setOf(ROW, WIDE_ROW, SQUARE, WIDE, TALL, BIG, EXTRA_TALL, EXTRA_BIG))
 }

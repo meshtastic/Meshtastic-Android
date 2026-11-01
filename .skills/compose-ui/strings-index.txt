@@ -2163,8 +2163,14 @@ website
 weight
 what_is_meshtastic
 what_is_meshtastic_description
+### WIDGET ###
+widget_bad_dropped
 widget_node_tracker_choose
 widget_node_tracker_not_found
+widget_node_tracker_title
+widget_pair_value
+widget_relays_canceled
+widget_traffic
 ### WIFI ###
 wifi_config
 wifi_devices
