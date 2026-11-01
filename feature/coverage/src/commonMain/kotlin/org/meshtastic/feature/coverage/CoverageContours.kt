@@ -27,67 +27,16 @@ import kotlin.math.roundToLong
  * This is the shape a map can actually draw coverage with, and the shape the hosted Site Planner exports. Emitting the
  * sample points instead produces a swarm of markers that the map clusters, which is what the first version did.
  *
- * Marching squares, tracing each band's boundary cell by cell. Deliberately simple: cells at or above the threshold
- * contribute their own square to the band, so the result is a union of cell rectangles rather than a smoothed isoline.
- * At ~100 m cells that reads as a solid coverage area, and it avoids the ambiguous-saddle handling a true isoline
- * tracer needs.
+ * Bands do not overlap: nested fills would paint over each other and hide the chosen colors, and a single overlay
+ * transparency is only meaningful when each pixel is painted once. See [bandPolygons].
  */
-internal fun CoverageGrid.bands(ranges: List<ClosedFloatingPointRange<Double>>): List<CoverageBand> = ranges
-    .map { range ->
-        val rings = mutableListOf<List<Pair<Double, Double>>>()
-        // Greedily merge horizontal runs of in-band cells into rectangles: far fewer polygons than
-        // one per cell, and the map renders a handful of rings rather than thousands.
-        val taken = BooleanArray(width * height)
-        for (y in 0 until height) {
-            var x = 0
-            while (x < width) {
-                if (taken[y * width + x] || !inBand(x, y, range)) {
-                    x++
-                    continue
-                }
-                var runEnd = x
-                while (runEnd + 1 < width && !taken[y * width + runEnd + 1] && inBand(runEnd + 1, y, range)) {
-                    runEnd++
-                }
-                // Extend downwards while the whole run stays in band.
-                var runBottom = y
-                while (
-                    runBottom + 1 < height &&
-                    (x..runEnd).all { inBand(it, runBottom + 1, range) } &&
-                    (x..runEnd).none { taken[(runBottom + 1) * width + it] }
-                ) {
-                    runBottom++
-                }
-                for (yy in y..runBottom) {
-                    for (xx in x..runEnd) taken[yy * width + xx] = true
-                }
-                rings.add(
-                    listOf(
-                        lonAt(x - HALF_CELL) to latAt(y - HALF_CELL),
-                        lonAt(runEnd + HALF_CELL) to latAt(y - HALF_CELL),
-                        lonAt(runEnd + HALF_CELL) to latAt(runBottom + HALF_CELL),
-                        lonAt(x - HALF_CELL) to latAt(runBottom + HALF_CELL),
-                        lonAt(x - HALF_CELL) to latAt(y - HALF_CELL),
-                    ),
-                )
-                x = runEnd + 1
-            }
-        }
-        CoverageBand(range.start, rings)
-    }
-    .filter { it.rings.isNotEmpty() }
-
-/**
- * Bands do not overlap: each cell belongs to exactly one. Nested fills would paint over each other and hide the chosen
- * colors, and a single overlay transparency is only meaningful when each pixel is painted once.
- */
-private fun CoverageGrid.inBand(x: Int, y: Int, range: ClosedFloatingPointRange<Double>): Boolean {
-    val v = at(x, y)
-    return !v.isNaN() && v >= range.start && v < range.endInclusive
+internal fun CoverageGrid.bands(floors: List<Double>): List<CoverageBand> {
+    val bands = floors.zip(bandPolygons(floors)) { floor, polygons -> CoverageBand(floor, polygons) }
+    return bands.filter { it.polygons.isNotEmpty() }
 }
 
 /** One iso-band, labeled by the weakest signal it contains. */
-internal class CoverageBand(val thresholdDbm: Double, val rings: List<List<Pair<Double, Double>>>)
+internal class CoverageBand(val thresholdDbm: Double, val polygons: List<CoveragePolygon>)
 
 /**
  * The coverage as GeoJSON polygons with simplestyle-spec fills: what the map draws as a layer.
@@ -97,17 +46,12 @@ internal class CoverageBand(val thresholdDbm: Double, val rings: List<List<Pair<
  */
 fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: Int = DEFAULT_BANDS): String {
     val step = (style.maxDbm - style.minDbm) / bandCount
-    // The strongest band runs to infinity: a cell above the picker's ceiling is still coverage, and
+    // The strongest band is open-ended: a cell above the picker's ceiling is still coverage, and
     // dropping it would punch a hole through the middle of the plot.
-    val ranges =
-        (0 until bandCount).map { index ->
-            val lower = style.minDbm + step * index
-            val upper = if (index == bandCount - 1) Double.POSITIVE_INFINITY else lower + step
-            lower..upper
-        }
+    val floors = (0 until bandCount).map { index -> style.minDbm + step * index }
 
     val features =
-        bands(ranges)
+        bands(floors)
             .map { band ->
                 // Spread across the band INDEX, not its lower bound. Coloring a band by where its
                 // floor sits samples the last one at 5/6, so the palette's brightest end never appears.
@@ -118,8 +62,12 @@ fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: In
                 // one level flatter makes a Polygon-with-holes wearing a MultiPolygon label, which MapLibre
                 // silently drops - the layer is added and nothing draws.
                 val polygons =
-                    band.rings.joinToString(",") { ring ->
-                        "[[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]]"
+                    band.polygons.joinToString(",") { polygon ->
+                        "[" +
+                            polygon.joinToString(",") { ring ->
+                                "[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]"
+                            } +
+                            "]"
                     }
                 """    {"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[$polygons]},""" +
                     """"properties":{"title":"\u2265 ${band.thresholdDbm.toFixed1()} dBm",""" +
@@ -142,7 +90,6 @@ $features
 """
 }
 
-private const val HALF_CELL = 0.5
 private const val DEFAULT_BANDS = 6
 private const val EMPTY_FEATURE_COLLECTION =
     """{"type":"FeatureCollection","properties":{"generator":"meshtastic-kp1812"},"features":[]}"""
