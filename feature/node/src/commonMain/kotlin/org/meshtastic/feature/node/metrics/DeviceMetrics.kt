@@ -86,6 +86,8 @@ import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
+import kotlin.math.ceil
+import kotlin.math.floor
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
@@ -319,10 +321,13 @@ private fun DeviceMetricsChart(
             object : CartesianLayerRangeProvider {
                 private fun effectiveMinY(minY: Double): Double = minOf(3.0, minY)
 
-                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double = effectiveMinY(minY)
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
+                    floor(effectiveMinY(minY) * 10) / 10
 
-                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
-                    if (maxY <= effectiveMinY(minY)) maxY + 1.0 else maxY
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+                    val effectiveMaxY = if (maxY <= effectiveMinY(minY)) maxY + 1.0 else maxY
+                    return ceil(effectiveMaxY * 10) / 10
+                }
             }
         }
         val leftLayer =
