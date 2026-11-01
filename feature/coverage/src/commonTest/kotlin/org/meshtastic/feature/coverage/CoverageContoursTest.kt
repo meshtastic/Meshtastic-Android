@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -52,22 +53,87 @@ class CoverageContoursTest {
     }
 
     @Test
-    fun mergedBandExtendsHalfACellBeyondEverySample() {
-        val grid =
-            CoverageGrid(
-                site = Site("Test", 10.0, 26.0, 915.0, 30.0, -130.0),
-                width = 2,
-                height = 2,
-                north = 12.0,
-                south = 8.0,
-                east = 32.0,
-                west = 20.0,
-                dbm = DoubleArray(4) { -90.0 },
+    fun theOuterEdgeOfAnEstimateIsACircleAtItsRadius() {
+        val grid = disc { -90.0 }
+
+        val ring = grid.bands(listOf(-130.0)).single().polygons.single().single()
+
+        // A cell is ~0.32 km here, so a staircase edge would miss the radius by up to ~0.2 km.
+        assertAllAtKm(ring, RADIUS_KM, tolerance = 0.02)
+    }
+
+    @Test
+    fun aBandEdgeFollowsTheThresholdBetweenSamples() {
+        // Signal falls 5 dB per km, so -85 dBm sits at exactly 5 km.
+        val grid = disc { km -> -60.0 - 5.0 * km }
+
+        val strong = grid.bands(listOf(-130.0, -85.0)).last()
+
+        assertAllAtKm(strong.polygons.single().single(), 5.0, tolerance = 0.05)
+    }
+
+    @Test
+    fun eachBandIsCutOutOfTheOneBelowSoTheyTileTheDisc() {
+        val grid = disc { km -> -60.0 - 5.0 * km }
+
+        val (weak, strong) = grid.bands(listOf(-130.0, -85.0))
+
+        val (outer, hole) = weak.polygons.single()
+        assertAllAtKm(outer, RADIUS_KM, tolerance = 0.02)
+        // The same points in the opposite direction: the bands share the edge exactly, with no gap or overlap.
+        val strongOuter = strong.polygons.single().single()
+        assertEquals(strongOuter.toSet(), hole.toSet())
+        assertEquals(-signedArea(strongOuter), signedArea(hole), absoluteTolerance = 1e-12)
+    }
+
+    @Test
+    fun aBandThatCoversTheWholeDiscLeavesTheBandBelowItEmpty() {
+        val grid = disc { -90.0 }
+
+        val bands = grid.bands(listOf(-130.0, -100.0))
+
+        assertEquals(listOf(-100.0), bands.map { it.thresholdDbm })
+    }
+
+    @Test
+    fun outerRingsRunCounterclockwiseAndHolesClockwise() {
+        val grid = disc { km -> -60.0 - 5.0 * km }
+
+        val (outer, hole) = grid.bands(listOf(-130.0, -85.0)).first().polygons.single()
+
+        assertTrue(signedArea(outer) > 0, "outer ring should be counterclockwise")
+        assertTrue(signedArea(hole) < 0, "hole should be clockwise")
+    }
+
+    private fun disc(dbmAtKm: (Double) -> Double): CoverageGrid {
+        val rings = 41
+        val step = RADIUS_KM / (rings - 1)
+        val polar =
+            PolarCoverage(
+                DISC_SITE,
+                RADIALS,
+                rings,
+                0.0,
+                step,
+                DoubleArray(RADIALS * rings) { dbmAtKm(it % rings * step) },
             )
+        return polar.toGrid(resolution = 64)
+    }
 
-        val ring = grid.bands(listOf(-130.0..-80.0)).single().rings.single()
+    private fun assertAllAtKm(ring: CoverageRing, km: Double, tolerance: Double) {
+        for ((lon, lat) in ring) {
+            val distance = haversineKm(DISC_SITE.latitude, DISC_SITE.longitude, lat, lon)
+            assertTrue(abs(distance - km) < tolerance, "point at $distance km, expected $km")
+        }
+    }
 
-        assertEquals(listOf(14.0 to 14.0, 38.0 to 14.0, 38.0 to 6.0, 14.0 to 6.0, 14.0 to 14.0), ring)
+    private fun signedArea(ring: CoverageRing): Double =
+        ring.zipWithNext { (x1, y1), (x2, y2) -> x1 * y2 - x2 * y1 }.sum() / 2
+
+    private companion object {
+        const val RADIUS_KM = 10.0
+        const val RADIALS = 180
+        val DISC_SITE = Site("Disc", 47.6, -122.2, 915.0, 30.0, -130.0, radiusKm = RADIUS_KM)
     }
 
     @Test
