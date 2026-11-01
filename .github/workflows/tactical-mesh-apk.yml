@@ -1,0 +1,33 @@
+name: Tactical Mesh Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ tactical-military-ui ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build F-Droid debug APK
+        run: ./gradlew :androidApp:assembleFdroidDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tactical-mesh-fdroid-debug
+          path: androidApp/build/outputs/apk/fdroid/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
