@@ -54,6 +54,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvi
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
@@ -85,6 +86,8 @@ import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
+import kotlin.math.ceil
+import kotlin.math.floor
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
@@ -314,6 +317,19 @@ private fun DeviceMetricsChart(
         }
 
         val percentRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0) }
+        val voltageRangeProvider = remember {
+            object : CartesianLayerRangeProvider {
+                private fun effectiveMinY(minY: Double): Double = minOf(3.0, minY)
+
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
+                    floor(effectiveMinY(minY) * 10) / 10
+
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+                    val effectiveMaxY = if (maxY <= effectiveMinY(minY)) maxY + 1.0 else maxY
+                    return ceil(effectiveMaxY * 10) / 10
+                }
+            }
+        }
         val leftLayer =
             rememberConditionalLayer(
                 hasData = leftLayerSeriesStyles.isNotEmpty(),
@@ -328,6 +344,7 @@ private fun DeviceMetricsChart(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(lineColor = voltageColor)),
                 verticalAxisPosition = Axis.Position.Vertical.End,
+                rangeProvider = voltageRangeProvider,
             )
 
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
