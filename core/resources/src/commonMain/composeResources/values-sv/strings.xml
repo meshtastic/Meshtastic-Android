@@ -235,6 +235,7 @@
     <string name="debug_store_logs_title">Spara meshnätsloggar</string>
     <string name="debug_tab_app_logs">Applikationsloggar</string>
     <string name="debug_tab_packets">Paket</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_title">Anslut till enheten?</string>
     <string name="deep_link_disconnect_title">Koppla från enheten?</string>
     <string name="default_">Förvald</string>

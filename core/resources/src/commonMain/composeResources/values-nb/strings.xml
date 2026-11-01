@@ -61,6 +61,7 @@
     <string name="copy">Kopier</string>
     <!-- DEBUG -->
     <string name="debug_panel">Feilsøkningspanel</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Slett</string>
     <string name="delete_for_everyone">Slett for alle brukere</string>

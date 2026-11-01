@@ -332,6 +332,7 @@
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_tab_app_logs">Sovelluslokitiedot</string>
     <string name="debug_tab_packets">Paketit</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Linkki osoitteessa %1$s pyytää tätä sovellusta muodostamaan yhteyden laitteeseen. Jatka vain, jos luotat linkin lähteeseen.</string>
     <string name="deep_link_connect_title">Muodostetaanko yhteys tähän laitteeseen?</string>
     <string name="deep_link_disconnect_message">Linkki pyytää tätä sovellusta katkaisemaan yhteyden laitteeseesi. Jatka vain, jos luotat linkin lähteeseen.</string>

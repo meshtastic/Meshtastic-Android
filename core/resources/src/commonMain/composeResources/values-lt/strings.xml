@@ -60,6 +60,7 @@
     <string name="copy">Kopijuoti</string>
     <!-- DEBUG -->
     <string name="debug_panel">Derinimo skydelis</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Ištrinti</string>
     <string name="delete_for_everyone">Ištrinti visiems</string>

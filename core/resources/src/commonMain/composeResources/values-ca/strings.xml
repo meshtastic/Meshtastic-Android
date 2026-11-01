@@ -49,6 +49,7 @@
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
     <!-- DEBUG -->
     <string name="debug_panel">Panell de depuració</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Esborrar</string>
     <string name="delete_for_everyone">Esborrar per a tothom</string>

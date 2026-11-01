@@ -165,6 +165,7 @@
     <string name="debug_search_clear">Keresés törlése</string>
     <string name="debug_search_next">Következő találat</string>
     <string name="debug_search_prev">Előző találat</string>
+    <!-- DEEP -->
     <string name="default_">Alapértelmezett</string>
     <!-- DELETE -->
     <string name="delete">Törlés</string>

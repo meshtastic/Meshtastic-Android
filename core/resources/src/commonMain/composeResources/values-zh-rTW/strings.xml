@@ -248,6 +248,7 @@
     <string name="debug_search_prev">上一個符合的</string>
     <string name="debug_store_logs_summary">停用後將不會把網狀網路日誌寫入磁碟</string>
     <string name="debug_store_logs_title">儲存網狀網路日誌</string>
+    <!-- DEEP -->
     <string name="default_">默認</string>
     <!-- DELETE -->
     <string name="delete">刪除</string>

@@ -52,6 +52,7 @@
     <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
     <!-- DEBUG -->
     <string name="debug_panel">Otklanjanje pogrešaka</string>
+    <!-- DEEP -->
     <string name="default_">Zadano</string>
     <!-- DELETE -->
     <string name="delete">Obriši</string>

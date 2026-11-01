@@ -52,6 +52,7 @@
     <string name="debug_filter_clear">Limpar todos os filtros</string>
     <string name="debug_filters">Filtros</string>
     <string name="debug_panel">Panel de depuración</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Eliminar</string>
     <string name="delete_for_everyone">Eliminar para todos</string>

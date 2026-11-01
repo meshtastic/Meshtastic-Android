@@ -101,6 +101,7 @@
     <!-- DEBUG -->
     <string name="debug">Depuração</string>
     <string name="debug_panel">Painel de depuração</string>
+    <!-- DEEP -->
     <string name="default_">Predefinição</string>
     <!-- DELETE -->
     <string name="delete">Excluir</string>

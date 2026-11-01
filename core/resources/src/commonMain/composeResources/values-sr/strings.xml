@@ -106,6 +106,7 @@
     <!-- DEBUG -->
     <string name="debug">Дебагуј</string>
     <string name="debug_panel">Панел за отклањање грешака</string>
+    <!-- DEEP -->
     <string name="default_">Подразумевано</string>
     <!-- DELETE -->
     <string name="delete">Обриши</string>

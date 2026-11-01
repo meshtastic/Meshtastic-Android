@@ -220,6 +220,7 @@
     <string name="debug_store_logs_title">Сховище для логування</string>
     <string name="debug_tab_app_logs">Журнали програми</string>
     <string name="debug_tab_packets">Пакетів</string>
+    <!-- DEEP -->
     <string name="default_">За замовчуванням</string>
     <!-- DELETE -->
     <string name="delete">Видалити</string>

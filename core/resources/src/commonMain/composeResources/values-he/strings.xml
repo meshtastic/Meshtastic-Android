@@ -51,6 +51,7 @@
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
     <!-- DEBUG -->
     <string name="debug_panel">פאנל דיבאג</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">מחק</string>
     <string name="delete_for_everyone">מחק לכולם</string>

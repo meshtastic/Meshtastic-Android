@@ -158,6 +158,7 @@
     <string name="debug_search_prev">Poprzednie dopasowanie</string>
     <string name="debug_store_logs_summary">Wyłącz, aby pominąć zapisywanie logów na dysku</string>
     <string name="debug_store_logs_title">Przechowuj logi sieci</string>
+    <!-- DEEP -->
     <string name="default_">Domyślny</string>
     <!-- DELETE -->
     <string name="delete">Usuń</string>

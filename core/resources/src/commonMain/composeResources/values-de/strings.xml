@@ -292,6 +292,7 @@
     <string name="debug_store_logs_summary">Deaktivieren, um das Schreiben von Netzprotokollen auf die Festplatte zu überspringen</string>
     <string name="debug_store_logs_title">Netzprotokolle speichern</string>
     <string name="debug_tab_packets">Pakete</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_title">Mit diesem Gerät verbinden?</string>
     <string name="deep_link_disconnect_title">Von deinem Gerät trennen?</string>
     <string name="default_">Standard</string>

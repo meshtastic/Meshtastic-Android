@@ -197,6 +197,7 @@
     <string name="debug_search_prev">Potrivirea anterioară</string>
     <string name="debug_store_logs_summary">Dezactivați pentru a omite scrierea jurnalelor din retea pe disc</string>
     <string name="debug_store_logs_title">Salvează jurnalele din retea</string>
+    <!-- DEEP -->
     <string name="default_">Prestabilit</string>
     <!-- DELETE -->
     <string name="delete">Șterge</string>
