@@ -99,6 +99,7 @@ class QuickSettingsTileControllerTest {
             connectionManager = mock(MockMode.autofill),
             dispatchers = dispatchers,
             localNetworkAccess = LocalNetworkAccess { true },
+            lastBleNodeRecorder = {},
         )
     }
 }
