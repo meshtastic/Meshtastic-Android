@@ -1253,7 +1253,7 @@
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="meshtastic_alerts_notifications_description">Critical alerts sent by nodes on the mesh.</string>
-    <string name="meshtastic_app_name">Meshtastic</string>
+    <string name="meshtastic_app_name">Tactical Mesh</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_broadcast_notifications_description">Messages sent to your channels.</string>
     <string name="meshtastic_client_notifications">Radio notifications</string>
