@@ -20,10 +20,14 @@ The `:feature:widget` module holds the **Android-only Jetpack Glance home-screen
 
 ```text
 src/main/kotlin/org/meshtastic/feature/widget/
-├── LocalStatsWidget.kt              ← GlanceAppWidget, 3 responsive sizes
+├── WidgetSizes.kt                   ← responsive breakpoints and type scale shared by both widgets
+├── WidgetComponents.kt              ← brand header, identity row, stat and bar rows, status body
+├── LocalStatsWidget.kt              ← GlanceAppWidget, header and refresh
+├── LocalStatsLayouts.kt             ← one layout per breakpoint
 ├── LocalStatsWidgetReceiver.kt      ← GlanceAppWidgetReceiver
 ├── LocalStatsWidgetState.kt         ← LocalStatsWidgetUiState + StateProvider
-├── NodeTrackerWidget.kt             ← GlanceAppWidget, 2 responsive sizes
+├── NodeTrackerWidget.kt             ← GlanceAppWidget, readings, not-found state
+├── NodeTrackerLayouts.kt            ← one layout per breakpoint
 ├── NodeTrackerWidgetReceiver.kt     ← GlanceAppWidgetReceiver
 ├── NodeTrackerWidgetState.kt        ← NodeTrackerWidgetState, nodeTrackerState(), DataSource
 ├── NodeTrackerConfigActivity.kt     ← APPWIDGET_CONFIGURE node picker (Compose, Material 3)
@@ -42,10 +46,11 @@ Each instance stores its node number under `TRACKED_NODE_NUM_KEY` in its Glance 
 
 | Size | Data shown |
 |---|---|
-| Small (under 200 dp wide) | Node chip, long name, battery, last heard |
-| Wide | Adds SNR and RSSI (direct, non-MQTT nodes only), hops away, distance (only while connected) |
+| Under 90 dp tall (one landscape row) | Mark, node chip, battery, long name, last heard; wide adds hops |
+| 90 to 180 dp tall (2x1 portrait on a Pixel) | Compact header, chip and battery, long name beside last heard; wide adds hops |
+| Two rows and up | Header, chip and battery, long name (two lines when fewer than four readings), then the first four of last heard, hops, distance (only while connected), SNR and RSSI (direct, non-MQTT nodes only); three rows show all five |
 
-`nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window renders dimmed; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
+`nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window keeps its chip colors and greys its values; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
 
 The widget holds no lazy collection, which the `ActionTrampolineActivity` removal in `androidApp/src/main/AndroidManifest.xml` relies on.
 
@@ -55,13 +60,16 @@ The widget shows the following information when connected:
 
 | Section | Data shown |
 |---|---|
-| Node identity | Short name chip with node colors |
-| Battery | Level percentage + progress bar |
+| Node identity | Short name chip with node colors, battery as the hero value |
 | Channel utilization | Percentage + progress bar |
 | Air utilization | Percentage + progress bar |
-| Traffic | TX / RX packet counts, duplicates, relay TX, relay canceled, dropped, bad RX |
-| Diagnostics | Noise floor (dBm), free heap / total heap |
-| Footer | Online nodes / total nodes, device uptime, last-updated timestamp |
+| Nodes and uptime | Online nodes / total nodes, device uptime to the minute |
+| Traffic | TX / RX, noise floor; relays / canceled at three rows |
+| Diagnostics | Bad / dropped and free memory (three rows, wide); last-updated time at any three-row size |
+
+Smaller sizes drop rows from the bottom of that list. One row shows the mark, chip, battery and channel utilization, plus nodes online when wide. The refresh button sits in the header only at two rows and two-plus cells wide, where the title leaves room for it; elsewhere tapping the widget opens the app.
+
+Both widgets share one design: a header with the theme-tinted Meshtastic mark and the widget's name (one-row sizes lead their row with the mark instead), the node chip with battery beside it, and the same stat rows and type scale (`WidgetSizes.Type`). A stale tracked node keeps its chip colors and greys its values.
 
 When not connected, the widget shows the app icon (a progress spinner while connecting) and the connection status: **Disconnected**, **Connecting**, or **Device sleeping**.
 
@@ -80,17 +88,16 @@ data class LocalStatsWidgetUiState(
     // Battery
     val batteryLevel: Int,
     val hasBattery: Boolean,
-    val batteryProgress: Float,
     // Utilization
     val channelUtilization: Float, val channelUtilizationProgress: Float,
     val airUtilization: Float, val airUtilizationProgress: Float,
     // Traffic counters
     val hasStats: Boolean,
     val numPacketsTx: Int, val numPacketsRx: Int,
-    val numRxDupe: Int, val numTxRelay: Int, val numTxRelayCanceled: Int,
+    val numTxRelay: Int, val numTxRelayCanceled: Int,
     val numTxDropped: Int, val numPacketsRxBad: Int,
     // Diagnostics
-    val noiseFloor: Int,
+    val noiseFloor: Int?,
     val heapFreeBytes: Int, val heapTotalBytes: Int,
     // Footer
     val totalNodes: Int, val onlineNodes: Int,
@@ -117,13 +124,15 @@ val state: StateFlow<LocalStatsWidgetUiState>
 
 ```kotlin
 class LocalStatsWidget : GlanceAppWidget(), KoinComponent {
-    override val sizeMode = SizeMode.Responsive(
-        setOf(DpSize(100.dp, 100.dp), DpSize(250.dp, 100.dp), DpSize(250.dp, 250.dp))
-    )
+    override val sizeMode: SizeMode = WidgetSizes.responsive
 }
 ```
 
-The sizes are `SMALL_SQUARE`, `HORIZONTAL_RECTANGLE` and `BIG_SQUARE`. Tapping the widget opens the app. The refresh button fires `RefreshLocalStatsAction`, which asks the local node for fresh `LOCAL_STATS` and `DEVICE` telemetry through `CommandSender`; the new values then reach the widget through the state flow. A rejected or unanswerable request is logged and skipped.
+### `WidgetSizes`
+
+Both widgets render one of the breakpoints in `WidgetSizes.responsive`. Under `SizeMode.Responsive`, `LocalSize` is the chosen breakpoint rather than the real bounds, and a breakpoint larger than the real bounds is never chosen, so each one sits under the smallest cell span it has to catch. On a Pixel 6a a 2x2 widget measures 179x202 dp in portrait and 394x107 dp in landscape. Both providers set `targetCellWidth`/`targetCellHeight` to 2x2 and `minResizeHeight` to one row.
+
+Tapping the Local Stats widget opens the app. The refresh button fires `RefreshLocalStatsAction`, which asks the local node for fresh `LOCAL_STATS` and `DEVICE` telemetry through `CommandSender`; the new values then reach the widget through the state flow. A rejected or unanswerable request is logged and skipped.
 
 Glance doesn't provide the Compose UI locals that Compose Multiplatform's `stringResource` reads, so `WidgetResourceEnvironment` bridges them into the widget's composition; every translated string in the widget depends on it. A composition failure shows the `widget_composition_error` layout through `onCompositionError` instead of crashing the app.
 

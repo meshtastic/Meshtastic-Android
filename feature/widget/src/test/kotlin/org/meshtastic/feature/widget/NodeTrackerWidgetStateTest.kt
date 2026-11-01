@@ -115,6 +115,14 @@ class NodeTrackerWidgetStateTest {
     }
 
     @Test
+    fun `an empty battery is a reading not an absence`() {
+        val flat = testNode(0x42, battery = 0)
+        val state = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(0x42, inputs(0x42 to flat)))
+
+        assertEquals(0, state.batteryLevel)
+    }
+
+    @Test
     fun `an empty node DB keeps the last reading on screen dimmed`() {
         val live = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(TRACKED_NUM, inputs(), HEARD - 1))
         val noDb = NodeTrackerInputs(connectionState = ConnectionState.Disconnected)

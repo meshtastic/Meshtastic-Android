@@ -19,7 +19,7 @@ package org.meshtastic.feature.widget
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
 import androidx.glance.testing.unit.hasContentDescriptionEqualTo
 import androidx.glance.testing.unit.hasText
@@ -27,9 +27,15 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.widget_relays_canceled
+import org.meshtastic.core.resources.widget_traffic
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
@@ -54,69 +60,120 @@ class LocalStatsWidgetContentTest {
 
     // Resolved here, at construction, rather than inside the test bodies: getString() wraps runBlocking, and
     // runGlanceAppWidgetUnitTest runs its block inside runTest, where a nested runBlocking risks deadlocking.
+    private val appName: String = getString(Res.string.meshtastic_app_name)
     private val disconnectedLabel: String = getString(Res.string.disconnected)
     private val refreshLabel: String = getString(Res.string.refresh)
+    private val trafficLabel: String = getString(Res.string.widget_traffic)
+    private val freeMemoryLabel: String = getString(Res.string.free_memory)
+    private val relaysLabel: String = getString(Res.string.widget_relays_canceled)
+    private val uptimeLabel: String = getString(Res.string.uptime)
+    private val batteryLabel: String = getString(Res.string.battery)
+
+    private val disconnected = LocalStatsWidgetUiState(connectionState = ConnectionState.Disconnected)
+
+    private fun render(
+        size: DpSize,
+        state: LocalStatsWidgetUiState = createMockWidgetState(),
+        assertions: GlanceAppWidgetUnitTest.() -> Unit,
+    ) = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+        setAppWidgetSize(size)
+        setContext(context)
+        provideComposable { LocalStatsWidget().WidgetContent(state) }
+        assertions()
+    }
 
     @Test
-    fun `connected content renders node identity and footer counts`() =
-        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
-            setAppWidgetSize(BIG_SQUARE)
-            setContext(context)
+    fun `wide two-row layout carries the brand header refresh identity and traffic`() = render(WidgetSizes.BIG) {
+        onNode(hasText(appName)).assertExists()
+        onNode(hasContentDescriptionEqualTo(refreshLabel)).assertExists()
+        onNode(hasText("ME")).assertExists()
+        onNode(hasText("85%")).assertExists()
+        onNode(hasText("2/3")).assertExists()
+        onNode(hasText(trafficLabel)).assertExists()
+        onNode(hasText("145 / 892")).assertExists()
+    }
 
-            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
+    @Test
+    fun `narrow two-row layout keeps the brand header but not refresh or traffic`() = render(WidgetSizes.TALL) {
+        onNode(hasText(appName)).assertExists()
+        onNode(hasContentDescriptionEqualTo(refreshLabel)).assertDoesNotExist()
+        onNode(hasText("18.5%")).assertExists()
+        onNode(hasText("3.2%")).assertExists()
+        onNode(hasText("2/3")).assertExists()
+        onNode(hasText(trafficLabel)).assertDoesNotExist()
+    }
 
-            // Values straight from createMockWidgetState(): short name, battery, and onlineNodes/totalNodes.
-            onNode(hasText("ME")).assertExists()
-            onNode(hasText("85%")).assertExists()
-            onNode(hasText("2/3")).assertExists()
+    @Test
+    fun `square layout shows the compact header identity and channel utilization`() = render(WidgetSizes.SQUARE) {
+        onNode(hasText(appName)).assertExists()
+        onNode(hasText("85%")).assertExists()
+        onNode(hasText("18.5%")).assertExists()
+        onNode(hasText("3.2%")).assertDoesNotExist()
+        onNode(hasText("2/3")).assertDoesNotExist()
+    }
+
+    @Test
+    fun `wide square layout adds air utilization and nodes online`() = render(WidgetSizes.WIDE) {
+        onNode(hasText("3.2%")).assertExists()
+        onNode(hasText("2/3")).assertExists()
+    }
+
+    @Test
+    fun `one-row layout has no header text but keeps node battery and channel utilization`() = render(WidgetSizes.ROW) {
+        onNode(hasText(appName)).assertDoesNotExist()
+        onNode(hasText("ME")).assertExists()
+        onNode(hasText("85%")).assertExists()
+        onNode(hasText("18.5%")).assertExists()
+        onNode(hasText("2/3")).assertDoesNotExist()
+    }
+
+    @Test
+    fun `wide one-row layout adds nodes online`() = render(WidgetSizes.WIDE_ROW) {
+        onNode(hasText("2/3")).assertExists()
+    }
+
+    @Test
+    fun `three-row wide layout adds free memory`() = render(WidgetSizes.EXTRA_BIG) {
+        onNode(hasText(freeMemoryLabel)).assertExists()
+    }
+
+    @Test
+    fun `three-row narrow layout adds relays but not free memory`() = render(WidgetSizes.EXTRA_TALL) {
+        onNode(hasText(relaysLabel)).assertExists()
+        onNode(hasText(freeMemoryLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a reported noise floor renders in dBm`() =
+        render(WidgetSizes.BIG, createMockWidgetState().copy(noiseFloor = -107)) {
+            onNode(hasText("-107 dBm")).assertExists()
         }
 
     @Test
-    fun `disconnected content renders the translated disconnected status`() =
-        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
-            setAppWidgetSize(BIG_SQUARE)
-            setContext(context)
+    fun `no local stats yet leaves out traffic but keeps uptime`() =
+        render(WidgetSizes.BIG, createMockWidgetState().copy(hasStats = false)) {
+            onNode(hasText(trafficLabel)).assertDoesNotExist()
+            onNode(hasText(uptimeLabel)).assertExists()
+        }
 
-            provideComposable {
-                LocalStatsWidget()
-                    .WidgetContent(
-                        LocalStatsWidgetUiState(connectionState = ConnectionState.Disconnected, showContent = false),
-                    )
-            }
+    @Test
+    fun `the unlabeled battery value is announced with its label`() = render(WidgetSizes.TALL) {
+        onNode(hasContentDescriptionEqualTo("$batteryLabel 85%")).assertExists()
+    }
 
-            // Proves the Crowdin-managed string resolved through the WidgetResourceEnvironment bridge.
+    @Test
+    fun `disconnected content keeps the header and renders the translated status`() =
+        render(WidgetSizes.BIG, disconnected) {
+            onNode(hasText(appName)).assertExists()
             onNode(hasText(disconnectedLabel)).assertExists()
         }
 
     @Test
-    fun `refresh affordance is present and labelled for accessibility`() =
-        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
-            setAppWidgetSize(BIG_SQUARE)
-            setContext(context)
-
-            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
-
-            // Glance's unit-test filters have no matcher for actionRunCallback, so this pins the button's
-            // presence and its content description rather than the callback class it dispatches to.
-            onNode(hasContentDescriptionEqualTo(refreshLabel)).assertExists()
-        }
-
-    @Test
-    fun `narrow layout still renders content rather than collapsing`() =
-        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
-            // Smallest entry in LocalStatsWidget's SizeMode.Responsive set, where isNarrow/isShort both kick in.
-            setAppWidgetSize(SMALL_SQUARE)
-            setContext(context)
-
-            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
-
-            onNode(hasText("ME")).assertExists()
-        }
+    fun `one-row disconnected layout still renders the status`() = render(WidgetSizes.ROW, disconnected) {
+        onNode(hasText(disconnectedLabel)).assertExists()
+    }
 
     private companion object {
-        val SMALL_SQUARE = DpSize(100.dp, 100.dp)
-        val BIG_SQUARE = DpSize(250.dp, 250.dp)
-
         /**
          * Well above Glance's 2-second `DEFAULT_TIMEOUT`, which is not a safe budget here. Booting Robolectric and
          * loading Compose Multiplatform resources comfortably exceeds two seconds whenever the machine is busy, and

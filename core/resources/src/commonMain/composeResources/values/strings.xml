@@ -2235,8 +2235,14 @@
     <string name="weight">Weight</string>
     <string name="what_is_meshtastic">What is Meshtastic?</string>
     <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>
+    <!-- WIDGET -->
+    <string name="widget_bad_dropped">Bad / dropped</string>
     <string name="widget_node_tracker_choose">Choose a node to track</string>
     <string name="widget_node_tracker_not_found">Node not found. Tap to choose a node.</string>
+    <string name="widget_node_tracker_title">Node Tracker</string>
+    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_relays_canceled">Relays / canceled</string>
+    <string name="widget_traffic">TX / RX</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>

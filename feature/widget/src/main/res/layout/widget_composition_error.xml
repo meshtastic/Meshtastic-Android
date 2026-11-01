@@ -39,6 +39,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:src="@drawable/widget_app_icon"
+        android:tint="?android:attr/textColorPrimary"
         android:contentDescription="@null" />
 
     <TextView

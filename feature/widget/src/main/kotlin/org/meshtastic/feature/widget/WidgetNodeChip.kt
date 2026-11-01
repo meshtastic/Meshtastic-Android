@@ -27,44 +27,28 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Row
 import androidx.glance.layout.padding
-import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
-private const val DIMMED_ALPHA = 0.55f
-
-/** The app's node chip, short name on the node's own colors, for a Glance tree. */
+/**
+ * The app's node chip, short name on the node's own colors, for a Glance tree. It is never dimmed: the node colors are
+ * chosen for contrast, and a stale node is marked through its values instead.
+ */
 @SuppressLint("RestrictedApi")
 @Composable
-internal fun WidgetNodeChip(
-    shortName: String,
-    colors: Pair<Int, Int>,
-    modifier: GlanceModifier = GlanceModifier,
-    dimmed: Boolean = false,
-) {
+internal fun WidgetNodeChip(shortName: String, colors: Pair<Int, Int>, modifier: GlanceModifier = GlanceModifier) {
     val (fg, bg) = colors
-    val alpha = if (dimmed) DIMMED_ALPHA else 1f
     Row(
-        modifier =
-        modifier
-            .width(64.dp)
-            .background(Color(bg).copy(alpha = alpha))
-            .cornerRadius(4.dp)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
+        modifier = modifier.background(Color(bg)).cornerRadius(12.dp).padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = shortName,
             maxLines = 1,
-            style =
-            TextStyle(
-                color = ColorProvider(Color(fg).copy(alpha = alpha)),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            style = TextStyle(color = ColorProvider(Color(fg)), fontSize = 12.sp, fontWeight = FontWeight.Bold),
         )
     }
 }

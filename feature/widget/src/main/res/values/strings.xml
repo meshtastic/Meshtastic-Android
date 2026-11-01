@@ -17,6 +17,8 @@
   -->
 <resources>
     <string name="widget_local_stats_label">Meshtastic</string>
-    <!-- Not in Crowdin: the picker label must be an Android resource, and crowdin.yml sources composeResources only. -->
+    <!-- Not in Crowdin: picker text must be an Android resource, and crowdin.yml sources composeResources only. -->
+    <string name="widget_local_stats_description">Channel use, battery, nodes online and uptime for your connected radio</string>
     <string name="widget_node_tracker_label">Node Tracker</string>
+    <string name="widget_node_tracker_description">Battery, signal and last heard for one node you pick</string>
 </resources>
