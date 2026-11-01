@@ -26,7 +26,6 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Row
-import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -42,7 +41,7 @@ import androidx.glance.unit.ColorProvider
 internal fun WidgetNodeChip(shortName: String, colors: Pair<Int, Int>, modifier: GlanceModifier = GlanceModifier) {
     val (fg, bg) = colors
     Row(
-        modifier = modifier.height(24.dp).background(Color(bg)).cornerRadius(12.dp).padding(horizontal = 8.dp),
+        modifier = modifier.background(Color(bg)).cornerRadius(12.dp).padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

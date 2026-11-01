@@ -17,7 +17,6 @@
 package org.meshtastic.feature.widget
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.glance.ColorFilter
@@ -38,11 +37,12 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 
 /** The Meshtastic mark, tinted to the theme so it reads on any wallpaper-derived background. */
 @Composable
@@ -61,13 +61,17 @@ internal fun WidgetMark(size: Dp) {
  */
 @Composable
 internal fun WidgetHeader(title: String, compact: Boolean, action: (@Composable () -> Unit)? = null) {
-    val height =
+    // Padding rather than a fixed height, so a large font scale grows the header instead of clipping the title.
+    val padding =
         when {
-            action != null -> 44.dp
-            compact -> 24.dp
-            else -> 32.dp
+            action != null -> 0.dp
+            compact -> 4.dp
+            else -> 6.dp
         }
-    Row(modifier = GlanceModifier.fillMaxWidth().height(height), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(vertical = padding),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         WidgetMark(if (compact) 16.dp else 20.dp)
         Spacer(GlanceModifier.width(6.dp))
         Text(
@@ -87,32 +91,37 @@ internal fun WidgetHeader(title: String, compact: Boolean, action: (@Composable 
 
 /**
  * The node chip with the battery as the widget's hero value. With a [trailing] pair the hero sits beside the chip and
- * the pair takes the right edge; without one the hero takes the right edge.
+ * the pair takes the right edge; without one the hero takes the right edge. The hero carries no visible label, so
+ * [heroDescription] is what a screen reader announces for it.
  */
 @Composable
 internal fun IdentityRow(
     chip: @Composable () -> Unit,
     hero: String?,
     heroIsWord: Boolean,
+    heroDescription: String?,
     isStale: Boolean = false,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    Row(modifier = GlanceModifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         chip()
         if (trailing != null) {
             Spacer(GlanceModifier.width(8.dp))
-            hero?.let { HeroText(it, heroIsWord, isStale) }
+            hero?.let { HeroText(it, heroIsWord, heroDescription, isStale) }
             Spacer(GlanceModifier.defaultWeight())
             trailing()
         } else {
             Spacer(GlanceModifier.defaultWeight())
-            hero?.let { HeroText(it, heroIsWord, isStale) }
+            hero?.let { HeroText(it, heroIsWord, heroDescription, isStale) }
         }
     }
 }
 
 @Composable
-private fun HeroText(text: String, isWord: Boolean, isStale: Boolean) {
+private fun HeroText(text: String, isWord: Boolean, description: String?, isStale: Boolean) {
     Text(
         text = text,
         maxLines = 1,
@@ -122,6 +131,7 @@ private fun HeroText(text: String, isWord: Boolean, isStale: Boolean) {
             fontSize = if (isWord) WidgetSizes.Type.heroWord else WidgetSizes.Type.hero,
             fontWeight = FontWeight.Medium,
         ),
+        modifier = description?.let { GlanceModifier.semantics { contentDescription = it } } ?: GlanceModifier,
     )
 }
 
@@ -178,12 +188,16 @@ internal fun PairText(label: String?, value: String, isStale: Boolean = false) {
 }
 
 @Composable
-internal fun ValueText(value: String, isStale: Boolean = false) {
+internal fun ValueText(value: String, isStale: Boolean = false, contentDescription: String? = null) {
     Text(
         text = value,
         maxLines = 1,
         style =
         TextStyle(color = valueColor(isStale), fontSize = WidgetSizes.Type.value, fontWeight = FontWeight.Medium),
+        modifier =
+        contentDescription?.let { description ->
+            GlanceModifier.semantics { this.contentDescription = description }
+        } ?: GlanceModifier,
     )
 }
 
@@ -235,8 +249,3 @@ internal fun StatusBody(text: String, connecting: Boolean, oneRow: Boolean) {
         )
     }
 }
-
-@Composable
-@ReadOnlyComposable
-internal fun valueColor(isStale: Boolean): ColorProvider =
-    if (isStale) GlanceTheme.colors.outline else GlanceTheme.colors.onSurface

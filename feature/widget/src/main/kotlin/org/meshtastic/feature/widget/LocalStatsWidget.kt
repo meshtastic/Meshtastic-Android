@@ -125,7 +125,7 @@ class LocalStatsWidget :
                             ),
                         ),
                 ) {
-                    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 6.dp)) {
+                    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 4.dp)) {
                         if (!oneRow) {
                             // Refresh needs the width of two-plus cells beside the title; the whole widget opens the
                             // app.
@@ -181,7 +181,6 @@ internal fun createMockWidgetState() = LocalStatsWidgetUiState(
     hasStats = true,
     numPacketsTx = 145,
     numPacketsRx = 892,
-    numRxDupe = 42,
     totalNodes = 3,
     onlineNodes = 2,
     uptimeSecs = 172800L,

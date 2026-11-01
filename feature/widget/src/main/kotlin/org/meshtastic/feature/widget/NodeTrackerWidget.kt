@@ -126,7 +126,7 @@ class NodeTrackerWidget :
         WidgetResourceEnvironment {
             GlanceTheme {
                 Scaffold(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
-                    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 6.dp)) {
+                    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 4.dp)) {
                         if (!oneRow) {
                             WidgetHeader(
                                 title = stringResource(Res.string.widget_node_tracker_title),

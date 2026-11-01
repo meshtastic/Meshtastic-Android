@@ -27,11 +27,14 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.widget_relays_canceled
 import org.meshtastic.core.resources.widget_traffic
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -62,6 +65,9 @@ class LocalStatsWidgetContentTest {
     private val refreshLabel: String = getString(Res.string.refresh)
     private val trafficLabel: String = getString(Res.string.widget_traffic)
     private val freeMemoryLabel: String = getString(Res.string.free_memory)
+    private val relaysLabel: String = getString(Res.string.widget_relays_canceled)
+    private val uptimeLabel: String = getString(Res.string.uptime)
+    private val batteryLabel: String = getString(Res.string.battery)
 
     private val disconnected = LocalStatsWidgetUiState(connectionState = ConnectionState.Disconnected)
 
@@ -129,6 +135,30 @@ class LocalStatsWidgetContentTest {
     @Test
     fun `three-row wide layout adds free memory`() = render(WidgetSizes.EXTRA_BIG) {
         onNode(hasText(freeMemoryLabel)).assertExists()
+    }
+
+    @Test
+    fun `three-row narrow layout adds relays but not free memory`() = render(WidgetSizes.EXTRA_TALL) {
+        onNode(hasText(relaysLabel)).assertExists()
+        onNode(hasText(freeMemoryLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a reported noise floor renders in dBm`() =
+        render(WidgetSizes.BIG, createMockWidgetState().copy(noiseFloor = -107)) {
+            onNode(hasText("-107 dBm")).assertExists()
+        }
+
+    @Test
+    fun `no local stats yet leaves out traffic but keeps uptime`() =
+        render(WidgetSizes.BIG, createMockWidgetState().copy(hasStats = false)) {
+            onNode(hasText(trafficLabel)).assertDoesNotExist()
+            onNode(hasText(uptimeLabel)).assertExists()
+        }
+
+    @Test
+    fun `the unlabeled battery value is announced with its label`() = render(WidgetSizes.TALL) {
+        onNode(hasContentDescriptionEqualTo("$batteryLabel 85%")).assertExists()
     }
 
     @Test

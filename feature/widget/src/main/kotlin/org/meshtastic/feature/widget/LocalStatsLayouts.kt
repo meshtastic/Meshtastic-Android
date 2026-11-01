@@ -47,26 +47,28 @@ import org.meshtastic.core.resources.widget_relays_canceled
 import org.meshtastic.core.resources.widget_traffic
 import kotlin.time.DurationUnit
 
-private const val MAX_BATTERY_PERCENT = 100
-
 /** One row: the mark, node and battery over channel utilization, with nodes online when wide. */
 @Composable
 internal fun StatsRow(state: LocalStatsWidgetUiState, wide: Boolean) {
     Column(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = GlanceModifier.fillMaxWidth().height(24.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             WidgetMark(16.dp)
             Spacer(GlanceModifier.width(6.dp))
             NodeChip(state)
             Spacer(GlanceModifier.defaultWeight())
-            batteryValue(state)?.let { ValueText(it) }
+            batteryValue(state)?.let { ValueText(it, contentDescription = batteryDescription(it)) }
         }
         Spacer(GlanceModifier.height(2.dp))
-        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            PairText(stringResource(Res.string.channel_utilization), MetricFormatter.percent(state.channelUtilization))
-            if (wide) {
+        val chUtil = MetricFormatter.percent(state.channelUtilization)
+        if (wide) {
+            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                PairText(stringResource(Res.string.channel_utilization), chUtil)
                 Spacer(GlanceModifier.defaultWeight())
                 PairText(stringResource(Res.string.nodes), nodesValue(state))
             }
+        } else {
+            // StatRow, so a long translated label gives way before the value does.
+            StatRow(stringResource(Res.string.channel_utilization), chUtil)
         }
     }
 }
@@ -76,7 +78,7 @@ internal fun StatsRow(state: LocalStatsWidgetUiState, wide: Boolean) {
 internal fun StatsSquare(state: LocalStatsWidgetUiState, wide: Boolean) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Identity(state, nodesInRow = wide)
-        Spacer(GlanceModifier.height(4.dp))
+        Spacer(GlanceModifier.height(2.dp))
         if (wide) BarPair(state) else ChUtilBar(state)
     }
 }
@@ -129,10 +131,12 @@ internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, extra: Boo
 
 @Composable
 private fun Identity(state: LocalStatsWidgetUiState, nodesInRow: Boolean) {
+    val battery = batteryValue(state)
     IdentityRow(
         chip = { NodeChip(state) },
-        hero = batteryValue(state),
+        hero = battery,
         heroIsWord = state.batteryLevel > MAX_BATTERY_PERCENT,
+        heroDescription = battery?.let { batteryDescription(it) },
         trailing = if (nodesInRow) ({ PairText(stringResource(Res.string.nodes), nodesValue(state)) }) else null,
     )
 }

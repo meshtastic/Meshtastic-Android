@@ -35,20 +35,10 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.DateFormatter
-import org.meshtastic.core.common.util.MetricFormatter
-import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.node_sort_last_heard
-import org.meshtastic.core.resources.powered
-import org.meshtastic.core.resources.rssi
-import org.meshtastic.core.resources.snr
-import org.meshtastic.core.resources.traceroute_direct
-import org.meshtastic.core.resources.unknown
 
-private const val MAX_BATTERY_PERCENT = 100
 private const val TALL_ROWS = 4
 private const val EXTRA_TALL_ROWS = 5
 
@@ -69,7 +59,7 @@ internal fun TrackerContent(state: NodeTrackerWidgetState.Tracking) {
 @Composable
 private fun TrackerRow(state: NodeTrackerWidgetState.Tracking, wide: Boolean) {
     Column(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = GlanceModifier.fillMaxWidth().height(24.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             WidgetMark(16.dp)
             Spacer(GlanceModifier.width(6.dp))
             WidgetNodeChip(shortName = state.shortName, colors = state.colors)
@@ -80,69 +70,66 @@ private fun TrackerRow(state: NodeTrackerWidgetState.Tracking, wide: Boolean) {
                 }
             }
             Spacer(GlanceModifier.defaultWeight())
-            batteryValue(state)?.let { ValueText(it, state.isStale) }
+            batteryValue(state)?.let { ValueText(it, state.isStale, batteryDescription(it)) }
         }
         Spacer(GlanceModifier.height(2.dp))
-        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            LongName(state, modifier = GlanceModifier.defaultWeight())
-            Spacer(GlanceModifier.width(8.dp))
-            PairText(
-                if (wide) stringResource(Res.string.node_sort_last_heard) else null,
-                lastHeardValue(state),
-                state.isStale,
-            )
-        }
+        NameAndLastHeard(state, lastHeardLabel = wide)
     }
 }
 
+/** Header, identity, then the name and last heard sharing one line so a portrait 2x1 cell holds it. */
 @Composable
 private fun TrackerSquare(state: NodeTrackerWidgetState.Tracking, wide: Boolean) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Identity(state)
         Spacer(GlanceModifier.height(2.dp))
-        LongName(state)
-        Spacer(GlanceModifier.height(2.dp))
-        if (wide) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                PairText(stringResource(Res.string.node_sort_last_heard), lastHeardValue(state), state.isStale)
-                Spacer(GlanceModifier.defaultWeight())
-                hopsValue(state)?.let { PairText(stringResource(Res.string.hops_away), it, state.isStale) }
-            }
-        } else {
-            StatRow(stringResource(Res.string.node_sort_last_heard), lastHeardValue(state), state.isStale)
-        }
+        NameAndLastHeard(state, lastHeardLabel = false, showHops = wide)
     }
 }
 
 @Composable
 private fun TrackerTall(state: NodeTrackerWidgetState.Tracking, extra: Boolean) {
+    val rows = readings(state).take(if (extra) EXTRA_TALL_ROWS else TALL_ROWS)
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Identity(state)
         Spacer(GlanceModifier.height(2.dp))
-        LongName(state, maxLines = if (extra) 2 else 1)
+        LongName(state, maxLines = if (extra || rows.size < TALL_ROWS) 2 else 1)
         Spacer(GlanceModifier.height(4.dp))
-        readings(state).take(if (extra) EXTRA_TALL_ROWS else TALL_ROWS).forEach { (label, value) ->
-            StatRow(label, value, state.isStale)
-        }
+        rows.forEach { (label, value) -> StatRow(label, value, state.isStale) }
     }
 }
 
-/** Every reading the node has, in the order they drop as the widget shrinks. */
 @Composable
-private fun readings(state: NodeTrackerWidgetState.Tracking): List<Pair<String, String>> = buildList {
-    add(stringResource(Res.string.node_sort_last_heard) to lastHeardValue(state))
-    hopsValue(state)?.let { add(stringResource(Res.string.hops_away) to it) }
-    state.distance?.let { add(stringResource(Res.string.distance) to it) }
-    state.snr?.let { add(stringResource(Res.string.snr) to MetricFormatter.snr(it)) }
-    state.rssi?.let { add(stringResource(Res.string.rssi) to MetricFormatter.rssi(it)) }
+private fun NameAndLastHeard(
+    state: NodeTrackerWidgetState.Tracking,
+    lastHeardLabel: Boolean,
+    showHops: Boolean = false,
+) {
+    Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        LongName(state, modifier = GlanceModifier.defaultWeight())
+        if (showHops) {
+            hopsValue(state)?.let {
+                Spacer(GlanceModifier.width(8.dp))
+                PairText(stringResource(Res.string.hops_away), it, state.isStale)
+            }
+        }
+        Spacer(GlanceModifier.width(8.dp))
+        PairText(
+            if (lastHeardLabel) stringResource(Res.string.node_sort_last_heard) else null,
+            lastHeardValue(state),
+            state.isStale,
+        )
+    }
 }
 
 @Composable
 private fun Identity(state: NodeTrackerWidgetState.Tracking) {
+    val battery = batteryValue(state)
     IdentityRow(
         chip = { WidgetNodeChip(shortName = state.shortName, colors = state.colors) },
-        hero = batteryValue(state),
+        hero = battery,
         heroIsWord = (state.batteryLevel ?: 0) > MAX_BATTERY_PERCENT,
+        heroDescription = battery?.let { batteryDescription(it) },
         isStale = state.isStale,
     )
 }
@@ -164,25 +151,6 @@ private fun LongName(
         ),
         modifier = modifier,
     )
-}
-
-@Composable
-private fun batteryValue(state: NodeTrackerWidgetState.Tracking): String? {
-    val level = state.batteryLevel ?: return null
-    return if (level > MAX_BATTERY_PERCENT) stringResource(Res.string.powered) else MetricFormatter.percent(level)
-}
-
-@Composable
-private fun hopsValue(state: NodeTrackerWidgetState.Tracking): String? = state.hopsAway?.let { hops ->
-    if (hops == 0) stringResource(Res.string.traceroute_direct) else hops.toString()
-}
-
-// An absolute time, because a relative "5 min ago" would freeze between widget updates and go on reading fresh.
-@Composable
-private fun lastHeardValue(state: NodeTrackerWidgetState.Tracking): String = if (state.lastHeard > 0) {
-    DateFormatter.formatShortDate(state.lastHeard.toLong() * TimeConstants.MS_PER_SEC)
-} else {
-    stringResource(Res.string.unknown)
 }
 
 private fun GlanceModifier.staleTag(state: NodeTrackerWidgetState.Tracking): GlanceModifier =

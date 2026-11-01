@@ -24,12 +24,14 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
+import androidx.glance.testing.unit.hasContentDescriptionEqualTo
 import androidx.glance.testing.unit.hasStartActivityClickAction
 import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.traceroute_direct
 import org.meshtastic.core.resources.widget_node_tracker_not_found
@@ -54,6 +56,7 @@ class NodeTrackerWidgetContentTest {
     private val title: String = getString(Res.string.widget_node_tracker_title)
     private val notFoundLabel: String = getString(Res.string.widget_node_tracker_not_found)
     private val directLabel: String = getString(Res.string.traceroute_direct)
+    private val batteryLabel: String = getString(Res.string.battery)
 
     private fun render(
         size: DpSize,
@@ -82,6 +85,17 @@ class NodeTrackerWidgetContentTest {
     @Test
     fun `three-row layout adds the fifth reading`() = render(WidgetSizes.EXTRA_TALL) {
         onNode(hasText("-85 dBm")).assertExists()
+    }
+
+    @Test
+    fun `an empty battery renders as 0 percent`() =
+        render(WidgetSizes.TALL, createMockTrackerState().copy(batteryLevel = 0)) {
+            onNode(hasText("0%")).assertExists()
+        }
+
+    @Test
+    fun `the unlabeled battery value is announced with its label`() = render(WidgetSizes.ROW) {
+        onNode(hasContentDescriptionEqualTo("$batteryLabel 76%")).assertExists()
     }
 
     @Test

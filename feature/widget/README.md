@@ -46,11 +46,11 @@ Each instance stores its node number under `TRACKED_NODE_NUM_KEY` in its Glance 
 
 | Size | Data shown |
 |---|---|
-| One row (2x1 on a Pixel) | Mark, node chip, battery, long name, last heard; wide adds hops |
-| 100 to 180 dp tall | Header, chip and battery, long name, last heard; wide adds hops |
-| Two rows and up | Header, chip and battery, long name, then the first four of last heard, hops, distance (only while connected), SNR and RSSI (direct, non-MQTT nodes only); three rows show all five |
+| Under 90 dp tall (one landscape row) | Mark, node chip, battery, long name, last heard; wide adds hops |
+| 90 to 180 dp tall (2x1 portrait on a Pixel) | Compact header, chip and battery, long name beside last heard; wide adds hops |
+| Two rows and up | Header, chip and battery, long name (two lines when fewer than four readings), then the first four of last heard, hops, distance (only while connected), SNR and RSSI (direct, non-MQTT nodes only); three rows show all five |
 
-`nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window renders dimmed; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
+`nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window keeps its chip colors and greys its values; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
 
 The widget holds no lazy collection, which the `ActionTrampolineActivity` removal in `androidApp/src/main/AndroidManifest.xml` relies on.
 
@@ -65,7 +65,7 @@ The widget shows the following information when connected:
 | Air utilization | Percentage + progress bar |
 | Nodes and uptime | Online nodes / total nodes, device uptime to the minute |
 | Traffic | TX / RX, noise floor; relays / canceled at three rows |
-| Diagnostics | Bad / dropped, free memory, last-updated time (three rows, wide) |
+| Diagnostics | Bad / dropped and free memory (three rows, wide); last-updated time at any three-row size |
 
 Smaller sizes drop rows from the bottom of that list. One row shows the mark, chip, battery and channel utilization, plus nodes online when wide. The refresh button sits in the header only at two rows and two-plus cells wide, where the title leaves room for it; elsewhere tapping the widget opens the app.
 
@@ -94,7 +94,7 @@ data class LocalStatsWidgetUiState(
     // Traffic counters
     val hasStats: Boolean,
     val numPacketsTx: Int, val numPacketsRx: Int,
-    val numRxDupe: Int, val numTxRelay: Int, val numTxRelayCanceled: Int,
+    val numTxRelay: Int, val numTxRelayCanceled: Int,
     val numTxDropped: Int, val numPacketsRxBad: Int,
     // Diagnostics
     val noiseFloor: Int?,

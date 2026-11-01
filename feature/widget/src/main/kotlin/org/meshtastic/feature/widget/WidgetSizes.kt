@@ -24,13 +24,14 @@ import androidx.glance.appwidget.SizeMode
 /**
  * Responsive breakpoints shared by both widgets. Under [SizeMode.Responsive] `LocalSize` is the chosen breakpoint, not
  * the real bounds, and a breakpoint larger than the real bounds is never chosen, so each one sits just under the
- * smallest cell span it has to catch: one row is 51dp tall in landscape, two cells 130dp wide in portrait.
+ * smallest cell span it has to catch: one row is 51dp tall in landscape and about 95dp in portrait, two cells 130dp
+ * wide in portrait.
  */
 internal object WidgetSizes {
     val ROW = DpSize(130.dp, 48.dp)
     val WIDE_ROW = DpSize(200.dp, 48.dp)
-    val SQUARE = DpSize(130.dp, 100.dp)
-    val WIDE = DpSize(200.dp, 100.dp)
+    val SQUARE = DpSize(130.dp, 90.dp)
+    val WIDE = DpSize(200.dp, 90.dp)
     val TALL = DpSize(130.dp, 180.dp)
     val BIG = DpSize(200.dp, 180.dp)
     val EXTRA_TALL = DpSize(130.dp, 260.dp)
