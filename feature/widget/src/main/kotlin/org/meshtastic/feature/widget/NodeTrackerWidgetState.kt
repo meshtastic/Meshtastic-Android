@@ -106,7 +106,7 @@ private fun trackingOf(node: Node, inputs: NodeTrackerInputs, onlineThreshold: I
         shortName = node.user.short_name.ifEmpty { "???" },
         longName = node.effectiveLongName.ifEmpty { NodeAddress.numToDefaultId(node.num) },
         colors = node.colors,
-        batteryLevel = node.batteryLevel?.takeIf { it > 0 },
+        batteryLevel = node.batteryLevel,
         snr = if (direct) node.snrOrNull else null,
         rssi = if (direct) node.rssiOrNull else null,
         hopsAway = node.hopsAway.takeIf { it >= 0 },

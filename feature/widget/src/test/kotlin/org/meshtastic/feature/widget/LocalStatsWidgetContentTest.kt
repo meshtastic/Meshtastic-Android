@@ -29,6 +29,8 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.local_stats_heap
+import org.meshtastic.core.resources.local_stats_traffic
 import org.meshtastic.core.resources.refresh
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -56,6 +58,8 @@ class LocalStatsWidgetContentTest {
     // runGlanceAppWidgetUnitTest runs its block inside runTest, where a nested runBlocking risks deadlocking.
     private val disconnectedLabel: String = getString(Res.string.disconnected)
     private val refreshLabel: String = getString(Res.string.refresh)
+    private val trafficLabel: String = getString(Res.string.local_stats_traffic, 145, 892, 42)
+    private val heapLabel: String = getString(Res.string.local_stats_heap)
 
     @Test
     fun `connected content renders node identity and footer counts`() =
@@ -69,6 +73,7 @@ class LocalStatsWidgetContentTest {
             onNode(hasText("ME")).assertExists()
             onNode(hasText("85%")).assertExists()
             onNode(hasText("2/3")).assertExists()
+            onNode(hasText(trafficLabel)).assertExists()
         }
 
     @Test
@@ -102,19 +107,87 @@ class LocalStatsWidgetContentTest {
         }
 
     @Test
-    fun `narrow layout still renders content rather than collapsing`() =
+    fun `square layout keeps utilization and footer but drops the title bar and traffic`() =
         runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
-            // Smallest entry in LocalStatsWidget's SizeMode.Responsive set, where isNarrow/isShort both kick in.
-            setAppWidgetSize(SMALL_SQUARE)
+            setAppWidgetSize(WidgetSizes.SQUARE)
             setContext(context)
 
             provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
 
             onNode(hasText("ME")).assertExists()
+            onNode(hasText("18.5%")).assertExists()
+            onNode(hasText("2/3")).assertExists()
+            onNode(hasContentDescriptionEqualTo(refreshLabel)).assertDoesNotExist()
+            onNode(hasText(trafficLabel)).assertDoesNotExist()
         }
 
+    @Test
+    fun `one-row layout shows the node battery channel utilization and nodes online`() =
+        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+            setAppWidgetSize(WidgetSizes.ROW)
+            setContext(context)
+
+            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
+
+            onNode(hasText("ME")).assertExists()
+            onNode(hasText("85%")).assertExists()
+            onNode(hasText("18.5%")).assertExists()
+            onNode(hasText("2/3")).assertExists()
+            onNode(hasText("3.2%")).assertDoesNotExist()
+        }
+
+    @Test
+    fun `wide one-row layout shows battery channel utilization and nodes online`() =
+        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+            setAppWidgetSize(WidgetSizes.WIDE_ROW)
+            setContext(context)
+
+            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
+
+            onNode(hasText("85%")).assertExists()
+            onNode(hasText("18.5%")).assertExists()
+            onNode(hasText("2/3")).assertExists()
+        }
+
+    @Test
+    fun `one-row disconnected layout still renders the status`() = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+        setAppWidgetSize(WidgetSizes.ROW)
+        setContext(context)
+
+        provideComposable {
+            LocalStatsWidget()
+                .WidgetContent(
+                    LocalStatsWidgetUiState(connectionState = ConnectionState.Disconnected, showContent = false),
+                )
+        }
+
+        onNode(hasText(disconnectedLabel)).assertExists()
+    }
+
+    @Test
+    fun `two-row layout drops heap so the footer is not clipped`() =
+        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+            setAppWidgetSize(WidgetSizes.TALL)
+            setContext(context)
+
+            provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
+
+            onNode(hasText(trafficLabel)).assertExists()
+            onNode(hasText(heapLabel)).assertDoesNotExist()
+            onNode(hasText("2/3")).assertExists()
+        }
+
+    @Test
+    fun `three-row layout adds heap`() = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+        setAppWidgetSize(WidgetSizes.EXTRA_TALL)
+        setContext(context)
+
+        provideComposable { LocalStatsWidget().WidgetContent(createMockWidgetState()) }
+
+        onNode(hasText(heapLabel)).assertExists()
+    }
+
     private companion object {
-        val SMALL_SQUARE = DpSize(100.dp, 100.dp)
         val BIG_SQUARE = DpSize(250.dp, 250.dp)
 
         /**

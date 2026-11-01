@@ -19,8 +19,6 @@ package org.meshtastic.feature.widget
 import android.app.Application
 import android.appwidget.AppWidgetManager
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
@@ -82,6 +80,56 @@ class NodeTrackerWidgetContentTest {
         }
 
     @Test
+    fun `tall layout stacks every reading under the identity`() = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+        setAppWidgetSize(WidgetSizes.TALL)
+        setContext(context)
+
+        provideComposable { NodeTrackerWidget().WidgetContent(createMockTrackerState(), WIDGET_ID) }
+
+        onNode(hasText("Basecamp Solar")).assertExists()
+        onNode(hasText("76%")).assertExists()
+        onNode(hasText(directLabel)).assertExists()
+        onNode(hasText("1.2 km")).assertExists()
+    }
+
+    @Test
+    fun `one-row layout keeps identity and battery but drops the signal readings`() =
+        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+            setAppWidgetSize(WidgetSizes.ROW)
+            setContext(context)
+
+            provideComposable { NodeTrackerWidget().WidgetContent(createMockTrackerState(), WIDGET_ID) }
+
+            onNode(hasText("BCS1")).assertExists()
+            onNode(hasText("Basecamp Solar")).assertExists()
+            onNode(hasText("76%")).assertExists()
+            onNode(hasText("1.2 km")).assertDoesNotExist()
+        }
+
+    @Test
+    fun `wide one-row layout adds the long name but not the signal readings`() =
+        runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+            setAppWidgetSize(WidgetSizes.WIDE_ROW)
+            setContext(context)
+
+            provideComposable { NodeTrackerWidget().WidgetContent(createMockTrackerState(), WIDGET_ID) }
+
+            onNode(hasText("Basecamp Solar")).assertExists()
+            onNode(hasText("76%")).assertExists()
+            onNode(hasText("1.2 km")).assertDoesNotExist()
+        }
+
+    @Test
+    fun `one-row unknown node still asks to choose one`() = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
+        setAppWidgetSize(WidgetSizes.ROW)
+        setContext(context)
+
+        provideComposable { NodeTrackerWidget().WidgetContent(NodeTrackerWidgetState.NodeNotFound, WIDGET_ID) }
+
+        onNode(hasText(notFoundLabel)).assertExists()
+    }
+
+    @Test
     fun `unknown node asks to choose one and opens the picker for this widget`() =
         runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
             setAppWidgetSize(WIDE)
@@ -114,8 +162,8 @@ class NodeTrackerWidgetContentTest {
 
     private companion object {
         const val WIDGET_ID = 7
-        val SMALL = DpSize(110.dp, 110.dp)
-        val WIDE = DpSize(250.dp, 110.dp)
+        val SMALL = WidgetSizes.SQUARE
+        val WIDE = WidgetSizes.WIDE
 
         /** Same budget as LocalStatsWidgetContentTest, for the same reason: Robolectric plus resource loading. */
         val TEST_TIMEOUT = 30.seconds
