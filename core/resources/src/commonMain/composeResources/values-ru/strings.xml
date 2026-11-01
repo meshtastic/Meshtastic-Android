@@ -378,6 +378,7 @@
     <string name="debug_tab_app_logs">Журналы приложения</string>
     <string name="debug_tab_mirror">Зеркало</string>
     <string name="debug_tab_packets">Пакеты</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Ссылка запрашивает у этого приложения подключение к устройству по адресу %1$s. Продолжай только если доверяешь источнику ссылки.</string>
     <string name="deep_link_connect_title">Подключиться к этому устройству?</string>
     <string name="deep_link_disconnect_message">Ссылка просит это приложение отключиться от устройства. Продолжай только если доверяешь источнику ссылки.</string>

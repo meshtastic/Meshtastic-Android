@@ -90,6 +90,7 @@
     <!-- DEBUG -->
     <string name="debug">Debug</string>
     <string name="debug_panel">Debug-paneel</string>
+    <!-- DEEP -->
     <string name="default_">Standaard</string>
     <!-- DELETE -->
     <string name="delete">Verwijder</string>

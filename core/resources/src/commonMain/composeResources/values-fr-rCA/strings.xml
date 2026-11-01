@@ -312,6 +312,7 @@
     <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
     <string name="debug_tab_app_logs">Journal de l'application</string>
     <string name="debug_tab_packets">Paquets</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Un lien demande à cette application de se connecter à l'appareil %1$s. Ne continuez que si vous avez confiance en l'origine du lien.</string>
     <string name="deep_link_connect_title">Se connecter à cet appareil ?</string>
     <string name="deep_link_disconnect_message">Un lien demande à cette application de se déconnecter de votre appareil. Continuez uniquement si vous faites confiance à l'origine du lien.</string>

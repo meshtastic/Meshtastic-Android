@@ -321,6 +321,7 @@
     <string name="debug_store_logs_title">Salvesta võrgusõlme logiid</string>
     <string name="debug_tab_app_logs">Rakenduse logi</string>
     <string name="debug_tab_packets">Paketid</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Link palub rakendusel luua ühendus seadmega aadressil %1$s. Jätka ainult siis, kui sa usaldad lingi päritolu.</string>
     <string name="deep_link_connect_title">Kas ühendada selle seadmega?</string>
     <string name="deep_link_disconnect_message">Link palub sellel rakendusel seadmest lahti ühendada. Jätka ainult siis, kui usaldad lingi allikat.</string>

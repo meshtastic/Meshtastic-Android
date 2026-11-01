@@ -162,6 +162,7 @@
     <string name="debug_search_clear">Borrar búsqueda</string>
     <string name="debug_search_next">Siguiente coincidencia</string>
     <string name="debug_search_prev">Coincidencia anterior</string>
+    <!-- DEEP -->
     <string name="default_">Por defecto</string>
     <!-- DELETE -->
     <string name="delete">Eliminar</string>

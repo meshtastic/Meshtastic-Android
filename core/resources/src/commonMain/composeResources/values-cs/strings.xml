@@ -318,6 +318,7 @@
     <string name="debug_store_logs_title">Uložit protokoly sítě</string>
     <string name="debug_tab_app_logs">Protokoly aplikace</string>
     <string name="debug_tab_packets">Pakety</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Odkaz chce tuto aplikaci připojit k zařízení na adrese %1$s. Pokračujte pouze tehdy, pokud důvěřujete tomu, odkud odkaz pochází.</string>
     <string name="deep_link_connect_title">Připojit k tomuto zařízení?</string>
     <string name="deep_link_disconnect_message">Odkaz chce tuto aplikaci odpojit od vašeho zařízení. Pokračujte pouze tehdy, pokud důvěřujete tomu, odkud odkaz pochází.</string>

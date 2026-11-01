@@ -58,6 +58,7 @@
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
     <!-- DEBUG -->
     <string name="debug_panel">Painéal Laige</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Scrios</string>
     <string name="delete_for_everyone">Scrios do gach duine</string>

@@ -61,6 +61,7 @@
     <string name="copy">Kopiraj</string>
     <!-- DEBUG -->
     <string name="debug_panel">Plošča za odpravljanje napak</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Izbriši</string>
     <string name="delete_for_everyone">Izbriši za vse</string>

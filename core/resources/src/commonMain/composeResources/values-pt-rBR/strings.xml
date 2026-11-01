@@ -171,6 +171,7 @@
     <string name="debug_search_clear">Limpar busca</string>
     <string name="debug_search_next">Próxima correspondência</string>
     <string name="debug_search_prev">Correspondência anterior</string>
+    <!-- DEEP -->
     <string name="default_">Padrão</string>
     <!-- DELETE -->
     <string name="delete">Excluir</string>

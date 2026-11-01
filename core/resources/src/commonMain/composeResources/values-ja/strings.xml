@@ -295,6 +295,7 @@
     <string name="debug_store_logs_title">メッシュログを保存</string>
     <string name="debug_tab_app_logs">アプリログ</string>
     <string name="debug_tab_packets">パケット</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">リンクが、%1$s のデバイスへの接続をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>
     <string name="deep_link_connect_title">このデバイスに接続しますか？</string>
     <string name="deep_link_disconnect_message">リンクが、デバイスからの切断をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>

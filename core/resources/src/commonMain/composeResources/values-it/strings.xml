@@ -297,6 +297,7 @@
     <string name="debug_store_logs_title">Memorizza i log della mesh</string>
     <string name="debug_tab_app_logs">Registri app</string>
     <string name="debug_tab_packets">Pacchetti</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Un link sta chiedendo a questa app di connettersi al dispositivo in %1$s. Continua solo se ti fidi della provenienza del link.</string>
     <string name="deep_link_connect_title">Connettersi a questo dispositivo?</string>
     <string name="deep_link_disconnect_message">Un link sta chiedendo a questa app di disconnettersi dal tuo dispositivo. Continua solo se ti fidi della provenienza del link.</string>

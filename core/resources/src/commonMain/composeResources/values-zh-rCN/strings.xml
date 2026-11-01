@@ -299,6 +299,7 @@
     <string name="debug_store_logs_title">储存mesh日志</string>
     <string name="debug_tab_app_logs">应用日志</string>
     <string name="debug_tab_packets">数据包</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">有一个链接正在请求此应用连接到位于 %1$s. 的设备请仅在您信任该链接来源的情况下继续操作。</string>
     <string name="deep_link_connect_title">是否连接到该设备？</string>
     <string name="deep_link_disconnect_message">有一个链接正在请求此应用断开与您的设备的连接请仅在您信任该链接来源的情况下继续操作。</string>

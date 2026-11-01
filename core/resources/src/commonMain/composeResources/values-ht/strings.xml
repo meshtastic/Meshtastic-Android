@@ -58,6 +58,7 @@
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
     <!-- DEBUG -->
     <string name="debug_panel">Panno Debug</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Efase</string>
     <string name="delete_for_everyone">Efase pou tout moun</string>

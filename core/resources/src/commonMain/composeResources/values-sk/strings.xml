@@ -100,6 +100,7 @@
     <string name="debug_search_clear">Vymazať vyhľadávanie</string>
     <string name="debug_search_next">Ďalšia zhoda</string>
     <string name="debug_search_prev">Predošlá zhoda</string>
+    <!-- DEEP -->
     <string name="default_">Predvolené</string>
     <!-- DELETE -->
     <string name="delete">Vymazať</string>

@@ -62,6 +62,7 @@
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <!-- DEBUG -->
     <string name="debug_panel">Paneli i debug-ut</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Fshi</string>
     <string name="delete_for_everyone">Fshi për të gjithë</string>

@@ -73,6 +73,7 @@
     <string name="debug_filter_add">Дадаць фільтр</string>
     <string name="debug_filters">Фільтры</string>
     <string name="debug_panel">Панэль адладкі</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Прыбраць</string>
     <string name="delete_for_everyone">Прыбраць для ўсіх</string>

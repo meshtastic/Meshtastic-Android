@@ -254,6 +254,7 @@
     <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_store_logs_title">Съхраняване на mesh мрежови журнали</string>
     <string name="debug_tab_packets">Пакети</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_title">Свързване с това устройство?</string>
     <string name="default_">По подразбиране</string>
     <!-- DELETE -->

@@ -115,6 +115,7 @@
     <string name="debug_search_clear">Aramayı sil</string>
     <string name="debug_search_next">Sonraki eşleşme</string>
     <string name="debug_search_prev">Önceki eşleşme</string>
+    <!-- DEEP -->
     <string name="default_">Varsayılan</string>
     <!-- DELETE -->
     <string name="delete">Sil</string>

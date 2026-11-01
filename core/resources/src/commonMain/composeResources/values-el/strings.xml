@@ -67,6 +67,7 @@
     <string name="copy">Αντιγραφή</string>
     <!-- DEBUG -->
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Διαγραφή</string>
     <string name="delete_for_everyone">Διαγραφή για όλους</string>
