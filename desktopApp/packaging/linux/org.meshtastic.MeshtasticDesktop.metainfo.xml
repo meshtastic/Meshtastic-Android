@@ -98,7 +98,7 @@
   <releases>
     <release version="2.8.4" date="2026-10-20">
       <description>
-        <p>Stability and reliability fixes.</p>
+        <p>See a node's 3D model with its live screen, and the mesh in AR. A Quick Settings tile, Live Update notifications and a Node Tracker widget. Local display names for nodes. Nodes at one spot draw as one counted chip. Traceroutes other nodes ran to you. MQTT root topics near you. Per-install TAK certificates. No crash loop on a corrupt database. Many stability fixes.</p>
       </description>
     </release>
     <release version="2.8.3" date="2026-09-30">
