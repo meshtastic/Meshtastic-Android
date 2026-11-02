@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -47,7 +48,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.rememberResourceEnvironment
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
@@ -55,6 +57,7 @@ import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -112,16 +115,27 @@ fun DeviceListItem(
             is DeviceListEntry.Replay -> MeshtasticIcons.Add
         }
 
-    val contentDescription =
+    // Suspend getString, as in ConnectionsScreen: these rows render while the handshake keeps Dispatchers.Default busy,
+    // and a first-time stringResource load parks the main thread until it is free.
+    val resourceEnvironment = rememberResourceEnvironment()
+    val descriptionRes =
         when (device) {
-            is DeviceListEntry.Ble -> stringResource(Res.string.bluetooth)
-            is DeviceListEntry.Usb -> stringResource(Res.string.serial)
-            is DeviceListEntry.Tcp -> stringResource(Res.string.network)
-            is DeviceListEntry.Mock -> stringResource(Res.string.add)
-            is DeviceListEntry.Replay -> stringResource(Res.string.add)
+            is DeviceListEntry.Ble -> Res.string.bluetooth
+            is DeviceListEntry.Usb -> Res.string.serial
+            is DeviceListEntry.Tcp -> Res.string.network
+            is DeviceListEntry.Mock -> Res.string.add
+            is DeviceListEntry.Replay -> Res.string.add
         }
-
-    val selectLabel = stringResource(Res.string.action_select_device)
+    val contentDescription by
+        produceState<String?>(null, descriptionRes, resourceEnvironment) {
+            value = getString(resourceEnvironment, descriptionRes)
+        }
+    val selectLabel by
+        produceState<String?>(null, resourceEnvironment) {
+            value = getString(resourceEnvironment, Res.string.action_select_device)
+        }
+    val rssiLabel by
+        produceState<String?>(null, resourceEnvironment) { value = getString(resourceEnvironment, Res.string.rssi) }
     val isSelected = connectionState is ConnectionState.Connected
     val clickableModifier =
         if (onDelete != null) {
@@ -158,7 +172,7 @@ fun DeviceListItem(
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (rssi != null) {
-                    Rssi(rssi = displayedRssi)
+                    Rssi(rssi = displayedRssi, label = rssiLabel.orEmpty())
                 }
 
                 if (connectionState is ConnectionState.Connecting) {

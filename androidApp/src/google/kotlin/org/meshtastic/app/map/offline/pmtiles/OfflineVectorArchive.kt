@@ -40,13 +40,21 @@ internal class OfflineVectorArchive private constructor(private val database: SQ
         database.insertWithOnConflict(TABLE_TILES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
-    /** The gzip-compressed tile bytes at (zoom, x, y) — google/osm XYZ, matching [ch.poole.geo.pmtiles.Reader]. */
-    fun readTile(zoom: Int, x: Int, y: Int): ByteArray? = database
-        .rawQuery(
-            "SELECT $COLUMN_DATA FROM $TABLE_TILES WHERE $COLUMN_ZOOM = ? AND $COLUMN_COLUMN = ? AND $COLUMN_ROW = ?",
-            arrayOf(zoom.toString(), x.toString(), tmsRow(zoom, y).toString()),
-        )
-        .use { cursor -> if (cursor.moveToFirst()) cursor.getBlob(0) else null }
+    /**
+     * The decompressed MVT tile bytes at (zoom, x, y) — google/osm XYZ, matching [ch.poole.geo.pmtiles.Reader]. Null
+     * once [close] has run: the overlay closes the archive on the main thread while an IO-thread read may still start.
+     */
+    fun readTile(zoom: Int, x: Int, y: Int): ByteArray? = try {
+        database
+            .rawQuery(
+                "SELECT $COLUMN_DATA FROM $TABLE_TILES " +
+                    "WHERE $COLUMN_ZOOM = ? AND $COLUMN_COLUMN = ? AND $COLUMN_ROW = ?",
+                arrayOf(zoom.toString(), x.toString(), tmsRow(zoom, y).toString()),
+            )
+            .use { cursor -> if (cursor.moveToFirst()) cursor.getBlob(0) else null }
+    } catch (_: IllegalStateException) {
+        null
+    }
 
     fun tileCount(): Long = database.rawQuery("SELECT COUNT(*) FROM $TABLE_TILES", null).use { cursor ->
         cursor.moveToFirst()
