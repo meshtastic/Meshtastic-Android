@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.resources.Res
@@ -185,7 +186,8 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
                     currentFrame,
                     palette,
                     enabled = active,
-                    hasTouch = displayInfo?.has_touch == true,
+                    // MUI (the only RGB565 source) feeds taps to its own virtual pointer, touch panel or not
+                    hasTouch = displayInfo?.has_touch == true || currentFrame.format == MirrorFormat.RGB565,
                     onEvent = viewModel::sendKey,
                     onTouch = viewModel::sendTouch,
                     onChar = viewModel::sendChar,
