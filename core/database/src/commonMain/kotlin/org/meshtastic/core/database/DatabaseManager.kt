@@ -2295,7 +2295,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     return@closeAttempt
                 }
 
-                snapshot.retiredNames.forEach { physicallyRetireDatabase(it) }
+                // Under mutex, like markCorruptForNextOpen, so a marker write cannot recreate a sidecar retirement
+                // just cleared and move a later database on that name aside.
+                mutex.withLock { snapshot.retiredNames.forEach { physicallyRetireDatabase(it) } }
 
                 // Only now transfer ownership and publish the terminal state. No admitted work can add another pool
                 // because the manager has remained CLOSING throughout this attempt.

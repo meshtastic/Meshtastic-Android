@@ -325,9 +325,10 @@ class MeshDataHandlerImpl(
      * use, so the three cannot drift. Waypoint packets are infrequent, so this one-shot read per waypoint is not hot.
      */
     private suspend fun storedWaypointModifiableBy(waypointId: Int, from: Int): Boolean {
-        // firstOrNull().orEmpty(): getWaypoints() is a hot repository flow that always emits (an empty list when there
-        // are none), but tolerate a flow that completes without emitting rather than throwing on the inbound path.
-        val active = packetRepository.value.getWaypoints().firstOrNull().orEmpty().activeWaypointPackets(nowSeconds)
+        // getWaypoints() emits an empty list when none are stored and completes without a value only when its query
+        // hit a corrupt page. An unreadable store cannot prove a waypoint unlocked, so that update is rejected.
+        val waypoints = packetRepository.value.getWaypoints().firstOrNull() ?: return false
+        val active = waypoints.activeWaypointPackets(nowSeconds)
         val stored = active[waypointId]?.waypoint
         return stored == null || stored.isModifiableBy(from)
     }
