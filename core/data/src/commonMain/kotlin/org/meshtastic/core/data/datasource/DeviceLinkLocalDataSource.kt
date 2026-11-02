@@ -26,8 +26,9 @@ import org.meshtastic.core.database.retryOnDbPoolFailure
 @Single
 class DeviceLinkLocalDataSource(private val dbManager: DatabaseProvider) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun observeAll(): Flow<List<DeviceLinkEntity>> =
-        dbManager.observeCurrentDb { db -> db.deviceLinkDao().observeAll() }.retryOnDbPoolFailure("deviceLinks")
+    fun observeAll(): Flow<List<DeviceLinkEntity>> = dbManager
+        .observeCurrentDb("DeviceLinkDataSource.observeAll") { db -> db.deviceLinkDao().observeAll() }
+        .retryOnDbPoolFailure("deviceLinks")
 
     suspend fun getAll(): List<DeviceLinkEntity> = dbManager.withReadDb { it.deviceLinkDao().getAll() }
 

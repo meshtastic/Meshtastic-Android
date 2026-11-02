@@ -49,9 +49,13 @@ object RoomPoolTimeoutLog {
         .joinToString("\n")
         .take(MAX_FORWARDED_CHARS)
 
-    /** `Throwable.printStackTrace` prints the throwable itself, message and dump included, through `println(Any)`. */
+    /**
+     * `Throwable.printStackTrace` prints the throwable itself, message and dump included, through `println(Any)`. No
+     * auto-flush: Android's stderr logs a partial line on every flush, so flushing each write would split one line into
+     * several logcat entries. The delegate keeps its own flushing.
+     */
     internal class Tap(delegate: PrintStream, private val minIntervalNanos: Long, private val nowNanos: () -> Long) :
-        PrintStream(delegate, true) {
+        PrintStream(delegate, false) {
         private val lastForward = AtomicLong(Long.MIN_VALUE)
 
         override fun println(x: Any?) {

@@ -40,7 +40,9 @@ class EventFirmwareEditionLocalDataSource(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?> = dbManager
-        .observeCurrentDb { db -> db.eventFirmwareEditionDao().observeByEdition(edition) }
+        .observeCurrentDb("EventFirmwareEditionDataSource.observeByEdition") { db ->
+            db.eventFirmwareEditionDao().observeByEdition(edition)
+        }
         .retryOnDbPoolFailure("eventFirmwareEdition")
 
     suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) {

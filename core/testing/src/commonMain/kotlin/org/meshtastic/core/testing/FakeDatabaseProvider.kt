@@ -36,7 +36,8 @@ class FakeDatabaseProvider : DatabaseProvider {
     /** Optional barrier/fault hook used to prove overlapping repository writes before they enter Room. */
     var beforeWithDb: suspend () -> Unit = {}
 
-    override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = currentDb.flatMapLatest(query)
+    override fun <T> observeCurrentDb(name: String?, query: (MeshtasticDatabase) -> Flow<T>): Flow<T> =
+        currentDb.flatMapLatest(query)
 
     override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(db)
 
