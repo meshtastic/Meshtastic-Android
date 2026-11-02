@@ -618,9 +618,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         // The lookup and the write share one lock hold, so an eviction cannot swap the file between them.
         withContext(NonCancellable) {
             mutex.withLock {
-                // Null for a detached pool. The lazily built default pool is published without a cache entry.
+                // A pool another collector replaced meanwhile is detached but still names the same corrupt file. The
+                // lazily built default pool is published without a cache entry.
                 val dbName =
                     dbCache.entries.firstOrNull { it.value === database }?.key
+                        ?: detachedDatabases.firstOrNull { it.database === database }?.dbName
                         ?: DatabaseConstants.DEFAULT_DB_NAME.takeIf {
                             synchronized(initializationLock) { currentDbState?.value === database }
                         }
