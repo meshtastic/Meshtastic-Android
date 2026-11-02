@@ -26,6 +26,8 @@ jobs:
           const branch = context.payload.pull_request.head.ref;
           const title = context.payload.pull_request.title || '';
           const labels = new Set();
+          // A label or unlabel event is a person editing labels: check, don't re-add.
+          const labelEdit = ['labeled', 'unlabeled'].includes(context.payload.action);
 
           // Match branch prefix (e.g. feat/..., fix/..., chore-something)
           // Also parse conventional-commit-style PR titles as a fallback: type(scope): subject
@@ -72,13 +74,16 @@ jobs:
           // Label from PR title scope, e.g. "feat(desktop): ..."
           if (titleScope && scopeMap[titleScope]) labels.add(scopeMap[titleScope]);
 
-          // Path-based labels from changed files
+          // Path-based labels from changed files. `repo` and `build` are changelog
+          // exclusions, so they only label a PR with no user-facing type.
+          const current = new Set(context.payload.pull_request.labels.map(l => l.name));
+          const userFacing = ['enhancement', 'bugfix'].some(l => labels.has(l) || current.has(l));
           const pathLabels = [
-            { prefix: '.github/', label: 'repo' },
-            { prefix: 'build-logic/', label: 'build' },
+            { prefix: '.github/', label: 'repo', excluded: true },
+            { prefix: 'build-logic/', label: 'build', excluded: true },
             { prefix: 'desktopApp/', label: 'desktop' },
-          ].filter(({ label }) => !labels.has(label));
-          if (pathLabels.length > 0) {
+          ].filter(({ label, excluded }) => !labels.has(label) && !(excluded && userFacing));
+          if (pathLabels.length > 0 && !labelEdit) {
             try {
               const files = await github.paginate(
                 github.rest.pulls.listFiles,
@@ -93,7 +98,9 @@ jobs:
             }
           }
 
-          if (labels.size > 0) {
+          if (labelEdit) {
+            labels.clear();
+          } else if (labels.size > 0) {
             const labelArray = [...labels];
             core.info(`Applying labels: ${labelArray.join(', ')}`);
             try {
