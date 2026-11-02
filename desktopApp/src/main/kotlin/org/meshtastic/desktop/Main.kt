@@ -80,6 +80,7 @@ import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.log.RoomPoolTimeoutLog
 import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
@@ -175,6 +176,7 @@ fun main(args: Array<String>) {
     application(exitProcessOnExit = false) {
         val koinApp = remember {
             installDesktopLogging(isDebug = DesktopBuildConfig.IS_DEBUG)
+            RoomPoolTimeoutLog.install()
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
                 .also { app ->
