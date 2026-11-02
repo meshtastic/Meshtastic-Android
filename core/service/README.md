@@ -34,6 +34,7 @@ graph TB
   :core:service --> :core:repository
   :core:service -.-> :core:common
   :core:service -.-> :core:database
+  :core:service -.-> :core:datastore
   :core:service -.-> :core:di
   :core:service -.-> :core:model
   :core:service -.-> :core:navigation
