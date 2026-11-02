@@ -73,6 +73,14 @@ class DatabaseManagerCorruptReadTest : DatabaseManagerTestFixture() {
     }
 
     @Test
+    fun aCorruptPageOnTheLazyDefaultPoolIsReportedButNotMarked() = runTest(testDispatcher) {
+        manager.observeCurrentDb<Unit> { flow { throw corruptPage() } }.toList()
+
+        assertEquals(listOf<String?>("database-corrupt"), reportedTags)
+        assertTrue(manager.corruptMarks.isEmpty(), "the default database is never moved aside")
+    }
+
+    @Test
     fun fts5VirtualTableErrorStillPropagates() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
 

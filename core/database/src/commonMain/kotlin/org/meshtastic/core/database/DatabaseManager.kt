@@ -304,6 +304,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     /** Databases whose corrupt page this process already reported. Guarded by [mutex]. */
     private val reportedCorruptDbs = mutableSetOf<String>()
 
+    /** Databases whose corruption marker this process has written. Guarded by [mutex]. */
+    private val markedCorruptDbs = mutableSetOf<String>()
+
     /** Replaced pools that remain live for consumers of an earlier [currentDb] emission until orderly shutdown. */
     private val detachedDatabases = mutableListOf<NamedDatabase>()
 
@@ -523,7 +526,14 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     /** Returns a cached database or builds one. Every caller must hold [mutex]. */
     private fun getOrOpenDatabase(dbName: String): MeshtasticDatabase = dbCache.getOrPut(dbName) {
-        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) getOrCreateDefaultDatabase() else newDatabase(dbName)
+        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) {
+            getOrCreateDefaultDatabase()
+        } else {
+            // Every device-pool build passes here (switch, pending route, association), so none can open a marked
+            // file.
+            moveMarkedDatabaseAside(dbName)
+            newDatabase(dbName)
+        }
     }
 
     /**
@@ -538,7 +548,6 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private suspend fun openVerifiedDatabase(dbName: String): MeshtasticDatabase {
         val cached = dbCache[dbName]
         val isNewDevicePool = cached == null && dbName != DatabaseConstants.DEFAULT_DB_NAME
-        if (isNewDevicePool) moveMarkedDatabaseAside(dbName)
         var probeFinished = false
         val failure =
             try {
@@ -568,15 +577,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     /**
      * Moves [dbName] aside before it opens when a query found it corrupt in an earlier session. Nothing holds it yet,
      * so its files can move, and a staged restore applied by the open that follows lands on the fresh file. Caller
-     * holds [mutex].
+     * holds [mutex] and is on the IO dispatcher.
      */
-    private suspend fun moveMarkedDatabaseAside(dbName: String) {
-        if (!withContext(dispatchers.io) { isMarkedCorrupt(dbName) }) return
-        if (detachedDatabases.any { it.dbName == dbName }) return
-        withContext(dispatchers.io) {
-            moveDatabaseFilesAside(dbName, "$CORRUPT_ASIDE_MARKER$nowMillis")
-            clearCorruptMark(dbName)
-        }
+    private fun moveMarkedDatabaseAside(dbName: String) {
+        if (!isMarkedCorrupt(dbName) || detachedDatabases.any { it.dbName == dbName }) return
+        moveDatabaseFilesAside(dbName, "$CORRUPT_ASIDE_MARKER$nowMillis")
+        clearCorruptMark(dbName)
         Exceptions.report(
             DbCorruptPageException("A query on $dbName hit a corrupt page in an earlier session"),
             "database-corrupt",
@@ -602,15 +608,26 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * database is never probed on open and is not marked.
      */
     private suspend fun markCorruptForNextOpen(database: MeshtasticDatabase, failure: Throwable) {
-        // Null for a detached pool, whose collectors a publication has already cancelled, or one already reported.
-        val dbName =
+        // Null for a detached pool, whose collectors a publication has already cancelled. The lazily built default pool
+        // is published without a cache entry.
+        val (dbName, firstReport) =
             mutex.withLock {
-                dbCache.entries.firstOrNull { it.value === database }?.key?.takeIf { reportedCorruptDbs.add(it) }
+                val name =
+                    dbCache.entries.firstOrNull { it.value === database }?.key
+                        ?: DatabaseConstants.DEFAULT_DB_NAME.takeIf {
+                            synchronized(initializationLock) { currentDbState?.value === database }
+                        }
+                name?.let { it to reportedCorruptDbs.add(it) }
             } ?: return
-        Exceptions.report(failure, "database-corrupt", "A database query hit a corrupt page")
-        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) return
+        if (firstReport) Exceptions.report(failure, "database-corrupt", "A database query hit a corrupt page")
+        if (dbName != DatabaseConstants.DEFAULT_DB_NAME && dbName !in markedCorruptDbs) writeCorruptMark(dbName)
+    }
+
+    /** Retried on each corrupt read until it lands; a cancelled or failed write leaves nothing for the next open. */
+    private suspend fun writeCorruptMark(dbName: String) {
         try {
-            withContext(dispatchers.io) { markCorrupt(dbName) }
+            withContext(NonCancellable + dispatchers.io) { markCorrupt(dbName) }
+            mutex.withLock { markedCorruptDbs.add(dbName) }
         } catch (e: IOException) {
             Logger.w(e) { "Could not mark a corrupt database for the next open" }
         }

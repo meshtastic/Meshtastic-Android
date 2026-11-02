@@ -630,8 +630,9 @@ class MeshNotificationManagerImpl(
                         nodeRepository.value.getNode(nodeId.orEmpty())
                     }
                 }
-                // Null only when the conversation's database query hit a corrupt page.
-                .firstOrNull() ?: return
+                // Null only when the conversation's database query hit a corrupt page. Cancelling still resolves a
+                // reply's RemoteInput spinner, which only a re-post or a cancel clears.
+                .firstOrNull() ?: return cancelMessageNotification(contactKey)
 
         val unread = history.filter { !it.read }
         val displayHistory =
@@ -869,6 +870,8 @@ class MeshNotificationManagerImpl(
             channelName = index?.let { channelSet?.settings?.getOrNull(it) }?.let { Channel(it, lora).name }
             // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
             conversationName = channelName ?: getStringSuspend(Res.string.channel)
+            // The notification takes its title and group style from channelName alone.
+            if (channelSet == null) channelName = conversationName
         } else {
             // DM contactKey is "<channelIndex><userId>" where userId starts at the '!'.
             val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
