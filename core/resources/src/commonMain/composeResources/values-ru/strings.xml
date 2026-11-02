@@ -381,6 +381,7 @@
     <!-- DEEP -->
     <string name="deep_link_connect_message">Ссылка запрашивает у этого приложения подключение к устройству по адресу %1$s. Продолжай только если доверяешь источнику ссылки.</string>
     <string name="deep_link_connect_title">Подключиться к этому устройству?</string>
+    <string name="deep_link_connect_with_pin_message">Ссылка предлагает этому приложению выполнить сопряжение с устройством по адресу %1$s с использованием PIN-кода %2$s, а затем подключиться к нему. PIN-код скопирован, ты можешь вставить его, если потребуется. Продолжай только в том случае, если доверяешь источнику ссылки.</string>
     <string name="deep_link_disconnect_message">Ссылка просит это приложение отключиться от устройства. Продолжай только если доверяешь источнику ссылки.</string>
     <string name="deep_link_disconnect_title">Отключиться от устройства?</string>
     <string name="default_">По умолчанию</string>
@@ -793,8 +794,10 @@
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
+    <string name="firmware_update_slow_bootloader_hint">Загрузка обновлений в загрузчик этого устройства происходит медленно. Установка загрузчика Meshtastic nRF52 позволяет значительно ускорить загрузку обновлений по Bluetooth.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
+    <string name="firmware_update_start_timed_out">Не удалось запустить обновление. Попробуй обновить снова.</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
     <string name="firmware_update_starting_ota">Запуск OTA обновления...</string>
     <string name="firmware_update_success">Обновлено успешно!</string>
@@ -965,17 +968,23 @@
     <string name="live_update">Онлайн обновление</string>
     <string name="live_update_direct">Прямой</string>
     <string name="live_update_distance">%1$s отсюда</string>
+    <string name="live_update_heard">Услышан %1$s</string>
+    <string name="live_update_heard_now">Услышан только что</string>
     <string name="live_update_hops">Хопов: %1$d</string>
     <string name="live_update_mesh_status">Статус сети</string>
     <string name="live_update_mesh_status_summary">Подключение, ноды онлайн, непрочитанные сообщения и батареи радиоустройства</string>
     <string name="live_update_no_nodes">Нет нод для отслеживания</string>
     <string name="live_update_nodes_online">%1$d из %2$d нод онлайн</string>
+    <string name="live_update_off_summary">Показать сеть или одну ноду в строке состояния</string>
+    <string name="live_update_promotion_off">Живые обновления отключены для Meshtastic в системных настройках</string>
     <string name="live_update_search_nodes">Поиск нод</string>
     <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
     <string name="live_update_start">Запуск</string>
     <string name="live_update_stop">Остановка</string>
     <string name="live_update_switch">Переключатель</string>
     <string name="live_update_track_in">Отслеживать в Live Update</string>
+    <string name="live_update_track_node">Отслеживание ноды</string>
+    <string name="live_update_track_node_summary">Аккумулятор одной ноды, сигнал, последние известия, хопы и расстояние</string>
     <string name="live_update_tracking">Отслеживание %1$s</string>
     <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
@@ -1195,7 +1204,12 @@
     <string name="mesh_hud_cardinal_south">Ю</string>
     <string name="mesh_hud_cardinal_west">З</string>
     <string name="mesh_hud_chip_description">%1$s, %2$s, в %3$d часов</string>
+    <string name="mesh_hud_chirpy_says">Чирпи говорит: "Это будет использовать батарею и сделает телефон горячим!"</string>
     <string name="mesh_hud_coach_dismiss">Понял</string>
+    <string name="mesh_hud_coach_find">Долгое нажатие на ноду, чтобы найти её.</string>
+    <string name="mesh_hud_coach_point">Поднимите телефон и направь его на горизонт.</string>
+    <string name="mesh_hud_coach_tap">Нажмите на ноду чтобы открыть её.</string>
+    <string name="mesh_hud_elevation_approximate">Высота указана приблизительно</string>
     <string name="mesh_hud_find">Поиск</string>
     <string name="mesh_hud_finding">Поиск %1$s · %2$s</string>
     <string name="mesh_hud_inside_geofence">Внутри %1$s</string>
@@ -1378,6 +1392,8 @@
     <string name="mqtt_topic_finder_nearby">Поблизости</string>
     <string name="mqtt_topic_finder_nearest">ближайший %1$s</string>
     <string name="mqtt_topic_finder_no_location">Нет местоположения. Подключи радио к месту или разреши точное местоположение чтобы увидеть страну, область и город.</string>
+    <string name="mqtt_topic_finder_nodes">ноды</string>
+    <string name="mqtt_topic_finder_use">Использовать эту тему</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <!-- MUTE -->
@@ -1698,6 +1714,7 @@
     <string name="range_test_config">Настройка проверки дальности</string>
     <string name="react">Среагировать</string>
     <string name="reboot">Перезагрузка</string>
+    <string name="reboot_into_dfu">Перезагрузить в режим DFU</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="reconnecting">Восстановление связи…</string>
     <string name="refresh">Обновить</string>
