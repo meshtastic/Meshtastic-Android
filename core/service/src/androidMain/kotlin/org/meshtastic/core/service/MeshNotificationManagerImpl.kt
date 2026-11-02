@@ -611,14 +611,15 @@ class MeshNotificationManagerImpl(
         isSilent: Boolean = false,
     ) {
         ensureChannels()
+        // The notification takes its title and group style from the channel name alone, so a broadcast whose channel
+        // did not resolve (no channel set, or an index it no longer has) falls back to the generic label, never to
+        // conversationName, which is the sender's name there.
+        val title =
+            channelName?.takeIf { it.isNotBlank() } ?: if (isBroadcast) getStringSuspend(Res.string.channel) else null
         // Publish (or refresh) a long-lived conversation shortcut before the notification references it, so Android can
-        // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel name
+        // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel
         // labels a broadcast conversation; a direct message is labelled by the other participant's name.
-        // Both names come from packet metadata and can be empty, so prefer the first non-blank one.
-        conversationShortcutPublisher.value.ensureConversationShortcut(
-            contactKey,
-            channelName?.takeIf { it.isNotBlank() } ?: conversationName,
-        )
+        conversationShortcutPublisher.value.ensureConversationShortcut(contactKey, title ?: conversationName)
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val history =
@@ -644,10 +645,6 @@ class MeshNotificationManagerImpl(
 
         if (displayHistory.isEmpty()) return
 
-        // The notification takes its title and group style from the channel name alone, so a broadcast whose channel
-        // did not resolve (no channel set, or an index it no longer has) falls back to the generic label.
-        val title =
-            channelName?.takeIf { it.isNotBlank() } ?: if (isBroadcast) getStringSuspend(Res.string.channel) else null
         val notification =
             createConversationNotification(
                 contactKey = contactKey,
