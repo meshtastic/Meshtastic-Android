@@ -67,6 +67,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import okio.IOException
 import okio.Path
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.Exceptions
@@ -300,6 +301,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     private val dbCache = mutableMapOf<String, MeshtasticDatabase>()
 
+    /** Databases whose corrupt page this process already reported. Guarded by [mutex]. */
+    private val reportedCorruptDbs = mutableSetOf<String>()
+
     /** Replaced pools that remain live for consumers of an earlier [currentDb] emission until orderly shutdown. */
     private val detachedDatabases = mutableListOf<NamedDatabase>()
 
@@ -420,6 +424,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     .catch { failure ->
                         if (failure is CancellationException) throw failure
                         val exception = failure as? Exception ?: throw failure
+                        if (isDbCorruptException(exception)) {
+                            markCorruptForNextOpen(database, failure)
+                            throw failure
+                        }
                         if (exception !is DbFlowStalledException) throw failure
                         if (
                             consecutivePoolRecoveries.value >= MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES &&
@@ -450,6 +458,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             },
         )
     }
+        .catch { failure ->
+            // Completing rather than waiting for a switch keeps one-shot readers from hanging; the latch already
+            // reported it and marked the file to move aside on its next open (markCorruptForNextOpen).
+            if (failure is CancellationException || !isDbCorruptException(failure)) throw failure
+        }
 
     /**
      * Fails the flow with [DbFlowStalledException] if the first value does not arrive within [timeoutMs].
@@ -525,6 +538,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private suspend fun openVerifiedDatabase(dbName: String): MeshtasticDatabase {
         val cached = dbCache[dbName]
         val isNewDevicePool = cached == null && dbName != DatabaseConstants.DEFAULT_DB_NAME
+        if (isNewDevicePool) moveMarkedDatabaseAside(dbName)
         var probeFinished = false
         val failure =
             try {
@@ -551,6 +565,25 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         return withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
     }
 
+    /**
+     * Moves [dbName] aside before it opens when a query found it corrupt in an earlier session. Nothing holds it yet,
+     * so its files can move, and a staged restore applied by the open that follows lands on the fresh file. Caller
+     * holds [mutex].
+     */
+    private suspend fun moveMarkedDatabaseAside(dbName: String) {
+        if (!withContext(dispatchers.io) { isMarkedCorrupt(dbName) }) return
+        if (detachedDatabases.any { it.dbName == dbName }) return
+        withContext(dispatchers.io) {
+            moveDatabaseFilesAside(dbName, "$CORRUPT_ASIDE_MARKER$nowMillis")
+            clearCorruptMark(dbName)
+        }
+        Exceptions.report(
+            DbCorruptPageException("A query on $dbName hit a corrupt page in an earlier session"),
+            "database-corrupt",
+            "Moved a corrupt device database aside and started a new one",
+        )
+    }
+
     /** The corruption failure from opening [database], or null when it opens or fails for any other reason. */
     @Suppress("TooGenericExceptionCaught")
     private suspend fun corruptionOnOpen(database: MeshtasticDatabase): Exception? = try {
@@ -560,6 +593,41 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         throw e
     } catch (e: Exception) {
         e.takeIf { isDbCorruptException(it) }
+    }
+
+    /**
+     * Records that a query on [database] hit a corrupt page, reporting [failure] once per database per process: every
+     * re-query of the damaged page fails the same way. The open-time probe never reads that page, and the files cannot
+     * move under live connections, so the move-aside waits for the next open of that device database. The default
+     * database is never probed on open and is not marked.
+     */
+    private suspend fun markCorruptForNextOpen(database: MeshtasticDatabase, failure: Throwable) {
+        // Null for a detached pool, whose collectors a publication has already cancelled, or one already reported.
+        val dbName =
+            mutex.withLock {
+                dbCache.entries.firstOrNull { it.value === database }?.key?.takeIf { reportedCorruptDbs.add(it) }
+            } ?: return
+        Exceptions.report(failure, "database-corrupt", "A database query hit a corrupt page")
+        if (dbName == DatabaseConstants.DEFAULT_DB_NAME) return
+        try {
+            withContext(dispatchers.io) { markCorrupt(dbName) }
+        } catch (e: IOException) {
+            Logger.w(e) { "Could not mark a corrupt database for the next open" }
+        }
+    }
+
+    /** Sidecar that makes the next [openVerifiedDatabase] of [dbName] move it aside. */
+    private fun corruptMarkerFor(dbName: String): Path =
+        DatabaseBackup.sibling(databaseFileFor(dbName), CORRUPT_PENDING_SUFFIX)
+
+    protected open fun markCorrupt(dbName: String) {
+        getFileSystem().write(corruptMarkerFor(dbName)) {}
+    }
+
+    protected open fun isMarkedCorrupt(dbName: String): Boolean = getFileSystem().exists(corruptMarkerFor(dbName))
+
+    protected open fun clearCorruptMark(dbName: String) {
+        getFileSystem().delete(corruptMarkerFor(dbName), mustExist = false)
     }
 
     /** The main database file for [dbName]; tests place it in a temporary directory. */
@@ -1074,7 +1142,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     @Suppress("TooGenericExceptionCaught")
     private suspend fun physicallyRetireDatabase(dbName: String) {
         try {
-            deleteDatabaseFiles(dbName)
+            deleteDatabaseFilesAndMark(dbName)
         } catch (failure: Throwable) {
             Logger.w(failure) { "Failed to delete retired database ${anonymizeDbName(dbName)}" }
             return
@@ -1796,9 +1864,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         private val SQLITE_ERROR_CODE = Regex("""error code: (\d+)\b""")
         private const val SQLITE_CORRUPT = 11
         private const val SQLITE_NOTADB = 26
+        private const val SQLITE_CORRUPT_SEQUENCE = 523
 
         /** Infix of a corrupt database file moved aside; such files are never device databases. */
         private const val CORRUPT_ASIDE_MARKER = ".corrupt-"
+
+        /** Suffix of the [markCorruptForNextOpen] marker; it carries [CORRUPT_ASIDE_MARKER] so listings skip it. */
+        private const val CORRUPT_PENDING_SUFFIX = "${CORRUPT_ASIDE_MARKER}pending"
 
         /**
          * A main database file in the database directory, so each database appears once: not a Room sidecar
@@ -1809,13 +1881,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             CORRUPT_ASIDE_MARKER !in name
 
         /**
-         * A damaged or non-SQLite file. Matches the primary codes exactly, so `SQLITE_CORRUPT_VTAB` (267), the FTS5
-         * desync an index rebuild heals, never counts.
+         * A damaged or non-SQLite file. Matches codes exactly, so `SQLITE_CORRUPT_VTAB` (267) and
+         * `SQLITE_CORRUPT_INDEX` (779), which an FTS rebuild or `REINDEX` heals, never count.
          */
         fun isDbCorruptException(e: Throwable): Boolean = generateSequence(e) { it.cause }
             .any { throwable ->
                 val code = throwable.message?.lowercase()?.let { SQLITE_ERROR_CODE.find(it) }?.groupValues?.get(1)
-                code?.toIntOrNull() in setOf(SQLITE_CORRUPT, SQLITE_NOTADB)
+                code?.toIntOrNull() in setOf(SQLITE_CORRUPT, SQLITE_NOTADB, SQLITE_CORRUPT_SEQUENCE)
             }
 
         private fun isDbLockedException(e: Throwable): Boolean =
@@ -1929,7 +2001,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             evictableVictims.forEach { name ->
                 try {
                     closeCachedDatabase(name)
-                    deleteDatabaseFiles(name)
+                    deleteDatabaseFilesAndMark(name)
                     datastore.edit { it.remove(lastUsedKey(name)) }
                     Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" }
                 } catch (cancellation: CancellationException) {
@@ -1955,7 +2027,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             if (dbFileExists(legacy)) {
                 try {
                     closeCachedDatabase(legacy)
-                    deleteDatabaseFiles(legacy)
+                    deleteDatabaseFilesAndMark(legacy)
                 } catch (cancellation: CancellationException) {
                     throw cancellation
                 } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
@@ -2015,6 +2087,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     /** Platform file removal seam used by orderly retirement and test fixtures. */
     protected open fun deleteDatabaseFiles(dbName: String) = deleteDatabase(dbName)
+
+    /** A marker left beside deleted files would move the next fresh database on this name aside. */
+    private fun deleteDatabaseFilesAndMark(dbName: String) {
+        deleteDatabaseFiles(dbName)
+        clearCorruptMark(dbName)
+    }
 
     /**
      * Establishes an orderly shutdown boundary: rejects new work, bounds manager-job cancellation, admitted

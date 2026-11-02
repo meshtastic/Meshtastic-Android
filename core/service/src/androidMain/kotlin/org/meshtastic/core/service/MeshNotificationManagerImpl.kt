@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -630,7 +630,8 @@ class MeshNotificationManagerImpl(
                         nodeRepository.value.getNode(nodeId.orEmpty())
                     }
                 }
-                .first()
+                // Null only when the conversation's database query hit a corrupt page.
+                .firstOrNull() ?: return
 
         val unread = history.filter { !it.read }
         val displayHistory =
@@ -861,10 +862,11 @@ class MeshNotificationManagerImpl(
         var channelName: String? = null
         if (isBroadcast) {
             // Resolve the effective channel name (an empty primary shows its modem-preset name, e.g. "LongFast").
-            val channelSet = radioConfigRepository.value.channelSetFlow.first()
-            val lora = channelSet.lora_config ?: Channel.default.loraConfig
+            // Null only when the channel set's query hit a corrupt page; the reply still refreshes, titled generically.
+            val channelSet = radioConfigRepository.value.channelSetFlow.firstOrNull()
+            val lora = channelSet?.lora_config ?: Channel.default.loraConfig
             val index = contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull()
-            channelName = index?.let { channelSet.settings.getOrNull(it) }?.let { Channel(it, lora).name }
+            channelName = index?.let { channelSet?.settings?.getOrNull(it) }?.let { Channel(it, lora).name }
             // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
             conversationName = channelName ?: getStringSuspend(Res.string.channel)
         } else {

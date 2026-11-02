@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -261,7 +260,7 @@ class MeshDataHandlerImpl(
             radioInterfaceService.launchSessionWork(scope, session) {
                 // design#140 behavior 10: still stored for the invitations list, but a mesh the radio is already on
                 // does not warrant a notification.
-                val channelSet = radioConfigRepository.channelSetFlow.first()
+                val channelSet = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launchSessionWork
                 if (beacon.isAlreadyJoined(channelSet.lora_config, channelSet.settings)) return@launchSessionWork
                 serviceNotifications.showMeshBeaconNotification(offer)
             }
@@ -576,7 +575,7 @@ class MeshDataHandlerImpl(
      * is its modem preset ("LongFast"), never an empty title.
      */
     private suspend fun effectiveChannelName(index: Int): String? {
-        val channelSet = radioConfigRepository.channelSetFlow.first()
+        val channelSet = radioConfigRepository.channelSetFlow.firstOrNull() ?: return null
         val lora = channelSet.lora_config ?: Channel.default.loraConfig
         return channelSet.settings.getOrNull(index)?.let { Channel(it, lora).name }
     }
