@@ -57,7 +57,7 @@ class SwitchingChannelSetDataSource(
 
     val channelSetFlow: Flow<ChannelSet> =
         dbManager
-            .observeCurrentDb { db -> db.channelSetDao().observe() }
+            .observeCurrentDb("ChannelSetDataSource.channelSetFlow") { db -> db.channelSetDao().observe() }
             .retryOnDbPoolFailure("channelSet")
             .map { entity -> entity?.channelSet ?: ChannelSet.Builder().build() }
             .distinctUntilChanged()

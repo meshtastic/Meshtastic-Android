@@ -411,16 +411,14 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * [FLOW_FIRST_EMISSION_TIMEOUT_MS], and the resulting [DbFlowStalledException] is the only failure that triggers
      * recovery; every other failure propagates.
      */
-    override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = flow {
+    override fun <T> observeCurrentDb(name: String?, query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = flow {
         val consecutivePoolRecoveries = atomic(0)
+        val coroutineName = CoroutineName(name ?: callerOf(query))
         emitAll(
             currentDb.flatMapLatest { database ->
                 flow {
                     emitAll(
-                        query(database).requireFirstEmissionWithin(
-                            FLOW_FIRST_EMISSION_TIMEOUT_MS,
-                            CoroutineName(callerOf(query)),
-                        ) {
+                        query(database).requireFirstEmissionWithin(FLOW_FIRST_EMISSION_TIMEOUT_MS, coroutineName) {
                             consecutivePoolRecoveries.value = 0
                         },
                     )

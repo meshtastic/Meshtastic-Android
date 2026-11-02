@@ -34,7 +34,7 @@ class QuickChatActionRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : QuickChatActionRepository {
     override fun getAllActions(): Flow<List<QuickChatAction>> = dbManager
-        .observeCurrentDb { it.quickChatActionDao().getAll() }
+        .observeCurrentDb("QuickChatActionRepository.getAllActions") { it.quickChatActionDao().getAll() }
         .map { actions -> actions.map { it.asExternalModel() } }
         .flowOn(dispatchers.io)
 

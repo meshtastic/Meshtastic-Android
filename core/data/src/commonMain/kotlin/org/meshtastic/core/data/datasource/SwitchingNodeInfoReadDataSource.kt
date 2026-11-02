@@ -29,11 +29,13 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
 
     // These flows back process-lifetime eager StateFlows (NodeRepositoryImpl); retryOnDbPoolFailure keeps them
     // restartable after a pool-wedge failure exhausts observeCurrentDb's in-place recovery budget (#6608).
-    override fun myNodeInfoFlow(): Flow<MyNodeEntity?> =
-        dbManager.observeCurrentDb { db -> db.nodeInfoDao().getMyNodeInfo() }.retryOnDbPoolFailure("myNodeInfo")
+    override fun myNodeInfoFlow(): Flow<MyNodeEntity?> = dbManager
+        .observeCurrentDb("NodeInfoDataSource.myNodeInfoFlow") { db -> db.nodeInfoDao().getMyNodeInfo() }
+        .retryOnDbPoolFailure("myNodeInfo")
 
-    override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> =
-        dbManager.observeCurrentDb { db -> db.nodeInfoDao().nodeDBbyNum() }.retryOnDbPoolFailure("nodeDBbyNum")
+    override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> = dbManager
+        .observeCurrentDb("NodeInfoDataSource.nodeDBbyNumFlow") { db -> db.nodeInfoDao().nodeDBbyNum() }
+        .retryOnDbPoolFailure("nodeDBbyNum")
 
     override fun getNodesFlow(
         sort: String,
@@ -41,7 +43,7 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
         onlyDirect: Boolean,
         lastHeardMin: Int,
     ): Flow<List<NodeWithRelations>> = dbManager
-        .observeCurrentDb { db ->
+        .observeCurrentDb("NodeInfoDataSource.getNodesFlow") { db ->
             db.nodeInfoDao()
                 .getNodes(
                     sort = sort,
@@ -52,12 +54,15 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
         }
         .retryOnDbPoolFailure("getNodes")
 
-    override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
-        dbManager.withReadDb { it.nodeInfoDao().getNodesOlderThan(lastHeard) }
+    override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> = dbManager.withReadDb {
+        it.nodeInfoDao().getNodesOlderThan(lastHeard)
+    }
 
-    override suspend fun getUnknownNodes(): List<NodeEntity> =
-        dbManager.withReadDb { it.nodeInfoDao().getUnknownNodes() }
+    override suspend fun getUnknownNodes(): List<NodeEntity> = dbManager.withReadDb {
+        it.nodeInfoDao().getUnknownNodes()
+    }
 
-    override suspend fun getNodeDbSnapshot(): Map<Int, NodeWithRelations> =
-        dbManager.withReadDb { it.nodeInfoDao().nodeDBbyNumSnapshot() }
+    override suspend fun getNodeDbSnapshot(): Map<Int, NodeWithRelations> = dbManager.withReadDb {
+        it.nodeInfoDao().nodeDBbyNumSnapshot()
+    }
 }

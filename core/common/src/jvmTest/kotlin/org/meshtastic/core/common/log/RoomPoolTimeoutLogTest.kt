@@ -20,6 +20,7 @@ import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 import java.io.PrintStream
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -78,6 +79,25 @@ class RoomPoolTimeoutLogTest {
         timeout.printStackTrace(tap)
 
         assertEquals(2, logged.size)
+    }
+
+    @Test
+    fun theTapDoesNotFlushTheDelegateMidLine() {
+        var flushes = 0
+        val sink =
+            object : OutputStream() {
+                override fun write(b: Int) = Unit
+
+                override fun flush() {
+                    flushes++
+                }
+            }
+        val lineBuffered = RoomPoolTimeoutLog.Tap(PrintStream(sink, false), minIntervalNanos = 60L) { now }
+
+        lineBuffered.print("prefix ")
+        lineBuffered.println("suffix")
+
+        assertEquals(0, flushes, "Android's stderr logs a partial line on every flush")
     }
 
     @Test

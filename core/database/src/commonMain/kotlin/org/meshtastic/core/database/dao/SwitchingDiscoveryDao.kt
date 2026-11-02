@@ -48,13 +48,14 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     }
 
     override fun getAllSessions(): Flow<List<DiscoverySessionEntity>> =
-        dbManager.observeCurrentDb { it.discoveryDao().getAllSessions() }
+        dbManager.observeCurrentDb("DiscoveryDao.getAllSessions") { it.discoveryDao().getAllSessions() }
 
     override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> =
         dbManager.withDb { it.discoveryDao().getAllSessionsSnapshot() }.orEmpty()
 
-    override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
-        dbManager.withDb { it.discoveryDao().getSession(sessionId) }
+    override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? = dbManager.withDb {
+        it.discoveryDao().getSession(sessionId)
+    }
 
     override suspend fun countSessionsForDevice(sessionId: Long, deviceAddress: String): Int =
         dbManager.withDb { it.discoveryDao().countSessionsForDevice(sessionId, deviceAddress) } ?: 0
@@ -89,7 +90,7 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().updateRecoverableSessionCompletionStatus(sessionId, status) } ?: 0
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> =
-        dbManager.observeCurrentDb { it.discoveryDao().getSessionFlow(sessionId) }
+        dbManager.observeCurrentDb("DiscoveryDao.getSessionFlow") { it.discoveryDao().getSessionFlow(sessionId) }
 
     override suspend fun deleteSession(sessionId: Long) {
         dbManager.withDb { it.discoveryDao().deleteSession(sessionId) }
@@ -99,8 +100,9 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().markInterruptedSessions() }
     }
 
-    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? =
-        dbManager.withDb { it.discoveryDao().getInterruptedSession(deviceAddress) }
+    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = dbManager.withDb {
+        it.discoveryDao().getInterruptedSession(deviceAddress)
+    }
 
     // endregion
 
@@ -127,7 +129,9 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().getPresetResults(sessionId) }.orEmpty()
 
     override fun getPresetResultsFlow(sessionId: Long): Flow<List<DiscoveryPresetResultEntity>> =
-        dbManager.observeCurrentDb { it.discoveryDao().getPresetResultsFlow(sessionId) }
+        dbManager.observeCurrentDb("DiscoveryDao.getPresetResultsFlow") {
+            it.discoveryDao().getPresetResultsFlow(sessionId)
+        }
 
     // endregion
 
@@ -148,7 +152,9 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().getDiscoveredNodes(presetResultId) }.orEmpty()
 
     override fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>> =
-        dbManager.observeCurrentDb { it.discoveryDao().getDiscoveredNodesFlow(presetResultId) }
+        dbManager.observeCurrentDb("DiscoveryDao.getDiscoveredNodesFlow") {
+            it.discoveryDao().getDiscoveredNodesFlow(presetResultId)
+        }
 
     override suspend fun getDiscoveredNodesForPresetResults(presetResultIds: List<Long>): List<DiscoveredNodeEntity> =
         dbManager.withDb { it.discoveryDao().getDiscoveredNodesForPresetResults(presetResultIds) }.orEmpty()
@@ -163,11 +169,13 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     override suspend fun getUniqueNodeCount(sessionId: Long): Int =
         dbManager.withDb { it.discoveryDao().getUniqueNodeCount(sessionId) } ?: 0
 
-    override suspend fun getMaxDistance(sessionId: Long): Double? =
-        dbManager.withDb { it.discoveryDao().getMaxDistance(sessionId) }
+    override suspend fun getMaxDistance(sessionId: Long): Double? = dbManager.withDb {
+        it.discoveryDao().getMaxDistance(sessionId)
+    }
 
-    override suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity? =
-        dbManager.withDb { it.discoveryDao().getSessionWithResults(sessionId) }
+    override suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity? = dbManager.withDb {
+        it.discoveryDao().getSessionWithResults(sessionId)
+    }
 
     // endregion
 }
