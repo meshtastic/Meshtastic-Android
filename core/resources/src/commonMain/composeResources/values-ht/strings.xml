@@ -277,6 +277,7 @@
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_new">Nouvo pwen</string>
     <string name="waypoint_received">Pwen resevwa: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adrès IP</string>
     <!-- WIND -->

@@ -428,6 +428,7 @@
     <string name="waypoint_new">Nieuw waypoint</string>
     <string name="waypoint_received">Ontvangen waypoint: %1$s</string>
     <string name="weight">Gewicht</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adres</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>

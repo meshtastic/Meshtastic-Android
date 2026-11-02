@@ -246,6 +246,7 @@
     <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_new">Novo punto de ruta</string>
     <string name="waypoint_received">Punto de ruta recibido:%1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Enderezo IP</string>
     <!-- WIND -->

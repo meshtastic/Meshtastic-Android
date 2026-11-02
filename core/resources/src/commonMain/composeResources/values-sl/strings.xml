@@ -300,6 +300,7 @@
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_new">Nova točka poti</string>
     <string name="waypoint_received">Prejeta točka poti: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP naslov</string>
     <!-- WIND -->

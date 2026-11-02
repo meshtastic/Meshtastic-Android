@@ -1560,6 +1560,8 @@
     <string name="waypoint_new">Nuovo waypoint</string>
     <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
     <string name="weight">Peso</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">Provisioning Wi-Fi per mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Reti disponibili</string>

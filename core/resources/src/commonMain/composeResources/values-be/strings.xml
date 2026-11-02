@@ -305,6 +305,7 @@
     <!-- USER -->
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>

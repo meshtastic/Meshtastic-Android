@@ -761,6 +761,7 @@
     <string name="waypoint_new">Új útpont</string>
     <string name="waypoint_received">Útvonalpont érkezett: %1$s</string>
     <string name="weight">Súly</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP cím</string>
     <string name="wifi_provision_success_username">Felhasználónév</string>

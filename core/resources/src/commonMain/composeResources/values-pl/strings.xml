@@ -724,6 +724,7 @@
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_done">Wykonano</string>

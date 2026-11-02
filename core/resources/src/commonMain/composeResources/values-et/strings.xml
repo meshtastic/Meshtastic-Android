@@ -1737,6 +1737,8 @@
     <string name="weight">Kaal</string>
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
