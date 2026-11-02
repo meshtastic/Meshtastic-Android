@@ -644,11 +644,15 @@ class MeshNotificationManagerImpl(
 
         if (displayHistory.isEmpty()) return
 
+        // The notification takes its title and group style from the channel name alone, so a broadcast whose channel
+        // did not resolve (no channel set, or an index it no longer has) falls back to the generic label.
+        val title =
+            channelName?.takeIf { it.isNotBlank() } ?: if (isBroadcast) getStringSuspend(Res.string.channel) else null
         val notification =
             createConversationNotification(
                 contactKey = contactKey,
                 isBroadcast = isBroadcast,
-                channelName = channelName,
+                channelName = title,
                 history = displayHistory,
                 isSilent = isSilent,
             )
@@ -870,8 +874,6 @@ class MeshNotificationManagerImpl(
             channelName = index?.let { channelSet?.settings?.getOrNull(it) }?.let { Channel(it, lora).name }
             // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
             conversationName = channelName ?: getStringSuspend(Res.string.channel)
-            // The notification takes its title and group style from channelName alone.
-            if (channelSet == null) channelName = conversationName
         } else {
             // DM contactKey is "<channelIndex><userId>" where userId starts at the '!'.
             val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
