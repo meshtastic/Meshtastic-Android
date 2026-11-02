@@ -35,6 +35,7 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -95,14 +96,18 @@ internal const val POOL_RECOVERY_WINDOW_MS = 10 * 60 * 1_000L
 /** Bounds Flow-triggered replacements per [POOL_RECOVERY_WINDOW_MS]. */
 internal const val MAX_FLOW_POOL_RECOVERIES_PER_WINDOW = MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES * 2
 
-/** How long Room's pool waits for a connection before it logs the timeout and waits again; set in `configureCommon`. */
-internal val ROOM_POOL_ACQUIRE_TIMEOUT: Duration = 30.seconds
+/**
+ * How long Room's pool waits for a connection before it logs the timeout, with a dump naming each holder, and waits
+ * again; set in `configureCommon`. Below [DatabaseManager.WITH_DB_TIMEOUT_MS] so the dump lands before a `withDb`
+ * abandon.
+ */
+internal val ROOM_POOL_ACQUIRE_TIMEOUT: Duration = 10.seconds
 
 /**
  * Deadline for the first emission of a re-latched DAO Flow. Comfortably above any legitimate cold-open, migration, or
- * backfill-contended first query, and above one full [ROOM_POOL_ACQUIRE_TIMEOUT], so a healthy database never trips it.
+ * backfill-contended first query, so a healthy database never trips it.
  */
-internal val FLOW_FIRST_EMISSION_TIMEOUT_MS = (ROOM_POOL_ACQUIRE_TIMEOUT + 15.seconds).inWholeMilliseconds
+internal const val FLOW_FIRST_EMISSION_TIMEOUT_MS = 45_000L
 
 /**
  * Bounds wedge-triggered replacements (a `withDb` block that never returned) per [POOL_RECOVERY_WINDOW_MS]. Lower than
@@ -412,7 +417,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             currentDb.flatMapLatest { database ->
                 flow {
                     emitAll(
-                        query(database).requireFirstEmissionWithin(FLOW_FIRST_EMISSION_TIMEOUT_MS) {
+                        query(database).requireFirstEmissionWithin(
+                            FLOW_FIRST_EMISSION_TIMEOUT_MS,
+                            CoroutineName(callerOf(query)),
+                        ) {
                             consecutivePoolRecoveries.value = 0
                         },
                     )
@@ -461,9 +469,14 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      *
      * [onEmission] runs in the producing coroutine as each value leaves the upstream, before it crosses the channel. A
      * downstream `onEach` could not be used for recovery bookkeeping: the upstream's own failure travels by cancelling
-     * this producer and can overtake the value it emitted a moment earlier.
+     * this producer and can overtake the value it emitted a moment earlier. The upstream is collected under [name], in
+     * that same coroutine, so Room's pool-timeout dump names the query holding a connection.
      */
-    private fun <T> Flow<T>.requireFirstEmissionWithin(timeoutMs: Long, onEmission: () -> Unit): Flow<T> = channelFlow {
+    private fun <T> Flow<T>.requireFirstEmissionWithin(
+        timeoutMs: Long,
+        name: CoroutineName,
+        onEmission: () -> Unit,
+    ): Flow<T> = channelFlow {
         val firstEmission = CompletableDeferred<Unit>()
         // A failing child fails this channelFlow with its own exception, so the stall reaches the recovery
         // `catch`
@@ -476,10 +489,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 )
             }
         }
-        collect { value ->
-            onEmission()
-            firstEmission.complete(Unit)
-            send(value)
+        withContext(name) {
+            collect { value ->
+                onEmission()
+                firstEmission.complete(Unit)
+                send(value)
+            }
         }
         watchdog.cancel()
     }
@@ -1396,7 +1411,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         blockStarted: CompletableDeferred<Unit>,
         timing: DbCallTiming,
         block: suspend (MeshtasticDatabase) -> T,
-    ): Deferred<T> = managerScope.async(admission.lane, start = CoroutineStart.ATOMIC) {
+    ): Deferred<T> = managerScope.async(
+        admission.lane + CoroutineName(callerOf(block)),
+        start = CoroutineStart.ATOMIC,
+    ) {
         val db = admission.database
         try {
             currentCoroutineContext().ensureActive()
