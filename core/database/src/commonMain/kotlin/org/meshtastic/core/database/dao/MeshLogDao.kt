@@ -132,8 +132,7 @@ interface MeshLogDao {
           AND (:portNum = -1 OR port_num = :portNum)
           AND (
             :beforeReceivedDate IS NULL
-            OR received_date < :beforeReceivedDate
-            OR (received_date = :beforeReceivedDate AND uuid < :beforeUuid)
+            OR (received_date, uuid) < (:beforeReceivedDate, :beforeUuid)
           )
         ORDER BY received_date DESC, uuid DESC
         LIMIT :pageSize
