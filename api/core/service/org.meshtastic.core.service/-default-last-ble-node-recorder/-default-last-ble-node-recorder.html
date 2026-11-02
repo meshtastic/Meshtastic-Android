@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>batteryProgress</title>
+    <title>DefaultLastBleNodeRecorder</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:widget/release">release</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:service/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -51,11 +51,11 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
-                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:widget/release" data-filter=":feature:widget/release">
+                                <input type="checkbox" class="checkbox--input" id=":core:service/commonMain" data-filter=":core:service/commonMain">
                                 <span class="checkbox--icon"></span>
-                                release
+                                common
                             </label>
                         </li>
                 </ul>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-widget::org.meshtastic.feature.widget/LocalStatsWidgetUiState/batteryProgress/#/PointingToDeclaration//1745845744">
-  <div class="breadcrumbs"><a href="../../index.html">feature-widget</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.widget</a><span class="delimiter">/</span><a href="index.html">LocalStatsWidgetUiState</a><span class="delimiter">/</span><span class="current">batteryProgress</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-service::org.meshtastic.core.service/DefaultLastBleNodeRecorder/DefaultLastBleNodeRecorder/#org.meshtastic.core.repository.ServiceRepository#org.meshtastic.core.repository.NodeRepository#org.meshtastic.core.repository.NodeManager#org.meshtastic.core.datastore.FirmwareRecoveryDataSource/PointingToDeclaration//1835284133">
+  <div class="breadcrumbs"><a href="../../index.html">core-service</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.service</a><span class="delimiter">/</span><a href="index.html">DefaultLastBleNodeRecorder</a><span class="delimiter">/</span><span class="current">DefaultLastBleNodeRecorder</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>battery</span><wbr><span><span>Progress</span></span></h1>
+    <h1 class="cover"><span>Default</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span>Node</span><wbr><span><span>Recorder</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:widget/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="battery-progress.html">batteryProgress</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/widget/src/main/kotlin/org/meshtastic/feature/widget/LocalStatsWidgetState.kt#L52">source</a>)</span></span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/commonMain/kotlin/org/meshtastic/core/service/LastBleNodeRecorder.kt#L55">source</a>)</span></span></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
