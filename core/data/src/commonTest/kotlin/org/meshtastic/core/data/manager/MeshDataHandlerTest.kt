@@ -1933,6 +1933,30 @@ class MeshDataHandlerTest {
     }
 
     @Test
+    fun `a waypoint update is dropped when the stored waypoints cannot be read`() = testScope.runTest {
+        // A corrupt page completes getWaypoints() without a value; that must not read as "nothing stored".
+        every { packetRepository.getWaypoints() } returns emptyFlow()
+        val packet =
+            waypointPacket(
+                txId = 501,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(501)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `non-owner takeover of a locked waypoint is dropped`() = testScope.runTest {
         storeWaypoint(id = 42, lockedTo = 111)
         // Mallory (999) locks waypoint 42 to herself. The inbound check passes (locked_to == from), so only the

@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -611,14 +611,15 @@ class MeshNotificationManagerImpl(
         isSilent: Boolean = false,
     ) {
         ensureChannels()
+        // The notification takes its title and group style from the channel name alone, so a broadcast whose channel
+        // did not resolve (no channel set, or an index it no longer has) falls back to the generic label, never to
+        // conversationName, which is the sender's name there.
+        val title =
+            channelName?.takeIf { it.isNotBlank() } ?: if (isBroadcast) getStringSuspend(Res.string.channel) else null
         // Publish (or refresh) a long-lived conversation shortcut before the notification references it, so Android can
-        // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel name
+        // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel
         // labels a broadcast conversation; a direct message is labelled by the other participant's name.
-        // Both names come from packet metadata and can be empty, so prefer the first non-blank one.
-        conversationShortcutPublisher.value.ensureConversationShortcut(
-            contactKey,
-            channelName?.takeIf { it.isNotBlank() } ?: conversationName,
-        )
+        conversationShortcutPublisher.value.ensureConversationShortcut(contactKey, title ?: conversationName)
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val history =
@@ -630,7 +631,9 @@ class MeshNotificationManagerImpl(
                         nodeRepository.value.getNode(nodeId.orEmpty())
                     }
                 }
-                .first()
+                // Null only when the conversation's database query hit a corrupt page. Cancelling still resolves a
+                // reply's RemoteInput spinner, which only a re-post or a cancel clears.
+                .firstOrNull() ?: return cancelMessageNotification(contactKey)
 
         val unread = history.filter { !it.read }
         val displayHistory =
@@ -646,7 +649,7 @@ class MeshNotificationManagerImpl(
             createConversationNotification(
                 contactKey = contactKey,
                 isBroadcast = isBroadcast,
-                channelName = channelName,
+                channelName = title,
                 history = displayHistory,
                 isSilent = isSilent,
             )
@@ -861,10 +864,11 @@ class MeshNotificationManagerImpl(
         var channelName: String? = null
         if (isBroadcast) {
             // Resolve the effective channel name (an empty primary shows its modem-preset name, e.g. "LongFast").
-            val channelSet = radioConfigRepository.value.channelSetFlow.first()
-            val lora = channelSet.lora_config ?: Channel.default.loraConfig
+            // Null only when the channel set's query hit a corrupt page; the reply still refreshes, titled generically.
+            val channelSet = radioConfigRepository.value.channelSetFlow.firstOrNull()
+            val lora = channelSet?.lora_config ?: Channel.default.loraConfig
             val index = contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull()
-            channelName = index?.let { channelSet.settings.getOrNull(it) }?.let { Channel(it, lora).name }
+            channelName = index?.let { channelSet?.settings?.getOrNull(it) }?.let { Channel(it, lora).name }
             // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
             conversationName = channelName ?: getStringSuspend(Res.string.channel)
         } else {

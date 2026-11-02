@@ -61,6 +61,7 @@ import org.meshtastic.proto.User
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -337,6 +338,31 @@ class MeshNotificationManagerImplConversationTest {
         assertEquals("LongFast", style.conversationTitle?.toString())
         assertEquals(true, style.isGroupConversation)
     }
+
+    @Test
+    fun `a channel message whose channel did not resolve is still a titled group conversation`() =
+        runWithRenderScope { scope ->
+            val manager = createManager(scope).also { it.initChannels() }
+            mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+            manager.updateMessageNotification("7^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = null)
+            advanceUntilIdle()
+
+            val style =
+                assertNotNull(
+                    NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(
+                        activeByTag("message").single().notification,
+                    ),
+                )
+            assertTrue(!style.conversationTitle.isNullOrBlank(), "a broadcast falls back to the generic channel label")
+            assertNotEquals("Hawk Ridge", style.conversationTitle?.toString(), "never the sender's name")
+            assertEquals(true, style.isGroupConversation)
+            val shortcut =
+                context.getSystemService(android.content.pm.ShortcutManager::class.java)!!.dynamicShortcuts.single {
+                    it.id == "7^all"
+                }
+            assertEquals(style.conversationTitle?.toString(), shortcut.shortLabel?.toString(), "the shortcut matches")
+        }
 
     @Test
     @Config(sdk = [29])

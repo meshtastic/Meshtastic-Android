@@ -149,6 +149,19 @@ abstract class DatabaseManagerTestFixture {
             restoredDbNames += dbName
         }
 
+        /** In-memory databases have no files beside them, so corruption marks live here. */
+        val corruptMarks = mutableSetOf<String>()
+
+        override fun markCorrupt(dbName: String) {
+            corruptMarks += dbName
+        }
+
+        override fun isMarkedCorrupt(dbName: String): Boolean = dbName in corruptMarks
+
+        override fun clearCorruptMark(dbName: String) {
+            corruptMarks -= dbName
+        }
+
         val builtDatabases = mutableListOf<MeshtasticDatabase>()
         val closedDatabases = mutableListOf<MeshtasticDatabase>()
         val closeAttempts = mutableListOf<MeshtasticDatabase>()

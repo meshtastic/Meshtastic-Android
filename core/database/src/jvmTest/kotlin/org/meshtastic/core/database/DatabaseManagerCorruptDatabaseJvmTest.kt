@@ -25,6 +25,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -94,6 +96,29 @@ class DatabaseManagerCorruptDatabaseJvmTest {
         FileSystem.SYSTEM.write(dbFile) { write(original) }
 
         assertRecoversOnSwitch(dbFile)
+    }
+
+    @Test
+    fun aCorruptPageFoundByAQueryIsMovedAsideOnTheNextOpen() = runTest(testDispatcher) {
+        val dbFile = createDeviceDatabase()
+        val first = FilePersistentManager(datastore, dispatchers, persistentDir)
+        try {
+            first.switchActiveDatabase(ADDRESS)
+            first
+                .observeCurrentDb<Unit> {
+                    flow {
+                        throw IllegalStateException("Error code: 11, message: database disk image is malformed")
+                    }
+                }
+                .toList()
+        } finally {
+            first.close()
+            runCurrent()
+        }
+        assertTrue(FileSystem.SYSTEM.exists(persistentDir / "${dbFile.name}.corrupt-pending"))
+
+        assertRecoversOnSwitch(dbFile)
+        assertFalse(FileSystem.SYSTEM.exists(persistentDir / "${dbFile.name}.corrupt-pending"))
     }
 
     @Test
@@ -169,7 +194,10 @@ class DatabaseManagerCorruptDatabaseJvmTest {
                     }
                 }
             assertEquals(1L, tables)
-            val aside = FileSystem.SYSTEM.list(persistentDir).filter { ".db.corrupt-" in it.name }
+            val aside =
+                FileSystem.SYSTEM.list(persistentDir).filter {
+                    ".db.corrupt-" in it.name && !it.name.endsWith(".corrupt-pending")
+                }
             assertEquals(1, aside.size, "expected one moved-aside file, found ${aside.map { it.name }}")
             assertTrue(FileSystem.SYSTEM.read(aside.single()) { readByteArray() }.contentEquals(damaged))
             assertFalse(FileSystem.SYSTEM.read(dbFile) { readByteArray() }.contentEquals(damaged))

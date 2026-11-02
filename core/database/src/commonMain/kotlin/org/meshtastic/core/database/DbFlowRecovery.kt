@@ -62,3 +62,6 @@ fun <T> Flow<T>.retryOnDbPoolFailure(label: String): Flow<T> = flow {
 
 /** Signals that a database-backed Flow never produced its first value, i.e. the Room pool is not serving queries. */
 class DbFlowStalledException(message: String) : IllegalStateException(message)
+
+/** A device database a query found corrupt in an earlier session, moved aside on its next open. */
+class DbCorruptPageException(message: String) : IllegalStateException(message)
