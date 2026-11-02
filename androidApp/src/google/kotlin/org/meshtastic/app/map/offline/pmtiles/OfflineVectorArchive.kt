@@ -41,7 +41,7 @@ internal class OfflineVectorArchive private constructor(private val database: SQ
     }
 
     /**
-     * The gzip-compressed tile bytes at (zoom, x, y) — google/osm XYZ, matching [ch.poole.geo.pmtiles.Reader]. Null
+     * The decompressed MVT tile bytes at (zoom, x, y) — google/osm XYZ, matching [ch.poole.geo.pmtiles.Reader]. Null
      * once [close] has run: the overlay closes the archive on the main thread while an IO-thread read may still start.
      */
     fun readTile(zoom: Int, x: Int, y: Int): ByteArray? = try {

@@ -1877,6 +1877,10 @@ private fun RenderedMapLayer.safeShow() {
         show()
     } catch (e: Exception) {
         Logger.withTag("MapView").e(e) { "Error adding map layer" }
+    } catch (e: OutOfMemoryError) {
+        // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
+        Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
+        safeHide()
     }
 }
 
