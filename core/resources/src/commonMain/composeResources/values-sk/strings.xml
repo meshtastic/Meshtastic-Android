@@ -463,6 +463,7 @@
     <string name="waypoint_new">Nový cieľový bod</string>
     <string name="waypoint_received">Prijatý cieľový bod: %1$s</string>
     <string name="weight">Hmotnosť</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Používateľské meno</string>

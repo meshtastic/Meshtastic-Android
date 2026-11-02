@@ -1669,6 +1669,8 @@
     <string name="weight">Hmotnost</string>
     <string name="what_is_meshtastic">Co je Meshtastic?</string>
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d/%2$d</string>
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>

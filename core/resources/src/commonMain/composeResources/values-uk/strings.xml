@@ -1123,6 +1123,8 @@
     <string name="waypoint_new">Новий мітка</string>
     <string name="waypoint_received">Отримано точку маршруту: %1$s</string>
     <string name="weight">Вага</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Доступні мережі</string>

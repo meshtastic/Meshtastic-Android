@@ -1270,6 +1270,8 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="waypoint_new">新建航點</string>
     <string name="waypoint_received">收到編輯航點：%1$s</string>
     <string name="weight">重量</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="wifi_provision_available_networks">可用的網路</string>

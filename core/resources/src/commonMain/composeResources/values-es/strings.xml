@@ -766,6 +766,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %1$s</string>
     <string name="weight">Peso</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_done">Hecho</string>
     <string name="wifi_provision_success_ip_address">Dirección IP</string>

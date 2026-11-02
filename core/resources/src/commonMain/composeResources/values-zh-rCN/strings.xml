@@ -1580,6 +1580,8 @@
     <string name="weight">重量</string>
     <string name="what_is_meshtastic">什么是 Meshtastic?</string>
     <string name="what_is_meshtastic_description">这是一个开源、离网、分布式 Mesh 网络，可在价格低廉的低功率无线电设备上运行。</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
     <string name="wifi_provision_available_networks">可用网络</string>

@@ -1456,6 +1456,8 @@
     <string name="weight">Gewicht</string>
     <string name="what_is_meshtastic">Was ist Meshtastic?</string>
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>

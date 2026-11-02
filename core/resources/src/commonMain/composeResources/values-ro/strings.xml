@@ -1000,6 +1000,8 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Reper recepționat: $1%1$s</string>
     <string name="weight">Greutate</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Rețele disponibile</string>

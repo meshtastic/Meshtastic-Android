@@ -1553,6 +1553,8 @@
     <string name="waypoint_new">新規ウェイポイント</string>
     <string name="waypoint_received">受信したウェイポイント: %1$s</string>
     <string name="weight">重さ</string>
+    <!-- WIDGET -->
+    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS の Wi-Fi プロビジョニング</string>
     <string name="wifi_provision_available_networks">利用可能なネットワーク</string>

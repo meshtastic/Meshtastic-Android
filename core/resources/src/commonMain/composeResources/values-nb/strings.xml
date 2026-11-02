@@ -296,6 +296,7 @@
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_new">Nytt veipunkt</string>
     <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adresse</string>
     <!-- WIND -->

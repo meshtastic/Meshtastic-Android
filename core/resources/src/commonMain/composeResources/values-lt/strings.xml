@@ -297,6 +297,7 @@
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_new">Naujas orientyras</string>
     <string name="waypoint_received">Gautas orientyras: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresas</string>
     <!-- WIND -->

@@ -485,6 +485,7 @@
     <string name="website">Вебсајт</string>
     <string name="what_is_meshtastic">Шта је Мештастик?</string>
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP адреса</string>
     <string name="wifi_provision_success_username">Корисничко име</string>

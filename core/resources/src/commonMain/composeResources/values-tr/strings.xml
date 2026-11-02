@@ -522,6 +522,7 @@
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %1$s</string>
     <string name="weight">Ağırlık</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresi</string>
     <string name="wifi_provision_success_username">Kullanıcı adı</string>
