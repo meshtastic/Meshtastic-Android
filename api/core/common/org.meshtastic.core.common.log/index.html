@@ -43,6 +43,7 @@
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:common/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmAndroidMain">jvmAndroid</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -57,6 +58,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":core:common/commonMain" data-filter=":core:common/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/jvmAndroidMain" data-filter=":core:common/jvmAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                jvmAndroid
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
@@ -97,7 +105,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="core-common::org.meshtastic.core.common.log////PointingToDeclaration//87723338">
+<div class="main-content" data-page-type="package" id="content" pageids="core-common::org.meshtastic.core.common.log////PointingToDeclaration//-1718495835">
   <div class="breadcrumbs"><a href="../index.html">core-common</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.common.log</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -150,6 +158,23 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-active="" data-toggle=":core:common/jvmMain">jvm</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-in-memory-log-buffer/index.html">InMemoryLogBuffer</a> : <span data-unresolved-link="co.touchlab.kermit/LogWriter///PointingToDeclaration/">LogWriter</span></div><div class="brief "><p class="paragraph">A bounded in-memory ring buffer of recent Kermit log lines. Desktop has no system logcat, so install this writer at startup (<code class="lang-kotlin">Logger.setLogWriters(platformLogWriter(), InMemoryLogBuffer)</code>) to let the Debug screen view and export the app's own logs. Lines are formatted to loosely match Android's <code class="lang-kotlin">logcat -v time</code> shape (<code class="lang-kotlin">L/tag: message</code>) so the same viewer/filters work on both platforms.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1839628215%2FClasslikes%2F-1509551193" anchor-label="RoomPoolTimeoutLog" id="-1839628215%2FClasslikes%2F-1509551193" data-filterable-set=":core:common/jvmAndroidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-room-pool-timeout-log/index.html"><span>Room</span><wbr><span>Pool</span><wbr><span>Timeout</span><wbr><span><span>Log</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1839628215%2FClasslikes%2F-1509551193"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain" data-active="" data-toggle=":core:common/jvmAndroidMain">jvmAndroid</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-room-pool-timeout-log/index.html">RoomPoolTimeoutLog</a></div><div class="brief "><p class="paragraph">Room's connection pool reports an acquire timeout, with a dump naming each connection's holder, only through <code class="lang-kotlin">printStackTrace</code> on <code class="lang-kotlin">System.err</code>, which reaches neither Kermit nor the crash backends. This forwards that one throwable's message to the log, at most once per interval, and passes all output through unchanged.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
