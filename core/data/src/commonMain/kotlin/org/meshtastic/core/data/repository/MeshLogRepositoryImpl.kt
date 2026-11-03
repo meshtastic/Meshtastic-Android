@@ -39,6 +39,7 @@ import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.withAdcVoltage
 import org.meshtastic.core.model.util.withLegacyOneWireTemperatures
 import org.meshtastic.core.model.util.withOneWireTemperature
@@ -160,7 +161,9 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                wb.time = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
+                val packetTime = log.fromRadio.packet?.rxTimeOrNull()
+                val fallbackTime = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
+                wb.time = telemetry.time.takeIf { it > 0 } ?: packetTime ?: fallbackTime
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }
             .build()
