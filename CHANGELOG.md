@@ -8,6 +8,27 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.4-internal.4)
+Changes since [`v2.8.4-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.1):
+
+#### 🏗️ Features
+* feat(connections): pair with a PIN from a connect link by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7856
+* feat(firmware): offer recovery for the last BLE node found stranded in its bootloader by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7842
+* feat(node): metrics voltage chart scale start at 3V by default by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7858
+* feat(widget): one branded design and real cell sizes for both widgets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7862
+* feat(database): log who holds the Room connection when an acquire times out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7875
+#### 🛠️ Fixes
+* fix(coverage): trace Site Planner bands as smooth outlines by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7860
+* fix(messaging): show MQTT origin on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7861
+* fix(node): disabled popup menu 'Message' option for unmessageable or unknown nodes by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7871
+* fix: stop 2.8.3 map crashes and the connect-list ANR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7873
+* fix(mqtt): accept topic aliases from brokers that send them unasked by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7876
+* fix(database): name every Flow query in the Room pool dump by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7878
+* fix(database): move a device database aside after a query finds it corrupt by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7874
+* fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
+#### 📝 Other Changes
+* refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
+
 ### Open Beta (v2.8.4-open.1)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
@@ -33,9 +54,6 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 #### 🖥️ Desktop
 * fix(coverage): Site Planner estimate placement, floor, offline terrain, threads and credit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7758
 #### 🛠️ Fixes
-* fix(flatpak): vendor the Gradle 9.8.2 sha256 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7677
-* fix(docs): keep screenshots versioned docs still link by @rcarteraz in https://github.com/meshtastic/Meshtastic-Android/pull/7694
-* fix(docs): stop labeling untranslated English pages Community translated by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7705
 * fix(settings): offer only presets and serial modes the firmware runs, label pairing modes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7709
 * fix(settings): make Disable LED Heartbeat mean what it says, cap MQTT password at 31 bytes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7708
 * fix(node): gate Mute on our own node's firmware, not the remote node's by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7710
@@ -53,7 +71,6 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(node): show the full firmware version in node details by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7770
 * fix(nodes): keep heard_on_current_lora current between handshakes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7785
 * fix(logging): write app logs to logcat on google release builds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7809
-* fix(test): THINKNODE_M8 now carries SoftDevice 6.1.1 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7811
 * fix(usb): add Seeed XIAO nRF52840 Kit (239a:810b) to device filter by @koshiro in https://github.com/meshtastic/Meshtastic-Android/pull/7838
 * fix(usb): add remaining firmware USB IDs to device filter by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7841
 * fix(admin): accept admin responses only for requests the app sent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7847
@@ -64,6 +81,7 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * @mvanhorn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7698
 * @vpolevikoff made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7802
 * @koshiro made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7838
+* @sergeich made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7870
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
