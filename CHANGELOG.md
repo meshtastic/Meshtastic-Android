@@ -8,28 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Closed Beta (v2.8.4-closed.2)
-Changes since [`v2.8.4-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.1):
-
-#### 🏗️ Features
-* feat(connections): pair with a PIN from a connect link by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7856
-* feat(firmware): offer recovery for the last BLE node found stranded in its bootloader by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7842
-* feat(node): metrics voltage chart scale start at 3V by default by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7858
-* feat(widget): one branded design and real cell sizes for both widgets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7862
-* feat(database): log who holds the Room connection when an acquire times out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7875
-#### 🛠️ Fixes
-* fix(coverage): trace Site Planner bands as smooth outlines by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7860
-* fix(messaging): show MQTT origin on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7861
-* fix(node): disabled popup menu 'Message' option for unmessageable or unknown nodes by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7871
-* fix: stop 2.8.3 map crashes and the connect-list ANR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7873
-* fix(mqtt): accept topic aliases from brokers that send them unasked by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7876
-* fix(database): name every Flow query in the Room pool dump by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7878
-* fix(database): move a device database aside after a query finds it corrupt by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7874
-* fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
-#### 📝 Other Changes
-* refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
-
-### Open Beta (v2.8.4-open.1)
+### Open Beta (v2.8.4-open.2)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
 #### 🏗️ Features
@@ -51,6 +30,11 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(firmware): reset-prime a dropped Legacy DFU only on bootloaders before 2.6.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7806
 * feat(node): compact layout improvements by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7802
 * feat(node): the connected device's live screen on its 3D model by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7651
+* feat(connections): pair with a PIN from a connect link by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7856
+* feat(firmware): offer recovery for the last BLE node found stranded in its bootloader by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7842
+* feat(node): metrics voltage chart scale start at 3V by default by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7858
+* feat(widget): one branded design and real cell sizes for both widgets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7862
+* feat(database): log who holds the Room connection when an acquire times out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7875
 #### 🖥️ Desktop
 * fix(coverage): Site Planner estimate placement, floor, offline terrain, threads and credit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7758
 #### 🛠️ Fixes
@@ -74,8 +58,17 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(usb): add Seeed XIAO nRF52840 Kit (239a:810b) to device filter by @koshiro in https://github.com/meshtastic/Meshtastic-Android/pull/7838
 * fix(usb): add remaining firmware USB IDs to device filter by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7841
 * fix(admin): accept admin responses only for requests the app sent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7847
+* fix(coverage): trace Site Planner bands as smooth outlines by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7860
+* fix(messaging): show MQTT origin on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7861
+* fix(node): disabled popup menu 'Message' option for unmessageable or unknown nodes by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7871
+* fix: stop 2.8.3 map crashes and the connect-list ANR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7873
+* fix(mqtt): accept topic aliases from brokers that send them unasked by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7876
+* fix(database): name every Flow query in the Room pool dump by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7878
+* fix(database): move a device database aside after a query finds it corrupt by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7874
+* fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
 #### 📝 Other Changes
 * refactor(database): drop dead pool-timeout recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7782
+* refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
 
 ## New Contributors
 * @mvanhorn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7698
