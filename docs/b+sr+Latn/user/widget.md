@@ -2,7 +2,7 @@
 title: Home Screen Widget
 parent: User Guide
 nav_order: 20
-last_updated: 2026-10-21
+last_updated: 2026-11-04
 description: Add Meshtastic home screen widgets to glance at your connected node's local stats, or keep an eye on one node you pick, without opening the app.
 aliases:
   - widget
@@ -24,17 +24,21 @@ You can place as many of each as you like. Each Node Tracker remembers its own n
 
 The **Meshtastic** widget displays the **connected node's** current local stats:
 
-- A **node chip** across the top, carrying the node's short name in its own colors
-- **Battery** — the node's battery level, or _Powered_ when running on external power
+- A **node chip** carrying the node's short name in its own colors, with the **battery** level beside it, or _Powered_ when running on external power
 - **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
 - **AirUtil** — the percentage of airtime this node used transmitting in the last hour
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the node is relaying)
-- **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone
-- **Heap** — free versus total memory on the node, drawn as a bar
 - **Nodes** — how many nodes are online, out of the total known
-- **Uptime** — how long the node has been running since its last reboot, shown beside Nodes
-- **Updated** — the time the stats last refreshed, along the foot of the widget
+- **Uptime** — how long the node has been running since its last reboot
+- **Packets sent** and **Packets received** — the node's traffic counters
+- **Noise floor** — the background noise level in dBm
+- **Free memory** — memory the node has left
+- **Relayed** — packets the node relayed for others
+- **Bad packets** — corrupt packets received
+- **Dropped packets** — packets the node discarded
+- **Relays canceled** — relays the node started and then canceled
+- **Updated** — the time the stats last refreshed, along the foot of a three-row widget
+
+The widget shows as many of those as its size holds, in that order, so a small widget keeps the readings people glance at most. A two-by-two widget shows the node, battery, utilization and the first few readings; four cells wide lays the readings out in two columns, and a taller widget adds lines until every reading is on screen.
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.
 
@@ -48,11 +52,13 @@ The **Node Tracker** widget shows one node from your node list:
 - **Battery**: the node's last reported battery level, or _Powered_ on external power
 - **Last heard**: the time your connected node last heard it, or the date if it was more than a day ago
 
-Widen the widget to add a second column:
+From two rows tall it adds, in this order, as many as fit (a wide widget under two rows tall shows Hops Away beside the name):
 
-- **SNR** and **RSSI**: the signal of the node's last packet, shown only when the node is heard directly rather than through other nodes or MQTT
 - **Hops Away**: how many hops away the node is, or _Direct_
 - **Distance**: how far the node is from your connected node. It appears only while you are connected and both nodes have a position
+- **SNR** and **RSSI**: the signal of the node's last packet, shown only when the node is heard directly rather than through other nodes or MQTT
+
+Four cells wide lays the readings out in two columns, so at the default font size every one fits in a two-row widget. A larger font size drops readings from the end of that list, RSSI first.
 
 When a node has not been heard within the last two hours, the widget dims its readings so they do not read as current. Tap the widget to open that node's details in the app.
 

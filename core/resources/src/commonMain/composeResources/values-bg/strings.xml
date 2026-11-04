@@ -534,7 +534,6 @@
     <string name="format_code">Код</string>
     <string name="format_italic">Наклонен</string>
     <string name="format_link">Връзка</string>
-    <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>
     <string name="generate_qr_code">Генериране на QR код</string>
@@ -1320,7 +1319,6 @@
     <string name="what_is_meshtastic">Какво е Meshtastic?</string>
     <string name="what_is_meshtastic_description">Мрежа с отворен код, работеща независимо от централизирана инфраструктура (off-grid), децентрализирана и изградена на принципа на мрежовата топология (mesh), която функционира чрез достъпни радиоустройства с ниска консумация на енергия.</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_config">Опции за Wi-Fi</string>
     <string name="wifi_devices">Осигуряване на Wi-Fi за mPWRD-OS</string>

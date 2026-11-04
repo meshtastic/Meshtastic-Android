@@ -1,7 +1,7 @@
 ---
 title: Уведомления
 nav_order: 18
-last_updated: 2026-10-21
+last_updated: 2026-11-04
 description: What each Meshtastic notification is for, how to silence one kind without the others, and what you can do from a message notification or a watch.
 aliases:
   - notifications
@@ -37,7 +37,7 @@ By default, direct messages, alerts and notices from your node pop up on screen,
 
 Alert notifications play an alarm sound. To let them through Do Not Disturb as well, open the category and allow it to override Do Not Disturb, which is the step [Getting Started](onboarding#critical-alerts-permission) offers during setup.
 
-The service notification stays in the shade while Meshtastic is connected in the background. It shows the connection state, and also shows progress while a firmware update or a preset scan runs. On Android 16 and newer you can turn it into a [Live Update](connections#live-update) that shows your mesh or one node in the status bar.
+The service notification stays in the shade while Meshtastic is connected in the background. It shows the connection state, and also shows progress while a firmware update or a preset scan runs. On Android 16 and newer you can turn it into a [Live Update](connections#live-update) that shows your mesh or one node in the status bar and in this notification, with a **Stop Live Update** action to end it.
 
 > ℹ️ **Note:** The Desktop app has no notification categories. It switches notifications from its own settings instead, described in [Notification Preferences](desktop#notification-preferences).
 

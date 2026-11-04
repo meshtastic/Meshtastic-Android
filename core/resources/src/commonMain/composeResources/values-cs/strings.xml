@@ -669,7 +669,6 @@
     <string name="fixed_position">Pevná poloha</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Volná paměť</string>
     <string name="free_memory_description">Dostupná systémová paměť v bajtech</string>
     <string name="freq">Frekv</string>
     <string name="gas_resistance">Odpor plynu</string>
@@ -1145,7 +1144,6 @@
     <string name="nodes_unheard_banner_one">1 uzel nebyl slyšen při vašem aktuálním nastavení LoRa</string>
     <string name="nodes_unheard_keep">Ponechat</string>
     <string name="nodes_unheard_remove">Odstranit</string>
-    <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
     <string name="noise_floor_no_reading">Úroveň šumu: bez měření</string>
     <string name="none">Žádný (zakázat)</string>
@@ -1670,7 +1668,7 @@
     <string name="what_is_meshtastic">Co je Meshtastic?</string>
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d/%2$d</string>
+    <string name="widget_packets_bad">Chybné pakety</string>
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>

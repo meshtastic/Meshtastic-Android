@@ -476,7 +476,6 @@
     <string name="fixed_position">固定位置</string>
     <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <!-- FORMAT -->
-    <string name="free_memory">可用記憶體</string>
     <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="freq">頻率</string>
     <string name="gas_resistance">氣體感測器</string>
@@ -1271,7 +1270,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="waypoint_received">收到編輯航點：%1$s</string>
     <string name="weight">重量</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="wifi_provision_available_networks">可用的網路</string>
