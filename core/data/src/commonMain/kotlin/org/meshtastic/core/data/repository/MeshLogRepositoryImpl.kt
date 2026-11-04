@@ -117,7 +117,9 @@ open class MeshLogRepositoryImpl(
                     it.meshLogDao().getLogsFrom(logId, PortNum.TELEMETRY_APP.value, DEFAULT_MAX_LOGS)
                 }
                 .distinctUntilChanged()
-                .mapLatest { list -> list.map { it.asExternalModel() }.mapNotNull(::parseTelemetryLog) }
+                .mapLatest { list ->
+                    list.map { it.asExternalModel() }.mapNotNull(::parseTelemetryLog).sortedByDescending { it.time }
+                }
         }
         .flowOn(dispatchers.io)
 
@@ -162,9 +164,9 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                val telemetryTime = validSecondsOrNull(telemetry.time)
-                val packetTime = validSecondsOrNull(log.fromRadio.packet?.rxTimeOrNull())
                 val fallbackTime = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
+                val telemetryTime = validSecondsOrNull(telemetry.time, maxValidTime = fallbackTime)
+                val packetTime = validSecondsOrNull(log.fromRadio.packet?.rxTimeOrNull(), maxValidTime = fallbackTime)
                 wb.time = telemetryTime ?: packetTime ?: fallbackTime
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }

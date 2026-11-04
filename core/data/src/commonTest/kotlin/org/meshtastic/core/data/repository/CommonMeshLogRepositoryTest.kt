@@ -460,7 +460,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = nowMillis,
+                received_date = now * TimeConstants.MS_PER_SEC,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -506,7 +506,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = nowMillis,
+                received_date = now * TimeConstants.MS_PER_SEC,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -583,8 +583,9 @@ abstract class CommonMeshLogRepositoryTest {
 
     @Test
     fun `parseTelemetryLog clamps future telemetry timestamp`() = runTest(testDispatcher) {
-        val startNow = nowSeconds.toInt()
-        val future = startNow + 1000
+        val now = nowSeconds.toInt()
+        val millis = now * TimeConstants.MS_PER_SEC
+        val future = now + 1000
         val telemetry =
             Telemetry.Builder()
                 .also { wb ->
@@ -609,7 +610,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = nowMillis,
+                received_date = millis,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -620,12 +621,11 @@ abstract class CommonMeshLogRepositoryTest {
 
         val result = repository.getTelemetryFrom(0).first()
 
-        val endNow = nowSeconds.toInt()
         assertNotNull(result)
         assertEquals(1, result.size)
         val resultTelemetry = result[0]
         assertNotNull(resultTelemetry)
-        assertTrue(resultTelemetry.time in startNow..endNow)
+        assertEquals(now, resultTelemetry.time)
     }
 
     private fun telemetryLog(

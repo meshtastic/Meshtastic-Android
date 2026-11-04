@@ -46,6 +46,7 @@ fun clampTimestampToNow(epochSeconds: Int): Int = minOf(epochSeconds, nowSeconds
 /** Converts these milliseconds to an [Instant]. */
 fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)
 
-/** checks if specified value is a valid seconds timestamp and clamps it to now, else returns null */
-fun validSecondsOrNull(epochSeconds: Int?): Int? =
-    epochSeconds?.takeIf { it > MIN_PLAUSIBLE_EPOCH_SECONDS }?.let { clampTimestampToNow(it) }
+/** checks if specified value is a valid seconds timestamp, else returns null */
+fun validSecondsOrNull(seconds: Int?, maxValidTime: Int): Int? = seconds?.takeIf {
+    it in MIN_PLAUSIBLE_EPOCH_SECONDS..maxValidTime
+}
