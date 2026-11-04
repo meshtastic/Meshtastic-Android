@@ -48,6 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -64,6 +71,7 @@ import org.meshtastic.core.resources.connect_radio_to_change_settings
 import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.save_and_restart
 import org.meshtastic.core.resources.save_changes
+import org.meshtastic.core.ui.component.ListScrollbar
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.RadioConfigState
@@ -161,56 +169,67 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             DisposableEffect(fieldFocus) { onDispose { fieldFocus?.clear(seenRequest.value) } }
 
             CompositionLocalProvider(LocalFieldHighlight provides highlight) {
-                LazyColumn(
-                    state = listState,
+                // Tab walks the fields on a hardware keyboard; a text field would otherwise insert it as a character.
+                Box(
                     modifier =
-                    Modifier.padding(innerPadding).fillMaxSize().onGloballyPositioned {
-                        highlight.listCoordinates = it
+                    Modifier.padding(innerPadding).fillMaxSize().onPreviewKeyEvent { event ->
+                        if (event.type != KeyEventType.KeyDown || event.key != Key.Tab) {
+                            return@onPreviewKeyEvent false
+                        }
+                        val direction = if (event.isShiftPressed) FocusDirection.Previous else FocusDirection.Next
+                        focusManager.moveFocus(direction)
+                        true
                     },
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    keyIndex.reset()
-                    val recording = FieldKeyRecordingScope(this, keyIndex, highlight)
-                    if (showConnectPrompt) {
-                        recording.item {
-                            Text(
-                                text = stringResource(Res.string.connect_radio_to_change_settings),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().onGloballyPositioned { highlight.listCoordinates = it },
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        keyIndex.reset()
+                        val recording = FieldKeyRecordingScope(this, keyIndex, highlight)
+                        if (showConnectPrompt) {
+                            recording.item {
+                                Text(
+                                    text = stringResource(Res.string.connect_radio_to_change_settings),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
-                    }
-                    recording.content()
+                        recording.content()
 
-                    item {
-                        AnimatedVisibility(
-                            modifier = Modifier.fillMaxWidth(),
-                            visible = showFooterButtons,
-                            enter = fadeIn() + expandIn(),
-                            exit = fadeOut() + shrinkOut(),
-                        ) {
-                            PreferenceFooter(
-                                enabled = enabled && showFooterButtons,
-                                positiveEnabled = saveEnabled,
-                                negativeText = stringResource(Res.string.discard_changes),
-                                onNegativeClicked = {
-                                    focusManager.clearFocus()
-                                    configState.reset()
-                                    onDiscard()
-                                },
-                                positiveText =
-                                if (rebootBehavior == RebootBehavior.ALWAYS) {
-                                    stringResource(Res.string.save_and_restart)
-                                } else {
-                                    stringResource(Res.string.save_changes)
-                                },
-                                onPositiveClicked = {
-                                    focusManager.clearFocus()
-                                    if (saveEnabled) onSave(configState.value)
-                                },
-                            )
+                        item {
+                            AnimatedVisibility(
+                                modifier = Modifier.fillMaxWidth(),
+                                visible = showFooterButtons,
+                                enter = fadeIn() + expandIn(),
+                                exit = fadeOut() + shrinkOut(),
+                            ) {
+                                PreferenceFooter(
+                                    enabled = enabled && showFooterButtons,
+                                    positiveEnabled = saveEnabled,
+                                    negativeText = stringResource(Res.string.discard_changes),
+                                    onNegativeClicked = {
+                                        focusManager.clearFocus()
+                                        configState.reset()
+                                        onDiscard()
+                                    },
+                                    positiveText =
+                                    if (rebootBehavior == RebootBehavior.ALWAYS) {
+                                        stringResource(Res.string.save_and_restart)
+                                    } else {
+                                        stringResource(Res.string.save_changes)
+                                    },
+                                    onPositiveClicked = {
+                                        focusManager.clearFocus()
+                                        if (saveEnabled) onSave(configState.value)
+                                    },
+                                )
+                            }
                         }
                     }
+                    ListScrollbar(listState)
                 }
             }
         }
