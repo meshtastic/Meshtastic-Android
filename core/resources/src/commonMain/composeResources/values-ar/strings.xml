@@ -260,6 +260,7 @@
     <string name="via_mqtt">فقط شبكة MQTT</string>
     <string name="voltage">شدة التيار</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">سيئ</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">عنوان الـ IP</string>
     <!-- WIND -->

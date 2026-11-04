@@ -1191,7 +1191,7 @@
     <string name="waypoint_received">Mottagen vägpunkt: %1$s</string>
     <string name="weight">Vikt</string>
     <!-- WIDGET -->
-    <string name="widget_packets_bad">Felaktiga paket</string>
+    <string name="widget_packets_bad">Dålig</string>
     <!-- WIFI -->
     <string name="wifi_provision_available_networks">Tillgängliga nätverk</string>
     <string name="wifi_provision_connect_failed">Kunde inte ansluta: %1$s</string>

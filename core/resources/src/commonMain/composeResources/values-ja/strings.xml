@@ -1552,7 +1552,7 @@
     <string name="waypoint_received">受信したウェイポイント: %1$s</string>
     <string name="weight">重さ</string>
     <!-- WIDGET -->
-    <string name="widget_packets_bad">不良パケット</string>
+    <string name="widget_packets_bad">不良</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS の Wi-Fi プロビジョニング</string>
     <string name="wifi_provision_available_networks">利用可能なネットワーク</string>

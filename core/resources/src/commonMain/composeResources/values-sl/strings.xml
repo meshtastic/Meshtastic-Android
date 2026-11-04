@@ -301,6 +301,7 @@
     <string name="waypoint_new">Nova točka poti</string>
     <string name="waypoint_received">Prejeta točka poti: %1$s</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">Slab</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP naslov</string>
     <!-- WIND -->

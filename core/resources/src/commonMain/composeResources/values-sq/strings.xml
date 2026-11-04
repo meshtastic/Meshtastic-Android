@@ -285,6 +285,7 @@
     <string name="waypoint_new">Pikë e re rreshti</string>
     <string name="waypoint_received">Pikë rreshti e marrë: %1$s</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">I Keq</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adresa IP</string>
     <!-- WIND -->

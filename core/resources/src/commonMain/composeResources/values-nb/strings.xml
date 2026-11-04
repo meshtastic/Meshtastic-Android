@@ -297,6 +297,7 @@
     <string name="waypoint_new">Nytt veipunkt</string>
     <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">Dårlig</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adresse</string>
     <!-- WIND -->

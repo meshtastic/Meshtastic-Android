@@ -278,6 +278,7 @@
     <string name="waypoint_new">Nouvo pwen</string>
     <string name="waypoint_received">Pwen resevwa: %1$s</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">Move</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adrès IP</string>
     <!-- WIND -->
