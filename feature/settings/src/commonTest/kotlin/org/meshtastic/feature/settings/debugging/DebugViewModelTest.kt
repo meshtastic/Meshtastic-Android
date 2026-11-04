@@ -219,6 +219,21 @@ class DebugViewModelTest {
     }
 
     @Test
+    fun `a new query clears the previous matches until its own search finishes`() {
+        val manager = LogSearchManager()
+        manager.setSearchText("App")
+        manager.applyMatches("App", listOf(LogSearchManager.SearchMatch(0, 0, 2, "message")))
+        manager.goToNextMatch()
+
+        manager.setSearchText("Apple")
+
+        manager.searchState.value.searchText shouldBe "Apple"
+        manager.searchState.value.hasMatches shouldBe false
+        manager.searchState.value.allMatches shouldBe emptyList()
+        manager.searchState.value.currentMatchIndex shouldBe -1
+    }
+
+    @Test
     fun `filterManager filters logs correctly with AND and OR modes`() {
         val logs =
             listOf(

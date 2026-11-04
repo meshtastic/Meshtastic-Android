@@ -95,7 +95,7 @@ class LogSearchManager {
         _searchText.value = text
         _currentMatchIndex.value = -1
         // The field reads its text from here; matches follow once the off-main search finishes.
-        _searchState.value = _searchState.value.copy(searchText = text)
+        _searchState.value = SearchState(searchText = text)
     }
 
     fun goToNextMatch() {
