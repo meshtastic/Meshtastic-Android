@@ -35,7 +35,7 @@ The **Meshtastic** widget displays the **connected node's** current local stats:
 - **Relayed** — packets the node relayed for others
 - **Bad** — corrupt packets received
 - **Dropped** — packets the node discarded
-- **Canceled** — relays the node started and then canceled
+- **Relays canceled** — relays the node started and then canceled
 - **Updated** — the time the stats last refreshed, along the foot of a three-row widget
 
 The widget shows as many of those as its size holds, in that order, so a small widget keeps the readings people glance at most. A two-by-two widget shows the node, battery, utilization and the first few readings; four cells wide lays the readings out in two columns, and a taller widget adds lines until every reading is on screen.

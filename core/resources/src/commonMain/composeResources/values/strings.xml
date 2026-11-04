@@ -2248,7 +2248,7 @@
     <string name="widget_packets_received">Received</string>
     <string name="widget_packets_sent">Sent</string>
     <string name="widget_relays">Relayed</string>
-    <string name="widget_relays_canceled">Canceled</string>
+    <string name="widget_relays_canceled">Relays canceled</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>

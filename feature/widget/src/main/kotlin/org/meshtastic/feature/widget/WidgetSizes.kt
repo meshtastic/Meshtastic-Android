@@ -93,7 +93,7 @@ internal object WidgetSizes {
      * The real bounds this composition is shown at: the cell the launcher reports for the current orientation when the
      * current breakpoint fits in it (the launcher only shows a breakpoint where it fits), else the other orientation's
      * when it fits there, else the breakpoint itself, so a stale or missing option costs slack, never a layout meant
-     * for another cell. Capped under the next breakpoint in each direction, where the launcher would show that one
+     * for another cell. Capped at the next breakpoint in each direction, from which the launcher shows that one
      * instead: between a resize and the recomposition it triggers, the launcher shows the old composition's layout for
      * the new size, and the cap keeps that layout counted for a cell of its own tier.
      */
