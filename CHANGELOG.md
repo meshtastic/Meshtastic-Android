@@ -8,6 +8,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.4-internal.5)
+Changes since [`v2.8.4-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.2):
+
+#### 🏗️ Features
+* feat(map): label Google map clusters with their exact count by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7896
+* feat(notifications): say where the Live Update shows and let it be stopped in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7901
+#### 🖥️ Desktop
+* fix(desktop): scrollbar and Tab focus on radio config screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7899
+#### 🛠️ Fixes
+* fix(debug): run the log search off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7891
+* fix(widget): size the readings to the real cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7902
+
 ### Open Beta (v2.8.4-open.2)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
