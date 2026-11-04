@@ -28,10 +28,10 @@ CONFIG = REPO_ROOT / "config.properties"
 TARGET = REPO_ROOT / "fastlane/metadata/android/en-US/changelogs/default.txt"
 RELEASES_URL = "https://github.com/meshtastic/Meshtastic-Android/releases"
 
-# Google Play caps "what's new" at 500 characters per locale. Translations run
-# longer than English, so leave room rather than filling it.
+# Google Play caps "what's new" at 500 characters per locale. Romance-language translations run
+# about 1.6x the English and the trailing link line translates too, so the body gets 250.
 PLAY_LIMIT = 500
-BUDGET = 380
+BUDGET = 250
 
 
 def version() -> str:
