@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.4-internal.5)
+### Closed Beta (v2.8.4-closed.3)
 Changes since [`v2.8.4-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.2):
 
 #### 🏗️ Features
