@@ -72,8 +72,6 @@ files:
       - sr-Latn
   - source: /fastlane/metadata/android/en-US/changelogs/default.txt
     translation: /fastlane/metadata/android/%locale%/changelogs/%original_file_name%
-    # One string, so Crowdin's per-string max length can hold the whole file under Play's 500.
-    content_segmentation: 0
     languages_mapping: *play_locales
     excluded_target_languages: *play_unsupported
   # In-app docs, user guide only (developer guide is English-only). English sources live under docs/en/;
