@@ -8,6 +8,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.4-internal.6)
+Changes since [`v2.8.4-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.3):
+
+#### 🛠️ Fixes
+* fix(widget): pick the layout by breakpoint and the line budget by the reported cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7912
+
 ### Open Beta (v2.8.4-open.3)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
