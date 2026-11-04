@@ -1,38 +1,38 @@
 ---
-title: Firmware Updates
+title: Atualização de Firmware
 nav_order: 13
 last_updated: 2026-10-28
-description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
+description: Atualize seu firmware do nó através do Bluetooth, Wi-Fi ou USB - processo OTA, canais de versão, verificações de pré-voo e recuperação.
 aliases:
   - firmware
-  - update
+  - atualizar
   - ota
   - flash
 ---
 
-# Firmware Updates
+# Atualização de Firmware
 
-Keep your Meshtastic node up to date with the latest firmware for new features, bug fixes, and security improvements.
+Mantenha o seu nó Meshtastic atualizado com o último firmware para novas funcionalidades, correções de bugs e melhorias na segurança.
 
-## Checking for Updates
+## A Verificar por Actualizações
 
-1. Open **Settings** for the connected node and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable nodes.
-2. The app checks for available firmware versions.
-3. Available updates show the version number and release notes.
+1. Abra **Configurações** para o nó conectado e, em **Avançado**, toque em **Firmware Update**. Apenas para nós que sejam compatíveis com OTA.
+2. O aplicativo verifica as versões de firmware disponíveis.
+3. Atualizações disponíveis mostram o número da versão e notas de lançamento.
 
-The app also tells you when the connected node is behind the latest stable release. The **Connect** tab shows a **Firmware update available** card naming the installed and the stable version, and a notification says the same once per node and release. Its button reads **Open Firmware Updates** when the app can update the node over the current connection, or **Open Meshtastic Flasher** when it can't.
+O aplicativo também informa quando o nó conectado está atrás da versão estável mais recente. Separador **Conectar** mostra uma atualização de **Firmware disponível** cartão que nomeia a versão instalada e estável. e uma notificação diz a mesma vez por nó e lançamento. O botão lê **Abrir Atualizações de Firmware** quando o aplicativo pode atualizar o nó através da conexão atual, ou **Abrir Flasher Meshtastic** quando ele não pode.
 
-## Update Methods
+## Atualizar Métodos
 
-The Firmware Update screen picks the method from how the node is connected, and its update button names it: **Update via BLE OTA**, **Update via Wi-Fi OTA**, or **Update via USB File Transfer**.
+O Firmware Update escolhe o método de como o nó está conectado, e seus nomes nos botões de atualização: **Atualize via OTA BLE**, **Atualizar via Wi-Fi OTA** ou **Atualizar via Transferência de Arquivos USB**.
 
-| Connection | nRF52             | ESP32     | RP2040            |
-| ---------- | ----------------- | --------- | ----------------- |
-| Bluetooth  | BLE OTA           | BLE OTA   | —                 |
-| Rede       | —                 | Wi-Fi OTA | —                 |
-| USB        | USB File Transfer | —         | USB File Transfer |
+| Ligação   | NRF52                              | ESP32     | RP2040                             |
+| --------- | ---------------------------------- | --------- | ---------------------------------- |
+| Bluetooth | BLE OTA                            | BLE OTA   | —                                  |
+| Rede      | —                                  | Wi-Fi OTA | —                                  |
+| USB       | Transferência de ficheiros por USB | —         | Transferência de ficheiros por USB |
 
-Where the table has no method, the screen says firmware updates are not supported over this connection. Connect another way, or use the [Web Flasher](https://flasher.meshtastic.org).
+Onde a tabela não tem nenhum método, o ecrã diz que as atualizações de firmware não são suportadas através desta conexão. Conectar a outra maneira, ou usar o [Web Flashes](https://flasher.meshtastic.org).
 
 ### OTA (Over-The-Air) via Bluetooth
 
