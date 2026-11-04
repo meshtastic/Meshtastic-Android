@@ -48,7 +48,7 @@ internal fun TrackerContent(state: NodeTrackerWidgetState.Tracking) {
         when {
             WidgetSizes.isOneRow(size) -> TrackerRow(state, wide)
             WidgetSizes.isCompact(size) -> TrackerSquare(state, wide)
-            else -> TrackerTall(state, columns = WidgetSizes.columns(size))
+            else -> TrackerTall(state, columns = WidgetSizes.columns())
         }
     }
 }
@@ -85,8 +85,8 @@ private fun TrackerSquare(state: NodeTrackerWidgetState.Tracking, wide: Boolean)
 }
 
 /**
- * Identity, the name, then the readings that fit in [columns]. Height left over sits under the readings: under a line
- * when the node has readings to fill it, more when it has few.
+ * Identity, the name, then the readings that fit in [columns]. Height left over spreads the lines when the node has
+ * fewer readings than lines, and sits under them otherwise.
  */
 @Composable
 private fun TrackerTall(state: NodeTrackerWidgetState.Tracking, columns: Int) {
@@ -103,7 +103,7 @@ private fun TrackerTall(state: NodeTrackerWidgetState.Tracking, columns: Int) {
         Spacer(GlanceModifier.height(2.dp))
         LongName(state, maxLines = if (linesUsed < lines) 2 else 1)
         Spacer(GlanceModifier.height(4.dp))
-        StatGrid(readings, columns, lines, state.isStale)
+        StatGrid(readings, columns, lines, GlanceModifier.defaultWeight(), state.isStale)
     }
 }
 

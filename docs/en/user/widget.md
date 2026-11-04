@@ -29,13 +29,13 @@ The **Meshtastic** widget displays the **connected node's** current local stats:
 - **AirUtil** — the percentage of airtime this node used transmitting in the last hour
 - **Nodes** — how many nodes are online, out of the total known
 - **Uptime** — how long the node has been running since its last reboot
-- **Packets sent** and **Packets received** — the node's traffic counters
+- **Sent** and **Received** — the node's packet counters
 - **Noise floor** — the background noise level in dBm
 - **Free memory** — memory the node has left
 - **Relayed** — packets the node relayed for others
-- **Bad packets** — corrupt packets received
-- **Dropped packets** — packets the node discarded
-- **Relays canceled** — relays the node started and then canceled
+- **Bad** — corrupt packets received
+- **Dropped** — packets the node discarded
+- **Canceled** — relays the node started and then canceled
 - **Updated** — the time the stats last refreshed, along the foot of a three-row widget
 
 The widget shows as many of those as its size holds, in that order, so a small widget keeps the readings people glance at most. A two-by-two widget shows the node, battery, utilization and the first few readings; four cells wide lays the readings out in two columns, and a taller widget adds lines until every reading is on screen.

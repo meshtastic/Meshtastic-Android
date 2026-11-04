@@ -80,7 +80,7 @@ internal fun StatsSquare(state: LocalStatsWidgetUiState, wide: Boolean) {
 
 /**
  * Under a header [headerHeight] tall: identity, utilization, then as many readings as the height holds, in [columns],
- * most glanced-at first. Height left over, under a line, sits under the readings.
+ * most glanced-at first. Height left over spreads the lines when the readings run out, and sits under them otherwise.
  */
 @Composable
 internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, columns: Int, extra: Boolean, headerHeight: Dp) {
@@ -103,8 +103,12 @@ internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, columns: I
             AirUtilBar(state)
         }
         Spacer(GlanceModifier.height(4.dp))
-        StatGrid(readings(state, nodesInGrid = !wide).take(lines * columns), columns, lines)
-        Spacer(GlanceModifier.defaultWeight())
+        StatGrid(
+            readings(state, nodesInGrid = !wide).take(lines * columns),
+            columns,
+            lines,
+            GlanceModifier.defaultWeight(),
+        )
         if (extra) Footnote(updatedText(state))
     }
 }

@@ -154,7 +154,7 @@ class LocalStatsWidget :
                                     StatsTall(
                                         state,
                                         wide,
-                                        columns = WidgetSizes.columns(size),
+                                        columns = WidgetSizes.columns(),
                                         extra = WidgetSizes.isExtraTall(size),
                                         headerHeight =
                                         if (refresh) {
