@@ -8,19 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Closed Beta (v2.8.4-closed.3)
-Changes since [`v2.8.4-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.2):
-
-#### 🏗️ Features
-* feat(map): label Google map clusters with their exact count by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7896
-* feat(notifications): say where the Live Update shows and let it be stopped in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7901
-#### 🖥️ Desktop
-* fix(desktop): scrollbar and Tab focus on radio config screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7899
-#### 🛠️ Fixes
-* fix(debug): run the log search off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7891
-* fix(widget): size the readings to the real cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7902
-
-### Open Beta (v2.8.4-open.2)
+### Open Beta (v2.8.4-open.3)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
 #### 🏗️ Features
@@ -47,8 +35,11 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(node): metrics voltage chart scale start at 3V by default by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7858
 * feat(widget): one branded design and real cell sizes for both widgets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7862
 * feat(database): log who holds the Room connection when an acquire times out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7875
+* feat(map): label Google map clusters with their exact count by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7896
+* feat(notifications): say where the Live Update shows and let it be stopped in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7901
 #### 🖥️ Desktop
 * fix(coverage): Site Planner estimate placement, floor, offline terrain, threads and credit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7758
+* fix(desktop): scrollbar and Tab focus on radio config screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7899
 #### 🛠️ Fixes
 * fix(settings): offer only presets and serial modes the firmware runs, label pairing modes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7709
 * fix(settings): make Disable LED Heartbeat mean what it says, cap MQTT password at 31 bytes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7708
@@ -78,6 +69,8 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(database): name every Flow query in the Room pool dump by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7878
 * fix(database): move a device database aside after a query finds it corrupt by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7874
 * fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
+* fix(debug): run the log search off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7891
+* fix(widget): size the readings to the real cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7902
 #### 📝 Other Changes
 * refactor(database): drop dead pool-timeout recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7782
 * refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
