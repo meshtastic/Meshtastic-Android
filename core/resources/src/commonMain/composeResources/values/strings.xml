@@ -833,7 +833,7 @@
     <string name="format_link">Link</string>
     <string name="format_strikethrough">Strikethrough</string>
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
-    <string name="free_memory">Free Memory</string>
+    <string name="free_memory">Free memory</string>
     <string name="free_memory_description">Available system memory in bytes</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Gas Resistance</string>
@@ -1546,7 +1546,7 @@
     <string name="nodes_unheard_banner_one">1 node not heard on your current LoRa settings</string>
     <string name="nodes_unheard_keep">Keep</string>
     <string name="nodes_unheard_remove">Remove</string>
-    <string name="noise_floor">Noise Floor</string>
+    <string name="noise_floor">Noise floor</string>
     <string name="noise_floor_definition">The background RF noise measured by the radio receiver. Lower values usually indicate a quieter receiver environment; -85 dBm is a busy reference point, not a hard failure threshold.</string>
     <string name="noise_floor_no_reading">Noise Floor: No reading</string>
     <string name="none">None (disable)</string>
@@ -2236,13 +2236,15 @@
     <string name="what_is_meshtastic">What is Meshtastic?</string>
     <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>
     <!-- WIDGET -->
-    <string name="widget_bad_dropped">Bad / dropped</string>
     <string name="widget_node_tracker_choose">Choose a node to track</string>
     <string name="widget_node_tracker_not_found">Node not found. Tap to choose a node.</string>
     <string name="widget_node_tracker_title">Node Tracker</string>
-    <string name="widget_pair_value">%1$d / %2$d</string>
-    <string name="widget_relays_canceled">Relays / canceled</string>
-    <string name="widget_traffic">TX / RX</string>
+    <string name="widget_packets_bad">Bad packets</string>
+    <string name="widget_packets_dropped">Dropped packets</string>
+    <string name="widget_packets_received">Packets received</string>
+    <string name="widget_packets_sent">Packets sent</string>
+    <string name="widget_relays">Relayed</string>
+    <string name="widget_relays_canceled">Relays canceled</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>

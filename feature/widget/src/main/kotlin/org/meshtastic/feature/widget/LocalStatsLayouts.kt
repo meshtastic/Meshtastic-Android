@@ -17,6 +17,7 @@
 package org.meshtastic.feature.widget
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
 import androidx.glance.layout.Alignment
@@ -33,19 +34,13 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.channel_utilization
-import org.meshtastic.core.resources.formatDuration
-import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.local_stats_updated_at
 import org.meshtastic.core.resources.nodes
-import org.meshtastic.core.resources.noise_floor
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.updated
-import org.meshtastic.core.resources.uptime
-import org.meshtastic.core.resources.widget_bad_dropped
-import org.meshtastic.core.resources.widget_pair_value
-import org.meshtastic.core.resources.widget_relays_canceled
-import org.meshtastic.core.resources.widget_traffic
-import kotlin.time.DurationUnit
+
+/** Between the two stacked bars at narrow widths, counted in the line budget. */
+private val BAR_SPACING = 2.dp
 
 /** One row: the mark, node and battery over channel utilization, with nodes online when wide. */
 @Composable
@@ -83,10 +78,20 @@ internal fun StatsSquare(state: LocalStatsWidgetUiState, wide: Boolean) {
     }
 }
 
-/** Under the full header: identity, utilization, then the readings that fit, most glanced-at first. */
+/**
+ * Under a header [headerHeight] tall: identity, utilization, then as many readings as the height holds, in [columns],
+ * most glanced-at first. Height left over, under a line, sits under the readings.
+ */
 @Composable
-@Suppress("LongMethod")
-internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, extra: Boolean) {
+internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, columns: Int, extra: Boolean, headerHeight: Dp) {
+    val heights = WidgetSizes.Heights
+    // Under the header, the identity row and the bars, plus over the footnote.
+    val gaps = heights.gap + heights.gap + heights.gap + (if (extra) heights.gap else 0.dp)
+    val lines =
+        WidgetSizes.lines(
+            fixed = headerHeight + gaps + heights.bottom + (if (wide) 0.dp else BAR_SPACING),
+            text = heights.identity + heights.bar * (if (wide) 1 else 2) + (if (extra) heights.footnote else 0.dp),
+        )
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Identity(state, nodesInRow = wide)
         Spacer(GlanceModifier.height(4.dp))
@@ -94,38 +99,13 @@ internal fun StatsTall(state: LocalStatsWidgetUiState, wide: Boolean, extra: Boo
             BarPair(state)
         } else {
             ChUtilBar(state)
-            Spacer(GlanceModifier.height(2.dp))
+            Spacer(GlanceModifier.height(BAR_SPACING))
             AirUtilBar(state)
         }
         Spacer(GlanceModifier.height(4.dp))
-        if (!wide) StatRow(stringResource(Res.string.nodes), nodesValue(state))
-        StatRow(stringResource(Res.string.uptime), formatDuration(state.uptimeSecs, DurationUnit.MINUTES))
-        if (state.hasStats && (wide || extra)) {
-            StatRow(
-                stringResource(Res.string.widget_traffic),
-                stringResource(Res.string.widget_pair_value, state.numPacketsTx, state.numPacketsRx),
-            )
-            state.noiseFloor?.let { StatRow(stringResource(Res.string.noise_floor), MetricFormatter.rssi(it)) }
-        }
-        if (!extra) return@Column
-        if (state.hasStats) {
-            StatRow(
-                stringResource(Res.string.widget_relays_canceled),
-                stringResource(Res.string.widget_pair_value, state.numTxRelay, state.numTxRelayCanceled),
-            )
-            if (wide) {
-                StatRow(
-                    stringResource(Res.string.widget_bad_dropped),
-                    stringResource(Res.string.widget_pair_value, state.numPacketsRxBad, state.numTxDropped),
-                )
-                StatRow(
-                    stringResource(Res.string.free_memory),
-                    stringResource(Res.string.widget_pair_value, state.heapFreeBytes, state.heapTotalBytes),
-                )
-            }
-        }
+        StatGrid(readings(state, nodesInGrid = !wide).take(lines * columns), columns, lines)
         Spacer(GlanceModifier.defaultWeight())
-        Footnote(updatedText(state))
+        if (extra) Footnote(updatedText(state))
     }
 }
 
@@ -183,8 +163,6 @@ private fun batteryValue(state: LocalStatsWidgetUiState): String? = when {
     state.batteryLevel > MAX_BATTERY_PERCENT -> stringResource(Res.string.powered)
     else -> MetricFormatter.percent(state.batteryLevel)
 }
-
-private fun nodesValue(state: LocalStatsWidgetUiState) = "${state.onlineNodes}/${state.totalNodes}"
 
 @Composable
 private fun updatedText(state: LocalStatsWidgetUiState): String {
