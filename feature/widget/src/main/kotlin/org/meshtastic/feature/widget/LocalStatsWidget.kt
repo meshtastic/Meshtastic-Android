@@ -32,15 +32,18 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.provideContent
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import co.touchlab.kermit.Logger
@@ -61,8 +64,8 @@ class LocalStatsWidget :
     GlanceAppWidget(),
     KoinComponent {
 
-    override val sizeMode: SizeMode = WidgetSizes.responsive
-    override val previewSizeMode: androidx.glance.appwidget.PreviewSizeMode = WidgetSizes.responsive
+    override val sizeMode: SizeMode = WidgetSizes.sizeMode
+    override val previewSizeMode: PreviewSizeMode = WidgetSizes.previewSizeMode
 
     private val stateProvider: LocalStatsWidgetStateProvider by inject()
 
@@ -109,9 +112,10 @@ class LocalStatsWidget :
     internal fun WidgetContent(state: LocalStatsWidgetUiState) {
         val context = LocalContext.current
         val size = LocalSize.current
-        val oneRow = size.height < WidgetSizes.SQUARE.height
-        val compact = size.height < WidgetSizes.TALL.height
-        val wide = size.width >= WidgetSizes.WIDE.width
+        val oneRow = WidgetSizes.isOneRow(size)
+        val compact = WidgetSizes.isCompact(size)
+        val wide = WidgetSizes.isWide(size)
+        val refresh = wide && !compact
         // Mandatory: without this bridge every stringResource call below throws. See WidgetResourceEnvironment.
         WidgetResourceEnvironment {
             GlanceTheme {
@@ -132,15 +136,34 @@ class LocalStatsWidget :
                             WidgetHeader(
                                 title = stringResource(Res.string.meshtastic_app_name),
                                 compact = compact,
-                                action = if (wide && !compact) ({ RefreshButton() }) else null,
+                                action = if (refresh) ({ RefreshButton() }) else null,
                             )
                             Spacer(GlanceModifier.height(4.dp))
                         }
-                        when {
-                            !state.showContent -> StatusBody(statusText(state), state.isConnecting, oneRow)
-                            oneRow -> StatsRow(state, wide)
-                            compact -> StatsSquare(state, wide)
-                            else -> StatsTall(state, wide, extra = size.height >= WidgetSizes.EXTRA_TALL.height)
+                        // The body takes what the header leaves, so a body that fills itself never runs under the
+                        // bottom edge.
+                        Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
+                            when {
+                                !state.showContent -> StatusBody(statusText(state), state.isConnecting, oneRow)
+
+                                oneRow -> StatsRow(state, wide)
+
+                                compact -> StatsSquare(state, wide)
+
+                                else ->
+                                    StatsTall(
+                                        state,
+                                        wide,
+                                        columns = WidgetSizes.columns(size),
+                                        extra = WidgetSizes.isExtraTall(size),
+                                        headerHeight =
+                                        if (refresh) {
+                                            WidgetSizes.Heights.actionHeader
+                                        } else {
+                                            WidgetSizes.Heights.header
+                                        },
+                                    )
+                            }
                         }
                     }
                 }

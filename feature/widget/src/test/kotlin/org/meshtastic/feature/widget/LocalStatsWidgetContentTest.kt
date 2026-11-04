@@ -18,7 +18,9 @@ package org.meshtastic.feature.widget
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
 import androidx.glance.testing.unit.hasContentDescriptionEqualTo
@@ -33,9 +35,14 @@ import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.widget_packets_bad
+import org.meshtastic.core.resources.widget_packets_dropped
+import org.meshtastic.core.resources.widget_packets_received
+import org.meshtastic.core.resources.widget_packets_sent
+import org.meshtastic.core.resources.widget_relays
 import org.meshtastic.core.resources.widget_relays_canceled
-import org.meshtastic.core.resources.widget_traffic
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
@@ -63,21 +70,27 @@ class LocalStatsWidgetContentTest {
     private val appName: String = getString(Res.string.meshtastic_app_name)
     private val disconnectedLabel: String = getString(Res.string.disconnected)
     private val refreshLabel: String = getString(Res.string.refresh)
-    private val trafficLabel: String = getString(Res.string.widget_traffic)
+    private val sentLabel: String = getString(Res.string.widget_packets_sent)
+    private val receivedLabel: String = getString(Res.string.widget_packets_received)
     private val freeMemoryLabel: String = getString(Res.string.free_memory)
-    private val relaysLabel: String = getString(Res.string.widget_relays_canceled)
+    private val relaysLabel: String = getString(Res.string.widget_relays)
+    private val badLabel: String = getString(Res.string.widget_packets_bad)
+    private val droppedLabel: String = getString(Res.string.widget_packets_dropped)
+    private val canceledLabel: String = getString(Res.string.widget_relays_canceled)
     private val uptimeLabel: String = getString(Res.string.uptime)
     private val batteryLabel: String = getString(Res.string.battery)
+    private val updatedLabel: String = getString(Res.string.updated)
 
     private val disconnected = LocalStatsWidgetUiState(connectionState = ConnectionState.Disconnected)
 
     private fun render(
         size: DpSize,
         state: LocalStatsWidgetUiState = createMockWidgetState(),
+        fontScale: Float = 1f,
         assertions: GlanceAppWidgetUnitTest.() -> Unit,
     ) = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
         setAppWidgetSize(size)
-        setContext(context)
+        setContext(context.atFontScale(fontScale))
         provideComposable { LocalStatsWidget().WidgetContent(state) }
         assertions()
     }
@@ -89,9 +102,46 @@ class LocalStatsWidgetContentTest {
         onNode(hasText("ME")).assertExists()
         onNode(hasText("85%")).assertExists()
         onNode(hasText("2/3")).assertExists()
-        onNode(hasText(trafficLabel)).assertExists()
-        onNode(hasText("145 / 892")).assertExists()
+        onNode(hasText(sentLabel)).assertExists()
+        onNode(hasText("145")).assertExists()
+        onNode(hasText(receivedLabel)).assertDoesNotExist()
     }
+
+    @Test
+    fun `two-column two-row layout shows four readings at the tier floor`() = render(WidgetSizes.TWO_COLUMNS) {
+        onNode(hasText(sentLabel)).assertExists()
+        onNode(hasText("892")).assertExists()
+        onNode(hasText(freeMemoryLabel)).assertExists()
+        onNode(hasText(relaysLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a Pixel 6a 4x2 shows six readings in two columns`() = render(PIXEL_6A_4X2) {
+        onNode(hasText(relaysLabel)).assertExists()
+        onNode(hasText(badLabel)).assertExists()
+        onNode(hasText(droppedLabel)).assertDoesNotExist()
+        onNode(hasText(updatedLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a taller 4x2 cell shows every reading`() = render(EMULATOR_4X2) {
+        onNode(hasText(canceledLabel)).assertExists()
+        onNode(hasText(updatedLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a larger font scale counts fewer lines instead of clipping`() = render(PIXEL_6A_4X2, fontScale = 1.5f) {
+        onNode(hasText(sentLabel)).assertExists()
+        onNode(hasText(receivedLabel)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `two-column three-row layout shows every reading and the update time`() =
+        render(WidgetSizes.EXTRA_TWO_COLUMNS) {
+            onNode(hasText(droppedLabel)).assertExists()
+            onNode(hasText(canceledLabel)).assertExists()
+            onNode(hasText(updatedLabel)).assertExists()
+        }
 
     @Test
     fun `narrow two-row layout keeps the brand header but not refresh or traffic`() = render(WidgetSizes.TALL) {
@@ -100,7 +150,7 @@ class LocalStatsWidgetContentTest {
         onNode(hasText("18.5%")).assertExists()
         onNode(hasText("3.2%")).assertExists()
         onNode(hasText("2/3")).assertExists()
-        onNode(hasText(trafficLabel)).assertDoesNotExist()
+        onNode(hasText(sentLabel)).assertDoesNotExist()
     }
 
     @Test
@@ -133,26 +183,35 @@ class LocalStatsWidgetContentTest {
     }
 
     @Test
-    fun `three-row wide layout adds free memory`() = render(WidgetSizes.EXTRA_BIG) {
-        onNode(hasText(freeMemoryLabel)).assertExists()
+    fun `three-row wide layout adds relays and the update time but not bad packets`() = render(WidgetSizes.EXTRA_BIG) {
+        onNode(hasText(relaysLabel)).assertExists()
+        onNode(hasText(updatedLabel)).assertExists()
+        onNode(hasText(badLabel)).assertDoesNotExist()
     }
 
     @Test
-    fun `three-row narrow layout adds relays but not free memory`() = render(WidgetSizes.EXTRA_TALL) {
-        onNode(hasText(relaysLabel)).assertExists()
+    fun `three-row narrow layout adds the packet counts but not free memory`() = render(WidgetSizes.EXTRA_TALL) {
+        onNode(hasText(sentLabel)).assertExists()
+        onNode(hasText("892")).assertExists()
         onNode(hasText(freeMemoryLabel)).assertDoesNotExist()
     }
 
     @Test
+    fun `free memory is shown in bytes units`() =
+        render(WidgetSizes.EXTRA_BIG, createMockWidgetState().copy(heapFreeBytes = 130_172)) {
+            onNode(hasText("130 kB")).assertExists()
+        }
+
+    @Test
     fun `a reported noise floor renders in dBm`() =
-        render(WidgetSizes.BIG, createMockWidgetState().copy(noiseFloor = -107)) {
+        render(WidgetSizes.EXTRA_BIG, createMockWidgetState().copy(noiseFloor = -107)) {
             onNode(hasText("-107 dBm")).assertExists()
         }
 
     @Test
     fun `no local stats yet leaves out traffic but keeps uptime`() =
         render(WidgetSizes.BIG, createMockWidgetState().copy(hasStats = false)) {
-            onNode(hasText(trafficLabel)).assertDoesNotExist()
+            onNode(hasText(sentLabel)).assertDoesNotExist()
             onNode(hasText(uptimeLabel)).assertExists()
         }
 
@@ -173,7 +232,18 @@ class LocalStatsWidgetContentTest {
         onNode(hasText(disconnectedLabel)).assertExists()
     }
 
+    /** The same context with the user's font scale set, which [WidgetSizes.lines] reads from its configuration. */
+    private fun Context.atFontScale(scale: Float): Context = if (scale == 1f) {
+        this
+    } else {
+        createConfigurationContext(Configuration(resources.configuration).apply { fontScale = scale })
+    }
+
     private companion object {
+        /** A 4x2 cell on a Pixel 6a, and the taller one the API 36 emulator's Pixel launcher gives. */
+        val PIXEL_6A_4X2 = DpSize(358.dp, 202.dp)
+        val EMULATOR_4X2 = DpSize(360.dp, 234.dp)
+
         /**
          * Well above Glance's 2-second `DEFAULT_TIMEOUT`, which is not a safe budget here. Booting Robolectric and
          * loading Compose Multiplatform resources comfortably exceeds two seconds whenever the machine is busy, and

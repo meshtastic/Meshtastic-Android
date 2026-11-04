@@ -39,19 +39,16 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.node_sort_last_heard
 
-private const val TALL_ROWS = 4
-private const val EXTRA_TALL_ROWS = 5
-
-/** The tracker body for the chosen [WidgetSizes] breakpoint, under the header the widget draws above it. */
+/** The tracker body for the current [WidgetSizes] tier, under the header the widget draws above it. */
 @Composable
 internal fun TrackerContent(state: NodeTrackerWidgetState.Tracking) {
     val size = LocalSize.current
-    val wide = size.width >= WidgetSizes.WIDE.width
+    val wide = WidgetSizes.isWide(size)
     Column(modifier = GlanceModifier.fillMaxSize().staleTag(state)) {
         when {
-            size.height < WidgetSizes.SQUARE.height -> TrackerRow(state, wide)
-            size.height < WidgetSizes.TALL.height -> TrackerSquare(state, wide)
-            else -> TrackerTall(state, extra = size.height >= WidgetSizes.EXTRA_TALL.height)
+            WidgetSizes.isOneRow(size) -> TrackerRow(state, wide)
+            WidgetSizes.isCompact(size) -> TrackerSquare(state, wide)
+            else -> TrackerTall(state, columns = WidgetSizes.columns(size))
         }
     }
 }
@@ -87,15 +84,26 @@ private fun TrackerSquare(state: NodeTrackerWidgetState.Tracking, wide: Boolean)
     }
 }
 
+/**
+ * Identity, the name, then the readings that fit in [columns]. Height left over sits under the readings: under a line
+ * when the node has readings to fill it, more when it has few.
+ */
 @Composable
-private fun TrackerTall(state: NodeTrackerWidgetState.Tracking, extra: Boolean) {
-    val rows = readings(state).take(if (extra) EXTRA_TALL_ROWS else TALL_ROWS)
+private fun TrackerTall(state: NodeTrackerWidgetState.Tracking, columns: Int) {
+    val heights = WidgetSizes.Heights
+    val lines =
+        WidgetSizes.lines(
+            fixed = heights.header + heights.gap * 2 + 2.dp + heights.bottom,
+            text = heights.identity + heights.name,
+        )
+    val readings = readings(state).take(lines * columns)
+    val linesUsed = if (readings.size <= lines) readings.size else (readings.size + columns - 1) / columns
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Identity(state)
         Spacer(GlanceModifier.height(2.dp))
-        LongName(state, maxLines = if (extra || rows.size < TALL_ROWS) 2 else 1)
+        LongName(state, maxLines = if (linesUsed < lines) 2 else 1)
         Spacer(GlanceModifier.height(4.dp))
-        rows.forEach { (label, value) -> StatRow(label, value, state.isStale) }
+        StatGrid(readings, columns, lines, state.isStale)
     }
 }
 

@@ -23,17 +23,30 @@ import androidx.glance.unit.ColorProvider
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.distance
+import org.meshtastic.core.resources.formatDuration
+import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.node_sort_last_heard
+import org.meshtastic.core.resources.nodes
+import org.meshtastic.core.resources.noise_floor
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.traceroute_direct
 import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.widget_packets_bad
+import org.meshtastic.core.resources.widget_packets_dropped
+import org.meshtastic.core.resources.widget_packets_received
+import org.meshtastic.core.resources.widget_packets_sent
+import org.meshtastic.core.resources.widget_relays
+import org.meshtastic.core.resources.widget_relays_canceled
+import kotlin.time.DurationUnit
 
 /** Firmware reports 101 for a node on external power. */
 internal const val MAX_BATTERY_PERCENT = 100
@@ -65,12 +78,30 @@ internal fun lastHeardValue(state: NodeTrackerWidgetState.Tracking): String = if
     stringResource(Res.string.unknown)
 }
 
+internal fun nodesValue(state: LocalStatsWidgetUiState) = "${state.onlineNodes}/${state.totalNodes}"
+
+/** Every reading the Local Stats tall layouts draw from, most glanced-at first; the counters wait for `LocalStats`. */
+@Composable
+internal fun readings(state: LocalStatsWidgetUiState, nodesInGrid: Boolean): List<Reading> = buildList {
+    if (nodesInGrid) add(Reading(stringResource(Res.string.nodes), nodesValue(state)))
+    add(Reading(stringResource(Res.string.uptime), formatDuration(state.uptimeSecs, DurationUnit.MINUTES)))
+    if (!state.hasStats) return@buildList
+    add(Reading(stringResource(Res.string.widget_packets_sent), state.numPacketsTx.toString()))
+    add(Reading(stringResource(Res.string.widget_packets_received), state.numPacketsRx.toString()))
+    state.noiseFloor?.let { add(Reading(stringResource(Res.string.noise_floor), MetricFormatter.rssi(it))) }
+    add(Reading(stringResource(Res.string.free_memory), formatByteSize(state.heapFreeBytes.toLong())))
+    add(Reading(stringResource(Res.string.widget_relays), state.numTxRelay.toString()))
+    add(Reading(stringResource(Res.string.widget_packets_bad), state.numPacketsRxBad.toString()))
+    add(Reading(stringResource(Res.string.widget_packets_dropped), state.numTxDropped.toString()))
+    add(Reading(stringResource(Res.string.widget_relays_canceled), state.numTxRelayCanceled.toString()))
+}
+
 /** Every reading the tracked node has, in the order they drop as the widget shrinks. */
 @Composable
-internal fun readings(state: NodeTrackerWidgetState.Tracking): List<Pair<String, String>> = buildList {
-    add(stringResource(Res.string.node_sort_last_heard) to lastHeardValue(state))
-    hopsValue(state)?.let { add(stringResource(Res.string.hops_away) to it) }
-    state.distance?.let { add(stringResource(Res.string.distance) to it) }
-    state.snr?.let { add(stringResource(Res.string.snr) to MetricFormatter.snr(it)) }
-    state.rssi?.let { add(stringResource(Res.string.rssi) to MetricFormatter.rssi(it)) }
+internal fun readings(state: NodeTrackerWidgetState.Tracking): List<Reading> = buildList {
+    add(Reading(stringResource(Res.string.node_sort_last_heard), lastHeardValue(state)))
+    hopsValue(state)?.let { add(Reading(stringResource(Res.string.hops_away), it)) }
+    state.distance?.let { add(Reading(stringResource(Res.string.distance), it)) }
+    state.snr?.let { add(Reading(stringResource(Res.string.snr), MetricFormatter.snr(it))) }
+    state.rssi?.let { add(Reading(stringResource(Res.string.rssi), MetricFormatter.rssi(it))) }
 }

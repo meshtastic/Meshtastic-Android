@@ -20,6 +20,7 @@ import android.app.Application
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
@@ -70,20 +71,33 @@ class NodeTrackerWidgetContentTest {
     }
 
     @Test
-    fun `tall layout carries the brand header identity and the first four readings`() = render(WidgetSizes.TALL) {
+    fun `tall layout carries the brand header identity and the first three readings`() = render(WidgetSizes.TALL) {
         onNode(hasText(title)).assertExists()
         onNode(hasText("BCS1")).assertExists()
         onNode(hasText("76%")).assertExists()
         onNode(hasText("Basecamp Solar")).assertExists()
         onNode(hasText(directLabel)).assertExists()
         onNode(hasText("1.2 km")).assertExists()
-        onNode(hasText("9.5 dB")).assertExists()
-        onNode(hasText("-85 dBm")).assertDoesNotExist()
+        onNode(hasText("9.5 dB")).assertDoesNotExist()
         onNode(hasTestTag(NodeTrackerWidget.STALE_TEST_TAG)).assertDoesNotExist()
     }
 
     @Test
+    fun `a Pixel 6a 2x2 holds four readings`() = render(PIXEL_6A_2X2) {
+        onNode(hasText("9.5 dB")).assertExists()
+        onNode(hasText("-85 dBm")).assertDoesNotExist()
+    }
+
+    @Test
     fun `three-row layout adds the fifth reading`() = render(WidgetSizes.EXTRA_TALL) {
+        onNode(hasText("-85 dBm")).assertExists()
+    }
+
+    @Test
+    fun `two-column two-row layout holds every reading`() = render(WidgetSizes.TWO_COLUMNS) {
+        onNode(hasText(title)).assertExists()
+        onNode(hasText("1.2 km")).assertExists()
+        onNode(hasText("9.5 dB")).assertExists()
         onNode(hasText("-85 dBm")).assertExists()
     }
 
@@ -156,6 +170,7 @@ class NodeTrackerWidgetContentTest {
 
     private companion object {
         const val WIDGET_ID = 7
+        val PIXEL_6A_2X2 = DpSize(179.dp, 202.dp)
 
         /** Same budget as LocalStatsWidgetContentTest, for the same reason: Robolectric plus resource loading. */
         val TEST_TIMEOUT = 30.seconds
