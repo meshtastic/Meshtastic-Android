@@ -29,6 +29,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.validSecondsOrNull
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.asEntity
@@ -161,9 +162,10 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                val packetTime = log.fromRadio.packet?.rxTimeOrNull()
+                val telemetryTime = validSecondsOrNull(telemetry.time)
+                val packetTime = validSecondsOrNull(log.fromRadio.packet?.rxTimeOrNull())
                 val fallbackTime = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
-                wb.time = telemetry.time.takeIf { it > 0 } ?: packetTime ?: fallbackTime
+                wb.time = telemetryTime ?: packetTime ?: fallbackTime
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }
             .build()

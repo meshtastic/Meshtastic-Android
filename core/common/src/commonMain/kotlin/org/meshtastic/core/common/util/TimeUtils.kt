@@ -20,6 +20,10 @@ import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+// / 2020-01-01: a boot-relative counter needs ~50 years of uptime to reach this, so it cannot be
+// / confused with a real epoch.
+const val MIN_PLAUSIBLE_EPOCH_SECONDS = 1577836800
+
 /** Accessor for the current time in milliseconds. */
 val nowMillis: Long
     get() = nowInstant.toEpochMilliseconds()
@@ -41,3 +45,7 @@ fun clampTimestampToNow(epochSeconds: Int): Int = minOf(epochSeconds, nowSeconds
 
 /** Converts these milliseconds to an [Instant]. */
 fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)
+
+/** checks if specified value is a valid seconds timestamp and clamps it to now, else returns null */
+fun validSecondsOrNull(epochSeconds: Int?): Int? =
+    epochSeconds?.takeIf { it > MIN_PLAUSIBLE_EPOCH_SECONDS }?.let { clampTimestampToNow(it) }
