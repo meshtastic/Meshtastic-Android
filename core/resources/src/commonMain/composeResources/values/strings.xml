@@ -2243,10 +2243,10 @@
     <string name="widget_node_tracker_choose">Choose a node to track</string>
     <string name="widget_node_tracker_not_found">Node not found. Tap to choose a node.</string>
     <string name="widget_node_tracker_title">Node Tracker</string>
-    <string name="widget_packets_bad">Bad packets</string>
-    <string name="widget_packets_dropped">Dropped packets</string>
-    <string name="widget_packets_received">Packets received</string>
-    <string name="widget_packets_sent">Packets sent</string>
+    <string name="widget_packets_bad">Bad</string>
+    <string name="widget_packets_dropped">Dropped</string>
+    <string name="widget_packets_received">Received</string>
+    <string name="widget_packets_sent">Sent</string>
     <string name="widget_relays">Relayed</string>
     <string name="widget_relays_canceled">Relays canceled</string>
     <!-- WIFI -->

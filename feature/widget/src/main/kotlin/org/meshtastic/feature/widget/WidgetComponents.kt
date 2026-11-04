@@ -161,14 +161,26 @@ internal fun StatRow(
 /**
  * [readings] as [StatRow]s, up to [columns] to a line, in reading order across then down. A short last line keeps its
  * cells the width of the others. Readings that all fit in one column of [lines] take one, so a tall cell fills with
- * lines rather than with gaps between sections.
+ * lines rather than with gaps between sections, and when they still leave lines over, the lines spread across the
+ * height [modifier] gives the grid rather than leaving a block under them.
  */
 @Composable
-internal fun StatGrid(readings: List<Reading>, columns: Int, lines: Int, isStale: Boolean = false) {
+internal fun StatGrid(
+    readings: List<Reading>,
+    columns: Int,
+    lines: Int,
+    modifier: GlanceModifier = GlanceModifier,
+    isStale: Boolean = false,
+) {
     val perLine = if (readings.size <= lines) 1 else columns
-    Column(modifier = GlanceModifier.fillMaxWidth()) {
-        readings.chunked(perLine).forEach { line ->
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val chunks = readings.chunked(perLine)
+    val spread = chunks.size < lines
+    Column(modifier = modifier.fillMaxWidth()) {
+        chunks.forEach { line ->
+            Row(
+                modifier = if (spread) GlanceModifier.fillMaxWidth().defaultWeight() else GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 repeat(perLine) { index ->
                     if (index > 0) Spacer(GlanceModifier.width(GRID_GUTTER))
                     val reading = line.getOrNull(index)

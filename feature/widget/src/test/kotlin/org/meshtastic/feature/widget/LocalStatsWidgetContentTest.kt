@@ -17,10 +17,14 @@
 package org.meshtastic.feature.widget
 
 import android.app.Application
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Bundle
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.LocalAppWidgetOptions
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
 import androidx.glance.testing.unit.hasContentDescriptionEqualTo
@@ -87,12 +91,25 @@ class LocalStatsWidgetContentTest {
         size: DpSize,
         state: LocalStatsWidgetUiState = createMockWidgetState(),
         fontScale: Float = 1f,
+        options: Bundle = Bundle(),
         assertions: GlanceAppWidgetUnitTest.() -> Unit,
     ) = runGlanceAppWidgetUnitTest(timeout = TEST_TIMEOUT) {
         setAppWidgetSize(size)
         setContext(context.atFontScale(fontScale))
-        provideComposable { LocalStatsWidget().WidgetContent(state) }
+        provideComposable {
+            CompositionLocalProvider(LocalAppWidgetOptions provides options) {
+                LocalStatsWidget().WidgetContent(state)
+            }
+        }
         assertions()
+    }
+
+    /** What a launcher puts in the widget options: the cell in portrait (min width, max height) and in landscape. */
+    private fun reportedCells(portrait: DpSize, landscape: DpSize): Bundle = Bundle().apply {
+        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, portrait.width.value.toInt())
+        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, portrait.height.value.toInt())
+        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, landscape.width.value.toInt())
+        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, landscape.height.value.toInt())
     }
 
     @Test
@@ -128,6 +145,42 @@ class LocalStatsWidgetContentTest {
         onNode(hasText(canceledLabel)).assertExists()
         onNode(hasText(updatedLabel)).assertDoesNotExist()
     }
+
+    @Test
+    fun `the line budget comes from the reported cell the breakpoint fits in`() =
+        render(WidgetSizes.TWO_COLUMNS, options = reportedCells(EMULATOR_4X2, DpSize(700.dp, 120.dp))) {
+            onNode(hasText(canceledLabel)).assertExists()
+        }
+
+    @Test
+    fun `in portrait the portrait cell wins over a landscape cell the breakpoint also fits`() =
+        render(WidgetSizes.EXTRA_BIG, options = reportedCells(DpSize(266.dp, 470.dp), DpSize(300.dp, 265.dp))) {
+            // The portrait cell holds every reading in one column; the landscape one, which fits too, holds five.
+            onNode(hasText(canceledLabel)).assertExists()
+            onNode(hasText(updatedLabel)).assertExists()
+        }
+
+    @Test
+    fun `a preferred cell the breakpoint does not fit in falls back to the other orientation`() =
+        render(WidgetSizes.TWO_COLUMNS, options = reportedCells(DpSize(200.dp, 100.dp), DpSize(400.dp, 234.dp))) {
+            // 234dp holds five lines of two columns; the breakpoint alone would hold two.
+            onNode(hasText(canceledLabel)).assertExists()
+        }
+
+    @Test
+    fun `a reported cell is capped under the next breakpoint`() =
+        render(WidgetSizes.BIG, options = reportedCells(DpSize(266.dp, 470.dp), DpSize(420.dp, 300.dp))) {
+            // The two-row tier is shown under 260dp, which holds six lines, not the nine a 470dp cell would count.
+            onNode(hasText(relaysLabel)).assertExists()
+            onNode(hasText(droppedLabel)).assertDoesNotExist()
+        }
+
+    @Test
+    fun `reported cells the breakpoint fits in neither of are ignored`() =
+        render(WidgetSizes.TWO_COLUMNS, options = reportedCells(DpSize(200.dp, 100.dp), DpSize(400.dp, 60.dp))) {
+            onNode(hasText(freeMemoryLabel)).assertExists()
+            onNode(hasText(relaysLabel)).assertDoesNotExist()
+        }
 
     @Test
     fun `a larger font scale counts fewer lines and columns instead of clipping`() =
