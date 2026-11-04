@@ -92,6 +92,8 @@ class LogSearchManager {
     val searchState = _searchState.asStateFlow()
 
     fun setSearchText(text: String) {
+        // An unchanged query never re-emits through the StateFlow, so clearing here would hide its matches for good.
+        if (text == _searchText.value) return
         _searchText.value = text
         _currentMatchIndex.value = -1
         // The field reads its text from here; matches follow once the off-main search finishes.

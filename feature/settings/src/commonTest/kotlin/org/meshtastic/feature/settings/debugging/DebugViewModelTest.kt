@@ -234,6 +234,18 @@ class DebugViewModelTest {
     }
 
     @Test
+    fun `setting the same query again keeps its matches`() {
+        val manager = LogSearchManager()
+        manager.setSearchText("App")
+        manager.applyMatches("App", listOf(LogSearchManager.SearchMatch(0, 0, 2, "message")))
+
+        manager.setSearchText("App")
+
+        manager.searchState.value.hasMatches shouldBe true
+        manager.searchState.value.allMatches.size shouldBe 1
+    }
+
+    @Test
     fun `filterManager filters logs correctly with AND and OR modes`() {
         val logs =
             listOf(
