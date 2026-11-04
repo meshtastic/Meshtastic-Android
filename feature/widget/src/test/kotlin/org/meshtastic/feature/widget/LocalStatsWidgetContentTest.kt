@@ -130,10 +130,11 @@ class LocalStatsWidgetContentTest {
     }
 
     @Test
-    fun `a larger font scale counts fewer lines instead of clipping`() = render(PIXEL_6A_4X2, fontScale = 1.5f) {
-        onNode(hasText(sentLabel)).assertExists()
-        onNode(hasText(receivedLabel)).assertDoesNotExist()
-    }
+    fun `a larger font scale counts fewer lines and columns instead of clipping`() =
+        render(PIXEL_6A_4X2, fontScale = 1.5f) {
+            onNode(hasText(uptimeLabel)).assertExists()
+            onNode(hasText(sentLabel)).assertDoesNotExist()
+        }
 
     @Test
     fun `two-column three-row layout shows every reading and the update time`() =

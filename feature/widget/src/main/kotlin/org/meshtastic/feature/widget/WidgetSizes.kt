@@ -71,8 +71,16 @@ internal object WidgetSizes {
     /** Three rows and up, where the last-updated footnote earns its line. */
     fun isExtraTall(size: DpSize): Boolean = size.height >= THREE_ROWS_HEIGHT
 
-    /** How many reading columns a width holds: two from four cells up, where a label and value pair fits in each. */
-    fun columns(size: DpSize): Int = if (size.width >= TWO_COLUMN_WIDTH) 2 else 1
+    /**
+     * How many reading columns a width holds: two from four cells up, where a label and value pair fits in each. The
+     * width counts in font-scaled dp, since the labels grow with the font and a column too narrow for them clips.
+     */
+    @Composable
+    @ReadOnlyComposable
+    fun columns(size: DpSize): Int {
+        val fontScale = LocalContext.current.resources.configuration.fontScale
+        return if (size.width / fontScale >= TWO_COLUMN_WIDTH) 2 else 1
+    }
 
     /**
      * How many [StatRow] lines fit in the current height under [fixed] chrome (headers, gaps, padding) and [text]

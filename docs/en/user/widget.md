@@ -52,13 +52,13 @@ The **Node Tracker** widget shows one node from your node list:
 - **Battery**: the node's last reported battery level, or *Powered* on external power
 - **Last heard**: the time your connected node last heard it, or the date if it was more than a day ago
 
-From two rows tall it adds, in this order, as many as fit:
+From two rows tall it adds, in this order, as many as fit (a wide widget under two rows tall shows Hops Away beside the name):
 
 - **Hops Away**: how many hops away the node is, or *Direct*
 - **Distance**: how far the node is from your connected node. It appears only while you are connected and both nodes have a position
 - **SNR** and **RSSI**: the signal of the node's last packet, shown only when the node is heard directly rather than through other nodes or MQTT
 
-Four cells wide lays the readings out in two columns, so every one fits in a two-row widget.
+Four cells wide lays the readings out in two columns, so at the default font size every one fits in a two-row widget. A larger font size drops readings from the end of that list, RSSI first.
 
 When a node has not been heard within the last two hours, the widget dims its readings so they do not read as current. Tap the widget to open that node's details in the app.
 
