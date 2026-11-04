@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.live_update
 import org.meshtastic.core.resources.live_update_mesh_status
 import org.meshtastic.core.resources.live_update_mesh_status_shown
+import org.meshtastic.core.resources.live_update_mesh_status_shown_shade
 import org.meshtastic.core.resources.live_update_mesh_status_summary
 import org.meshtastic.core.resources.live_update_no_nodes
 import org.meshtastic.core.resources.live_update_off_summary
@@ -68,6 +69,7 @@ import org.meshtastic.core.resources.live_update_switch
 import org.meshtastic.core.resources.live_update_track_node
 import org.meshtastic.core.resources.live_update_track_node_summary
 import org.meshtastic.core.resources.live_update_tracking_shown
+import org.meshtastic.core.resources.live_update_tracking_shown_shade
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
@@ -136,17 +138,26 @@ fun LiveUpdateCard(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // With promotion off, Android keeps the update out of the status bar and shows it in the shade only.
     val summary =
         when (mode) {
             LiveUpdateMode.Off -> stringResource(Res.string.live_update_off_summary)
 
-            LiveUpdateMode.MeshStatus -> stringResource(Res.string.live_update_mesh_status_shown)
+            LiveUpdateMode.MeshStatus ->
+                if (turnedOffInSettings) {
+                    stringResource(Res.string.live_update_mesh_status_shown_shade)
+                } else {
+                    stringResource(Res.string.live_update_mesh_status_shown)
+                }
 
-            is LiveUpdateMode.TrackNode ->
-                stringResource(
-                    Res.string.live_update_tracking_shown,
-                    trackedNode?.listName() ?: NodeAddress.numToDefaultId(mode.nodeNum),
-                )
+            is LiveUpdateMode.TrackNode -> {
+                val name = trackedNode?.listName() ?: NodeAddress.numToDefaultId(mode.nodeNum)
+                if (turnedOffInSettings) {
+                    stringResource(Res.string.live_update_tracking_shown_shade, name)
+                } else {
+                    stringResource(Res.string.live_update_tracking_shown, name)
+                }
+            }
         }
     Card(modifier = modifier.fillMaxWidth()) {
         BasicListItem(

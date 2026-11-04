@@ -153,7 +153,7 @@ On Android 16 and newer, the **Connect** tab has a **Live Update** row while you
 
 Tap the row to start one or switch to the other. Only one runs at a time, and it is off until you start it. On a node's details, **Track in Live Update** starts tracking that node directly.
 
-While one runs, the row says what it shows and has a **Stop** button, and the notification itself has a **Stop Live Update** action. Either ends it and leaves the radio connected; the notification goes back to showing only the connection state.
+While one runs, the row says what it shows and has a **Stop** button, and the notification itself has a **Stop Live Update** action. Either ends it and leaves the radio connected; the notification goes back to its usual connection state and mesh statistics.
 
 A dropped link keeps it running and shows the connection state until the node is back. Disconnecting, switching nodes, or deleting or ignoring the tracked node stops it. If the row says Live Updates are turned off for Meshtastic, Android shows it as an ordinary notification until you allow them in system settings.
 

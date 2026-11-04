@@ -973,6 +973,7 @@
     <string name="live_update_hops">Hops away: %1$d</string>
     <string name="live_update_mesh_status">Mesh status</string>
     <string name="live_update_mesh_status_shown">Mesh status in the status bar and notification shade</string>
+    <string name="live_update_mesh_status_shown_shade">Mesh status in the notification shade</string>
     <string name="live_update_mesh_status_summary">Connection, nodes online, unread messages and your radio's battery</string>
     <string name="live_update_no_nodes">No nodes to track</string>
     <string name="live_update_nodes_online">%1$d of %2$d nodes online</string>
@@ -988,6 +989,7 @@
     <string name="live_update_track_node">Track a node</string>
     <string name="live_update_track_node_summary">One node's battery, signal, last heard, hops and distance</string>
     <string name="live_update_tracking_shown">Tracking %1$s in the status bar and notification shade</string>
+    <string name="live_update_tracking_shown_shade">Tracking %1$s in the notification shade</string>
     <string name="live_update_unread">%1$d unread</string>
     <!-- LOAD -->
     <string name="load">Load</string>
