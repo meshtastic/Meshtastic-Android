@@ -835,7 +835,6 @@
     <string name="format_italic">Курсив</string>
     <string name="format_link">Ссылка</string>
     <string name="format_strikethrough">Зачёркнутый</string>
-    <string name="free_memory">Свободная память</string>
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="freq">Частота</string>
     <string name="gas_resistance">Сопротивление газа</string>
@@ -975,7 +974,6 @@
     <string name="live_update_mesh_status_summary">Подключение, ноды онлайн, непрочитанные сообщения и батареи радиоустройства</string>
     <string name="live_update_no_nodes">Нет нод для отслеживания</string>
     <string name="live_update_nodes_online">%1$d из %2$d нод онлайн</string>
-    <string name="live_update_off_summary">Показать сеть или одну ноду в строке состояния</string>
     <string name="live_update_promotion_off">Живые обновления отключены для Meshtastic в системных настройках</string>
     <string name="live_update_search_nodes">Поиск нод</string>
     <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
@@ -985,7 +983,6 @@
     <string name="live_update_track_in">Отслеживать в Live Update</string>
     <string name="live_update_track_node">Отслеживание ноды</string>
     <string name="live_update_track_node_summary">Аккумулятор одной ноды, сигнал, последние известия, хопы и расстояние</string>
-    <string name="live_update_tracking">Отслеживание %1$s</string>
     <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
@@ -1515,7 +1512,6 @@
     <string name="nodes_unheard_banner_one">1 нода не слышна на твоих текущих настройках LoRa</string>
     <string name="nodes_unheard_keep">Оставить</string>
     <string name="nodes_unheard_remove">Удалить</string>
-    <string name="noise_floor">Уровень шума</string>
     <string name="noise_floor_definition">Фоновый радиошум, измеряемый радиоприемником. Более низкие значения обычно указывают на более тихое окружение для приемника; -85 дБм — это ориентировочная отметка загруженности, а не жесткий порог отказа.</string>
     <string name="noise_floor_no_reading">Уровень шума: нет показаний</string>
     <string name="none">Нет (выключить)</string>
@@ -2190,7 +2186,7 @@
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">Битые пакеты</string>
     <!-- WIFI -->
     <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>

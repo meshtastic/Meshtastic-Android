@@ -628,7 +628,6 @@
     <string name="format_italic">Italique</string>
     <string name="format_link">Lien</string>
     <string name="format_strikethrough">Barré</string>
-    <string name="free_memory">Mémoire libre</string>
     <string name="free_memory_description">Mémoire système disponible en octets</string>
     <string name="freq">Fréq</string>
     <string name="gas_resistance">Résistance au gaz</string>
@@ -1371,7 +1370,7 @@
     <string name="waypoint_received">Point de passage reçu : %1$s</string>
     <string name="weight">Poids</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">Paquets invalides</string>
     <!-- WIFI -->
     <string name="wifi_devices">Approvisionnement Wi-Fi pour mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Réseaux disponibles</string>

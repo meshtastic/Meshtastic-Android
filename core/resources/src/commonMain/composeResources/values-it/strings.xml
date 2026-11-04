@@ -649,7 +649,6 @@
     <string name="format_italic">Corsivo</string>
     <string name="format_link">Link</string>
     <string name="format_strikethrough">Barrato</string>
-    <string name="free_memory">Memoria libera</string>
     <string name="free_memory_description">Memoria di sistema disponibile in byte</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
@@ -1073,7 +1072,6 @@
     <string name="nodes_empty_searching_title">Ricerca dei nodi</string>
     <string name="nodes_queued_for_deletion">%1$d nodi in coda per l'eliminazione:</string>
     <string name="nodes_unheard_remove">Elimina</string>
-    <string name="noise_floor">Rumore di fondo</string>
     <string name="noise_floor_definition">Il rumore RF di fondo misurato dal ricevitore radio. Valori più bassi indicano di solito un ambiente di ricezione più silenzioso; −85 dBm è un riferimento di ambiente trafficato, non una soglia di guasto.</string>
     <string name="noise_floor_no_reading">Rumore di fondo: nessuna lettura</string>
     <string name="none">Nessuno (disattiva)</string>
@@ -1561,7 +1559,7 @@
     <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
     <string name="weight">Peso</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">Pacchetti non validi</string>
     <!-- WIFI -->
     <string name="wifi_devices">Provisioning Wi-Fi per mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Reti disponibili</string>

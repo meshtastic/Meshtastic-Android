@@ -714,7 +714,6 @@
     <string name="format_italic">Italic</string>
     <string name="format_link">Ühendus</string>
     <string name="format_strikethrough">Läbikriipsutus</string>
-    <string name="free_memory">Vaba mälumaht</string>
     <string name="free_memory_description">Saadaolev süsteemimälu baitides</string>
     <string name="freq">Sagedus</string>
     <string name="gas_resistance">Gaasi surve</string>
@@ -1193,7 +1192,6 @@
     <string name="nodes_empty_searching_title">Otsin võrgusõlmi</string>
     <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="nodes_unheard_remove">Eemalda</string>
-    <string name="noise_floor">Müratase</string>
     <string name="noise_floor_definition">Raadiovastuvõtja poolt mõõdetud RF taustamüra. Madalamad väärtused näitavad tavaliselt vaiksemat vastuvõtukeskkonda; -85 dBm on võrdluspunkt, mitte tõsise rikke lävi.</string>
     <string name="noise_floor_no_reading">Müratase: Näitu pole</string>
     <string name="none">Puudub (pole kasutatud)</string>
@@ -1738,7 +1736,7 @@
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">Halvad paketid</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>

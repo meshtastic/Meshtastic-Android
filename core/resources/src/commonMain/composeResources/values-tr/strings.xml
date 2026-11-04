@@ -186,7 +186,6 @@
     <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <!-- FORMAT -->
-    <string name="free_memory">Boş Hafıza</string>
     <string name="freq">Frekans</string>
     <string name="gas_resistance">Gaz Direnci</string>
     <string name="generate_qr_code">QR kod oluştur</string>

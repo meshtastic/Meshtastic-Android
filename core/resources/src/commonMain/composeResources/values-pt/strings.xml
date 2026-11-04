@@ -596,7 +596,6 @@
     <string name="firmware_update_unknown_hardware">Modelo de hardware desconhecido: %1$d</string>
     <string name="fixed_position">Posição fixa</string>
     <!-- FORMAT -->
-    <string name="free_memory">Memória livre</string>
     <string name="freq">Freq</string>
     <!-- GEOFENCE -->
     <string name="good">Bom</string>

@@ -662,7 +662,6 @@
     <string name="format_italic">斜体</string>
     <string name="format_link">链接</string>
     <string name="format_strikethrough">删除线</string>
-    <string name="free_memory">可用内存</string>
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
     <string name="gas_resistance">气体电阻性</string>
@@ -1092,7 +1091,6 @@
     <string name="nodes_empty_searching_title">正在搜索节点</string>
     <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
     <string name="nodes_unheard_remove">移除</string>
-    <string name="noise_floor">底噪</string>
     <string name="noise_floor_definition">无线电接收器测量到的背景射频噪声。较低的数值通常表示接收环境较为安静; -85 dBm 是一个表示环境繁忙的参考基准，而非硬性故障阈值。</string>
     <string name="noise_floor_no_reading">底噪:未获取到数据</string>
     <string name="none">无 (停用)</string>
@@ -1581,7 +1579,7 @@
     <string name="what_is_meshtastic">什么是 Meshtastic?</string>
     <string name="what_is_meshtastic_description">这是一个开源、离网、分布式 Mesh 网络，可在价格低廉的低功率无线电设备上运行。</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">错误数据包</string>
     <!-- WIFI -->
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
     <string name="wifi_provision_available_networks">可用网络</string>

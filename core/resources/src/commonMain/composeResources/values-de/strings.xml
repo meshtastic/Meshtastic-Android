@@ -600,7 +600,6 @@
     <string name="fixed_position">Fester Standort</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Freier Speicher</string>
     <string name="free_memory_description">Verfügbarer Systemspeicher in Bytes</string>
     <string name="freq">Frequenz</string>
     <string name="gas_resistance">Gaswiderstand</string>
@@ -988,7 +987,6 @@
     <string name="nodes_empty_searching_title">Suche nach Knoten</string>
     <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="nodes_unheard_remove">Entfernen</string>
-    <string name="noise_floor">Lärmboden</string>
     <string name="noise_floor_definition">Das vom Funkempfänger gemessene HF-Hintergrundrauschen. Niedrigere Werte deuten in der Regel auf eine störungsärmere Empfangsumgebung hin; -85 dBm ist ein Referenzwert für eine hohe Auslastung, kein fester Schwellenwert für einen Ausfall.</string>
     <string name="noise_floor_no_reading">Lärmboden: kein Wert</string>
     <string name="none">Nichts (deaktiviert)</string>
@@ -1457,7 +1455,7 @@
     <string name="what_is_meshtastic">Was ist Meshtastic?</string>
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
     <!-- WIDGET -->
-    <string name="widget_pair_value">%1$d / %2$d</string>
+    <string name="widget_packets_bad">Fehlerhafte Pakete</string>
     <!-- WIFI -->
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>
