@@ -280,7 +280,7 @@ dependencies {
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
     // The app draws imported layers through this data layer itself, so it is declared rather than inherited.
-    // The version is a plain floor over maps-utils-ktx 6.2.0's transitive 5.0.0 — see gradle/libs.versions.toml.
+    // The pin is load-bearing: the cluster renderer's exact-count labels need 7.0.0; see gradle/libs.versions.toml.
     googleImplementation(libs.android.maps.utils)
     // Offline vector basemap: extracts PMTiles-format tiles into a local MBTiles archive, then decodes their MVT
     // protobuf geometry to draw as native GoogleMap Polygon/Polyline overlays. See offline/pmtiles/README.md.
