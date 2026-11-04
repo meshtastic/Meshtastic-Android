@@ -154,10 +154,17 @@ class LocalStatsWidgetContentTest {
 
     @Test
     fun `in portrait the portrait cell wins over a landscape cell the breakpoint also fits`() =
-        render(WidgetSizes.EXTRA_BIG, options = reportedCells(DpSize(266.dp, 470.dp), DpSize(420.dp, 300.dp))) {
-            // 470dp holds every reading in one column; the landscape cell would have given two columns and a gap.
+        render(WidgetSizes.EXTRA_BIG, options = reportedCells(DpSize(266.dp, 470.dp), DpSize(300.dp, 265.dp))) {
+            // The portrait cell holds every reading in one column; the landscape one, which fits too, holds five.
             onNode(hasText(canceledLabel)).assertExists()
             onNode(hasText(updatedLabel)).assertExists()
+        }
+
+    @Test
+    fun `a preferred cell the breakpoint does not fit in falls back to the other orientation`() =
+        render(WidgetSizes.TWO_COLUMNS, options = reportedCells(DpSize(200.dp, 100.dp), DpSize(400.dp, 234.dp))) {
+            // 234dp holds five lines of two columns; the breakpoint alone would hold two.
+            onNode(hasText(canceledLabel)).assertExists()
         }
 
     @Test
@@ -169,7 +176,7 @@ class LocalStatsWidgetContentTest {
         }
 
     @Test
-    fun `a reported cell the breakpoint does not fit in is ignored`() =
+    fun `reported cells the breakpoint fits in neither of are ignored`() =
         render(WidgetSizes.TWO_COLUMNS, options = reportedCells(DpSize(200.dp, 100.dp), DpSize(400.dp, 60.dp))) {
             onNode(hasText(freeMemoryLabel)).assertExists()
             onNode(hasText(relaysLabel)).assertDoesNotExist()
