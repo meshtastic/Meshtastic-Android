@@ -24,6 +24,8 @@ import org.meshtastic.feature.connections.component.DemoModeSectionPreview
 import org.meshtastic.feature.connections.component.DeviceListItemPreview
 import org.meshtastic.feature.connections.component.DeviceSectionHeaderPreview
 import org.meshtastic.feature.connections.component.DisconnectButtonPreview
+import org.meshtastic.feature.connections.component.LiveUpdateCardOffPreview
+import org.meshtastic.feature.connections.component.LiveUpdateCardTrackingPreview
 import org.meshtastic.feature.connections.component.TransportSelectorNoBluetoothPreview
 import org.meshtastic.feature.connections.component.TransportSelectorNoUsbPreview
 import org.meshtastic.feature.connections.component.TransportSelectorPreview
@@ -82,4 +84,18 @@ fun ScreenshotTransportSelectorNoUsb() {
 @Composable
 fun ScreenshotDemoModeSection() {
     DemoModeSectionPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotLiveUpdateCardOff() {
+    LiveUpdateCardOffPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotLiveUpdateCardTracking() {
+    LiveUpdateCardTrackingPreview()
 }

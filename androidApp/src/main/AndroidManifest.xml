@@ -372,6 +372,10 @@
         <service
             android:name="org.meshtastic.core.service.ConversationActionService"
             android:exported="false" />
+        <!-- Stop from a Live Update notification -->
+        <receiver
+            android:name="org.meshtastic.core.service.LiveUpdateStopReceiver"
+            android:exported="false" />
 
         <receiver
             android:name="org.meshtastic.feature.widget.LocalStatsWidgetReceiver"

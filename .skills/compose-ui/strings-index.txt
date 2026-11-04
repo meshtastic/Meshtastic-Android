@@ -936,6 +936,8 @@ live_update_heard
 live_update_heard_now
 live_update_hops
 live_update_mesh_status
+live_update_mesh_status_shown
+live_update_mesh_status_shown_shade
 live_update_mesh_status_summary
 live_update_no_nodes
 live_update_nodes_online
@@ -945,11 +947,13 @@ live_update_search_nodes
 live_update_signal
 live_update_start
 live_update_stop
+live_update_stop_action
 live_update_switch
 live_update_track_in
 live_update_track_node
 live_update_track_node_summary
-live_update_tracking
+live_update_tracking_shown
+live_update_tracking_shown_shade
 live_update_unread
 ### LOAD ###
 load

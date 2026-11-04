@@ -58,6 +58,7 @@ import org.meshtastic.core.resources.formatDurationSuspend
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.live_update_heard_now
 import org.meshtastic.core.resources.live_update_nodes_online
+import org.meshtastic.core.resources.live_update_stop_action
 import org.meshtastic.core.resources.live_update_unread
 import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.testing.FakeLiveUpdatePrefs
@@ -327,6 +328,11 @@ class MeshNotificationManagerImplTest {
         assertEquals(getString(Res.string.live_update_nodes_online, 3, 12), serviceBigText()?.lineSequence()?.first())
         assertTrue(serviceBigText().orEmpty().contains(getString(Res.string.live_update_unread, 2)))
         assertEquals(offTitle, serviceTitle())
+        val stop = assertNotNull(posted.actions).single()
+        assertEquals(getString(Res.string.live_update_stop_action), stop.title.toString())
+        val stopIntent = Shadows.shadowOf(stop.actionIntent).savedIntent
+        assertEquals(LiveUpdateStopReceiver.ACTION_STOP, stopIntent.action)
+        assertEquals(LiveUpdateStopReceiver::class.java.name, stopIntent.component?.className)
 
         liveUpdatePrefs.setMode(LiveUpdateMode.Off)
         runUntilSettled {
@@ -334,6 +340,7 @@ class MeshNotificationManagerImplTest {
         }
         assertNull(serviceExtras()?.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT))
         assertEquals(offTitle, serviceTitle())
+        assertTrue(activeServiceNotification()?.notification?.actions.isNullOrEmpty())
     }
 
     @Test
@@ -352,6 +359,7 @@ class MeshNotificationManagerImplTest {
 
         assertEquals(getString(Res.string.firmware_update_in_progress), serviceTitle())
         assertEquals("42%", serviceExtras()?.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT))
+        assertTrue(activeServiceNotification()?.notification?.actions.isNullOrEmpty())
 
         firmwareUpdateStatusRepository.publishProgress(null)
         runUntilSettled { serviceExtras()?.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT) == "1/1" }
