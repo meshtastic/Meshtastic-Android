@@ -2186,7 +2186,8 @@
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
     <!-- WIDGET -->
-    <string name="widget_packets_bad">Битые пакеты</string>
+    <string name="widget_packets_bad">Плохой</string>
+    <string name="widget_packets_received">Получено</string>
     <!-- WIFI -->
     <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>

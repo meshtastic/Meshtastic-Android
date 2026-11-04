@@ -508,6 +508,7 @@
     <string name="waypoint_received">웨이포인트 수신: %1$s</string>
     <string name="weight">무게</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">나쁨</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP 주소</string>
     <string name="wifi_provision_success_username">사용자명</string>

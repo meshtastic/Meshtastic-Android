@@ -1787,7 +1787,8 @@
     <string name="what_is_meshtastic">Mikä on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avoimen lähdekoodin, internetistä riippumaton ja hajautettu mesh-verkko, joka toimii edullisilla ja vähän virtaa kuluttavilla radioilla.</string>
     <!-- WIDGET -->
-    <string name="widget_packets_bad">Virheelliset paketit</string>
+    <string name="widget_packets_bad">Huono</string>
+    <string name="widget_packets_received">Vastaanotettu</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi-asetukset</string>
     <string name="wifi_devices">WiFi-määritys mPWRD-OS:lle</string>

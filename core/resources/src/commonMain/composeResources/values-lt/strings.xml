@@ -298,6 +298,7 @@
     <string name="waypoint_new">Naujas orientyras</string>
     <string name="waypoint_received">Gautas orientyras: %1$s</string>
     <!-- WIDGET -->
+    <string name="widget_packets_bad">Silpnas</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresas</string>
     <!-- WIND -->
