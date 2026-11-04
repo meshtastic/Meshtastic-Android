@@ -17,7 +17,7 @@ navigation3 = "1.2.0"
 # navigation3-runtime is AndroidX's own KMP artifact, separate from the JetBrains
 # navigation3-ui mirror above; the two refs move independently and the mirror does not
 # publish every AndroidX version, so they are not always equal.
-navigation3-runtime = "1.2.0"
+navigation3-runtime = "1.2.1"
 navigationevent = "1.1.0"
 paging = "3.5.3"
 room = "3.1.0-alpha03"
