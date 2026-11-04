@@ -56,6 +56,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.live_update
 import org.meshtastic.core.resources.live_update_mesh_status
+import org.meshtastic.core.resources.live_update_mesh_status_shown
 import org.meshtastic.core.resources.live_update_mesh_status_summary
 import org.meshtastic.core.resources.live_update_no_nodes
 import org.meshtastic.core.resources.live_update_off_summary
@@ -66,9 +67,11 @@ import org.meshtastic.core.resources.live_update_stop
 import org.meshtastic.core.resources.live_update_switch
 import org.meshtastic.core.resources.live_update_track_node
 import org.meshtastic.core.resources.live_update_track_node_summary
-import org.meshtastic.core.resources.live_update_tracking
+import org.meshtastic.core.resources.live_update_tracking_shown
 import org.meshtastic.core.resources.open_settings
-import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.component.BasicListItem
+import org.meshtastic.core.ui.component.icon
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notifications
@@ -98,6 +101,7 @@ fun LiveUpdateSection(connected: Boolean, modifier: Modifier = Modifier) {
         trackedNode = trackedNode,
         turnedOffInSettings = support.turnedOff,
         onClick = { showChooser = true },
+        onStop = { viewModel.setMode(LiveUpdateMode.Off) },
         onOpenSettings = support.openSettings,
         modifier = modifier,
     )
@@ -118,13 +122,17 @@ fun LiveUpdateSection(connected: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-/** The Connections row that shows what the Live Update is doing and opens the chooser. */
+/**
+ * The Connections row that says what the Live Update shows and where, and opens the chooser. While one runs the row
+ * carries its own Stop, so ending it never needs the chooser.
+ */
 @Composable
 fun LiveUpdateCard(
     mode: LiveUpdateMode,
     trackedNode: Node?,
     turnedOffInSettings: Boolean,
     onClick: () -> Unit,
+    onStop: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -132,19 +140,25 @@ fun LiveUpdateCard(
         when (mode) {
             LiveUpdateMode.Off -> stringResource(Res.string.live_update_off_summary)
 
-            LiveUpdateMode.MeshStatus -> stringResource(Res.string.live_update_mesh_status)
+            LiveUpdateMode.MeshStatus -> stringResource(Res.string.live_update_mesh_status_shown)
 
             is LiveUpdateMode.TrackNode ->
                 stringResource(
-                    Res.string.live_update_tracking,
+                    Res.string.live_update_tracking_shown,
                     trackedNode?.listName() ?: NodeAddress.numToDefaultId(mode.nodeNum),
                 )
         }
     Card(modifier = modifier.fillMaxWidth()) {
-        ListItem(
+        BasicListItem(
             text = stringResource(Res.string.live_update),
             supportingText = summary,
             leadingIcon = MeshtasticIcons.Notifications,
+            trailingContent =
+            if (mode == LiveUpdateMode.Off) {
+                MeshtasticIcons.ChevronRight.icon()
+            } else {
+                { TextButton(onClick = onStop) { Text(stringResource(Res.string.live_update_stop)) } }
+            },
             onClick = onClick,
         )
         if (turnedOffInSettings && mode != LiveUpdateMode.Off) {
