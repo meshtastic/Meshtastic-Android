@@ -81,7 +81,8 @@ private const val VIEW_BASED_ALGORITHM_NODE_THRESHOLD = 1000
  *
  * Each unclustered item is composed as a [PulsingNodeChip] (`clusterItemContent`), badged with a count when it stands
  * for several nodes at one spot, with its z-index forwarded through [ClusteringMarkerProperties]; cluster bubbles keep
- * the library's default rendering. Precision circles are drawn for every item, clustered or not.
+ * the library's default rendering, labeled with their exact count. Precision circles are drawn for every item,
+ * clustered or not.
  *
  * Requires maps-compose >= 8.4.0: earlier versions composed cluster items into a detached `ComposeView` that carried no
  * lifecycle/saved-state owners, crashing under the Navigation 3 hierarchy (fixed upstream in
@@ -136,10 +137,14 @@ fun NodeClusterMarkers(
             StackedNodeChip(item)
         },
         onClusterManager = { clusterManager ->
-            // The library renderer extends DefaultClusterRenderer; raise its clustering threshold once.
+            // The library renderer extends DefaultClusterRenderer; configure it once.
             val renderer = clusterManager.renderer as? DefaultClusterRenderer<*>
-            if (renderer != null && renderer.minClusterSize != MIN_CLUSTER_SIZE) {
+            if (renderer != null && (renderer.minClusterSize != MIN_CLUSTER_SIZE || !renderer.showExactCount)) {
                 renderer.minClusterSize = MIN_CLUSTER_SIZE
+                // Exact counts, "1.2k" past a thousand: what the MapLibre map's point_count_abbreviated label and the
+                // Apple map's cluster badge show, where the library's default buckets read "10+", "20+", "50+".
+                renderer.showExactCount = true
+                renderer.useCompactNumberFormatting = true
                 clusterManager.cluster()
             }
             // Only swap on a threshold crossing; otherwise just resize in place - replacing re-migrates every item.
