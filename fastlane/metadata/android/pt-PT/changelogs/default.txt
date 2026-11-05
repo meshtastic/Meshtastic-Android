@@ -1,3 +1,3 @@
-A node's 3D model with its live screen, and the mesh in AR. Quick Settings tile, Live Update notifications, Node Tracker widget. Local node names. Stacked nodes draw as one chip. Traceroutes to you. MQTT topics near you. Certificados TAK específicos de cada instalação.
+Stability and reliability fixes.
 
 Notas de lançamento completas: https://github.com/meshtastic/Meshtastic-Android/releases
