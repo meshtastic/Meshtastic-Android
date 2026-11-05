@@ -8,13 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Closed Beta (v2.8.4-closed.4)
-Changes since [`v2.8.4-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4-open.3):
-
-#### 🛠️ Fixes
-* fix(widget): pick the layout by breakpoint and the line budget by the reported cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7912
-
-### Open Beta (v2.8.4-open.3)
+### Open Beta (v2.8.4-open.4)
 Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3):
 
 #### 🏗️ Features
@@ -77,6 +71,7 @@ Changes since [`v2.8.3`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
 * fix(debug): run the log search off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7891
 * fix(widget): size the readings to the real cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7902
+* fix(widget): pick the layout by breakpoint and the line budget by the reported cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7912
 #### 📝 Other Changes
 * refactor(database): drop dead pool-timeout recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7782
 * refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
