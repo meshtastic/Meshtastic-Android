@@ -30,7 +30,7 @@ Tap the search field at the top of the docs browser to open a full-screen search
 
 ![Страница документации, отображаемая в приложении](../../assets/screenshots/docs-browser_page.png)
 
-### Pages in your language
+### Страницы на твоём языке
 
 With the app set to a language other than English, a page that has a community translation opens in that language, labeled **Community translated** under its title. On the Google-flavor Android build, a page with no community translation opens in English and is then machine-translated on the phone, labeled **Auto-translated**. F-Droid and desktop builds show such a page in English.
 

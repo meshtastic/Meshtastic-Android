@@ -440,8 +440,11 @@
     <string name="device_model_capture_failed">Невозможно сохранить изображение</string>
     <string name="device_model_capture_saved">Сохранено в изображениях</string>
     <string name="device_model_load_failed">Не удалось загрузить 3D модель</string>
+    <string name="device_model_rest_face_down">Экраном вниз</string>
+    <string name="device_model_rest_face_up">Экраном вверх</string>
     <string name="device_model_rest_left_side">Левая сторона</string>
     <string name="device_model_rest_right_side">Правая сторона</string>
+    <string name="device_model_rest_upright">Вертикально</string>
     <string name="device_model_view">Просмотр 3D-модели</string>
     <string name="device_model_view_in_space">Просмотреть в твоём пространстве</string>
     <string name="device_sleeping">Устройство спит</string>
@@ -835,6 +838,7 @@
     <string name="format_italic">Курсив</string>
     <string name="format_link">Ссылка</string>
     <string name="format_strikethrough">Зачёркнутый</string>
+    <string name="free_memory">Свободная память</string>
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="freq">Частота</string>
     <string name="gas_resistance">Сопротивление газа</string>
@@ -971,18 +975,24 @@
     <string name="live_update_heard_now">Услышан только что</string>
     <string name="live_update_hops">Хопов: %1$d</string>
     <string name="live_update_mesh_status">Статус сети</string>
+    <string name="live_update_mesh_status_shown">Состояние сети в строке состояния и шторке уведомлений</string>
+    <string name="live_update_mesh_status_shown_shade">Статус Mesh в шторке уведомлений</string>
     <string name="live_update_mesh_status_summary">Подключение, ноды онлайн, непрочитанные сообщения и батареи радиоустройства</string>
     <string name="live_update_no_nodes">Нет нод для отслеживания</string>
     <string name="live_update_nodes_online">%1$d из %2$d нод онлайн</string>
+    <string name="live_update_off_summary">Показать сеть или одну ноду в строке состояния и шторке уведомлений</string>
     <string name="live_update_promotion_off">Живые обновления отключены для Meshtastic в системных настройках</string>
     <string name="live_update_search_nodes">Поиск нод</string>
     <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
     <string name="live_update_start">Запуск</string>
     <string name="live_update_stop">Остановка</string>
+    <string name="live_update_stop_action">Остановить онлайн обновление</string>
     <string name="live_update_switch">Переключатель</string>
     <string name="live_update_track_in">Отслеживать в Live Update</string>
     <string name="live_update_track_node">Отслеживание ноды</string>
     <string name="live_update_track_node_summary">Аккумулятор одной ноды, сигнал, последние известия, хопы и расстояние</string>
+    <string name="live_update_tracking_shown">Отслеживание %1$s в строке состояния и шторке уведомлений</string>
+    <string name="live_update_tracking_shown_shade">Отслеживание %1$s в шторке уведомлений</string>
     <string name="live_update_unread"> %1$d непрочитанное</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
@@ -1206,12 +1216,17 @@
     <string name="mesh_hud_coach_find">Долгое нажатие на ноду, чтобы найти её.</string>
     <string name="mesh_hud_coach_point">Поднимите телефон и направь его на горизонт.</string>
     <string name="mesh_hud_coach_tap">Нажмите на ноду чтобы открыть её.</string>
+    <string name="mesh_hud_distance_no_altitude">%1$s · без высоты</string>
     <string name="mesh_hud_elevation_approximate">Высота указана приблизительно</string>
     <string name="mesh_hud_find">Поиск</string>
     <string name="mesh_hud_finding">Поиск %1$s · %2$s</string>
+    <string name="mesh_hud_heading">Услышана %1$s</string>
+    <string name="mesh_hud_heading_accuracy">Услышана %1$s ± %2$s</string>
+    <string name="mesh_hud_heading_low_accuracy">Низкая точность определения направления. Для калибровки перемещайте телефон по траектории в форме восьмерки.</string>
     <string name="mesh_hud_inside_geofence">Внутри %1$s</string>
     <string name="mesh_hud_inside_unnamed_geofence">Внутри геозоны</string>
     <string name="mesh_hud_joined">%1$s · %2$s</string>
+    <string name="mesh_hud_location_rationale">При просмотре сети ноды размещаются вокруг тебя в соответствии с твоим местоположением.</string>
     <string name="mesh_hud_more">+%1$d</string>
     <string name="mesh_hud_nearby">Поблизости</string>
     <string name="mesh_hud_no_nodes">Нет узлов с позицией</string>
@@ -1222,10 +1237,14 @@
     <string name="mesh_hud_own_accuracy">Ты ± %1$s</string>
     <string name="mesh_hud_radar_description">%1$s, %2$s</string>
     <string name="mesh_hud_rise_above">▲ %1$s</string>
+    <string name="mesh_hud_rise_above_spoken">%1$s выше тебя</string>
     <string name="mesh_hud_rise_below">▼ %1$s</string>
+    <string name="mesh_hud_rise_below_spoken">%1$s ниже тебя</string>
     <string name="mesh_hud_snr">%1$s дБ</string>
     <string name="mesh_hud_thermal_critical">Телефон слишком горячий. Камера приостановлена.</string>
     <string name="mesh_hud_thermal_hot">Телефон горячий. Реже обновляется.</string>
+    <string name="mesh_hud_tilt_down">Наклонить вниз на %1$d°</string>
+    <string name="mesh_hud_tilt_up">Поднять вверх на %1$d°</string>
     <string name="mesh_hud_track_empty">В окне трека нет позиций</string>
     <string name="mesh_hud_track_newest">%1$s · новейшая %2$s</string>
     <plurals name="mesh_hud_track_points">
@@ -1234,6 +1253,7 @@
         <item quantity="many">%1$d пунктов</item>
         <item quantity="other">%1$d пунктов</item>
     </plurals>
+    <string name="mesh_hud_track_summary">%1$s за %2$s · самые новые %3$s</string>
     <string name="mesh_hud_turn_left">Поверни налево %1$d°</string>
     <string name="mesh_hud_turn_right">Поверни направо %1$d°</string>
     <string name="mesh_hud_waiting_sensor">Ожидание датчика ориентации</string>
@@ -1324,6 +1344,7 @@
     <string name="mirror_back">Назад</string>
     <string name="mirror_device_screen">Экран устройства</string>
     <string name="mirror_eink_hint">E-ink дисплей: обновляется медленно, поэтому предпочитай обновлять через непрерывное зеркалирование.</string>
+    <string name="mirror_frame_info">%1$d×%2$d · кадр #%3$d</string>
     <string name="mirror_hint_keyboard_active">Стрелки · Enter = OK · Esc = обратно</string>
     <string name="mirror_hint_tap_keyboard">Нажмите на экран для управления клавиатурой или проведи по нему для навигации</string>
     <string name="mirror_hint_tap_touch">Нажми на экран, чтобы прикоснуться к устройству или проведи пальцем для навигации</string>
@@ -1360,6 +1381,7 @@
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
     <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
     <string name="mqtt_proxy_local">MQTT-прокси в этом приложении</string>
+    <string name="mqtt_proxy_local_summary">Это приложение ретранслирует трафик MQTT для подключенного устройства. Выключи его, чтобы немедленно отключить ретрансляцию без изменения настроек MQTT на устройстве. Это поможет, если трафик MQTT перегружает соединение. Чтобы возобновить ретрансляцию, снова включи приложение.</string>
     <string name="mqtt_root_problem_empty">Введи тему</string>
     <string name="mqtt_root_problem_empty_segment">Темы не могут содержать два слэша в строке.</string>
     <string name="mqtt_root_problem_ends_with_version">Темы не могут заканчиваться на /2.</string>
@@ -1382,9 +1404,15 @@
     <string name="mqtt_topic_finder">Найти темы рядом с тобой</string>
     <string name="mqtt_topic_finder_active">Активные темы</string>
     <string name="mqtt_topic_finder_connecting">Подключение…</string>
+    <string name="mqtt_topic_finder_counts">Счетчик количества нод, слышимые во время пробы. Оживленные темы заполняются в течение нескольких секунд; тихие темы могут оставаться на нуле.</string>
     <string name="mqtt_topic_finder_custom">Пользовательская тема</string>
+    <string name="mqtt_topic_finder_custom_hint">До 31 ASCII-символа, без начального и конечного слэша, без + и #.</string>
     <string name="mqtt_topic_finder_failed_closed">Брокер закрыл соединение.</string>
     <string name="mqtt_topic_finder_failed_connect">Не удалось подключиться к брокеру.</string>
+    <string name="mqtt_topic_finder_failed_error">Проба остановилась из-за непредвиденной ошибки.</string>
+    <string name="mqtt_topic_finder_failed_filters">Брокер не поддерживает эти фильтры тем.</string>
+    <string name="mqtt_topic_finder_finished">Прослушано %1$d сообщений по %2$d темам</string>
+    <string name="mqtt_topic_finder_footer">Слушает %1$s в течение одной минуты и ничего не публикует. Брокер видит твой IP-адрес и случайный идентификатор клиента, а не вашу ноду. Информация о твоем местоположении никогда не попадает к брокеру: геокодер телефона преобразует ее в названия страны, области и города. При выборе темы заполняется поле «Основная тема», и радио ничего не получает, пока ты не сохранишь данные.</string>
     <string name="mqtt_topic_finder_geocode_failed">Не удалось найти название места для твоего местоположения.</string>
     <string name="mqtt_topic_finder_level_city">Город</string>
     <string name="mqtt_topic_finder_level_community">Сообщества</string>
@@ -1396,8 +1424,14 @@
     <string name="mqtt_topic_finder_nearby">Поблизости</string>
     <string name="mqtt_topic_finder_nearest">ближайший %1$s</string>
     <string name="mqtt_topic_finder_no_location">Нет местоположения. Подключи радио к месту или разреши точное местоположение чтобы увидеть страну, область и город.</string>
+    <string name="mqtt_topic_finder_no_region">Сначала установите регион LoRa.</string>
     <string name="mqtt_topic_finder_nodes">ноды</string>
+    <string name="mqtt_topic_finder_nothing_heard">Во время пробы ничего не было услышано.</string>
+    <string name="mqtt_topic_finder_nothing_yet">Пока ничего не слышно</string>
+    <string name="mqtt_topic_finder_only_above">Во время пробы были активны только вышеперечисленные темы.</string>
+    <string name="mqtt_topic_finder_sample_again">Повторить пробу</string>
     <string name="mqtt_topic_finder_subscribing">Подписка…</string>
+    <string name="mqtt_topic_finder_summary">Прослушивание брокера в течение минуты и перечисление основных тем, которые используются поблизости.</string>
     <string name="mqtt_topic_finder_use">Использовать эту тему</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
@@ -1575,6 +1609,7 @@
     <!-- PACKET -->
     <string name="packet_authenticity">Подлинность пакета</string>
     <string name="packet_authenticity_balanced">Сбалансировано — предпочтительно аутентифицировать</string>
+    <string name="packet_authenticity_balanced_summary">Отклонять неподписанные попытки понижения рейтинга от нод, которые, как известно, подписаны.</string>
     <string name="packet_authenticity_compatible">Совместимо — принять не подписано</string>
     <string name="packet_authenticity_compatible_summary">Для максимальной совместимости принимать трафик без цифровой подписи. Пакет все равно будет отброшен, если подпись неверна и ее возможно проверить.</string>
     <string name="packet_authenticity_level">Уровень защиты</string>
@@ -1607,6 +1642,7 @@
     <string name="permission_nearby_devices_summary">Найти и подключиться к ноде через Bluetooth</string>
     <string name="permission_notifications_summary">Оповещать о сообщениях, новых нодах и низком заряде батареи</string>
     <string name="permission_state_allowed">Разрешено</string>
+    <string name="permission_state_approximate_only">Только приблизительно. Для отображения твоего местоположения в сети требуется точное местоположение.</string>
     <string name="permission_state_blocked">Заблокировано — нажми, чтобы открыть системные настройки</string>
     <string name="permission_state_denied">Отклонено — нажмите для разрешения</string>
     <string name="permission_state_not_applicable">Не требуется для этой версии Android</string>
@@ -1720,6 +1756,7 @@
     <string name="react">Среагировать</string>
     <string name="reboot">Перезагрузка</string>
     <string name="reboot_into_dfu">Перезагрузить в режим DFU</string>
+    <string name="reboot_into_dfu_warning">Нода остается в своем загрузчике и отключена от сети до тех пор, пока не будет перепрошита новая прошивка или она не будет сброшена.</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="reconnecting">Восстановление связи…</string>
     <string name="refresh">Обновить</string>
@@ -1742,6 +1779,7 @@
     <string name="remote_shell">Удаленная консоль</string>
     <string name="remote_shell_command_hint">Команда</string>
     <string name="remote_shell_error_notice">Ошибка от ноды: %1$s</string>
+    <string name="remote_shell_full_screen">Полноэкранным программам требуется больше ресурсов, чем может вместить сеть, поэтому их выходные данные могут отображаться некорректно</string>
     <string name="remote_shell_input_dropped">Потеряно %1$d байт входных данных, нода не справляется</string>
     <string name="remote_shell_key_alt">Уровень моря</string>
     <string name="remote_shell_key_ctrl">Управление</string>
@@ -1755,6 +1793,7 @@
     <string name="remote_shell_key_right">Стрелка вправо</string>
     <string name="remote_shell_key_tab">Табуляция</string>
     <string name="remote_shell_key_up">Стрелка вверх</string>
+    <string name="remote_shell_last_contact">Ожидание ноды, последний раз вещала %1$d с назад</string>
     <string name="remote_shell_menu_line_mode">Вид линий</string>
     <string name="remote_shell_menu_paste">Вставить</string>
     <string name="remote_shell_menu_text_larger">Увеличить текст</string>
@@ -1775,6 +1814,7 @@
     <string name="remote_shell_status_failed">Сеанс завершился с ошибкой</string>
     <string name="remote_shell_status_not_connected">Связь не установлена</string>
     <string name="remote_shell_status_opening">Открытие сеанса…</string>
+    <string name="remote_shell_subtitle_round_trip">%1$s, %2$d мс в пути</string>
     <string name="remotely_administrating">"[Удалённо] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Удалить</string>
@@ -2005,7 +2045,7 @@
     <string name="speed">Скорость</string>
     <string name="speed_kmh">%1$d км/ч</string>
     <string name="speed_mph">%1$d миль/ч</string>
-    <string name="status_message">Состояние сообщения</string>
+    <string name="status_message">Сообщение о состоянии</string>
     <string name="status_message_summary">Публичное сообщение о статусе, которое отправляется в сеть при изменении и каждые 12 часов.</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
     <string name="stop_connecting">Остановить подключение</string>

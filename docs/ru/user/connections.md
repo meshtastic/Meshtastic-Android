@@ -2,7 +2,7 @@
 title: Соединения
 nav_order: 2
 last_updated: 2026-11-04
-description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
+description: Подключите свой телефон или настольный компьютер к ноде Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -12,23 +12,23 @@ aliases:
 
 # Соединения
 
-Meshtastic supports multiple transport methods to communicate between your phone or desktop and a node.
+Meshtastic поддерживает несколько способов передачи данных между твоим телефоном или настольным компьютером и нодой.
 
 ## Bluetooth (BLE)
 
 Bluetooth Low Energy является наиболее распространенным методом подключения на Android.
 
-### Pairing a Radio
+### Сопряжение радиоприемника
 
-1. Power on your node. Most nodes advertise over Bluetooth as soon as they boot, so there is no pairing mode to enter. Nodes with a color touchscreen ship with Bluetooth switched off, so turn it on from the node's own on-screen menu first.
+1. Включи ноду. Большинство нод объявляют об этом по Bluetooth сразу после загрузки, поэтому переход в режим сопряжения невозможен. Ноды с цветным сенсорным экраном поставляются с отключенным Bluetooth, поэтому сначала включите его в собственном экранном меню ноды.
 2. Откройте приложение и перейдите на вкладку **Подключение**.
-3. Tap **Scan for Bluetooth devices**. Nearby Meshtastic nodes appear in the list.
-4. Select your node from the list.
-5. Android asks you to pair. If your node has a screen, it shows a six-digit PIN. Type that into the Android dialog. If your node has no screen, the PIN is `123456`.
+3. Нажми **Сканировать Bluetooth-устройства**. В списке отображаются близлежащие ноды Meshtastic.
+4. Выберите свое устройство из списка.
+5. Android попросит выполнить сопряжение. Если у твоей ноды имеется экран, то отображается шестизначный PIN-код. Введите его в диалоговом окне Android. Если у ноды нет экрана, PIN-код — `123456`.
 
-![Scanning for Bluetooth devices, with a discovered node in the list](../../assets/screenshots/connections_bluetooth_scan.png)
+![Сканирование Bluetooth-устройств с обнаружением нод в списке](../../assets/screenshots/connections_bluetooth_scan.png)
 
-To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
+Чтобы изменить метод сопряжения или включить Bluetooth для ноды, которая поставляется с выключенным Bluetooth, открой **Настройки → Конфигурация устройства → Bluetooth**. См. [Настройки — Радио и Пользователь](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
 Используйте селектор транспорта — ряд сегментированных кнопок под карточкой подключения — для переключения между транспортами Bluetooth, Network и USB (одновременно активен только один):
 
@@ -40,7 +40,7 @@ On hardware with no Bluetooth LE the selector leaves out **Bluetooth**, and on h
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
-| What you see                                                | Что это значит                                                                                                                                                             |
+| Что видишь ты                                               | Что это значит                                                                                                                                                             |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A card asking for **Nearby devices**                        | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
 | **Bluetooth is off**                                        | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
@@ -57,7 +57,7 @@ The **Connect** tab icon in the navigation bar shows the connection state by col
 | ------ | --------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 🟢     | Подключено      | Active link to the node. The badge shows the transport in use: Bluetooth, Wi-Fi, or USB |
 | 🟠     | Подключение     | Выполняется рукопожатие                                                                                                 |
-| 🔴     | Отключено       | No active connection. The app retries automatically, with a growing delay between attempts              |
+| 🔴     | Отключено       | Нет активного соединения. The app retries automatically, with a growing delay between attempts          |
 | 🟡     | Устройство спит | The node is in light sleep. The app is waiting for it to wake and reconnect, not failing                |
 
 These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
@@ -169,11 +169,11 @@ To disconnect, tap the disconnect button on the **Connect** tab:
 On Android you can add a **Meshtastic** tile to Quick Settings: pull down the notification shade, tap the edit (pencil) button, and drag the tile into place.
 
 - **Connected** - the tile is on and shows your node's short name. Tap it to disconnect, the same as the disconnect button on the **Connect** tab.
-- **Connecting** - the tile is on and reads "Connecting". Tap it to cancel.
+- **Connecting** - the tile is on and reads "Connecting". Нажми для отмены.
 - **Disconnected** or **Device sleeping** - the tile is off. Tap it to reconnect to the node you last selected.
 - **No device selected** - tap the tile to open the **Connect** tab and pick a node.
 
-Disconnecting forgets the selected node, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. On a locked phone the tile asks you to unlock first.
+Disconnecting forgets the selected node, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. На заблокированном телефоне плитка попросит сначала разблокировать его.
 
 ## Подключение к компьютеру
 
@@ -181,15 +181,15 @@ Disconnecting forgets the selected node, so after a disconnect the tile opens th
 
 - **Bluetooth (BLE)** — через библиотеку Kable; работает на macOS, Linux и Windows
 - **Последовательный USB** — основной способ проводного подключения
-- **TCP/IP** — for network-connected nodes
+- **TCP/IP** — для нод, подключенных к сети
 
 См. [десктопное приложение](desktop) для информации о платформе и сочетаниях клавиш.
 
 ## Связанные темы
 
 - [Начало работы](onboarding) — настройка при первом запуске и разрешения
-- [Settings — Radio & User](settings-radio-user) — Bluetooth, region, and network configuration
+- [Настройки — Радио и пользователь](settings-radio-user) — настройка Bluetooth, региона и сети
 - [Messages & Channels](messages-and-channels) — send your first message once the node is connected
-- [Nodes](nodes) — see who else is on your mesh
+- [Ноды](nodes) — посмотри, кто ещё в твоей сети
 - [Десктопное приложение](desktop) — детали подключения, специфичные для настольных компьютеров
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible nodes on meshtastic.org
