@@ -2,7 +2,7 @@
 title: Виджет на главный экран
 nav_order: 20
 last_updated: 2026-11-04
-description: Add Meshtastic home screen widgets to glance at your connected node's local stats, or keep an eye on one node you pick, without opening the app.
+description: Добавь виджеты Meshtastic на главный экран, чтобы просматривать локальную статистику подключенных нод или следить за выбранной нодой не открывая приложение.
 aliases:
   - widget
   - home-screen-widget
@@ -12,29 +12,29 @@ aliases:
 
 # Виджет на главный экран
 
-On Android, Meshtastic provides two home screen **widgets**:
+На Android Meshtastic предоставляет два **виджета** для главного экрана:
 
-- **Meshtastic** shows live local statistics from your connected node.
-- **Node Tracker** follows one node you choose: its battery, signal, when it was last heard, how many hops away it is, and how far it is from your connected node.
+- **Meshtastic** показывает в реальном времени локальную статистику с подключенной ноды.
+- **Трекер нод** отслеживает выбранную тобой нооду: уровень заряда, сигнал, время последнего приема, количество хопов и расстояние до подключенной ноды.
 
-You can place as many of each as you like. Each Node Tracker remembers its own node.
+Ты можешь разместить столько каждого, сколько захочешь. Каждый трекер нод запоминает свою собственную ноду.
 
 ## Локальная статистика
 
-The **Meshtastic** widget displays the **connected node's** current local stats:
+Виджет **Meshtastic** отображает текущую локальную статистику **подключенной ноды**:
 
 - A **node chip** carrying the node's short name in its own colors, with the **battery** level beside it, or _Powered_ when running on external power
 - **ChUtil** — использование канала (насколько занят канал LoRa, в процентах)
 - **AirUtil** — the percentage of airtime this node used transmitting in the last hour
-- **Nodes** — how many nodes are online, out of the total known
-- **Uptime** — how long the node has been running since its last reboot
-- **Sent** and **Received** — the node's packet counters
-- **Noise floor** — the background noise level in dBm
-- **Free memory** — memory the node has left
-- **Relayed** — packets the node relayed for others
-- **Bad** — corrupt packets received
-- **Dropped** — packets the node discarded
-- **Relays canceled** — relays the node started and then canceled
+- **Ноды** — сколько нод из общего количества известных в сети
+- **Uptime** — время работы ноды с момента её последней перезагрузки
+- **Отправлено** и **Получено** — счетчики пакетов ноды
+- **Уровень шума** — уровень фонового шума в дБм
+- **Свободная память** — остаточная память ноды
+- **Передано** — пакеты, передаваемые нодой другим
+- **Плохо** — полученные пакеты повреждены
+- **Отброшено** — пакеты, отброшенные нодой
+- **Ретрансляции отменены** — запущенные ретрансляции, но после отмененные
 - **Updated** — the time the stats last refreshed, along the foot of a three-row widget
 
 The widget shows as many of those as its size holds, in that order, so a small widget keeps the readings people glance at most. A two-by-two widget shows the node, battery, utilization and the first few readings; four cells wide lays the readings out in two columns, and a taller widget adds lines until every reading is on screen.
@@ -43,7 +43,7 @@ The widget shows as many of those as its size holds, in that order, so a small w
 
 > ℹ️ **Note:** The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
-## Node Tracker
+## Трекер нод
 
 The **Node Tracker** widget shows one node from your node list:
 
@@ -65,7 +65,7 @@ After you disconnect from your node in the app, the widget keeps the tracked nod
 
 If your node list does not include the node you picked, because you removed it or connected to a different node, the widget says **Node not found**. Tap it to choose another node.
 
-## Adding a Widget
+## Добавление виджета
 
 1. Touch & hold an empty area of your Android home screen.
 2. Tap **Widgets**, then find **Meshtastic** in the list.
@@ -73,13 +73,13 @@ If your node list does not include the node you picked, because you removed it o
 4. For a Node Tracker, pick the node to follow. Your favorites are listed first, then the most recently heard nodes; type in the search field to filter by name or node ID. Backing out without picking cancels the widget.
 5. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
-To track a different node later, touch & hold the Node Tracker and choose the widget's settings or reconfigure option. The exact wording depends on your launcher.
+To track a different node later, touch & hold the Node Tracker and choose the widget's settings or reconfigure option. Точная формулировка зависит от твоего лаунчера.
 
-> ℹ️ **Note:** The widgets are Android-only. They are not available in the desktop app.
+> ℹ️ **Примечание:** виджеты доступны только на Android. Они не доступны в десктопном приложении
 
 ## Связанные темы
 
 - [Метрики нод](node-metrics) — полная статистика сигнала и локальная статистика внутри приложения
-- [Nodes](nodes) — favorites, last heard, and node details
-- [Connections](connections) — connect to a node so the widgets have data to show
-- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
+- [Ноды](nodes) — избранное, последнее обновление и сведения о нодах
+- [Подключения](connections) — подключение к ноде, чтобы виджет отображал данные
+- [Локальное обнаружение сети] (discovery) — использование канала и времени использования сети
