@@ -23,7 +23,7 @@ aliases:
 
 Виджет **Meshtastic** отображает текущую локальную статистику **подключенной ноды**:
 
-- A **node chip** carrying the node's short name in its own colors, with the **battery** level beside it, or _Powered_ when running on external power
+- **Чип ноды**, содержащий краткое название ноды, выделенное его собственными цветами, с указанием уровня заряда **батареи** рядом с ним или _включено_ при работе от внешнего источника питания
 - **ChUtil** — использование канала (насколько занят канал LoRa, в процентах)
 - **AirUtil** — the percentage of airtime this node used transmitting in the last hour
 - **Ноды** — сколько нод из общего количества известных в сети
@@ -70,10 +70,10 @@ If your node list does not include the node you picked, because you removed it o
 1. Touch & hold an empty area of your Android home screen.
 2. Tap **Widgets**, then find **Meshtastic** in the list.
 3. Drag the **Meshtastic** (local stats) or **Node Tracker** widget to your home screen.
-4. For a Node Tracker, pick the node to follow. Your favorites are listed first, then the most recently heard nodes; type in the search field to filter by name or node ID. Backing out without picking cancels the widget.
+4. Чтобы отслеживать ноды, выберите ноду, за которой нужно следить. Сначала перечисляются твои избранные, затем самые последние прослушиваемые ноды; введи в поле поиска, чтобы выполнить фильтрацию по названию или идентификатору ноды. Отмена возврата без выбора приводит к отмене виджета.
 5. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
-To track a different node later, touch & hold the Node Tracker and choose the widget's settings or reconfigure option. Точная формулировка зависит от твоего лаунчера.
+Чтобы позже отследить другую ноду, нажми и удерживай кнопку отслеживания нод и выбери настройки виджета или вариант перенастройки. Точная формулировка зависит от твоего лаунчера.
 
 > ℹ️ **Примечание:** виджеты доступны только на Android. Они не доступны в десктопном приложении
 
