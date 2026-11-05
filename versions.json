@@ -6,6 +6,12 @@
   ],
   "prereleases": [
     {
+      "dir": "v2.8.4-open.4",
+      "version": "2.8.4",
+      "track": "open",
+      "seq": 4
+    },
+    {
       "dir": "v2.8.4-open.3",
       "version": "2.8.4",
       "track": "open",
