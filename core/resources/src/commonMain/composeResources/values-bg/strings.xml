@@ -534,6 +534,7 @@
     <string name="format_code">Код</string>
     <string name="format_italic">Наклонен</string>
     <string name="format_link">Връзка</string>
+    <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>
     <string name="generate_qr_code">Генериране на QR код</string>
@@ -616,6 +617,7 @@
     <string name="licensed_mode_enable_title">Да се ​​активира лицензиран (Радиолюбителски) режим?</string>
     <!-- LIVE -->
     <string name="live_update_direct">Директно</string>
+    <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
     <string name="live_update_unread">%1$d непрочетени</string>
     <!-- LOAD -->
     <string name="load">Натоварване</string>
@@ -731,6 +733,7 @@
     <string name="max">Макс</string>
     <!-- MESH -->
     <string name="mesh_beacon_channel_number">Канал %1$d</string>
+    <string name="mesh_beacon_interval_error">Изберете интервал от поне един час</string>
     <string name="mesh_beacon_listen">Слушане за маяци</string>
     <string name="mesh_beacon_no_channels">Няма налични канали</string>
     <string name="mesh_beacon_offer_add">Добавяне на канал</string>
@@ -746,6 +749,8 @@
     <string name="mesh_beacon_target_default">По подразбиране</string>
     <string name="mesh_beacon_target_remove">Премахване на целта</string>
     <string name="mesh_hud_joined">%1$s · %2$s</string>
+    <string name="mesh_hud_no_nodes">Няма възли с позиция</string>
+    <string name="mesh_hud_radar_description">%1$s, %2$s</string>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
     <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <!-- MESHTASTIC -->
@@ -789,6 +794,7 @@
     <!-- MIRROR -->
     <string name="mirror_back">Назад</string>
     <string name="mirror_key_ok">Добре</string>
+    <string name="mirror_keyboard">Клавиатура</string>
     <string name="modem_preset">Предварително зададени</string>
     <string name="module_settings">Конфигуриране на модулите</string>
     <string name="modules_already_unlocked">Модулите вече са отключени</string>
@@ -813,6 +819,9 @@
     <string name="mqtt_topic_finder_connecting">Свързване…</string>
     <string name="mqtt_topic_finder_level_country">Държава</string>
     <string name="mqtt_topic_finder_level_region">Регион</string>
+    <string name="mqtt_topic_finder_level_subdivision">Щат или провинция</string>
+    <string name="mqtt_topic_finder_nodes">възли</string>
+    <string name="mqtt_topic_finder_nothing_heard"></string>
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <!-- MUTE -->
@@ -944,6 +953,7 @@
     <string name="open_source_libraries">Библиотеки с отворен код</string>
     <string name="open_wifi_settings">Отваряне на настройките на Wi-Fi</string>
     <string name="options">Опции</string>
+    <string name="orp">ORP</string>
     <!-- PACKET -->
     <string name="packet_authenticity_level">Ниво на защита</string>
     <string name="password">Парола</string>
@@ -1323,6 +1333,7 @@
     <!-- WIFI -->
     <string name="wifi_config">Опции за Wi-Fi</string>
     <string name="wifi_devices">Осигуряване на Wi-Fi за mPWRD-OS</string>
+    <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Налични мрежи</string>
     <string name="wifi_provision_connect_failed">Не можа да се свърже: %1$s</string>
     <string name="wifi_provision_description">Предоставете идентификационни данни за Wi-Fi на вашето mPWRD-OS устройство чрез Bluetooth.</string>
