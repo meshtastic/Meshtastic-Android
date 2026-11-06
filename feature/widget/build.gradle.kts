@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.compose.multiplatform.resources)
     implementation(libs.kermit)
 
+    testImplementation(projects.core.testing)
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.glance.testing)
     testImplementation(libs.androidx.glance.appwidget.testing)
