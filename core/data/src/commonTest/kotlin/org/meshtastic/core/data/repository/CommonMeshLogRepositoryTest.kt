@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.MIN_PLAUSIBLE_EPOCH_SECONDS
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseProvider
@@ -436,39 +437,11 @@ abstract class CommonMeshLogRepositoryTest {
     @Test
     fun `parseTelemetryLog preserves valid telemetry timestamp`() = runTest(testDispatcher) {
         val validTime = nowSeconds.toInt() - 100
-        val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.time = validTime // valid timestamp (sender node)
-                }
-                .build()
-
-        val meshPacket =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.payload = telemetry.encode().toByteString()
-                                wb.portnum = PortNum.TELEMETRY_APP
-                            }
-                            .build()
-                }
-                .build()
-
-        val meshLog =
-            MeshLog(
-                uuid = "123",
-                message_type = "telemetry",
-                received_date = nowMillis,
-                raw_message = "",
-                fromNum = 0,
-                portNum = PortNum.TELEMETRY_APP.value,
-                fromRadio = FromRadio.Builder().also { wb -> wb.packet = meshPacket }.build(),
-            )
-
-        repository.insert(meshLog)
+        createAndStoreTelemetry(
+            telemetrySeconds = validTime,
+            packetSeconds = nowSeconds.toInt() - 50,
+            receivedSeconds = nowSeconds.toInt(),
+        )
 
         val result = repository.getTelemetryFrom(0).first()
 
@@ -480,99 +453,28 @@ abstract class CommonMeshLogRepositoryTest {
     }
 
     @Test
-    fun `parseTelemetryLog skips invalid telemetry timestamp in favor of packet time`() = runTest(testDispatcher) {
-        val validTime = nowSeconds.toInt() - 100
-        val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.time = 1000 // invalid or uptime timestamp (sender node)
-                }
-                .build()
-
-        val meshPacket =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.payload = telemetry.encode().toByteString()
-                                wb.portnum = PortNum.TELEMETRY_APP
-                            }
-                            .build()
-                    wb.rx_time = validTime // valid timestamp (receiver node)
-                }
-                .build()
-
-        val meshLog =
-            MeshLog(
-                uuid = "123",
-                message_type = "telemetry",
-                received_date = nowMillis,
-                raw_message = "",
-                fromNum = 0,
-                portNum = PortNum.TELEMETRY_APP.value,
-                fromRadio =
-                FromRadio.Builder()
-                    .also { wb ->
-                        wb.packet = meshPacket
-                    }
-                    .build(),
-            )
-
-        repository.insert(meshLog)
-
+    fun `parseTelemetryLog skips future telemetry timestamp in favor of packet time`() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val validTime = now - 50
+        val future = now + 1000
+        createAndStoreTelemetry(
+            telemetrySeconds = future,
+            packetSeconds = validTime,
+            receivedSeconds = now,
+        )
         val result = repository.getTelemetryFrom(0).first()
-
-        assertNotNull(result)
-        assertEquals(1, result.size)
-        val resultTelemetry = result[0]
-        assertNotNull(resultTelemetry)
-        assertEquals(validTime, resultTelemetry.time)
+        assertEquals(validTime, result[0].time)
     }
 
     @Test
     fun `parseTelemetryLog skips invalid telemetry and packet timestamps in favor of received time`() =
         runTest(testDispatcher) {
-            val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
-            val telemetry =
-                Telemetry.Builder()
-                    .also { wb ->
-                        wb.time = 1000 // invalid or uptime timestamp (sender node)
-                    }
-                    .build()
-
-            val meshPacket =
-                MeshPacket.Builder()
-                    .also { wb ->
-                        wb.decoded =
-                            Data.Builder()
-                                .also { wb ->
-                                    wb.payload = telemetry.encode().toByteString()
-                                    wb.portnum = PortNum.TELEMETRY_APP
-                                }
-                                .build()
-                        wb.rx_time = 2000 // invalid timestamp (receiver node)
-                    }
-                    .build()
-
-            val meshLog =
-                MeshLog(
-                    uuid = "123",
-                    message_type = "telemetry",
-                    received_date = nowMillis, // valid (application) timestamp
-                    raw_message = "",
-                    fromNum = 0,
-                    portNum = PortNum.TELEMETRY_APP.value,
-                    fromRadio =
-                    FromRadio.Builder()
-                        .also { wb ->
-                            wb.packet = meshPacket
-                        }
-                        .build(),
-                )
-
-            repository.insert(meshLog)
+            val now = nowSeconds.toInt()
+            createAndStoreTelemetry(
+                telemetrySeconds = 1000, // invalid
+                packetSeconds = 2000, // invalid
+                receivedSeconds = now,
+            )
 
             val result = repository.getTelemetryFrom(0).first()
 
@@ -580,18 +482,117 @@ abstract class CommonMeshLogRepositoryTest {
             assertEquals(1, result.size)
             val resultTelemetry = result[0]
             assertNotNull(resultTelemetry)
-            assertEquals((nowMillis / TimeConstants.MS_PER_SEC).toInt(), resultTelemetry.time)
+            assertEquals(now, resultTelemetry.time)
         }
 
     @Test
-    fun `parseTelemetryLog clamps future telemetry timestamp`() = runTest(testDispatcher) {
+    fun `parseTelemetryLog skips invalid telemetry and future packet in favor of received time`() =
+        runTest(testDispatcher) {
+            val now = nowSeconds.toInt()
+            val future = now + 1000
+            createAndStoreTelemetry(
+                telemetrySeconds = 1000,
+                packetSeconds = future,
+                receivedSeconds = now,
+            )
+            val result = repository.getTelemetryFrom(0).first()
+            assertNotNull(result)
+            assertEquals(1, result.size)
+            val resultTelemetry = result[0]
+            assertNotNull(resultTelemetry)
+            assertEquals(now, resultTelemetry.time)
+        }
+
+    @Test
+    fun `parseTelemetryLog prefers valid telemetry time over future packet time`() = runTest(testDispatcher) {
         val now = nowSeconds.toInt()
-        val nowMillis = now * TimeConstants.MS_PER_SEC
-        val future = now + 1000
+        val validTelemetryTime = now - 100
+        val futurePacketTime = now + 1000
+        createAndStoreTelemetry(
+            telemetrySeconds = validTelemetryTime,
+            packetSeconds = futurePacketTime,
+            receivedSeconds = now,
+        )
+        val result = repository.getTelemetryFrom(0).first()
+        assertNotNull(result)
+        assertEquals(1, result.size)
+        val resultTelemetry = result[0]
+        assertNotNull(resultTelemetry)
+        assertEquals(validTelemetryTime, resultTelemetry.time)
+    }
+
+    @Test
+    fun `parseTelemetryLog rejects empty telemetry timestamp`() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val packetSeconds = now - 50
+        createAndStoreTelemetry(
+            telemetrySeconds = 0,
+            packetSeconds = packetSeconds,
+            receivedSeconds = now,
+        )
+        val result = repository.getTelemetryFrom(0).first()
+        assertNotNull(result)
+        assertEquals(1, result.size)
+        val resultTelemetry = result[0]
+        assertNotNull(resultTelemetry)
+        assertEquals(packetSeconds, resultTelemetry.time)
+    }
+
+    @Test
+    fun `parseTelemetryLog accepts timestamp exactly at minimum plausible epoch`() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val packetSeconds = now - 50
+        createAndStoreTelemetry(
+            telemetrySeconds = MIN_PLAUSIBLE_EPOCH_SECONDS,
+            packetSeconds = packetSeconds,
+            receivedSeconds = now,
+        )
+        val result = repository.getTelemetryFrom(0).first()
+        assertNotNull(result)
+        assertEquals(1, result.size)
+        val resultTelemetry = result[0]
+        assertNotNull(resultTelemetry)
+        assertEquals(MIN_PLAUSIBLE_EPOCH_SECONDS, resultTelemetry.time)
+    }
+
+    @Test
+    fun `parseTelemetryLog rejects timestamp below minimum plausible epoch`() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val packetSeconds = now - 50
+        createAndStoreTelemetry(
+            telemetrySeconds = MIN_PLAUSIBLE_EPOCH_SECONDS - 1,
+            packetSeconds = packetSeconds,
+            receivedSeconds = now,
+        )
+        val result = repository.getTelemetryFrom(0).first()
+        assertNotNull(result)
+        assertEquals(1, result.size)
+        val resultTelemetry = result[0]
+        assertNotNull(resultTelemetry)
+        assertEquals(packetSeconds, resultTelemetry.time)
+    }
+
+    @Test
+    fun `parseTelemetryLog accepts timestamp exactly at received time`() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        createAndStoreTelemetry(
+            telemetrySeconds = now,
+            packetSeconds = now - 50,
+            receivedSeconds = now,
+        )
+        val result = repository.getTelemetryFrom(0).first()
+        assertNotNull(result)
+        assertEquals(1, result.size)
+        val resultTelemetry = result[0]
+        assertNotNull(resultTelemetry)
+        assertEquals(now, resultTelemetry.time)
+    }
+
+    private suspend fun createAndStoreTelemetry(telemetrySeconds: Int, packetSeconds: Int, receivedSeconds: Int) {
         val telemetry =
             Telemetry.Builder()
                 .also { wb ->
-                    wb.time = future // future timestamp (sender node)
+                    wb.time = telemetrySeconds
                 }
                 .build()
 
@@ -605,6 +606,7 @@ abstract class CommonMeshLogRepositoryTest {
                                 wb.portnum = PortNum.TELEMETRY_APP
                             }
                             .build()
+                    wb.rx_time = packetSeconds
                 }
                 .build()
 
@@ -612,7 +614,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = nowMillis,
+                received_date = receivedSeconds * TimeConstants.MS_PER_SEC,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -620,14 +622,6 @@ abstract class CommonMeshLogRepositoryTest {
             )
 
         repository.insert(meshLog)
-
-        val result = repository.getTelemetryFrom(0).first()
-
-        assertNotNull(result)
-        assertEquals(1, result.size)
-        val resultTelemetry = result[0]
-        assertNotNull(resultTelemetry)
-        assertEquals(now, resultTelemetry.time)
     }
 
     private fun telemetryLog(
