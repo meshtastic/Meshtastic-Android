@@ -22,7 +22,13 @@ import android.content.Context
 import androidx.glance.appwidget.composeForPreview
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.runner.RunWith
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
@@ -35,9 +41,23 @@ class WidgetPreviewTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
+
     @Test
-    fun `the picker preview composes without a glance id`() = runTest {
+    fun `the node tracker picker preview composes without a glance id`() = runTest {
         val views = NodeTrackerWidget().composeForPreview(context, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+        assertNotNull(views)
+    }
+
+    @Test
+    fun `the local stats picker preview composes without a glance id`() = runTest {
+        startKoin {
+            modules(module { single { LocalStatsWidgetStateProvider(FakeNodeRepository(), FakeServiceRepository()) } })
+        }
+        val views = LocalStatsWidget().composeForPreview(context, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
         assertNotNull(views)
     }
 }
