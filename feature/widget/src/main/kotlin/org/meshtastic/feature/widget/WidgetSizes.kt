@@ -22,6 +22,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,13 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.LocalAppWidgetOptions
 import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
+
+/**
+ * True inside `providePreview`. Glance composes the picker preview without a [LocalGlanceId], whose default throws, so
+ * nothing under a preview may read it.
+ */
+@Suppress("CompositionLocalAllowlist")
+internal val LocalWidgetPreview = staticCompositionLocalOf { false }
 
 /**
  * How both widgets read their size. They compose under [SizeMode.Responsive], so the launcher picks the layout by the
@@ -122,8 +130,13 @@ internal object WidgetSizes {
     @Composable
     @ReadOnlyComposable
     private fun currentOptions(context: Context): Bundle {
-        val glanceId = LocalGlanceId.current
-        val appWidgetId = runCatching { GlanceAppWidgetManager(context).getAppWidgetId(glanceId) }.getOrNull()
+        val appWidgetId =
+            if (LocalWidgetPreview.current) {
+                null
+            } else {
+                val glanceId = LocalGlanceId.current
+                runCatching { GlanceAppWidgetManager(context).getAppWidgetId(glanceId) }.getOrNull()
+            }
         return appWidgetId
             ?.let { AppWidgetManager.getInstance(context).getAppWidgetOptions(it) }
             ?.takeIf { !it.isEmpty } ?: LocalAppWidgetOptions.current

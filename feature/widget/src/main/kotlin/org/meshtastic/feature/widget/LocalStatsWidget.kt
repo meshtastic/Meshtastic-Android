@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
@@ -85,7 +86,7 @@ class LocalStatsWidget :
             } else {
                 createMockWidgetState()
             }
-        provideContent { WidgetContent(stateToRender) }
+        provideContent { CompositionLocalProvider(LocalWidgetPreview provides true) { WidgetContent(stateToRender) } }
     }
 
     /**

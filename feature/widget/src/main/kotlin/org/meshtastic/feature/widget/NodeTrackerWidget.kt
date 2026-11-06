@@ -22,6 +22,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -102,7 +103,11 @@ class NodeTrackerWidget :
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        provideContent { WidgetContent(createMockTrackerState(), AppWidgetManager.INVALID_APPWIDGET_ID) }
+        provideContent {
+            CompositionLocalProvider(LocalWidgetPreview provides true) {
+                WidgetContent(createMockTrackerState(), AppWidgetManager.INVALID_APPWIDGET_ID)
+            }
+        }
     }
 
     /** Same last-resort error UI as [LocalStatsWidget.onCompositionError]. */
