@@ -19,6 +19,11 @@ package org.meshtastic.feature.widget
 import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.RemoteViews
+import android.widget.TextView
+import androidx.core.view.children
 import androidx.glance.appwidget.composeForPreview
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
@@ -32,7 +37,7 @@ import org.meshtastic.core.testing.FakeServiceRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
-import kotlin.test.assertNotNull
+import kotlin.test.assertContains
 
 /** Composes the widget-picker preview the way `GlanceAppWidgetManager.setWidgetPreviews` does. */
 @RunWith(RobolectricTestRunner::class)
@@ -49,7 +54,7 @@ class WidgetPreviewTest {
     @Test
     fun `the node tracker picker preview composes without a glance id`() = runTest {
         val views = NodeTrackerWidget().composeForPreview(context, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-        assertNotNull(views)
+        assertContains(texts(views), "BCS1")
     }
 
     @Test
@@ -58,6 +63,17 @@ class WidgetPreviewTest {
             modules(module { single { LocalStatsWidgetStateProvider(FakeNodeRepository(), FakeServiceRepository()) } })
         }
         val views = LocalStatsWidget().composeForPreview(context, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-        assertNotNull(views)
+        assertContains(texts(views), "ME")
+    }
+
+    /** Inflates [views] and returns every string a TextView in it shows, so a test sees the mock state rendered. */
+    private fun texts(views: RemoteViews): List<String> {
+        val root = views.apply(context, FrameLayout(context))
+        return generateSequence(listOf(root)) { level -> level.filterIsInstance<ViewGroup>().flatMap { it.children } }
+            .takeWhile { it.isNotEmpty() }
+            .flatten()
+            .filterIsInstance<TextView>()
+            .map { it.text.toString() }
+            .toList()
     }
 }
