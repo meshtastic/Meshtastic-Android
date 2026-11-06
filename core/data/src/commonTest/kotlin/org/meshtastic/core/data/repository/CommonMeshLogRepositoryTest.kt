@@ -435,11 +435,12 @@ abstract class CommonMeshLogRepositoryTest {
 
     @Test
     fun `parseTelemetryLog preserves valid telemetry timestamp`() = runTest(testDispatcher) {
-        val now = nowSeconds.toInt()
+        val validTime = nowSeconds.toInt() - 100
+        val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
         val telemetry =
             Telemetry.Builder()
                 .also { wb ->
-                    wb.time = now // valid timestamp (sender node)
+                    wb.time = validTime // valid timestamp (sender node)
                 }
                 .build()
 
@@ -460,7 +461,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = now * TimeConstants.MS_PER_SEC,
+                received_date = nowMillis,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -475,12 +476,13 @@ abstract class CommonMeshLogRepositoryTest {
         assertEquals(1, result.size)
         val resultTelemetry = result[0]
         assertNotNull(resultTelemetry)
-        assertEquals(now, resultTelemetry.time)
+        assertEquals(validTime, resultTelemetry.time)
     }
 
     @Test
     fun `parseTelemetryLog skips invalid telemetry timestamp in favor of packet time`() = runTest(testDispatcher) {
-        val now = nowSeconds.toInt()
+        val validTime = nowSeconds.toInt() - 100
+        val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
         val telemetry =
             Telemetry.Builder()
                 .also { wb ->
@@ -498,7 +500,7 @@ abstract class CommonMeshLogRepositoryTest {
                                 wb.portnum = PortNum.TELEMETRY_APP
                             }
                             .build()
-                    wb.rx_time = now // valid timestamp (receiver node)
+                    wb.rx_time = validTime // valid timestamp (receiver node)
                 }
                 .build()
 
@@ -506,7 +508,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = now * TimeConstants.MS_PER_SEC,
+                received_date = nowMillis,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
@@ -526,13 +528,13 @@ abstract class CommonMeshLogRepositoryTest {
         assertEquals(1, result.size)
         val resultTelemetry = result[0]
         assertNotNull(resultTelemetry)
-        assertEquals(now, resultTelemetry.time)
+        assertEquals(validTime, resultTelemetry.time)
     }
 
     @Test
     fun `parseTelemetryLog skips invalid telemetry and packet timestamps in favor of received time`() =
         runTest(testDispatcher) {
-            val now = nowMillis
+            val nowMillis = nowSeconds * TimeConstants.MS_PER_SEC
             val telemetry =
                 Telemetry.Builder()
                     .also { wb ->
@@ -550,7 +552,7 @@ abstract class CommonMeshLogRepositoryTest {
                                     wb.portnum = PortNum.TELEMETRY_APP
                                 }
                                 .build()
-                        wb.rx_time = 1000 // invalid timestamp (receiver node)
+                        wb.rx_time = 2000 // invalid timestamp (receiver node)
                     }
                     .build()
 
@@ -558,7 +560,7 @@ abstract class CommonMeshLogRepositoryTest {
                 MeshLog(
                     uuid = "123",
                     message_type = "telemetry",
-                    received_date = now, // valid (application) timestamp
+                    received_date = nowMillis, // valid (application) timestamp
                     raw_message = "",
                     fromNum = 0,
                     portNum = PortNum.TELEMETRY_APP.value,
@@ -578,13 +580,13 @@ abstract class CommonMeshLogRepositoryTest {
             assertEquals(1, result.size)
             val resultTelemetry = result[0]
             assertNotNull(resultTelemetry)
-            assertEquals((now / TimeConstants.MS_PER_SEC).toInt(), resultTelemetry.time)
+            assertEquals((nowMillis / TimeConstants.MS_PER_SEC).toInt(), resultTelemetry.time)
         }
 
     @Test
     fun `parseTelemetryLog clamps future telemetry timestamp`() = runTest(testDispatcher) {
         val now = nowSeconds.toInt()
-        val millis = now * TimeConstants.MS_PER_SEC
+        val nowMillis = now * TimeConstants.MS_PER_SEC
         val future = now + 1000
         val telemetry =
             Telemetry.Builder()
@@ -610,7 +612,7 @@ abstract class CommonMeshLogRepositoryTest {
             MeshLog(
                 uuid = "123",
                 message_type = "telemetry",
-                received_date = millis,
+                received_date = nowMillis,
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
