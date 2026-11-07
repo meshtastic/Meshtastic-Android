@@ -29,7 +29,9 @@ import java.nio.ByteBuffer
  */
 class RangeCheckedHttpChannel(private val url: URL) : UrlFileChannel() {
 
-    private var etag: String? = null
+    /** The ETag of the first response, which every later response must match. */
+    var etag: String? = null
+        private set
 
     override fun read(dst: ByteBuffer, pos: Long): Int {
         val capacity = dst.capacity()

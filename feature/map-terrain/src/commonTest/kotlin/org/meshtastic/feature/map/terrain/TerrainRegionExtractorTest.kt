@@ -116,6 +116,39 @@ class TerrainRegionExtractorTest {
         assertTrue(store.hasTile(TerrainSource.REGIONAL, TerrainTileMath.tileAt(regionalZoom, 47.605, -122.395)))
     }
 
+    @Test
+    fun `a completed download names each archive that supplied tiles with its version`() = runTest {
+        val extractor =
+            TerrainRegionExtractor(store) { url ->
+                object : TerrainRegionExtractor.TileArchive {
+                    override val version: String = "etag-of-$url"
+
+                    override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray = byteArrayOf(1)
+
+                    override fun close() = Unit
+                }
+            }
+
+        val result = extractor.download(straddling, regionalZoom).last()
+
+        assertIs<TerrainDownloadState.Complete>(result)
+        val global = MapterhornEndpoints.GLOBAL_PMTILES_URL
+        val west = MapterhornEndpoints.regionalArchiveUrl(TileIndex(6, 9, 22))
+        val east = MapterhornEndpoints.regionalArchiveUrl(TileIndex(6, 10, 22))
+        assertEquals(
+            mapOf(global to "etag-of-$global", west to "etag-of-$west", east to "etag-of-$east"),
+            result.archives,
+        )
+    }
+
+    @Test
+    fun `a regional archive that stores nothing is not named as a source`() = runTest {
+        val result = extractor(Regional.EMPTY).download(seattle, regionalZoom).last()
+
+        assertIs<TerrainDownloadState.Complete>(result)
+        assertEquals(setOf(MapterhornEndpoints.GLOBAL_PMTILES_URL), result.archives.keys)
+    }
+
     /** Throws [ArchiveChangedException] on its first fetch for the first [changes] archives opened. */
     private fun changingExtractor(changes: Int): TerrainRegionExtractor {
         var remaining = changes

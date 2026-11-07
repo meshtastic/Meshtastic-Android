@@ -22,6 +22,8 @@ package org.meshtastic.feature.map.terrain
  */
 actual fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher? = object : TerrainTileFetcher {
 
+    override val version: String? = null
+
     override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = throw NotImplementedError(
         "Terrain tile fetching is not implemented for Kotlin/Native (iOS). " +
             "This module has no iOS surface; use the Android or JVM implementations instead.",

@@ -33,7 +33,11 @@ actual fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher? = try
  */
 private class PmtilesTerrainTileFetcher(pmtilesUrl: String) : TerrainTileFetcher {
 
-    private val reader: Reader = Reader(RangeCheckedHttpChannel(URI(pmtilesUrl).toURL()))
+    private val channel = RangeCheckedHttpChannel(URI(pmtilesUrl).toURL())
+    private val reader: Reader = Reader(channel)
+
+    override val version: String?
+        get() = channel.etag
 
     override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? {
         val raw = reader.getTile(zoom, x, y) ?: return null

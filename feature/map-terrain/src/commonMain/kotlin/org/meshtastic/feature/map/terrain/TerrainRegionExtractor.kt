@@ -23,7 +23,13 @@ import kotlinx.coroutines.flow.flow
 sealed interface TerrainDownloadState {
     data class InProgress(val completed: Int, val total: Int) : TerrainDownloadState
 
-    data class Complete(val tileCount: Long, val byteSize: Long, val hasRegionalDetail: Boolean) : TerrainDownloadState
+    /** [archives] maps each archive URL that supplied tiles to its version (the server's ETag), when it gave one. */
+    data class Complete(
+        val tileCount: Long,
+        val byteSize: Long,
+        val hasRegionalDetail: Boolean,
+        val archives: Map<String, String?> = emptyMap(),
+    ) : TerrainDownloadState
 
     data class Failed(val reason: TerrainDownloadFailure) : TerrainDownloadState
 }
@@ -57,6 +63,10 @@ class TerrainRegionExtractor(
      * [openArchive] returns `null` for an archive the host doesn't have.
      */
     interface TileArchive : AutoCloseable {
+        /** The archive's version as the server reports it (its ETag), or `null` if it gave none. */
+        val version: String?
+            get() = null
+
         fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
     }
 
@@ -116,11 +126,12 @@ class TerrainRegionExtractor(
                 tileCount = stored.global + stored.regional,
                 byteSize = store.sizeBytes(),
                 hasRegionalDetail = stored.regional > 0,
+                archives = stored.archives,
             ),
         )
     }
 
-    private data class StoredTiles(val global: Long, val regional: Long)
+    private data class StoredTiles(val global: Long, val regional: Long, val archives: Map<String, String?>)
 
     private suspend fun fetchAll(
         globalTiles: List<TileIndex>,
@@ -133,6 +144,7 @@ class TerrainRegionExtractor(
                 ?: error("Global terrain archive not found")
         var processed = global.processed
         var regionalStored = 0L
+        val archives = mutableMapOf(MapterhornEndpoints.GLOBAL_PMTILES_URL to global.version)
         for ((archiveTile, tiles) in regionalTilesByArchive) {
             val url = MapterhornEndpoints.regionalArchiveUrl(archiveTile)
             val regional = fetchInto(url, TerrainSource.REGIONAL, tiles, processed, total, onProgress)
@@ -142,9 +154,10 @@ class TerrainRegionExtractor(
             } else {
                 processed = regional.processed
                 regionalStored += regional.stored
+                if (regional.stored > 0) archives[url] = regional.version
             }
         }
-        return StoredTiles(global = global.stored, regional = regionalStored)
+        return StoredTiles(global = global.stored, regional = regionalStored, archives = archives)
     }
 
     /**
@@ -154,7 +167,7 @@ class TerrainRegionExtractor(
      * `null` for a tile the source archive doesn't have — is documented as normal, not an error, so it must not inflate
      * the count the UI reports as "downloaded".
      */
-    private data class FetchResult(val processed: Int, val stored: Long)
+    private data class FetchResult(val processed: Int, val stored: Long, val version: String?)
 
     private suspend fun fetchInto(
         pmtilesUrl: String,
@@ -167,7 +180,7 @@ class TerrainRegionExtractor(
         var processed = alreadyProcessed
         var stored = 0L
         val opened = openArchive(pmtilesUrl) ?: return null
-        opened.use { archive ->
+        val version = opened.use { archive ->
             for (tile in tiles) {
                 archive.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes ->
                     store.writeTile(source, tile, bytes)
@@ -178,8 +191,9 @@ class TerrainRegionExtractor(
                     onProgress(TerrainDownloadState.InProgress(processed, totalTiles))
                 }
             }
+            archive.version
         }
-        return FetchResult(processed, stored)
+        return FetchResult(processed, stored, version)
     }
 
     companion object {
@@ -191,6 +205,9 @@ class TerrainRegionExtractor(
         private fun remoteArchive(pmtilesUrl: String): TileArchive? {
             val fetcher = openTerrainTileFetcher(pmtilesUrl) ?: return null
             return object : TileArchive {
+                override val version: String?
+                    get() = fetcher.version
+
                 override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = fetcher.fetchTile(zoom, x, y)
 
                 override fun close() = fetcher.close()
