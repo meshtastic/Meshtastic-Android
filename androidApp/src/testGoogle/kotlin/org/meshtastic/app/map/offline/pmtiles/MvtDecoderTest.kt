@@ -143,4 +143,135 @@ class MvtDecoderTest {
 
         assertEquals(listOf(TileCoord(0, 0), TileCoord(5, 5)), rings.single())
     }
+
+    @Test
+    fun `an outer ring, its hole and a second outer ring group into two polygons`() {
+        // Tile coordinates are y-down, so the spec's clockwise exterior has a positive shoelace area:
+        // (0,0)->(100,0)->(100,100)->(0,100) is +20000, and the counterclockwise hole is -6400.
+        val outerOne = listOf(0 to 0, 100 to 0, 100 to 100, 0 to 100)
+        val hole = listOf(20 to 20, 20 to 80, 80 to 80, 80 to 20)
+        val outerTwo = listOf(200 to 0, 300 to 0, 300 to 100, 200 to 100)
+
+        val rings = MvtDecoder.decodeGeometry(VectorTile.GEOM_POLYGON, polygonCommands(outerOne, hole, outerTwo))
+        val polygons = MvtDecoder.groupPolygons(rings)
+
+        assertEquals(2, polygons.size)
+        assertEquals(TileCoord(100, 100), polygons[0].outer[2])
+        assertEquals(1, polygons[0].holes.size)
+        assertEquals(TileCoord(20, 80), polygons[0].holes.single()[1])
+        assertEquals(TileCoord(200, 0), polygons[1].outer.first())
+        assertEquals(emptyList(), polygons[1].holes)
+    }
+
+    @Test
+    fun `a hole separates two outer rings that follow it`() {
+        val outerOne = listOf(0 to 0, 100 to 0, 100 to 100, 0 to 100)
+        val outerTwo = listOf(200 to 0, 300 to 0, 300 to 100, 200 to 100)
+        val holeInTwo = listOf(220 to 20, 220 to 80, 280 to 80, 280 to 20)
+
+        val polygons =
+            MvtDecoder.groupPolygons(
+                MvtDecoder.decodeGeometry(VectorTile.GEOM_POLYGON, polygonCommands(outerOne, outerTwo, holeInTwo)),
+            )
+
+        assertEquals(listOf(0, 1), polygons.map { it.holes.size })
+    }
+
+    @Test
+    fun `tiles wound the other way group relative to the first ring`() {
+        val outerOne = listOf(0 to 0, 0 to 100, 100 to 100, 100 to 0)
+        val hole = listOf(20 to 20, 80 to 20, 80 to 80, 20 to 80)
+        val outerTwo = listOf(200 to 0, 200 to 100, 300 to 100, 300 to 0)
+
+        val polygons =
+            MvtDecoder.groupPolygons(
+                MvtDecoder.decodeGeometry(VectorTile.GEOM_POLYGON, polygonCommands(outerOne, hole, outerTwo)),
+            )
+
+        assertEquals(listOf(1, 0), polygons.map { it.holes.size })
+    }
+
+    @Test
+    fun `a ring with no area is dropped`() {
+        val sliver = polygonCommands(listOf(0 to 0, 10 to 0, 20 to 0))
+
+        assertEquals(emptyList(), MvtDecoder.groupPolygons(MvtDecoder.decodeGeometry(VectorTile.GEOM_POLYGON, sliver)))
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test
+    fun `feature id presence and attributes decode, including zigzag sint values`() {
+        // Layer{ keys=["min_zoom","kind"], values=[sint 12 (zigzag 24), string "rail"] },
+        // Feature{ tags=[0,0,1,1] } with no id, then Feature{ id=0 }.
+        val bytes =
+            byteArrayOf(
+                0x1A,
+                0x28, // Tile.layers[0], len=40
+                0x12,
+                0x06,
+                0x12,
+                0x04,
+                0x00,
+                0x00,
+                0x01,
+                0x01, // features[0]: tags (packed) [0,0,1,1]
+                0x12,
+                0x02,
+                0x08,
+                0x00, // features[1]: id = 0
+                0x1A,
+                0x08,
+                0x6D,
+                0x69,
+                0x6E,
+                0x5F,
+                0x7A,
+                0x6F,
+                0x6F,
+                0x6D, // keys[0] "min_zoom"
+                0x1A,
+                0x04,
+                0x6B,
+                0x69,
+                0x6E,
+                0x64, // keys[1] "kind"
+                0x22,
+                0x02,
+                0x30,
+                0x18, // values[0].sint_value = 24 (zigzag of 12)
+                0x22,
+                0x06,
+                0x0A,
+                0x04,
+                0x72,
+                0x61,
+                0x69,
+                0x6C, // values[1].string_value "rail"
+            )
+
+        val layer = ProtoBuf.decodeFromByteArray(VectorTile.serializer(), bytes).layers.single()
+        val withTags = layer.features[0]
+
+        assertEquals(null, withTags.id)
+        assertEquals(0L, layer.features[1].id)
+        assertEquals(mapOf<String, Any>("min_zoom" to 12L, "kind" to "rail"), withTags.properties(layer))
+    }
+
+    /** The command stream for rings given as absolute points; the cursor carries across rings as in the spec. */
+    private fun polygonCommands(vararg rings: List<Pair<Int, Int>>): List<Int> {
+        fun zigzag(v: Int) = (v shl 1) xor (v shr 31)
+        var cursor = 0 to 0
+        val out = mutableListOf<Int>()
+        for (ring in rings) {
+            ring.forEachIndexed { i, point ->
+                if (i == 0) out += 1 or (1 shl 3)
+                if (i == 1) out += 2 or ((ring.size - 1) shl 3)
+                out += zigzag(point.first - cursor.first)
+                out += zigzag(point.second - cursor.second)
+                cursor = point
+            }
+            out += 7 or (1 shl 3)
+        }
+        return out
+    }
 }
