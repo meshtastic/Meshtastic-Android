@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-10-24
+last_updated: 2026-11-07
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -196,7 +196,7 @@ On **Google Play**, the layers sheet's **Offline Manager** section downloads its
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
 directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
 it finishes turn on **Show on map** to draw it. The switch is off by default, so a download never covers up the
-live map unasked. **Desktop** has no offline base map downloads, though the offline terrain described next
+live map unasked. With no network it also names the places and bodies of water in view. **Desktop** has no offline base map downloads, though the offline terrain described next
 does work there.
 
 ### Offline terrain

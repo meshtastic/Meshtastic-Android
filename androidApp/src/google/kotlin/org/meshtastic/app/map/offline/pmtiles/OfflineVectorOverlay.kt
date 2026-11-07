@@ -59,10 +59,17 @@ private val WATERWAY_KINDS = setOf("river", "stream", "canal")
  * technique the sibling iOS app uses (`PMTilesMapView.swift`'s `OfflineVectorTileProvider`), decoding straight to
  * shapes rather than rasterizing, so the offline basemap draws in the same coordinate space as node markers with no
  * compositing seam. Only mounted while [region] covers the visible map and the user has manually enabled the offline
- * overlay — a toggle, not a network-down gate; see `MapView.kt`'s `offlineOverlayEnabled` caller.
+ * overlay — a toggle, not a network-down gate; see `MapView.kt`'s `offlineOverlayEnabled` caller. With [showLabels] it
+ * also names places and water ([OfflineLabelMarkers]).
  */
 @Composable
-internal fun OfflineVectorOverlay(region: OfflineRegion, archiveFile: File, cameraPositionState: CameraPositionState) {
+internal fun OfflineVectorOverlay(
+    region: OfflineRegion,
+    archiveFile: File,
+    cameraPositionState: CameraPositionState,
+    showLabels: Boolean,
+    dark: Boolean,
+) {
     val archive = remember(region.id) { OfflineVectorArchive.open(archiveFile) } ?: return
     DisposableEffect(archive) { onDispose { archive.close() } }
 
@@ -81,6 +88,16 @@ internal fun OfflineVectorOverlay(region: OfflineRegion, archiveFile: File, came
         derivedStateOf {
             (cameraPositionState.position.zoom * ZOOM_STEPS_PER_LEVEL).roundToInt() / ZOOM_STEPS_PER_LEVEL
         }
+    }
+
+    if (showLabels) {
+        val ranked = remember(features) { OfflineMapLabels.ranked(features) }
+        val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+        val labels =
+            remember(ranked, bounds, zoom) {
+                bounds?.let { OfflineMapLabels.visible(ranked, it, zoom.toDouble()) } ?: emptyList()
+            }
+        OfflineLabelMarkers(labels, dark)
     }
 
     features.forEach { feature ->

@@ -158,7 +158,7 @@ internal class OfflineVectorRenderer {
         }
 
         private val LOG = Logger.withTag("OfflineVectorRenderer")
-        val RENDERED_LAYERS = setOf("water", "roads", "boundaries")
+        val RENDERED_LAYERS = setOf("water", "roads", "boundaries", "places")
         private const val MAX_CACHED_TILES = 96
         private const val INITIAL_CAPACITY = 16
         private const val LOAD_FACTOR = 0.75f

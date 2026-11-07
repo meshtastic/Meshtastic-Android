@@ -18,7 +18,7 @@ markers with no compositing seam.
 3. **`OfflineVectorArchive`** writes the fetched tiles into a local `.mbtiles` archive (`tiles`/`metadata` tables,
    `format=pbf`) — the same container `MBTilesProvider` already reads for raster imports, just vector this time.
    Stored uncompressed, not gzip: simpler, at the cost of more disk per tile (see "Deferred" below).
-4. **`OfflineVectorRenderer`** decodes a rendered tile's `water`/`roads`/`boundaries` layers (`VectorTile.kt` +
+4. **`OfflineVectorRenderer`** decodes a rendered tile's `water`/`roads`/`boundaries`/`places` layers (`VectorTile.kt` +
    `MvtDecoder.kt`) into `LatLng` geometry with each feature's id and attributes, cached per tile so panning within
    the same tiles doesn't redecode. Polygon rings are grouped into exterior-plus-holes by winding in tile space
    (spec 4.3.4.4). A feature lying wholly inside a neighboring tile that has the same layer and id is that tile's
@@ -28,6 +28,11 @@ markers with no compositing seam.
    `secondary`/`tertiary` `kind_detail` takes the medium style, minor roads appear from zoom 12), rail and
    waterway lines with `min_zoom` above 11 only from zoom 11, roads in `sort_rank` order, tunnels faded and dashed,
    bridges above the other roads.
+6. **`OfflineMapLabels`** picks names from the `places` layer's points (countries skipped) and the `water` layer's
+   named points, localized (`name:<lang>`, else `name`) and ranked by `min_zoom`, population rank, kind, name. Those
+   with `min_zoom` reached are thinned to one per cell of a 5 x 8 grid over the view (at most 40).
+   **`OfflineLabelMarkers`** draws each as a `Marker` whose icon is the text with a halo, cached per name, kind and
+   theme. Labels show only while the offline layer draws with no network (`MapViewModel.mapNetworkAvailable`).
 
 ## Why this shape, not iOS's
 
@@ -51,7 +56,6 @@ markers with no compositing seam.
 
 - **Compression**: tiles are gunzipped once at download time and stored raw. Storing gzip (like every other MBTiles
   vector-tile archive) and decompressing at render time would meaningfully shrink a downloaded region.
-- **Place names**: Google Maps Compose has no text primitive, so the offline layer draws no labels.
 - **Auto-activation on connectivity loss**: `offlineOverlayEnabled` is a manual toggle. `MapViewModel` already
   exposes `mapNetworkAvailable`; driving the toggle from it would draw a downloaded region the moment the network
   drops, as the MapLibre flavor and iOS do.
@@ -73,7 +77,7 @@ math in `:feature:map-terrain`.
 
 `androidApp/src/testGoogle`, run by `:androidApp:testGoogleDebugUnitTest` — `MvtDecoderTest` (hand-encoded protobuf
 bytes, not a vendored fixture or a round-trip through the same encoder under test — see its own doc comment;
-ring grouping by winding), `OfflineMapStyleTest`, `OfflineVectorRendererTest` (cross-tile dedup),
+ring grouping by winding), `OfflineMapStyleTest`, `OfflineVectorRendererTest` (cross-tile dedup), `OfflineMapLabelsTest` (ranking, zoom filter, grid cap),
 `WebMercatorTileMathTest`, `OfflineRegionTileSetTest`, `OfflineRegionStoreTest`.
 No test drives the network extractor itself; it's a thin loop over already-tested pieces (`Reader`, `MvtDecoder`,
 `OfflineVectorArchive`).
