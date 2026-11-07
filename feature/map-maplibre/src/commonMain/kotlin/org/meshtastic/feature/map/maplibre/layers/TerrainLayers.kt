@@ -31,6 +31,9 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.dp
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.interpolate
+import org.maplibre.compose.expressions.dsl.linear
+import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonData
@@ -152,6 +155,8 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
             id = "offline-terrain-hillshade-regional",
             source = regionalSource,
             minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM.toFloat(),
+            maxZoom = hillshadeEndZoom(regionalMaxZoom),
+            exaggeration = fadingExaggeration(regionalMaxZoom),
             shadowColor = const(Color.Black),
             highlightColor = const(Color.White),
             accentColor = const(Color.Black),
@@ -160,12 +165,28 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
         HillshadeLayer(
             id = "offline-terrain-hillshade-global",
             source = globalSource,
+            maxZoom = hillshadeEndZoom(globalMaxZoom),
+            exaggeration = fadingExaggeration(globalMaxZoom),
             shadowColor = const(Color.Black),
             highlightColor = const(Color.White),
             accentColor = const(Color.Black),
         )
     }
 }
+
+/** Zoom at which a hillshade layer stops drawing: two zooms past [dataMaxZoom], after the fade. */
+private fun hillshadeEndZoom(dataMaxZoom: Int): Float = (dataMaxZoom + HILLSHADE_END_ZOOMS_PAST_DATA).toFloat()
+
+/** Full strength to one zoom past [dataMaxZoom], then fading to nothing over the next, as the Apple app does. */
+private fun fadingExaggeration(dataMaxZoom: Int) = interpolate(
+    linear(),
+    zoom(),
+    (dataMaxZoom + HILLSHADE_END_ZOOMS_PAST_DATA - 1).toFloat() to const(HILLSHADE_EXAGGERATION),
+    hillshadeEndZoom(dataMaxZoom) to const(0f),
+)
+
+private const val HILLSHADE_EXAGGERATION = 0.5f
+private const val HILLSHADE_END_ZOOMS_PAST_DATA = 3
 
 /**
  * Elevation contours for the tiles [viewportBounds] touches, decoded off the composition thread — see

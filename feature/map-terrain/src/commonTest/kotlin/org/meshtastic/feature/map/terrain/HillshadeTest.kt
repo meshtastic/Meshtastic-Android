@@ -103,4 +103,56 @@ class HillshadeTest {
 
         assertEquals(1000f, despiked.elevationAt(0, 0))
     }
+
+    @Test
+    fun `strength is full to one zoom past the data, half the zoom after, then none`() {
+        assertEquals(1f, Hillshade.strength(zoom = 12, dataMaxZoom = 12))
+        assertEquals(1f, Hillshade.strength(zoom = 13, dataMaxZoom = 12))
+        assertEquals(0.5f, Hillshade.strength(zoom = 14, dataMaxZoom = 12))
+        assertEquals(0f, Hillshade.strength(zoom = 15, dataMaxZoom = 12))
+    }
+
+    @Test
+    fun `metersPerSample at the equator is the Web Mercator ground resolution`() {
+        assertEquals(
+            156_543.03f,
+            Hillshade.metersPerSample(zoom = 0, tileY = 0, tileSize = 256),
+            absoluteTolerance = 1f,
+        )
+    }
+
+    @Test
+    fun `overzoom interpolates the parent's elevations at the child's own pixel centers`() {
+        val parentMargin = Hillshade.overzoomMargin(margin = 1, levels = 1)
+        val parentSize = 4 + 2 * parentMargin
+        val parent =
+            ElevationTile(
+                parentSize,
+                parentSize,
+                FloatArray(parentSize * parentSize) { 10f * ((it % parentSize) - parentMargin) },
+            )
+
+        val child = Hillshade.overzoom(parent, parentMargin, levels = 1, childX = 0, childY = 0, size = 4, margin = 1)
+
+        assertEquals(6, child.width)
+        assertEquals(7.5f, child.elevationAt(2 + 1, 2 + 1), absoluteTolerance = 1e-4f)
+        assertEquals(12.5f, child.elevationAt(3 + 1, 1))
+    }
+
+    @Test
+    fun `valley shading darkens a pit and leaves a summit alone`() {
+        val metersPerSample = 500f
+        val margin = Hillshade.valleyMargin(metersPerSample)
+        val size = 1 + 2 * margin
+        fun grid(center: Float, around: Float) =
+            ElevationTile(size, size, FloatArray(size * size) { if (it == size * margin + margin) center else around })
+
+        val pit = Hillshade.shade(grid(100f, 200f), 1, 1, 1f, margin, metersPerSample)[0]
+        val summit = Hillshade.shade(grid(300f, 200f), 1, 1, 1f, margin, metersPerSample)[0]
+        val pitWithout = Hillshade.shade(grid(100f, 200f), 1, 1, 1f, margin)[0]
+
+        assertTrue(pit > 0f, "expected the pit to darken, got $pit")
+        assertEquals(0f, pitWithout)
+        assertEquals(0f, summit)
+    }
 }
