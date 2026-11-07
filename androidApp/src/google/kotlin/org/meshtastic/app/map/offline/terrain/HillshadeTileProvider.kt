@@ -103,8 +103,9 @@ internal class HillshadeTileProvider(private val store: TerrainTileStore, privat
                 size,
                 size,
                 MAX_SHADOW_ALPHA * strength,
+                metersPerSample,
                 margin,
-                if (shadeValleys) metersPerSample else null,
+                shadeValleys,
             )
         return Tile(size, size, renderShadowPng(shadow, size, size))
     }

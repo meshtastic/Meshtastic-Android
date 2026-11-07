@@ -174,18 +174,22 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
     }
 }
 
-/** Zoom at which a hillshade layer stops drawing: two zooms past [dataMaxZoom], after the fade. */
+/** Zoom at which a hillshade layer stops drawing: three zooms past [dataMaxZoom], where the fade reaches nothing. */
 private fun hillshadeEndZoom(dataMaxZoom: Int): Float = (dataMaxZoom + HILLSHADE_END_ZOOMS_PAST_DATA).toFloat()
 
-/** Full strength to one zoom past [dataMaxZoom], then fading to nothing over the next, as the Apple app does. */
+/**
+ * Full strength to one zoom past [dataMaxZoom], half at two past and nothing at three, matching the Google flavor's
+ * `Hillshade.strength` and the Apple app.
+ */
 private fun fadingExaggeration(dataMaxZoom: Int) = interpolate(
     linear(),
     zoom(),
-    (dataMaxZoom + HILLSHADE_END_ZOOMS_PAST_DATA - 1).toFloat() to const(HILLSHADE_EXAGGERATION),
+    (dataMaxZoom + HILLSHADE_FULL_ZOOMS_PAST_DATA).toFloat() to const(HILLSHADE_EXAGGERATION),
     hillshadeEndZoom(dataMaxZoom) to const(0f),
 )
 
 private const val HILLSHADE_EXAGGERATION = 0.5f
+private const val HILLSHADE_FULL_ZOOMS_PAST_DATA = 1
 private const val HILLSHADE_END_ZOOMS_PAST_DATA = 3
 
 /**

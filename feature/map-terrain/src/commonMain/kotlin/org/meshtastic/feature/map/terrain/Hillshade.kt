@@ -49,17 +49,19 @@ object Hillshade {
     /**
      * Shadow alpha per output pixel, `0f` (no shading) to `1f` (full shadow), row-major, [width]×[height].
      *
-     * [padded] carries [margin] pixels of context on every side. With [valleyMetersPerSample] set, the margin must
-     * reach [valleyMargin] so each pixel can look out across the terrain around it, and ground that sees little sky
-     * darkens whichever way it faces the light.
+     * [padded] carries [margin] pixels of context on every side, and [metersPerSample] is its ground resolution
+     * ([Hillshade.metersPerSample]), which sets the slope. With [shadeValleys], the margin must reach [valleyMargin] so
+     * each pixel can look out across the terrain around it, and ground that sees little sky darkens whichever way it
+     * faces the light.
      */
     fun shade(
         padded: ElevationTile,
         width: Int,
         height: Int,
         maxShadowAlpha: Float,
+        metersPerSample: Float,
         margin: Int = MARGIN,
-        valleyMetersPerSample: Float? = null,
+        shadeValleys: Boolean = false,
     ): FloatArray {
         require(margin >= MARGIN) { "margin ($margin) must be at least $MARGIN" }
         require(padded.width == width + 2 * margin && padded.height == height + 2 * margin) {
@@ -68,12 +70,15 @@ object Hillshade {
         }
 
         val despiked = despike(padded)
-        val occlusion = valleyMetersPerSample?.let { SkyOcclusion.compute(despiked, margin, width, height, it) }
+        val occlusion =
+            if (shadeValleys) SkyOcclusion.compute(despiked, margin, width, height, metersPerSample) else null
+        val cellSize = max(metersPerSample, MIN_CELL_SIZE_METERS)
         val shadow = FloatArray(width * height)
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val index = y * width + x
-                shadow[index] = shadeOnePixel(despiked, x + margin, y + margin, maxShadowAlpha, occlusion?.get(index))
+                shadow[index] =
+                    shadeOnePixel(despiked, x + margin, y + margin, cellSize, maxShadowAlpha, occlusion?.get(index))
             }
         }
         return shadow
@@ -149,6 +154,7 @@ object Hillshade {
         padded: ElevationTile,
         px: Int,
         py: Int,
+        cellSize: Float,
         maxShadowAlpha: Float,
         occlusion: Float?,
     ): Float {
@@ -163,8 +169,8 @@ object Hillshade {
         val h = padded.elevationAt(px, py + 1)
         val i = padded.elevationAt(px + 1, py + 1)
 
-        val dzdx = ((c + 2 * f + i) - (a + 2 * d + g)) / (HORN_DENOMINATOR * CELL_SIZE_METERS)
-        val dzdy = ((g + 2 * h + i) - (a + 2 * b + c)) / (HORN_DENOMINATOR * CELL_SIZE_METERS)
+        val dzdx = ((c + 2 * f + i) - (a + 2 * d + g)) / (HORN_DENOMINATOR * cellSize)
+        val dzdy = ((g + 2 * h + i) - (a + 2 * b + c)) / (HORN_DENOMINATOR * cellSize)
 
         val slope = atan(sqrt(dzdx * dzdx + dzdy * dzdy))
         val aspect = atan2(dzdy, -dzdx)
@@ -248,11 +254,7 @@ object Hillshade {
 
     private const val HORN_DENOMINATOR = 8f
 
-    // Terrarium tiles are 256px covering one Web Mercator tile edge at the tile's own zoom; the true meters-per-
-    // pixel cell size varies with latitude and zoom, so this is a coarse constant tuned for legible shading
-    // rather than a geodesic distance — matching how iOS's own Horn-method cellSize is a shading parameter, not
-    // a precise ground measurement.
-    private const val CELL_SIZE_METERS = 30f
+    private const val MIN_CELL_SIZE_METERS = 0.0001f
 
     private const val SEA_LEVEL_FADE_START = 0.5f
     private const val SEA_LEVEL_FADE_RANGE = 2.5f

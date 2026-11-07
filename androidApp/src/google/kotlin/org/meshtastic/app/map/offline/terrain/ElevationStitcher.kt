@@ -43,8 +43,8 @@ internal object ElevationStitcher {
         val paddedWidth = center.width + 2 * margin
         val paddedHeight = center.height + 2 * margin
         val elevations = FloatArray(paddedWidth * paddedHeight)
-        for (py in -margin..center.height) {
-            for (px in -margin..center.width) {
+        for (py in -margin until center.height + margin) {
+            for (px in -margin until center.width + margin) {
                 elevations[(py + margin) * paddedWidth + (px + margin)] = elevationAt(center, neighbors, px, py)
             }
         }
