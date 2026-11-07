@@ -67,7 +67,10 @@ object HttpClientDefaults {
      */
     const val RELEASE_BASE_URL = "https://release.meshtastic.org"
 
-    /** The flasher's device models, `<name>.glb` beside the `img/devices/<name>.svg` illustrations the apps show. */
+    /**
+     * The device models meshtastic/3d-assets builds and publishes to the flasher, `<name>.glb` beside the
+     * `img/devices/<name>.svg` illustrations the apps show.
+     */
     const val DEVICE_MODEL_BASE_URL = "https://flasher.meshtastic.org/models/devices"
 }
 
