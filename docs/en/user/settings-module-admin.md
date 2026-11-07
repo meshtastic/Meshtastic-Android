@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-08
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -47,6 +47,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | MQTT proxy in this app | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | — |
 | Password | Authentication password | The public broker's |
 | Root Topic | Base MQTT topic path | `msh` |
+| Targeted Downlink Only | Transmit only downlink addressed to this node and ignore the rest. Shown for firmware 2.8.3 and newer. See [MQTT](mqtt) | Off |
 | TLS Enabled | Use a secure connection | Off |
 | Username | Authentication username | The public broker's |
 

@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-10-21
+last_updated: 2026-11-08
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -49,6 +49,7 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **Root Topic** | Base topic for messages | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
 | **MQTT Client Proxy** | Relay MQTT through the connected app | Disabled |
 | **Map Reporting** | Report position to public map | Disabled |
+| **Targeted Downlink Only** | Transmit only downlink addressed to this node. Shown for firmware 2.8.3 and newer. See [Targeted downlink](#targeted-downlink) | Disabled |
 
 ### Connection Status and Test Connection
 
@@ -128,6 +129,10 @@ Reports appear at [meshmap.net](https://meshmap.net) and similar community map s
 | **Downlink** | Messages from MQTT broker → mesh |
 
 Uplink and downlink are per-channel settings, not MQTT module settings. Open **Settings → Channels**, tap the channel, and use **MQTT Uplink Enabled** and **MQTT Downlink Enabled**. Every channel you want bridged out needs uplink on, and every channel you want MQTT traffic injected into needs downlink on.
+
+### Targeted downlink
+
+By default your node transmits the packets it gets from the broker on a channel with downlink on, apart from its own uploads coming back. A service on the broker can address a packet to particular gateways instead, for example to answer a node that only your gateway heard. With **Targeted Downlink Only** on, your node transmits only those packets that name it and ignores the rest of the downlink. Use it to help with such replies without putting all broker traffic on air. It needs firmware 2.8.3 or newer, and the channel still needs downlink on.
 
 ## Message Formats
 
