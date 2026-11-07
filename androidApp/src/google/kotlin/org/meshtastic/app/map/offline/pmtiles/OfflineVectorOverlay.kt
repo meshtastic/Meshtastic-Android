@@ -95,7 +95,7 @@ internal fun OfflineVectorOverlay(
         val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
         val labels =
             remember(ranked, bounds, zoom) {
-                bounds?.let { OfflineMapLabels.visible(ranked, it, zoom.toDouble()) } ?: emptyList()
+                bounds?.let { OfflineMapLabels.visible(ranked, it, zoom.toDouble()) }.orEmpty()
             }
         OfflineLabelMarkers(labels, dark)
     }
