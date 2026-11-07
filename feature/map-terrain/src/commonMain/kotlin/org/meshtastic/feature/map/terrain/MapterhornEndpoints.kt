@@ -50,23 +50,16 @@ object MapterhornEndpoints {
     /** Regional archives never go deeper than this, even where source data would allow it. */
     const val REGIONAL_MAX_ZOOM = 18
 
-    private const val REGIONAL_ARCHIVE_ZOOM = 6
+    /** Each regional archive covers exactly one tile at this zoom. */
+    const val REGIONAL_ARCHIVE_ZOOM = 6
 
     /**
-     * The regional archive URL for [bounds], or `null` if [bounds] doesn't fit inside one z6 tile — matching iOS's
-     * "global-only terrain is normal, never an error" rule: a region spanning more than one z6 tile just gets no
-     * regional detail, rather than trying to stitch multiple regional archives together.
-     *
-     * **Every URL this builds 404s as of 2026-09-16.** Five z6 tiles were probed plus the bare host, while
-     * `planet.pmtiles` still serves; whether the naming changed or Mapterhorn stopped publishing per-region archives is
-     * unverified. [tileUrl] reaches the same detail and deeper, so new callers should prefer it.
+     * The regional archive for one z6 [tile]. Mapterhorn publishes one only where it has high-resolution data, so a 404
+     * here means global-only terrain for that tile, not an error.
      */
-    fun regionalUrlFor(bounds: GeoBounds): String? {
-        if (!TerrainTileMath.fitsInSingleTile(REGIONAL_ARCHIVE_ZOOM, bounds)) return null
-        val centerLat = (bounds.north + bounds.south) / 2
-        val centerLon = (bounds.east + bounds.west) / 2
-        val tile = TerrainTileMath.tileAt(REGIONAL_ARCHIVE_ZOOM, centerLat, centerLon)
-        return "https://download.mapterhorn.com/${tile.x}-${tile.y}.pmtiles"
+    fun regionalArchiveUrl(tile: TileIndex): String {
+        require(tile.zoom == REGIONAL_ARCHIVE_ZOOM) { "Regional archives are keyed by z$REGIONAL_ARCHIVE_ZOOM tiles" }
+        return "https://download.mapterhorn.com/$REGIONAL_ARCHIVE_ZOOM-${tile.x}-${tile.y}.pmtiles"
     }
 
     /**

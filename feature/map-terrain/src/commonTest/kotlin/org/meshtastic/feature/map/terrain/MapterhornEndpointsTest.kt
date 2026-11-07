@@ -18,21 +18,22 @@ package org.meshtastic.feature.map.terrain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertFailsWith
 
 class MapterhornEndpointsTest {
 
     @Test
-    fun `a tiny region resolves a regional archive URL`() {
-        val seattle = GeoBounds(south = 47.6, west = -122.4, north = 47.61, east = -122.39)
-        val url = MapterhornEndpoints.regionalUrlFor(seattle)
-        assertEquals(true, url?.startsWith("https://download.mapterhorn.com/"))
-        assertEquals(true, url?.endsWith(".pmtiles"))
+    fun `a regional archive is named by its zoom and z6 tile`() {
+        assertEquals(
+            "https://download.mapterhorn.com/6-10-22.pmtiles",
+            MapterhornEndpoints.regionalArchiveUrl(TileIndex(zoom = 6, x = 10, y = 22)),
+        )
     }
 
     @Test
-    fun `a region spanning multiple z6 tiles has no regional archive`() {
-        val global = GeoBounds(south = -60.0, west = -170.0, north = 60.0, east = 170.0)
-        assertNull(MapterhornEndpoints.regionalUrlFor(global))
+    fun `a regional archive rejects a tile at any other zoom`() {
+        assertFailsWith<IllegalArgumentException> {
+            MapterhornEndpoints.regionalArchiveUrl(TileIndex(zoom = 7, x = 20, y = 44))
+        }
     }
 }

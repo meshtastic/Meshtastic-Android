@@ -38,9 +38,10 @@ enum class TerrainDownloadFailure {
 
 /**
  * Extracts a region's offline terrain: a global low-res layer (always, up to [MapterhornEndpoints.GLOBAL_MAX_ZOOM])
- * plus, where [bounds] fits inside a single z6 tile, a regional high-res layer on top — ported from the sibling iOS
- * app's two-tier `TerrainStore` download behavior. One tile per HTTP request, like the base offline layer's own
- * extractor; see its README for why that bounds [MAX_TILES] well below iOS's own per-region cap.
+ * plus a regional high-res layer from every z6 regional archive the bounds touch, each clipped to its own z6 tile. A z6
+ * tile with no published archive contributes nothing, and the renderer falls back to the global layer there. One tile
+ * per HTTP request, like the base offline layer's own extractor; see its README for why that bounds [MAX_TILES] well
+ * below iOS's own per-region cap.
  *
  * This module owns nothing about how a terrain download relates to a base map region (shared storage budget, region
  * lifecycle, "delete the terrain without touching the basemap") — that's the caller's integration concern, same
@@ -48,10 +49,13 @@ enum class TerrainDownloadFailure {
  */
 class TerrainRegionExtractor(
     private val store: TerrainTileStore,
-    private val openArchive: (pmtilesUrl: String) -> TileArchive = ::remoteArchive,
+    private val openArchive: (pmtilesUrl: String) -> TileArchive? = ::remoteArchive,
 ) {
 
-    /** One open PMTiles archive — [TerrainTileFetcher] in production; a seam so tests can script sparse coverage. */
+    /**
+     * One open PMTiles archive — [TerrainTileFetcher] in production; a seam so tests can script sparse coverage.
+     * [openArchive] returns `null` for an archive the host doesn't have.
+     */
     interface TileArchive : AutoCloseable {
         fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
     }
@@ -59,8 +63,7 @@ class TerrainRegionExtractor(
     @Suppress("SuspendFunSwallowedCancellation") // cancellation deletes the partial region, then is rethrown
     fun download(bounds: GeoBounds, maxZoom: Int): Flow<TerrainDownloadState> = flow {
         val globalZoomRange = globalTerrainZooms(maxZoom)
-        val regionalZoomRange = regionalTerrainZooms(bounds, maxZoom)
-        val regionalUrl = regionalZoomRange?.let { MapterhornEndpoints.regionalUrlFor(bounds) }
+        val regionalZoomRange = regionalTerrainZooms(maxZoom)
 
         // Counted from tile corners before anything is materialized. A single regional z6 tile at maxZoom 18 is ~16.7M
         // tiles at z18 alone; enumerating before this check would allocate that whole list on exactly the oversized
@@ -77,19 +80,32 @@ class TerrainRegionExtractor(
 
         // Only materialized now that the cheap count above has confirmed it's under MAX_TILES.
         val globalTiles = globalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
-        val regionalTiles = regionalZoomRange?.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }.orEmpty()
+        val regionalTilesByArchive =
+            regionalZoomRange
+                ?.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
+                .orEmpty()
+                .groupBy { TerrainTileMath.ancestorAt(MapterhornEndpoints.REGIONAL_ARCHIVE_ZOOM, it) }
         val total = totalTiles.toInt()
 
-        var global = FetchResult(processed = 0, stored = 0)
-        var regional = FetchResult(processed = 0, stored = 0)
+        var globalStored = 0L
+        var regionalStored = 0L
         try {
-            global =
+            val global =
                 fetchInto(MapterhornEndpoints.GLOBAL_PMTILES_URL, TerrainSource.GLOBAL, globalTiles, 0, total) {
                     emit(it)
+                } ?: error("Global terrain archive not found")
+            globalStored = global.stored
+            var processed = global.processed
+            for ((archiveTile, tiles) in regionalTilesByArchive) {
+                val url = MapterhornEndpoints.regionalArchiveUrl(archiveTile)
+                val regional = fetchInto(url, TerrainSource.REGIONAL, tiles, processed, total) { emit(it) }
+                if (regional == null) {
+                    processed += tiles.size
+                    emit(TerrainDownloadState.InProgress(processed, total))
+                } else {
+                    processed = regional.processed
+                    regionalStored += regional.stored
                 }
-            if (regionalUrl != null) {
-                regional =
-                    fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, global.processed, total) { emit(it) }
             }
         } catch (e: CancellationException) {
             // A cancelled download leaves no partial region behind, and nothing may be emitted after cancellation.
@@ -101,13 +117,12 @@ class TerrainRegionExtractor(
             return@flow
         }
 
-        // Per tier, not "a regional URL existed": a regional archive with no coverage here stores nothing, and a
-        // renderer trusting the flag would then read an empty REGIONAL dir at z13+ instead of the global tiles.
+        // From what was stored, not from which archives existed: an archive with no coverage here stores nothing.
         emit(
             TerrainDownloadState.Complete(
-                tileCount = global.stored + regional.stored,
+                tileCount = globalStored + regionalStored,
                 byteSize = store.sizeBytes(),
-                hasRegionalDetail = regional.stored > 0,
+                hasRegionalDetail = regionalStored > 0,
             ),
         )
     }
@@ -128,10 +143,11 @@ class TerrainRegionExtractor(
         alreadyProcessed: Int,
         totalTiles: Int,
         onProgress: suspend (TerrainDownloadState.InProgress) -> Unit,
-    ): FetchResult {
+    ): FetchResult? {
         var processed = alreadyProcessed
         var stored = 0L
-        openArchive(pmtilesUrl).use { archive ->
+        val opened = openArchive(pmtilesUrl) ?: return null
+        opened.use { archive ->
             for (tile in tiles) {
                 archive.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes ->
                     store.writeTile(source, tile, bytes)
@@ -151,8 +167,8 @@ class TerrainRegionExtractor(
         const val MAX_TILES = 3_000
         private const val PROGRESS_STRIDE = 10
 
-        private fun remoteArchive(pmtilesUrl: String): TileArchive {
-            val fetcher = TerrainTileFetcher(pmtilesUrl)
+        private fun remoteArchive(pmtilesUrl: String): TileArchive? {
+            val fetcher = openTerrainTileFetcher(pmtilesUrl) ?: return null
             return object : TileArchive {
                 override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = fetcher.fetchTile(zoom, x, y)
 

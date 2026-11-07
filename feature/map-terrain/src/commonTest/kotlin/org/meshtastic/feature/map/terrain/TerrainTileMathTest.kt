@@ -19,7 +19,6 @@ package org.meshtastic.feature.map.terrain
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class TerrainTileMathTest {
@@ -107,12 +106,10 @@ class TerrainTileMathTest {
     }
 
     @Test
-    fun `fitsInSingleTile is true for a tiny box and false for a global one`() {
-        val tiny = GeoBounds(south = 47.6, west = -122.4, north = 47.61, east = -122.39)
-        assertTrue(TerrainTileMath.fitsInSingleTile(zoom = 6, tiny))
-
-        val global = GeoBounds(south = -60.0, west = -170.0, north = 60.0, east = 170.0)
-        assertFalse(TerrainTileMath.fitsInSingleTile(zoom = 6, global))
+    fun `ancestorAt finds the containing tile and is the identity at the tile's own zoom`() {
+        val tile = TileIndex(zoom = 13, x = 1310, y = 2860)
+        assertEquals(TileIndex(zoom = 6, x = 10, y = 22), TerrainTileMath.ancestorAt(6, tile))
+        assertEquals(tile, TerrainTileMath.ancestorAt(13, tile))
     }
 
     @Test
