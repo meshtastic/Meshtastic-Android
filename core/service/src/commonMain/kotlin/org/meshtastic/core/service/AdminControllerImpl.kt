@@ -339,15 +339,20 @@ internal class AdminControllerImpl(
     @Suppress("SuspendFunSwallowedCancellation") // a block's cancellation is held only until the commit, then rethrown
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
-        requireBeginBoundaryAccepted(destNum)
+        // One transport session owns the whole transaction: begin, every write and the commit carry the version
+        // captured here, so a radio switch mid-transaction rejects the rest instead of splitting it across radios.
+        val connectionVersion = connectionStateProvider.connectionLifecycle.value.version
+        requireBeginBoundaryAccepted(destNum, connectionVersion)
 
         // Firmware has no abort boundary. Preserve any block failure, including cancellation, only long enough to
         // attempt the commit that closes the accepted session; the original failure is restored below. Local cache
         // projections are staged by the session and become visible only after both the block and commit succeed.
-        val session = EditSettingsSession(destNum, isLocalDestination)
+        val session = EditSettingsSession(destNum, isLocalDestination, connectionVersion)
         val blockResult = runCatching { session.block() }
         val commitResult = runCatching {
-            withContext(NonCancellable) { requireCommitBoundaryAccepted(destNum, isLocalDestination) }
+            withContext(NonCancellable) {
+                requireCommitBoundaryAccepted(destNum, isLocalDestination, connectionVersion)
+            }
         }
 
         blockResult.exceptionOrNull()?.let { blockFailure ->
@@ -385,27 +390,30 @@ internal class AdminControllerImpl(
     }
 
     /** Binds [AdminEditScope] writes to one destination and stages optimistic projections until commit acceptance. */
-    private inner class EditSettingsSession(private val destNum: Int, private val isLocalDestination: Boolean) :
-        AdminEditScope {
+    private inner class EditSettingsSession(
+        private val destNum: Int,
+        private val isLocalDestination: Boolean,
+        private val connectionVersion: Long,
+    ) : AdminEditScope {
         private val projectionLock = SynchronizedObject()
         private val stagedProjections = mutableListOf<suspend () -> Unit>()
 
         override suspend fun setOwner(user: User) {
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+            commandSender.sendAdminForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.set_owner = user }.build()
             }
             stageProjection { nodeManager.handleReceivedUser(destNum, user) }
         }
 
         override suspend fun setConfig(config: Config) {
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+            commandSender.sendAdminForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
             }
             if (isLocalDestination) stageProjection { radioConfigRepository.setLocalConfig(config) }
         }
 
         override suspend fun setModuleConfig(config: ModuleConfig) {
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+            commandSender.sendAdminForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.set_module_config = config }.build()
             }
             if (isLocalDestination) {
@@ -420,7 +428,7 @@ internal class AdminControllerImpl(
         // set, so the operation adding channel writes must reconcile that set after the transaction; mirroring slots
         // here could expose a partial cache if a later write or commit fails.
         override suspend fun setChannel(channel: Channel) =
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+            commandSender.sendAdminForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
             }
 
@@ -432,7 +440,7 @@ internal class AdminControllerImpl(
                 } else {
                     nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
                 }
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+            commandSender.sendAdminForConnection(destNum, connectionVersion) {
                 position.toFixedPositionAdminMessage()
             }
             if (projectionNodeNum != null) {
@@ -465,9 +473,9 @@ internal class AdminControllerImpl(
     }
 
     /** Requires the begin boundary to be admitted before any transactional settings writes are issued. */
-    private suspend fun requireBeginBoundaryAccepted(destNum: Int) {
+    private suspend fun requireBeginBoundaryAccepted(destNum: Int, connectionVersion: Long) {
         if (
-            !commandSender.sendAdminAwait(destNum) {
+            !commandSender.sendAdminAwaitForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.begin_edit_settings = true }.build()
             }
         ) {
@@ -480,9 +488,13 @@ internal class AdminControllerImpl(
      * commit's queue acceptance keeps the caller suspended until the sender has processed every preceding write. This
      * prevents a rebooting transport write from overtaking an uncommitted settings transaction.
      */
-    private suspend fun requireCommitBoundaryAccepted(destNum: Int, isLocalDestination: Boolean) {
+    private suspend fun requireCommitBoundaryAccepted(
+        destNum: Int,
+        isLocalDestination: Boolean,
+        connectionVersion: Long,
+    ) {
         val result =
-            commandSender.sendAdminAwaitResult(destNum) {
+            commandSender.sendAdminAwaitResultForConnection(destNum, connectionVersion) {
                 AdminMessage.Builder().also { wb -> wb.commit_edit_settings = true }.build()
             }
         val uncertainAfterDispatch =
