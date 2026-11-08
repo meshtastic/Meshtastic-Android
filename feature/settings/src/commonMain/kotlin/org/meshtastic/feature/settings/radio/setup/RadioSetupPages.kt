@@ -86,18 +86,8 @@ internal const val SHORT_NAME_MAX_BYTES = 4 // short_name max_size:5
 private const val STATUS_MESSAGE_MAX_BYTES = 80 // status_message max_size:80
 
 @Composable
-internal fun PageHeader(headline: String, body: String) {
-    OnboardingPageHeader(headline = headline, body = body)
-}
-
-@Composable
-internal fun Notice(text: String) {
-    OnboardingNotice(text = text, icon = MeshtasticIcons.Info)
-}
-
-@Composable
 internal fun IntroPage() {
-    PageHeader(
+    OnboardingPageHeader(
         headline = stringResource(Res.string.radio_setup_intro_headline),
         body = stringResource(Res.string.radio_setup_intro_body),
     )
@@ -121,7 +111,7 @@ internal fun RegionPage(loraForm: ConfigState<Config.LoRaConfig>, state: RadioCo
         val region = loraForm.value.region
         val constraint = remember(regionPresetMap, region) { setupConstraintFor(regionPresetMap, region) }
 
-        PageHeader(
+        OnboardingPageHeader(
             headline = stringResource(Res.string.schema_lora_region),
             body = stringResource(Res.string.radio_setup_region_body),
         )
@@ -138,9 +128,17 @@ internal fun RegionPage(loraForm: ConfigState<Config.LoRaConfig>, state: RadioCo
                 },
             )
         }
-        if (suggestionShown && region == suggested) Notice(stringResource(Res.string.radio_setup_region_suggested))
+        if (suggestionShown && region == suggested) {
+            OnboardingNotice(
+                icon = MeshtasticIcons.Info,
+                text = stringResource(Res.string.radio_setup_region_suggested),
+            )
+        }
         if (constraint?.isGated(state.localIsLicensed) == true) {
-            Notice(stringResource(Res.string.config_lora_modem_preset_licensed_summary))
+            OnboardingNotice(
+                icon = MeshtasticIcons.Info,
+                text = stringResource(Res.string.config_lora_modem_preset_licensed_summary),
+            )
         }
     }
 }
@@ -176,7 +174,7 @@ internal fun PresetPage(loraForm: ConfigState<Config.LoRaConfig>, state: RadioCo
                 )
             }
 
-        PageHeader(
+        OnboardingPageHeader(
             headline = stringResource(Res.string.modem_preset),
             body = stringResource(Res.string.radio_setup_preset_body),
         )
@@ -191,9 +189,15 @@ internal fun PresetPage(loraForm: ConfigState<Config.LoRaConfig>, state: RadioCo
                 if (presetsGated) stringResource(Res.string.config_lora_modem_preset_licensed_summary) else null,
             )
         }
-        if (!loraForm.value.use_preset) Notice(stringResource(Res.string.radio_setup_preset_custom))
-        if (!capabilities.appliesLoraConfigLive) Notice(stringResource(Res.string.radio_setup_restart_notice))
-        if (!state.connected) Notice(stringResource(Res.string.radio_setup_reconnecting))
+        if (!loraForm.value.use_preset) {
+            OnboardingNotice(icon = MeshtasticIcons.Info, text = stringResource(Res.string.radio_setup_preset_custom))
+        }
+        if (!capabilities.appliesLoraConfigLive) {
+            OnboardingNotice(icon = MeshtasticIcons.Info, text = stringResource(Res.string.radio_setup_restart_notice))
+        }
+        if (!state.connected) {
+            OnboardingNotice(icon = MeshtasticIcons.Info, text = stringResource(Res.string.radio_setup_reconnecting))
+        }
     }
 }
 
@@ -208,7 +212,7 @@ internal fun NamePage(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         val user = userForm.value
-        PageHeader(
+        OnboardingPageHeader(
             headline = stringResource(Res.string.radio_setup_name_headline),
             body = stringResource(Res.string.radio_setup_name_body),
         )
@@ -232,14 +236,16 @@ internal fun NamePage(
                 )
             }
         }
-        if (!state.connected) Notice(stringResource(Res.string.radio_setup_reconnecting))
+        if (!state.connected) {
+            OnboardingNotice(icon = MeshtasticIcons.Info, text = stringResource(Res.string.radio_setup_reconnecting))
+        }
     }
 }
 
 @Composable
 internal fun DonePage(lora: Config.LoRaConfig, user: User, status: String, offersStatus: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        PageHeader(
+        OnboardingPageHeader(
             headline = stringResource(Res.string.radio_setup_done_headline),
             body = stringResource(Res.string.radio_setup_done_body),
         )
