@@ -61,8 +61,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
