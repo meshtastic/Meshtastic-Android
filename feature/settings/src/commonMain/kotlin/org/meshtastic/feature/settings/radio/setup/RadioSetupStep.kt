@@ -22,5 +22,6 @@ enum class RadioSetupStep {
     REGION,
     PRESET,
     NAME,
+    BEACONS,
     DONE,
 }

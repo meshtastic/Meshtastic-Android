@@ -1679,6 +1679,12 @@ quick_chat_show
 radiation
 ### RADIO ###
 radio_configuration
+radio_setup_beacons_body
+radio_setup_beacons_headline
+radio_setup_beacons_listening
+radio_setup_beacons_none
+radio_setup_beacons_settings
+radio_setup_beacons_waiting
 radio_setup_done_body
 radio_setup_done_headline
 radio_setup_intro_body
@@ -1689,6 +1695,8 @@ radio_setup_preset_body
 radio_setup_preset_custom
 radio_setup_reconnecting
 radio_setup_region_body
+radio_setup_region_none
+radio_setup_region_search
 radio_setup_region_suggested
 radio_setup_restart_notice
 radio_setup_title
