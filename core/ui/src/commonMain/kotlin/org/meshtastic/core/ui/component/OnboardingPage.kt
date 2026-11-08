@@ -18,8 +18,6 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -70,7 +68,6 @@ fun OnboardingPageHeader(headline: String, body: String, modifier: Modifier = Mo
 }
 
 /** One text secondary action on the left and one filled primary action on the right. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OnboardingBottomBar(
     primaryText: String,
@@ -80,20 +77,17 @@ fun OnboardingBottomBar(
     secondaryText: String? = null,
     onSecondary: () -> Unit = {},
 ) {
-    // A flow row, so a long label at a large font scale wraps the primary action under the secondary one instead of
-    // clipping it.
+    // Each action takes at most half the bar and wraps its label, so a long label at a large font scale is never
+    // clipped beside the other one.
     BottomAppBar(modifier = modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp)) {
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (secondaryText != null) {
-                TextButton(onClick = onSecondary) { Text(secondaryText) }
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
+        if (secondaryText != null) {
+            TextButton(onClick = onSecondary, modifier = Modifier.weight(1f, fill = false)) {
+                Text(secondaryText, textAlign = TextAlign.Center)
             }
-            Button(onClick = onPrimary, enabled = primaryEnabled) { Text(primaryText) }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Button(onClick = onPrimary, enabled = primaryEnabled, modifier = Modifier.weight(1f, fill = false)) {
+            Text(primaryText, textAlign = TextAlign.Center)
         }
     }
 }
