@@ -18,9 +18,21 @@ markers with no compositing seam.
 3. **`OfflineVectorArchive`** writes the fetched tiles into a local `.mbtiles` archive (`tiles`/`metadata` tables,
    `format=pbf`) — the same container `MBTilesProvider` already reads for raster imports, just vector this time.
    Stored uncompressed, not gzip: simpler, at the cost of more disk per tile (see "Deferred" below).
-4. **`OfflineVectorRenderer`** decodes a rendered tile's `water`/`roads`/`boundaries` layers (`VectorTile.kt` +
-   `MvtDecoder.kt`) into `LatLng` rings, cached per tile so panning within the same tiles doesn't redecode.
-5. **`OfflineVectorOverlay`** (a `@Composable`) draws those rings as native `Polygon`/`Polyline`.
+4. **`OfflineVectorRenderer`** decodes a rendered tile's `water`/`roads`/`boundaries`/`places` layers (`VectorTile.kt` +
+   `MvtDecoder.kt`) into `LatLng` geometry with each feature's id and attributes, cached per tile so panning within
+   the same tiles doesn't redecode. Polygon rings are grouped into exterior-plus-holes by winding in tile space
+   (spec 4.3.4.4). A feature lying wholly inside a neighboring tile that has the same layer and id is that tile's
+   buffer copy and is dropped; a feature cut by a tile edge keeps each tile's piece, and one with no id is kept.
+5. **`OfflineVectorOverlay`** (a `@Composable`) draws polygons with their holes and lines as native
+   `Polygon`/`Polyline`, styled by `OfflineMapStyle`: road width by zoom and `kind` (`major_road` with a
+   `secondary`/`tertiary` `kind_detail` takes the medium style, minor roads appear from zoom 12), rail and
+   waterway lines with `min_zoom` above 11 only from zoom 11, roads in `sort_rank` order, tunnels faded and dashed,
+   bridges above the other roads.
+6. **`OfflineMapLabels`** picks names from the `places` layer's points (countries skipped) and the `water` layer's
+   named points, localized (`name:<lang>`, else `name`) and ranked by `min_zoom`, population rank, kind, name. Those
+   with `min_zoom` reached are thinned to one per cell of a 5 x 8 grid over the view (at most 40).
+   **`OfflineLabelMarkers`** draws each as a `Marker` whose icon is the text with a halo, cached per name, kind and
+   theme. Labels show only while the offline layer draws with no network (`MapViewModel.mapNetworkAvailable`).
 
 ## Why this shape, not iOS's
 
@@ -44,9 +56,6 @@ markers with no compositing seam.
 
 - **Compression**: tiles are gunzipped once at download time and stored raw. Storing gzip (like every other MBTiles
   vector-tile archive) and decompressing at render time would meaningfully shrink a downloaded region.
-- **Polygon holes**: every ring MVT returns — hole or exterior — is drawn as its own independent `Polygon`. A real
-  lake-with-island therefore double-draws over the island rather than cutting it out. Grouping rings by winding
-  direction (spec section 4.3.3.3) into proper polygon/hole sets would fix this.
 - **Auto-activation on connectivity loss**: `offlineOverlayEnabled` is a manual toggle. `MapViewModel` already
   exposes `mapNetworkAvailable`; driving the toggle from it would draw a downloaded region the moment the network
   drops, as the MapLibre flavor and iOS do.
@@ -67,7 +76,8 @@ math in `:feature:map-terrain`.
 ## Testing
 
 `androidApp/src/testGoogle`, run by `:androidApp:testGoogleDebugUnitTest` — `MvtDecoderTest` (hand-encoded protobuf
-bytes, not a vendored fixture or a round-trip through the same encoder under test — see its own doc comment),
+bytes, not a vendored fixture or a round-trip through the same encoder under test — see its own doc comment;
+ring grouping by winding), `OfflineMapStyleTest`, `OfflineVectorRendererTest` (cross-tile dedup), `OfflineMapLabelsTest` (ranking, zoom filter, grid cap),
 `WebMercatorTileMathTest`, `OfflineRegionTileSetTest`, `OfflineRegionStoreTest`.
 No test drives the network extractor itself; it's a thin loop over already-tested pieces (`Reader`, `MvtDecoder`,
 `OfflineVectorArchive`).

@@ -24,11 +24,61 @@ internal data class TileCoord(val x: Int, val y: Int)
  *
  * For [org.meshtastic.app.map.offline.pmtiles.VectorTile.GEOM_POINT] the single returned ring is every point of a
  * Point/MultiPoint feature. For `GEOM_LINESTRING` each ring is one polyline. For `GEOM_POLYGON` each ring is one closed
- * ring (exterior or a hole; MVT gives no explicit hole flag — winding order is what distinguishes them, and this
- * decoder doesn't need to tell them apart since [OfflineVectorOverlay] draws every ring it's given as its own
- * independent [com.google.maps.android.compose.Polygon] — no hole grouping, see that file's doc comment).
+ * ring (exterior or a hole; MVT gives no explicit hole flag, [groupPolygons] separates them by winding).
  */
 internal object MvtDecoder {
+
+    /** One polygon: an exterior ring and the holes cut out of it. */
+    data class PolygonRings(val outer: List<TileCoord>, val holes: List<List<TileCoord>>)
+
+    /**
+     * Groups a polygon feature's rings into polygons by winding (spec 4.3.4.4): in tile coordinates (y down) an
+     * exterior ring is clockwise, which is a positive shoelace area, and a hole is the opposite. Winding is read
+     * relative to the first ring with any area, so a tile written with the opposite convention still groups correctly,
+     * and that ring is always taken as an exterior: winding alone can't tell a leading hole. Rings with no area are
+     * dropped.
+     */
+    fun groupPolygons(rings: List<List<TileCoord>>): List<PolygonRings> {
+        val outerSign =
+            rings.firstNotNullOfOrNull { signedArea(it).sign.takeIf { sign -> sign != 0 } } ?: return emptyList()
+        val outers = mutableListOf<List<TileCoord>>()
+        val holes = mutableListOf<MutableList<List<TileCoord>>>()
+        for (ring in rings) {
+            val sign = signedArea(ring).sign
+            when {
+                sign == 0 -> Unit
+
+                sign == outerSign -> {
+                    outers += ring
+                    holes += mutableListOf<List<TileCoord>>()
+                }
+
+                holes.isNotEmpty() -> holes.last() += ring
+            }
+        }
+        return outers.mapIndexed { index, outer -> PolygonRings(outer, holes[index]) }
+    }
+
+    /** Twice the shoelace area in tile coordinates; positive is clockwise on screen (y down). */
+    private fun signedArea(ring: List<TileCoord>): Long {
+        var sum = 0L
+        for (i in ring.indices) {
+            val a = ring[i]
+            val b = ring[(i + 1) % ring.size]
+            sum += a.x.toLong() * b.y - b.x.toLong() * a.y
+        }
+        return sum
+    }
+
+    private val Long.sign: Int
+        get() =
+            if (this > 0) {
+                1
+            } else if (this < 0) {
+                -1
+            } else {
+                0
+            }
 
     private const val COMMAND_MOVE_TO = 1
     private const val COMMAND_LINE_TO = 2

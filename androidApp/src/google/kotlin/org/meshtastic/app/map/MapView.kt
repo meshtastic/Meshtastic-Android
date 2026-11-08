@@ -789,6 +789,8 @@ fun MapView(
                         region = region,
                         archiveFile = mapViewModel.offlineRegionArchiveFile(region.id),
                         cameraPositionState = cameraPositionState,
+                        showLabels = !mapNetworkAvailable,
+                        dark = dark,
                     )
                 }
             }
