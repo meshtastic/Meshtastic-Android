@@ -425,6 +425,7 @@ fun MapView(
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
     val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
     val terrainHillshadeEnabled by mapViewModel.terrainHillshadeEnabled.collectAsStateWithLifecycle()
+    val terrainShadeValleysEnabled by mapViewModel.terrainShadeValleysEnabled.collectAsStateWithLifecycle()
     val terrainContoursEnabled by mapViewModel.terrainContoursEnabled.collectAsStateWithLifecycle()
     val mapNetworkAvailable by mapViewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
@@ -799,8 +800,11 @@ fun MapView(
                 if (terrainHillshadeEnabled) {
                     key(coveringRegion.id) {
                         val hillshadeProvider =
-                            remember(coveringRegion.id) {
-                                HillshadeTileProvider(mapViewModel.terrainStoreForRegion(coveringRegion.id))
+                            remember(coveringRegion.id, terrainShadeValleysEnabled) {
+                                HillshadeTileProvider(
+                                    mapViewModel.terrainStoreForRegion(coveringRegion.id),
+                                    terrainShadeValleysEnabled,
+                                )
                             }
                         TileOverlay(
                             tileProvider = hillshadeProvider,
@@ -1202,8 +1206,10 @@ fun MapView(
                 terrainDownloadRegionId = terrainDownloadRegionId,
                 terrainHillshadeEnabled = terrainHillshadeEnabled,
                 terrainContoursEnabled = terrainContoursEnabled,
+                terrainShadeValleysEnabled = terrainShadeValleysEnabled,
                 onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
                 onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
+                onToggleShadeValleys = mapViewModel::setTerrainShadeValleysEnabled,
                 onToggleContours = mapViewModel::setTerrainContoursEnabled,
             )
             HorizontalDivider()

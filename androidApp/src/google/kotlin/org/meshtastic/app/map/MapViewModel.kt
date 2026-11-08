@@ -590,6 +590,13 @@ class MapViewModel(
     private val _terrainContoursEnabled = MutableStateFlow(false)
     val terrainContoursEnabled: StateFlow<Boolean> = _terrainContoursEnabled.asStateFlow()
 
+    private val _terrainShadeValleysEnabled = MutableStateFlow(false)
+    val terrainShadeValleysEnabled: StateFlow<Boolean> = _terrainShadeValleysEnabled.asStateFlow()
+
+    fun setTerrainShadeValleysEnabled(enabled: Boolean) {
+        _terrainShadeValleysEnabled.value = enabled
+    }
+
     fun setTerrainHillshadeEnabled(enabled: Boolean) {
         _terrainHillshadeEnabled.value = enabled
     }

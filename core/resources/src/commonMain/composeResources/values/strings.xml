@@ -1134,6 +1134,7 @@
     <string name="map_offline_terrain_download_failed_io">Terrain download failed — check your connection and try again</string>
     <string name="map_offline_terrain_download_failed_tile_limit">Selected area is too large for terrain — zoom in or pick a smaller region</string>
     <string name="map_offline_terrain_downloading_progress">Downloading terrain… %1$d / %2$d tiles</string>
+    <string name="map_offline_terrain_shade_valleys">Shade Valleys</string>
     <string name="map_offline_unavailable">Offline maps are unavailable on this device</string>
     <string name="map_overlay_hillshade">Hillshade</string>
     <string name="map_overlay_precipitation">Precipitation</string>
