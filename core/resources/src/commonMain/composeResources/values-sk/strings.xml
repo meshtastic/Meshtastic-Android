@@ -348,7 +348,9 @@
     <string name="quick_chat_instant">Okamžite pošli</string>
     <string name="quick_chat_new">Nový rýchly čet</string>
     <string name="radiation">Radiácia</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfigurácia vysielača</string>
+    <string name="radio_setup_name_headline">Názov</string>
     <string name="range_test">Test dosahu</string>
     <string name="reboot">Reštartovať</string>
     <!-- REMOTE -->

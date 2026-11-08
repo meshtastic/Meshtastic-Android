@@ -550,7 +550,9 @@
     <string name="quick_chat_new">Nowy szablon</string>
     <string name="quick_chat_show">Pokaż menu szybkiego wyboru</string>
     <string name="radiation">Promieniowanie</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Ustawienia urządzenia</string>
+    <string name="radio_setup_name_headline">Przyjazna nazwa</string>
     <string name="range_test">Test zasięgu</string>
     <string name="range_test_config">Konfiguracja testu zasięgu</string>
     <string name="reboot">Restart</string>

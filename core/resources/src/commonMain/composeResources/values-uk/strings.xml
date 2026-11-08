@@ -847,7 +847,9 @@
     <string name="quick_chat_new">Новий швидкий чат</string>
     <string name="quick_chat_show">Показати меню швидкого чату</string>
     <string name="radiation">Радіація</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Налаштування пристрою</string>
+    <string name="radio_setup_name_headline">Дружня назва</string>
     <string name="rainfall_1h">Дощ (1 год)</string>
     <string name="rainfall_24h">Дощ (24 год)</string>
     <string name="range_test">Тест дальності</string>

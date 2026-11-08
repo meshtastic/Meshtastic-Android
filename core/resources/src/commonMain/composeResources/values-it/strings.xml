@@ -1201,7 +1201,9 @@
     <string name="quick_chat_new">Nuova chat rapida</string>
     <string name="quick_chat_show">Mostra menu della chat rapida</string>
     <string name="radiation">Radiazione</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Impostazioni dispositivo</string>
+    <string name="radio_setup_name_headline">Nome semplificato</string>
     <string name="rainfall_1h">Pioggia (1h)</string>
     <string name="rainfall_24h">Pioggia (24h)</string>
     <string name="range_test">Test Distanza</string>

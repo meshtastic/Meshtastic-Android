@@ -317,7 +317,9 @@
     <string name="quick_chat_instant">Direct verzenden</string>
     <string name="quick_chat_new">Nieuwe snelle chat</string>
     <string name="radiation">Straling</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radioconfiguratie</string>
+    <string name="radio_setup_name_headline">Weergavenaam</string>
     <string name="range_test">Bereik Test</string>
     <string name="reboot">Herstart</string>
     <!-- REMOTE -->

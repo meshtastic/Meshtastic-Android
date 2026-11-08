@@ -789,7 +789,9 @@
     <string name="quick_chat_instant">Enviar imediatamente</string>
     <string name="quick_chat_new">Novo chat rápido</string>
     <string name="radiation">Radiação</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Configurações do dispositivo</string>
+    <string name="radio_setup_name_headline">Nome amigável</string>
     <string name="range_test">Teste de Alcance</string>
     <string name="range_test_config">Configuração de Teste de Alcance</string>
     <string name="reboot">Reiniciar</string>

@@ -968,7 +968,9 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_show">顯示快速聊天選單</string>
     <string name="radiation">輻射</string>
+    <!-- RADIO -->
     <string name="radio_configuration">設備設定</string>
+    <string name="radio_setup_name_headline">顯示名稱</string>
     <string name="rainfall_1h">降雨（1h）</string>
     <string name="rainfall_24h">降雨（24h）</string>
     <string name="range_test">範圍測試</string>

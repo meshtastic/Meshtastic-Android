@@ -1034,7 +1034,9 @@
     <string name="quick_chat_new">Нов бърз разговор</string>
     <string name="quick_chat_show">Показване на менюто за бърз чат</string>
     <string name="radiation">Радиация</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Конфигурация на радиото</string>
+    <string name="radio_setup_name_headline">Име</string>
     <string name="rainfall_1h">Дъжд (1ч)</string>
     <string name="rainfall_24h">Дъжд (24 ч)</string>
     <string name="range_test">Тест на обхвата</string>

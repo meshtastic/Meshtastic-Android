@@ -216,7 +216,9 @@
     <string name="quick_chat_edit">Επεξεργασία ταχείας συνομιλίας</string>
     <string name="quick_chat_instant">Άμεση αποστολή</string>
     <string name="quick_chat_new">Νέα γρήγορη συνομιλία</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
+    <string name="radio_setup_name_headline">Ονομα</string>
     <string name="reboot">Επανεκκίνηση</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
