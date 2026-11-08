@@ -148,6 +148,10 @@ class ConnectionsViewModel(
      * screen opens the setup once per emission and marks the radio offered, so a radio the user closed is never
      * reopened on its own. Bound to the active session the same way as [activeNodeInfoReady].
      */
+    /** The connected radio's transport address, the key the radio setup binds to. */
+    val connectionAddress: StateFlow<String?> =
+        nodeManager.connectionIdentity.map { it?.address }.distinctUntilChanged().stateInWhileSubscribed(null)
+
     val radioSetupOffer: StateFlow<Int?> =
         combine(
             nodeManager.connectionIdentity,

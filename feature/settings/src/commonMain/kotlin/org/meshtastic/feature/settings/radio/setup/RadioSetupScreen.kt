@@ -79,25 +79,17 @@ import org.meshtastic.proto.User
 fun RadioSetupScreen(
     viewModel: RadioConfigViewModel,
     onDone: () -> Unit,
+    boundAddress: String?,
     modifier: Modifier = Modifier,
     nodeManager: NodeManager = koinInject(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    // Closes the setup when a different radio becomes the connected one. Keyed on the transport address, not the node
-    // number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it.
-    // The radio this setup was opened for, kept across navigation. A reconnect clears the identity before the new
-    // handshake publishes it, so a setup that composes in that gap binds to the first identity it sees.
+    // The setup is bound to the radio it was opened for, by the transport address its route carries, never to the
+    // node number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it. Any
+    // identity on another address closes it, and a setup opened with no radio bound closes on the first one.
     val currentOnDone by rememberUpdatedState(onDone)
-    var boundAddress by rememberSaveable { mutableStateOf(nodeManager.connectionIdentity.value?.address) }
-    LaunchedEffect(nodeManager) {
-        nodeManager.connectionIdentity.filterNotNull().collect {
-            val bound = boundAddress
-            if (bound == null) {
-                boundAddress = it.address
-            } else if (it.address != bound) {
-                currentOnDone()
-            }
-        }
+    LaunchedEffect(nodeManager, boundAddress) {
+        nodeManager.connectionIdentity.filterNotNull().collect { if (it.address != boundAddress) currentOnDone() }
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }

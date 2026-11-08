@@ -31,6 +31,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.FirmwareRoute
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.koinInject
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -152,16 +156,21 @@ private fun ColumnScope.RadioConfigContent(enabled: Boolean, onRouteClick: (Enum
     }
 }
 
-/** The guided setup, local only: it writes to the connected radio and never to a remote node. */
+/** The guided setup, local only: it is bound to the connected radio's address and never writes to a remote node. */
 @Composable
-private fun ColumnScope.SetUpRadioContent(enabled: Boolean, onNavigate: (Route) -> Unit) {
+private fun ColumnScope.SetUpRadioContent(
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+    nodeManager: NodeManager = koinInject(),
+) {
+    val identity by nodeManager.connectionIdentity.collectAsStateWithLifecycle()
     ListItem(
         text = stringResource(Res.string.radio_setup_title),
         leadingIcon = MeshtasticIcons.Language,
         trailingIcon = MeshtasticIcons.ChevronRight,
-        enabled = enabled,
+        enabled = enabled && identity != null,
     ) {
-        onNavigate(SettingsRoute.RadioSetup)
+        onNavigate(SettingsRoute.RadioSetup(identity?.address))
     }
 }
 

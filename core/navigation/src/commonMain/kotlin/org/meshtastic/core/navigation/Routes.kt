@@ -121,8 +121,11 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object Administration : SettingsRoute
 
-    /** The guided setup for the connected radio: region, preset and name. Writes only to the connected radio. */
-    @Serializable data object RadioSetup : SettingsRoute
+    /**
+     * The guided setup for the connected radio: region, preset and name. [address] is the transport address of the
+     * radio it was opened for; the setup writes to that radio only and closes when another one connects.
+     */
+    @Serializable data class RadioSetup(val address: String? = null) : SettingsRoute
 
     // region radio Config Routes
 
