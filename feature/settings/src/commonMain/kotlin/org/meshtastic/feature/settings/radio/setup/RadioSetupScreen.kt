@@ -89,7 +89,7 @@ fun RadioSetupScreen(
     // The radio this setup was opened for, kept across navigation; opened with none connected, any radio that connects
     // is a different one.
     val currentOnDone by rememberUpdatedState(onDone)
-    val boundAddress: String? = rememberSaveable { nodeManager.connectionIdentity.value?.address }
+    val boundAddress by rememberSaveable { mutableStateOf(nodeManager.connectionIdentity.value?.address) }
     LaunchedEffect(nodeManager, boundAddress) {
         nodeManager.connectionIdentity.filterNotNull().collect { if (it.address != boundAddress) currentOnDone() }
     }
