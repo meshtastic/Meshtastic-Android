@@ -110,9 +110,10 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
             // manifest entry is an orphan nothing would ever delete.
             val region =
                 try {
-                    extractWithRetry(archiveFile, url, tiles) { completed ->
-                        emit(OfflineDownloadState.InProgress(completed, tiles.size))
-                    }
+                    val buildUrl =
+                        extractWithRetry(archiveFile, url, tiles) { completed ->
+                            emit(OfflineDownloadState.InProgress(completed, tiles.size))
+                        }
                     OfflineRegion(
                         id = id,
                         southLat = bounds.southwest.latitude,
@@ -124,6 +125,7 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
                         tileCount = tiles.size.toLong(),
                         byteSize = archiveFile.length(),
                         createdAtEpochSeconds = nowSeconds,
+                        protomapsBuildUrl = buildUrl.toString(),
                     )
                         .also { store.add(it) }
                 } catch (e: IOException) {

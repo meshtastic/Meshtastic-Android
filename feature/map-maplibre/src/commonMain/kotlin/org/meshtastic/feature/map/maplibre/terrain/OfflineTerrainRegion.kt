@@ -41,6 +41,10 @@ data class OfflineTerrainRegion(
     val hasRegionalDetail: Boolean,
     val tileCount: Long,
     val byteSize: Long,
+    /** Each Mapterhorn archive URL the tiles came from, mapped to its ETag when the server gave one. */
+    val sourceArchives: Map<String, String?> = emptyMap(),
+    /** When the download finished; `null` for manifests written before it was recorded. */
+    val downloadedAtEpochSeconds: Long? = null,
 ) {
     val bounds: GeoBounds
         get() = GeoBounds(south = south, west = west, north = north, east = east)

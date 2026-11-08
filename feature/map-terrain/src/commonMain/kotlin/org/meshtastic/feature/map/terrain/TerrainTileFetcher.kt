@@ -22,6 +22,9 @@ package org.meshtastic.feature.map.terrain
  */
 interface TerrainTileFetcher : AutoCloseable {
 
+    /** The archive's version as the server reports it (its ETag), or `null` if it gave none. */
+    val version: String?
+
     /** Raw tile bytes (WebP, Terrarium-encoded) at [zoom]/[x]/[y] — google/osm XYZ convention — or `null` if absent. */
     fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
 }
