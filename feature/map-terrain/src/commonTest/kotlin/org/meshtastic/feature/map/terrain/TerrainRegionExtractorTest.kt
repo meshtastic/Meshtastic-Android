@@ -115,4 +115,38 @@ class TerrainRegionExtractorTest {
         assertEquals(true, result.hasRegionalDetail)
         assertTrue(store.hasTile(TerrainSource.REGIONAL, TerrainTileMath.tileAt(regionalZoom, 47.605, -122.395)))
     }
+
+    /**
+     * For the first [changes] archives opened, serves one tile and then throws [ArchiveChangedException], so the
+     * download has stored something before the archive changes under it.
+     */
+    private fun changingExtractor(changes: Int): TerrainRegionExtractor {
+        var remaining = changes
+        return TerrainRegionExtractor(store) { _ ->
+            val changesNow = remaining-- > 0
+            var fetched = 0
+            object : TerrainRegionExtractor.TileArchive {
+                override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? =
+                    if (changesNow && fetched++ > 0) throw ArchiveChangedException() else byteArrayOf(1)
+
+                override fun close() = Unit
+            }
+        }
+    }
+
+    @Test
+    fun `an archive replaced mid-download is fetched again once`() = runTest {
+        val result = changingExtractor(changes = 1).download(seattle, MapterhornEndpoints.GLOBAL_MAX_ZOOM).last()
+
+        assertIs<TerrainDownloadState.Complete>(result)
+        assertTrue(store.hasTile(TerrainSource.GLOBAL, TerrainTileMath.tileAt(12, 47.605, -122.395)))
+    }
+
+    @Test
+    fun `an archive replaced twice fails and keeps nothing`() = runTest {
+        val result = changingExtractor(changes = 2).download(seattle, MapterhornEndpoints.GLOBAL_MAX_ZOOM).last()
+
+        assertEquals(TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR), result)
+        assertEquals(0L, store.sizeBytes())
+    }
 }
