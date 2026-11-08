@@ -60,6 +60,7 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OnboardingBottomBar
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -246,6 +247,12 @@ fun RadioSetupScreen(
                             listens = beaconConfig?.listens?.takeIf { offersBeacons },
                         )
                 }
+            }
+            // The join dialog renders against this entry's UIViewModel: the app shell's SharedDialogs watches a
+            // different instance, so an offer set here never reaches it.
+            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+            requestChannelSet?.let {
+                ScannedQrCodeDialog(incoming = it, onDismiss = { uiViewModel.clearRequestChannelUrl() })
             }
             LoadingOverlay(state = responseState)
             if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
