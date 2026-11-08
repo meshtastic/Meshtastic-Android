@@ -334,6 +334,7 @@ internal fun BeaconsPage(
     offers: List<MeshBeaconOffer>,
     lora: Config.LoRaConfig?,
     state: RadioConfigState,
+    canWrite: Boolean,
     onListenChange: (Boolean) -> Unit,
     onJoin: (ChannelSet) -> Unit,
     onNavigate: (Route) -> Unit,
@@ -348,7 +349,7 @@ internal fun BeaconsPage(
                 title = stringResource(Res.string.mesh_beacon_listen),
                 summary = stringResource(Res.string.mesh_beacon_listen_summary),
                 checked = beaconConfig?.listens == true,
-                enabled = beaconConfig != null && state.connected && !state.responseState.isWaiting(),
+                enabled = beaconConfig != null && canWrite && !state.responseState.isWaiting(),
                 onCheckedChange = onListenChange,
                 containerColor = CardDefaults.cardColors().containerColor,
             )
@@ -368,7 +369,13 @@ internal fun BeaconsPage(
             )
         }
         offers.forEach { offer ->
-            BeaconOfferRow(offer = offer, lora = lora, channels = state.channelList, onJoin = onJoin)
+            BeaconOfferRow(
+                offer = offer,
+                lora = lora,
+                channels = state.channelList,
+                canWrite = canWrite,
+                onJoin = onJoin,
+            )
         }
         Card(modifier = Modifier.fillMaxWidth()) {
             ListItem(
@@ -391,6 +398,7 @@ private fun BeaconOfferRow(
     offer: MeshBeaconOffer,
     lora: Config.LoRaConfig?,
     channels: List<ChannelSettings>,
+    canWrite: Boolean,
     onJoin: (ChannelSet) -> Unit,
 ) {
     val joinOption = remember(offer, lora, channels) { offer.beacon.beaconJoinOption(lora, channels) }
@@ -422,7 +430,7 @@ private fun BeaconOfferRow(
                 }
             Button(
                 onClick = { offer.beacon.toJoinChannelSet(joinOption, lora)?.let(onJoin) },
-                enabled = joinOption != BeaconJoinOption.NONE,
+                enabled = canWrite && joinOption != BeaconJoinOption.NONE,
             ) {
                 Text(stringResource(label))
             }

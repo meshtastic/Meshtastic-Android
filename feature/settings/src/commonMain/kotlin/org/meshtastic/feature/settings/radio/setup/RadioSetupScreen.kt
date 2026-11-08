@@ -227,6 +227,7 @@ fun RadioSetupScreen(
                             offers = offers,
                             lora = state.radioConfig.lora,
                             state = state,
+                            canWrite = canWrite,
                             onListenChange = { listen ->
                                 beaconConfig?.let {
                                     viewModel.setModuleConfig(
