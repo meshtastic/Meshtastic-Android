@@ -18,8 +18,8 @@ package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +43,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -470,59 +471,65 @@ private fun AddDeviceDialog(
     onHideDialog: () -> Unit,
     onClickAdd: (address: String, fullAddress: String) -> Unit,
 ) {
+    ModalBottomSheet(onDismissRequest = onHideDialog, sheetState = sheetState) {
+        AddDeviceForm(onCancel = onHideDialog, onClickAdd = onClickAdd)
+    }
+}
+
+/**
+ * The manual-address form: address and port fields stacked full width, then a low-emphasis cancel and the one filled
+ * add action, end-aligned and free to wrap.
+ */
+@Composable
+internal fun AddDeviceForm(onCancel: () -> Unit, onClickAdd: (address: String, fullAddress: String) -> Unit) {
     val addressState = rememberTextFieldState("")
     val portState = rememberTextFieldState(NetworkConstants.SERVICE_PORT.toString())
 
-    @Suppress("MagicNumber")
-    ModalBottomSheet(onDismissRequest = onHideDialog, sheetState = sheetState) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    state = addressState,
-                    labelPosition = TextFieldLabelPosition.Above(),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    label = { Text(stringResource(Res.string.address)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
-                    modifier = Modifier.weight(.7f),
-                )
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        OutlinedTextField(
+            state = addressState,
+            labelPosition = TextFieldLabelPosition.Above(),
+            lineLimits = TextFieldLineLimits.SingleLine,
+            label = { Text(stringResource(Res.string.address)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
-                OutlinedTextField(
-                    state = portState,
-                    labelPosition = TextFieldLabelPosition.Above(),
-                    placeholder = { Text(NetworkConstants.SERVICE_PORT.toString()) },
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    label = { Text(stringResource(Res.string.ip_port)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    modifier = Modifier.weight(.3f),
-                )
-            }
+        OutlinedTextField(
+            state = portState,
+            labelPosition = TextFieldLabelPosition.Above(),
+            placeholder = { Text(NetworkConstants.SERVICE_PORT.toString()) },
+            lineLimits = TextFieldLineLimits.SingleLine,
+            label = { Text(stringResource(Res.string.ip_port)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(modifier = Modifier.weight(1f), onClick = { onHideDialog() }) {
-                    Text(stringResource(Res.string.cancel))
-                }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        ) {
+            TextButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
 
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        val address = addressState.text.toString()
-                        if (address.isValidAddress()) {
-                            val portString = portState.text.toString()
-                            val port = portString.toIntOrNull()
+            Button(
+                onClick = {
+                    val address = addressState.text.toString()
+                    if (address.isValidAddress()) {
+                        val portString = portState.text.toString()
+                        val port = portString.toIntOrNull()
 
-                            val combinedString =
-                                if (port != null && port != NetworkConstants.SERVICE_PORT) {
-                                    "$address:$portString"
-                                } else {
-                                    address
-                                }
+                        val combinedString =
+                            if (port != null && port != NetworkConstants.SERVICE_PORT) {
+                                "$address:$portString"
+                            } else {
+                                address
+                            }
 
-                            onClickAdd(combinedString, "t$combinedString")
-                        }
-                    },
-                ) {
-                    Text(stringResource(Res.string.add_network_device))
-                }
+                        onClickAdd(combinedString, "t$combinedString")
+                    }
+                },
+            ) {
+                Text(stringResource(Res.string.add_network_device))
             }
         }
     }

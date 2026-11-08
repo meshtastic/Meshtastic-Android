@@ -16,18 +16,24 @@
  */
 package org.meshtastic.feature.connections.ui.components
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SingleChoiceSegmentedButtonRowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceType
@@ -60,21 +66,41 @@ fun TransportSelector(
 ) {
     val transports =
         DeviceType.entries.filter { (it != DeviceType.BLE || showBluetooth) && (it != DeviceType.USB || showUsb) }
+    val labels = transports.map { stringResource(it.label) }
+    val textMeasurer = rememberTextMeasurer()
+    val labelStyle = MaterialTheme.typography.labelLarge
+    val density = LocalDensity.current
     // Fill the width so the control reads as one deliberate group spanning the same width as the connection card
     // above; each SegmentedButton carries an internal weight(1f), so the segments divide the row evenly.
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        transports.forEachIndexed { index, transport ->
-            TransportSegment(
-                selected = activeTransport == transport,
-                index = index,
-                count = transports.size,
-                label = transport.label,
-                icon = transport.icon,
-                onClick = { onSelectTransport(transport) },
-            )
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        // SegmentedButton never constrains its label: a long one spills into the padding and then under the border,
+        // so whether it fits has to be measured here rather than read back from the text layout.
+        val segmentWidth = maxWidth / transports.size
+        val labelsFit =
+            remember(labels, labelStyle, density, segmentWidth) {
+                labels.all { label ->
+                    val textWidth = textMeasurer.measure(label, labelStyle, softWrap = false, density = density)
+                    with(density) { textWidth.size.width.toDp() } + LabeledSegmentMinimumChrome <= segmentWidth
+                }
+            }
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            transports.forEachIndexed { index, transport ->
+                TransportSegment(
+                    selected = activeTransport == transport,
+                    index = index,
+                    count = transports.size,
+                    label = labels[index],
+                    icon = transport.icon,
+                    showLabel = labelsFit,
+                    onClick = { onSelectTransport(transport) },
+                )
+            }
         }
     }
 }
+
+/** A labeled segment's icon and icon gap, plus an 8dp inset each side so the label never meets the divider. */
+private val LabeledSegmentMinimumChrome = SegmentedButtonDefaults.IconSize + 8.dp + 8.dp * 2
 
 private val DeviceType.label: StringResource
     get() =
@@ -94,8 +120,11 @@ private val DeviceType.icon: ImageVector
         }
 
 /**
- * A single transport segment: shows a check when [selected] and the transport [icon] otherwise, so selection is
- * unambiguous while the unselected segments still communicate which transport they represent.
+ * A single transport segment. Labeled, it shows a check when [selected] and the transport [icon] otherwise, so
+ * selection is unambiguous while the unselected segments still communicate which transport they represent. When
+ * [showLabel] is false (some label would not fit at this width and font scale) the segment is icon-only: the transport
+ * icon carries [label] as its content description and the check marks the selected one. The section header below names
+ * the active pane, so nothing is lost visually.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,8 +132,9 @@ private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
     selected: Boolean,
     index: Int,
     count: Int,
-    label: StringResource,
+    label: String,
     icon: ImageVector,
+    showLabel: Boolean,
     onClick: () -> Unit,
 ) {
     SegmentedButton(
@@ -112,14 +142,24 @@ private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
         onClick = onClick,
         shape = SegmentedButtonDefaults.itemShape(index = index, count = count),
         icon = {
-            SegmentedButtonDefaults.Icon(active = selected) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
-                )
+            if (showLabel) {
+                SegmentedButtonDefaults.Icon(active = selected) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
+                    )
+                }
+            } else {
+                SegmentedButtonDefaults.Icon(active = selected)
             }
         },
-        label = { Text(text = stringResource(label), maxLines = 1) },
+        label = {
+            if (showLabel) {
+                Text(text = label, maxLines = 1)
+            } else {
+                Icon(imageVector = icon, contentDescription = label)
+            }
+        },
     )
 }

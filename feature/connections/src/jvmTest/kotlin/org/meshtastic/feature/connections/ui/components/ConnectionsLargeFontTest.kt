@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.connections.ui.components
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.ui.theme.AppTheme
+import kotlin.test.Test
+import kotlin.test.assertTrue
+import kotlin.test.fail
+
+/**
+ * The design standards require the app to support system font scaling up to 200% without clipping text. These render
+ * Connections controls on a 360dp phone and read each label's text layout, so a regression shows up as a failing
+ * assertion rather than a screenshot someone has to notice.
+ */
+@OptIn(ExperimentalTestApi::class)
+class ConnectionsLargeFontTest {
+
+    @Test
+    fun transportSelectorShowsLabelsThatFitAtDefaultFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 1f) { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+
+        for (label in TRANSPORT_LABELS) {
+            assertTextFits(onNodeWithText(label).fetchSemanticsNode(), label)
+        }
+    }
+
+    @Test
+    fun transportSelectorFallsBackToNamedIconsAtDoubleFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 2f) { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+
+        for (label in TRANSPORT_LABELS) {
+            onNodeWithText(label).assertDoesNotExist()
+            onNodeWithContentDescription(label).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun addDeviceFormIsNotClippedAtDoubleFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 2f) { AddDeviceForm(onCancel = {}, onClickAdd = { _, _ -> }) }
+
+        for (label in listOf("Address", "Port:", "Cancel", "Add")) {
+            assertTextFits(onNodeWithText(label).fetchSemanticsNode(), label)
+        }
+        // The port field shows the default service port; every digit of it must be inside the field.
+        val portValue = onAllNodesWithText("4403").fetchSemanticsNodes().first()
+        val textWidth = textLayout(portValue).size.width
+        assertTrue(
+            textWidth <= portValue.boundsInRoot.width - FIELD_HORIZONTAL_PADDING_PX,
+            "port value is $textWidth px wide in a ${portValue.boundsInRoot.width} px field",
+        )
+    }
+
+    @Test
+    fun sectionHeaderWithScanActionIsNotClippedAtDoubleFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 2f) {
+            DeviceSectionHeader(
+                title = "Bluetooth",
+                trailing = { TextButton(onClick = {}) { Text("Scan for Bluetooth devices") } },
+            )
+        }
+
+        assertTextFits(onNodeWithText("Bluetooth").fetchSemanticsNode(), "Bluetooth")
+        assertTextFits(onNodeWithText("Scan for Bluetooth devices").fetchSemanticsNode(), "Scan for Bluetooth devices")
+        onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading)).assertIsDisplayed()
+    }
+
+    private fun ComposeUiTest.setPhoneContent(fontScale: Float, content: @Composable () -> Unit) = setContent {
+        CompositionLocalProvider(LocalDensity provides Density(density = 1f, fontScale = fontScale)) {
+            // 360dp phone minus the screen's 16dp side padding.
+            AppTheme { Box(modifier = Modifier.width(328.dp)) { content() } }
+        }
+    }
+
+    // Line geometry, not hasVisualOverflow: the latter also fires when a font's ascent overhangs its line height, which
+    // is a rendering detail, not a clipped label.
+    private fun assertTextFits(node: SemanticsNode, label: String) {
+        val layout = textLayout(node)
+        val lines = 0 until layout.lineCount
+        val truncated = layout.multiParagraph.didExceedMaxLines || lines.any { layout.isLineEllipsized(it) }
+        val widest = lines.maxOf { layout.getLineRight(it) }
+        assertTrue(!truncated, "\"$label\" is truncated: ${describe(layout)}")
+        assertTrue(widest <= layout.size.width + 1f, "\"$label\" runs $widest px in a ${describe(layout)} box")
+        val words = label.split(' ').size
+        assertTrue(layout.lineCount <= words, "\"$label\" breaks inside a word: ${describe(layout)}")
+    }
+
+    private fun textLayout(node: SemanticsNode): TextLayoutResult {
+        val results = mutableListOf<TextLayoutResult>()
+        val action =
+            node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action
+                ?: fail("no text layout on ${node.config.getOrNull(SemanticsProperties.Text)}")
+        action(results)
+        return results.single()
+    }
+
+    private fun describe(layout: TextLayoutResult) =
+        "lines=${layout.lineCount} size=${layout.size} overflow=${layout.hasVisualOverflow}"
+}
+
+private val TRANSPORT_LABELS = listOf("Bluetooth", "Network", "USB")
+
+private const val FIELD_HORIZONTAL_PADDING_PX = 32f

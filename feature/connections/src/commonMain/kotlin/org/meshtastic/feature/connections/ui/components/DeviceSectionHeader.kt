@@ -18,7 +18,7 @@ package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -27,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /**
@@ -36,8 +38,9 @@ import androidx.compose.ui.unit.dp
  * [trailing] slot on the right (typically a [androidx.compose.material3.TextButton] for a scan toggle), and an optional
  * thin [LinearProgressIndicator] rendered underneath when [showProgress] is true.
  *
- * The header title and the trailing action are rendered on the same baseline so a section's control never drifts above
- * or below its header.
+ * The title and the trailing action share a vertically centered line; when they don't fit side by side (a large font
+ * scale, a long translation) the action wraps below the title instead of squeezing it. The title is a heading, so
+ * screen readers can jump between sections.
  */
 @Composable
 fun DeviceSectionHeader(
@@ -47,15 +50,16 @@ fun DeviceSectionHeader(
     trailing: @Composable () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            itemVerticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.semantics { heading() },
             )
             trailing()
         }
