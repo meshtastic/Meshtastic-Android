@@ -118,6 +118,17 @@ class RadioSetupPolicyTest {
         val joined = listOf(ChannelSettings.Builder().also { cb -> cb.name = "Mesh1" }.build())
         val listed = setupBeaconOffers(offers, lora(region = RegionCode.US), joined).map { it.fromNodeNum }
         assertEquals(listOf(2, 3, 4, 5, 6), listed)
+        // A channel with the same name but another key is a different mesh, so its offer stays.
+        val otherKey =
+            listOf(
+                ChannelSettings.Builder()
+                    .also { cb ->
+                        cb.name = "Mesh1"
+                        cb.psk = okio.ByteString.of(1, 2, 3)
+                    }
+                    .build(),
+            )
+        assertEquals(1, setupBeaconOffers(offers, lora(region = RegionCode.US), otherKey).first().fromNodeNum)
         assertEquals(emptyList(), setupBeaconOffers(emptyList(), null, emptyList()))
     }
 

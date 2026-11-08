@@ -117,7 +117,9 @@ fun RadioSetupScreen(
     val licensed = destNode?.user?.is_licensed
     val steps = remember(licensed == null, offersBeacons) { radioSetupSteps(licensed == true, offersBeacons) }
     var stepName by rememberSaveable { mutableStateOf(RadioSetupStep.INTRO.name) }
-    val stepIndex = steps.indexOf(RadioSetupStep.valueOf(stepName)).coerceAtLeast(0)
+    // A page that leaves the list under the user (the beacon page, on a reconnect that excludes the module) falls
+    // through to the summary, never back to the start.
+    val stepIndex = steps.indexOf(RadioSetupStep.valueOf(stepName)).takeIf { it >= 0 } ?: steps.lastIndex
     val step = steps[stepIndex]
     val advance = { stepName = steps[(stepIndex + 1).coerceAtMost(steps.lastIndex)].name }
     val canStepBack = stepIndex > 0 && step != RadioSetupStep.DONE
