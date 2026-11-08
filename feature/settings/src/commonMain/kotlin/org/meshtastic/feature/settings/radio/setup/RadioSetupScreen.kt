@@ -86,17 +86,22 @@ fun RadioSetupScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     // Closes the setup when a different radio becomes the connected one. Keyed on the transport address, not the node
     // number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it.
-    // The radio this setup was opened for, kept across navigation; opened with none connected, any radio that connects
-    // is a different one.
+    // The radio this setup was opened for, kept across navigation. A reconnect clears the identity before the new
+    // handshake publishes it, so a setup that composes in that gap binds to the first identity it sees.
     val currentOnDone by rememberUpdatedState(onDone)
-    val boundAddress by rememberSaveable { mutableStateOf(nodeManager.connectionIdentity.value?.address) }
-    LaunchedEffect(nodeManager, boundAddress) {
-        nodeManager.connectionIdentity.filterNotNull().collect { if (it.address != boundAddress) currentOnDone() }
+    var boundAddress by rememberSaveable { mutableStateOf(nodeManager.connectionIdentity.value?.address) }
+    LaunchedEffect(nodeManager) {
+        nodeManager.connectionIdentity.filterNotNull().collect {
+            val bound = boundAddress
+            if (bound == null) boundAddress = it.address else if (it.address != bound) currentOnDone()
+        }
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
-    // Fixed at open: a licensing change mid-flow must not move the page out from under an edit.
-    val steps = remember { radioSetupSteps(state.localIsLicensed) }
+    // Fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a licensing change
+    // mid-flow must not move the page out from under an edit.
+    val licensed = destNode?.user?.is_licensed
+    val steps = remember(licensed == null) { radioSetupSteps(licensed == true) }
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
     val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
