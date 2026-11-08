@@ -14,20 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.intro
+package org.meshtastic.feature.settings.radio.setup
 
-import androidx.compose.ui.graphics.vector.ImageVector
-import org.jetbrains.compose.resources.StringResource
-
-/**
- * Data class representing the UI elements for a feature row in the app introduction.
- *
- * @param icon The vector asset for the feature icon.
- * @param titleRes Optional string resource ID for the feature title.
- * @param subtitleRes String resource ID for the feature subtitle.
- */
-internal data class FeatureUIData(
-    val icon: ImageVector,
-    val titleRes: StringResource? = null,
-    val subtitleRes: StringResource,
-)
+/** The pages of the radio setup, in order. */
+enum class RadioSetupStep {
+    INTRO,
+    REGION,
+    PRESET,
+    NAME,
+    DONE,
+}

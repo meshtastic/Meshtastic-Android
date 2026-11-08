@@ -1737,7 +1737,21 @@
     <string name="quick_chat_new">New quick chat</string>
     <string name="quick_chat_show">Show quick chat menu</string>
     <string name="radiation">Radiation</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radio configuration</string>
+    <string name="radio_setup_done_body">The radio transmits with these settings. Change them any time in Radio configuration.</string>
+    <string name="radio_setup_done_headline">All set</string>
+    <string name="radio_setup_intro_body">The radio needs a region before it can transmit. The next pages set the region, the modem preset and the name other people see.</string>
+    <string name="radio_setup_intro_headline">Set up your radio</string>
+    <string name="radio_setup_name_body">Other people see these names in their node lists and on their maps.</string>
+    <string name="radio_setup_name_headline">Name</string>
+    <string name="radio_setup_preset_body">The preset sets the range and speed of the mesh. Everyone on a mesh uses the same one.</string>
+    <string name="radio_setup_preset_custom">This radio uses custom modem settings. They stay unless you pick a preset.</string>
+    <string name="radio_setup_reconnecting">Waiting for the radio to reconnect…</string>
+    <string name="radio_setup_region_body">Pick the region where this radio is used. It sets the frequencies and the power the radio may use.</string>
+    <string name="radio_setup_region_suggested">Suggested from your phone's region. Confirm it or pick another.</string>
+    <string name="radio_setup_restart_notice">The radio restarts after saving. The setup continues once it reconnects.</string>
+    <string name="radio_setup_title">Set up radio</string>
     <string name="rainfall_1h">Rain (1h)</string>
     <string name="rainfall_24h">Rain (24h)</string>
     <string name="range_test">Range Test</string>

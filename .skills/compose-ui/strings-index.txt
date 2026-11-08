@@ -1677,7 +1677,21 @@ quick_chat_instant
 quick_chat_new
 quick_chat_show
 radiation
+### RADIO ###
 radio_configuration
+radio_setup_done_body
+radio_setup_done_headline
+radio_setup_intro_body
+radio_setup_intro_headline
+radio_setup_name_body
+radio_setup_name_headline
+radio_setup_preset_body
+radio_setup_preset_custom
+radio_setup_reconnecting
+radio_setup_region_body
+radio_setup_region_suggested
+radio_setup_restart_notice
+radio_setup_title
 rainfall_1h
 rainfall_24h
 range_test

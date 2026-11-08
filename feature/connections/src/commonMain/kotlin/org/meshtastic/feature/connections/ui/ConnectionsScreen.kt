@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,6 +103,7 @@ import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_location_settings
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.open_wifi_settings
+import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.set_your_region
 import org.meshtastic.core.resources.transmit_disabled
@@ -180,6 +182,8 @@ internal fun ConfigurationWarningCards(
     regionUnset: Boolean,
     txDisabled: Boolean,
     onConfigNavigate: (Route) -> Unit,
+    radioSetupOffer: Int? = null,
+    onOfferRadioSetup: (Int) -> Unit = {},
 ) {
     val showWarnings =
         canShowConfigWarnings(
@@ -190,17 +194,25 @@ internal fun ConfigurationWarningCards(
             isPhysicalDevice = isPhysicalDevice,
         )
 
+    // Opens the radio setup on its own, once per radio, under the same policy that admits the region card.
+    val currentOnOfferRadioSetup by rememberUpdatedState(onOfferRadioSetup)
+    val currentOnConfigNavigate by rememberUpdatedState(onConfigNavigate)
+    LaunchedEffect(showWarnings, radioSetupOffer) {
+        if (showWarnings && radioSetupOffer != null) {
+            currentOnOfferRadioSetup(radioSetupOffer)
+            currentOnConfigNavigate(SettingsRoute.RadioSetup)
+        }
+    }
+
     Column {
-        if (showWarnings && regionUnset) {
+        if (showWarnings) {
             Spacer(modifier = Modifier.height(8.dp))
             Card(modifier = Modifier.fillMaxWidth()) {
                 ListItem(
                     leadingIcon = MeshtasticIcons.Language,
-                    text = stringResource(Res.string.set_your_region),
-                    // Navigate straight to the LoRa screen: it re-reads the route on entry and renders from the
-                    // connect-time snapshot meanwhile, so pre-fetching behind a progress dialog here bought nothing and
-                    // could strand the user on an empty dialog when the read completed before the dialog observed it.
-                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
+                    text =
+                    stringResource(if (regionUnset) Res.string.set_your_region else Res.string.radio_setup_title),
+                    onClick = { onConfigNavigate(SettingsRoute.RadioSetup) },
                 )
             }
         }
@@ -237,6 +249,7 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
     val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
+    val radioSetupOffer by connectionsViewModel.radioSetupOffer.collectAsStateWithLifecycle()
     val txDisabled by connectionsViewModel.txDisabled.collectAsStateWithLifecycle()
     val activeNodeInfoReady by connectionsViewModel.activeNodeInfoReady.collectAsStateWithLifecycle()
     val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
@@ -609,6 +622,8 @@ fun ConnectionsScreen(
                             regionUnset = regionUnset,
                             txDisabled = txDisabled,
                             onConfigNavigate = onConfigNavigate,
+                            radioSetupOffer = radioSetupOffer,
+                            onOfferRadioSetup = connectionsViewModel::markRadioSetupOffered,
                         )
 
                         LiveUpdateSection(

@@ -121,6 +121,9 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object Administration : SettingsRoute
 
+    /** The guided setup for the connected radio: region, preset and name. Writes only to the connected radio. */
+    @Serializable data object RadioSetup : SettingsRoute
+
     // region radio Config Routes
 
     @Serializable data object User : SettingsRoute

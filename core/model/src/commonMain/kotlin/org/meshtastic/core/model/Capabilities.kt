@@ -99,6 +99,9 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
     val supportsEsp32Ota = atLeast(V2_7_18)
 
+    /** Whether a LoRa config write applies without a reboot: v2.8.0 applies it live, older firmware restarts. */
+    val appliesLoraConfigLive = atLeast(V2_8_0)
+
     /**
      * Whether a `coding_rate` above the modem preset's own raises it while `use_preset` is on. Supported since firmware
      * v2.7.18 (meshtastic/firmware#9155); older firmware uses the preset's rate whatever is stored. `coding_rate` is
