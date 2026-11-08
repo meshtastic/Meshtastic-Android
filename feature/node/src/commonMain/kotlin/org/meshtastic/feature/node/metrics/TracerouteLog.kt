@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,11 +55,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.effectiveLongName
@@ -76,18 +79,22 @@ import org.meshtastic.core.resources.traceroute_hops
 import org.meshtastic.core.resources.traceroute_log
 import org.meshtastic.core.resources.traceroute_no_response
 import org.meshtastic.core.resources.traceroute_observed
+import org.meshtastic.core.resources.traceroute_rate_limited
 import org.meshtastic.core.resources.traceroute_return_hops
 import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
 import org.meshtastic.core.resources.traceroute_traced_by
 import org.meshtastic.core.resources.traceroute_unknown_hop
+import org.meshtastic.core.resources.traceroute_waiting
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MessageEnroute
 import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.PersonSearch
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Route
+import org.meshtastic.core.ui.icon.Speed
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -118,11 +125,24 @@ fun TracerouteLogScreen(
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
+    val tracerouteNaks by viewModel.tracerouteNaks.collectAsStateWithLifecycle()
+    val now by
+        produceState(nowMillis) {
+            while (true) {
+                delay(STATE_TICK_MS)
+                value = nowMillis
+            }
+        }
 
     val unknownHopLabel = stringResource(Res.string.traceroute_unknown_hop)
 
-    fun getUsername(nodeNum: Int): String =
-        tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel, viewModel.getDisplayName(nodeNum))
+    fun getUsername(nodeNum: Int): String = tracerouteHopName(
+        nodeNum,
+        viewModel.getUser(nodeNum),
+        unknownHopLabel,
+        viewModel.getDisplayName(nodeNum),
+        viaMqtt = viewModel.isViaMqtt(nodeNum),
+    )
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
@@ -192,6 +212,10 @@ fun TracerouteLogScreen(
                 itemsIndexed(points, key = { _, point -> point.log.uuid }) { _, point ->
                     TracerouteCard(
                         point = point,
+                        requestState =
+                        point
+                            .takeIf { it.kind == TracerouteKind.REQUESTED }
+                            ?.let { tracerouteRequestState(it, tracerouteNaks, now) },
                         getUsername = ::getUsername,
                         isSelected = point.timeSeconds == selectedX,
                         onClick = { onCardClick(point.timeSeconds) },
@@ -242,6 +266,7 @@ fun TracerouteLogScreen(
 @OptIn(ExperimentalFoundationApi::class)
 private fun TracerouteCard(
     point: TraceroutePoint,
+    requestState: TracerouteRequestState?,
     getUsername: (Int) -> String,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -250,7 +275,17 @@ private fun TracerouteCard(
 ) {
     val time = DateFormatter.formatDateTime(point.log.received_date)
     val (routeText, routeIcon) =
-        if (point.kind == TracerouteKind.TRACED_BY) point.route.getInboundText() else point.route.getTextAndIcon()
+        when {
+            point.kind == TracerouteKind.TRACED_BY -> point.route.getInboundText()
+
+            requestState == TracerouteRequestState.WAITING ->
+                stringResource(Res.string.traceroute_waiting) to MeshtasticIcons.MessageEnroute
+
+            requestState == TracerouteRequestState.RATE_LIMITED ->
+                stringResource(Res.string.traceroute_rate_limited) to MeshtasticIcons.Speed
+
+            else -> point.route.getTextAndIcon()
+        }
     val (label, icon) =
         when (point.kind) {
             TracerouteKind.REQUESTED -> null to routeIcon
@@ -505,3 +540,6 @@ private fun RouteDiscovery?.getInboundText(): Pair<String, ImageVector> = when {
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
 }
+
+/** How often the log re-reads the clock, so a waiting request turns into no response without a reload. */
+private const val STATE_TICK_MS = 5_000L

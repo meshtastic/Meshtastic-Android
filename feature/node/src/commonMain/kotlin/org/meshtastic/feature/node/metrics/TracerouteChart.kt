@@ -52,6 +52,7 @@ import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.proto.Routing
 
 /** How an entry in a node's traceroute history came about. */
 internal enum class TracerouteKind {
@@ -95,6 +96,30 @@ internal data class TraceroutePoint(
             val packet = result?.fromRadio?.packet ?: return null
             return if (kind == TracerouteKind.TRACED_BY) packet.inboundRouteDiscovery else packet.fullRouteDiscovery
         }
+}
+
+/** Where a request this app sent stands. A refusal for the radio's rate limit reads differently from silence. */
+internal enum class TracerouteRequestState {
+    WAITING,
+    ANSWERED,
+    NO_RESPONSE,
+    RATE_LIMITED,
+}
+
+/** How long a request waits for its answer before it reads as no response. */
+internal const val TRACEROUTE_ANSWER_WINDOW_MS = 120_000L
+
+/** The state of [point]'s request at [nowMillis], given the routing errors in [naks] keyed by request id. */
+internal fun tracerouteRequestState(
+    point: TraceroutePoint,
+    naks: Map<Int, Int>,
+    nowMillis: Long,
+): TracerouteRequestState = when {
+    point.result != null -> TracerouteRequestState.ANSWERED
+    naks[point.requestId] == Routing.Error.RATE_LIMIT_EXCEEDED.value -> TracerouteRequestState.RATE_LIMITED
+    point.requestId in naks -> TracerouteRequestState.NO_RESPONSE
+    nowMillis - point.log.received_date < TRACEROUTE_ANSWER_WINDOW_MS -> TracerouteRequestState.WAITING
+    else -> TracerouteRequestState.NO_RESPONSE
 }
 
 /**

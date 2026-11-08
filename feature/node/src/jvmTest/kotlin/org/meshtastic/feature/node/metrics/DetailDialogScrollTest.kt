@@ -96,6 +96,7 @@ class DetailDialogScrollTest {
         every { tracerouteResponseProvider.tracerouteResponse } returns MutableStateFlow(null)
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
         every { nodeRequestActions.lastRequestNeighborTimes } returns MutableStateFlow(emptyMap())
+        every { nodeRequestActions.tracerouteNaks } returns MutableStateFlow(emptyMap())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { getNodeDetailsUseCase(any()) } returns flowOf(NodeDetailUiState())
         every { tracerouteSnapshotRepository.getSnapshotPositions(any()) } returns flowOf(emptyMap())

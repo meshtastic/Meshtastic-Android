@@ -171,6 +171,36 @@ class RouteDiscoveryTest {
     }
 
     @Test
+    fun hopName_marksNodeHeardOverMqtt() {
+        val known = user("!a1b2c3d4", "Base Station", "BASE", HardwareModel.TBEAM)
+
+        assertEquals(
+            "My Base (BASE) (MQTT)",
+            tracerouteHopName(0xa1b2c3d4.toInt(), known, UNKNOWN_HOP, displayName = "My Base", viaMqtt = true),
+        )
+    }
+
+    @Test
+    fun hopName_marksMqttOnce_whenLongNameAlreadyCarriesIt() {
+        val known = user("!a1b2c3d4", "Base Station (MQTT)", "BASE", HardwareModel.TBEAM)
+
+        assertEquals(
+            "Base Station (MQTT) (BASE)",
+            tracerouteHopName(0xa1b2c3d4.toInt(), known, UNKNOWN_HOP, viaMqtt = true),
+        )
+    }
+
+    @Test
+    fun hopName_leavesUnknownHopUnmarked() {
+        val placeholder = user("!ffffffff", "Meshtastic ffff", "ffff")
+
+        assertEquals(
+            UNKNOWN_HOP,
+            tracerouteHopName(NodeAddress.NODENUM_BROADCAST, placeholder, UNKNOWN_HOP, viaMqtt = true),
+        )
+    }
+
+    @Test
     fun tracerouteResponse_namesUnknownHopById_andKnownHopByName() {
         val users =
             mapOf(

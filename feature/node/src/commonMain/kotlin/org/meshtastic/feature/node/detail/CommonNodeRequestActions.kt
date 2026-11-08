@@ -62,6 +62,9 @@ constructor(
     private val _lastRequestNeighborTimes = MutableStateFlow<Map<Int, Long>>(emptyMap())
     override val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
+    private val _tracerouteNaks = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    override val tracerouteNaks: StateFlow<Map<Int, Int>> = _tracerouteNaks.asStateFlow()
+
     private suspend fun showFeedback(text: UiText) {
         snackbarManager.showSnackbar(message = resolveUiText(text))
     }
@@ -135,7 +138,13 @@ constructor(
         Logger.i { "Requesting traceroute for '$destNum'" }
         var sent = false
         try {
-            nakWatcher.watch(Res.string.traceroute, longName) { id -> radioController.requestTraceroute(id, destNum) }
+            nakWatcher.watch(
+                Res.string.traceroute,
+                longName,
+                onNak = { id, error -> _tracerouteNaks.update { it + (id to error) } },
+            ) { id ->
+                radioController.requestTraceroute(id, destNum)
+            }
             sent = true
         } finally {
             // A failed or canceled send must not start the cooldown; only undo our own claim.

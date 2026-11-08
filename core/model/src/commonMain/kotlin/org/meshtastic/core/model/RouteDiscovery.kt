@@ -85,19 +85,30 @@ val MeshPacket.inboundRouteDiscovery: RouteDiscovery?
  * Display name for a traceroute hop. A node missing from the node DB comes back from the repository as a placeholder
  * user with no hardware model and a generated "Meshtastic xxxx" name; that case is named by its full node id. Firmware
  * fills a relay that did not add itself with the broadcast address, which is not a node, so it gets [unknownHopLabel].
- * A non-blank local [displayName] replaces the broadcast long name.
+ * A non-blank local [displayName] replaces the broadcast long name. A node last heard over MQTT ([viaMqtt]) is marked
+ * MQTT once, since a hop across MQTT is not an RF hop and its signal reading means something else.
  */
-fun tracerouteHopName(nodeNum: Int, user: User, unknownHopLabel: String, displayName: String = ""): String {
+fun tracerouteHopName(
+    nodeNum: Int,
+    user: User,
+    unknownHopLabel: String,
+    displayName: String = "",
+    viaMqtt: Boolean = false,
+): String {
     if (nodeNum == NodeAddress.NODENUM_BROADCAST) return unknownHopLabel
     val id = NodeAddress.numToDefaultId(nodeNum)
     val placeholder =
         displayName.isBlank() &&
             user.hw_model == HardwareModel.UNSET &&
             (user.long_name.isBlank() || user.long_name == "Meshtastic ${id.takeLast(PLACEHOLDER_SUFFIX_LENGTH)}")
-    return if (placeholder) id else "${displayName.ifBlank { user.long_name }} (${user.short_name})"
+    val name = if (placeholder) id else "${displayName.ifBlank { user.long_name }} (${user.short_name})"
+    return if (viaMqtt && !name.contains(MQTT_MARK)) "$name $MQTT_MARK" else name
 }
 
 private const val PLACEHOLDER_SUFFIX_LENGTH = 4
+
+/** The suffix the node DB already appends to a long name that arrived over MQTT. */
+private const val MQTT_MARK = "(MQTT)"
 
 @Suppress("MagicNumber")
 internal fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {

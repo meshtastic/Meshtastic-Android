@@ -195,6 +195,8 @@ open class MetricsViewModel(
 
     val lastTraceRouteTime: StateFlow<Long?> = nodeRequestActions.lastTracerouteTime
 
+    val tracerouteNaks: StateFlow<Map<Int, Int>> = nodeRequestActions.tracerouteNaks
+
     val lastRequestNeighborsTime: StateFlow<Long?> =
         combine(nodeRequestActions.lastRequestNeighborTimes, activeNodeId) { map, id -> id?.let { map[it] } }
             .stateInWhileSubscribed(null)
@@ -202,6 +204,8 @@ open class MetricsViewModel(
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun getDisplayName(nodeNum: Int): String = nodeRepository.nodeDBbyNum.value[nodeNum]?.displayName.orEmpty()
+
+    fun isViaMqtt(nodeNum: Int): Boolean = nodeRepository.nodeDBbyNum.value[nodeNum]?.viaMqtt == true
 
     /** Persists a user-editable label (e.g. "Solar", "Battery") for a power-metrics channel (0-based index). */
     fun setPowerChannelLabel(nodeNum: Int, channelIndex: Int, label: String) =

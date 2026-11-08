@@ -2061,6 +2061,7 @@ toggle_my_position
 trace_route
 ### TRACEROUTE ###
 traceroute
+traceroute_available_in
 traceroute_diff
 traceroute_direct
 traceroute_duration
@@ -2072,6 +2073,7 @@ traceroute_map_no_data
 traceroute_no_response
 traceroute_observed
 traceroute_outgoing_route
+traceroute_rate_limited
 traceroute_return_hops
 traceroute_return_route
 traceroute_round_trip
@@ -2080,6 +2082,7 @@ traceroute_route_towards_dest
 traceroute_showing_nodes
 traceroute_traced_by
 traceroute_unknown_hop
+traceroute_waiting
 track_and_share_locations
 track_point
 ### TRAFFIC ###

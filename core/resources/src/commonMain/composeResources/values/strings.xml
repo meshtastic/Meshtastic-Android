@@ -2130,6 +2130,7 @@
     <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
+    <string name="traceroute_available_in">Trace Route in %1$d s</string>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
     <string name="traceroute_direct">Direct</string>
     <string name="traceroute_duration">Duration: %1$s s</string>
@@ -2144,6 +2145,7 @@
     <string name="traceroute_no_response">No Response</string>
     <string name="traceroute_observed">Observed</string>
     <string name="traceroute_outgoing_route">Outgoing route</string>
+    <string name="traceroute_rate_limited">Rate limited: the radio sends one traceroute every 30 seconds</string>
     <string name="traceroute_return_hops">Return Hops</string>
     <string name="traceroute_return_route">Return route</string>
     <string name="traceroute_round_trip">Round Trip</string>
@@ -2152,6 +2154,7 @@
     <string name="traceroute_showing_nodes">Showing %1$d/%2$d nodes</string>
     <string name="traceroute_traced_by">Traced by %1$s</string>
     <string name="traceroute_unknown_hop">Unknown hop</string>
+    <string name="traceroute_waiting">Waiting for response</string>
     <string name="track_and_share_locations">Track and Share Locations</string>
     <string name="track_point">track point</string>
     <!-- TRAFFIC -->

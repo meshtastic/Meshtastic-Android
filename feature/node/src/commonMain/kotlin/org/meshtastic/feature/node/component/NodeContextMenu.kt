@@ -27,7 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
@@ -51,6 +50,7 @@ import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.set_display_name
 import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.trace_route
+import org.meshtastic.core.resources.traceroute_available_in
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
 import org.meshtastic.core.ui.icon.CenterFocusStrong
@@ -245,15 +245,17 @@ private fun TraceRouteMenuItem(
     onTraceRoute: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var coolingDown by remember { mutableStateOf(false) }
+    // Seconds until the radio takes another traceroute; 0 when it would take one now.
+    var secondsLeft by remember { mutableLongStateOf(0L) }
     LaunchedEffect(lastTracerouteTime) {
         val endTime = (lastTracerouteTime ?: 0L) + COOL_DOWN_TIME_MS
-        coolingDown = nowMillis < endTime
-        while (coolingDown) {
+        secondsLeft = cooldownSecondsLeft(endTime)
+        while (secondsLeft > 0) {
             delay(COOLDOWN_TICK_MS)
-            coolingDown = nowMillis < endTime
+            secondsLeft = cooldownSecondsLeft(endTime)
         }
     }
+    val coolingDown = secondsLeft > 0
     DropdownMenuItem(
         onClick = {
             onTraceRoute()
@@ -261,7 +263,16 @@ private fun TraceRouteMenuItem(
         },
         enabled = !node.isIgnored && !coolingDown,
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Route, contentDescription = null) },
-        text = { Text(text = stringResource(Res.string.trace_route)) },
+        text = {
+            Text(
+                text =
+                if (coolingDown) {
+                    stringResource(Res.string.traceroute_available_in, secondsLeft.toInt())
+                } else {
+                    stringResource(Res.string.trace_route)
+                },
+            )
+        },
     )
 }
 

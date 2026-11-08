@@ -58,11 +58,13 @@ class TracerouteHandlerImpl(
         val unknownHopLabel = getStringSuspend(Res.string.traceroute_unknown_hop)
         routeDiscovery.getTracerouteResponse(
             getUser = { num ->
+                val node = nodeRepository.nodeDBbyNum.value[num]
                 tracerouteHopName(
                     num,
                     nodeRepository.getUser(num),
                     unknownHopLabel,
-                    nodeRepository.nodeDBbyNum.value[num]?.displayName.orEmpty(),
+                    node?.displayName.orEmpty(),
+                    viaMqtt = node?.viaMqtt == true,
                 )
             },
             headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
