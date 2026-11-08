@@ -143,6 +143,10 @@ class ConnectionsViewModel(
     // it lands cannot open the setup a second time.
     private val radioSetupOfferedNow = MutableStateFlow<Set<Int>>(emptySet())
 
+    /** The connected radio's transport address, the key the radio setup binds to. */
+    val connectionAddress: StateFlow<String?> =
+        nodeManager.connectionIdentity.map { it?.address }.distinctUntilChanged().stateInWhileSubscribed(null)
+
     /**
      * The connected radio's node number while its region is UNSET and the radio setup has not opened for it yet. The
      * screen opens the setup once per emission and marks the radio offered, so a radio the user closed is never

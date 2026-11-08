@@ -62,7 +62,6 @@ import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.settings.navigation.ModuleRoute
-import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -85,6 +84,7 @@ import org.meshtastic.proto.User
 fun RadioSetupScreen(
     viewModel: RadioConfigViewModel,
     onDone: () -> Unit,
+    boundAddress: String?,
     onNavigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
     nodeManager: NodeManager = koinInject(),
@@ -92,21 +92,12 @@ fun RadioSetupScreen(
     uiViewModel: UIViewModel = koinViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    // Closes the setup when a different radio becomes the connected one. Keyed on the transport address, not the node
-    // number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it.
-    // The radio this setup was opened for, kept across navigation. A reconnect clears the identity before the new
-    // handshake publishes it, so a setup that composes in that gap binds to the first identity it sees.
+    // The setup is bound to the radio it was opened for, by the transport address its route carries, never to the
+    // node number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it. Any
+    // identity on another address closes it, and a setup opened with no radio bound closes on the first one.
     val currentOnDone by rememberUpdatedState(onDone)
-    var boundAddress by rememberSaveable { mutableStateOf(nodeManager.connectionIdentity.value?.address) }
-    LaunchedEffect(nodeManager) {
-        nodeManager.connectionIdentity.filterNotNull().collect {
-            val bound = boundAddress
-            if (bound == null) {
-                boundAddress = it.address
-            } else if (it.address != bound) {
-                currentOnDone()
-            }
-        }
+    LaunchedEffect(nodeManager, boundAddress) {
+        nodeManager.connectionIdentity.filterNotNull().collect { if (it.address != boundAddress) currentOnDone() }
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
@@ -146,6 +137,12 @@ fun RadioSetupScreen(
             setupBeaconOffers(allOffers, state.radioConfig.lora, state.channelList)
         }
 
+    // A write goes out only while the bound radio is the one connected: a switch disconnects first, and the bridge
+    // that reports the new radio connected can land before its identity does, so the transport flag alone is not
+    // enough.
+    val identity by nodeManager.connectionIdentity.collectAsStateWithLifecycle()
+    val canWrite = radioSetupCanWrite(state.connected, boundAddress, identity?.address)
+
     val responseState = state.responseState
     val saving = responseState is ResponseState.Loading
     // Two writes leave the name page; a failure on either stands until the user saves again, so a late ack for the
@@ -170,7 +167,7 @@ fun RadioSetupScreen(
         bottomBar = {
             RadioSetupButtons(
                 step = step,
-                state = state,
+                canWrite = canWrite,
                 saving = saving,
                 loraValid = loraForm.value.region != RegionCode.UNSET,
                 userValid = userForm.value.isValidName(capabilities),
@@ -178,10 +175,10 @@ fun RadioSetupScreen(
                 onNext = advance,
                 onSaveLora = {
                     saveFailed = false
-                    if (loraSetupChanged(storedLora, loraForm.value)) {
+                    if (canWrite && loraSetupChanged(storedLora, loraForm.value)) {
                         val lora = loraForm.value.withCodingRateOverrideFor(capabilities)
                         viewModel.setConfig(Config.Builder().also { wb -> wb.lora = lora }.build())
-                    } else {
+                    } else if (canWrite) {
                         advance()
                     }
                 },
@@ -189,9 +186,11 @@ fun RadioSetupScreen(
                     saveFailed = false
                     val userDirty = userForm.isDirty
                     val statusDirty = offersStatus && statusInput != storedStatus
-                    if (userDirty) viewModel.saveUserConfig(userForm.value)
-                    if (statusDirty) viewModel.setModuleConfig(statusConfig(statusInput))
-                    if (!userDirty && !statusDirty) advance()
+                    if (canWrite) {
+                        if (userDirty) viewModel.saveUserConfig(userForm.value)
+                        if (statusDirty) viewModel.setModuleConfig(statusConfig(statusInput))
+                        if (!userDirty && !statusDirty) advance()
+                    }
                 },
                 onDone = onDone,
             )
@@ -228,6 +227,7 @@ fun RadioSetupScreen(
                             offers = offers,
                             lora = state.radioConfig.lora,
                             state = state,
+                            canWrite = canWrite,
                             onListenChange = { listen ->
                                 beaconConfig?.let {
                                     viewModel.setModuleConfig(
@@ -296,7 +296,7 @@ private fun statusConfig(status: String): ModuleConfig = ModuleConfig.Builder()
 @Composable
 private fun RadioSetupButtons(
     step: RadioSetupStep,
-    state: RadioConfigState,
+    canWrite: Boolean,
     saving: Boolean,
     loraValid: Boolean,
     userValid: Boolean,
@@ -326,14 +326,14 @@ private fun RadioSetupButtons(
             OnboardingBottomBar(
                 primaryText = stringResource(Res.string.save),
                 onPrimary = onSaveLora,
-                primaryEnabled = state.connected && loraValid && !saving,
+                primaryEnabled = canWrite && loraValid && !saving,
             )
 
         RadioSetupStep.NAME ->
             OnboardingBottomBar(
                 primaryText = stringResource(Res.string.save),
                 onPrimary = onSaveName,
-                primaryEnabled = state.connected && userValid && !saving,
+                primaryEnabled = canWrite && userValid && !saving,
                 secondaryText = stringResource(Res.string.skip),
                 onSecondary = onNext,
             )

@@ -183,6 +183,7 @@ internal fun ConfigurationWarningCards(
     txDisabled: Boolean,
     onConfigNavigate: (Route) -> Unit,
     radioSetupOffer: Int? = null,
+    radioSetupAddress: String? = null,
     onOfferRadioSetup: (Int) -> Unit = {},
 ) {
     val showWarnings =
@@ -197,10 +198,11 @@ internal fun ConfigurationWarningCards(
     // Opens the radio setup on its own, once per radio, under the same policy that admits the region card.
     val currentOnOfferRadioSetup by rememberUpdatedState(onOfferRadioSetup)
     val currentOnConfigNavigate by rememberUpdatedState(onConfigNavigate)
-    LaunchedEffect(showWarnings, radioSetupOffer) {
-        if (showWarnings && radioSetupOffer != null) {
+    // The offer and the address come from the same identity but through two collectors, so wait for both.
+    LaunchedEffect(showWarnings, radioSetupOffer, radioSetupAddress) {
+        if (showWarnings && radioSetupOffer != null && radioSetupAddress != null) {
             currentOnOfferRadioSetup(radioSetupOffer)
-            currentOnConfigNavigate(SettingsRoute.RadioSetup)
+            currentOnConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress))
         }
     }
 
@@ -212,7 +214,7 @@ internal fun ConfigurationWarningCards(
                     leadingIcon = MeshtasticIcons.Language,
                     text =
                     stringResource(if (regionUnset) Res.string.set_your_region else Res.string.radio_setup_title),
-                    onClick = { onConfigNavigate(SettingsRoute.RadioSetup) },
+                    onClick = { onConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress)) },
                 )
             }
         }
@@ -250,6 +252,7 @@ fun ConnectionsScreen(
     val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
     val radioSetupOffer by connectionsViewModel.radioSetupOffer.collectAsStateWithLifecycle()
+    val connectionAddress by connectionsViewModel.connectionAddress.collectAsStateWithLifecycle()
     val txDisabled by connectionsViewModel.txDisabled.collectAsStateWithLifecycle()
     val activeNodeInfoReady by connectionsViewModel.activeNodeInfoReady.collectAsStateWithLifecycle()
     val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
@@ -623,6 +626,7 @@ fun ConnectionsScreen(
                             txDisabled = txDisabled,
                             onConfigNavigate = onConfigNavigate,
                             radioSetupOffer = radioSetupOffer,
+                            radioSetupAddress = connectionAddress,
                             onOfferRadioSetup = connectionsViewModel::markRadioSetupOffered,
                         )
 

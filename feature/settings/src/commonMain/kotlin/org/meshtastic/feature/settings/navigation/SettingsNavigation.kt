@@ -249,7 +249,7 @@ private fun NavKey.usesRadioConfigSettingsSession(): Boolean = this is SettingsR
     this == SettingsRoute.DeviceConfiguration ||
     this == SettingsRoute.ModuleConfiguration ||
     this == SettingsRoute.Administration ||
-    this == SettingsRoute.RadioSetup ||
+    this is SettingsRoute.RadioSetup ||
     ConfigRoute.entries.any { it.route == this } ||
     ModuleRoute.entries.any { it.route == this }
 
@@ -304,9 +304,10 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         )
     }
 
-    entry<SettingsRoute.RadioSetup> {
+    entry<SettingsRoute.RadioSetup> { args ->
         RadioSetupScreen(
             viewModel = radioConfigViewModelProvider(null),
+            boundAddress = args.address,
             onDone = dropUnlessResumed { backStack.removeLastOrNull() },
             onNavigate = backStack::addSettingsRoute,
         )
