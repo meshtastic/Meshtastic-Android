@@ -35,10 +35,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1190,51 +1193,55 @@ fun MapView(
                 mapViewModel.clearTerrainDownloadState()
             },
         ) {
-            val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
-            val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
-            val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
-            val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
-            OfflineRegionManagerSection(
-                visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
-                currentZoom = cameraPositionState.position.zoom.toInt(),
-                regions = offlineRegions,
-                downloadState = offlineDownloadState,
-                offlineOverlayEnabled = offlineOverlayEnabled,
-                estimateTileCount = mapViewModel::estimateOfflineTileCount,
-                onDownload = mapViewModel::downloadOfflineRegion,
-                onDeleteRegion = mapViewModel::deleteOfflineRegion,
-                onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
-                terrainDownloadState = terrainDownloadState,
-                terrainDownloadRegionId = terrainDownloadRegionId,
-                terrainHillshadeEnabled = terrainHillshadeEnabled,
-                terrainContoursEnabled = terrainContoursEnabled,
-                terrainShadeValleysEnabled = terrainShadeValleysEnabled,
-                onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
-                onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
-                onToggleShadeValleys = mapViewModel::setTerrainShadeValleysEnabled,
-                onToggleContours = mapViewModel::setTerrainContoursEnabled,
-            )
-            HorizontalDivider()
+            // One scroll container for the whole sheet: the offline region list grows with every saved region, and
+            // the layer toggles below it must stay reachable.
+            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+                val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
+                val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
+                val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
+                OfflineRegionManagerSection(
+                    visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
+                    currentZoom = cameraPositionState.position.zoom.toInt(),
+                    regions = offlineRegions,
+                    downloadState = offlineDownloadState,
+                    offlineOverlayEnabled = offlineOverlayEnabled,
+                    estimateTileCount = mapViewModel::estimateOfflineTileCount,
+                    onDownload = mapViewModel::downloadOfflineRegion,
+                    onDeleteRegion = mapViewModel::deleteOfflineRegion,
+                    onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
+                    terrainDownloadState = terrainDownloadState,
+                    terrainDownloadRegionId = terrainDownloadRegionId,
+                    terrainHillshadeEnabled = terrainHillshadeEnabled,
+                    terrainContoursEnabled = terrainContoursEnabled,
+                    terrainShadeValleysEnabled = terrainShadeValleysEnabled,
+                    onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
+                    onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
+                    onToggleShadeValleys = mapViewModel::setTerrainShadeValleysEnabled,
+                    onToggleContours = mapViewModel::setTerrainContoursEnabled,
+                )
+                HorizontalDivider()
 
-            // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
-            RasterOverlayToggles(
-                available = mapViewModel.availableOverlays,
-                enabledIds = enabledOverlayIds,
-                onToggle = { mapViewModel.toggleOverlay(it) },
-                opacity = layerOpacity,
-                onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
-            )
-            HorizontalDivider()
-            CustomMapLayersSheet(
-                mapLayers = mapLayers,
-                onToggleVisibility = onToggleVisibility,
-                onRemoveLayer = onRemoveLayer,
-                onAddLayerClicked = onAddLayerClicked,
-                onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
-                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
-                opacity = layerOpacity,
-                onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
-            )
+                // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
+                RasterOverlayToggles(
+                    available = mapViewModel.availableOverlays,
+                    enabledIds = enabledOverlayIds,
+                    onToggle = { mapViewModel.toggleOverlay(it) },
+                    opacity = layerOpacity,
+                    onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
+                )
+                HorizontalDivider()
+                CustomMapLayersSheet(
+                    mapLayers = mapLayers,
+                    onToggleVisibility = onToggleVisibility,
+                    onRemoveLayer = onRemoveLayer,
+                    onAddLayerClicked = onAddLayerClicked,
+                    onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
+                    onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
+                    opacity = layerOpacity,
+                    onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
+                )
+            }
         }
     }
     // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
