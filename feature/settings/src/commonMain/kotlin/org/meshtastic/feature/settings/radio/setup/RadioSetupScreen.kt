@@ -57,7 +57,6 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OnboardingBottomBar
-import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -128,7 +127,8 @@ fun RadioSetupScreen(
     var statusInput by rememberSaveable(storedStatus) { mutableStateOf(storedStatus) }
 
     // A write goes out only while the bound radio is the one connected: a switch disconnects first, and the bridge
-    // that reports the new radio connected can land before its identity does, so the transport flag alone is not enough.
+    // that reports the new radio connected can land before its identity does, so the transport flag alone is not
+    // enough.
     val identity by nodeManager.connectionIdentity.collectAsStateWithLifecycle()
     val canWrite = radioSetupCanWrite(state.connected, boundAddress, identity?.address)
 
