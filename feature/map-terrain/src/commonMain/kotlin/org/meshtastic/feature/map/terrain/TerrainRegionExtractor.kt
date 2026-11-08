@@ -144,7 +144,8 @@ class TerrainRegionExtractor(
                 ?: error("Global terrain archive not found")
         var processed = global.processed
         var regionalStored = 0L
-        val archives = mutableMapOf(MapterhornEndpoints.GLOBAL_PMTILES_URL to global.version)
+        val archives = mutableMapOf<String, String?>()
+        if (global.stored > 0) archives[MapterhornEndpoints.GLOBAL_PMTILES_URL] = global.version
         for ((archiveTile, tiles) in regionalTilesByArchive) {
             val url = MapterhornEndpoints.regionalArchiveUrl(archiveTile)
             val regional = fetchInto(url, TerrainSource.REGIONAL, tiles, processed, total, onProgress)

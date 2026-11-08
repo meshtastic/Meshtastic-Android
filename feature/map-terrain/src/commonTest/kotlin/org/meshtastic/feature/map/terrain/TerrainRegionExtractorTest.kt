@@ -142,6 +142,23 @@ class TerrainRegionExtractorTest {
     }
 
     @Test
+    fun `a global archive that stores nothing is not named as a source`() = runTest {
+        val extractor =
+            TerrainRegionExtractor(store) { _ ->
+                object : TerrainRegionExtractor.TileArchive {
+                    override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = null
+
+                    override fun close() = Unit
+                }
+            }
+
+        val result = extractor.download(seattle, MapterhornEndpoints.GLOBAL_MAX_ZOOM).last()
+
+        assertIs<TerrainDownloadState.Complete>(result)
+        assertEquals(emptyMap(), result.archives)
+    }
+
+    @Test
     fun `a regional archive that stores nothing is not named as a source`() = runTest {
         val result = extractor(Regional.EMPTY).download(seattle, regionalZoom).last()
 
