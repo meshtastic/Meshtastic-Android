@@ -110,14 +110,17 @@ internal enum class TracerouteRequestState {
 internal const val TRACEROUTE_ANSWER_WINDOW_MS = 120_000L
 
 /** The state of [point]'s request at [nowMillis], given the routing errors in [naks] keyed by request id. */
-internal fun tracerouteRequestState(point: TraceroutePoint, naks: Map<Int, Int>, nowMillis: Long): TracerouteRequestState =
-    when {
-        point.result != null -> TracerouteRequestState.ANSWERED
-        naks[point.requestId] == Routing.Error.RATE_LIMIT_EXCEEDED.value -> TracerouteRequestState.RATE_LIMITED
-        point.requestId in naks -> TracerouteRequestState.NO_RESPONSE
-        nowMillis - point.log.received_date < TRACEROUTE_ANSWER_WINDOW_MS -> TracerouteRequestState.WAITING
-        else -> TracerouteRequestState.NO_RESPONSE
-    }
+internal fun tracerouteRequestState(
+    point: TraceroutePoint,
+    naks: Map<Int, Int>,
+    nowMillis: Long,
+): TracerouteRequestState = when {
+    point.result != null -> TracerouteRequestState.ANSWERED
+    naks[point.requestId] == Routing.Error.RATE_LIMIT_EXCEEDED.value -> TracerouteRequestState.RATE_LIMITED
+    point.requestId in naks -> TracerouteRequestState.NO_RESPONSE
+    nowMillis - point.log.received_date < TRACEROUTE_ANSWER_WINDOW_MS -> TracerouteRequestState.WAITING
+    else -> TracerouteRequestState.NO_RESPONSE
+}
 
 /**
  * Chart series colours for the three traceroute metrics. Forward and return use the same colours as the routes on the

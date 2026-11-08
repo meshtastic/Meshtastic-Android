@@ -30,13 +30,15 @@ class TracerouteRequestStateTest {
         message_type = "Packet",
         received_date = receivedDate,
         raw_message = "",
-        fromRadio = FromRadio(packet = packet),
+        fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
     )
+
+    private fun packet(id: Int) = MeshPacket.Builder().also { wb -> wb.id = id }.build()
 
     private fun requested(sentAt: Long, answered: Boolean = false) = TraceroutePoint(
         kind = TracerouteKind.REQUESTED,
-        request = log("req", MeshPacket(id = REQUEST_ID), sentAt),
-        result = if (answered) log("res", MeshPacket(id = 2), sentAt + 1_000) else null,
+        request = log("req", packet(REQUEST_ID), sentAt),
+        result = if (answered) log("res", packet(2), sentAt + 1_000) else null,
         timeSeconds = sentAt / 1000.0,
         forwardHops = null,
         returnHops = null,

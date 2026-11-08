@@ -55,9 +55,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlinx.coroutines.delay
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
@@ -79,12 +79,12 @@ import org.meshtastic.core.resources.traceroute_hops
 import org.meshtastic.core.resources.traceroute_log
 import org.meshtastic.core.resources.traceroute_no_response
 import org.meshtastic.core.resources.traceroute_observed
+import org.meshtastic.core.resources.traceroute_rate_limited
 import org.meshtastic.core.resources.traceroute_return_hops
 import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
 import org.meshtastic.core.resources.traceroute_traced_by
-import org.meshtastic.core.resources.traceroute_rate_limited
 import org.meshtastic.core.resources.traceroute_unknown_hop
 import org.meshtastic.core.resources.traceroute_waiting
 import org.meshtastic.core.ui.icon.Group
@@ -136,14 +136,13 @@ fun TracerouteLogScreen(
 
     val unknownHopLabel = stringResource(Res.string.traceroute_unknown_hop)
 
-    fun getUsername(nodeNum: Int): String =
-        tracerouteHopName(
-            nodeNum,
-            viewModel.getUser(nodeNum),
-            unknownHopLabel,
-            viewModel.getDisplayName(nodeNum),
-            viaMqtt = viewModel.isViaMqtt(nodeNum),
-        )
+    fun getUsername(nodeNum: Int): String = tracerouteHopName(
+        nodeNum,
+        viewModel.getUser(nodeNum),
+        unknownHopLabel,
+        viewModel.getDisplayName(nodeNum),
+        viaMqtt = viewModel.isViaMqtt(nodeNum),
+    )
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
@@ -278,10 +277,13 @@ private fun TracerouteCard(
     val (routeText, routeIcon) =
         when {
             point.kind == TracerouteKind.TRACED_BY -> point.route.getInboundText()
+
             requestState == TracerouteRequestState.WAITING ->
                 stringResource(Res.string.traceroute_waiting) to MeshtasticIcons.MessageEnroute
+
             requestState == TracerouteRequestState.RATE_LIMITED ->
                 stringResource(Res.string.traceroute_rate_limited) to MeshtasticIcons.Speed
+
             else -> point.route.getTextAndIcon()
         }
     val (label, icon) =

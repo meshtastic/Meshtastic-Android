@@ -27,7 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
@@ -247,13 +246,13 @@ private fun TraceRouteMenuItem(
     onDismiss: () -> Unit,
 ) {
     // Seconds until the radio takes another traceroute; 0 when it would take one now.
-    var secondsLeft by remember { mutableStateOf(0L) }
+    var secondsLeft by remember { mutableLongStateOf(0L) }
     LaunchedEffect(lastTracerouteTime) {
         val endTime = (lastTracerouteTime ?: 0L) + COOL_DOWN_TIME_MS
-        secondsLeft = secondsUntil(endTime)
+        secondsLeft = cooldownSecondsLeft(endTime)
         while (secondsLeft > 0) {
             delay(COOLDOWN_TICK_MS)
-            secondsLeft = secondsUntil(endTime)
+            secondsLeft = cooldownSecondsLeft(endTime)
         }
     }
     val coolingDown = secondsLeft > 0
@@ -277,10 +276,7 @@ private fun TraceRouteMenuItem(
     )
 }
 
-private fun secondsUntil(endTime: Long): Long = ((endTime - nowMillis).coerceAtLeast(0L) + MS_PER_SECOND - 1) / MS_PER_SECOND
-
 private const val COOLDOWN_TICK_MS = 500L
-private const val MS_PER_SECOND = 1000L
 
 @Composable
 private fun MenuItem(icon: ImageVector, text: String, onClick: () -> Unit, onDismiss: () -> Unit) {
