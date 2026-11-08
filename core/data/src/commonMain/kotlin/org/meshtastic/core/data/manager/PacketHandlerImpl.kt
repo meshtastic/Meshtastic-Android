@@ -269,29 +269,41 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult = if (packet.id == 0) {
-        Logger.w { "Rejecting awaited packet without an ID" }
-        AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
-    } else {
-        when (val admission = enqueuePacket(packet, awaitRouting = true)) {
-            is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
+    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult =
+        enqueueAndAwait(packet, expectedConnectionVersion = null)
 
-            QueueAdmission.TransportUnavailable -> {
-                Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: radio is not connected" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
-            }
+    override suspend fun sendToRadioAndAwaitResultForConnection(
+        packet: MeshPacket,
+        expectedConnectionVersion: Long,
+    ): AwaitedSendResult = enqueueAndAwait(packet, expectedConnectionVersion)
 
-            QueueAdmission.ScopeInactive -> {
-                Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
-            }
+    private suspend fun enqueueAndAwait(packet: MeshPacket, expectedConnectionVersion: Long?): AwaitedSendResult =
+        if (packet.id == 0) {
+            Logger.w { "Rejecting awaited packet without an ID" }
+            AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+        } else {
+            when (
+                val admission =
+                    enqueuePacket(packet, awaitRouting = true, expectedConnectionVersion = expectedConnectionVersion)
+            ) {
+                is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
 
-            QueueAdmission.DuplicateId -> {
-                Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
-                AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+                QueueAdmission.TransportUnavailable -> {
+                    Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: radio is not connected" }
+                    AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
+                }
+
+                QueueAdmission.ScopeInactive -> {
+                    Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
+                    AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
+                }
+
+                QueueAdmission.DuplicateId -> {
+                    Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
+                    AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+                }
             }
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun awaitAdmittedPacket(packet: MeshPacket, pending: PendingResponse): AwaitedSendResult {

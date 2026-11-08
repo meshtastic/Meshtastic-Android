@@ -206,6 +206,28 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `reconnect before an owned awaited packet is admitted reports the transport stopped`() =
+        runTest(testDispatcher) {
+            connectionStateFlow.value = ConnectionState.Connected
+            val lifecycleFlow = MutableStateFlow(ConnectionLifecycle(version = 11, state = ConnectionState.Connected))
+            every { serviceRepository.connectionLifecycle } returns lifecycleFlow
+            val ownedHandler = handlerWithScope(testScope)
+            val capturedVersion = lifecycleFlow.value.version
+
+            lifecycleFlow.value = ConnectionLifecycle(version = 13, state = ConnectionState.Connected)
+
+            val result =
+                ownedHandler.sendToRadioAndAwaitResultForConnection(
+                    MeshPacket.Builder().also { wb -> wb.id = 462 }.build(),
+                    capturedVersion,
+                )
+
+            assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, result.status)
+            assertFalse(result.dispatched)
+            verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
+        }
+
+    @Test
     fun `reconnect while an owned packet waits in the queue prevents stale dispatch`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         val lifecycleFlow = MutableStateFlow(ConnectionLifecycle(version = 11, state = ConnectionState.Connected))

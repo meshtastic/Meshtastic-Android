@@ -45,7 +45,13 @@ interface CommandSender {
      */
     suspend fun sendData(p: DataPacket)
 
-    /** Sends an admin message to a specific node, or throws if the outbound queue rejects it. */
+    /**
+     * Sends an admin message to a specific node, or throws if the outbound queue rejects it.
+     *
+     * The message is bound to the connection lifecycle `version` current when this call is made: a disconnect or radio
+     * switch before the queue dispatches it rejects it with [PacketQueueRejectedException] instead of sending it
+     * through the replacement transport. Admin messages carry the passkey of one session, so none outlives it.
+     */
     suspend fun sendAdmin(
         destNum: Int,
         requestId: Int = generatePacketId(),
@@ -96,10 +102,32 @@ interface CommandSender {
     /**
      * Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. Queue or transport
      * rejection is represented by a non-accepted [AwaitedSendResult] with `dispatched == false`; it is not reported as
-     * [PacketQueueRejectedException].
+     * [PacketQueueRejectedException]. Bound to the current lifecycle `version` like [sendAdmin].
      */
     suspend fun sendAdminAwaitResult(
         destNum: Int,
+        requestId: Int = generatePacketId(),
+        wantResponse: Boolean = false,
+        initFn: () -> AdminMessage,
+    ): AwaitedSendResult
+
+    /** [sendAdminAwait] bound to a `version` the caller captured earlier; see [sendAdminAwaitResultForConnection]. */
+    suspend fun sendAdminAwaitForConnection(
+        destNum: Int,
+        expectedConnectionVersion: Long,
+        requestId: Int = generatePacketId(),
+        wantResponse: Boolean = false,
+        initFn: () -> AdminMessage,
+    ): Boolean =
+        sendAdminAwaitResultForConnection(destNum, expectedConnectionVersion, requestId, wantResponse, initFn).accepted
+
+    /**
+     * [sendAdminAwaitResult] bound to a `version` the caller captured earlier, for a sequence of writes that must all
+     * reach the same transport session. A stale version is a non-accepted result with `dispatched == false`.
+     */
+    suspend fun sendAdminAwaitResultForConnection(
+        destNum: Int,
+        expectedConnectionVersion: Long,
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
         initFn: () -> AdminMessage,
