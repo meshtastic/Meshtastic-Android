@@ -180,6 +180,30 @@ internal fun canShowConfigWarnings(
 ): Boolean =
     connectedWithNode && activeNodeInfoReady && lockdownState.allowsConfigWrites && !isManaged && isPhysicalDevice
 
+/**
+ * Opens the radio setup on its own, once per radio, under the same policy that admits the region card. It runs at
+ * screen level, not inside the warning cards, because on a phone those cards live in the device list's lazy header and
+ * leave composition once scrolled away.
+ */
+@Composable
+internal fun RadioSetupOfferEffect(
+    showWarnings: Boolean,
+    radioSetupOffer: Int?,
+    radioSetupAddress: String?,
+    onOfferRadioSetup: (Int) -> Unit,
+    onConfigNavigate: (Route) -> Unit,
+) {
+    val currentOnOfferRadioSetup by rememberUpdatedState(onOfferRadioSetup)
+    val currentOnConfigNavigate by rememberUpdatedState(onConfigNavigate)
+    // The offer and the address come from the same identity but through two collectors, so wait for both.
+    LaunchedEffect(showWarnings, radioSetupOffer, radioSetupAddress) {
+        if (showWarnings && radioSetupOffer != null && radioSetupAddress != null) {
+            currentOnOfferRadioSetup(radioSetupOffer)
+            currentOnConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress))
+        }
+    }
+}
+
 /** Applies connection policy and renders the actionable configuration-health cards it admits. */
 @Composable
 internal fun ConfigurationWarningCards(
@@ -191,9 +215,7 @@ internal fun ConfigurationWarningCards(
     regionUnset: Boolean,
     txDisabled: Boolean,
     onConfigNavigate: (Route) -> Unit,
-    radioSetupOffer: Int? = null,
     radioSetupAddress: String? = null,
-    onOfferRadioSetup: (Int) -> Unit = {},
 ) {
     val showWarnings =
         canShowConfigWarnings(
@@ -203,17 +225,6 @@ internal fun ConfigurationWarningCards(
             isManaged = isManaged,
             isPhysicalDevice = isPhysicalDevice,
         )
-
-    // Opens the radio setup on its own, once per radio, under the same policy that admits the region card.
-    val currentOnOfferRadioSetup by rememberUpdatedState(onOfferRadioSetup)
-    val currentOnConfigNavigate by rememberUpdatedState(onConfigNavigate)
-    // The offer and the address come from the same identity but through two collectors, so wait for both.
-    LaunchedEffect(showWarnings, radioSetupOffer, radioSetupAddress) {
-        if (showWarnings && radioSetupOffer != null && radioSetupAddress != null) {
-            currentOnOfferRadioSetup(radioSetupOffer)
-            currentOnConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress))
-        }
-    }
 
     // Emitted only when there is a card to show: an empty column would still take a gap in the caller's spacing.
     if (!showWarnings) return
@@ -473,21 +484,48 @@ fun ConnectionsScreen(
             )
         },
     ) { paddingValues ->
+        val uiState =
+            when {
+                connectionState is ConnectionState.Connected && ourNode != null -> ConnectionUiState.CONNECTED_WITH_NODE
+
+                connectionState is ConnectionState.Connected ||
+                    connectionState == ConnectionState.Connecting ||
+                    selectedDevice != NO_DEVICE_SELECTED -> ConnectionUiState.CONNECTING
+
+                else -> ConnectionUiState.NO_DEVICE
+            }
+        val isPhysicalDevice =
+            selectedDevice != InterfaceId.MOCK.id.toString() && selectedDevice != InterfaceId.REPLAY.id.toString()
+        val isManaged = localConfig.security?.is_managed == true
+
+        // Gate on LockdownState rather than sessionAuthorized. Pre-2.8 firmware and newer builds that
+        // do not include runtime lockdown support never enter that authentication flow, while an
+        // explicit DISABLED state also leaves sessionAuthorized false. None, Disabled, and Unlocked do
+        // not withhold config writes on lockdown grounds; AwaitingResponse stays non-actionable until
+        // firmware reports the result. Managed mode is a separate client policy: match the existing
+        // settings behavior and suppress warnings only when SecurityConfig explicitly marks the device
+        // managed, so an incomplete first-run config stream does not hide the region warning.
+        // Node readiness binds the warnings to the active transport session. Stage 1 clears cached
+        // config before accepting the fresh stream, while a cached node can survive a database switch;
+        // do not attribute post-handshake config state to a node the new session has not identified.
+        RadioSetupOfferEffect(
+            showWarnings =
+            canShowConfigWarnings(
+                connectedWithNode = uiState == ConnectionUiState.CONNECTED_WITH_NODE,
+                activeNodeInfoReady = activeNodeInfoReady,
+                lockdownState = lockdownState,
+                isManaged = isManaged,
+                isPhysicalDevice = isPhysicalDevice,
+            ),
+            radioSetupOffer = radioSetupOffer,
+            radioSetupAddress = connectionAddress,
+            onOfferRadioSetup = connectionsViewModel::markRadioSetupOffered,
+            onConfigNavigate = onConfigNavigate,
+        )
+
         // Connection card, warnings, transport selector and permission cards. Stacked, this is the head of the device
         // list's LazyColumn, so one scroll reaches everything at any font scale; split, it is the first pane.
         val connectionHeader: @Composable ColumnScope.() -> Unit = {
-            val uiState =
-                when {
-                    connectionState is ConnectionState.Connected && ourNode != null ->
-                        ConnectionUiState.CONNECTED_WITH_NODE
-
-                    connectionState is ConnectionState.Connected ||
-                        connectionState == ConnectionState.Connecting ||
-                        selectedDevice != NO_DEVICE_SELECTED -> ConnectionUiState.CONNECTING
-
-                    else -> ConnectionUiState.NO_DEVICE
-                }
-
             // ── Connected Device slot ──
             // A single Card shell hosts all three states; AnimatedContent animates the size between them and
             // `heightIn(min = CardMinHeight)` keeps a stable floor. No animateContentSize here: under the two-pane
@@ -594,20 +632,7 @@ fun ConnectionsScreen(
                 }
 
             // Config warnings sit outside the animated card so they do not affect the
-            // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.
-            val isPhysicalDevice =
-                selectedDevice != InterfaceId.MOCK.id.toString() && selectedDevice != InterfaceId.REPLAY.id.toString()
-            val isManaged = localConfig.security?.is_managed == true
-            // Gate on LockdownState rather than sessionAuthorized. Pre-2.8 firmware and newer builds that
-            // do not include runtime lockdown support never enter that authentication flow, while an
-            // explicit DISABLED state also leaves sessionAuthorized false. None, Disabled, and Unlocked do
-            // not withhold config writes on lockdown grounds; AwaitingResponse stays non-actionable until
-            // firmware reports the result. Managed mode is a separate client policy: match the existing
-            // settings behavior and suppress warnings only when SecurityConfig explicitly marks the device
-            // managed, so an incomplete first-run config stream does not hide the region warning.
-            // Node readiness binds the warnings to the active transport session. Stage 1 clears cached
-            // config before accepting the fresh stream, while a cached node can survive a database switch;
-            // do not attribute post-handshake config state to a node the new session has not identified.
+            // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition. Same policy as RadioSetupOfferEffect above.
             ConfigurationWarningCards(
                 connectedWithNode = uiState == ConnectionUiState.CONNECTED_WITH_NODE,
                 activeNodeInfoReady = activeNodeInfoReady,
@@ -617,9 +642,7 @@ fun ConnectionsScreen(
                 regionUnset = regionUnset,
                 txDisabled = txDisabled,
                 onConfigNavigate = onConfigNavigate,
-                radioSetupOffer = radioSetupOffer,
                 radioSetupAddress = connectionAddress,
-                onOfferRadioSetup = connectionsViewModel::markRadioSetupOffered,
             )
 
             LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)

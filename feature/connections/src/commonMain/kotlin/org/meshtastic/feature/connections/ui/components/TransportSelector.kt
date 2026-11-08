@@ -103,8 +103,12 @@ fun TransportSelector(
     }
 }
 
-/** A labeled segment's icon and icon gap, plus an 8dp inset each side so the label never meets the divider. */
-private val LabeledSegmentMinimumChrome = SegmentedButtonDefaults.IconSize + 8.dp + 8.dp * 2
+/**
+ * A labeled segment's icon and icon gap, plus a 4dp inset each side so the label never meets the divider. Three labels
+ * at default font on a 360dp phone keep about 9dp of headroom, so font metrics that differ by a few percent between
+ * devices don't flip the selector to icons.
+ */
+private val LabeledSegmentMinimumChrome = SegmentedButtonDefaults.IconSize + 8.dp + 4.dp * 2
 
 private val DeviceType.label: StringResource
     get() =

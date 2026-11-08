@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
@@ -60,9 +63,33 @@ class ConnectionsLargeFontTest {
     fun transportSelectorShowsLabelsThatFitAtDefaultFontScale() = runComposeUiTest {
         setPhoneContent(fontScale = 1f) { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
 
-        for (label in TRANSPORT_LABELS) {
-            assertTextFits(onNodeWithText(label).fetchSemanticsNode(), label)
+        assertLabelsFitTheirSegments()
+    }
+
+    // The fallback is chosen per layout, not once: a selector that starts too narrow for its labels shows icons, and
+    // gets its labels back when it widens.
+    @Test
+    fun transportSelectorLabelsReturnWhenTheSelectorWidens() = runComposeUiTest {
+        var width by mutableStateOf(200.dp)
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(density = 1f, fontScale = 1f)) {
+                AppTheme {
+                    Box(modifier = Modifier.width(width)) {
+                        TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+                    }
+                }
+            }
         }
+
+        for (label in TRANSPORT_LABELS) {
+            onNodeWithText(label).assertDoesNotExist()
+            onNodeWithContentDescription(label).assertIsDisplayed()
+        }
+
+        width = 328.dp
+        waitForIdle()
+
+        assertLabelsFitTheirSegments()
     }
 
     @Test
@@ -138,8 +165,28 @@ class ConnectionsLargeFontTest {
         val widest = lines.maxOf { layout.getLineRight(it) }
         assertTrue(!truncated, "\"$label\" is truncated: ${describe(layout)}")
         assertTrue(widest <= layout.size.width + 1f, "\"$label\" runs $widest px in a ${describe(layout)} box")
-        val words = label.split(' ').size
-        assertTrue(layout.lineCount <= words, "\"$label\" breaks inside a word: ${describe(layout)}")
+        val text = layout.layoutInput.text.text
+        for (line in 0 until layout.lineCount - 1) {
+            val end = layout.getLineEnd(line)
+            val atSpace = text.getOrNull(end - 1)?.isWhitespace() == true || text.getOrNull(end)?.isWhitespace() == true
+            assertTrue(atSpace, "\"$label\" breaks inside a word after \"${text.take(end)}\"")
+        }
+    }
+
+    // Each label sits inside its own segment with at least the selector's 4dp inset, so it can't spill into the
+    // padding or under the divider, which the text layout alone would not show.
+    private fun ComposeUiTest.assertLabelsFitTheirSegments() {
+        for (label in TRANSPORT_LABELS) {
+            val text = onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+            assertTextFits(text, label)
+            val segment =
+                generateSequence(text.parent) { it.parent }.first { SemanticsActions.OnClick in it.config }.boundsInRoot
+            val bounds = text.boundsInRoot
+            assertTrue(
+                bounds.left >= segment.left + SEGMENT_INSET_PX && bounds.right <= segment.right - SEGMENT_INSET_PX,
+                "\"$label\" at $bounds is not inset in its segment $segment",
+            )
+        }
     }
 
     private fun textLayout(node: SemanticsNode): TextLayoutResult {
@@ -158,3 +205,6 @@ class ConnectionsLargeFontTest {
 private val TRANSPORT_LABELS = listOf("Bluetooth", "Network", "USB")
 
 private const val FIELD_HORIZONTAL_PADDING_PX = 32f
+
+// The selector's minimum label inset, at the test's density of 1.
+private const val SEGMENT_INSET_PX = 4f
