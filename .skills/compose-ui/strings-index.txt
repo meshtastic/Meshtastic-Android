@@ -1048,6 +1048,7 @@ low_entropy_key_title
 lux
 manage_custom_tile_sources
 manage_map_layers
+managed_mode_recovery
 manual_position_request
 ### MAP ###
 map
