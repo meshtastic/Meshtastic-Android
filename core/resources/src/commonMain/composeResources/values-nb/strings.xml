@@ -220,7 +220,9 @@
     <string name="quick_chat_edit">Endre enkelchat</string>
     <string name="quick_chat_instant">Send øyeblikkelig</string>
     <string name="quick_chat_new">Ny enkelchat</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radiokonfigurasjon</string>
+    <string name="radio_setup_name_headline">Navn</string>
     <string name="reboot">Omstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Fjernadministrasjon</string>

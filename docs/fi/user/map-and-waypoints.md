@@ -195,7 +195,7 @@ On **Google Play**, the layers sheet's **Offline Manager** section downloads its
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
 directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
 it finishes turn on **Show on map** to draw it. The switch is off by default, so a download never covers up the
-live map unasked. **Desktop** has no offline base map downloads, though the offline terrain described next
+live map unasked. With no network it also names the places and bodies of water in view. **Desktop** has no offline base map downloads, though the offline terrain described next
 does work there.
 
 ### Offline terrain

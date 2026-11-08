@@ -220,7 +220,9 @@
     <string name="quick_chat_edit">Redaguoti greitą pokalbį</string>
     <string name="quick_chat_instant">Siųsti nedelsiant</string>
     <string name="quick_chat_new">Naujas greitas pokalbis</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radijo modulio konfigūracija</string>
+    <string name="radio_setup_name_headline">Pavadinimas</string>
     <string name="reboot">Perkrauti</string>
     <!-- REMOTE -->
     <string name="remote_admin">Nuotolinis administravimas</string>

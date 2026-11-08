@@ -1078,7 +1078,9 @@
     <string name="quick_chat_new">Nouveau clavardage</string>
     <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
     <string name="radiation">Radiation</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Réglages de l'appareil</string>
+    <string name="radio_setup_name_headline">Nom convivial</string>
     <string name="rainfall_1h">Pluie (1h)</string>
     <string name="rainfall_24h">Pluie (24h)</string>
     <string name="range_test">Tests de portée</string>

@@ -219,7 +219,9 @@
     <string name="quick_chat_edit">Redakto bisedën e shpejtë</string>
     <string name="quick_chat_instant">Dërgo menjëherë</string>
     <string name="quick_chat_new">Bisedë e re e shpejtë</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfigurimi i radios</string>
+    <string name="radio_setup_name_headline">Emri</string>
     <string name="reboot">Rindiz</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administratë e Largët</string>

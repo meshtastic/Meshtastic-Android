@@ -551,7 +551,9 @@
     <string name="quick_chat_new">Új gyors csevegés</string>
     <string name="quick_chat_show">Gyors csevegés menü megjelenítése</string>
     <string name="radiation">Sugárzás</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Eszköz beállítások</string>
+    <string name="radio_setup_name_headline">Barátságos név</string>
     <string name="range_test">Hatótáv-teszt</string>
     <string name="range_test_config">Hatótáv-teszt beállításai</string>
     <string name="react">Reagálás</string>

@@ -229,6 +229,8 @@
     <string name="qr_code">QR-код</string>
     <!-- QUICK -->
     <string name="quick_chat_instant">Імгненна даслаць</string>
+    <!-- RADIO -->
+    <string name="radio_setup_name_headline">Назва</string>
     <string name="reboot">Перазагрузіць</string>
     <!-- REMOTE -->
     <string name="remote_shell_send">Адправіць</string>

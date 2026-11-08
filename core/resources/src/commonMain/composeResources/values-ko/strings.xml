@@ -375,7 +375,9 @@
     <string name="quick_chat_instant">즉시 보내기</string>
     <string name="quick_chat_new">새로운 빠른 대화</string>
     <string name="radiation">복사</string>
+    <!-- RADIO -->
     <string name="radio_configuration">무선 설정</string>
+    <string name="radio_setup_name_headline">식별 이름</string>
     <string name="range_test">거리 테스트</string>
     <string name="range_test_config">거리 테스트 설정</string>
     <string name="react">반응</string>

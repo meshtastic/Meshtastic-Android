@@ -197,7 +197,9 @@
     <string name="quick_chat_edit">Uredi brzi chat</string>
     <string name="quick_chat_instant">Pošalji odmah</string>
     <string name="quick_chat_new">Novi brzi razgovor</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfiguracija uređaja</string>
+    <string name="radio_setup_name_headline">Ime</string>
     <string name="reboot">Ponovno pokreni</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">Zaključano</string>

@@ -199,7 +199,9 @@
     <!-- PREVIEW -->
     <string name="qr_code">رمز الاستجابة السريع</string>
     <!-- QUICK -->
+    <!-- RADIO -->
     <string name="radio_configuration">إعدادات الراديو</string>
+    <string name="radio_setup_name_headline">الاسم</string>
     <string name="reboot">إعادة التشغيل</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">مقفل</string>

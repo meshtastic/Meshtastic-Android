@@ -222,7 +222,9 @@
     <string name="quick_chat_edit">Uredi hitri klepet</string>
     <string name="quick_chat_instant">Pošlji takoj</string>
     <string name="quick_chat_new">Novi hitri klepet</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Nastavitev radia</string>
+    <string name="radio_setup_name_headline">Ime</string>
     <string name="reboot">Ponovni zagon</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administracija na daljavo</string>

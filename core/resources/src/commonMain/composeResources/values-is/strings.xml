@@ -164,7 +164,9 @@
     <string name="quick_chat_edit">Breyta flýtiskilaboðum</string>
     <string name="quick_chat_instant">Sent samtímis</string>
     <string name="quick_chat_new">Ný flýtiskilaboð</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Stillingar radíós</string>
+    <string name="radio_setup_name_headline">Heiti</string>
     <string name="reboot">Endurræsa</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">Læst</string>
