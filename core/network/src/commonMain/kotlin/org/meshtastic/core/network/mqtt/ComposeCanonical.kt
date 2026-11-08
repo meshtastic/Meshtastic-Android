@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.network.mqtt
 
-import platform.Foundation.NSString
-import platform.Foundation.decomposedStringWithCanonicalMapping
-
-@Suppress("CAST_NEVER_SUCCEEDS")
-internal actual fun decomposeCanonical(text: String): String = (text as NSString).decomposedStringWithCanonicalMapping
+/**
+ * Canonical composition (NFC), so a letter typed as a base letter plus a combining mark ("u" + "\u0308") matches the
+ * precomposed letter ("ü") a community writes in its root.
+ */
+internal expect fun composeCanonical(text: String): String
