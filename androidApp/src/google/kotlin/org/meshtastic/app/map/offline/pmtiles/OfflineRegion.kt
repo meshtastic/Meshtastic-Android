@@ -55,6 +55,12 @@ data class OfflineRegion(
      * always-present global one (zoom 0-12) — see [org.meshtastic.feature.map.terrain.TerrainRegionExtractor].
      */
     val terrainHasRegionalDetail: Boolean = false,
+    /** The Protomaps build the vector tiles came from; `null` for manifests written before it was recorded. */
+    val protomapsBuildUrl: String? = null,
+    /** Each Mapterhorn archive URL the terrain came from, mapped to its ETag when the server gave one. */
+    val terrainSourceArchives: Map<String, String?> = emptyMap(),
+    /** When the terrain download finished, or `null` when there is none or it predates this field. */
+    val terrainDownloadedAtEpochSeconds: Long? = null,
 ) {
     val bounds: LatLngBounds
         get() = LatLngBounds(LatLng(southLat, westLon), LatLng(northLat, eastLon))

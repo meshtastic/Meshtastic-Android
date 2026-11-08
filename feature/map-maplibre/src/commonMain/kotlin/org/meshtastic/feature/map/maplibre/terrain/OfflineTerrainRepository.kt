@@ -35,6 +35,7 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.layers.mapLayerFileSystem
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.TerrainDownloadFailure
@@ -254,6 +255,8 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
                 hasRegionalDetail = state.hasRegionalDetail,
                 tileCount = state.tileCount,
                 byteSize = state.byteSize,
+                sourceArchives = state.archives,
+                downloadedAtEpochSeconds = nowSeconds,
             )
         return try {
             writeManifest(downloaded)
