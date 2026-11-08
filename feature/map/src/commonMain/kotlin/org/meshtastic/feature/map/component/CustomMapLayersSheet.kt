@@ -18,13 +18,10 @@ package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -100,52 +98,48 @@ fun CustomMapLayersSheet(
     modifier: Modifier = Modifier,
 ) {
     var showAddNetworkLayerDialog by remember { mutableStateOf(false) }
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 16.dp)) {
-        item {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = stringResource(Res.string.manage_map_layers),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            HorizontalDivider()
-        }
-        item {
-            Text(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp),
-                text = stringResource(Res.string.map_layer_formats),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
+    // Not lazy: this sits inside the layers sheet's single scroll container, under sections whose height grows with
+    // the saved offline regions, and a lazy list there gets squeezed to nothing.
+    Column(modifier = modifier.padding(bottom = 16.dp)) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(Res.string.manage_map_layers),
+            style = MaterialTheme.typography.headlineSmall,
+        )
+        HorizontalDivider()
+        Text(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp),
+            text = stringResource(Res.string.map_layer_formats),
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         if (mapLayers.isEmpty()) {
-            item {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = stringResource(Res.string.no_map_layers_loaded),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = stringResource(Res.string.no_map_layers_loaded),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         } else {
-            items(mapLayers, key = { it.id }) { layer ->
-                MapLayerRow(
-                    layer = layer,
-                    onToggleVisibility = onToggleVisibility,
-                    onRemoveLayer = onRemoveLayer,
-                    onRefreshLayer = onRefreshLayer,
-                    opacity = opacity,
-                    onOpacityChange = onOpacityChange,
-                )
-                HorizontalDivider()
+            mapLayers.forEach { layer ->
+                key(layer.id) {
+                    MapLayerRow(
+                        layer = layer,
+                        onToggleVisibility = onToggleVisibility,
+                        onRemoveLayer = onRemoveLayer,
+                        onRefreshLayer = onRefreshLayer,
+                        opacity = opacity,
+                        onOpacityChange = onOpacityChange,
+                    )
+                    HorizontalDivider()
+                }
             }
         }
-        item {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(modifier = Modifier.fillMaxWidth(), onClick = onAddLayerClicked) {
-                    Text(stringResource(Res.string.add_layer))
-                }
-                Button(modifier = Modifier.fillMaxWidth(), onClick = { showAddNetworkLayerDialog = true }) {
-                    Text(stringResource(Res.string.add_network_layer))
-                }
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = onAddLayerClicked) {
+                Text(stringResource(Res.string.add_layer))
+            }
+            Button(modifier = Modifier.fillMaxWidth(), onClick = { showAddNetworkLayerDialog = true }) {
+                Text(stringResource(Res.string.add_network_layer))
             }
         }
     }

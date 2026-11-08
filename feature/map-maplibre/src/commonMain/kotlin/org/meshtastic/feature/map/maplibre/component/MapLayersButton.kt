@@ -19,6 +19,8 @@ package org.meshtastic.feature.map.maplibre.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -103,7 +105,9 @@ private fun MapLayersSheet(
     onDismiss: () -> Unit,
     extra: @Composable () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    // One scroll container for the whole sheet: the offline packs list grows with every saved region, and the
+    // imported-layer manager below it must stay reachable.
+    Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Text(
             text = stringResource(Res.string.manage_map_layers),
             style = MaterialTheme.typography.titleMedium,
