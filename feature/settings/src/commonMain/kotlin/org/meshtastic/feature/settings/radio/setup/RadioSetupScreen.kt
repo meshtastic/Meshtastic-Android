@@ -226,7 +226,9 @@ fun RadioSetupScreen(
                             onListenChange = { listen ->
                                 beaconConfig?.let {
                                     viewModel.setModuleConfig(
-                                        ModuleConfig.Builder().also { wb -> wb.mesh_beacon = it.withListen(listen) }.build(),
+                                        ModuleConfig.Builder()
+                                            .also { wb -> wb.mesh_beacon = it.withListen(listen) }
+                                            .build(),
                                     )
                                 }
                             },

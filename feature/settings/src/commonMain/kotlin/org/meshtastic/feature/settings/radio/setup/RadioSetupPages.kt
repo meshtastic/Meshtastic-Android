@@ -21,9 +21,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,23 +38,48 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.currentRegionCode
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
 import org.meshtastic.core.model.limitToBytes
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.suggestedRegionForCountry
 import org.meshtastic.core.model.utf8Size
+import org.meshtastic.core.model.util.BeaconJoinOption
+import org.meshtastic.core.model.util.beaconJoinOption
+import org.meshtastic.core.model.util.toJoinChannelSet
+import org.meshtastic.core.navigation.DiscoveryRoute
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.config_lora_modem_preset_licensed_summary
+import org.meshtastic.core.resources.disabled
+import org.meshtastic.core.resources.discovery_start_scan
+import org.meshtastic.core.resources.enabled
 import org.meshtastic.core.resources.long_name
 import org.meshtastic.core.resources.lora_preset_custom
+import org.meshtastic.core.resources.mesh_beacon_invitations_title
+import org.meshtastic.core.resources.mesh_beacon_listen
+import org.meshtastic.core.resources.mesh_beacon_listen_summary
+import org.meshtastic.core.resources.mesh_beacon_offer_add
+import org.meshtastic.core.resources.mesh_beacon_offer_channel
+import org.meshtastic.core.resources.mesh_beacon_offer_from_unknown
+import org.meshtastic.core.resources.mesh_beacon_offer_join
 import org.meshtastic.core.resources.modem_preset
+import org.meshtastic.core.resources.radio_setup_beacons_body
+import org.meshtastic.core.resources.radio_setup_beacons_headline
+import org.meshtastic.core.resources.radio_setup_beacons_listening
+import org.meshtastic.core.resources.radio_setup_beacons_none
+import org.meshtastic.core.resources.radio_setup_beacons_settings
+import org.meshtastic.core.resources.radio_setup_beacons_waiting
 import org.meshtastic.core.resources.radio_setup_done_body
 import org.meshtastic.core.resources.radio_setup_done_headline
 import org.meshtastic.core.resources.radio_setup_intro_body
@@ -58,56 +90,22 @@ import org.meshtastic.core.resources.radio_setup_preset_body
 import org.meshtastic.core.resources.radio_setup_preset_custom
 import org.meshtastic.core.resources.radio_setup_reconnecting
 import org.meshtastic.core.resources.radio_setup_region_body
+import org.meshtastic.core.resources.radio_setup_region_none
+import org.meshtastic.core.resources.radio_setup_region_search
 import org.meshtastic.core.resources.radio_setup_region_suggested
 import org.meshtastic.core.resources.radio_setup_restart_notice
 import org.meshtastic.core.resources.schema_lora_region
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.status_message
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.semantics.Role
-import org.meshtastic.core.model.MeshBeaconOffer
-import org.meshtastic.core.model.util.BeaconJoinOption
-import org.meshtastic.core.model.util.beaconJoinOption
-import org.meshtastic.core.model.util.toJoinChannelSet
-import org.meshtastic.core.navigation.DiscoveryRoute
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.resources.discovery_start_scan
-import org.meshtastic.core.resources.mesh_beacon_invitations_title
-import org.meshtastic.core.resources.mesh_beacon_listen
-import org.meshtastic.core.resources.mesh_beacon_listen_summary
-import org.meshtastic.core.resources.mesh_beacon_offer_add
-import org.meshtastic.core.resources.mesh_beacon_offer_channel
-import org.meshtastic.core.resources.mesh_beacon_offer_from_unknown
-import org.meshtastic.core.resources.mesh_beacon_offer_join
-import org.meshtastic.core.resources.disabled
-import org.meshtastic.core.resources.enabled
-import org.meshtastic.core.resources.radio_setup_beacons_body
-import org.meshtastic.core.resources.radio_setup_beacons_headline
-import org.meshtastic.core.resources.radio_setup_beacons_listening
-import org.meshtastic.core.resources.radio_setup_beacons_none
-import org.meshtastic.core.resources.radio_setup_beacons_settings
-import org.meshtastic.core.resources.radio_setup_beacons_waiting
-import org.meshtastic.core.resources.radio_setup_region_none
-import org.meshtastic.core.resources.radio_setup_region_search
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.SwitchPreference
-import org.meshtastic.core.ui.icon.Search
-import org.meshtastic.core.ui.icon.Settings
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.ChannelSettings
-import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import org.meshtastic.core.ui.component.OnboardingNotice
 import org.meshtastic.core.ui.component.OnboardingPageHeader
+import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Search
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.component.ConfigState
 import org.meshtastic.feature.settings.radio.component.StatusMessageField
@@ -117,9 +115,12 @@ import org.meshtastic.feature.settings.radio.component.buildRegionItems
 import org.meshtastic.feature.settings.radio.component.presetLabels
 import org.meshtastic.feature.settings.radio.component.regionLabels
 import org.meshtastic.feature.settings.radio.component.rememberStatusMessageFocus
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import org.meshtastic.proto.User
 
 internal const val SHORT_NAME_MAX_BYTES = 4 // short_name max_size:5
@@ -355,7 +356,10 @@ internal fun BeaconsPage(
         if (beaconConfig == null) {
             OnboardingNotice(icon = MeshtasticIcons.Info, text = stringResource(Res.string.radio_setup_beacons_waiting))
         }
-        Text(text = stringResource(Res.string.mesh_beacon_invitations_title), style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(Res.string.mesh_beacon_invitations_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
         if (offers.isEmpty()) {
             Text(
                 text = stringResource(Res.string.radio_setup_beacons_none),
@@ -363,7 +367,9 @@ internal fun BeaconsPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        offers.forEach { offer -> BeaconOfferRow(offer = offer, lora = lora, channels = state.channelList, onJoin = onJoin) }
+        offers.forEach { offer ->
+            BeaconOfferRow(offer = offer, lora = lora, channels = state.channelList, onJoin = onJoin)
+        }
         Card(modifier = Modifier.fillMaxWidth()) {
             ListItem(
                 text = stringResource(Res.string.discovery_start_scan),
@@ -409,7 +415,11 @@ private fun BeaconOfferRow(
             }
             // Add merges the channel into a free slot with no reboot; Join retunes the radio. NONE has no channel.
             val label =
-                if (joinOption == BeaconJoinOption.ADD) Res.string.mesh_beacon_offer_add else Res.string.mesh_beacon_offer_join
+                if (joinOption == BeaconJoinOption.ADD) {
+                    Res.string.mesh_beacon_offer_add
+                } else {
+                    Res.string.mesh_beacon_offer_join
+                }
             Button(
                 onClick = { offer.beacon.toJoinChannelSet(joinOption, lora)?.let(onJoin) },
                 enabled = joinOption != BeaconJoinOption.NONE,

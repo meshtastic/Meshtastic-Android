@@ -110,21 +110,23 @@ class RadioSetupPolicyTest {
     fun `the page lists at most five beacons not already joined`() {
         val offers = (1..7).map { offer(it) }
 
-        assertEquals(RADIO_SETUP_BEACON_LIMIT, setupBeaconOffers(offers, lora(region = RegionCode.US), emptyList()).size)
+        assertEquals(
+            RADIO_SETUP_BEACON_LIMIT,
+            setupBeaconOffers(offers, lora(region = RegionCode.US), emptyList()).size,
+        )
         assertEquals(emptyList(), setupBeaconOffers(emptyList(), null, emptyList()))
     }
 
-    private fun offer(n: Int) =
-        MeshBeaconOffer(
-            fromNodeNum = n,
-            beacon =
-            MeshBeacon.Builder()
-                .also { wb ->
-                    wb.message = "Mesh $n"
-                    wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = "Mesh$n" }.build()
-                }
-                .build(),
-        )
+    private fun offer(n: Int) = MeshBeaconOffer(
+        fromNodeNum = n,
+        beacon =
+        MeshBeacon.Builder()
+            .also { wb ->
+                wb.message = "Mesh $n"
+                wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = "Mesh$n" }.build()
+            }
+            .build(),
+    )
 
     @Test
     fun `a factory fresh US radio moves to Long Turbo`() {
