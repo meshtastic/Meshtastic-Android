@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.terrain
 
 import com.sun.net.httpserver.HttpServer
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.URI
@@ -43,14 +44,22 @@ class RangeCheckedHttpChannelTest {
     }
 
     private var mode = Mode.HONEST
-    private var etag = "\"v1\""
+    private var etag: String? = "\"v1\""
+
+    /** When set, the server answers every request with this status and no body. */
+    private var status: Int? = null
 
     private val server =
         HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
             createContext("/archive.pmtiles") { exchange ->
                 val (first, last) =
                     exchange.requestHeaders.getFirst("Range")!!.removePrefix("bytes=").split('-').map { it.toInt() }
-                exchange.responseHeaders.add("ETag", etag)
+                etag?.let { exchange.responseHeaders.add("ETag", it) }
+                status?.let {
+                    exchange.sendResponseHeaders(it, -1)
+                    exchange.close()
+                    return@createContext
+                }
                 when (mode) {
                     Mode.IGNORES_RANGE -> {
                         exchange.sendResponseHeaders(200, body.size.toLong())
@@ -104,6 +113,34 @@ class RangeCheckedHttpChannelTest {
         read(pos = 0, length = 8)
         etag = "\"v2\""
         assertFailsWith<ArchiveChangedException> { read(pos = 8, length = 8) }
+    }
+
+    @Test
+    fun `an etag that goes missing after the first read is an archive change`() {
+        read(pos = 0, length = 8)
+        etag = null
+        assertFailsWith<ArchiveChangedException> { read(pos = 8, length = 8) }
+    }
+
+    @Test
+    fun `a range that is no longer satisfiable is an archive change`() {
+        read(pos = 0, length = 8)
+        status = 416
+        assertFailsWith<ArchiveChangedException> { read(pos = 8, length = 8) }
+    }
+
+    @Test
+    fun `only a 404 reads as a missing archive`() {
+        status = 404
+        assertFailsWith<FileNotFoundException> { read(pos = 0, length = 8) }
+        status = 410
+        val gone = assertFailsWith<IOException> { read(pos = 0, length = 8) }
+        assertFalse(gone is FileNotFoundException)
+    }
+
+    @Test
+    fun `content range rejects numbers too large to parse`() {
+        assertFalse(contentRangeMatches("bytes 99999999999999999999-63/64", first = 60, last = 63))
     }
 
     @Test

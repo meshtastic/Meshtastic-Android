@@ -149,14 +149,18 @@ class TerrainRegionExtractorTest {
         assertEquals(setOf(MapterhornEndpoints.GLOBAL_PMTILES_URL), result.archives.keys)
     }
 
-    /** Throws [ArchiveChangedException] on its first fetch for the first [changes] archives opened. */
+    /**
+     * For the first [changes] archives opened, serves one tile and then throws [ArchiveChangedException], so the
+     * download has stored something before the archive changes under it.
+     */
     private fun changingExtractor(changes: Int): TerrainRegionExtractor {
         var remaining = changes
         return TerrainRegionExtractor(store) { _ ->
             val changesNow = remaining-- > 0
+            var fetched = 0
             object : TerrainRegionExtractor.TileArchive {
                 override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? =
-                    if (changesNow) throw ArchiveChangedException() else byteArrayOf(1)
+                    if (changesNow && fetched++ > 0) throw ArchiveChangedException() else byteArrayOf(1)
 
                 override fun close() = Unit
             }
