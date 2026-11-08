@@ -29,7 +29,8 @@ import org.meshtastic.proto.ChannelSettings
 private val previewChannelSet =
     ChannelSet.Builder()
         .also { wb ->
-            wb.settings = listOf(Channel.default.settings, ChannelSettings.Builder().also { it.name = "Hiking" }.build())
+            wb.settings =
+                listOf(Channel.default.settings, ChannelSettings.Builder().also { it.name = "Hiking" }.build())
             wb.lora_config = Channel.default.loraConfig
         }
         .build()

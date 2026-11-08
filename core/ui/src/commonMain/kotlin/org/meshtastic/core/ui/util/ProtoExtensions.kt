@@ -200,7 +200,11 @@ fun getChannelPreviewForAdd(
             alreadyOnRadio++
         }
     }
-    return ChannelAddPreview(settings = previewSettings, selections = previewSelections, alreadyOnRadio = alreadyOnRadio)
+    return ChannelAddPreview(
+        settings = previewSettings,
+        selections = previewSelections,
+        alreadyOnRadio = alreadyOnRadio,
+    )
 }
 
 /**

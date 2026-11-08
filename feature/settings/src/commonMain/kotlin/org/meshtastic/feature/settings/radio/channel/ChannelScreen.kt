@@ -86,8 +86,8 @@ import org.meshtastic.core.resources.share_channels_subject
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.icon.ChevronRight
@@ -363,7 +363,11 @@ private fun ChannelShareModeSelector(shareState: ChannelShareState) {
         Text(
             text =
             stringResource(
-                if (shareState.shouldAdd) Res.string.share_channels_add_hint else Res.string.share_channels_replace_hint,
+                if (shareState.shouldAdd) {
+                    Res.string.share_channels_add_hint
+                } else {
+                    Res.string.share_channels_replace_hint
+                },
             ),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             style = MaterialTheme.typography.bodySmall,

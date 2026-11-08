@@ -42,7 +42,9 @@ private val fullRadio =
 
 /** An add-only link to a full radio: one channel is already there, one has no free slot. */
 private val addOnlyLink =
-    ChannelSet.Builder().also { wb -> wb.settings = listOf(namedChannel("Team 2", 2), namedChannel("Hiking", 9)) }.build()
+    ChannelSet.Builder()
+        .also { wb -> wb.settings = listOf(namedChannel("Team 2", 2), namedChannel("Hiking", 9)) }
+        .build()
 
 @PreviewLightDark
 @Composable

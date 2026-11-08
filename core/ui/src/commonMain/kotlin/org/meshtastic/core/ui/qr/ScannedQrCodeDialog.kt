@@ -283,10 +283,13 @@ fun ScannedQrCodeDialog(
 
                 if (!shouldReplace) {
                     item {
+                        val incomingLeftOut =
+                            (channels.settings.size until channelSelections.size).any { !channelSelections[it] }
                         AddCapacitySummary(
                             selectedCount = selectedChannelSet.settings.size,
                             maxChannels = effectiveMaxChannels,
                             alreadyOnRadio = addPreview.alreadyOnRadio,
+                            incomingLeftOut = incomingLeftOut,
                         )
                     }
                 }
@@ -388,9 +391,11 @@ fun ScannedQrCodeDialog(
     }
 }
 
-/** Add never overwrites, so the operator sees the slot count, what was skipped, and what to do when the radio is full. */
+/**
+ * Add never overwrites, so the operator sees the slot count, what was skipped, and what to do when the radio is full.
+ */
 @Composable
-private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRadio: Int) {
+private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRadio: Int, incomingLeftOut: Boolean) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
         Text(
             text = stringResource(Res.string.channel_slots_used, selectedCount, maxChannels),
@@ -404,7 +409,7 @@ private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRa
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (selectedCount > maxChannels) {
+        if (selectedCount > maxChannels || (incomingLeftOut && selectedCount >= maxChannels)) {
             Text(
                 text = stringResource(Res.string.channel_slots_full, maxChannels),
                 modifier = Modifier.padding(top = 4.dp),
