@@ -92,6 +92,11 @@ interface UiPrefs {
 
     fun setAppIntroCompleted(completed: Boolean)
 
+    /** Node numbers of the radios the radio setup has already opened for on its own. */
+    val radioSetupOfferedNodes: StateFlow<Set<Int>>
+
+    fun markRadioSetupOffered(nodeNum: Int)
+
     val theme: StateFlow<Int>
 
     fun setTheme(value: Int)

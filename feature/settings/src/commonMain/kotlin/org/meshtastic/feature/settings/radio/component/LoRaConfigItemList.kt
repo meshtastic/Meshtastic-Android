@@ -149,7 +149,7 @@ internal fun buildPresetItems(
  * Builds the region dropdown items: hide regions the target firmware's region table doesn't have yet
  * ([Capabilities.supportsRegion]), but never hide the device's current selection.
  */
-private fun buildRegionItems(
+internal fun buildRegionItems(
     capabilities: Capabilities,
     selectedRegion: RegionCode,
     labels: Map<RegionCode, String>,
@@ -163,7 +163,7 @@ internal fun presetLabels(): Map<ModemPreset, String> =
     ModemPreset.entries.mapNotNull { preset -> preset.schemaLabelRes()?.let { preset to stringResource(it) } }.toMap()
 
 @Composable
-private fun regionLabels(): Map<RegionCode, String> =
+internal fun regionLabels(): Map<RegionCode, String> =
     RegionCode.entries.mapNotNull { region -> region.schemaLabelRes()?.let { region to stringResource(it) } }.toMap()
 
 @Composable
@@ -563,7 +563,7 @@ private fun FrequencyOverridePreference(
     )
 }
 
-private fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
+internal fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
     if (capabilities.supportsCodingRateOverride) normalizeCodingRateOverride() else this
 
 /**

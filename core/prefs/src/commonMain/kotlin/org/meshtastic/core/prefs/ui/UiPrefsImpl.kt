@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.atomicfu.atomic
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
@@ -123,6 +124,17 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
 
     override fun setShowFullMessageTimestamps(show: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] = show } }
+    }
+
+    override val radioSetupOfferedNodes: StateFlow<Set<Int>> =
+        dataStore.data
+            .map { prefs -> prefs[KEY_RADIO_SETUP_OFFERED].orEmpty().mapNotNull { it.toIntOrNull() }.toSet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun markRadioSetupOffered(nodeNum: Int) {
+        scope.launch {
+            dataStore.edit { it[KEY_RADIO_SETUP_OFFERED] = it[KEY_RADIO_SETUP_OFFERED].orEmpty() + nodeNum.toString() }
+        }
     }
 
     override val eventThemeEnabled: StateFlow<Boolean> =
@@ -349,6 +361,7 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
         val KEY_SHOW_FULL_MESSAGE_TIMESTAMPS = booleanPreferencesKey("show-full-message-timestamps")
         val KEY_EVENT_THEME_ENABLED = booleanPreferencesKey("event-theme-enabled")
+        val KEY_RADIO_SETUP_OFFERED = stringSetPreferencesKey("radio-setup-offered-nodes")
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")
         val KEY_THEME = intPreferencesKey("theme")

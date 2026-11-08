@@ -139,6 +139,25 @@ class ConnectionsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     /**
+     * The connected radio's node number while its region is UNSET and the radio setup has not opened for it yet. The
+     * screen opens the setup once per emission and marks the radio offered, so a radio the user closed is never
+     * reopened on its own. Bound to the active session the same way as [activeNodeInfoReady].
+     */
+    val radioSetupOffer: StateFlow<Int?> =
+        combine(
+            nodeManager.connectionIdentity,
+            nodeRepository.ourNodeInfo,
+            regionUnset,
+            uiPrefs.radioSetupOfferedNodes,
+        ) { identity, ourNode, unset, offered ->
+            radioSetupOfferFor(identity?.nodeNum, ourNode?.num, unset, offered)
+        }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = null)
+
+    fun markRadioSetupOffered(nodeNum: Int) = uiPrefs.markRadioSetupOffered(nodeNum)
+
+    /**
      * Whether the device is configured not to transmit. Null-safe against the pre-config [LocalConfig] so the notice
      * cannot flash before the device's config arrives.
      */
@@ -327,3 +346,12 @@ private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = 
     InterfaceId.REPLAY,
     -> null
 }
+
+/**
+ * The node to open the radio setup for, or null. The session's node and the repository's node must agree, so a cached
+ * node from an earlier session never triggers the setup, and an unarrived config reads as a null `lora`, not UNSET.
+ */
+internal fun radioSetupOfferFor(sessionNodeNum: Int?, ourNodeNum: Int?, regionUnset: Boolean, offered: Set<Int>): Int? =
+    sessionNodeNum?.takeIf {
+        it == ourNodeNum && regionUnset && it !in offered
+    }
