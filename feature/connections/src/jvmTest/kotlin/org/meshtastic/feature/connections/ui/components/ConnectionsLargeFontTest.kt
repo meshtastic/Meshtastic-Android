@@ -34,13 +34,16 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.ui.theme.AppTheme
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -69,6 +72,22 @@ class ConnectionsLargeFontTest {
         for (label in TRANSPORT_LABELS) {
             onNodeWithText(label).assertDoesNotExist()
             onNodeWithContentDescription(label).assertIsDisplayed()
+        }
+    }
+
+    // SegmentedButton measures its icon slot at the label's height; the icon must still sit on the label's center
+    // line rather than at the top of that slot once the label grows taller than the 18dp icon.
+    @Test
+    fun transportSelectorIconsStayCenteredOnTheirLabelsAtDoubleFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 2f, width = 600.dp) {
+            TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+        }
+
+        for (label in listOf("Network", "USB")) {
+            val icon = onNodeWithTag("$TRANSPORT_ICON_TAG:$label", useUnmergedTree = true).fetchSemanticsNode()
+            val text = onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+            val offset = abs(icon.boundsInRoot.center.y - text.boundsInRoot.center.y)
+            assertTrue(offset <= 1f, "\"$label\" icon is $offset px off its label's center line")
         }
     }
 
@@ -102,12 +121,13 @@ class ConnectionsLargeFontTest {
         onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading)).assertIsDisplayed()
     }
 
-    private fun ComposeUiTest.setPhoneContent(fontScale: Float, content: @Composable () -> Unit) = setContent {
-        CompositionLocalProvider(LocalDensity provides Density(density = 1f, fontScale = fontScale)) {
-            // 360dp phone minus the screen's 16dp side padding.
-            AppTheme { Box(modifier = Modifier.width(328.dp)) { content() } }
+    // 328dp is a 360dp phone minus the screen's 16dp side padding.
+    private fun ComposeUiTest.setPhoneContent(fontScale: Float, width: Dp = 328.dp, content: @Composable () -> Unit) =
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(density = 1f, fontScale = fontScale)) {
+                AppTheme { Box(modifier = Modifier.width(width)) { content() } }
+            }
         }
-    }
 
     // Line geometry, not hasVisualOverflow: the latter also fires when a font's ascent overhangs its line height, which
     // is a rendering detail, not a clipped label.

@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.connections.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,9 +31,11 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -119,6 +123,9 @@ private val DeviceType.icon: ImageVector
             DeviceType.USB -> MeshtasticIcons.Usb
         }
 
+/** Test tag prefix for a labeled segment's transport icon, suffixed with `:<label>`. */
+internal const val TRANSPORT_ICON_TAG = "TransportIcon"
+
 /**
  * A single transport segment. Labeled, it shows a check when [selected] and the transport [icon] otherwise, so
  * selection is unambiguous while the unselected segments still communicate which transport they represent. When
@@ -142,16 +149,22 @@ private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
         onClick = onClick,
         shape = SegmentedButtonDefaults.itemShape(index = index, count = count),
         icon = {
+            // SegmentedButton measures this slot at the label's full height, which pins a bare 18dp icon to the top
+            // of the slot once the label is taller. Each icon centers itself in that height instead.
+            val activeIcon: @Composable () -> Unit = { CenteredSegmentIcon { SegmentedButtonDefaults.ActiveIcon() } }
             if (showLabel) {
-                SegmentedButtonDefaults.Icon(active = selected) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
-                    )
+                SegmentedButtonDefaults.Icon(active = selected, activeContent = activeIcon) {
+                    CenteredSegmentIcon {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier =
+                            Modifier.size(SegmentedButtonDefaults.IconSize).testTag("$TRANSPORT_ICON_TAG:$label"),
+                        )
+                    }
                 }
             } else {
-                SegmentedButtonDefaults.Icon(active = selected)
+                SegmentedButtonDefaults.Icon(active = selected, activeContent = activeIcon)
             }
         },
         label = {
@@ -162,4 +175,10 @@ private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
             }
         },
     )
+}
+
+/** Fills the height SegmentedButton gives its icon slot and centers [icon] in it. */
+@Composable
+private fun CenteredSegmentIcon(icon: @Composable () -> Unit) {
+    Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) { icon() }
 }
