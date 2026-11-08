@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -44,9 +43,12 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.filterNotNull
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.utf8Size
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.done
@@ -57,6 +59,9 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OnboardingBottomBar
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -80,8 +85,11 @@ fun RadioSetupScreen(
     viewModel: RadioConfigViewModel,
     onDone: () -> Unit,
     boundAddress: String?,
+    onNavigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
     nodeManager: NodeManager = koinInject(),
+    meshBeaconRepository: MeshBeaconRepository = koinInject(),
+    uiViewModel: UIViewModel = koinViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     // The setup is bound to the radio it was opened for, by the transport address its route carries, never to the
@@ -93,21 +101,26 @@ fun RadioSetupScreen(
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
-    // Fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a licensing change
-    // mid-flow must not move the page out from under an edit.
+    val offersBeacons = capabilities.supportsMeshBeacon && !state.metadata.excludes(ExcludedModules.MESHBEACON_CONFIG)
+    // The licensing is fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a
+    // change mid-flow must not move the page out from under an edit. The beacon page follows the metadata as it
+    // arrives, and the page the user is on is held by name, so a list change never moves it.
     val licensed = destNode?.user?.is_licensed
-    val steps = remember(licensed == null) { radioSetupSteps(licensed == true) }
-    var stepIndex by rememberSaveable { mutableIntStateOf(0) }
-    val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
-    val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
+    val steps = remember(licensed == null, offersBeacons) { radioSetupSteps(licensed == true, offersBeacons) }
+    var stepName by rememberSaveable { mutableStateOf(RadioSetupStep.INTRO.name) }
+    // A page that leaves the list under the user (the beacon page, on a reconnect that excludes the module) falls
+    // through to the summary, never back to the start.
+    val stepIndex = steps.indexOf(RadioSetupStep.valueOf(stepName)).takeIf { it >= 0 } ?: steps.lastIndex
+    val step = steps[stepIndex]
+    val advance = { stepName = steps[(stepIndex + 1).coerceAtMost(steps.lastIndex)].name }
     val canStepBack = stepIndex > 0 && step != RadioSetupStep.DONE
     // The top bar's arrow and the system back do the same thing: a page back, or out from the first page.
-    val stepBack = { if (canStepBack) stepIndex -= 1 else onDone() }
+    val stepBack = { if (canStepBack) stepName = steps[stepIndex - 1].name else onDone() }
 
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
         isBackEnabled = canStepBack,
-        onBackCompleted = { stepIndex -= 1 },
+        onBackCompleted = { stepName = steps[stepIndex - 1].name },
     )
 
     val storedLora = state.radioConfig.lora ?: Config.LoRaConfig.Builder().build()
@@ -117,6 +130,12 @@ fun RadioSetupScreen(
         capabilities.supportsStatusMessage && !state.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
     val storedStatus = state.moduleConfig.statusmessage?.node_status ?: destNode?.nodeStatus.orEmpty()
     var statusInput by rememberSaveable(storedStatus) { mutableStateOf(storedStatus) }
+    val beaconConfig = state.moduleConfig.mesh_beacon
+    val allOffers by meshBeaconRepository.offers.collectAsStateWithLifecycle()
+    val offers =
+        remember(allOffers, state.radioConfig.lora, state.channelList) {
+            setupBeaconOffers(allOffers, state.radioConfig.lora, state.channelList)
+        }
 
     // A write goes out only while the bound radio is the one connected: a switch disconnects first, and the bridge
     // that reports the new radio connected can land before its identity does, so the transport flag alone is not
@@ -202,17 +221,54 @@ fun RadioSetupScreen(
                             onStatusChange = { statusInput = it },
                         )
 
+                    RadioSetupStep.BEACONS ->
+                        BeaconsPage(
+                            beaconConfig = beaconConfig,
+                            offers = offers,
+                            lora = state.radioConfig.lora,
+                            state = state,
+                            onListenChange = { listen ->
+                                beaconConfig?.let {
+                                    viewModel.setModuleConfig(
+                                        ModuleConfig.Builder()
+                                            .also { wb -> wb.mesh_beacon = it.withListen(listen) }
+                                            .build(),
+                                    )
+                                }
+                            },
+                            onJoin = uiViewModel::setRequestChannelSet,
+                            onNavigate = onNavigate,
+                        )
+
                     // The summary reads back what the radio holds, not what a skipped page left in its form.
                     RadioSetupStep.DONE ->
-                        DonePage(storedLora, destNode?.user ?: userForm.value, storedStatus, offersStatus)
+                        DonePage(
+                            lora = storedLora,
+                            user = destNode?.user ?: userForm.value,
+                            status = storedStatus,
+                            offersStatus = offersStatus,
+                            listens = beaconConfig?.listens?.takeIf { offersBeacons },
+                        )
                 }
+            }
+            // The join dialog renders against this entry's UIViewModel: the app shell's SharedDialogs watches a
+            // different instance, so an offer set here never reaches it.
+            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+            requestChannelSet?.let {
+                ScannedQrCodeDialog(incoming = it, onDismiss = { uiViewModel.clearRequestChannelUrl() })
             }
             LoadingOverlay(state = responseState)
             if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
+                // setModuleConfig merges the listen flag before the radio answers, so a failed write is re-read from
+                // the radio rather than left showing a value it never applied.
+                val failedBeaconWrite = responseState is ResponseState.Error && step == RadioSetupStep.BEACONS
                 PacketResponseStateDialog(
                     state = responseState,
-                    onDismiss = viewModel::clearPacketResponse,
-                    onBack = { if (succeeded) advance() },
+                    onDismiss = {
+                        viewModel.clearPacketResponse()
+                        if (failedBeaconWrite) viewModel.loadConfigRoute(ModuleRoute.MESH_BEACON)
+                    },
+                    onBack = { if (succeeded && step != RadioSetupStep.BEACONS) advance() },
                     rebootBehavior =
                     if (capabilities.appliesLoraConfigLive || step != RadioSetupStep.PRESET) {
                         RebootBehavior.NEVER
@@ -280,6 +336,8 @@ private fun RadioSetupButtons(
                 secondaryText = stringResource(Res.string.skip),
                 onSecondary = onNext,
             )
+
+        RadioSetupStep.BEACONS -> OnboardingBottomBar(primaryText = stringResource(Res.string.next), onPrimary = onNext)
 
         RadioSetupStep.DONE -> OnboardingBottomBar(primaryText = stringResource(Res.string.done), onPrimary = onDone)
     }

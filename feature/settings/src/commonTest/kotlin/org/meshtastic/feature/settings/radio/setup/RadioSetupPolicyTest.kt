@@ -16,12 +16,16 @@
  */
 package org.meshtastic.feature.settings.radio.setup
 
+import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.LoRaPresetGroup
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LoRaRegionPresets
+import org.meshtastic.proto.MeshBeacon
+import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -71,8 +75,73 @@ class RadioSetupPolicyTest {
             listOf(RadioSetupStep.INTRO, RadioSetupStep.REGION, RadioSetupStep.PRESET, RadioSetupStep.DONE),
             radioSetupSteps(isLicensed = true),
         )
-        assertEquals(RadioSetupStep.entries, radioSetupSteps(isLicensed = false))
+        assertEquals(
+            RadioSetupStep.entries - RadioSetupStep.BEACONS,
+            radioSetupSteps(isLicensed = false, supportsBeacons = false),
+        )
     }
+
+    @Test
+    fun `the nearby meshes page exists only with the mesh beacon module`() {
+        assertEquals(RadioSetupStep.entries, radioSetupSteps(isLicensed = false, supportsBeacons = true))
+        assertFalse(RadioSetupStep.BEACONS in radioSetupSteps(isLicensed = true, supportsBeacons = false))
+    }
+
+    @Test
+    fun `the listen switch changes only the listen flag`() {
+        val broadcast = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
+        val stored =
+            MeshBeaconConfig.Builder()
+                .also { wb ->
+                    wb.flags = broadcast
+                    wb.broadcast_message = "Join us"
+                }
+                .build()
+
+        val listening = stored.withListen(true)
+        assertTrue(listening.listens)
+        assertEquals("Join us", listening.broadcast_message)
+        assertEquals(broadcast, listening.flags and broadcast)
+        assertFalse(listening.withListen(false).listens)
+        assertEquals(stored, listening.withListen(false))
+    }
+
+    @Test
+    fun `the page lists at most five beacons not already joined`() {
+        val offers = (1..7).map { offer(it) }
+
+        assertEquals(
+            RADIO_SETUP_BEACON_LIMIT,
+            setupBeaconOffers(offers, lora(region = RegionCode.US), emptyList()).size,
+        )
+        // Mesh1 is already on the radio, so Mesh6 moves into the five.
+        val joined = listOf(ChannelSettings.Builder().also { cb -> cb.name = "Mesh1" }.build())
+        val listed = setupBeaconOffers(offers, lora(region = RegionCode.US), joined).map { it.fromNodeNum }
+        assertEquals(listOf(2, 3, 4, 5, 6), listed)
+        // A channel with the same name but another key is a different mesh, so its offer stays.
+        val otherKey =
+            listOf(
+                ChannelSettings.Builder()
+                    .also { cb ->
+                        cb.name = "Mesh1"
+                        cb.psk = okio.ByteString.of(1, 2, 3)
+                    }
+                    .build(),
+            )
+        assertEquals(1, setupBeaconOffers(offers, lora(region = RegionCode.US), otherKey).first().fromNodeNum)
+        assertEquals(emptyList(), setupBeaconOffers(emptyList(), null, emptyList()))
+    }
+
+    private fun offer(n: Int) = MeshBeaconOffer(
+        fromNodeNum = n,
+        beacon =
+        MeshBeacon.Builder()
+            .also { wb ->
+                wb.message = "Mesh $n"
+                wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = "Mesh$n" }.build()
+            }
+            .build(),
+    )
 
     @Test
     fun `a factory fresh US radio moves to Long Turbo`() {

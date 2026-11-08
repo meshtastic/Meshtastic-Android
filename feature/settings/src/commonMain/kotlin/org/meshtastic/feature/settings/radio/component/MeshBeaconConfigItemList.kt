@@ -91,9 +91,9 @@ private val MIN_INTERVAL_SECS = FixedUpdateIntervals.ONE_HOUR.value.toInt()
 // matches a radio channel, -2 marks an explicit "no channels" placeholder row. Never a real channel_index.
 private const val NO_CHANNELS_ITEM_VALUE = -2
 
-private fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag else this and flag.inv()
+internal fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag else this and flag.inv()
 
-private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
+internal fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
 
 /**
  * Editor for `ModuleConfig.MeshBeaconConfig` (design#140, Android issue #6931). Reads via
