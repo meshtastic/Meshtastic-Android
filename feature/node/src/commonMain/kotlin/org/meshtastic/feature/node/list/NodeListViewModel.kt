@@ -37,6 +37,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -217,7 +218,7 @@ class NodeListViewModel(
 
     private suspend fun resolveDeviceImageUrl(hwModel: Int) {
         val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull() ?: return
-        val imageFile = hw.images?.getOrNull(1) ?: hw.images?.getOrNull(0) ?: return
+        val imageFile = hw.heroImageFile ?: return
         val url = "$FLASHER_DEVICE_IMAGE_BASE_URL$imageFile"
         _deviceImageUrls.value = _deviceImageUrls.value + (hwModel to url)
     }

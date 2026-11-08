@@ -88,6 +88,7 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseType
+import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.back
@@ -858,7 +859,7 @@ private fun ChirpyCard() {
 
 @Composable
 private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifier = Modifier) {
-    val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
+    val hwImg = deviceHardware.heroImageFile ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
     val fallbackPainter = painterResource(Res.drawable.img_hw_unknown)
 
