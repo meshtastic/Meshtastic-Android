@@ -127,6 +127,11 @@ fun RadioSetupScreen(
     val storedStatus = state.moduleConfig.statusmessage?.node_status ?: destNode?.nodeStatus.orEmpty()
     var statusInput by rememberSaveable(storedStatus) { mutableStateOf(storedStatus) }
 
+    // A write goes out only while the bound radio is the one connected: a switch disconnects first, and the bridge
+    // that reports the new radio connected can land before its identity does, so the transport flag alone is not enough.
+    val identity by nodeManager.connectionIdentity.collectAsStateWithLifecycle()
+    val canWrite = radioSetupCanWrite(state.connected, boundAddress, identity?.address)
+
     val responseState = state.responseState
     val saving = responseState is ResponseState.Loading
     // Two writes leave the name page; a failure on either stands until the user saves again, so a late ack for the
@@ -151,7 +156,7 @@ fun RadioSetupScreen(
         bottomBar = {
             RadioSetupButtons(
                 step = step,
-                state = state,
+                canWrite = canWrite,
                 saving = saving,
                 loraValid = loraForm.value.region != RegionCode.UNSET,
                 userValid = userForm.value.isValidName(capabilities),
@@ -159,10 +164,10 @@ fun RadioSetupScreen(
                 onNext = advance,
                 onSaveLora = {
                     saveFailed = false
-                    if (loraSetupChanged(storedLora, loraForm.value)) {
+                    if (canWrite && loraSetupChanged(storedLora, loraForm.value)) {
                         val lora = loraForm.value.withCodingRateOverrideFor(capabilities)
                         viewModel.setConfig(Config.Builder().also { wb -> wb.lora = lora }.build())
-                    } else {
+                    } else if (canWrite) {
                         advance()
                     }
                 },
@@ -170,9 +175,11 @@ fun RadioSetupScreen(
                     saveFailed = false
                     val userDirty = userForm.isDirty
                     val statusDirty = offersStatus && statusInput != storedStatus
-                    if (userDirty) viewModel.saveUserConfig(userForm.value)
-                    if (statusDirty) viewModel.setModuleConfig(statusConfig(statusInput))
-                    if (!userDirty && !statusDirty) advance()
+                    if (canWrite) {
+                        if (userDirty) viewModel.saveUserConfig(userForm.value)
+                        if (statusDirty) viewModel.setModuleConfig(statusConfig(statusInput))
+                        if (!userDirty && !statusDirty) advance()
+                    }
                 },
                 onDone = onDone,
             )
@@ -240,7 +247,7 @@ private fun statusConfig(status: String): ModuleConfig = ModuleConfig.Builder()
 @Composable
 private fun RadioSetupButtons(
     step: RadioSetupStep,
-    state: RadioConfigState,
+    canWrite: Boolean,
     saving: Boolean,
     loraValid: Boolean,
     userValid: Boolean,
@@ -270,14 +277,14 @@ private fun RadioSetupButtons(
             OnboardingBottomBar(
                 primaryText = stringResource(Res.string.save),
                 onPrimary = onSaveLora,
-                primaryEnabled = state.connected && loraValid && !saving,
+                primaryEnabled = canWrite && loraValid && !saving,
             )
 
         RadioSetupStep.NAME ->
             OnboardingBottomBar(
                 primaryText = stringResource(Res.string.save),
                 onPrimary = onSaveName,
-                primaryEnabled = state.connected && userValid && !saving,
+                primaryEnabled = canWrite && userValid && !saving,
                 secondaryText = stringResource(Res.string.skip),
                 onSecondary = onNext,
             )

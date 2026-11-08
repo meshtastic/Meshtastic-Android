@@ -53,3 +53,11 @@ internal fun loraSetupChanged(stored: Config.LoRaConfig, edited: Config.LoRaConf
     stored.region != edited.region ||
         stored.modem_preset != edited.modem_preset ||
         stored.use_preset != edited.use_preset
+
+/**
+ * Whether the setup may write: the transport is connected and the radio it reports is the one the setup was opened for.
+ * A setup bound to no radio yet never writes, and neither does one whose radio has not published its identity since
+ * reconnecting.
+ */
+internal fun radioSetupCanWrite(connected: Boolean, boundAddress: String?, identityAddress: String?): Boolean =
+    connected && boundAddress != null && identityAddress == boundAddress

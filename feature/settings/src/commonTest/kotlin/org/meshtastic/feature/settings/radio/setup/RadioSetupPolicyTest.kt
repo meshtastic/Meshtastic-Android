@@ -99,4 +99,13 @@ class RadioSetupPolicyTest {
         assertTrue(loraSetupChanged(stored, stored.withSetupPreset(ModemPreset.SHORT_FAST)))
         assertTrue(loraSetupChanged(stored, lora(region = RegionCode.US, usePreset = false)))
     }
+
+    @Test
+    fun `writes need the bound radio to be the connected one`() {
+        assertTrue(radioSetupCanWrite(connected = true, boundAddress = "a", identityAddress = "a"))
+        assertFalse(radioSetupCanWrite(connected = false, boundAddress = "a", identityAddress = "a"))
+        assertFalse(radioSetupCanWrite(connected = true, boundAddress = "a", identityAddress = "b"))
+        assertFalse(radioSetupCanWrite(connected = true, boundAddress = "a", identityAddress = null))
+        assertFalse(radioSetupCanWrite(connected = true, boundAddress = null, identityAddress = "a"))
+    }
 }
