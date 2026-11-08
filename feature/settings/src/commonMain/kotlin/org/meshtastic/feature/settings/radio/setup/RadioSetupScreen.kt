@@ -86,16 +86,17 @@ fun RadioSetupScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     // Closes the setup when a different radio becomes the connected one. Keyed on the transport address, not the node
     // number: a 2.8 radio renumbers itself on its first region set and must keep the setup open through it.
+    // The radio this setup was opened for, kept across navigation; opened with none connected, any radio that connects
+    // is a different one.
     val currentOnDone by rememberUpdatedState(onDone)
-    LaunchedEffect(nodeManager) {
-        val address = nodeManager.connectionIdentity.value?.address
-        nodeManager.connectionIdentity.filterNotNull().collect {
-            if (address != null && it.address != address) currentOnDone()
-        }
+    val boundAddress: String? = rememberSaveable { nodeManager.connectionIdentity.value?.address }
+    LaunchedEffect(nodeManager, boundAddress) {
+        nodeManager.connectionIdentity.filterNotNull().collect { if (it.address != boundAddress) currentOnDone() }
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
-    val steps = remember(state.localIsLicensed) { radioSetupSteps(state.localIsLicensed) }
+    // Fixed at open: a licensing change mid-flow must not move the page out from under an edit.
+    val steps = remember { radioSetupSteps(state.localIsLicensed) }
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
     val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
@@ -118,8 +119,12 @@ fun RadioSetupScreen(
     var statusInput by rememberSaveable(storedStatus) { mutableStateOf(storedStatus) }
 
     val responseState = state.responseState
-    val succeeded = responseState is ResponseState.Success
     val saving = responseState is ResponseState.Loading
+    // Two writes leave the name page; a failure on either stands until the user saves again, so a late ack for the
+    // other cannot report the page saved.
+    var saveFailed by rememberSaveable { mutableStateOf(false) }
+    if (responseState is ResponseState.Error) saveFailed = true
+    val succeeded = responseState is ResponseState.Success && !saveFailed
 
     Scaffold(
         modifier = modifier,
@@ -144,6 +149,7 @@ fun RadioSetupScreen(
                 onNotNow = onDone,
                 onNext = advance,
                 onSaveLora = {
+                    saveFailed = false
                     if (loraSetupChanged(storedLora, loraForm.value)) {
                         val lora = loraForm.value.withCodingRateOverrideFor(capabilities)
                         viewModel.setConfig(Config.Builder().also { wb -> wb.lora = lora }.build())
@@ -152,6 +158,7 @@ fun RadioSetupScreen(
                     }
                 },
                 onSaveName = {
+                    saveFailed = false
                     val userDirty = userForm.isDirty
                     val statusDirty = offersStatus && statusInput != storedStatus
                     if (userDirty) viewModel.saveUserConfig(userForm.value)

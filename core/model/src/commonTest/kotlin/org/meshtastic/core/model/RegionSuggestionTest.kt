@@ -29,6 +29,9 @@ class RegionSuggestionTest {
         assertEquals(RegionCode.EU_868, suggestedRegionForCountry("DE"))
         assertEquals(RegionCode.ANZ, suggestedRegionForCountry("NZ"))
         assertEquals(RegionCode.BR_902, suggestedRegionForCountry("BR"))
+        assertEquals(RegionCode.JP, suggestedRegionForCountry("JP"))
+        assertEquals(RegionCode.IN, suggestedRegionForCountry("IN"))
+        assertEquals(RegionCode.TH, suggestedRegionForCountry("TH"))
     }
 
     @Test

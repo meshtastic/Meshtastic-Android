@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
@@ -138,6 +139,10 @@ class ConnectionsViewModel(
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = false)
 
+    // The preference write lands later; this session's offers are consumed at once so a return to Connections before
+    // it lands cannot open the setup a second time.
+    private val radioSetupOfferedNow = MutableStateFlow<Set<Int>>(emptySet())
+
     /**
      * The connected radio's node number while its region is UNSET and the radio setup has not opened for it yet. The
      * screen opens the setup once per emission and marks the radio offered, so a radio the user closed is never
@@ -149,13 +154,17 @@ class ConnectionsViewModel(
             nodeRepository.ourNodeInfo,
             regionUnset,
             uiPrefs.radioSetupOfferedNodes,
-        ) { identity, ourNode, unset, offered ->
-            radioSetupOfferFor(identity?.nodeNum, ourNode?.num, unset, offered)
+            radioSetupOfferedNow,
+        ) { identity, ourNode, unset, offered, offeredNow ->
+            radioSetupOfferFor(identity?.nodeNum, ourNode?.num, unset, offered + offeredNow)
         }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = null)
 
-    fun markRadioSetupOffered(nodeNum: Int) = uiPrefs.markRadioSetupOffered(nodeNum)
+    fun markRadioSetupOffered(nodeNum: Int) {
+        radioSetupOfferedNow.update { it + nodeNum }
+        uiPrefs.markRadioSetupOffered(nodeNum)
+    }
 
     /**
      * Whether the device is configured not to transmit. Null-safe against the pre-config [LocalConfig] so the notice
