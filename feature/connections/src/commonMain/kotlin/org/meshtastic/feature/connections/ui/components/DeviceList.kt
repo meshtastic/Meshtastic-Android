@@ -18,6 +18,7 @@ package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -100,6 +101,9 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
  * `"ble:<fullAddress>"`) keep LazyColumn's recomposition scope tight to the actual item that changed when a user taps a
  * device card.
  *
+ * [header] is emitted as the list's first item, so content above the devices scrolls with them instead of competing for
+ * height with a separate scroller.
+ *
  * BLE / network scanning is user-triggered — the header's trailing toggle calls back to the caller.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,6 +126,8 @@ fun DeviceList(
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
     virtualDevices: List<DeviceListEntry> = emptyList(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    header: (@Composable () -> Unit)? = null,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -146,7 +152,12 @@ fun DeviceList(
         )
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        header?.let { item(key = "header:connection", contentType = "connection") { it() } }
         when (activeTransport) {
             DeviceType.BLE ->
                 bluetoothSection(
