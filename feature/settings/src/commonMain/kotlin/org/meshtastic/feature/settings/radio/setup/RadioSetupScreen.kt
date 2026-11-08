@@ -93,7 +93,11 @@ fun RadioSetupScreen(
     LaunchedEffect(nodeManager) {
         nodeManager.connectionIdentity.filterNotNull().collect {
             val bound = boundAddress
-            if (bound == null) boundAddress = it.address else if (it.address != bound) currentOnDone()
+            if (bound == null) {
+                boundAddress = it.address
+            } else if (it.address != bound) {
+                currentOnDone()
+            }
         }
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
