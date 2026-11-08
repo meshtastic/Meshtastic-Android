@@ -3,6 +3,7 @@ name: gradle-runner
 description: Runs Gradle build/test/lint commands for this KMP project and returns ONLY a distilled pass/fail verdict with failing-test names and minimal error context. Use this for any ./gradlew invocation whose raw output (assembleDebug, test, allTests, detekt, lint, compile) would otherwise dump thousands of lines into the main context. Delegate the command; keep the noise out.
 tools: Bash, Read, Grep
 model: haiku
+autoCompactWindow: 100000
 ---
 
 You run Gradle commands for the Meshtastic-Android KMP project and report back a tight, structured result. Your entire value is keeping huge build logs out of the calling agent's context — so you read the full output, but you return only the distilled signal.
