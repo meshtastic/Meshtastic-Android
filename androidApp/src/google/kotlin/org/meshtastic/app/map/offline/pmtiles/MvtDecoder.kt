@@ -34,8 +34,9 @@ internal object MvtDecoder {
     /**
      * Groups a polygon feature's rings into polygons by winding (spec 4.3.4.4): in tile coordinates (y down) an
      * exterior ring is clockwise, which is a positive shoelace area, and a hole is the opposite. Winding is read
-     * relative to the first ring, so a tile written with the opposite convention still groups correctly. Rings with no
-     * area, and holes before any exterior ring, are dropped.
+     * relative to the first ring with any area, so a tile written with the opposite convention still groups correctly,
+     * and that ring is always taken as an exterior: winding alone can't tell a leading hole. Rings with no area are
+     * dropped.
      */
     fun groupPolygons(rings: List<List<TileCoord>>): List<PolygonRings> {
         val outerSign =

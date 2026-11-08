@@ -133,8 +133,8 @@ internal class OfflineVectorRenderer {
         /**
          * Drops features whose id also appears in another tile that wholly contains them: a tile's buffer repeats its
          * neighbors' geometry, and drawing both doubles translucent fills. A piece reaching past its own tile edge is
-         * never contained by a neighbor, so a feature cut by a tile edge keeps each tile's piece. Features without an
-         * id are kept.
+         * never contained by a neighbor, so a feature cut by a tile edge keeps each tile's piece. A feature on a shared
+         * edge sits inside both tiles, so the lowest tile by (x, y) keeps it. Features without an id are kept.
          */
         fun dropBufferCopies(perTile: List<List<OfflineFeature>>): List<OfflineFeature> {
             val tilesByKey = mutableMapOf<Pair<String, Long>, MutableSet<TileIndex>>()
@@ -152,7 +152,8 @@ internal class OfflineVectorRenderer {
                 if (id == null || own == null || box == null) {
                     false
                 } else {
-                    tilesByKey[feature.layerName to id].orEmpty().any { it != own && GeoBox.of(it).contains(box) }
+                    val owners = tilesByKey[feature.layerName to id].orEmpty().filter { GeoBox.of(it).contains(box) }
+                    owners.any { it != own } && own != owners.minWithOrNull(compareBy({ it.x }, { it.y }))
                 }
             }
         }
@@ -173,8 +174,12 @@ private data class GeoBox(val south: Double, val west: Double, val north: Double
         fun of(tile: TileIndex): GeoBox {
             val nw = WebMercatorTileMath.tileFractionalToLatLng(tile.zoom, tile.x, tile.y, 0.0, 0.0)
             val se = WebMercatorTileMath.tileFractionalToLatLng(tile.zoom, tile.x, tile.y, 1.0, 1.0)
-            return GeoBox(se.latitude, nw.longitude, nw.latitude, se.longitude)
+            // LatLng wraps the easternmost tile's east edge from 180 to -180.
+            val east = if (se.longitude <= nw.longitude) ANTIMERIDIAN else se.longitude
+            return GeoBox(se.latitude, nw.longitude, nw.latitude, east)
         }
+
+        private const val ANTIMERIDIAN = 180.0
 
         fun of(feature: OfflineFeature): GeoBox? {
             val points = feature.rings.flatten() + feature.polygons.flatMap { it.outer }

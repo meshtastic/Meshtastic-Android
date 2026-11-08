@@ -82,6 +82,34 @@ class OfflineVectorRendererTest {
     }
 
     @Test
+    fun `a point on a shared tile edge is kept once`() {
+        fun pointAt(tile: TileIndex, fx: Double) = OfflineFeature(
+            layerName = "places",
+            geometryType = VectorTile.GEOM_POINT,
+            rings = listOf(listOf(WebMercatorTileMath.tileFractionalToLatLng(tile.zoom, tile.x, tile.y, fx, 0.5))),
+            id = 9,
+            tile = tile,
+        )
+        val fromWest = pointAt(west, 1.0)
+        val fromEast = pointAt(east, 0.0)
+
+        val kept = OfflineVectorRenderer.dropBufferCopies(listOf(listOf(fromWest), listOf(fromEast)))
+
+        assertEquals(listOf(fromWest), kept)
+    }
+
+    @Test
+    fun `a buffer copy inside the easternmost tile is dropped`() {
+        val easternmost = TileIndex(zoom = 2, x = 3, y = 1)
+        val own = lakeAt(easternmost, 0.3, 0.5, id = 7)
+        val bufferCopy = lakeAt(east, 1.3, 1.5, id = 7)
+
+        val kept = OfflineVectorRenderer.dropBufferCopies(listOf(listOf(bufferCopy), listOf(own)))
+
+        assertEquals(listOf(own), kept)
+    }
+
+    @Test
     fun `a lone tile's features are untouched`() {
         val only = lakeAt(east, 0.2, 0.4, id = 7)
 

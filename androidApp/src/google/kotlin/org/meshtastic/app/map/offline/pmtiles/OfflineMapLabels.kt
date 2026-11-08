@@ -57,8 +57,16 @@ internal object OfflineMapLabels {
     fun ranked(features: List<OfflineFeature>, locale: Locale = Locale.getDefault()): List<OfflineMapLabel> =
         features.flatMap { labelsOf(it, locale) }.distinctBy { Triple(it.kind, it.name, it.position) }.sortedWith(ORDER)
 
-    /** From [ranked] labels, the ones meant to show at [zoom], the first in each grid cell over [bounds]. */
-    fun visible(ranked: List<OfflineMapLabel>, bounds: LatLngBounds, zoom: Double): List<OfflineMapLabel> {
+    /**
+     * From [ranked] labels, the ones meant to show at [zoom], the first in each grid cell over [bounds]. [onScreen]
+     * drops labels inside [bounds] but outside a rotated or tilted view before they can claim a cell.
+     */
+    fun visible(
+        ranked: List<OfflineMapLabel>,
+        bounds: LatLngBounds,
+        zoom: Double,
+        onScreen: (LatLng) -> Boolean = { true },
+    ): List<OfflineMapLabel> {
         val minLat = bounds.southwest.latitude
         val minLon = bounds.southwest.longitude
         val cellLat = (bounds.northeast.latitude - minLat) / ROWS
@@ -66,7 +74,7 @@ internal object OfflineMapLabels {
         if (cellLat <= 0.0 || cellLon <= 0.0) return emptyList()
         val taken = mutableSetOf<Int>()
         val result = mutableListOf<OfflineMapLabel>()
-        for (label in ranked.filter { it.minZoom <= zoom }) {
+        for (label in ranked.filter { it.minZoom <= zoom && onScreen(it.position) }) {
             val row = floor((label.position.latitude - minLat) / cellLat).toInt()
             val column = floor(wrap(label.position.longitude - minLon) / cellLon).toInt()
             if (row in 0 until ROWS && column in 0 until COLUMNS && taken.add(row * COLUMNS + column)) {

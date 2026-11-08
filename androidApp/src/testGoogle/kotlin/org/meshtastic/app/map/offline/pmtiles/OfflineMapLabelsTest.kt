@@ -49,13 +49,23 @@ class OfflineMapLabelsTest {
                 label("z", minZoom = 5.0),
                 label("small", minZoom = 3.0, rank = 1),
                 label("big", minZoom = 3.0, rank = 9),
-                label("town", minZoom = 3.0, rank = 1, kind = OfflineMapLabel.Kind.Town),
+                label("A town", minZoom = 3.0, rank = 1, kind = OfflineMapLabel.Kind.Town),
                 label("a", minZoom = 3.0, rank = 1),
             )
 
         val ranked = OfflineMapLabels.ranked(labels.map(::asFeature), Locale.ENGLISH).map { it.name }
 
-        assertEquals(listOf("big", "a", "small", "town", "z"), ranked)
+        // "A town" sorts first by name, so it lands after the cities only through the kind comparison.
+        assertEquals(listOf("big", "a", "small", "A town", "z"), ranked)
+    }
+
+    @Test
+    fun `a label off a rotated screen does not claim its cell`() {
+        val ranked = listOf(label("offscreen", lat = 0.2, lon = 0.2), label("onscreen", lat = 0.4, lon = 0.4))
+
+        val shown = OfflineMapLabels.visible(ranked, view, zoom = 10.0) { it.latitude > 0.3 }
+
+        assertEquals(listOf("onscreen"), shown.map { it.name })
     }
 
     @Test

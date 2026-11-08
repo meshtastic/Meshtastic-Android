@@ -38,7 +38,7 @@ import com.google.maps.android.compose.Polyline
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.ioDispatcher
 import java.io.File
-import kotlin.math.roundToInt
+import kotlin.math.floor
 
 private val WATER_FILL = Color(0x33_4FC3F7)
 private val WATER_STROKE = Color(0xFF_4FC3F7)
@@ -83,19 +83,29 @@ internal fun OfflineVectorOverlay(
     }
 
     val density = LocalDensity.current.density
-    // Quantized so a pinch doesn't restyle every shape on each frame.
+    // Quantized so a pinch doesn't restyle every shape on each frame; rounded down so no style or label shows
+    // before the zoom it is meant for.
     val zoom by remember {
         derivedStateOf {
-            (cameraPositionState.position.zoom * ZOOM_STEPS_PER_LEVEL).roundToInt() / ZOOM_STEPS_PER_LEVEL
+            floor(cameraPositionState.position.zoom * ZOOM_STEPS_PER_LEVEL) / ZOOM_STEPS_PER_LEVEL
         }
     }
 
     if (showLabels) {
         val ranked = remember(features) { OfflineMapLabels.ranked(features) }
-        val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+        val projection = cameraPositionState.projection
+        val bounds = projection?.visibleRegion?.latLngBounds
         val labels =
             remember(ranked, bounds, zoom) {
-                bounds?.let { OfflineMapLabels.visible(ranked, it, zoom.toDouble()) }.orEmpty()
+                if (projection == null || bounds == null) {
+                    emptyList()
+                } else {
+                    val corner = projection.toScreenLocation(projection.visibleRegion.nearRight)
+                    OfflineMapLabels.visible(ranked, bounds, zoom.toDouble()) { position ->
+                        val point = projection.toScreenLocation(position)
+                        point.x in 0..corner.x && point.y in 0..corner.y
+                    }
+                }
             }
         OfflineLabelMarkers(labels, dark)
     }
