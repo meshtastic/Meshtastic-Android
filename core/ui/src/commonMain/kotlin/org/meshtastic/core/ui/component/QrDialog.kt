@@ -19,11 +19,14 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,6 +93,7 @@ fun QrDialog(
     onDismiss: () -> Unit,
     subtitle: String? = null,
     shareSubject: String = title,
+    options: (@Composable () -> Unit)? = null,
 ) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -156,7 +160,10 @@ fun QrDialog(
         confirmText = stringResource(Res.string.okay),
         onConfirm = onDismiss,
         text = {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 subtitle?.let {
                     Text(
                         text = it,
@@ -165,6 +172,8 @@ fun QrDialog(
                         textAlign = TextAlign.Center,
                     )
                 }
+
+                options?.let { Box(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) { it() } }
 
                 Image(
                     painter = qrPainter,

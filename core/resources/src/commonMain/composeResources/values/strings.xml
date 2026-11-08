@@ -212,9 +212,18 @@
     <string name="channel_6">Channel 6</string>
     <string name="channel_7">Channel 7</string>
     <string name="channel_8">Channel 8</string>
+    <plurals name="channel_already_on_radio">
+        <item quantity="one">%1$d channel in this link is already on your radio and was left out.</item>
+        <item quantity="other">%1$d channels in this link are already on your radio and were left out.</item>
+    </plurals>
     <string name="channel_features">Channel Features</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="channel_name">Channel Name</string>
+    <plurals name="channel_slots_full">
+        <item quantity="one">Your radio holds %2$d channels. Uncheck %1$d channel to make room. Unchecking a channel already on your radio removes it.</item>
+        <item quantity="other">Your radio holds %2$d channels. Uncheck %1$d channels to make room. Unchecking a channel already on your radio removes it.</item>
+    </plurals>
+    <string name="channel_slots_used">%1$d of %2$d channel slots in use</string>
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>
@@ -1984,8 +1993,8 @@
     <string name="share_action">Share link</string>
     <string name="share_by_tap_subtext">While this is open, another phone can also take it by tapping yours.</string>
     <string name="share_channels">Share Channels</string>
-    <string name="share_channels_add_hint">Adding keeps the channels they already have and appends yours.</string>
-    <string name="share_channels_replace_hint">Replacing overwrites every channel on their radio with yours.</string>
+    <string name="share_channels_add_hint">Add keeps their channels and LoRa settings and appends yours.</string>
+    <string name="share_channels_replace_hint">Replace overwrites every channel on their radio with yours and applies your LoRa settings.</string>
     <string name="share_channels_subject">Meshtastic channels</string>
     <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>

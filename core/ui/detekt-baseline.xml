@@ -79,6 +79,7 @@
     <ID>ParameterNaming:PreferenceFooter.kt:onNegativeClicked: () -> Unit = {}</ID>
     <ID>ParameterNaming:PreferenceFooter.kt:onPositiveClicked: () -> Unit = {}</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Composable Content Alert") @Composable fun PreviewComposableAlert</ID>
+    <ID>PreviewPublic:ScannedQrCodePreviews.kt:@PreviewLightDark @Composable fun PreviewScannedQrCodeAddToFullRadio</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "HTML Alert") @Composable fun PreviewHtmlAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Icon and Text Alert") @Composable fun PreviewIconAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Multiple Choice Alert") @Composable fun PreviewMultipleChoiceAlert</ID>

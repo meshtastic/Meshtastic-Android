@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.util.ChannelIdentity
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.channelIdentity
 import org.meshtastic.core.model.util.isChannelPlaceholder
@@ -181,10 +182,17 @@ fun getChannelPreviewForAdd(
     loraConfig: Config.LoRaConfig,
     maxChannels: Int,
 ): ChannelAddPreview {
-    val seen = existing.map { it.channelIdentity(loraConfig) }.toMutableSet()
+    // A blank secondary is an empty slot, not a channel, so it must not shadow an incoming cleartext preset channel.
+    val onRadio =
+        existing
+            .filterIndexed { index, settings -> index == 0 || !settings.isChannelPlaceholder() }
+            .map { it.channelIdentity(loraConfig) }
+            .toSet()
+    val seen = onRadio.toMutableSet()
     val previewSettings = existing.toMutableList()
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
+    val alreadyOnRadio = mutableSetOf<ChannelIdentity>()
     for (channel in incoming) {
         val shouldShow = !channel.isChannelPlaceholder()
         val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
@@ -194,10 +202,23 @@ fun getChannelPreviewForAdd(
             val shouldSelect = remaining > 0
             previewSelections += shouldSelect
             if (shouldSelect) remaining--
+        } else if (identity != null && identity in onRadio) {
+            alreadyOnRadio += identity
         }
     }
-    return ChannelAddPreview(settings = previewSettings, selections = previewSelections)
+    return ChannelAddPreview(
+        settings = previewSettings,
+        selections = previewSelections,
+        alreadyOnRadio = alreadyOnRadio.size,
+    )
 }
 
-/** Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched). */
-data class ChannelAddPreview(val settings: List<ChannelSettings>, val selections: List<Boolean>)
+/**
+ * Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched), and how
+ * many incoming channels were left out because the radio already has them.
+ */
+data class ChannelAddPreview(
+    val settings: List<ChannelSettings>,
+    val selections: List<Boolean>,
+    val alreadyOnRadio: Int = 0,
+)

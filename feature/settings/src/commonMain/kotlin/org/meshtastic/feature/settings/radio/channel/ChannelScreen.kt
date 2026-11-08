@@ -72,8 +72,8 @@ import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.are_you_sure_change_default
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.cant_change_no_radio
+import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.edit
-import org.meshtastic.core.resources.generate_qr_code
 import org.meshtastic.core.resources.modem_preset
 import org.meshtastic.core.resources.navigate_into_label
 import org.meshtastic.core.resources.replace
@@ -87,11 +87,12 @@ import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.QrCode
+import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
@@ -245,7 +246,9 @@ fun ChannelScreen(
 
     if (showShareDialog) {
         ChannelShareDialog(
-            uriString = channelShareState.uriString(selectedChannelSet),
+            shareState = channelShareState,
+            channelSet = selectedChannelSet,
+            modemPresetName = modemPresetName,
             onDismiss = { showShareDialog = false },
         )
     }
@@ -261,6 +264,16 @@ fun ChannelScreen(
                 actions = {},
                 onClickChip = {},
             )
+        },
+        floatingActionButton = {
+            if (enabled) {
+                MeshtasticImportFAB(
+                    onImport = { url ->
+                        viewModel.requestChannelUrl(url) { scope.launch { showToast(Res.string.channel_invalid) } }
+                    },
+                    isContactContext = false,
+                )
+            }
         },
     ) { innerPadding ->
         val listState = rememberLazyListState()
@@ -283,38 +296,6 @@ fun ChannelScreen(
                         viewModel.trackShare()
                         showShareDialog = true
                     },
-                )
-            }
-            item {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                    SegmentedButton(
-                        label = { Text(text = stringResource(Res.string.replace)) },
-                        onClick = { channelShareState.shouldAdd = false },
-                        selected = !channelShareState.shouldAdd,
-                        shape = SegmentedButtonDefaults.itemShape(0, 2),
-                    )
-                    SegmentedButton(
-                        label = { Text(text = stringResource(Res.string.add)) },
-                        onClick = { channelShareState.shouldAdd = true },
-                        selected = channelShareState.shouldAdd,
-                        shape = SegmentedButtonDefaults.itemShape(1, 2),
-                    )
-                }
-            }
-            item {
-                // Replace is destructive on the recipient's radio, and the two words alone do not say so.
-                Text(
-                    text =
-                    stringResource(
-                        if (channelShareState.shouldAdd) {
-                            Res.string.share_channels_add_hint
-                        } else {
-                            Res.string.share_channels_replace_hint
-                        },
-                    ),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             item {
@@ -345,13 +326,54 @@ fun ChannelScreen(
 }
 
 @Composable
-private fun ChannelShareDialog(uriString: String, onDismiss: () -> Unit) {
+internal fun ChannelShareDialog(
+    shareState: ChannelShareState,
+    channelSet: ChannelSet,
+    modemPresetName: String,
+    onDismiss: () -> Unit,
+) {
     QrDialog(
         title = stringResource(Res.string.share_channels),
-        uriString = uriString,
+        uriString = shareState.uriString(channelSet),
         onDismiss = onDismiss,
+        subtitle = channelSet.settings.joinToString(", ") { it.name.ifEmpty { modemPresetName } },
         shareSubject = stringResource(Res.string.share_channels_subject),
+        options = { ChannelShareModeSelector(shareState) },
     )
+}
+
+/** Replace or Add, chosen where the QR and link are, with what the recipient's radio will do in each case. */
+@Composable
+private fun ChannelShareModeSelector(shareState: ChannelShareState) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            SegmentedButton(
+                label = { Text(text = stringResource(Res.string.replace)) },
+                onClick = { shareState.shouldAdd = false },
+                selected = !shareState.shouldAdd,
+                shape = SegmentedButtonDefaults.itemShape(0, 2),
+            )
+            SegmentedButton(
+                label = { Text(text = stringResource(Res.string.add)) },
+                onClick = { shareState.shouldAdd = true },
+                selected = shareState.shouldAdd,
+                shape = SegmentedButtonDefaults.itemShape(1, 2),
+            )
+        }
+        Text(
+            text =
+            stringResource(
+                if (shareState.shouldAdd) {
+                    Res.string.share_channels_add_hint
+                } else {
+                    Res.string.share_channels_replace_hint
+                },
+            ),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable
@@ -402,9 +424,9 @@ private fun ChannelListView(
         second = {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Button(onClick = onClickShare, modifier = Modifier.padding(16.dp), enabled = enabled) {
-                    Icon(imageVector = MeshtasticIcons.QrCode, contentDescription = null)
+                    Icon(imageVector = MeshtasticIcons.Share, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = stringResource(Res.string.generate_qr_code))
+                    Text(text = stringResource(Res.string.share_channels))
                 }
             }
         },
