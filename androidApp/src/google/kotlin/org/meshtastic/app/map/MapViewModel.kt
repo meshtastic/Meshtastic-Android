@@ -60,6 +60,7 @@ import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.app.map.tiles.RasterTileProvider
 import org.meshtastic.app.map.tiles.toRasterBasemap
 import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -662,6 +663,8 @@ class MapViewModel(
                 hasTerrain = true,
                 terrainByteSize = state.byteSize,
                 terrainHasRegionalDetail = state.hasRegionalDetail,
+                terrainSourceArchives = state.archives,
+                terrainDownloadedAtEpochSeconds = nowSeconds,
             ),
         )
         _offlineRegions.value = offlineRegionStore.list()
