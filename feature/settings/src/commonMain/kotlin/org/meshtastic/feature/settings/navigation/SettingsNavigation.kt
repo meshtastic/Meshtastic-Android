@@ -308,6 +308,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         RadioSetupScreen(
             viewModel = radioConfigViewModelProvider(null),
             onDone = dropUnlessResumed { backStack.removeLastOrNull() },
+            onNavigate = backStack::addSettingsRoute,
         )
     }
 

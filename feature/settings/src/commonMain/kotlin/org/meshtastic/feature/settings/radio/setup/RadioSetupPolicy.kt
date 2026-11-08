@@ -16,15 +16,43 @@
  */
 package org.meshtastic.feature.settings.radio.setup
 
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.presetForRegionChange
+import org.meshtastic.core.model.util.isAlreadyJoined
+import org.meshtastic.feature.settings.radio.component.hasFlag
+import org.meshtastic.feature.settings.radio.component.withFlag
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 
-/** The steps a radio gets. A licensed operator's long name comes from the call sign, so the name page is skipped. */
-internal fun radioSetupSteps(isLicensed: Boolean): List<RadioSetupStep> =
-    RadioSetupStep.entries.filterNot { it == RadioSetupStep.NAME && isLicensed }
+/**
+ * The steps a radio gets. A licensed operator's long name comes from the call sign, so the name page is skipped, and
+ * the Nearby Meshes page exists only on firmware with the Mesh Beacon module.
+ */
+internal fun radioSetupSteps(isLicensed: Boolean, supportsBeacons: Boolean = false): List<RadioSetupStep> =
+    RadioSetupStep.entries.filterNot {
+        (it == RadioSetupStep.NAME && isLicensed) || (it == RadioSetupStep.BEACONS && !supportsBeacons)
+    }
+
+/** The beacon config write for the Listen switch: the stored config with only its listen flag changed. */
+internal fun MeshBeaconConfig.withListen(listen: Boolean): MeshBeaconConfig = newBuilder()
+    .also { wb -> wb.flags = flags.withFlag(MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value, listen) }
+    .build()
+
+internal val MeshBeaconConfig.listens: Boolean
+    get() = flags.hasFlag(MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value)
+
+/** The beacons the page lists: the ones not already joined, newest first, at most [RADIO_SETUP_BEACON_LIMIT]. */
+internal fun setupBeaconOffers(
+    offers: List<MeshBeaconOffer>,
+    lora: Config.LoRaConfig?,
+    channels: List<ChannelSettings>,
+): List<MeshBeaconOffer> = offers.filterNot { it.beacon.isAlreadyJoined(lora, channels) }.take(RADIO_SETUP_BEACON_LIMIT)
+
+internal const val RADIO_SETUP_BEACON_LIMIT = 5
 
 /**
  * The LoRa config the region page writes when [region] is chosen: the region, and the preset [presetForRegionChange]

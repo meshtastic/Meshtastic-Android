@@ -44,9 +44,12 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.filterNotNull
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.utf8Size
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.done
@@ -57,6 +60,7 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OnboardingBottomBar
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
@@ -80,8 +84,11 @@ import org.meshtastic.proto.User
 fun RadioSetupScreen(
     viewModel: RadioConfigViewModel,
     onDone: () -> Unit,
+    onNavigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
     nodeManager: NodeManager = koinInject(),
+    meshBeaconRepository: MeshBeaconRepository = koinInject(),
+    uiViewModel: UIViewModel = koinViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     // Closes the setup when a different radio becomes the connected one. Keyed on the transport address, not the node
@@ -102,10 +109,11 @@ fun RadioSetupScreen(
     }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
+    val offersBeacons = capabilities.supportsMeshBeacon && !state.metadata.excludes(ExcludedModules.MESHBEACON_CONFIG)
     // Fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a licensing change
-    // mid-flow must not move the page out from under an edit.
+    // mid-flow must not move the page out from under an edit. The firmware's module set is known from the same node.
     val licensed = destNode?.user?.is_licensed
-    val steps = remember(licensed == null) { radioSetupSteps(licensed == true) }
+    val steps = remember(licensed == null) { radioSetupSteps(licensed == true, offersBeacons) }
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
     val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
@@ -126,6 +134,12 @@ fun RadioSetupScreen(
         capabilities.supportsStatusMessage && !state.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
     val storedStatus = state.moduleConfig.statusmessage?.node_status ?: destNode?.nodeStatus.orEmpty()
     var statusInput by rememberSaveable(storedStatus) { mutableStateOf(storedStatus) }
+    val beaconConfig = state.moduleConfig.mesh_beacon
+    val allOffers by meshBeaconRepository.offers.collectAsStateWithLifecycle()
+    val offers =
+        remember(allOffers, state.radioConfig.lora, state.channelList) {
+            setupBeaconOffers(allOffers, state.radioConfig.lora, state.channelList)
+        }
 
     val responseState = state.responseState
     val saving = responseState is ResponseState.Loading
@@ -203,9 +217,32 @@ fun RadioSetupScreen(
                             onStatusChange = { statusInput = it },
                         )
 
+                    RadioSetupStep.BEACONS ->
+                        BeaconsPage(
+                            beaconConfig = beaconConfig,
+                            offers = offers,
+                            lora = state.radioConfig.lora,
+                            state = state,
+                            onListenChange = { listen ->
+                                beaconConfig?.let {
+                                    viewModel.setModuleConfig(
+                                        ModuleConfig.Builder().also { wb -> wb.mesh_beacon = it.withListen(listen) }.build(),
+                                    )
+                                }
+                            },
+                            onJoin = uiViewModel::setRequestChannelSet,
+                            onNavigate = onNavigate,
+                        )
+
                     // The summary reads back what the radio holds, not what a skipped page left in its form.
                     RadioSetupStep.DONE ->
-                        DonePage(storedLora, destNode?.user ?: userForm.value, storedStatus, offersStatus)
+                        DonePage(
+                            lora = storedLora,
+                            user = destNode?.user ?: userForm.value,
+                            status = storedStatus,
+                            offersStatus = offersStatus,
+                            listens = beaconConfig?.listens?.takeIf { offersBeacons },
+                        )
                 }
             }
             LoadingOverlay(state = responseState)
@@ -213,7 +250,7 @@ fun RadioSetupScreen(
                 PacketResponseStateDialog(
                     state = responseState,
                     onDismiss = viewModel::clearPacketResponse,
-                    onBack = { if (succeeded) advance() },
+                    onBack = { if (succeeded && step != RadioSetupStep.BEACONS) advance() },
                     rebootBehavior =
                     if (capabilities.appliesLoraConfigLive || step != RadioSetupStep.PRESET) {
                         RebootBehavior.NEVER
@@ -281,6 +318,8 @@ private fun RadioSetupButtons(
                 secondaryText = stringResource(Res.string.skip),
                 onSecondary = onNext,
             )
+
+        RadioSetupStep.BEACONS -> OnboardingBottomBar(primaryText = stringResource(Res.string.next), onPrimary = onNext)
 
         RadioSetupStep.DONE -> OnboardingBottomBar(primaryText = stringResource(Res.string.done), onPrimary = onDone)
     }
