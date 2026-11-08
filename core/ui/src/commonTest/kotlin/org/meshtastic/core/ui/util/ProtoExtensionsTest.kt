@@ -587,6 +587,54 @@ class ProtoExtensionsTest {
     }
 
     @Test
+    fun preview_counts_a_channel_already_on_the_radio_once_and_ignores_incoming_only_repeats() {
+        fun named(name: String, key: Byte) = ChannelSettings.Builder()
+            .also { wb ->
+                wb.name = name
+                wb.psk = byteArrayOf(key).toByteString()
+            }
+            .build()
+        val primary = named("Base", 1)
+        val onRadio = named("A", 2)
+        val incomingOnly = named("B", 3)
+
+        val preview =
+            getChannelPreviewForAdd(
+                existing = listOf(primary, onRadio),
+                incoming = listOf(onRadio, onRadio, incomingOnly, incomingOnly),
+                loraConfig = ModelChannel.default.loraConfig,
+                maxChannels = 8,
+            )
+
+        assertEquals(listOf(primary, onRadio, incomingOnly), preview.settings)
+        assertEquals(1, preview.alreadyOnRadio)
+    }
+
+    @Test
+    fun preview_blank_secondary_slot_does_not_hide_an_incoming_cleartext_preset_channel() {
+        val primary =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Base"
+                    wb.psk = byteArrayOf(1).toByteString()
+                }
+                .build()
+        val blankSlot = ChannelSettings.Builder().build()
+        val cleartextPreset = ChannelSettings.Builder().also { wb -> wb.psk = byteArrayOf(0).toByteString() }.build()
+
+        val preview =
+            getChannelPreviewForAdd(
+                existing = listOf(primary, blankSlot),
+                incoming = listOf(cleartextPreset),
+                loraConfig = ModelChannel.default.loraConfig,
+                maxChannels = 8,
+            )
+
+        assertEquals(listOf(primary, blankSlot, cleartextPreset), preview.settings)
+        assertEquals(0, preview.alreadyOnRadio)
+    }
+
+    @Test
     fun preview_duplicate_inside_incoming_keeps_first_and_omits_later() {
         val a =
             ChannelSettings.Builder()

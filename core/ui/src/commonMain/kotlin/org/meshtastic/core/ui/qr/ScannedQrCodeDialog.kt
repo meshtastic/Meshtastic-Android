@@ -409,9 +409,16 @@ private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRa
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (selectedCount > maxChannels || (incomingLeftOut && selectedCount >= maxChannels)) {
+        // Over the limit, uncheck the excess; at the limit with a new channel left out, one more slot is needed.
+        val toUncheck =
+            when {
+                selectedCount > maxChannels -> selectedCount - maxChannels
+                incomingLeftOut && selectedCount == maxChannels -> 1
+                else -> 0
+            }
+        if (toUncheck > 0) {
             Text(
-                text = stringResource(Res.string.channel_slots_full, maxChannels),
+                text = pluralStringResource(Res.plurals.channel_slots_full, toUncheck, toUncheck, maxChannels),
                 modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,

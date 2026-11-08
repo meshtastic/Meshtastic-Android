@@ -219,7 +219,10 @@
     <string name="channel_features">Channel Features</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="channel_name">Channel Name</string>
-    <string name="channel_slots_full">Your radio holds %1$d channels. Deselect one to make room.</string>
+    <plurals name="channel_slots_full">
+        <item quantity="one">Your radio holds %2$d channels. Uncheck %1$d channel to make room. Unchecking a channel already on your radio removes it.</item>
+        <item quantity="other">Your radio holds %2$d channels. Uncheck %1$d channels to make room. Unchecking a channel already on your radio removes it.</item>
+    </plurals>
     <string name="channel_slots_used">%1$d of %2$d channel slots in use</string>
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>

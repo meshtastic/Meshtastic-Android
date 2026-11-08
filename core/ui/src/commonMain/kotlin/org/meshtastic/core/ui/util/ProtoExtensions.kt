@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.util.ChannelIdentity
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.channelIdentity
 import org.meshtastic.core.model.util.isChannelPlaceholder
@@ -181,12 +182,17 @@ fun getChannelPreviewForAdd(
     loraConfig: Config.LoRaConfig,
     maxChannels: Int,
 ): ChannelAddPreview {
-    val onRadio = existing.map { it.channelIdentity(loraConfig) }.toSet()
+    // A blank secondary is an empty slot, not a channel, so it must not shadow an incoming cleartext preset channel.
+    val onRadio =
+        existing
+            .filterIndexed { index, settings -> index == 0 || !settings.isChannelPlaceholder() }
+            .map { it.channelIdentity(loraConfig) }
+            .toSet()
     val seen = onRadio.toMutableSet()
     val previewSettings = existing.toMutableList()
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
-    var alreadyOnRadio = 0
+    val alreadyOnRadio = mutableSetOf<ChannelIdentity>()
     for (channel in incoming) {
         val shouldShow = !channel.isChannelPlaceholder()
         val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
@@ -197,13 +203,13 @@ fun getChannelPreviewForAdd(
             previewSelections += shouldSelect
             if (shouldSelect) remaining--
         } else if (identity != null && identity in onRadio) {
-            alreadyOnRadio++
+            alreadyOnRadio += identity
         }
     }
     return ChannelAddPreview(
         settings = previewSettings,
         selections = previewSelections,
-        alreadyOnRadio = alreadyOnRadio,
+        alreadyOnRadio = alreadyOnRadio.size,
     )
 }
 
