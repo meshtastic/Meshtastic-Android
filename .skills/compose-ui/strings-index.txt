@@ -185,9 +185,12 @@ channel_5
 channel_6
 channel_7
 channel_8
+channel_already_on_radio
 channel_features
 channel_invalid
 channel_name
+channel_slots_full
+channel_slots_used
 channel_url
 channel_utilization
 channels

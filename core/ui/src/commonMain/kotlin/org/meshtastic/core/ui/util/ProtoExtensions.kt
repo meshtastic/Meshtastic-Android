@@ -181,10 +181,12 @@ fun getChannelPreviewForAdd(
     loraConfig: Config.LoRaConfig,
     maxChannels: Int,
 ): ChannelAddPreview {
-    val seen = existing.map { it.channelIdentity(loraConfig) }.toMutableSet()
+    val onRadio = existing.map { it.channelIdentity(loraConfig) }.toSet()
+    val seen = onRadio.toMutableSet()
     val previewSettings = existing.toMutableList()
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
+    var alreadyOnRadio = 0
     for (channel in incoming) {
         val shouldShow = !channel.isChannelPlaceholder()
         val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
@@ -194,10 +196,19 @@ fun getChannelPreviewForAdd(
             val shouldSelect = remaining > 0
             previewSelections += shouldSelect
             if (shouldSelect) remaining--
+        } else if (identity != null && identity in onRadio) {
+            alreadyOnRadio++
         }
     }
-    return ChannelAddPreview(settings = previewSettings, selections = previewSelections)
+    return ChannelAddPreview(settings = previewSettings, selections = previewSelections, alreadyOnRadio = alreadyOnRadio)
 }
 
-/** Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched). */
-data class ChannelAddPreview(val settings: List<ChannelSettings>, val selections: List<Boolean>)
+/**
+ * Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched), and how
+ * many incoming channels were left out because the radio already has them.
+ */
+data class ChannelAddPreview(
+    val settings: List<ChannelSettings>,
+    val selections: List<Boolean>,
+    val alreadyOnRadio: Int = 0,
+)

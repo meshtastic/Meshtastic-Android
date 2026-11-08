@@ -583,6 +583,7 @@ class ProtoExtensionsTest {
             getChannelPreviewForAdd(listOf(channel), listOf(channel), ModelChannel.default.loraConfig, maxChannels = 8)
 
         assertEquals(listOf(channel), preview.settings)
+        assertEquals(1, preview.alreadyOnRadio)
     }
 
     @Test
@@ -608,6 +609,7 @@ class ProtoExtensionsTest {
         assertEquals(listOf(a, b), preview.settings)
         assertTrue(preview.selections[0])
         assertTrue(preview.selections[1])
+        assertEquals(0, preview.alreadyOnRadio)
     }
 
     @Test
