@@ -83,4 +83,27 @@ class ElevationStitcherTest {
         assertEquals(3f, padded.elevationAt(0, 3))
         assertEquals(4f, padded.elevationAt(3, 3))
     }
+
+    @Test
+    fun `a margin wider than one pixel reads that many pixels into the neighbor`() {
+        val west = ElevationTile(width = 2, height = 2, elevations = floatArrayOf(301f, 302f, 303f, 304f))
+
+        val padded = ElevationStitcher.buildPadded(center, neighbors = mapOf((-1 to 0) to west), margin = 2)
+
+        assertEquals(6, padded.width)
+        assertEquals(301f, padded.elevationAt(0, 2))
+        assertEquals(302f, padded.elevationAt(1, 2))
+        assertEquals(1f, padded.elevationAt(2, 2))
+    }
+
+    @Test
+    fun `a margin wider than one pixel fills the east and south padding too`() {
+        val east = ElevationTile(width = 2, height = 2, elevations = floatArrayOf(501f, 502f, 503f, 504f))
+
+        val padded = ElevationStitcher.buildPadded(center, neighbors = mapOf((1 to 0) to east), margin = 2)
+
+        assertEquals(501f, padded.elevationAt(4, 2))
+        assertEquals(502f, padded.elevationAt(5, 2))
+        assertEquals(4f, padded.elevationAt(5, 5))
+    }
 }

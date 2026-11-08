@@ -76,9 +76,8 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
 
     // Owns download execution — deliberately not the caller's CoroutineScope. A UI-scoped download (the layers
     // sheet's own rememberCoroutineScope, say) is cancelled the instant that UI goes away — closing the sheet,
-    // rotating the device — and TerrainRegionExtractor's own broad `catch (_: Exception)` also catches the
-    // CancellationException that produces, running store.deleteAll() on a download the user never actually asked
-    // to abandon. Owning the scope here means only this repository's own lifetime (the process) can cancel one.
+    // rotating the device — and TerrainRegionExtractor deletes every partial tile when cancelled, discarding a
+    // download the user never asked to abandon. Owning the scope here ties a download to this repository's lifetime.
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private var downloadJob: Job? = null
 

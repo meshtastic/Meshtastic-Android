@@ -20,11 +20,17 @@ import ch.poole.geo.pmtiles.Constants
 import ch.poole.geo.pmtiles.HttpUrlConnectionChannel
 import ch.poole.geo.pmtiles.Reader
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-actual fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher = PmtilesTerrainTileFetcher(pmtilesUrl)
+// The reader reads the archive header on construction, and HttpURLConnection reports a 404 as FileNotFoundException.
+actual fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher? = try {
+    PmtilesTerrainTileFetcher(pmtilesUrl)
+} catch (_: FileNotFoundException) {
+    null
+}
 
 /**
  * Backed by `ch.poole.geo.pmtiles:Reader` (MIT-licensed), the same library the base offline layer uses for Protomaps.

@@ -30,8 +30,8 @@ All in `commonMain` unless noted:
 | `ContourIntervals.kt` | The zoom-banded minor/index interval table, in metric or feet-derived round numbers; every fifth line is an index line. |
 | `ContourStyle.kt` | Contour stroke color, width and opacity as simplestyle-spec values, which both renderers already apply to imported layers. |
 | `MapterhornEndpoints.kt` | Mapterhorn's two-tier PMTiles layout: a global archive up to z12 and per-region high-resolution archives (z13 to z18) keyed by their z6 tile, plus the attribution string. |
-| `TerrainTileFetcher.kt` | Range-request reads of single tiles from a remote PMTiles archive. The `jvmAndroidMain` actual wraps the `pmtiles-reader` Java library. |
-| `TerrainRegionExtractor.kt` | Downloads a region: the global layer always, the regional layer where the bounds fit one z6 tile. Reports `TerrainDownloadState` and fails with `TILE_LIMIT_EXCEEDED` above `MAX_TILES` (3,000). |
+| `TerrainTileFetcher.kt` | Range-request reads of single tiles from a remote PMTiles archive; opening one the host doesn't have returns `null`. The `jvmAndroidMain` actual wraps the `pmtiles-reader` Java library. |
+| `TerrainRegionExtractor.kt` | Downloads a region: the global layer always, plus the regional layer from every z6 archive the bounds touch. A z6 tile with no archive (404) is skipped, not an error. Reports `TerrainDownloadState` and fails with `TILE_LIMIT_EXCEEDED` above `MAX_TILES` (3,000). |
 | `TerrainTileStore.kt` | Raw WebP tiles as plain files under `<baseDir>/<global or regional>/<zoom>/<x>/<y>.webp`, through Okio so it works on Desktop too. The caller decides where `baseDir` lives. |
 | `TerrainTileMath.kt`, `TerrainTileCount.kt` | Web Mercator tile math (`GeoBounds`, `TileIndex`) and `terrainTileCount()` for download estimates. |
 

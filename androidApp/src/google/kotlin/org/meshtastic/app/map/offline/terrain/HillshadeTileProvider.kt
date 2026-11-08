@@ -22,7 +22,6 @@ import com.google.android.gms.maps.model.Tile
 import com.google.android.gms.maps.model.TileProvider
 import org.meshtastic.feature.map.terrain.ElevationTile
 import org.meshtastic.feature.map.terrain.Hillshade
-import org.meshtastic.feature.map.terrain.TerrainSource
 import org.meshtastic.feature.map.terrain.TerrainTileStore
 import org.meshtastic.feature.map.terrain.TileIndex
 import org.meshtastic.feature.map.terrain.decodeTerrariumTile
@@ -43,10 +42,15 @@ private val LOG = Logger.withTag("HillshadeTileProvider")
  * neighbor-tile elevation data around the tile it shades ([ElevationStitcher] assembles that, gracefully clamping to
  * this tile's own edge wherever a neighbor wasn't downloaded — see its own doc comment).
  *
+ * A tile past the deepest downloaded zoom at its spot is resampled from the nearest parent that has data, fading out
+ * over the zoom after one past the data and absent beyond. With [shadeValleys], ground that sees little sky also
+ * darkens.
+ *
  * [getTile] is called concurrently by the Maps SDK from multiple threads, so both caches below are guarded by
  * `synchronized`, as is [org.meshtastic.app.map.offline.pmtiles.OfflineVectorRenderer]'s identically-shaped tile cache.
  */
-internal class HillshadeTileProvider(private val store: TerrainTileStore) : TileProvider {
+internal class HillshadeTileProvider(private val store: TerrainTileStore, private val shadeValleys: Boolean = false) :
+    TileProvider {
 
     private val elevationCache =
         object : LinkedHashMap<String, ElevationTile>(INITIAL_CAPACITY, LOAD_FACTOR, true) {
@@ -65,27 +69,54 @@ internal class HillshadeTileProvider(private val store: TerrainTileStore) : Tile
         val cached = synchronized(renderedCache) { renderedCache[key] }
         if (cached != null) return cached
 
-        val source = terrainSourceForZoom(zoom)
-        val center = decode(source, TileIndex(zoom, x, y))
-        return if (center == null) {
-            TileProvider.NO_TILE
-        } else {
-            val neighbors =
-                NEIGHBOR_OFFSETS.mapNotNull { (dx, dy) ->
-                    decode(source, TileIndex(zoom, x + dx, y + dy))?.let { (dx to dy) to it }
-                }
-                    .toMap()
-
-            val padded = ElevationStitcher.buildPadded(center, neighbors)
-            val shadow = Hillshade.shade(padded, center.width, center.height, MAX_SHADOW_ALPHA)
-            val tile = Tile(center.width, center.height, renderShadowPng(shadow, center.width, center.height))
-            synchronized(renderedCache) { renderedCache[key] = tile }
-            tile
-        }
+        val levels = (0..MAX_OVERZOOM_LEVELS).firstOrNull { hasData(zoom - it, x shr it, y shr it) }
+        val strength = levels?.let { Hillshade.strength(zoom, zoom - it) } ?: 0f
+        val parent = levels?.takeIf { strength > 0f }?.let { decode(zoom - it, x shr it, y shr it) }
+        val tile = if (levels == null || parent == null) null else render(x, y, zoom, levels, parent, strength)
+        return tile?.also { synchronized(renderedCache) { renderedCache[key] = it } } ?: TileProvider.NO_TILE
     }
 
-    private fun decode(source: TerrainSource, tile: TileIndex): ElevationTile? {
-        val key = "${source.dirName}/${tile.zoom}/${tile.x}/${tile.y}"
+    private fun render(x: Int, y: Int, zoom: Int, levels: Int, parent: ElevationTile, strength: Float): Tile {
+        val size = parent.width
+        val metersPerSample = Hillshade.metersPerSample(zoom, y, size)
+        val margin = if (shadeValleys) Hillshade.valleyMargin(metersPerSample) else Hillshade.MARGIN
+        val parentMargin = if (levels == 0) margin else Hillshade.overzoomMargin(margin, levels)
+        val parentZoom = zoom - levels
+        val parentX = x shr levels
+        val parentY = y shr levels
+        val neighbors =
+            NEIGHBOR_OFFSETS.mapNotNull { (dx, dy) ->
+                decode(parentZoom, parentX + dx, parentY + dy)?.let { (dx to dy) to it }
+            }
+                .toMap()
+        val padded = ElevationStitcher.buildPadded(parent, neighbors, parentMargin)
+        val mask = (1 shl levels) - 1
+        val grid =
+            if (levels == 0) {
+                padded
+            } else {
+                Hillshade.overzoom(padded, parentMargin, levels, x and mask, y and mask, size, margin)
+            }
+        val shadow =
+            Hillshade.shade(
+                grid,
+                size,
+                size,
+                MAX_SHADOW_ALPHA * strength,
+                metersPerSample,
+                margin,
+                shadeValleys,
+            )
+        return Tile(size, size, renderShadowPng(shadow, size, size))
+    }
+
+    private fun hasData(zoom: Int, x: Int, y: Int): Boolean =
+        zoom >= 0 && store.hasTile(terrainSourceForZoom(zoom), TileIndex(zoom, x, y))
+
+    private fun decode(zoom: Int, x: Int, y: Int): ElevationTile? {
+        val source = terrainSourceForZoom(zoom)
+        val tile = TileIndex(zoom, x, y)
+        val key = "${source.dirName}/$zoom/$x/$y"
         val cached = synchronized(elevationCache) { elevationCache[key] }
         if (cached != null) return cached
 
@@ -128,6 +159,8 @@ internal class HillshadeTileProvider(private val store: TerrainTileStore) : Tile
         const val MAX_SHADOW_ALPHA = 0.5f
 
         private val NEIGHBOR_OFFSETS = listOf(-1 to -1, 0 to -1, 1 to -1, -1 to 0, 1 to 0, -1 to 1, 0 to 1, 1 to 1)
+
+        private const val MAX_OVERZOOM_LEVELS = 2
 
         private const val MAX_CACHED_ELEVATION_TILES = 128
         private const val MAX_CACHED_RENDERED_TILES = 64

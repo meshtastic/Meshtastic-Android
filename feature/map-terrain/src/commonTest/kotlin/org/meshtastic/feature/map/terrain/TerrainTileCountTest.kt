@@ -36,11 +36,17 @@ class TerrainTileCountTest {
     }
 
     @Test
-    fun `a box with no regional archive never counts past the global tier`() {
-        val globalOnly = terrainTileCount(continentalBox, maxZoom = MapterhornEndpoints.GLOBAL_MAX_ZOOM)
+    fun `a box crossing a z6 line still adds the regional zooms`() {
+        // The z6 column boundary between x=9 and x=10 runs along -123.75.
+        val straddling = GeoBounds(south = 47.6, west = -123.76, north = 47.61, east = -123.74)
+        val global = terrainTileCount(straddling, maxZoom = MapterhornEndpoints.GLOBAL_MAX_ZOOM)
 
-        assertEquals(8_869_485L, globalOnly)
-        assertEquals(globalOnly, terrainTileCount(continentalBox, maxZoom = MapterhornEndpoints.REGIONAL_MAX_ZOOM))
+        assertEquals(global + TerrainTileMath.tileCountAt(13, straddling), terrainTileCount(straddling, maxZoom = 13))
+    }
+
+    @Test
+    fun `the global tier of a continental box`() {
+        assertEquals(8_869_485L, terrainTileCount(continentalBox, maxZoom = MapterhornEndpoints.GLOBAL_MAX_ZOOM))
     }
 
     @Test
