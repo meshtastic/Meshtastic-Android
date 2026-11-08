@@ -35,27 +35,36 @@ class ManagedModeAdminKeyTest {
         .build()
 
     @Test
-    fun `removing the last admin key turns managed mode off`() {
-        val updated = managed(key).withAdminKeys(emptyList())
+    fun `saving with no admin key turns managed mode off`() {
+        val saved = managed().forSave()
 
-        assertFalse(updated.is_managed)
-        assertTrue(updated.admin_key.isEmpty())
+        assertFalse(saved.is_managed)
+        assertTrue(saved.admin_key.isEmpty())
     }
 
     @Test
-    fun `leaving only blank slots turns managed mode off`() {
-        val updated = managed(key).withAdminKeys(listOf(ByteString.EMPTY))
+    fun `saving with only blank or short slots turns managed mode off`() {
+        val short = ByteArray(1) { 1 }.toByteString()
+        val saved = managed(ByteString.EMPTY, short).forSave()
 
-        assertFalse(updated.is_managed)
-        assertFalse(updated.hasAdminKey())
+        assertFalse(saved.hasAdminKey())
+        assertFalse(saved.is_managed)
     }
 
     @Test
-    fun `removing one of several admin keys keeps managed mode on`() {
-        val other = ByteArray(32) { (it + 2).toByte() }.toByteString()
-        val updated = managed(key, other).withAdminKeys(listOf(other))
+    fun `a blank slot before a valid key keeps managed mode on`() {
+        val config = managed(ByteString.EMPTY, key)
 
-        assertTrue(updated.is_managed)
-        assertEquals(listOf(other), updated.admin_key)
+        assertTrue(config.hasAdminKey())
+        assertEquals(config, config.forSave())
+    }
+
+    @Test
+    fun `clearing the sole key mid edit keeps the managed choice until save`() {
+        val editing = managed(key).newBuilder().also { wb -> wb.admin_key = listOf(ByteString.EMPTY) }.build()
+        assertTrue(editing.is_managed)
+
+        val replaced = editing.newBuilder().also { wb -> wb.admin_key = listOf(key) }.build()
+        assertTrue(replaced.forSave().is_managed)
     }
 }

@@ -117,7 +117,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb -> wb.security = it }.build()
+            val config = Config.Builder().also { wb -> wb.security = it.forSave() }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -185,7 +185,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { formState.value = formState.value.withAdminKeys(it) },
+                    onValuesChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.admin_key = it }.build()
+                    },
                 )
             }
         }
@@ -223,7 +225,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     title = stringResource(Res.string.schema_security_is_managed),
                     modifier = Modifier.settingsField(Res.string.schema_security_is_managed),
                     summary = stringResource(Res.string.schema_security_is_managed_description),
-                    checked = formState.value.is_managed,
+                    checked = formState.value.is_managed && formState.value.hasAdminKey(),
                     enabled = state.connected && formState.value.hasAdminKey(),
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.is_managed = it }.build()
@@ -265,18 +267,15 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
 
 internal const val SECURITY_PUBLIC_KEY_COPY_TEST_TAG = "security_public_key_copy"
 
-/** The list editor adds blank slots, so only a non-empty entry counts as an admin key. */
-internal fun Config.SecurityConfig.hasAdminKey(): Boolean = admin_key.any { it.size > 0 }
+/** Firmware only counts a 32-byte public key as an admin key; blank or short slots authorize nobody. */
+internal fun Config.SecurityConfig.hasAdminKey(): Boolean = admin_key.any { it.size == ADMIN_KEY_SIZE }
 
 /**
- * A managed node with no admin key accepts no configuration from anyone, so losing the last key clears managed mode.
+ * A managed node with no admin key accepts no configuration from anyone, so managed mode is cleared at save time, not
+ * while the keys are being edited.
  */
-internal fun Config.SecurityConfig.withAdminKeys(keys: List<ByteString>): Config.SecurityConfig = newBuilder()
-    .also { wb ->
-        wb.admin_key = keys
-        if (keys.none { it.size > 0 }) wb.is_managed = false
-    }
-    .build()
+internal fun Config.SecurityConfig.forSave(): Config.SecurityConfig =
+    if (is_managed && !hasAdminKey()) newBuilder().also { wb -> wb.is_managed = false }.build() else this
 
 /**
  * Public keys come from the device. Editing the private key invalidates that derived value until the device responds
@@ -399,3 +398,6 @@ fun PrivateKeyRegenerateDialog(
 
 /** X25519 private key length in bytes. */
 private const val PRIVATE_KEY_SIZE = 32
+
+/** X25519 public key length in bytes. */
+private const val ADMIN_KEY_SIZE = 32
