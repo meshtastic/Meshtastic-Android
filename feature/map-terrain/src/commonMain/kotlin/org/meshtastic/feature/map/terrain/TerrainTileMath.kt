@@ -102,11 +102,11 @@ object TerrainTileMath {
         return columns.toLong() * rows.toLong()
     }
 
-    /** Whether [bounds] fits entirely inside a single tile at [zoom] — used for Mapterhorn's regional-archive gate. */
-    fun fitsInSingleTile(zoom: Int, bounds: GeoBounds): Boolean {
-        val northwest = tileAt(zoom, bounds.north, bounds.west)
-        val southeast = tileAt(zoom, bounds.south, bounds.east)
-        return northwest == southeast
+    /** The tile at [zoom] that contains [tile]; [zoom] must not be deeper than [tile]'s own. */
+    fun ancestorAt(zoom: Int, tile: TileIndex): TileIndex {
+        require(zoom in 0..tile.zoom) { "z$zoom is not an ancestor zoom of z${tile.zoom}" }
+        val shift = tile.zoom - zoom
+        return TileIndex(zoom, tile.x shr shift, tile.y shr shift)
     }
 
     /**

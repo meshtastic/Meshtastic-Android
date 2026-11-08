@@ -26,5 +26,5 @@ interface TerrainTileFetcher : AutoCloseable {
     fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
 }
 
-/** Opens the remote PMTiles archive at [pmtilesUrl]. */
-expect fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher
+/** Opens the remote PMTiles archive at [pmtilesUrl], or returns `null` when the host has no archive there (404). */
+expect fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher?

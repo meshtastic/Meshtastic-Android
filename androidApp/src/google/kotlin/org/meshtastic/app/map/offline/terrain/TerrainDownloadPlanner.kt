@@ -25,11 +25,10 @@ import org.meshtastic.feature.map.terrain.terrainTileCount
  *
  * [org.meshtastic.feature.map.terrain.TerrainRegionExtractor] deliberately has no zoom-fitting of its own — per its own
  * doc comment, relating a terrain download to a base region's storage budget is the caller's job. Left to always
- * request Mapterhorn's full regional depth (zoom 18), most regions small enough to actually qualify for regional detail
- * (they must fit inside a single zoom-6 tile — see [MapterhornEndpoints.regionalUrlFor]) would still enumerate a 13-18
- * tile count well past [org.meshtastic.feature.map.terrain.TerrainRegionExtractor.MAX_TILES] and fail outright with no
- * partial credit. So this walks zoom back from 18 until the enumeration — computed the same way the extractor's own
- * `download` counts tiles — actually fits.
+ * request Mapterhorn's full regional depth (zoom 18), almost any region would enumerate a 13-18 tile count well past
+ * [org.meshtastic.feature.map.terrain.TerrainRegionExtractor.MAX_TILES] and fail outright with no partial credit. So
+ * this walks zoom back from 18 until the enumeration — computed the same way the extractor's own `download` counts
+ * tiles — actually fits.
  */
 internal object TerrainDownloadPlanner {
 

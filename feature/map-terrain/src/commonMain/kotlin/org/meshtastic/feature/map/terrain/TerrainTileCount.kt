@@ -17,25 +17,24 @@
 package org.meshtastic.feature.map.terrain
 
 /**
- * How many tiles [TerrainRegionExtractor.download] fetches for [bounds] up to [maxZoom]: the global tier always, the
- * regional tier only where [MapterhornEndpoints.regionalUrlFor] finds an archive. Counted from tile corners, O(1) per
- * zoom, so it is safe to call before deciding whether a download fits.
+ * How many tiles [TerrainRegionExtractor.download] asks for over [bounds] up to [maxZoom]: the global tier, plus the
+ * regional tier for every tile past it. An upper bound, since a z6 tile with no regional archive fetches nothing.
+ * Counted from tile corners, O(1) per zoom, so it is safe to call before deciding whether a download fits.
  */
 fun terrainTileCount(bounds: GeoBounds, maxZoom: Int): Long {
-    val regional = regionalTerrainZooms(bounds, maxZoom)?.let { tileCount(bounds, it) } ?: 0L
+    val regional = regionalTerrainZooms(maxZoom)?.let { tileCount(bounds, it) } ?: 0L
     return tileCount(bounds, globalTerrainZooms(maxZoom)) + regional
 }
 
 /** Zoom levels fetched from the global archive for a download to [maxZoom]. */
 internal fun globalTerrainZooms(maxZoom: Int): IntRange = 0..minOf(maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
 
-/** Zoom levels fetched from the regional archive, or null when [bounds] has none or [maxZoom] stays global. */
-internal fun regionalTerrainZooms(bounds: GeoBounds, maxZoom: Int): IntRange? =
-    if (maxZoom > MapterhornEndpoints.GLOBAL_MAX_ZOOM && MapterhornEndpoints.regionalUrlFor(bounds) != null) {
-        MapterhornEndpoints.REGIONAL_MIN_ZOOM..minOf(maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
-    } else {
-        null
-    }
+/** Zoom levels fetched from regional archives, or null when [maxZoom] stays within the global tier. */
+internal fun regionalTerrainZooms(maxZoom: Int): IntRange? = if (maxZoom > MapterhornEndpoints.GLOBAL_MAX_ZOOM) {
+    MapterhornEndpoints.REGIONAL_MIN_ZOOM..minOf(maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
+} else {
+    null
+}
 
 private fun tileCount(bounds: GeoBounds, zooms: IntRange): Long = zooms.sumOf { zoom ->
     TerrainTileMath.tileCountAt(zoom, bounds)
