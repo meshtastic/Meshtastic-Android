@@ -17,7 +17,6 @@
 package org.meshtastic.feature.connections.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -38,6 +37,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -214,22 +215,19 @@ internal fun ConfigurationWarningCards(
         }
     }
 
-    Column {
-        if (showWarnings) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(modifier = Modifier.fillMaxWidth()) {
-                ListItem(
-                    leadingIcon = MeshtasticIcons.Language,
-                    text =
-                    stringResource(if (regionUnset) Res.string.set_your_region else Res.string.radio_setup_title),
-                    onClick = { onConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress)) },
-                )
-            }
+    // Emitted only when there is a card to show: an empty column would still take a gap in the caller's spacing.
+    if (!showWarnings) return
+    Column(verticalArrangement = Arrangement.spacedBy(HeaderItemSpacing)) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            ListItem(
+                leadingIcon = MeshtasticIcons.Language,
+                text = stringResource(if (regionUnset) Res.string.set_your_region else Res.string.radio_setup_title),
+                onClick = { onConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress)) },
+            )
         }
 
         // An unset region already disables transmit and has its own card, so do not blame one root cause twice.
-        if (showWarnings && txDisabled && !regionUnset) {
-            Spacer(modifier = Modifier.height(8.dp))
+        if (txDisabled && !regionUnset) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 ListItem(
                     leadingIcon = MeshtasticIcons.CellTower,
@@ -491,10 +489,10 @@ fun ConnectionsScreen(
                 }
 
             // ── Connected Device slot ──
-            // A single Card shell hosts all three states. `animateContentSize` smooths any
-            // height changes, while `heightIn(min = CardMinHeight)` reserves a stable floor so
-            // the card never collapses between states.
-            Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+            // A single Card shell hosts all three states; AnimatedContent animates the size between them and
+            // `heightIn(min = CardMinHeight)` keeps a stable floor. No animateContentSize here: under the two-pane
+            // scaffold's lookahead it stuck the card at an earlier, narrower width.
+            Card(modifier = Modifier.fillMaxWidth()) {
                 AnimatedContent(
                     targetState = uiState,
                     label = "connection_state",
@@ -544,10 +542,7 @@ fun ConnectionsScreen(
             // over from here, and celebrating an event that has passed would undercut its nudge.
             LocalEventBranding.current
                 ?.takeIf { !it.hasEnded() }
-                ?.let { edition ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    EventFirmwareCard(edition = edition)
-                }
+                ?.let { edition -> EventFirmwareCard(edition = edition) }
 
             firmwareUpdateNotice?.let { notice ->
                 FirmwareUpdateNoticeCard(
@@ -570,7 +565,6 @@ fun ConnectionsScreen(
             pendingRecovery
                 ?.takeIf { connectionState !is ConnectionState.Connected && scanModel.bluetoothSupported }
                 ?.let { recovery ->
-                    Spacer(modifier = Modifier.height(8.dp))
                     RecoveryCard(
                         message = stringResource(Res.string.firmware_recovery_banner, recovery.deviceName),
                         actionLabel = stringResource(Res.string.firmware_recovery_button),
@@ -592,7 +586,6 @@ fun ConnectionsScreen(
             LocalEventBranding.current
                 ?.takeIf { it.hasEnded() }
                 ?.let { endedEvent ->
-                    Spacer(modifier = Modifier.height(8.dp))
                     RecoveryCard(
                         message = stringResource(Res.string.firmware_event_ended_banner, endedEvent.displayName),
                         actionLabel = stringResource(Res.string.firmware_event_ended_button),
@@ -629,10 +622,7 @@ fun ConnectionsScreen(
                 onOfferRadioSetup = connectionsViewModel::markRadioSetupOffered,
             )
 
-            LiveUpdateSection(
-                connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)
 
             // Transport selector sits between the connection card and device list; it controls only the
             // visible discovery pane, not the globally selected/connected device shown above.
@@ -858,8 +848,17 @@ fun ConnectionsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
+                // Each pane scrolls on its own, so a tall header (large font scale) can't push its own actions
+                // off screen.
                 AdaptiveTwoPane(
-                    first = { header(this) },
+                    first = {
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(HeaderItemSpacing),
+                        ) {
+                            header(this)
+                        }
+                    },
                     second = { deviceList(Modifier.weight(1f).fillMaxWidth(), PaddingValues(0.dp), null) },
                 )
             }
@@ -874,11 +873,14 @@ fun ConnectionsScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                 ),
             ) {
-                Column { header(this) }
+                Column(verticalArrangement = Arrangement.spacedBy(HeaderItemSpacing)) { header(this) }
             }
         }
     }
 }
+
+/** The one gap between the header's cards and controls; the device list spaces its own items. */
+private val HeaderItemSpacing = 12.dp
 
 /** Informational, non-dismissible nudge for a connected device with a newer stable firmware release. */
 @Composable
