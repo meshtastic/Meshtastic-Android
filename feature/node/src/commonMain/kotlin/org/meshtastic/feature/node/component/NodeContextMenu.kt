@@ -75,7 +75,8 @@ import org.meshtastic.feature.node.model.canDirectMessage
 internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true
 
 /**
- * Shared context menu for node actions (favorite, mute, message, trace route, compass, mesh view, ignore, remove).
+ * Shared context menu for node actions (message, favorite, mute, trace route, compass, mesh view, ignore, remove).
+ * Message comes first on every client (design#171).
  *
  * Used by both Android and Desktop adaptive node list screens.
  */
@@ -98,11 +99,11 @@ fun NodeContextMenu(
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            MessageMenuItem(node, onMessage, onDismiss)
             FavoriteMenuItem(node, onFavorite, onDismiss)
             if (canMuteFrom(ourNode)) {
                 MuteMenuItem(node, onMute, onDismiss)
             }
-            MessageMenuItem(node, onMessage, onDismiss)
             MenuItem(
                 MeshtasticIcons.Edit,
                 stringResource(Res.string.set_display_name),
