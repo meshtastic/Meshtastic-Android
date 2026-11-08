@@ -1,7 +1,7 @@
 ---
 title: Kaart ja teekonnapunktid
 nav_order: 6
-last_updated: 2026-10-24
+last_updated: 2026-11-07
 description: Vaata sõlmede asukohti kaardil, loo ja jaga teekonnapunkte ning halda asukoha jagamist ja privaatsust.
 aliases:
   - kaart
@@ -207,7 +207,10 @@ shows why a link fails when there is no network. The terrain data comes from Map
 the map. On **Google Play**, each downloaded region in the **Offline Manager** list has a **Download Terrain**
 button. Terrain attaches to that region and shares its storage limit, and an area too large for terrain asks
 you to zoom in or pick a smaller region. Once the terrain is downloaded, the button gives way to **Hillshade**
-and **Contours** switches, both off until you turn them on. On **F-Droid** and **Desktop**, the layers sheet
+and **Contours** switches, both off until you turn them on. Hillshade draws at full strength to one zoom level past
+the deepest terrain downloaded for that spot, fades over the next level and stops after it; contours keep drawing.
+On **Google Play**, turning on **Hillshade** also offers **Shade Valleys**, off by default, which darkens valleys and
+gorges by how little sky they see, whichever way they face the light. On **F-Droid** and **Desktop**, the layers sheet
 has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the hillshade and
 contours draw automatically from then on, whenever the downloaded area is in view.
 
