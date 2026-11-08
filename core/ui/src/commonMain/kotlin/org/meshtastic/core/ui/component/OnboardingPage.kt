@@ -77,18 +77,13 @@ fun OnboardingBottomBar(
     secondaryText: String? = null,
     onSecondary: () -> Unit = {},
 ) {
-    // Each action takes at most half the bar and wraps its label, so a long label at a large font scale is never
-    // clipped beside the other one.
+    // The labels wrap rather than clip when a long one meets a large font scale.
     BottomAppBar(modifier = modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp)) {
         if (secondaryText != null) {
-            TextButton(onClick = onSecondary, modifier = Modifier.weight(1f, fill = false)) {
-                Text(secondaryText, textAlign = TextAlign.Center)
-            }
+            TextButton(onClick = onSecondary) { Text(secondaryText, textAlign = TextAlign.Center) }
         }
         Spacer(modifier = Modifier.weight(1f))
-        Button(onClick = onPrimary, enabled = primaryEnabled, modifier = Modifier.weight(1f, fill = false)) {
-            Text(primaryText, textAlign = TextAlign.Center)
-        }
+        Button(onClick = onPrimary, enabled = primaryEnabled) { Text(primaryText, textAlign = TextAlign.Center) }
     }
 }
 
