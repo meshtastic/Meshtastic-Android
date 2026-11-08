@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.configure_critical_alerts
 import org.meshtastic.core.resources.critical_alerts
 import org.meshtastic.core.resources.critical_alerts_dnd_request_text
 import org.meshtastic.core.resources.skip
+import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.core.ui.theme.AppTheme
 
 /**
@@ -53,11 +54,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 internal fun CriticalAlertsScreen(onSkip: () -> Unit, onConfigure: () -> Unit) {
     Scaffold(
         bottomBar = {
-            IntroBottomBar(
-                onSkip = onSkip,
-                onConfigure = onConfigure,
-                configureButtonText = stringResource(Res.string.configure_critical_alerts),
-                skipButtonText = stringResource(Res.string.skip),
+            OnboardingBottomBar(
+                primaryText = stringResource(Res.string.configure_critical_alerts),
+                onPrimary = onConfigure,
+                secondaryText = stringResource(Res.string.skip),
+                onSecondary = onSkip,
             )
         },
     ) { innerPadding ->

@@ -64,6 +64,10 @@ import org.meshtastic.core.resources.schema_lora_region
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.ui.component.DropDownPreference
+import org.meshtastic.core.ui.component.OnboardingNotice
+import org.meshtastic.core.ui.component.OnboardingPageHeader
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.component.ConfigState
 import org.meshtastic.feature.settings.radio.component.StatusMessageField
@@ -83,15 +87,12 @@ private const val STATUS_MESSAGE_MAX_BYTES = 80 // status_message max_size:80
 
 @Composable
 internal fun PageHeader(headline: String, body: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = headline, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold))
-        Text(text = body, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    OnboardingPageHeader(headline = headline, body = body)
 }
 
 @Composable
 internal fun Notice(text: String) {
-    Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    OnboardingNotice(text = text, icon = MeshtasticIcons.Info)
 }
 
 @Composable

@@ -19,17 +19,13 @@ package org.meshtastic.feature.settings.radio.setup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +56,7 @@ import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
@@ -102,10 +99,13 @@ fun RadioSetupScreen(
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
     val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
+    val canStepBack = stepIndex > 0 && step != RadioSetupStep.DONE
+    // The top bar's arrow and the system back do the same thing: a page back, or out from the first page.
+    val stepBack = { if (canStepBack) stepIndex -= 1 else onDone() }
 
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
-        isBackEnabled = stepIndex > 0 && step != RadioSetupStep.DONE,
+        isBackEnabled = canStepBack,
         onBackCompleted = { stepIndex -= 1 },
     )
 
@@ -129,7 +129,7 @@ fun RadioSetupScreen(
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
-                onNavigateUp = onDone,
+                onNavigateUp = stepBack,
                 onClickChip = {},
                 actions = {},
             )
@@ -167,6 +167,9 @@ fun RadioSetupScreen(
                 modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                // The flow has a known length, so the page shows where it is in it.
+                val progress = (stepIndex + 1).toFloat() / steps.size
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
                 when (step) {
                     RadioSetupStep.INTRO -> IntroPage()
 
@@ -231,35 +234,38 @@ private fun RadioSetupButtons(
     onSaveName: () -> Unit,
     onDone: () -> Unit,
 ) {
-    BottomAppBar(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp)) {
-        when (step) {
-            RadioSetupStep.INTRO -> TextButton(onClick = onNotNow) { Text(stringResource(Res.string.not_now)) }
+    when (step) {
+        RadioSetupStep.INTRO ->
+            OnboardingBottomBar(
+                primaryText = stringResource(Res.string.next),
+                onPrimary = onNext,
+                secondaryText = stringResource(Res.string.not_now),
+                onSecondary = onNotNow,
+            )
 
-            RadioSetupStep.NAME -> TextButton(onClick = onNext) { Text(stringResource(Res.string.skip)) }
+        RadioSetupStep.REGION ->
+            OnboardingBottomBar(
+                primaryText = stringResource(Res.string.next),
+                onPrimary = onNext,
+                primaryEnabled = loraValid,
+            )
 
-            RadioSetupStep.REGION,
-            RadioSetupStep.PRESET,
-            RadioSetupStep.DONE,
-            -> Unit
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        when (step) {
-            RadioSetupStep.INTRO -> Button(onClick = onNext) { Text(stringResource(Res.string.next)) }
+        RadioSetupStep.PRESET ->
+            OnboardingBottomBar(
+                primaryText = stringResource(Res.string.save),
+                onPrimary = onSaveLora,
+                primaryEnabled = state.connected && loraValid && !saving,
+            )
 
-            RadioSetupStep.REGION ->
-                Button(onClick = onNext, enabled = loraValid) { Text(stringResource(Res.string.next)) }
+        RadioSetupStep.NAME ->
+            OnboardingBottomBar(
+                primaryText = stringResource(Res.string.save),
+                onPrimary = onSaveName,
+                primaryEnabled = state.connected && userValid && !saving,
+                secondaryText = stringResource(Res.string.skip),
+                onSecondary = onNext,
+            )
 
-            RadioSetupStep.PRESET ->
-                Button(onClick = onSaveLora, enabled = state.connected && loraValid && !saving) {
-                    Text(stringResource(Res.string.save))
-                }
-
-            RadioSetupStep.NAME ->
-                Button(onClick = onSaveName, enabled = state.connected && userValid && !saving) {
-                    Text(stringResource(Res.string.save))
-                }
-
-            RadioSetupStep.DONE -> Button(onClick = onDone) { Text(stringResource(Res.string.done)) }
-        }
+        RadioSetupStep.DONE -> OnboardingBottomBar(primaryText = stringResource(Res.string.done), onPrimary = onDone)
     }
 }
