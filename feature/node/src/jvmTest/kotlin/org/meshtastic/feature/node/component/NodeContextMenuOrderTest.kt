@@ -25,15 +25,21 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.ignore
 import org.meshtastic.core.resources.message
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.remove
+import org.meshtastic.core.resources.set_display_name
 import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.DeviceMetadata
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
-/** Message leads the node list menu on every client (design#171), whether or not Mute is offered. */
+/**
+ * The node list menu opens with Message then Set display name, the two things you do about that person (design#171).
+ * Ignore and Remove stay last, whether or not Mute is offered.
+ */
 @OptIn(ExperimentalTestApi::class)
 class NodeContextMenuOrderTest {
 
@@ -60,26 +66,39 @@ class NodeContextMenuOrderTest {
         }
     }
 
-    private fun ComposeUiTest.top(label: StringResource): Float =
-        onNodeWithText(getString(label)).fetchSemanticsNode().positionInRoot.y
-
-    @Test
-    fun `message comes before favorite mute and trace route`() = runComposeUiTest {
-        showMenu(ourFirmware = "2.7.18")
-
-        val message = top(Res.string.message)
-        assertTrue(message < top(Res.string.add_favorite))
-        assertTrue(message < top(Res.string.mute_notifications))
-        assertTrue(message < top(Res.string.trace_route))
+    private fun ComposeUiTest.assertTopToBottom(vararg labels: StringResource) {
+        val tops = labels.map { onNodeWithText(getString(it)).fetchSemanticsNode().positionInRoot.y }
+        assertEquals(tops.sorted(), tops, "menu order")
+        assertEquals(tops.size, tops.toSet().size, "menu order")
     }
 
     @Test
-    fun `message comes first when mute is not offered`() = runComposeUiTest {
+    fun `message then display name lead and ignore then remove close the menu`() = runComposeUiTest {
+        showMenu(ourFirmware = "2.7.18")
+
+        assertTopToBottom(
+            Res.string.message,
+            Res.string.set_display_name,
+            Res.string.add_favorite,
+            Res.string.mute_notifications,
+            Res.string.trace_route,
+            Res.string.ignore,
+            Res.string.remove,
+        )
+    }
+
+    @Test
+    fun `the order holds when mute is not offered`() = runComposeUiTest {
         showMenu(ourFirmware = "2.7.15")
 
         onNodeWithText(getString(Res.string.mute_notifications)).assertDoesNotExist()
-        val message = top(Res.string.message)
-        assertTrue(message < top(Res.string.add_favorite))
-        assertTrue(message < top(Res.string.trace_route))
+        assertTopToBottom(
+            Res.string.message,
+            Res.string.set_display_name,
+            Res.string.add_favorite,
+            Res.string.trace_route,
+            Res.string.ignore,
+            Res.string.remove,
+        )
     }
 }
