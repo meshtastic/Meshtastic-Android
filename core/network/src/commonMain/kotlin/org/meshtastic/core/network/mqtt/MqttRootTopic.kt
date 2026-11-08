@@ -24,7 +24,6 @@ object MqttRootTopic {
     enum class Problem {
         EMPTY,
         WHITESPACE,
-        NON_ASCII,
         WILDCARD,
         LEADING_SLASH,
         TRAILING_SLASH,
@@ -44,8 +43,11 @@ object MqttRootTopic {
     @Suppress("CyclomaticComplexMethod", "ReturnCount")
     fun problem(root: String): Problem? {
         if (root.isEmpty()) return Problem.EMPTY
-        if (root.any { it.code <= SPACE || it.code == DEL }) return Problem.WHITESPACE
-        if (root.any { it.code > TILDE }) return Problem.NON_ASCII
+        // Any kind of space, control or invisible character, not only the ASCII ones. Other letters are fine: the
+        // firmware stores the root as UTF-8 and only limits its length.
+        if (root.any { it.isWhitespace() || it.isISOControl() || it.category == CharCategory.FORMAT }) {
+            return Problem.WHITESPACE
+        }
         if (root.contains('+') || root.contains('#')) return Problem.WILDCARD
         if (root.startsWith("/")) return Problem.LEADING_SLASH
         if (root.endsWith("/")) return Problem.TRAILING_SLASH
@@ -67,8 +69,4 @@ object MqttRootTopic {
     }
 
     fun rootsMatch(a: String, b: String): Boolean = a.equals(b, ignoreCase = true)
-
-    private const val SPACE = 0x20
-    private const val DEL = 0x7F
-    private const val TILDE = 0x7E
 }

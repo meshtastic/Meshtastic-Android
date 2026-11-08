@@ -40,7 +40,8 @@ class MqttTopicDiscoveryTest {
     fun rootRulesReportTheFirstProblem() {
         assertEquals(Problem.EMPTY, MqttRootTopic.problem(""))
         assertEquals(Problem.WHITESPACE, MqttRootTopic.problem("msh/US WA"))
-        assertEquals(Problem.NON_ASCII, MqttRootTopic.problem("msh/NO/Østlandet"))
+        assertEquals(Problem.WHITESPACE, MqttRootTopic.problem("msh/US/\u200Bseattle"))
+        assertEquals(Problem.WHITESPACE, MqttRootTopic.problem("msh/US/\u00A0seattle"))
         assertEquals(Problem.WILDCARD, MqttRootTopic.problem("msh/US/+"))
         assertEquals(Problem.LEADING_SLASH, MqttRootTopic.problem("/msh/US"))
         assertEquals(Problem.TRAILING_SLASH, MqttRootTopic.problem("msh/US/"))
@@ -48,6 +49,16 @@ class MqttTopicDiscoveryTest {
         assertEquals(Problem.ENDS_WITH_VERSION, MqttRootTopic.problem("msh/US/CA/US/2"))
         assertEquals(Problem.TOO_LONG, MqttRootTopic.problem("msh/US/WA/abcdefghijklmnopqrstuv"))
         assertNull(MqttRootTopic.problem("msh/US/WA/seattle"))
+    }
+
+    @Test
+    fun rootsInOtherLettersAreAccepted() {
+        assertNull(MqttRootTopic.problem("msh/EU_868/NO/Østlandet"))
+        assertNull(MqttRootTopic.problem("msh/EU_868/SE/Göteborg"))
+        assertNull(MqttRootTopic.problem("msh/JP/東京"))
+        // Each of ø, å and æ is two bytes against the firmware's 31.
+        assertEquals(Problem.TOO_LONG, MqttRootTopic.problem("msh/EU_868/NO/" + "ø".repeat(9)))
+        assertNull(MqttRootTopic.problem("msh/EU_868/NO/" + "ø".repeat(8)))
     }
 
     @Test
@@ -111,13 +122,20 @@ class MqttTopicDiscoveryTest {
     }
 
     @Test
-    fun segmentFoldsLatinAndDropsOtherScripts() {
+    fun segmentKeepsLettersInAnyScript() {
         assertEquals("stjohns", TopicPlan.segment("St. John's", lowercased = true))
         assertEquals("coeurdalene", TopicPlan.segment("Coeur d'Alene", lowercased = true))
-        assertEquals("munchen", TopicPlan.segment("München", lowercased = true))
-        assertEquals("Ostlandet", TopicPlan.segment("Østlandet", lowercased = false))
-        assertEquals("strasse", TopicPlan.segment("Straße", lowercased = true))
-        assertNull(TopicPlan.segment("東京都", lowercased = true))
+        assertEquals("münchen", TopicPlan.segment("München", lowercased = true))
+        assertEquals("Østlandet", TopicPlan.segment("Østlandet", lowercased = false))
+        assertEquals("MøreogRomsdal", TopicPlan.segment("Møre og Romsdal", lowercased = false))
+        assertEquals("straße", TopicPlan.segment("Straße", lowercased = true))
+        assertEquals("東京都", TopicPlan.segment("東京都", lowercased = true))
+        // A decomposed letter (u + combining diaeresis) is composed first.
+        assertEquals("zürich", TopicPlan.segment("Zu\u0308rich", lowercased = true))
+        // Vowel signs with no precomposed form stay with their consonant.
+        assertEquals("दिल्ली", TopicPlan.segment("दिल्ली", lowercased = true))
+        assertEquals("กรุงเทพมหานคร", TopicPlan.segment("กรุงเทพ มหานคร", lowercased = true))
+        assertNull(TopicPlan.segment("!?.", lowercased = true))
     }
 
     @Test
@@ -138,7 +156,7 @@ class MqttTopicDiscoveryTest {
                 REGION to "msh/EU_868",
                 COUNTRY to "msh/EU_868/DE",
                 SUBDIVISION to "msh/EU_868/DE/Bayern",
-                CITY to "msh/EU_868/DE/Bayern/munchen",
+                CITY to "msh/EU_868/DE/Bayern/münchen",
             ),
             plan.suggestions.map { it.kind to it.topic },
         )
@@ -148,7 +166,7 @@ class MqttTopicDiscoveryTest {
     fun noCountryLevelUntilTheBrokerShowsOne() {
         val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"))
         assertEquals(
-            listOf(REGION to "msh/EU_868", SUBDIVISION to "msh/EU_868/Bayern", CITY to "msh/EU_868/Bayern/munchen"),
+            listOf(REGION to "msh/EU_868", SUBDIVISION to "msh/EU_868/Bayern", CITY to "msh/EU_868/Bayern/münchen"),
             plan.suggestions.map { it.kind to it.topic },
         )
     }
@@ -164,7 +182,7 @@ class MqttTopicDiscoveryTest {
             listOf(
                 REGION to "msh/EU_868",
                 SUBDIVISION to "msh/EU_868/DE/Bayern",
-                CITY to "msh/EU_868/DE/Bayern/munchen",
+                CITY to "msh/EU_868/DE/Bayern/münchen",
             ),
             plan.suggestions.map { it.kind to it.topic },
         )

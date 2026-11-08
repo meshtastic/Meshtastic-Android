@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.mqtt
 
-import java.text.Normalizer
+import platform.Foundation.NSString
+import platform.Foundation.precomposedStringWithCanonicalMapping
 
-internal actual fun decomposeCanonical(text: String): String = Normalizer.normalize(text, Normalizer.Form.NFD)
+@Suppress("CAST_NEVER_SUCCEEDS")
+internal actual fun composeCanonical(text: String): String = (text as NSString).precomposedStringWithCanonicalMapping

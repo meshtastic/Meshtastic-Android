@@ -1386,7 +1386,6 @@
     <string name="mqtt_root_problem_empty_segment">Темы не могут содержать два слэша в строке.</string>
     <string name="mqtt_root_problem_ends_with_version">Темы не могут заканчиваться на /2.</string>
     <string name="mqtt_root_problem_leading_slash">Темы не могут начинаться со слэша.</string>
-    <string name="mqtt_root_problem_non_ascii">Темы должны использовать символы ASCII.</string>
     <string name="mqtt_root_problem_too_long">Темы ограничиваются 31 символом.</string>
     <string name="mqtt_root_problem_trailing_slash">Темы не могут заканчиваться слэшем.</string>
     <string name="mqtt_root_problem_whitespace">Темы не могут содержать пробелы или управляющие символы.</string>

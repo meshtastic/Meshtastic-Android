@@ -164,18 +164,21 @@ data class TopicPlan(
         }
 
         /**
-         * Diacritics stripped, Latin letters folded to ASCII, then only `[A-Za-z0-9_-]` kept, lowercased when asked.
-         * Subdivisions keep their case ("WA"); cities follow the community's lowercase convention. Null when nothing is
-         * left: a name in a non-Latin script gets no rung rather than a romanization the local mesh would not use.
+         * Letters and digits in any script kept as they are (æ, ø, å, ü, 東京), `_` and `-` kept, anything else dropped,
+         * lowercased when asked. Subdivisions keep their case ("WA"); cities follow the community's lowercase
+         * convention. Null when nothing is left. Communities write their roots in their own letters
+         * (`msh/EU_868/NO/Østlandet`), so a suggestion does the same rather than folding to ASCII.
          */
         fun segment(place: String, lowercased: Boolean): String? {
-            val kept =
-                foldToAscii(place).filter {
-                    it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-'
-                }
+            val kept = composeCanonical(place).filter { it.isLetterOrDigit() || it.isMark() || it == '_' || it == '-' }
             if (kept.isEmpty()) return null
             return if (lowercased) kept.lowercase() else kept
         }
+
+        // Vowel signs and other marks NFC cannot fold into a letter (Devanagari कि, Thai ที่) are part of the word.
+        private fun Char.isMark(): Boolean = category == CharCategory.NON_SPACING_MARK ||
+            category == CharCategory.COMBINING_SPACING_MARK ||
+            category == CharCategory.ENCLOSING_MARK
 
         private fun fitted(base: String, lastSegment: String): String? {
             var segment = lastSegment

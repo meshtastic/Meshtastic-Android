@@ -1382,8 +1382,7 @@
     <string name="mqtt_root_problem_empty_segment">Topics cannot contain two slashes in a row.</string>
     <string name="mqtt_root_problem_ends_with_version">Topics cannot end with /2.</string>
     <string name="mqtt_root_problem_leading_slash">Topics cannot start with a slash.</string>
-    <string name="mqtt_root_problem_non_ascii">Topics must use ASCII characters.</string>
-    <string name="mqtt_root_problem_too_long">Topics are limited to 31 characters.</string>
+    <string name="mqtt_root_problem_too_long">Topics are limited to 31 bytes (æ, ø and å use two).</string>
     <string name="mqtt_root_problem_trailing_slash">Topics cannot end with a slash.</string>
     <string name="mqtt_root_problem_whitespace">Topics cannot contain spaces or control characters.</string>
     <string name="mqtt_root_problem_wildcard">Topics cannot contain + or #.</string>
@@ -1403,7 +1402,7 @@
     <string name="mqtt_topic_finder_counts">Counts are nodes heard during the sample. Busy topics fill in within seconds; quiet ones may stay at zero.</string>
     <string name="mqtt_topic_finder_custom">Custom topic</string>
     <string name="mqtt_topic_finder_custom_example" translatable="false">msh/US/WA/seattle</string>
-    <string name="mqtt_topic_finder_custom_hint">Up to 31 ASCII characters, no leading or trailing slash, no + or #.</string>
+    <string name="mqtt_topic_finder_custom_hint">Up to 31 bytes, no leading or trailing slash, no + or #.</string>
     <string name="mqtt_topic_finder_failed_closed">The broker closed the connection.</string>
     <string name="mqtt_topic_finder_failed_connect">Could not connect to the broker.</string>
     <string name="mqtt_topic_finder_failed_error">The sample stopped on an unexpected error.</string>
