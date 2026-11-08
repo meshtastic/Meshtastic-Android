@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import org.meshtastic.core.resources.config_security_private_key
 import org.meshtastic.core.resources.config_security_private_key_remote
 import org.meshtastic.core.resources.direct_message_key
 import org.meshtastic.core.resources.logs
+import org.meshtastic.core.resources.managed_mode_recovery
 import org.meshtastic.core.resources.redacted
 import org.meshtastic.core.resources.regenerate_keys_confirmation
 import org.meshtastic.core.resources.regenerate_private_key
@@ -60,6 +62,7 @@ import org.meshtastic.core.resources.schema_security_public_key_description
 import org.meshtastic.core.resources.schema_security_serial_enabled
 import org.meshtastic.core.resources.schema_security_serial_enabled_description
 import org.meshtastic.core.resources.security
+import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
@@ -182,9 +185,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.admin_key = it }.build()
-                    },
+                    onValuesChanged = { formState.value = formState.value.withAdminKeys(it) },
                 )
             }
         }
@@ -223,11 +224,17 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     modifier = Modifier.settingsField(Res.string.schema_security_is_managed),
                     summary = stringResource(Res.string.schema_security_is_managed_description),
                     checked = formState.value.is_managed,
-                    enabled = state.connected && formState.value.admin_key.isNotEmpty(),
+                    enabled = state.connected && formState.value.hasAdminKey(),
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.is_managed = it }.build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
+                )
+                AutoLinkText(
+                    text = stringResource(Res.string.managed_mode_recovery),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 HorizontalDivider()
                 val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
@@ -257,6 +264,19 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
 }
 
 internal const val SECURITY_PUBLIC_KEY_COPY_TEST_TAG = "security_public_key_copy"
+
+/** The list editor adds blank slots, so only a non-empty entry counts as an admin key. */
+internal fun Config.SecurityConfig.hasAdminKey(): Boolean = admin_key.any { it.size > 0 }
+
+/**
+ * A managed node with no admin key accepts no configuration from anyone, so losing the last key clears managed mode.
+ */
+internal fun Config.SecurityConfig.withAdminKeys(keys: List<ByteString>): Config.SecurityConfig = newBuilder()
+    .also { wb ->
+        wb.admin_key = keys
+        if (keys.none { it.size > 0 }) wb.is_managed = false
+    }
+    .build()
 
 /**
  * Public keys come from the device. Editing the private key invalidates that derived value until the device responds
