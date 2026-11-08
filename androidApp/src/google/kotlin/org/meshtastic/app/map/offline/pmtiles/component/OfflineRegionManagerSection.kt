@@ -59,6 +59,7 @@ import org.meshtastic.core.resources.map_offline_terrain_download_complete
 import org.meshtastic.core.resources.map_offline_terrain_download_failed_io
 import org.meshtastic.core.resources.map_offline_terrain_download_failed_tile_limit
 import org.meshtastic.core.resources.map_offline_terrain_downloading_progress
+import org.meshtastic.core.resources.map_offline_terrain_shade_valleys
 import org.meshtastic.core.resources.map_overlay_hillshade
 import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
@@ -100,8 +101,10 @@ internal fun OfflineRegionManagerSection(
     terrainDownloadRegionId: String?,
     terrainHillshadeEnabled: Boolean,
     terrainContoursEnabled: Boolean,
+    terrainShadeValleysEnabled: Boolean,
     onDownloadTerrain: (String) -> Unit,
     onToggleHillshade: (Boolean) -> Unit,
+    onToggleShadeValleys: (Boolean) -> Unit,
     onToggleContours: (Boolean) -> Unit,
 ) {
     val zoomRange = currentZoom.coerceIn(MIN_ZOOM, MAX_ZOOM).let { it..(it + EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_ZOOM) }
@@ -149,9 +152,11 @@ internal fun OfflineRegionManagerSection(
             terrainDownloadRegionId = terrainDownloadRegionId,
             terrainHillshadeEnabled = terrainHillshadeEnabled,
             terrainContoursEnabled = terrainContoursEnabled,
+            terrainShadeValleysEnabled = terrainShadeValleysEnabled,
             onDeleteRegion = onDeleteRegion,
             onDownloadTerrain = onDownloadTerrain,
             onToggleHillshade = onToggleHillshade,
+            onToggleShadeValleys = onToggleShadeValleys,
             onToggleContours = onToggleContours,
         )
     }
@@ -165,9 +170,11 @@ private fun DownloadedRegionsList(
     terrainDownloadRegionId: String?,
     terrainHillshadeEnabled: Boolean,
     terrainContoursEnabled: Boolean,
+    terrainShadeValleysEnabled: Boolean,
     onDeleteRegion: (String) -> Unit,
     onDownloadTerrain: (String) -> Unit,
     onToggleHillshade: (Boolean) -> Unit,
+    onToggleShadeValleys: (Boolean) -> Unit,
     onToggleContours: (Boolean) -> Unit,
 ) {
     if (regions.isEmpty()) {
@@ -198,8 +205,10 @@ private fun DownloadedRegionsList(
             isDownloadingTerrain = terrainDownloadRegionId == region.id,
             terrainHillshadeEnabled = terrainHillshadeEnabled,
             terrainContoursEnabled = terrainContoursEnabled,
+            terrainShadeValleysEnabled = terrainShadeValleysEnabled,
             onDownloadTerrain = { onDownloadTerrain(region.id) },
             onToggleHillshade = onToggleHillshade,
+            onToggleShadeValleys = onToggleShadeValleys,
             onToggleContours = onToggleContours,
         )
     }
@@ -256,8 +265,10 @@ private fun OfflineRegionRow(
     isDownloadingTerrain: Boolean,
     terrainHillshadeEnabled: Boolean,
     terrainContoursEnabled: Boolean,
+    terrainShadeValleysEnabled: Boolean,
     onDownloadTerrain: () -> Unit,
     onToggleHillshade: (Boolean) -> Unit,
+    onToggleShadeValleys: (Boolean) -> Unit,
     onToggleContours: (Boolean) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
@@ -288,6 +299,13 @@ private fun OfflineRegionRow(
                 checked = terrainHillshadeEnabled,
                 onCheckedChange = onToggleHillshade,
             )
+            if (terrainHillshadeEnabled) {
+                TerrainToggleRow(
+                    label = stringResource(Res.string.map_offline_terrain_shade_valleys),
+                    checked = terrainShadeValleysEnabled,
+                    onCheckedChange = onToggleShadeValleys,
+                )
+            }
             TerrainToggleRow(
                 label = stringResource(Res.string.map_offline_terrain_contours),
                 checked = terrainContoursEnabled,

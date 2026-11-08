@@ -35,13 +35,16 @@ import org.meshtastic.feature.map.terrain.Hillshade
 internal object ElevationStitcher {
 
     /** [center]'s own 8 neighbor tiles, keyed by `(dx, dy)` in `{-1,0,1}²` — absent means "not downloaded". */
-    fun buildPadded(center: ElevationTile, neighbors: Map<Pair<Int, Int>, ElevationTile>): ElevationTile {
-        val margin = Hillshade.MARGIN
+    fun buildPadded(
+        center: ElevationTile,
+        neighbors: Map<Pair<Int, Int>, ElevationTile>,
+        margin: Int = Hillshade.MARGIN,
+    ): ElevationTile {
         val paddedWidth = center.width + 2 * margin
         val paddedHeight = center.height + 2 * margin
         val elevations = FloatArray(paddedWidth * paddedHeight)
-        for (py in -margin..center.height) {
-            for (px in -margin..center.width) {
+        for (py in -margin until center.height + margin) {
+            for (px in -margin until center.width + margin) {
                 elevations[(py + margin) * paddedWidth + (px + margin)] = elevationAt(center, neighbors, px, py)
             }
         }
@@ -81,14 +84,14 @@ internal object ElevationStitcher {
             // returned), so the `else` branch below is only ever reached with an in-range coordinate on that axis.
             val localX =
                 when (dx) {
-                    -1 -> neighbor.width - 1
-                    1 -> 0
+                    -1 -> neighbor.width + px
+                    1 -> px - center.width
                     else -> px
                 }
             val localY =
                 when (dy) {
-                    -1 -> neighbor.height - 1
-                    1 -> 0
+                    -1 -> neighbor.height + py
+                    1 -> py - center.height
                     else -> py
                 }
             neighbor.elevationAt(localX, localY)
