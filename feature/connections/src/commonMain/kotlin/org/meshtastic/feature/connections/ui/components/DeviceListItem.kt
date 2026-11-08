@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
@@ -136,6 +137,8 @@ fun DeviceListItem(
         }
     val rssiLabel by
         produceState<String?>(null, resourceEnvironment) { value = getString(resourceEnvironment, Res.string.rssi) }
+    val removeLabel by
+        produceState<String?>(null, resourceEnvironment) { value = getString(resourceEnvironment, Res.string.remove) }
     val isSelected = connectionState is ConnectionState.Connected
     val clickableModifier =
         if (onDelete != null) {
@@ -144,6 +147,7 @@ fun DeviceListItem(
                     onClickLabel = selectLabel,
                     role = Role.RadioButton,
                     onClick = onSelect,
+                    onLongClickLabel = removeLabel,
                     onLongClick = onDelete,
                 )
         } else {

@@ -89,7 +89,7 @@ fun AdaptiveTwoPane(
     // unbounded constraints (the scaffold branch below leaves composition on that flip).
     val paneExpansionState = rememberPaneExpansionState()
 
-    if (directive.maxHorizontalPartitions > 1) {
+    if (directive.isSplit) {
         // Expanded: split side-by-side. Only a bounded host may use the pane scaffold; an unbounded one
         // gets a plain Row that wraps content height instead of echoing infinity (Crashlytics 788308c5).
         BoxWithConstraints(modifier = modifier) {
@@ -116,6 +116,18 @@ fun AdaptiveTwoPane(
         }
     }
 }
+
+/**
+ * Whether [AdaptiveTwoPane] shows its slots side by side in the current window. A screen whose stacked layout should be
+ * one scrolling list rather than a column of two slots branches on this, so both layouts flip at the same breakpoint.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun isAdaptiveTwoPaneSplit(): Boolean = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).isSplit
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private val PaneScaffoldDirective.isSplit: Boolean
+    get() = maxHorizontalPartitions > 1
 
 /** Test tag for the split divider; lets tests prove the scaffold branch (not the Row fallback) rendered. */
 const val ADAPTIVE_TWO_PANE_DRAG_HANDLE_TAG: String = "AdaptiveTwoPaneDragHandle"

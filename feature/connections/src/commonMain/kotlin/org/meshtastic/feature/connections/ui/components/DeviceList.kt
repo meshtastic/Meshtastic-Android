@@ -18,7 +18,7 @@ package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,21 +28,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,24 +45,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.isValidAddress
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.network.repository.NetworkConstants
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.add_network_device_manually
-import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.bluetooth
-import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.demo_mode
-import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.no_bluetooth_devices_hint
 import org.meshtastic.core.resources.no_bluetooth_devices_seen
@@ -100,6 +84,9 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
  * `"ble:<fullAddress>"`) keep LazyColumn's recomposition scope tight to the actual item that changed when a user taps a
  * device card.
  *
+ * [header] is emitted as the list's first item, so content above the devices scrolls with them instead of competing for
+ * height with a separate scroller.
+ *
  * BLE / network scanning is user-triggered — the header's trailing toggle calls back to the caller.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,6 +109,8 @@ fun DeviceList(
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
     virtualDevices: List<DeviceListEntry> = emptyList(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    header: (@Composable () -> Unit)? = null,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -146,7 +135,12 @@ fun DeviceList(
         )
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        header?.let { item(key = "header:connection", contentType = "connection") { it() } }
         when (activeTransport) {
             DeviceType.BLE ->
                 bluetoothSection(
@@ -447,72 +441,6 @@ private fun SectionEmptyState(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-        }
-    }
-}
-
-/** Dialog for manually adding a TCP device by IP address and port. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AddDeviceDialog(
-    sheetState: SheetState,
-    onHideDialog: () -> Unit,
-    onClickAdd: (address: String, fullAddress: String) -> Unit,
-) {
-    val addressState = rememberTextFieldState("")
-    val portState = rememberTextFieldState(NetworkConstants.SERVICE_PORT.toString())
-
-    @Suppress("MagicNumber")
-    ModalBottomSheet(onDismissRequest = onHideDialog, sheetState = sheetState) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    state = addressState,
-                    labelPosition = TextFieldLabelPosition.Above(),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    label = { Text(stringResource(Res.string.address)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
-                    modifier = Modifier.weight(.7f),
-                )
-
-                OutlinedTextField(
-                    state = portState,
-                    labelPosition = TextFieldLabelPosition.Above(),
-                    placeholder = { Text(NetworkConstants.SERVICE_PORT.toString()) },
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    label = { Text(stringResource(Res.string.ip_port)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    modifier = Modifier.weight(.3f),
-                )
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(modifier = Modifier.weight(1f), onClick = { onHideDialog() }) {
-                    Text(stringResource(Res.string.cancel))
-                }
-
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        val address = addressState.text.toString()
-                        if (address.isValidAddress()) {
-                            val portString = portState.text.toString()
-                            val port = portString.toIntOrNull()
-
-                            val combinedString =
-                                if (port != null && port != NetworkConstants.SERVICE_PORT) {
-                                    "$address:$portString"
-                                } else {
-                                    address
-                                }
-
-                            onClickAdd(combinedString, "t$combinedString")
-                        }
-                    },
-                ) {
-                    Text(stringResource(Res.string.add_network_device))
-                }
-            }
         }
     }
 }
