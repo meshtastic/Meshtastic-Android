@@ -170,10 +170,15 @@ data class TopicPlan(
          * (`msh/EU_868/NO/Østlandet`), so a suggestion does the same rather than folding to ASCII.
          */
         fun segment(place: String, lowercased: Boolean): String? {
-            val kept = composeCanonical(place).filter { it.isLetterOrDigit() || it == '_' || it == '-' }
+            val kept = composeCanonical(place).filter { it.isLetterOrDigit() || it.isMark() || it == '_' || it == '-' }
             if (kept.isEmpty()) return null
             return if (lowercased) kept.lowercase() else kept
         }
+
+        // Vowel signs and other marks NFC cannot fold into a letter (Devanagari कि, Thai ที่) are part of the word.
+        private fun Char.isMark(): Boolean = category == CharCategory.NON_SPACING_MARK ||
+            category == CharCategory.COMBINING_SPACING_MARK ||
+            category == CharCategory.ENCLOSING_MARK
 
         private fun fitted(base: String, lastSegment: String): String? {
             var segment = lastSegment

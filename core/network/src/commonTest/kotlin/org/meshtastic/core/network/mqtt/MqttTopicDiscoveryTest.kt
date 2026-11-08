@@ -132,6 +132,9 @@ class MqttTopicDiscoveryTest {
         assertEquals("東京都", TopicPlan.segment("東京都", lowercased = true))
         // A decomposed letter (u + combining diaeresis) is composed first.
         assertEquals("zürich", TopicPlan.segment("Zu\u0308rich", lowercased = true))
+        // Vowel signs with no precomposed form stay with their consonant.
+        assertEquals("दिल्ली", TopicPlan.segment("दिल्ली", lowercased = true))
+        assertEquals("กรุงเทพมหานคร", TopicPlan.segment("กรุงเทพ มหานคร", lowercased = true))
         assertNull(TopicPlan.segment("!?.", lowercased = true))
     }
 
