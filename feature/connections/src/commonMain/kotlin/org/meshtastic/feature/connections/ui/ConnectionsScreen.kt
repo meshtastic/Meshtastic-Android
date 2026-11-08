@@ -198,8 +198,9 @@ internal fun ConfigurationWarningCards(
     // Opens the radio setup on its own, once per radio, under the same policy that admits the region card.
     val currentOnOfferRadioSetup by rememberUpdatedState(onOfferRadioSetup)
     val currentOnConfigNavigate by rememberUpdatedState(onConfigNavigate)
-    LaunchedEffect(showWarnings, radioSetupOffer) {
-        if (showWarnings && radioSetupOffer != null) {
+    // The offer and the address come from the same identity but through two collectors, so wait for both.
+    LaunchedEffect(showWarnings, radioSetupOffer, radioSetupAddress) {
+        if (showWarnings && radioSetupOffer != null && radioSetupAddress != null) {
             currentOnOfferRadioSetup(radioSetupOffer)
             currentOnConfigNavigate(SettingsRoute.RadioSetup(radioSetupAddress))
         }
