@@ -87,6 +87,7 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingFailureReason
 import com.google.ar.core.TrackingState
+import io.github.sceneview.NodeScope
 import io.github.sceneview.ar.ARCoachingOverlay
 import io.github.sceneview.ar.ARMotionSensorHealth
 import io.github.sceneview.ar.ARSceneView
@@ -99,6 +100,7 @@ import io.github.sceneview.ar.probeARMotionSensors
 import io.github.sceneview.ar.rememberArGuidanceState
 import io.github.sceneview.ar.reticlePhaseFor
 import io.github.sceneview.ar.scene.SceneUnderstanding
+import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.model.model
@@ -132,7 +134,9 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.util.DeviceModelArViewer
+import org.meshtastic.feature.node.component.BananaToggle
 import org.meshtastic.feature.node.component.DeviceScreenNode
+import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
 import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
@@ -165,7 +169,16 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
         screenMin: FloatArray?,
         screenMax: FloatArray?,
         screenFrame: MirrorFrame?,
-    ) = DeviceModelAr(glb, title, notice, onDismiss, ArScreen(screenMin, screenMax, screenFrame))
+        banana: ByteArray?,
+        onBananaShownChange: (Boolean) -> Unit,
+    ) = DeviceModelAr(
+        glb,
+        title,
+        notice,
+        onDismiss,
+        ArScreen(screenMin, screenMax, screenFrame),
+        ArBanana(banana, onBananaShownChange),
+    )
 }
 
 /**
@@ -173,7 +186,14 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
  * is scaled. A later tap moves it rather than adding another, and a twist turns it.
  */
 @Composable
-private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit, screen: ArScreen) {
+private fun DeviceModelAr(
+    glb: ByteArray,
+    title: String,
+    notice: String?,
+    onDismiss: () -> Unit,
+    screen: ArScreen,
+    banana: ArBanana,
+) {
     BackHandler(onBack = onDismiss)
     LockOrientationWhileShown()
     // Asked here rather than left to the AR view, whose own request never appears from inside a dialog.
@@ -195,8 +215,8 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        if (cameraGranted) DeviceModelArScene(glb, screen, onCapture = rememberArCapture(title))
-        ArHeader(title, notice, onDismiss)
+        if (cameraGranted) DeviceModelArScene(glb, screen, banana.glb, onCapture = rememberArCapture(title))
+        ArHeader(title, notice, onDismiss, banana)
     }
 }
 
@@ -206,7 +226,7 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
  */
 @Composable
 @Suppress("LongMethod")
-private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, onCapture: (() -> Unit)?) {
+private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, banana: ByteArray?, onCapture: (() -> Unit)?) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
@@ -311,6 +331,8 @@ private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, onCapture: (() 
                                 }
                             }
                         }
+                        // Outside the yaw, so the device turns beside a banana that stays put.
+                        if (banana != null && bounds != null) BananaNode(modelLoader, banana, bounds, pose)
                     }
                 }
             }
@@ -422,9 +444,22 @@ private val RestPose.label: StringResource
             RestPose.RightSide -> Res.string.device_model_rest_right_side
         }
 
+/**
+ * The banana on the surface on the device's left as placed, upright whatever face the device rests on and clear of it
+ * however it is turned, at its real size like the device.
+ */
+@Composable
+private fun NodeScope.BananaNode(modelLoader: ModelLoader, glb: ByteArray, device: GlbBounds, pose: RestPose) {
+    val instance = remember(modelLoader, glb) { modelLoader.createModelInstance(ByteBuffer.wrap(glb)) }
+    DisposableEffect(instance) { onDispose { modelLoader.destroyModel(instance.model) } }
+    val bananaBounds = remember(glb) { GlbBounds.parse(glb) } ?: return
+    val at = BananaForScale.besideOnSurface(device, pose, bananaBounds)
+    ModelNode(modelInstance = instance, position = Position(at[0], at[1], at[2]))
+}
+
 /** Title bar over the camera; the model's notice opens under it, clear of the controls at the bottom. */
 @Composable
-private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit) {
+private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit, banana: ArBanana) {
     var noticeShown by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier =
@@ -439,6 +474,16 @@ private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 modifier = Modifier.padding(start = 8.dp).weight(1f),
+            )
+            BananaToggle(
+                checked = banana.glb != null,
+                onCheckedChange = banana.onShownChange,
+                colors =
+                IconButtonDefaults.iconToggleButtonColors(
+                    contentColor = Color.White,
+                    checkedContentColor = Color.White,
+                    checkedContainerColor = Color.White.copy(alpha = SCRIM_ALPHA),
+                ),
             )
             if (notice != null) {
                 IconButton(onClick = { noticeShown = !noticeShown }) {
@@ -511,3 +556,6 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 
 /** The display glass in model coordinates and the live frame to draw on it; all null when there is nothing to show. */
 private class ArScreen(val glassMin: FloatArray?, val glassMax: FloatArray?, val frame: MirrorFrame?)
+
+/** The banana's GLB while it is shown, and the toggle that shows or hides it. */
+private class ArBanana(val glb: ByteArray?, val onShownChange: (Boolean) -> Unit)

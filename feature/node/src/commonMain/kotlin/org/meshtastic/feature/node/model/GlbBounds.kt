@@ -298,6 +298,6 @@ private const val INT_BYTES = 4
 private const val BYTE_BITS = 8
 private const val BYTE_MASK = 0xFF
 
-private fun ByteArray.readIntLe(offset: Int): Int = (0 until INT_BYTES).fold(0) { acc, i ->
+internal fun ByteArray.readIntLe(offset: Int): Int = (0 until INT_BYTES).fold(0) { acc, i ->
     acc or ((this[offset + i].toInt() and BYTE_MASK) shl (BYTE_BITS * i))
 }
