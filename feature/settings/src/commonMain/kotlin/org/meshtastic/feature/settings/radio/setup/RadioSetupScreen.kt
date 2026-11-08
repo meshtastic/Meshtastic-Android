@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,6 +62,7 @@ import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigState
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -111,21 +111,23 @@ fun RadioSetupScreen(
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
     val offersBeacons = capabilities.supportsMeshBeacon && !state.metadata.excludes(ExcludedModules.MESHBEACON_CONFIG)
-    // Fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a licensing change
-    // mid-flow must not move the page out from under an edit. The firmware's module set is known from the same node.
+    // The licensing is fixed once the node is known: a fresh session starts unlicensed until its node arrives, and a
+    // change mid-flow must not move the page out from under an edit. The beacon page follows the metadata as it
+    // arrives, and the page the user is on is held by name, so a list change never moves it.
     val licensed = destNode?.user?.is_licensed
-    val steps = remember(licensed == null) { radioSetupSteps(licensed == true, offersBeacons) }
-    var stepIndex by rememberSaveable { mutableIntStateOf(0) }
-    val step = steps[stepIndex.coerceIn(0, steps.lastIndex)]
-    val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
+    val steps = remember(licensed == null, offersBeacons) { radioSetupSteps(licensed == true, offersBeacons) }
+    var stepName by rememberSaveable { mutableStateOf(RadioSetupStep.INTRO.name) }
+    val stepIndex = steps.indexOf(RadioSetupStep.valueOf(stepName)).coerceAtLeast(0)
+    val step = steps[stepIndex]
+    val advance = { stepName = steps[(stepIndex + 1).coerceAtMost(steps.lastIndex)].name }
     val canStepBack = stepIndex > 0 && step != RadioSetupStep.DONE
     // The top bar's arrow and the system back do the same thing: a page back, or out from the first page.
-    val stepBack = { if (canStepBack) stepIndex -= 1 else onDone() }
+    val stepBack = { if (canStepBack) stepName = steps[stepIndex - 1].name else onDone() }
 
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
         isBackEnabled = canStepBack,
-        onBackCompleted = { stepIndex -= 1 },
+        onBackCompleted = { stepName = steps[stepIndex - 1].name },
     )
 
     val storedLora = state.radioConfig.lora ?: Config.LoRaConfig.Builder().build()
@@ -256,9 +258,15 @@ fun RadioSetupScreen(
             }
             LoadingOverlay(state = responseState)
             if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
+                // setModuleConfig merges the listen flag before the radio answers, so a failed write is re-read from
+                // the radio rather than left showing a value it never applied.
+                val failedBeaconWrite = responseState is ResponseState.Error && step == RadioSetupStep.BEACONS
                 PacketResponseStateDialog(
                     state = responseState,
-                    onDismiss = viewModel::clearPacketResponse,
+                    onDismiss = {
+                        viewModel.clearPacketResponse()
+                        if (failedBeaconWrite) viewModel.loadConfigRoute(ModuleRoute.MESH_BEACON)
+                    },
                     onBack = { if (succeeded && step != RadioSetupStep.BEACONS) advance() },
                     rebootBehavior =
                     if (capabilities.appliesLoraConfigLive || step != RadioSetupStep.PRESET) {

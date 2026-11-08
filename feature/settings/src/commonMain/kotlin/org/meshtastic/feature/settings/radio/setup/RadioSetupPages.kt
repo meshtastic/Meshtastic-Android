@@ -348,7 +348,7 @@ internal fun BeaconsPage(
                 title = stringResource(Res.string.mesh_beacon_listen),
                 summary = stringResource(Res.string.mesh_beacon_listen_summary),
                 checked = beaconConfig?.listens == true,
-                enabled = beaconConfig != null && state.connected,
+                enabled = beaconConfig != null && state.connected && !state.responseState.isWaiting(),
                 onCheckedChange = onListenChange,
                 containerColor = CardDefaults.cardColors().containerColor,
             )

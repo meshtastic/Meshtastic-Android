@@ -114,6 +114,10 @@ class RadioSetupPolicyTest {
             RADIO_SETUP_BEACON_LIMIT,
             setupBeaconOffers(offers, lora(region = RegionCode.US), emptyList()).size,
         )
+        // Mesh1 is already on the radio, so Mesh6 moves into the five.
+        val joined = listOf(ChannelSettings.Builder().also { cb -> cb.name = "Mesh1" }.build())
+        val listed = setupBeaconOffers(offers, lora(region = RegionCode.US), joined).map { it.fromNodeNum }
+        assertEquals(listOf(2, 3, 4, 5, 6), listed)
         assertEquals(emptyList(), setupBeaconOffers(emptyList(), null, emptyList()))
     }
 
