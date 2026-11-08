@@ -27,6 +27,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,8 @@ import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Routing
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -109,6 +112,26 @@ class CommonNodeRequestActionsTest {
 
         assertNotNull(sending.lastTracerouteTime.value)
         verifySuspend(exactly(1)) { radioController.requestTraceroute(42, 1234) }
+    }
+
+    @Test
+    fun `a rate limit refusal is recorded against the traceroute request`() = runTest {
+        every { radioController.generatePacketId() } returns 42
+        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        val packets = MutableSharedFlow<MeshPacket>()
+        val sending =
+            CommonNodeRequestActions(
+                radioController = radioController,
+                snackbarManager = snackbarManager,
+                analytics = mock<PlatformAnalytics>(MockMode.autofill),
+                nakWatcher = testNakWatcher(radioController, packets = packets),
+                resolveUiText = { "feedback" },
+            )
+
+        sending.requestTraceroute(destNum = 1234, longName = "Test Node")
+        packets.emit(routingNakPacket(requestId = 42, from = 1, error = Routing.Error.RATE_LIMIT_EXCEEDED))
+
+        assertEquals(mapOf(42 to Routing.Error.RATE_LIMIT_EXCEEDED.value), sending.tracerouteNaks.value)
     }
 
     @Test

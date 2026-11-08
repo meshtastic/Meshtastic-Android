@@ -43,8 +43,16 @@ class RequestNakWatcher(
     private val snackbarManager: SnackbarManager,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) {
-    /** Runs [send] with a fresh packet id, watching for a NAK to that id from before the send until [WINDOW] after. */
-    suspend fun watch(request: StringResource, longName: String, send: suspend (requestId: Int) -> Unit) {
+    /**
+     * Runs [send] with a fresh packet id, watching for a NAK to that id from before the send until [WINDOW] after.
+     * [onNak] gets the request id and routing error before the snackbar shows.
+     */
+    suspend fun watch(
+        request: StringResource,
+        longName: String,
+        onNak: (requestId: Int, routingError: Int) -> Unit = { _, _ -> },
+        send: suspend (requestId: Int) -> Unit,
+    ) {
         val requestId = radioController.generatePacketId()
         val watcher =
             serviceScope.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -54,6 +62,7 @@ class RequestNakWatcher(
                             .mapNotNull { it.routingNakOrNull() }
                             .first { it.requestId == requestId }
                     } ?: return@launch
+                onNak(requestId, nak.routingError)
                 val reason = getStringResFrom(nak.routingError)
                 snackbarManager.showSnackbar(
                     resolveUiText(UiText.Resource(Res.string.request_failed_from, request, longName, reason)),

@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.set_display_name
 import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.trace_route
+import org.meshtastic.core.resources.traceroute_available_in
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
 import org.meshtastic.core.ui.icon.CenterFocusStrong
@@ -245,15 +246,17 @@ private fun TraceRouteMenuItem(
     onTraceRoute: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var coolingDown by remember { mutableStateOf(false) }
+    // Seconds until the radio takes another traceroute; 0 when it would take one now.
+    var secondsLeft by remember { mutableStateOf(0L) }
     LaunchedEffect(lastTracerouteTime) {
         val endTime = (lastTracerouteTime ?: 0L) + COOL_DOWN_TIME_MS
-        coolingDown = nowMillis < endTime
-        while (coolingDown) {
+        secondsLeft = secondsUntil(endTime)
+        while (secondsLeft > 0) {
             delay(COOLDOWN_TICK_MS)
-            coolingDown = nowMillis < endTime
+            secondsLeft = secondsUntil(endTime)
         }
     }
+    val coolingDown = secondsLeft > 0
     DropdownMenuItem(
         onClick = {
             onTraceRoute()
@@ -261,11 +264,23 @@ private fun TraceRouteMenuItem(
         },
         enabled = !node.isIgnored && !coolingDown,
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Route, contentDescription = null) },
-        text = { Text(text = stringResource(Res.string.trace_route)) },
+        text = {
+            Text(
+                text =
+                if (coolingDown) {
+                    stringResource(Res.string.traceroute_available_in, secondsLeft.toInt())
+                } else {
+                    stringResource(Res.string.trace_route)
+                },
+            )
+        },
     )
 }
 
+private fun secondsUntil(endTime: Long): Long = ((endTime - nowMillis).coerceAtLeast(0L) + MS_PER_SECOND - 1) / MS_PER_SECOND
+
 private const val COOLDOWN_TICK_MS = 500L
+private const val MS_PER_SECOND = 1000L
 
 @Composable
 private fun MenuItem(icon: ImageVector, text: String, onClick: () -> Unit, onDismiss: () -> Unit) {

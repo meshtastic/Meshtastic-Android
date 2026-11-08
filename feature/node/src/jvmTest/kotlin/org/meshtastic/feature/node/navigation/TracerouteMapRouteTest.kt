@@ -144,6 +144,7 @@ class TracerouteMapRouteTest {
         val nodeRequestActions: NodeRequestActions = mock()
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
         every { nodeRequestActions.lastRequestNeighborTimes } returns MutableStateFlow(emptyMap())
+        every { nodeRequestActions.tracerouteNaks } returns MutableStateFlow(emptyMap())
         val nodeRepository: NodeRepository = mock()
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         val node = Node(num = NODE_NUM, user = User.Builder().also { wb -> wb.long_name = NODE_NAME }.build())
