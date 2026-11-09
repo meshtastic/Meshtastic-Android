@@ -17,9 +17,20 @@
 package org.meshtastic.app.xr
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import org.koin.compose.koinInject
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.xr.SpatialShell
 
 @Composable
-@NonRestartableComposable
-fun AppSpatialShell(content: @Composable () -> Unit) = SpatialShell(content = content)
+fun AppSpatialShell(content: @Composable () -> Unit) {
+    val nodes by koinInject<NodeRepository>().nodeDBbyNum.collectAsState()
+    val positions =
+        remember(nodes) {
+            nodes.values.filter { it.validPosition != null }.map { LatLon(it.latitude, it.longitude) }
+        }
+    SpatialShell(nodePositions = positions, content = content)
+}

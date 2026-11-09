@@ -16,13 +16,19 @@
  */
 package org.meshtastic.feature.xr
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,22 +41,38 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.xr_full_space
 import org.meshtastic.core.resources.xr_home_space
+import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.ui.icon.CloseFullscreen
+import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.OpenInFull
+import org.meshtastic.feature.map.terrain.spatial.LatLon
 
 /**
  * Hosts the app on Android XR. In Full Space the activity's window is the main panel, with an orbiter below it to go
  * back; in Home Space it draws as usual with a button to enter Full Space. Off XR it is just [content].
  */
 @Composable
-fun SpatialShell(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun SpatialShell(
+    modifier: Modifier = Modifier,
+    nodePositions: List<LatLon> = emptyList(),
+    content: @Composable () -> Unit,
+) {
     val spatial = LocalSpatialCapabilities.current.isSpatialUiEnabled
+    var mapShown by remember { mutableStateOf(false) }
     Box(modifier.fillMaxSize()) {
         content()
         if (spatial) {
             // The main panel keeps its Home Space size; sizing it resizes the window and recreates the activity.
-            Orbiter(position = OrbiterPosition.BottomCenter()) { SpaceToggle(inFullSpace = true) }
+            Orbiter(position = OrbiterPosition.BottomCenter()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SpaceToggle(inFullSpace = true)
+                    FilledTonalIconButton(onClick = { mapShown = !mapShown }) {
+                        Icon(MeshtasticIcons.Map, contentDescription = stringResource(Res.string.xr_terrain_map))
+                    }
+                }
+            }
+            if (mapShown) SpatialTerrainMap(nodePositions)
         } else {
             SpaceToggle(
                 inFullSpace = false,

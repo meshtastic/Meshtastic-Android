@@ -2281,8 +2281,15 @@ write_nfc_failed
 write_nfc_subtext
 write_nfc_success
 write_nfc_text
+### XR ###
 xr_full_space
 xr_home_space
+xr_terrain_empty
+xr_terrain_flat
+xr_terrain_loading
+xr_terrain_map
+xr_terrain_unavailable
+xr_terrain_zoom
 you
 zh_CN
 zh_TW

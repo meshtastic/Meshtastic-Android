@@ -30,10 +30,14 @@ dependencies {
     implementation(projects.core.repository)
     implementation(projects.core.resources)
     implementation(projects.core.ui)
+    implementation(projects.feature.mapTerrain)
     implementation(projects.feature.node)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.kermit)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
 
     implementation(libs.compose.multiplatform.ui)
     implementation(libs.compose.multiplatform.foundation)

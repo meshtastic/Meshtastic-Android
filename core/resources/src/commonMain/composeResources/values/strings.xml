@@ -2359,8 +2359,15 @@
     <string name="write_nfc_subtext">Writing saves this link to an NFC tag anyone can tap.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
+    <!-- XR -->
     <string name="xr_full_space">Full Space</string>
     <string name="xr_home_space">Home Space</string>
+    <string name="xr_terrain_empty">No nodes with a position yet, so there is no area to show.</string>
+    <string name="xr_terrain_flat">No terrain data for this area, so the ground is flat.</string>
+    <string name="xr_terrain_loading">Building the terrain…</string>
+    <string name="xr_terrain_map">3D map</string>
+    <string name="xr_terrain_unavailable">The terrain could not be loaded. Check the connection and try again.</string>
+    <string name="xr_terrain_zoom">Zoom</string>
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
