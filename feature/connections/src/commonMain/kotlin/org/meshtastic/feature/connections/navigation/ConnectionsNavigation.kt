@@ -138,13 +138,15 @@ private val connectLinkPrefixes = listOf("$DEEP_LINK_BASE_URI/connections", "htt
 internal fun connectLinkFrom(contents: String): ConnectionsRoute.Connections? {
     val text = contents.trim()
     val uri =
-        text.takeIf { candidate -> connectLinkPrefixes.any { candidate.startsWith(it, ignoreCase = true) } }?.let {
-            try {
-                CommonUri.parse(it)
-            } catch (_: IllegalArgumentException) {
-                null
+        text
+            .takeIf { candidate -> connectLinkPrefixes.any { candidate.startsWith(it, ignoreCase = true) } }
+            ?.let {
+                try {
+                    CommonUri.parse(it)
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
             }
-        }
     val link = uri?.let(DeepLinkRouter::route)?.lastOrNull() as? ConnectionsRoute.Connections
     return link?.takeIf { it.address?.let(::isLinkableAddress) == true }
 }
