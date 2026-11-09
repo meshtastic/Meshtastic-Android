@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.model
 
 import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -57,6 +58,9 @@ enum class RestPose(val pitchDegrees: Float, val rollDegrees: Float) {
         return floatArrayOf(x * cos(roll) - y1 * sin(roll), x * sin(roll) + y1 * cos(roll), z1)
     }
 }
+
+/** The turn about +Y, in degrees, that points a model's front (+Z) at a point ([x], [z]) on its surface's plane. */
+fun facingYawDegrees(x: Float, z: Float): Float = atan2(x, z) / DEGREES_TO_RADIANS
 
 private const val QUARTER_TURN = 90f
 private const val AXES = 3

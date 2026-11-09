@@ -38,6 +38,7 @@ import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
+import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
 import kotlin.time.Duration.Companion.seconds
 
@@ -92,6 +93,19 @@ class DeviceModelViewModel(
             .map { it.security?.is_managed == true }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    private val _withBanana = MutableStateFlow<DeviceModelState.Ready?>(null)
+
+    /** The model with the banana standing beside it while [setBanana] has it on; null while off or still building. */
+    val withBanana: StateFlow<DeviceModelState.Ready?> = _withBanana.asStateFlow()
+
+    private val _banana = MutableStateFlow<ByteArray?>(null)
+
+    /** The banana's own model, loaded the first time it is shown, for AR to place on its own. */
+    val banana: StateFlow<ByteArray?> = _banana.asStateFlow()
+
+    private var bananaWanted = false
+    private var staging: Job? = null
+
     private var mirroring = false
     private var wanted = false
     private var pendingDisarm: Job? = null
@@ -106,14 +120,50 @@ class DeviceModelViewModel(
     fun load(imageFile: String) = loadModel(imageFile) { repository.getModel(imageFile) }
 
     /** Swaps in Chirpy, the mascot, bundled with the app: the viewer's easter egg. */
-    fun showChirpy() = loadModel(CHIRPY_KEY) {
-        try {
-            Res.readBytes(CHIRPY_MODEL)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            null
+    fun showChirpy() = loadModel(CHIRPY_KEY) { readBundled(CHIRPY_MODEL) }
+
+    /** Stands the bundled banana beside whichever model is shown, now and for the ones after it, or takes it away. */
+    fun setBanana(shown: Boolean) {
+        if (bananaWanted == shown) return
+        bananaWanted = shown
+        stageBanana()
+    }
+
+    private fun stageBanana() {
+        val ready = _state.value as? DeviceModelState.Ready
+        if (!bananaWanted || ready == null) {
+            staging?.cancel()
+            _withBanana.value = null
+            return
         }
+        if (_withBanana.value?.imageFile == ready.imageFile) return
+        staging?.cancel()
+        staging = viewModelScope.launch {
+            val banana = _banana.value ?: readBundled(BananaForScale.MODEL)?.also { _banana.value = it }
+            // Merging copies both files whole: off the main thread.
+            val staged = banana?.let {
+                withContext(dispatchers.default) {
+                    BananaForScale.stage(ready.glb, ready.bounds, ready.copyright, it)
+                }
+            }
+            _withBanana.value = staged?.let {
+                DeviceModelState.Ready(
+                    ready.imageFile,
+                    it.glb,
+                    BananaForScale.framing(it.bounds),
+                    it.copyright,
+                    ready.screen,
+                )
+            }
+        }
+    }
+
+    private suspend fun readBundled(path: String): ByteArray? = try {
+        Res.readBytes(path)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        null
     }
 
     private fun loadModel(key: String, fetch: suspend () -> ByteArray?) {
@@ -121,6 +171,7 @@ class DeviceModelViewModel(
         loadedImageFile = key
         loading?.cancel()
         _state.value = DeviceModelState.Loading
+        stageBanana()
         loading = viewModelScope.launch {
             val glb = fetch()
             // Parsing walks the whole file, screen detection every triangle of it: off the main thread.
@@ -145,6 +196,7 @@ class DeviceModelViewModel(
                     loadedImageFile = null
                     DeviceModelState.Failed
                 }
+            stageBanana()
         }
     }
 
@@ -154,6 +206,7 @@ class DeviceModelViewModel(
         loading?.cancel()
         loadedImageFile = null
         _state.value = DeviceModelState.Failed
+        stageBanana()
     }
 
     fun setMirror(enabled: Boolean) {

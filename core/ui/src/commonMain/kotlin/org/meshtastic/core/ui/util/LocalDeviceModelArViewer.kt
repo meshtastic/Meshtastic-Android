@@ -31,9 +31,11 @@ interface DeviceModelArViewer {
 
     /**
      * [notice] is the model's own copyright line, shown with it. With [screenMin]/[screenMax] (the display glass, in
-     * model coordinates) and a [screenFrame], the live device screen is drawn on the model.
+     * model coordinates) and a [screenFrame], the live device screen is drawn on the model. [banana] is the banana's
+     * GLB, standing beside the model at its real size while [bananaShown]; [onBananaShownChange] shows or hides it.
      */
     @Composable
+    @Suppress("LongParameterList")
     fun Content(
         glb: ByteArray,
         title: String,
@@ -42,5 +44,8 @@ interface DeviceModelArViewer {
         screenMin: FloatArray?,
         screenMax: FloatArray?,
         screenFrame: MirrorFrame?,
+        banana: ByteArray?,
+        bananaShown: Boolean,
+        onBananaShownChange: (Boolean) -> Unit,
     )
 }

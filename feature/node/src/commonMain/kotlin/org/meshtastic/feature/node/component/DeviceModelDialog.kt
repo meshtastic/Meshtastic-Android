@@ -33,6 +33,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.IconToggleButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,7 +53,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +68,7 @@ import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.device_model_banana_for_scale
 import org.meshtastic.core.resources.device_model_load_failed
 import org.meshtastic.core.resources.device_model_view_in_space
 import org.meshtastic.core.resources.info
@@ -98,10 +105,20 @@ fun DeviceModelDialog(
         onDispose {}
     }
     val title = if (chirpy) stringResource(Res.string.chirpy) else deviceHardware.displayName
+    var bananaShown by rememberSaveable { mutableStateOf(false) }
+    DisposableEffect(bananaShown) {
+        viewModel.setBanana(bananaShown)
+        onDispose {}
+    }
+    val withBanana by viewModel.withBanana.collectAsStateWithLifecycle()
+    val banana by viewModel.banana.collectAsStateWithLifecycle()
+    val ready = state as? DeviceModelState.Ready
+    // The device alone until the banana is merged in, rather than a spinner over a model that was already showing.
+    val shown = withBanana?.takeIf { bananaShown && it.imageFile == ready?.imageFile } ?: state
 
     val arViewer = LocalDeviceModelArViewer.current?.takeIf { it.isAvailable() }
     var inAr by rememberSaveable { mutableStateOf(false) }
-    val arModel = (state as? DeviceModelState.Ready)?.takeIf { inAr && arViewer != null }
+    val arModel = ready?.takeIf { inAr && arViewer != null }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // The orbit view stays composed under AR with its surface dropped, so coming back does not reload the model.
@@ -109,23 +126,30 @@ fun DeviceModelDialog(
             OrbitContent(
                 deviceHardware = deviceHardware,
                 title = title,
-                state = state,
+                state = shown,
                 screenFrame = screenFrame,
                 onError = viewModel::markFailed,
                 onDismiss = onDismiss,
                 onOpenAr = if (arViewer != null) ({ inAr = true }) else null,
                 onToggleChirpy = { chirpy = !chirpy },
+                bananaShown = bananaShown,
+                onBananaShownChange = { bananaShown = it },
                 visible = arModel == null,
             )
             arModel?.let {
+                // The device's own file: AR stands the banana beside it on the surface, clear of the rest poses.
                 arViewer?.Content(
                     glb = it.glb,
                     title = title,
-                    notice = it.copyright,
+                    // With the banana merged in, its notice carries both credits.
+                    notice = (shown as? DeviceModelState.Ready)?.copyright ?: it.copyright,
                     onDismiss = { inAr = false },
                     screenMin = it.screen?.min,
                     screenMax = it.screen?.max,
                     screenFrame = screenFrame,
+                    banana = banana,
+                    bananaShown = bananaShown,
+                    onBananaShownChange = { shown -> bananaShown = shown },
                 )
             }
         }
@@ -142,6 +166,8 @@ private fun OrbitContent(
     onDismiss: () -> Unit,
     onOpenAr: (() -> Unit)?,
     onToggleChirpy: () -> Unit,
+    bananaShown: Boolean,
+    onBananaShownChange: (Boolean) -> Unit,
     visible: Boolean,
 ) {
     val ready = state as? DeviceModelState.Ready
@@ -165,6 +191,7 @@ private fun OrbitContent(
                         detectTapGestures { if (++titleTaps % CHIRPY_TAPS == 0) toggleChirpy() }
                     },
                 )
+                if (ready != null) BananaToggle(bananaShown, onBananaShownChange)
                 if (onOpenAr != null && ready != null) {
                     IconButton(onClick = onOpenAr) {
                         Icon(
@@ -242,6 +269,28 @@ fun ModelNotice(
         }
     }
 }
+
+/** Stands a real-size banana beside the model, or takes it away. */
+@Composable
+fun BananaToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    colors: IconToggleButtonColors =
+        IconButtonDefaults.iconToggleButtonColors(checkedContainerColor = MaterialTheme.colorScheme.secondaryContainer),
+) {
+    IconToggleButton(checked = checked, onCheckedChange = onCheckedChange, modifier = modifier, colors = colors) {
+        val label = stringResource(Res.string.device_model_banana_for_scale)
+        // The emoji is the icon: it keeps its own colors, so the checked state shows in the container.
+        Text(
+            text = BANANA_EMOJI,
+            fontSize = 22.sp,
+            modifier = Modifier.clearAndSetSemantics { contentDescription = label },
+        )
+    }
+}
+
+private const val BANANA_EMOJI = "🍌"
 
 /** Taps on the title that swap Chirpy in or out. */
 private const val CHIRPY_TAPS = 7
