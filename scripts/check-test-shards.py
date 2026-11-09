@@ -27,6 +27,7 @@ NO_TESTS_YET = {
     ':core:di',
     ':core:nfc',
     ':core:resources',
+    ':feature:xr',
 }
 
 
