@@ -1,7 +1,7 @@
 ---
 title: Connexions
 nav_order: 2
-last_updated: 2026-11-04
+last_updated: 2026-11-08
 description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -27,6 +27,12 @@ Bluetooth Low Energy is the default and most common connection method on Android
 5. Android asks you to pair. If your node has a screen, it shows a six-digit PIN. Type that into the Android dialog. If your node has no screen, the PIN is `123456`.
 
 ![Scanning for Bluetooth devices, with a discovered node in the list](../../assets/screenshots/connections_bluetooth_scan.png)
+
+### Connecting from a QR code or NFC tag
+
+Some nodes come with a connect code, printed on a label or shown on the node's screen. Scan it with your phone's camera, hold the phone to an NFC tag holding the same link, or tap the scan icon at the top of the **Connect** tab. The app asks whether to connect and shows the node's address, plus its pairing PIN when the code has one. Tap **Connect** and the app copies the PIN and pairs. Up to Android 16 the app enters the PIN for you; on Android 17 the pairing dialog asks, and you paste it.
+
+A code that isn't a Meshtastic connect code, or one with an address the app can't use, connects to nothing.
 
 To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
