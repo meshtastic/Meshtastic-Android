@@ -276,6 +276,8 @@ dependencies {
     googleImplementation("io.github.sceneview:arsceneview:${libs.versions.sceneview.get()}") {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
     }
+    // Jetpack XR pulls ARCore and a prebuilt native renderer, so the spatial shell is google only.
+    googleImplementation(projects.feature.xr)
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)

@@ -33,9 +33,17 @@
         android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
         tools:node="remove" />
 
+    <!-- Spatial UI on Android XR headsets; phones and tablets install as before. -->
+    <uses-feature
+        android:name="android.software.xr.api.spatial"
+        android:required="false" />
+
     <application
         android:name="org.meshtastic.app.GoogleMeshUtilApplication"
         tools:replace="android:name">
+        <property
+            android:name="android.window.PROPERTY_XR_ACTIVITY_START_MODE"
+            android:value="XR_ACTIVITY_START_MODE_HOME_SPACE" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
