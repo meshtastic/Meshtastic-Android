@@ -194,6 +194,9 @@ class FirmwareUpdateViewModel(
     private var pendingLocalFirmwareArtifact: FirmwareArtifact? = null
     private var originalDeviceAddress: String? = null
 
+    /** The firmware version verification waits for, from the release being installed; null for a local file. */
+    private var expectedFirmwareVersion: String? = null
+
     /** Set when [checkForUpdates] enters recovery mode (disconnected + a saved record); consumed by [startUpdate]. */
     private var pendingRecovery: PendingFirmwareRecovery? = null
 
@@ -553,6 +556,7 @@ class FirmwareUpdateViewModel(
         },
     ) {
         originalDeviceAddress = radioPrefs.devAddr.value
+        expectedFirmwareVersion = release.reportedVersion()
         viewModelScope.launch {
             if (!checkBatteryLevel()) return@launch
             launchUpdateJob {
@@ -659,6 +663,7 @@ class FirmwareUpdateViewModel(
      */
     private fun startRecoveryUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
         originalDeviceAddress = pendingRecovery?.fullAddress
+        expectedFirmwareVersion = release.reportedVersion()
         // A failed BLE re-flash of a stranded device points at USB serial-DFU recovery instead of the low-level
         // error; an error that wrote nothing keeps its own message.
         launchUpdateJob(
@@ -717,6 +722,7 @@ class FirmwareUpdateViewModel(
         }
 
         originalDeviceAddress = radioPrefs.devAddr.value
+        expectedFirmwareVersion = release.reportedVersion()
         maintenanceHardware = currentState.deviceHardware
         destructiveWriteDone = false
         _bootloaderFault.value = null
@@ -1225,6 +1231,7 @@ class FirmwareUpdateViewModel(
         }
         trackUpdateStart(currentState, LOCAL_RELEASE_ID)
         originalDeviceAddress = radioPrefs.devAddr.value
+        expectedFirmwareVersion = null
 
         viewModelScope.launch {
             if (!checkBatteryLevel()) {
@@ -1366,17 +1373,23 @@ class FirmwareUpdateViewModel(
         }
 
         // Wait for device to reconnect and settle
+        val expected = expectedFirmwareVersion
         val result =
             withTimeoutOrNull(VERIFY_TIMEOUT) {
                 // Wait for both Connected state and node info to be present
                 connectionState.first { it is ConnectionState.Connected }
                 nodeRepository.ourNodeInfo.filterNotNull().first()
+                // A reconnect alone can be the old firmware still running; wait for the release it was given.
+                if (expected != null) nodeRepository.myNodeInfo.first { it?.firmwareVersion == expected }
                 delay(VERIFY_DELAY) // Extra buffer for initial config sync
                 true
             }
 
         if (result == null) {
-            Logger.w { "Post-update verification timed out for ${address.anonymize()}" }
+            Logger.w {
+                "Post-update verification timed out for ${address.anonymize()} (expected=$expected, " +
+                    "reported=${nodeRepository.myNodeInfo.value?.firmwareVersion})"
+            }
             // The opted-in wipe is deliberately skipped: a device we could not verify is never wiped.
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
@@ -1458,6 +1471,14 @@ private sealed interface LocalFirmwareResolution {
 
     data class Invalid(val reason: LocalFirmwareFileValidationReason, val fileName: String) : LocalFirmwareResolution
 }
+
+private val REPORTED_VERSION = Regex("""\d+\.\d+\.\d+\.[0-9a-f]+""")
+
+/**
+ * The `firmware_version` a device reports once it runs this release (`v2.8.2.d5f1619` reports `2.8.2.d5f1619`), or null
+ * when the id has no such form and verification cannot check it.
+ */
+internal fun FirmwareRelease.reportedVersion(): String? = id.removePrefix("v").takeIf { REPORTED_VERSION.matches(it) }
 
 private fun shouldTryLocalFirmwareBundle(fileName: String, reason: LocalFirmwareFileValidationReason): Boolean {
     val normalizedFileName = fileName.substringAfterLast('/').substringAfterLast('\\').lowercase()

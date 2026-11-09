@@ -378,6 +378,40 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `verification waits for the device to report the installed release`() = runTest {
+        val release = FirmwareRelease(id = "v2.8.3.771efca", title = "2.8.3", zipUrl = "url", releaseNotes = "")
+        every { firmwareReleaseRepository.stableRelease } returns flowOf(release)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        radioController.setConnectionState(ConnectionState.Connected)
+        runCurrent()
+        assertIs<FirmwareUpdateState.Verifying>(viewModel.state.value, "the old firmware is still reporting")
+
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "2.8.3.771efca", pioEnv = "tbeam"),
+        )
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Success>(viewModel.state.value)
+    }
+
+    @Test
+    fun `release ids map to the version the device reports`() {
+        assertEquals("2.8.3.771efca", FirmwareRelease(id = "v2.8.3.771efca").reportedVersion())
+        assertEquals(null, FirmwareRelease(id = "1").reportedVersion())
+        assertEquals(null, FirmwareRelease(id = "v2.7.17").reportedVersion())
+    }
+
+    @Test
     fun `an error that wrote nothing retires the recovery record`() = runTest {
         advanceUntilIdle()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }

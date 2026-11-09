@@ -49,7 +49,7 @@ abstract class CommonPerformUsbUpdateTest {
     // ── firmwareUri != null (user-selected file) ────────────────────────────
 
     @Test
-    fun `user-selected file emits Downloading then Processing then AwaitingFileSave`() = runTest {
+    fun `user-selected file reboots then waits for the save without a download state`() = runTest {
         val radioController = FakeRadioController()
         val nodeRepository = FakeNodeRepository()
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 42))
@@ -67,10 +67,9 @@ abstract class CommonPerformUsbUpdateTest {
             retrieveUsbFirmware = { _, _, _ -> null },
         )
 
-        assertTrue(states.size >= 3, "Expected at least 3 state transitions, got ${states.size}")
-        assertIs<FirmwareUpdateState.Downloading>(states[0])
-        assertIs<FirmwareUpdateState.Processing>(states[1])
-        assertIs<FirmwareUpdateState.AwaitingFileSave>(states[2])
+        assertEquals(2, states.size, "Expected Processing then AwaitingFileSave, got $states")
+        assertIs<FirmwareUpdateState.Processing>(states[0])
+        assertIs<FirmwareUpdateState.AwaitingFileSave>(states[1])
     }
 
     @Test

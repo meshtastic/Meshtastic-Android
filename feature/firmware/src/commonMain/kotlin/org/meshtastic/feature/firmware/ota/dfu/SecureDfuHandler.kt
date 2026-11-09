@@ -43,7 +43,6 @@ import org.meshtastic.core.resources.firmware_update_bootloader_not_upgraded
 import org.meshtastic.core.resources.firmware_update_bootloader_unverified
 import org.meshtastic.core.resources.firmware_update_bootloader_uploading
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
-import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
@@ -56,7 +55,6 @@ import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_uploading_after_bootloader
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
-import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.firmware.BootloaderDfuZip
 import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
@@ -66,11 +64,10 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.ota.ThroughputTracker
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
-import org.meshtastic.feature.firmware.ota.formatTransferPercent
+import org.meshtastic.feature.firmware.ota.downloadWithProgress
 import org.meshtastic.feature.firmware.ota.formatTransferProgress
 import org.meshtastic.feature.firmware.ota.retryWithDelay
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
-import org.meshtastic.feature.firmware.stripFormatArgs
 import org.meshtastic.feature.firmware.wireValue
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -672,16 +669,11 @@ class SecureDfuHandler(
                 val appPkg = parseDfuZipEntries(firmwareFileHandler.extractZipEntries(appArtifact))
 
                 bootloaderZip =
-                    firmwareRetriever.retrieveBootloaderDfuZip(asset) { progress ->
-                        updateState(
-                            FirmwareUpdateState.Downloading(
-                                ProgressState(
-                                    UiText.Resource(Res.string.firmware_update_bootloader_downloading),
-                                    progress,
-                                    formatTransferPercent(progress),
-                                ),
-                            ),
-                        )
+                    downloadWithProgress(
+                        updateState,
+                        UiText.Resource(Res.string.firmware_update_bootloader_downloading),
+                    ) { onProgress ->
+                        firmwareRetriever.retrieveBootloaderDfuZip(asset, onProgress)
                     }
                 val bootloaderArtifact =
                     bootloaderZip
@@ -700,6 +692,8 @@ class SecureDfuHandler(
                 val preStart =
                     enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
                 if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
+                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode.
+                    resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)
                     throw DfuException.TransferFailed(
                         "Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package",
                     )
@@ -1094,21 +1088,9 @@ class SecureDfuHandler(
             return FirmwareArtifact(uri = firmwareUri, fileName = firmwareUri.pathSegments.lastOrNull())
         }
 
-        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-
-        updateState(
-            FirmwareUpdateState.Downloading(
-                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
-            ),
-        )
-
         val path =
-            firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                updateState(
-                    FirmwareUpdateState.Downloading(
-                        ProgressState(UiText.DynamicString(downloadingMsg), progress, formatTransferPercent(progress)),
-                    ),
-                )
+            downloadWithProgress(updateState) { onProgress ->
+                firmwareRetriever.retrieveOtaFirmware(release, hardware, onProgress)
             }
 
         if (path == null) {

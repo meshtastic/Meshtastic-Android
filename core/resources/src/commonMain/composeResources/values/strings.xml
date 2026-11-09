@@ -777,6 +777,7 @@
     <string name="firmware_update_do_not_close">Do not close the app.</string>
     <string name="firmware_update_done">Done</string>
     <string name="firmware_update_downloading_percent">Downloading firmware... %1$d%</string>
+    <string name="firmware_update_downloading">Downloading firmware...</string>
     <string name="firmware_update_enabling_dfu">Enabling DFU mode...</string>
     <string name="firmware_update_erasing">Erasing...</string>
     <string name="firmware_update_error">Error: %1$s</string>

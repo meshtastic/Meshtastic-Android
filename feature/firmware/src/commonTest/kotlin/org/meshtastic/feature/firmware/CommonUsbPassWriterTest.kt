@@ -151,7 +151,7 @@ abstract class CommonUsbPassWriterTest {
 
         assertEquals(
             listOf<UiText?>(UiText.Resource(Res.string.firmware_update_transfer_percent, 50)),
-            states.filterIsInstance<FirmwareUpdateState.Downloading>().map { it.progressState.details },
+            states.filterIsInstance<FirmwareUpdateState.Downloading>().mapNotNull { it.progressState.details },
         )
     }
 
