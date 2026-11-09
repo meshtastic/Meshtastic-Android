@@ -363,7 +363,6 @@
     <string name="firmware_update_unknown_hardware">Model hardware necunoscut: %1$d</string>
     <string name="firmware_update_unknown_release">Lansare la distanţă necunoscută</string>
     <string name="firmware_update_uploading">Încărcare firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s de obicei este livrat cu un bootloader care nu acceptă actualizări OTA. Este posibil să fie nevoie să instalați un bootloader OTA prin USB înainte de a instala OTA.</string>
     <string name="firmware_update_usb_failed">Actualizare USB nereuşită</string>
     <string name="firmware_update_usb_instruction_text">Dispozitivul dvs. a repornit în modul DFU şi ar trebui să apară ca un dispozitiv USB (de exemplu, RAK4631).\n\nCând se deschide selectorul de fişiere, vă rugăm să selectaţi rădăcina acelui disc pentru a salva fişierul de firmwar.</string>
     <string name="firmware_update_usb_instruction_title">Selectați DFU USB disk</string>

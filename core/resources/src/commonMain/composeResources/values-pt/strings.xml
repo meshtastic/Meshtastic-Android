@@ -523,7 +523,6 @@
     <string name="firmware_maintenance_bootloader_available">Mais recente: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Instalado: %1$s</string>
     <string name="firmware_maintenance_bootloader_last_fault">O Bootloader reportou uma falha: %1$s</string>
-    <string name="firmware_maintenance_bootloader_latest_hint">Versão mais recente: %1$s. A versão instalada será apresentada quando o dispositivo reiniciar em modo de atualização.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">O bootloader está atualizado</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Não há nada para atualizar. O firmware será reinstalado de seguida, o que irá reiniciar o dispositivo.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">O ficheiro de limpeza foi copiado, mas o dispositivo não iniciou a limpeza. Ainda não foi efetuada qualquer alteração. Desligue o dispositivo, prima duas vezes o botão de reposição e tente novamente.</string>
@@ -537,12 +536,10 @@
     <string name="firmware_maintenance_unknown_softdevice">Esta aplicação não consegue confirmar qual o stack Bluetooth utilizado pelo dispositivo, pelo que não é seguro efetuar a limpeza. Utilize a ferramenta de instalação em flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">Este dispositivo não suporta a limpeza através da aplicação.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Atualizar bootloader</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">Esta ação instala um bootloader atualizado em %1$s, tornando as futuras atualizações por Bluetooth muito mais rápidas. O firmware será reinstalado de seguida.\n\nNão desligue o dispositivo durante este processo.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Atualizar bootloader?</string>
     <string name="firmware_maintenance_wrong_destination">Essa localização não corresponde à unidade de atualização do dispositivo, pelo que não foi gravado nada no dispositivo. Selecione a unidade amovível que aparece quando o dispositivo está em modo de atualização.</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="firmware_recovery_banner">Concluir a atualização de %1$s</string>
-    <string name="firmware_recovery_ble_failed">Não foi possível concluir a atualização por Bluetooth. O bootloader de origem deste dispositivo não consegue concluir de forma fiável uma atualização sem fios interrompida. Para recuperar o dispositivo, ligue-o a um computador por USB e reinstale o firmware utilizando a ferramenta DFU por porta série do fabricante (por exemplo, adafruit-nrfutil).</string>
     <string name="firmware_recovery_button">Retomar atualização do firmware</string>
     <string name="firmware_recovery_dismiss">Ignorar recuperação do firmware</string>
     <string name="firmware_recovery_explanation">Este dispositivo está em modo bootloader devido a uma atualização do firmware que não foi concluída. Mantenha-o por perto e o firmware será reinstalado para concluir a atualização.</string>
@@ -567,7 +564,6 @@
     <string name="firmware_update_ota_failed">A atualização OTA falhou: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">O carregador OTA deste dispositivo rejeitou o método de atualização solicitado: %1$s</string>
     <string name="firmware_update_preparing_flash">A preparar o dispositivo: a apagar a memória flash. Este processo pode demorar até um minuto...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">No RAK WisBlock RAK4631, o ficheiro .zip do bootloader do fabricante tem de ser instalado com uma ferramenta DFU por porta série, como o adafruit-nrfutil — copiar esse ficheiro .zip para a unidade do dispositivo não funciona. Em alternativa, ligue este dispositivo por USB e utilize a opção de atualização do bootloader nesta aplicação.</string>
     <string name="firmware_update_rebooting">A reiniciar em modo DFU...</string>
     <string name="firmware_update_release_notes">Notas de lançamento</string>
     <string name="firmware_update_requires_bin">%1$s requer um ficheiro .bin compatível com o modelo de destino.</string>
@@ -579,7 +575,6 @@
     <string name="firmware_update_save_dfu_file">Guarde o ficheiro .uf2 na unidade DFU do seu dispositivo.</string>
     <string name="firmware_update_searching_device">A procurar um dispositivo OTA na rede...</string>
     <string name="firmware_update_select_file">Selecionar ficheiro local</string>
-    <string name="firmware_update_slow_bootloader_hint">As atualizações são lentas com o bootloader deste dispositivo. Instalar o Meshtastic nRF52 Bootloader permite atualizações por BLE muito mais rápidas.</string>
     <string name="firmware_update_source_local">Origem: ficheiro local</string>
     <string name="firmware_update_stable">Estável</string>
     <string name="firmware_update_start_timed_out">Não foi possível iniciar a atualização dentro do tempo previsto. Tente atualizar novamente.</string>

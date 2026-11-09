@@ -411,7 +411,6 @@
     <string name="firmware_update_unknown_hardware">Невідома модель обладнання: %1$d</string>
     <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_uploading">Завантаження прошивки...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s зазвичай постачається із завантажувачем, який не підтримує оновлення OTA. Вам може знадобитися завантажувач з можливістю оновлень OTA через USB перед прошиванням OTA.</string>
     <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні "Зберегти як", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_usb_instruction_title">Оберіть USB DFU накопичувач</string>
     <string name="firmware_update_validating">Перевірка прошивки...</string>

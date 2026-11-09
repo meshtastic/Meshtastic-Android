@@ -536,7 +536,6 @@
     <string name="firmware_maintenance_upgrade_confirm_title">Mettre à jour le chargeur de démarrage ?</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
     <string name="firmware_recovery_banner">Fin de la mise à jour %1$s</string>
-    <string name="firmware_recovery_ble_failed">Impossible de terminer la mise à jour via le Bluetooth. Le programme d'amorçage par défaut ne peut pas correctement effectuer une mise à jour OTA. Connectez l'appareil sur un ordinateur via USB et tentez de flasher en utilisant les outils DFU du vendeur (par exemple, adafruit-nrfutil) pour restaurer l'appareil.</string>
     <string name="firmware_recovery_button">Reprendre la mise à jour du micrologiciel</string>
     <string name="firmware_too_old">Mise à jour du micrologiciel requise.</string>
     <string name="firmware_update_almost_there">On y est presque...</string>
@@ -610,7 +609,6 @@
     <string name="firmware_update_unsupported_transport">Les mises à jour du microprogramme ne sont pas prises en charge par cette connexion pour cet appareil. Connectez une autre manière (par exemple Bluetooth) pour mettre à jour.</string>
     <string name="firmware_update_unsupported_update_method">Les fichiers du firmware local ne sont pas pris en charge pour cette méthode de mise à jour.</string>
     <string name="firmware_update_uploading">Transfert du Firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="firmware_update_usb_failed">Échec de la mise à jour USB</string>
     <string name="firmware_update_usb_instruction_text">Votre appareil a redémarré en mode DFU et devrait apparaître comme une clé USB (par exemple, RAK4631).\n\nLorsque le sélecteur de fichier s'ouvre, veuillez sélectionner la racine de ce lecteur pour enregistrer le fichier firmware.</string>
     <string name="firmware_update_usb_instruction_title">Sélectionnez un lecteur USB DFU</string>

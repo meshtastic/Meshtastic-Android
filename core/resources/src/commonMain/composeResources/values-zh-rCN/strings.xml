@@ -561,7 +561,6 @@
     <string name="firmware_gate_update">更新固件</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="firmware_recovery_banner">完成更新 %1$s</string>
-    <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
     <string name="firmware_recovery_button">继续固件升级</string>
     <string name="firmware_recovery_dismiss">取消固件恢复</string>
     <string name="firmware_recovery_explanation">此设备目前处于引导程序模式，原因是之前的固件更新未能完成请将其保持在手机附近系统将重新刷入固件以完成更新。</string>
@@ -644,7 +643,6 @@
     <string name="firmware_update_unsupported_transport">此设备不支持通过当前连接进行固件更新.请通过其他方式 (例如蓝牙) 连接以进行更新。</string>
     <string name="firmware_update_unsupported_update_method">此更新方法不支持本地固件文件。</string>
     <string name="firmware_update_uploading">正在上传固件……</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="firmware_update_usb_failed">USB 更新失败</string>
     <string name="firmware_update_usb_instruction_text">您的设备已经重启到 DFU 模式并应显示为 USB 驱动器(如RAK4631)。\n\n当文件选择器打开时，请选择该驱动器的根目录来保存固件文件。</string>
     <string name="firmware_update_usb_instruction_title">选择 DFU USB 驱动器</string>

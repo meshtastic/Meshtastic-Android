@@ -604,12 +604,10 @@
     <string name="firmware_maintenance_unknown_softdevice">See rakendus ei saa kinnitada, millist sinihamba protokolli see seade kasutab, seega pole selle kustutamine ohutu. Kasuta selle asemel veebipõhist uuendust aadressil flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">See seade ei toeta rakenduse sisest kustutamist.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Uuenda alglaadurit</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">See paigaldab seadmesse %1$s uuendatud alglaaduri, mis muudab tulevased Bluetoothi ​​värskendused palju kiiremaks. Püsivara paigaldatakse pärast uuesti.\n\nÄrge ühendage seadet selle töötamise ajal lahti.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Kas uuendada alglaadurit?</string>
     <string name="firmware_maintenance_wrong_destination">See asukoht ei ole seadme uuendusketas, seega ei kirjutatud seadmesse midagi. Valige eemaldatav ketas, mis kuvatakse, kui seade on uuendusrežiimis.</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
     <string name="firmware_recovery_banner">Lõpeta värskendamine: %1$s</string>
-    <string name="firmware_recovery_ble_failed">Sinihamba ​​kaudu värskendust ei õnnestunud lõpule viia. Selle seadme alglaadur ei suuda katkenud värskendust õhu kaudu usaldusväärselt lõpule viia. Ühenda see USB kaudu arvutiga ja püsivarauuenda see uuesti tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil) abil, et seade taastada.</string>
     <string name="firmware_recovery_button">Jätka püsivara värskendamist</string>
     <string name="firmware_recovery_dismiss">Keela püsivara taastamine</string>
     <string name="firmware_recovery_explanation">See seade on püsivara värskenduse tõttu alglaaduri režiimis, mis ei ole lõppenud. Hoidke seda läheduses ja see püsivarauuendatakse uuesti värskenduse lõpuleviimiseks.</string>
@@ -664,7 +662,6 @@
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
     <string name="firmware_update_preparing_flash">Seadme ettevalmistamine: välkmälu kustutamine. See võib võtta kuni minuti...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul tuleb tootja alglaaduri .zip-fail paigaldada jadapordi DFU-tööriistaga, näiteks adafruit-nrfutil – selle .zip-faili kopeerimine seadme kettale ei toimi. Teise võimalusena ühendage seade USB kaudu ja kasutage selle rakenduse alglaaduri uuendust.</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_release_notes">Väljalaske märkmed</string>
     <string name="firmware_update_requires_bin">%1$s nõuab sihtmärgile vastavat .bin faili.</string>
@@ -692,7 +689,6 @@
     <string name="firmware_update_unsupported_transport">Selle seadme püsivara värskendus ei toetata üle selle ühenduse. Värskendamiseks loo ühendus muul viisil (nt sinihamba ​​kaudu).</string>
     <string name="firmware_update_unsupported_update_method">See värskendusmeetod ei toeta kohalikke püsivara faile.</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
     <string name="firmware_update_usb_instruction_text">Seade on taaskäivitatud DFU režiimis ja kuvatakse USB kettana (nt RAK4631).\n\nKui failivalija avaneb, vali püsivara faili salvestamiseks selle ketta juurkaust.</string>
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
