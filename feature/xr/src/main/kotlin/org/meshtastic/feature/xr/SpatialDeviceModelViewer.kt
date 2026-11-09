@@ -170,8 +170,7 @@ private fun DeviceModelInSpace(
                 awaitCancellation()
             } finally {
                 device = null
-                entity.parent = null
-                model.close()
+                release(entity, model)
             }
         }
         DeviceScreenPanel(session, device, screen, screenFrame)
@@ -221,8 +220,7 @@ private fun DeviceBanana(session: Session, device: GltfModelEntity?, glb: ByteAr
         try {
             awaitCancellation()
         } finally {
-            entity.parent = null
-            model.close()
+            release(entity, model)
         }
     }
 }
@@ -269,6 +267,13 @@ private fun InSpaceChrome(
             }
         }
     }
+}
+
+/** The entity goes before the model it borrows: the native side aborts if the model is released while it is held. */
+@Suppress("DEPRECATION")
+private fun release(entity: GltfModelEntity, model: GltfModel) {
+    entity.dispose()
+    model.close()
 }
 
 private suspend fun loadModel(session: Session, glb: ByteArray, name: String): GltfModel? = try {
