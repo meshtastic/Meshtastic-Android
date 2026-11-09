@@ -1924,7 +1924,7 @@
     <string name="routing_error_no_interface">No radio interface</string>
     <string name="routing_error_no_response">No app response</string>
     <string name="routing_error_no_route">No route</string>
-    <string name="routing_error_none">Acknowledged</string>
+    <string name="routing_error_none">Delivered to recipient</string>
     <string name="routing_error_not_authorized">Not authorized</string>
     <string name="routing_error_pki_failed">Could not send encrypted message</string>
     <string name="routing_error_pki_send_fail_public_key">Recipient key unavailable</string>
