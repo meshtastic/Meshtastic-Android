@@ -42,6 +42,28 @@ internal val DEVICE_INFORMATION_SERVICE_UUID: Uuid = Uuid.parse("0000180A-0000-1
 /** DIS Firmware Revision String: `<git describe> <softdevice> <softdevice version>`, e.g. `2.6.0 s140 6.1.1`. */
 internal val FIRMWARE_REVISION_UUID: Uuid = Uuid.parse("00002A26-0000-1000-8000-00805F9B34FB")
 
+/** DIS Model Number String: the bootloader's compiled-in `BLEDIS_MODEL`, e.g. `WisBlock RAK4631`. */
+internal val MODEL_NUMBER_UUID: Uuid = Uuid.parse("00002A24-0000-1000-8000-00805F9B34FB")
+
+/**
+ * The SoftDevice version at the end of a DIS Firmware Revision String (`2.6.0 s140 6.1.1` reads as `6.1.1`), or null
+ * when the string names no S140 SoftDevice.
+ */
+internal fun parseBootloaderSoftDevice(firmwareRevision: String): String? {
+    val parts = firmwareRevision.trim().split(' ').filter { it.isNotBlank() }
+    val sdIndex = parts.indexOfFirst { it.equals("s140", ignoreCase = true) }
+    return parts.getOrNull(sdIndex + 1)?.takeIf { sdIndex >= 0 }
+}
+
+/** What a bootloader in DFU mode says about itself over DIS; each field is null when absent or unreadable. */
+data class BootloaderIdentity(val model: String?, val firmwareRevision: String?) {
+    val version: KotlinVersion?
+        get() = firmwareRevision?.let(::parseBootloaderVersion)
+
+    val softDevice: String?
+        get() = firmwareRevision?.let(::parseBootloaderSoftDevice)
+}
+
 /**
  * First Meshtastic nRF52 Bootloader whose BLE DFU returns to idle when the central disconnects, so a reconnecting
  * central's START_DFU starts over instead of being refused with INVALID_STATE until the board is reset.
@@ -86,14 +108,29 @@ internal object LegacyDfuOpcode {
     const val INIT_PARAMS_COMPLETE: Byte = 0x01
 }
 
-/**
- * `START_DFU` image-type bitmask. Meshtastic only ever ships application updates over OTA, so the transport hard-codes
- * [APPLICATION].
- */
+/** `START_DFU` image-type bitmask. */
 internal object LegacyDfuImageType {
     const val SOFT_DEVICE: Byte = 0x01
     const val BOOTLOADER: Byte = 0x02
+    const val SOFT_DEVICE_BOOTLOADER: Byte = 0x03
     const val APPLICATION: Byte = 0x04
+}
+
+/** The `START_DFU` control-point write for [image]. */
+internal fun legacyStartPayload(image: DfuImage): ByteArray = byteArrayOf(
+    LegacyDfuOpcode.START_DFU,
+    when (image) {
+        DfuImage.Application -> LegacyDfuImageType.APPLICATION
+        is DfuImage.SoftDeviceBootloader -> LegacyDfuImageType.SOFT_DEVICE_BOOTLOADER
+    },
+)
+
+/** The image-sizes write that follows `START_DFU` for an [image] whose `.bin` is [firmwareSize] bytes. */
+internal fun legacyImageSizesPayload(image: DfuImage, firmwareSize: Int): ByteArray = when (image) {
+    DfuImage.Application -> legacyImageSizesPayload(appSize = firmwareSize)
+
+    is DfuImage.SoftDeviceBootloader ->
+        legacyImageSizesPayload(appSize = 0, softDeviceSize = image.sdSize, bootloaderSize = image.blSize)
 }
 
 /** Result codes returned in the third byte of a response notification. */
@@ -178,8 +215,7 @@ internal sealed class LegacyDfuResponse {
 /**
  * Build the 12-byte image-sizes payload written to the Packet characteristic immediately after `START_DFU`.
  *
- * Layout: `[soft_device_size_u32_le, bootloader_size_u32_le, app_size_u32_le]`. Meshtastic only updates the
- * application, so [softDeviceSize] and [bootloaderSize] default to 0.
+ * Layout: `[soft_device_size_u32_le, bootloader_size_u32_le, app_size_u32_le]`.
  */
 internal fun legacyImageSizesPayload(appSize: Int, softDeviceSize: Int = 0, bootloaderSize: Int = 0): ByteArray =
     intToLeBytes(softDeviceSize) + intToLeBytes(bootloaderSize) + intToLeBytes(appSize)

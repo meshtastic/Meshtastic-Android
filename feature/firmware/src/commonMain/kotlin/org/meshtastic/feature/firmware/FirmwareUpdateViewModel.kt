@@ -384,7 +384,8 @@ class FirmwareUpdateViewModel(
                             showBootloaderWarning =
                             deviceHardware.requiresBootloaderUpgradeForOta == true &&
                                 !dismissed &&
-                                radioPrefs.isBle(),
+                                radioPrefs.isBle() &&
+                                bootloader?.isCurrent != true,
                             updateMethod = firmwareUpdateMethod,
                             currentFirmwareVersion = ourNode.firmwareVersion,
                             maintenance =
@@ -397,6 +398,14 @@ class FirmwareUpdateViewModel(
                                 bootloader = bootloader,
                             ),
                             bootloader = bootloader,
+                            bleBootloaderUpgrade =
+                            bleBootloaderUpgradeFor(
+                                manifest = maintenanceUf2Manifest,
+                                hardware = deviceHardware,
+                                updateMethod = firmwareUpdateMethod,
+                                hasRelease = release != null,
+                                bootloader = bootloader,
+                            ),
                         )
                 }
             }
@@ -511,8 +520,39 @@ class FirmwareUpdateViewModel(
         }
     }
 
+    /** Upgrades the bootloader over BLE with the Ready state's package, then reinstalls the selected release. */
+    @Suppress("ReturnCount") // preconditions; each missing one must abort before the device is rebooted
+    fun startBleBootloaderUpgrade() {
+        val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
+        val release = currentState.release ?: return
+        val bootloader = currentState.bleBootloaderUpgrade ?: return
+        pendingFactoryResetAfterUpdate = false
+        _bootloaderFault.value = null
+        trackUpdateStart(currentState, release.id, wipeDevice = false)
+        startNormalUpdate(currentState, release) {
+            firmwareUpdateManager.upgradeBootloaderOverBle(
+                release = release,
+                hardware = currentState.deviceHardware,
+                address = currentState.address,
+                bootloader = bootloader,
+                updateState = { _state.value = it },
+            )
+        }
+    }
+
     @Suppress("SuspendFunSwallowedCancellation") // cancellation resets the UI state, then is rethrown
-    private fun startNormalUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
+    private fun startNormalUpdate(
+        currentState: FirmwareUpdateState.Ready,
+        release: FirmwareRelease,
+        runUpdate: suspend () -> FirmwareArtifact? = {
+            firmwareUpdateManager.startUpdate(
+                release = release,
+                hardware = currentState.deviceHardware,
+                address = currentState.address,
+                updateState = { _state.value = it },
+            )
+        },
+    ) {
         originalDeviceAddress = radioPrefs.devAddr.value
 
         viewModelScope.launch {
@@ -523,13 +563,7 @@ class FirmwareUpdateViewModel(
                         // Persist a recovery record before flashing so a stranded bootloader (interrupted upload,
                         // app closed, missed reconnect) can be re-flashed later while disconnected.
                         maybeRecordRecovery(currentState)
-                        tempFirmwareFile =
-                            firmwareUpdateManager.startUpdate(
-                                release = release,
-                                hardware = currentState.deviceHardware,
-                                address = currentState.address,
-                                updateState = { _state.value = it },
-                            )
+                        tempFirmwareFile = runUpdate()
 
                         when (val finalState = _state.value) {
                             is FirmwareUpdateState.Success ->

@@ -163,4 +163,28 @@ class LegacyDfuProtocolTest {
             assertEquals(keeps, dropOnBootloader(revision).keepsDroppedSession(), revision)
         }
     }
+
+    @Test
+    fun `START payload names the image type`() {
+        assertContentEquals(byteArrayOf(0x01, 0x04), legacyStartPayload(DfuImage.Application))
+        assertContentEquals(byteArrayOf(0x01, 0x03), legacyStartPayload(DfuImage.SoftDeviceBootloader(1, 1)))
+    }
+
+    @Test
+    fun `image sizes carry the SoftDevice and bootloader and a zero application`() {
+        val sizes = legacyImageSizesPayload(DfuImage.SoftDeviceBootloader(sdSize = 151016, blSize = 39000), 190016)
+        assertContentEquals(
+            intToLeBytes(151016) + intToLeBytes(39000) + intToLeBytes(0),
+            sizes,
+        )
+        assertContentEquals(legacyImageSizesPayload(appSize = 512), legacyImageSizesPayload(DfuImage.Application, 512))
+    }
+
+    @Test
+    fun `SoftDevice is read from the DIS firmware revision`() {
+        assertEquals("6.1.1", parseBootloaderSoftDevice("2.6.0 s140 6.1.1"))
+        assertEquals("7.3.0", parseBootloaderSoftDevice("0.9.2-OTAFIX2.5 S140 7.3.0"))
+        assertNull(parseBootloaderSoftDevice("2.6.0"))
+        assertNull(parseBootloaderSoftDevice("2.6.0 s140"))
+    }
 }

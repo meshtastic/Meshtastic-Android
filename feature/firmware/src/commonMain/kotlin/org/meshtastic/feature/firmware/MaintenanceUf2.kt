@@ -123,8 +123,56 @@ private fun MaintenanceUf2Manifest.otafixAssetOrNull(otafixBoardSlug: String, sh
     return MaintenanceUf2(url = "$otafixBase/$name", fileName = name, sha256 = sha256)
 }
 
+/**
+ * A pinned legacy DFU SoftDevice+bootloader package for one board, and what its bootloader must report over DIS before
+ * it is written.
+ */
+data class BootloaderDfuZip(
+    val url: String,
+    val fileName: String,
+    val sha256: String,
+    val version: String,
+    val softDevice: SoftDeviceVariant,
+    val bleModel: String,
+) {
+    init {
+        require(SAFE_DFU_ZIP_FILE_NAME.matches(fileName)) { "Unsafe bootloader package filename: $fileName" }
+    }
+}
+
+private val SAFE_DFU_ZIP_FILE_NAME = Regex("""[A-Za-z0-9._-]+\.zip""")
+
+/**
+ * The SoftDevice+bootloader package [platformioTarget] takes over BLE, or `null` when [manifest] maps none, names an
+ * unsafe file or an unknown SoftDevice, or disagrees with [mappedSoftDevice] (the bootloader-quirks hint). `null`
+ * refuses the upgrade; there is no default row.
+ */
+@Suppress("ReturnCount")
+internal fun bootloaderDfuZipFor(
+    manifest: MaintenanceUf2Manifest,
+    platformioTarget: String,
+    mappedSoftDevice: SoftDeviceVariant?,
+): BootloaderDfuZip? {
+    val row =
+        manifest.otafixBleDfuByTarget.entries.firstOrNull { it.key.equals(platformioTarget, ignoreCase = true) }?.value
+            ?: return null
+    val softDevice = SoftDeviceVariant.fromWire(row.softDevice) ?: return null
+    if (mappedSoftDevice != null && mappedSoftDevice != softDevice) return null
+    if (manifest.otafixReleaseTag.isBlank() || row.bleModel.isBlank()) return null
+    val name = "${row.otafixBoardSlug}_bootloader-${manifest.otafixReleaseTag}_s140_${row.softDevice}.zip"
+    if (!SAFE_DFU_ZIP_FILE_NAME.matches(name)) return null
+    return BootloaderDfuZip(
+        url = "${manifest.otafixBase}/$name",
+        fileName = name,
+        sha256 = row.sha256,
+        version = manifest.otafixReleaseTag,
+        softDevice = softDevice,
+        bleModel = row.bleModel,
+    )
+}
+
 /** [SoftDeviceVariant.fromWire]'s own input strings — the key space [MaintenanceUf2EraseSet.nrf52] is indexed by. */
-private val SoftDeviceVariant.wireValue: String
+internal val SoftDeviceVariant.wireValue: String
     get() =
         when (this) {
             SoftDeviceVariant.S140_6_1_1 -> "6.1.1"

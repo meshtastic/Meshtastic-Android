@@ -58,6 +58,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
+import kotlin.uuid.Uuid
 
 /**
  * Kable-based transport for the Nordic **Legacy DFU** protocol (Nordic SDK 11/12 / Adafruit `BLEDfu`).
@@ -79,6 +80,7 @@ internal constructor(
     private val address: String,
     dispatcher: CoroutineDispatcher,
     private val streamProfile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+    private val image: DfuImage = DfuImage.Application,
 ) : DfuUploadTransport {
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "Legacy DFU")
@@ -194,17 +196,29 @@ internal constructor(
      * rethrows, which would surface as cancellation of the upload.
      */
     private suspend fun readBootloaderVersion() {
-        val firmwareRevision =
-            withTimeoutOrNull(DIS_READ_TIMEOUT) {
-                safeCatching {
-                    bleConnection.profile(DEVICE_INFORMATION_SERVICE_UUID) { service ->
-                        service.read(service.characteristic(FIRMWARE_REVISION_UUID)).decodeToString()
-                    }
-                }
-                    .getOrNull()
-            }
+        val firmwareRevision = readDisString(FIRMWARE_REVISION_UUID)
         bootloaderVersion = firmwareRevision?.let(::parseBootloaderVersion)
         Logger.i { "Legacy DFU: DIS firmware revision = '${firmwareRevision ?: "?"}' (version=$bootloaderVersion)" }
+    }
+
+    /** The bootloader's DIS Model Number and Firmware Revision. Valid after [connectToDfuMode]. */
+    suspend fun readBootloaderIdentity(): BootloaderIdentity {
+        val identity =
+            BootloaderIdentity(
+                model = readDisString(MODEL_NUMBER_UUID),
+                firmwareRevision = readDisString(FIRMWARE_REVISION_UUID),
+            )
+        Logger.i { "Legacy DFU: bootloader identity $identity" }
+        return identity
+    }
+
+    private suspend fun readDisString(characteristic: Uuid): String? = withTimeoutOrNull(DIS_READ_TIMEOUT) {
+        safeCatching {
+            bleConnection.profile(DEVICE_INFORMATION_SERVICE_UUID) { service ->
+                service.read(service.characteristic(characteristic)).decodeToString().trimEnd('\u0000').trim()
+            }
+        }
+            .getOrNull()
     }
 
     // ---------------------------------------------------------------------------
@@ -213,8 +227,8 @@ internal constructor(
 
     /**
      * Sends the legacy DFU init packet using the SDK 7+ extended-init flow:
-     * 1. `START_DFU [APP]` → device prepares.
-     * 2. Image sizes `[0u32, 0u32, appSize_u32]` on the Packet characteristic.
+     * 1. `START_DFU [type]` → device prepares.
+     * 2. Image sizes `[sd, bl, app]` on the Packet characteristic.
      * 3. `INIT_PARAMS_START` → init bytes on Packet → `INIT_PARAMS_COMPLETE`.
      *
      * The legacy init packet for an APP image is typically 14 bytes (SDK 7) or 32 bytes (SDK 11 with signature). Any
@@ -249,8 +263,8 @@ internal constructor(
      * Drives the full upload sequence (START, init-packet brackets, PRN setup, firmware stream, validate, activate).
      *
      * Sequence details:
-     * 1. `START_DFU [0x04]` (APP image only).
-     * 2. Image sizes payload on Packet char: `[0u32, 0u32, firmware.size_u32]`.
+     * 1. `START_DFU [type]`: `0x04` for an application, `0x03` for a SoftDevice+bootloader [image].
+     * 2. Image sizes payload on Packet char: `[0, 0, app]` or `[sd, bl, 0]`.
      * 3. Await START response.
      * 4. `INIT_PARAMS_START`, init bytes on Packet, `INIT_PARAMS_COMPLETE`. Await init response.
      * 5. `PRN_REQ [PRN_LE16]`. (No response.)
@@ -282,8 +296,8 @@ internal constructor(
         // The bootloader erases the application region before it answers; without lazy erase that is tens of
         // seconds of silence, so tell the UI what the wait is.
         onPhase(DfuUploadPhase.PREPARING)
-        writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
-        writePacket(legacyImageSizesPayload(appSize = firmware.size))
+        writeControlPoint(legacyStartPayload(image))
+        writePacket(legacyImageSizesPayload(image, firmware.size))
         handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
         onPhase(DfuUploadPhase.STARTED)
 

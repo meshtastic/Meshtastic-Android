@@ -33,6 +33,25 @@ data class MaintenanceUf2Manifest(
     @SerialName("erase") val erase: MaintenanceUf2EraseSet? = null,
     @SerialName("otafixByBoardId") val otafixByBoardId: Map<String, OtafixAssetEntry> = emptyMap(),
     @SerialName("otafixSupportedTargets") val otafixSupportedTargets: List<String> = emptyList(),
+    @SerialName("otafixBleDfuByTarget") val otafixBleDfuByTarget: Map<String, OtafixBleDfuEntry> = emptyMap(),
+)
+
+/**
+ * The legacy DFU SoftDevice+bootloader package a board takes over BLE, keyed in [MaintenanceUf2Manifest] by
+ * [DeviceHardware.platformioTarget]: BLE cannot read the drive's Board-ID, so the running node's target picks the row
+ * and the bootloader's own DIS Model Number must then equal [bleModel] before anything is written.
+ *
+ * @property softDevice The SoftDevice the package carries, as [SoftDeviceVariant.fromWire] reads it. It must equal the
+ *   installed one: an app linked for the other SoftDevice does not boot.
+ * @property bleModel The bootloader's `BLEDIS_MODEL`, read back from DIS 0x2A24 in DFU mode.
+ * @property sha256 Digest of the release's `<otafixBoardSlug>_bootloader-<tag>_s140_<softDevice>.zip`.
+ */
+@Serializable
+data class OtafixBleDfuEntry(
+    @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
+    @SerialName("softDevice") val softDevice: String,
+    @SerialName("bleModel") val bleModel: String,
+    @SerialName("sha256") val sha256: String,
 )
 
 /**

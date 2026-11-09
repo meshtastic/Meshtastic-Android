@@ -27,6 +27,8 @@ data class FirmwareUpdateActions(
     /** Pick the device's UF2 volume for a maintenance pass, which vets the drive before writing to it. */
     val onPickVolume: () -> Unit,
     val onBootloaderUpgrade: () -> Unit,
+    /** Upgrades the bootloader over BLE, then reinstalls the selected release. */
+    val onBleBootloaderUpgrade: () -> Unit,
     val onConfirmBootloaderUpgrade: () -> Unit,
     /** Leaves the bootloader as it is and moves on to reinstalling the firmware. */
     val onSkipBootloaderUpgrade: () -> Unit,

@@ -229,6 +229,37 @@ class LegacyDfuTransportTest {
     }
 
     @Test
+    fun `transferFirmware starts a SoftDevice and bootloader image with its sizes`() = runTest {
+        val image = DfuImage.SoftDeviceBootloader(sdSize = 48, blSize = 32)
+        val env = createConnectedTransport(image = image)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+        val firmware = ByteArray(80) { it.toByte() }
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val result = env.transport.transferFirmware(firmware) {}
+
+        assertTrue(result.isSuccess, "transferFirmware failed: ${result.exceptionOrNull()}")
+        val startWrite = env.controlPointWrites().single { it.data[0] == LegacyDfuOpcode.START_DFU }
+        assertContentEquals(byteArrayOf(LegacyDfuOpcode.START_DFU, 0x03), startWrite.data)
+        val imageSizes = env.packetWrites().flatMap { it.data.toList() }.toByteArray().copyOfRange(0, 12)
+        assertContentEquals(
+            byteArrayOf(48, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0),
+            imageSizes,
+        )
+    }
+
+    @Test
+    fun `readBootloaderIdentity reads the DIS model and firmware revision`() = runTest {
+        val env = createConnectedTransport(firmwareRevision = "2.6.0 s140 6.1.1", modelNumber = "WisBlock RAK4631")
+
+        val identity = env.transport.readBootloaderIdentity()
+
+        assertEquals("WisBlock RAK4631", identity.model)
+        assertEquals(KotlinVersion(2, 6, 0), identity.version)
+        assertEquals("6.1.1", identity.softDevice)
+    }
+
+    @Test
     fun `transferFirmware uses high-MTU packets when the link negotiates a larger MTU`() = runTest {
         val env = createConnectedTransport(mtu = 244)
         env.responder.scheme = LegacyResponderScheme.HappyPath
@@ -401,10 +432,13 @@ class LegacyDfuTransportTest {
         profile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
         suppressDisconnectEmissions: Boolean = false,
         firmwareRevision: String? = null,
+        image: DfuImage = DfuImage.Application,
+        modelNumber: String? = null,
     ): TestEnv {
         val scanner = FakeBleScanner()
         val fakeConnection = FakeBleConnection().apply { maxWriteValueLength = mtu }
         firmwareRevision?.let { fakeConnection.service.enqueueRead(FIRMWARE_REVISION_UUID, it.encodeToByteArray()) }
+        modelNumber?.let { fakeConnection.service.enqueueRead(MODEL_NUMBER_UUID, it.encodeToByteArray()) }
         val autoService = AutoRespondingLegacyService(fakeConnection.service)
         val factory =
             object : BleConnectionFactory {
@@ -415,7 +449,7 @@ class LegacyDfuTransportTest {
                     suppressDisconnectEmissions = suppressDisconnectEmissions,
                 )
             }
-        val transport = LegacyDfuTransport(scanner, factory, address, Dispatchers.Unconfined, profile)
+        val transport = LegacyDfuTransport(scanner, factory, address, Dispatchers.Unconfined, profile, image)
 
         scanner.emitDevice(FakeBleDevice(dfuAddress))
         transport.connectToDfuMode().getOrThrow()
@@ -580,13 +614,9 @@ class LegacyDfuTransportTest {
             // First packet write is the 12-byte image sizes payload (after START_DFU).
             if (!imageSizesWritten) {
                 imageSizesWritten = true
-                // Parse appSize from bytes 8..11 (LE u32).
+                // The image is sd + bl + app bytes long (three LE u32s), as the bootloader counts it.
                 if (data.size >= 12) {
-                    expectedFirmwareSize =
-                        (data[8].toInt() and 0xFF) or
-                        ((data[9].toInt() and 0xFF) shl 8) or
-                        ((data[10].toInt() and 0xFF) shl 16) or
-                        ((data[11].toInt() and 0xFF) shl 24)
+                    expectedFirmwareSize = data.readIntLe(0) + data.readIntLe(4) + data.readIntLe(8)
                 }
                 return listOf(startResponse())
             }
