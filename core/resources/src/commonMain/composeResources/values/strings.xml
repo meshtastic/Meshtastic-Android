@@ -754,7 +754,13 @@
     <string name="firmware_update_bootloader_not_upgraded">Firmware reinstalled, but the bootloader reports %1$s instead of %2$s.</string>
     <string name="firmware_update_bootloader_older_than">Bootloader: older than %1$s</string>
     <string name="firmware_update_bootloader_unverified">Bootloader package %1$s failed verification. Nothing was written.</string>
-    <string name="firmware_update_bootloader_uploading">Uploading bootloader...</string>
+    <string name="firmware_update_bootloader_uploading">Uploading bootloader, step 1 of 2...</string>
+    <string name="firmware_update_uploading_after_bootloader">Uploading firmware, step 2 of 2...</string>
+    <string name="firmware_update_bootloader_model_unknown">The bootloader didn't report its model, so this package for %1$s was not written.</string>
+    <string name="firmware_update_stop_title">Stop update?</string>
+    <string name="firmware_update_stop_text">If the device is mid-update it stays in update mode until you finish or recover it.</string>
+    <string name="firmware_update_stop">Stop</string>
+    <string name="firmware_update_keep_going">Keep going</string>
     <string name="firmware_update_checking">Checking for updates...</string>
     <string name="firmware_update_confirm_file_button">Start Flashing</string>
     <string name="firmware_update_confirm_file_message">Review the full selected filename before flashing. Flashing starts only after you confirm.</string>

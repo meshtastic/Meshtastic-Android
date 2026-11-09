@@ -37,6 +37,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_bootloader_downloading
 import org.meshtastic.core.resources.firmware_update_bootloader_installing
 import org.meshtastic.core.resources.firmware_update_bootloader_mismatch
+import org.meshtastic.core.resources.firmware_update_bootloader_model_unknown
 import org.meshtastic.core.resources.firmware_update_bootloader_not_back
 import org.meshtastic.core.resources.firmware_update_bootloader_not_upgraded
 import org.meshtastic.core.resources.firmware_update_bootloader_unverified
@@ -52,6 +53,7 @@ import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_start_timed_out
 import org.meshtastic.core.resources.firmware_update_starting_dfu
 import org.meshtastic.core.resources.firmware_update_uploading
+import org.meshtastic.core.resources.firmware_update_uploading_after_bootloader
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
 import org.meshtastic.core.resources.getStringSuspend
@@ -512,6 +514,56 @@ internal fun requireBootloaderMatches(identity: BootloaderIdentity, asset: Bootl
 private suspend fun readIdentity(transport: DfuUploadTransport): BootloaderIdentity =
     (transport as? LegacyDfuTransport)?.readBootloaderIdentity() ?: BootloaderIdentity(null, null)
 
+/** The Error state for a failed DFU run. A refused bootloader package wrote nothing, so it owes no recovery. */
+internal fun Exception.toErrorState(): FirmwareUpdateState.Error = when (this) {
+    is DfuException.StartTimedOut ->
+        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_start_timed_out))
+
+    is DfuException.BootloaderMismatch ->
+        FirmwareUpdateState.Error(
+            reported.model?.let {
+                UiText.Resource(Res.string.firmware_update_bootloader_mismatch, it, expectedModel)
+            } ?: UiText.Resource(Res.string.firmware_update_bootloader_model_unknown, expectedModel),
+            nothingWritten = true,
+        )
+
+    is BootloaderSwapTimeout ->
+        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_bootloader_not_back))
+
+    else -> FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, message.orEmpty()))
+}
+
+/**
+ * Unbinds the mesh link and sends the buttonless DFU trigger, then gives the device time to reboot into its bootloader.
+ * The trigger always uses [SecureDfuTransport]: it speaks both the Secure (FE59) and Legacy (1530) buttonless triggers.
+ * A failed trigger is not fatal, since the device may already be in DFU mode.
+ *
+ * @return The pre-START budget, which starts once the device has been asked to leave its application.
+ */
+private suspend fun enterDfuMode(
+    target: String,
+    radioController: RadioController,
+    bleScanner: BleScanner,
+    bleConnectionFactory: BleConnectionFactory,
+    dispatchers: CoroutineDispatchers,
+    updateState: (FirmwareUpdateState) -> Unit,
+): PreStartBudget {
+    updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu))))
+    radioController.setDeviceAddress("n")
+    delay(GATT_RELEASE_DELAY_MS)
+    val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+    try {
+        triggerTransport.triggerButtonlessDfu().onFailure { e ->
+            Logger.w(e) { "DFU: buttonless trigger failed; device may already be in DFU mode" }
+        }
+    } finally {
+        withContext(NonCancellable) { triggerTransport.close() }
+    }
+    val preStart = PreStartBudget(PRE_START_BUDGET)
+    delay(DFU_REBOOT_WAIT_MS)
+    return preStart
+}
+
 private fun DfuUploadResult.throwOnFailure() {
     if (this is DfuUploadResult.Failure) throw error
 }
@@ -560,26 +612,8 @@ class SecureDfuHandler(
                 val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
-                updateState(
-                    FirmwareUpdateState.Processing(
-                        ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
-                    ),
-                )
-                radioController.setDeviceAddress("n")
-                delay(GATT_RELEASE_DELAY_MS)
-
-                // The trigger always uses SecureDfuTransport — it speaks both Secure (FE59) and Legacy (1530)
-                // buttonless triggers and falls back automatically (commit f26f610c0).
-                val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-                try {
-                    triggerTransport.triggerButtonlessDfu().onFailure { e ->
-                        Logger.w(e) { "DFU: Buttonless trigger failed ($e) — device may already be in DFU mode" }
-                    }
-                } finally {
-                    withContext(NonCancellable) { triggerTransport.close() }
-                }
-                val preStart = PreStartBudget(PRE_START_BUDGET)
-                delay(DFU_REBOOT_WAIT_MS)
+                val preStart =
+                    enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
 
                 // ── 4. Service detection: which DFU service does the bootloader advertise? ─
                 val detection = detectBootloaderProtocol(target, updateState)
@@ -608,21 +642,9 @@ class SecureDfuHandler(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DfuException.StartTimedOut) {
-            Logger.w(e) { "DFU: pre-START budget spent" }
-            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_start_timed_out)))
-            cleanupArtifact
-        } catch (e: DfuException) {
-            Logger.e(e) { "DFU: Protocol error" }
-            updateState(
-                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-            )
-            cleanupArtifact
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "DFU: Unexpected error" }
-            updateState(
-                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-            )
+            Logger.e(e) { "DFU: update failed" }
+            updateState(e.toErrorState())
             cleanupArtifact
         }
     }
@@ -667,6 +689,7 @@ class SecureDfuHandler(
                             updateState(
                                 FirmwareUpdateState.Error(
                                     UiText.Resource(Res.string.firmware_update_bootloader_unverified, asset.fileName),
+                                    nothingWritten = true,
                                 ),
                             )
                             return@withContext appArtifact
@@ -674,23 +697,8 @@ class SecureDfuHandler(
                 val bootloaderPkg =
                     parseBootloaderDfuZipEntries(firmwareFileHandler.extractZipEntries(bootloaderArtifact))
 
-                updateState(
-                    FirmwareUpdateState.Processing(
-                        ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
-                    ),
-                )
-                radioController.setDeviceAddress("n")
-                delay(GATT_RELEASE_DELAY_MS)
-                val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-                try {
-                    triggerTransport.triggerButtonlessDfu().onFailure { e ->
-                        Logger.w(e) { "Bootloader DFU: buttonless trigger failed; device may already be in DFU mode" }
-                    }
-                } finally {
-                    withContext(NonCancellable) { triggerTransport.close() }
-                }
-                delay(DFU_REBOOT_WAIT_MS)
-
+                val preStart =
+                    enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
                 if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
                     throw DfuException.TransferFailed(
                         "Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package",
@@ -702,7 +710,7 @@ class SecureDfuHandler(
                     target = target,
                     pkg = bootloaderPkg,
                     budget = budget,
-                    preStart = PreStartBudget(PRE_START_BUDGET),
+                    preStart = preStart,
                     updateState = updateState,
                     session =
                     UploadSessionOptions(
@@ -738,6 +746,7 @@ class SecureDfuHandler(
                             lowSpeed = transport.isLowSpeedTransfer
                         },
                         reportSuccess = false,
+                        uploadMessage = UiText.Resource(Res.string.firmware_update_uploading_after_bootloader),
                     ),
                 )
                     .throwOnFailure()
@@ -761,31 +770,9 @@ class SecureDfuHandler(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DfuException.BootloaderMismatch) {
-            Logger.w(e) { "Bootloader DFU: refused" }
-            updateState(
-                FirmwareUpdateState.Error(
-                    UiText.Resource(
-                        Res.string.firmware_update_bootloader_mismatch,
-                        e.reported.model ?: "?",
-                        e.expectedModel,
-                    ),
-                ),
-            )
-            appZip
-        } catch (e: BootloaderSwapTimeout) {
-            Logger.e(e) { "Bootloader DFU: no bootloader after the swap" }
-            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_bootloader_not_back)))
-            appZip
-        } catch (e: DfuException.StartTimedOut) {
-            Logger.w(e) { "Bootloader DFU: pre-START budget spent" }
-            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_start_timed_out)))
-            appZip
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "Bootloader DFU: failed" }
-            updateState(
-                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-            )
+            updateState(e.toErrorState())
             appZip
         } finally {
             bootloaderZip?.let { withContext(NonCancellable) { firmwareFileHandler.deleteFile(it) } }
@@ -1062,9 +1049,6 @@ class SecureDfuHandler(
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
         val serviceUuid = protocol.serviceUuid()
-        updateState(
-            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
-        )
         retryWithDelay(
             attempts = CONNECT_ATTEMPTS,
             retryDelayMillis = RETRY_DELAY_MS,
@@ -1131,6 +1115,7 @@ class SecureDfuHandler(
             updateState(
                 FirmwareUpdateState.Error(
                     UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                    nothingWritten = true,
                 ),
             )
         }

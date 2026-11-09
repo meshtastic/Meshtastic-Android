@@ -352,6 +352,50 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `retrying verification waits for the device again without flashing it again`() = runTest {
+        advanceUntilIdle()
+        var flashes = 0
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                flashes++
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.VerificationFailed>(viewModel.state.value)
+
+        viewModel.retryVerification()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Verifying>(viewModel.state.value)
+        radioController.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Success>(viewModel.state.value)
+        assertEquals(1, flashes)
+    }
+
+    @Test
+    fun `an error that wrote nothing retires the recovery record`() = runTest {
+        advanceUntilIdle()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("refused"), nothingWritten = true))
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertEquals(UiText.DynamicString("refused"), (viewModel.state.value as FirmwareUpdateState.Error).error)
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
     fun `startUpdate without wipe never factory-resets`() = runTest {
         advanceUntilIdle()
 

@@ -129,6 +129,7 @@ import org.meshtastic.core.resources.firmware_update_done
 import org.meshtastic.core.resources.firmware_update_error
 import org.meshtastic.core.resources.firmware_update_hang_tight
 import org.meshtastic.core.resources.firmware_update_keep_device_close
+import org.meshtastic.core.resources.firmware_update_keep_going
 import org.meshtastic.core.resources.firmware_update_latest
 import org.meshtastic.core.resources.firmware_update_local_file
 import org.meshtastic.core.resources.firmware_update_method_detail
@@ -141,6 +142,9 @@ import org.meshtastic.core.resources.firmware_update_select_file
 import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_source_local
 import org.meshtastic.core.resources.firmware_update_stable
+import org.meshtastic.core.resources.firmware_update_stop
+import org.meshtastic.core.resources.firmware_update_stop_text
+import org.meshtastic.core.resources.firmware_update_stop_title
 import org.meshtastic.core.resources.firmware_update_success
 import org.meshtastic.core.resources.firmware_update_success_wiped
 import org.meshtastic.core.resources.firmware_update_taking_a_while
@@ -248,6 +252,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
+                onRetryVerification = viewModel::retryVerification,
                 onCancel = { showExitConfirmation = true },
                 onPlayChirpyHop = { showChirpyHop = true },
                 onDone = { onNavigateUp() },
@@ -267,15 +272,15 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     if (showExitConfirmation) {
         MeshtasticDialog(
             onDismiss = { showExitConfirmation = false },
-            title = stringResource(Res.string.firmware_update_disclaimer_title),
-            message = stringResource(Res.string.firmware_update_disconnect_warning),
-            confirmText = stringResource(Res.string.firmware_update_retry),
+            title = stringResource(Res.string.firmware_update_stop_title),
+            message = stringResource(Res.string.firmware_update_stop_text),
+            confirmText = stringResource(Res.string.firmware_update_stop),
             onConfirm = {
                 showExitConfirmation = false
                 viewModel.cancelUpdate()
                 onNavigateUp()
             },
-            dismissText = stringResource(Res.string.back),
+            dismissText = stringResource(Res.string.firmware_update_keep_going),
         )
     }
 
@@ -495,9 +500,12 @@ private fun FirmwareUpdateContent(
             is FirmwareUpdateState.Verifying -> VerifyingState(onPlayChirpyHop = onPlayChirpyHop)
 
             is FirmwareUpdateState.VerificationFailed ->
-                VerificationFailedState(onRetry = { actions.onStartUpdate(false) }, onIgnore = actions.onDone)
+                VerificationFailedState(onRetry = actions.onRetryVerification, onIgnore = actions.onDone)
 
             is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
+
+            // A handler reports Success before the app has reconnected; the update is not final until verified.
+            is FirmwareUpdateState.Success if !state.verified -> VerifyingState(onPlayChirpyHop = onPlayChirpyHop)
 
             is FirmwareUpdateState.Success ->
                 SuccessState(
@@ -594,7 +602,7 @@ private fun ReadyState(
     }
 
     if (state.maintenance.showBootloaderUpgrade) {
-        UsbMaintenanceCard(
+        BootloaderUpgradeCard(
             deviceName = device.displayName,
             latestBootloader = state.maintenance.latestBootloader,
             onBootloaderUpgrade = actions.onBootloaderUpgrade,
@@ -603,7 +611,7 @@ private fun ReadyState(
     }
 
     if (state.bleBootloaderUpgrade != null && !state.isRecovery) {
-        UsbMaintenanceCard(
+        BootloaderUpgradeCard(
             deviceName = device.displayName,
             latestBootloader = null,
             onBootloaderUpgrade = actions.onBleBootloaderUpgrade,
@@ -1010,7 +1018,7 @@ private fun BootloaderVersionLines(bootloader: BootloaderStatus) {
  * on.
  */
 @Composable
-internal fun UsbMaintenanceCard(
+internal fun BootloaderUpgradeCard(
     deviceName: String,
     latestBootloader: String?,
     onBootloaderUpgrade: () -> Unit,
@@ -1230,11 +1238,11 @@ private fun ProgressContent(
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
+        } else if (isUpdating) {
+            CircularWavyProgressIndicator(progress = { progressState.progress }, modifier = Modifier.size(64.dp))
         } else {
-            CircularWavyProgressIndicator(
-                progress = { if (isUpdating) progressState.progress else 1f },
-                modifier = Modifier.size(64.dp),
-            )
+            // Waits (reboot, bootloader swap) have no measure of progress; a full static ring read as stalled.
+            CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
         }
 
         Spacer(Modifier.height(24.dp))
