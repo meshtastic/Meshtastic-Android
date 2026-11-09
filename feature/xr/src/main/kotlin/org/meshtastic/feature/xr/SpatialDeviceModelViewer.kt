@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.xr
 
+import android.widget.ImageView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,22 +33,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.runtime.Session
+import androidx.xr.runtime.math.FloatSize2d
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Vector3
 import androidx.xr.scenecore.GltfModel
 import androidx.xr.scenecore.GltfModelEntity
 import androidx.xr.scenecore.MovableComponent
+import androidx.xr.scenecore.PanelEntity
 import androidx.xr.scenecore.Space
 import androidx.xr.scenecore.scene
 import co.touchlab.kermit.Logger
@@ -63,6 +68,7 @@ import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.DeviceModelArViewer
 import org.meshtastic.feature.node.component.BananaToggle
+import org.meshtastic.feature.node.component.toBitmap
 import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
 
@@ -100,7 +106,18 @@ private class SpatialOrFallbackViewer(private val fallback: DeviceModelArViewer?
                 onBananaShownChange,
             )
         } else {
-            DeviceModelInSpace(session, glb, title, notice, onDismiss, banana, bananaShown, onBananaShownChange)
+            DeviceModelInSpace(
+                session,
+                glb,
+                title,
+                notice,
+                onDismiss,
+                screen = if (screenMin != null && screenMax != null) GlbBounds(screenMin, screenMax) else null,
+                screenFrame = screenFrame,
+                banana = banana,
+                bananaShown = bananaShown,
+                onBananaShownChange = onBananaShownChange,
+            )
         }
     }
 }
@@ -117,6 +134,8 @@ private fun DeviceModelInSpace(
     title: String,
     notice: String?,
     onDismiss: () -> Unit,
+    screen: GlbBounds?,
+    screenFrame: MirrorFrame?,
     banana: ByteArray?,
     bananaShown: Boolean,
     onBananaShownChange: (Boolean) -> Unit,
@@ -155,23 +174,8 @@ private fun DeviceModelInSpace(
                 model.close()
             }
         }
-        // A child of the device, so it moves with it and toggling it leaves the device loaded.
-        val bananaGlb = banana?.takeIf { bananaShown }
-        LaunchedEffect(session, device, bananaGlb) {
-            val parent = device ?: return@LaunchedEffect
-            val at =
-                bananaGlb?.let { b ->
-                    GlbBounds.parse(glb)?.let { d -> GlbBounds.parse(b)?.let { BananaForScale.beside(d, it) } }
-                } ?: return@LaunchedEffect
-            val model = loadModel(session, bananaGlb, BANANA_NAME) ?: return@LaunchedEffect
-            val entity = GltfModelEntity.create(session, model, Pose(Vector3(at[0], at[1], at[2])), parent)
-            try {
-                awaitCancellation()
-            } finally {
-                entity.parent = null
-                model.close()
-            }
-        }
+        DeviceScreenPanel(session, device, screen, screenFrame)
+        DeviceBanana(session, device, glb, banana?.takeIf { bananaShown })
     }
     InSpaceChrome(
         title = title,
@@ -181,6 +185,46 @@ private fun DeviceModelInSpace(
         bananaShown = bananaShown,
         onBananaShownChange = onBananaShownChange,
     )
+}
+
+/** The live screen on the display glass, a child of [device] so it moves and turns with it. */
+@Composable
+private fun DeviceScreenPanel(session: Session, device: GltfModelEntity?, glass: GlbBounds?, frame: MirrorFrame?) {
+    val context = LocalContext.current
+    val view = remember { ImageView(context).apply { scaleType = ImageView.ScaleType.FIT_XY } }
+    SideEffect { frame?.toBitmap()?.let(view::setImageBitmap) }
+    LaunchedEffect(session, device, glass) {
+        val parent = device ?: return@LaunchedEffect
+        val bounds = glass ?: return@LaunchedEffect
+        val size = FloatSize2d(bounds.max[0] - bounds.min[0], bounds.max[1] - bounds.min[1])
+        val at = Vector3(bounds.center[0], bounds.center[1], bounds.max[2] + SCREEN_LIFT_METERS)
+        val panel = PanelEntity.create(session, view, size, SCREEN_NAME, Pose(at), parent)
+        try {
+            awaitCancellation()
+        } finally {
+            panel.parent = null
+        }
+    }
+}
+
+/** The banana on the device's left, a child of [device] so toggling it leaves the device loaded. */
+@Composable
+private fun DeviceBanana(session: Session, device: GltfModelEntity?, glb: ByteArray, banana: ByteArray?) {
+    LaunchedEffect(session, device, banana) {
+        val parent = device ?: return@LaunchedEffect
+        val bananaGlb = banana ?: return@LaunchedEffect
+        val at =
+            GlbBounds.parse(glb)?.let { d -> GlbBounds.parse(bananaGlb)?.let { BananaForScale.beside(d, it) } }
+                ?: return@LaunchedEffect
+        val model = loadModel(session, bananaGlb, BANANA_NAME) ?: return@LaunchedEffect
+        val entity = GltfModelEntity.create(session, model, Pose(Vector3(at[0], at[1], at[2])), parent)
+        try {
+            awaitCancellation()
+        } finally {
+            entity.parent = null
+            model.close()
+        }
+    }
 }
 
 @Composable
@@ -238,5 +282,7 @@ private suspend fun loadModel(session: Session, glb: ByteArray, name: String): G
 
 private const val MODEL_NAME = "device"
 private const val BANANA_NAME = "banana"
+private const val SCREEN_NAME = "screen"
+private const val SCREEN_LIFT_METERS = 0.0005f
 private const val CLEARANCE_METERS = 0.25f
 private const val DROP_FRACTION = 0.25f
