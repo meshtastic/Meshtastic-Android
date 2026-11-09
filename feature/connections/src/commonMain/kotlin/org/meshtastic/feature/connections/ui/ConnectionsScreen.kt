@@ -44,6 +44,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -113,6 +114,7 @@ import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.open_wifi_settings
 import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.scan_connect_code
 import org.meshtastic.core.resources.set_your_region
 import org.meshtastic.core.resources.transmit_disabled
 import org.meshtastic.core.resources.transmit_disabled_summary
@@ -132,6 +134,7 @@ import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.icon.QrCodeScanner
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.PermissionGateAction
@@ -261,6 +264,7 @@ fun ConnectionsScreen(
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
+    onScanConnectCode: (() -> Unit)? = null,
 ) {
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
@@ -479,7 +483,16 @@ fun ConnectionsScreen(
                 showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
-                actions = {},
+                actions = {
+                    onScanConnectCode?.let { scan ->
+                        IconButton(onClick = scan) {
+                            Icon(
+                                imageVector = MeshtasticIcons.QrCodeScanner,
+                                contentDescription = stringResource(Res.string.scan_connect_code),
+                            )
+                        }
+                    }
+                },
                 onClickChip = { onClickNodeChip(it.num) },
             )
         },

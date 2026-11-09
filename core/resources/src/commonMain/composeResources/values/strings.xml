@@ -321,6 +321,7 @@
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="configure_notification_permissions">Configure notification permissions</string>
     <string name="connect">Connect</string>
+    <string name="connect_code_invalid">That code isn\'t a Meshtastic connect code.</string>
     <string name="connect_radio_for_remote_admin">Connect to a radio to administer remote nodes.</string>
     <string name="connect_radio_to_change_settings">Connect to a radio to change these settings.</string>
     <string name="connected">Connected</string>
@@ -1926,6 +1927,7 @@
     <string name="scan_bluetooth_devices">Scan for Bluetooth devices</string>
     <string name="scan_channels_nfc">Scan Shared Channels NFC</string>
     <string name="scan_channels_qr">Scan Shared Channels QR Code</string>
+    <string name="scan_connect_code">Scan a connect code</string>
     <string name="scan_network_devices">Scan for network devices</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
