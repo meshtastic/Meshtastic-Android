@@ -750,17 +750,12 @@
     <string name="firmware_update_bootloader_installing">Installing bootloader. This takes a few minutes.</string>
     <string name="firmware_update_bootloader_latest">Latest Bootloader: %1$s</string>
     <string name="firmware_update_bootloader_mismatch">Bootloader reports %1$s, but this package is for %2$s. Nothing was written.</string>
+    <string name="firmware_update_bootloader_model_unknown">The bootloader didn't report its model, so this package for %1$s was not written.</string>
     <string name="firmware_update_bootloader_not_back">The device didn't come back over Bluetooth. On USB it waits as a drive: install the firmware there, or unplug it, reset it and use recovery.</string>
     <string name="firmware_update_bootloader_not_upgraded">Firmware reinstalled, but the bootloader reports %1$s instead of %2$s.</string>
     <string name="firmware_update_bootloader_older_than">Bootloader: older than %1$s</string>
     <string name="firmware_update_bootloader_unverified">Bootloader package %1$s failed verification. Nothing was written.</string>
     <string name="firmware_update_bootloader_uploading">Uploading bootloader, step 1 of 2...</string>
-    <string name="firmware_update_uploading_after_bootloader">Uploading firmware, step 2 of 2...</string>
-    <string name="firmware_update_bootloader_model_unknown">The bootloader didn't report its model, so this package for %1$s was not written.</string>
-    <string name="firmware_update_stop_title">Stop update?</string>
-    <string name="firmware_update_stop_text">If the device is mid-update it stays in update mode until you finish or recover it.</string>
-    <string name="firmware_update_stop">Stop</string>
-    <string name="firmware_update_keep_going">Keep going</string>
     <string name="firmware_update_checking">Checking for updates...</string>
     <string name="firmware_update_confirm_file_button">Start Flashing</string>
     <string name="firmware_update_confirm_file_message">Review the full selected filename before flashing. Flashing starts only after you confirm.</string>
@@ -776,8 +771,8 @@
     <string name="firmware_update_disconnect_warning">Note: This will temporarily disconnect your device during the update.</string>
     <string name="firmware_update_do_not_close">Do not close the app.</string>
     <string name="firmware_update_done">Done</string>
-    <string name="firmware_update_downloading_percent">Downloading firmware... %1$d%</string>
     <string name="firmware_update_downloading">Downloading firmware...</string>
+    <string name="firmware_update_downloading_percent">Downloading firmware... %1$d%</string>
     <string name="firmware_update_enabling_dfu">Enabling DFU mode...</string>
     <string name="firmware_update_erasing">Erasing...</string>
     <string name="firmware_update_error">Error: %1$s</string>
@@ -790,6 +785,7 @@
     <string name="firmware_update_in_progress">Updating firmware…</string>
     <string name="firmware_update_invalid_local_file_detail">The selected file "%1$s" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
     <string name="firmware_update_keep_device_close">Keep your device close to your phone.</string>
+    <string name="firmware_update_keep_going">Keep going</string>
     <string name="firmware_update_latest">Update To: %1$s</string>
     <string name="firmware_update_local_file">Local File</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
@@ -826,6 +822,9 @@
     <string name="firmware_update_start_timed_out">The update could not start in time. Try the update again.</string>
     <string name="firmware_update_starting_dfu">Starting DFU...</string>
     <string name="firmware_update_starting_ota">Starting OTA update...</string>
+    <string name="firmware_update_stop">Stop</string>
+    <string name="firmware_update_stop_text">If the device is mid-update it stays in update mode until you finish or recover it.</string>
+    <string name="firmware_update_stop_title">Stop update?</string>
     <string name="firmware_update_success">Update Successful!</string>
     <string name="firmware_update_success_wiped">The device was reset to factory defaults and needs to be set up (and paired) again.</string>
     <string name="firmware_update_taking_a_while">This might take a minute...</string>
@@ -839,6 +838,7 @@
     <string name="firmware_update_unsupported_transport">Firmware updates are not supported over this connection for this device. Connect a different way (e.g. Bluetooth) to update.</string>
     <string name="firmware_update_unsupported_update_method">Local firmware files are not supported for this update method.</string>
     <string name="firmware_update_uploading">Uploading firmware...</string>
+    <string name="firmware_update_uploading_after_bootloader">Uploading firmware, step 2 of 2...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s often ships with a bootloader that can't take Bluetooth updates. Upgrade the bootloader first.</string>
     <string name="firmware_update_usb_failed">USB Update failed</string>
     <string name="firmware_update_usb_instruction_text">Your device has rebooted into DFU mode and should appear as a USB drive (e.g., RAK4631).\n\nWhen the file picker opens, please select the root of that drive to save the firmware file.</string>

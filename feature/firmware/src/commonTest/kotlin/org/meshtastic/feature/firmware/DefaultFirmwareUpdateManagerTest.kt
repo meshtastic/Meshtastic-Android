@@ -19,14 +19,20 @@ package org.meshtastic.feature.firmware
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
@@ -38,6 +44,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 /**
  * Tests for [DefaultFirmwareUpdateManager] routing logic. Verifies that `getHandler()` selects the correct handler
@@ -196,5 +203,56 @@ class DefaultFirmwareUpdateManagerTest {
     fun `Unknown connection target is empty string`() {
         val manager = createManager("z_unknown")
         assertEquals("", manager.getTarget("something"))
+    }
+
+    // ── BLE bootloader upgrade ──────────────────────────────────────────────
+
+    private val bootloaderZip =
+        BootloaderDfuZip(
+            url = "https://example.com/wiscore_rak4631_board_bootloader-2.6.0_s140_6.1.1.zip",
+            fileName = "wiscore_rak4631_board_bootloader-2.6.0_s140_6.1.1.zip",
+            sha256 = "00",
+            version = "2.6.0",
+            softDevice = SoftDeviceVariant.S140_6_1_1,
+            bleModel = "WisBlock RAK4631",
+        )
+
+    @Test
+    fun `BLE bootloader upgrade refuses a node that is not nRF52 on BLE`() = runTest {
+        assertFailsWith<IllegalStateException> {
+            createManager("s/dev/ttyUSB0").upgradeBootloaderOverBle(
+                FirmwareRelease(),
+                nrf52Hardware,
+                "",
+                bootloaderZip,
+            ) {}
+        }
+        assertFailsWith<IllegalStateException> {
+            createManager("xAA:BB:CC:DD:EE:FF").upgradeBootloaderOverBle(
+                FirmwareRelease(),
+                esp32Hardware,
+                "AA:BB:CC:DD:EE:FF",
+                bootloaderZip,
+            ) {}
+        }
+    }
+
+    @Test
+    fun `BLE bootloader upgrade leaves the device alone when the firmware cannot be fetched`() = runTest {
+        val states = mutableListOf<FirmwareUpdateState>()
+
+        val artifact =
+            createManager("xAA:BB:CC:DD:EE:FF").upgradeBootloaderOverBle(
+                FirmwareRelease(id = "v2.8.3.771efca", zipUrl = "https://example.com/fw.zip"),
+                nrf52Hardware,
+                "AA:BB:CC:DD:EE:FF",
+                bootloaderZip,
+            ) {
+                states += it
+            }
+
+        assertNull(artifact)
+        assertIs<FirmwareUpdateState.Error>(states.last())
+        verifySuspend(mode = VerifyMode.not) { radioController.setDeviceAddress(any()) }
     }
 }

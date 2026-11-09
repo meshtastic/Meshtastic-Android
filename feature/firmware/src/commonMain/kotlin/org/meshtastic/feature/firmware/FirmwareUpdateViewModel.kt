@@ -573,12 +573,16 @@ class FirmwareUpdateViewModel(
      * wait at a USB save, or show the error.
      *
      * @param mapError Rewrites a handler's error, for flows whose guidance differs (recovery).
+     * @param strandedBefore True when the device was already in its bootloader before this run, so an error that wrote
+     *   nothing still leaves it stranded and its recovery record must stay.
      */
     @Suppress("SuspendFunSwallowedCancellation") // cancellation resets the UI state, then is rethrown
     private fun launchUpdateJob(
         mapError: (FirmwareUpdateState.Error) -> FirmwareUpdateState.Error = { it },
+        strandedBefore: Boolean = false,
         runUpdate: suspend () -> FirmwareArtifact?,
     ) {
+        val endFailed: suspend (FirmwareUpdateState.Error) -> Unit = { endFailedUpdate(mapError(it), strandedBefore) }
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             val failed = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
@@ -591,11 +595,11 @@ class FirmwareUpdateViewModel(
                     // The USB path pauses for the user to pick a save location; saveDfuFile() resumes it.
                     is FirmwareUpdateState.AwaitingFileSave -> Unit
 
-                    is FirmwareUpdateState.Error -> endFailedUpdate(mapError(finalState))
+                    is FirmwareUpdateState.Error -> endFailed(finalState)
 
                     else -> {
                         Logger.w { "Firmware update returned without terminal state: $finalState" }
-                        endFailedUpdate(mapError(failed))
+                        endFailed(failed)
                     }
                 }
             } catch (e: CancellationException) {
@@ -605,19 +609,20 @@ class FirmwareUpdateViewModel(
                 throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Firmware update failed" }
-                endFailedUpdate(mapError(failed))
+                endFailed(failed)
             }
         }
     }
 
     /**
-     * Shows [error] and drops the update's files. A device that was never written to boots its application as before,
-     * so its recovery record is retired and the radio is bound to it again.
+     * Shows [error] and drops the update's files. A device that was never written to, and was running its application
+     * before ([strandedBefore] false), boots it as before, so its recovery record is retired and the radio is bound to
+     * it again.
      */
-    private suspend fun endFailedUpdate(error: FirmwareUpdateState.Error) {
+    private suspend fun endFailedUpdate(error: FirmwareUpdateState.Error, strandedBefore: Boolean) {
         _state.value = error
         tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-        if (!error.nothingWritten) return
+        if (!error.nothingWritten || strandedBefore) return
         pendingRecovery = null
         firmwareRecoveryDataSource.clear()
         originalDeviceAddress?.takeIf { it != radioPrefs.devAddr.value }?.let { radioController.setDeviceAddress(it) }
@@ -674,6 +679,7 @@ class FirmwareUpdateViewModel(
                     FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
                 }
             },
+            strandedBefore = true,
         ) {
             firmwareUpdateManager.recoverDfuDevice(
                 release = release,
