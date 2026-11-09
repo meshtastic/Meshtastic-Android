@@ -98,8 +98,9 @@ Three distribution shapes, all carrying the same object:
   provenance for a file no Obtainium install actually produced.
 - **Deep link** — `obtainium://app/<percent-encoded config JSON>` adds the app
   with settings baked in. `obtainium://add/<url>` only prefills the Add-App page.
-  Wrapping it as `https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/…`
-  keeps the link clickable in places that won't linkify a custom scheme.
+  Wrapping it as `https://apps.obtainium.imranr.dev/redirect.html?r=obtainium%3A%2F%2Fapp/…`
+  keeps the link clickable in places that won't linkify a custom scheme. The redirect
+  page rejects an unencoded `obtainium://` prefix.
 
 ## Why our settings are what they are
 
