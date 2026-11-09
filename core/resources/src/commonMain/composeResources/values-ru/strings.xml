@@ -1747,7 +1747,12 @@
     <string name="radiation">Радиация</string>
     <!-- RADIO -->
     <string name="radio_configuration">Настройки устройства</string>
+    <string name="radio_setup_intro_headline">Настройте ваше радио</string>
     <string name="radio_setup_name_headline">Понятное имя</string>
+    <string name="radio_setup_reconnecting">Ожидание переподключения устройства…</string>
+    <string name="radio_setup_region_none">Регион не совпадает.</string>
+    <string name="radio_setup_region_search">Поиск по регионам</string>
+    <string name="radio_setup_title">Настроить радио</string>
     <string name="rainfall_1h">Дождь (1ч)</string>
     <string name="rainfall_24h">Дождь (24ч)</string>
     <string name="range_test">Проверка дальности</string>
@@ -1907,6 +1912,7 @@
     <string name="scan_bluetooth_devices">Сканировать Bluetooth-устройства</string>
     <string name="scan_channels_nfc">Сканировать общие каналы NFC</string>
     <string name="scan_channels_qr">Сканировать QR-код общих каналов</string>
+    <string name="scan_connect_code">Сканировать код подключения</string>
     <string name="scan_network_devices">Сканировать сетевые устройства</string>
     <string name="scan_nfc">Сканировать NFC</string>
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
@@ -2120,6 +2126,7 @@
     <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трассировка маршрута</string>
+    <string name="traceroute_available_in">Маршрут трассировки в %1$d с</string>
     <string name="traceroute_diff">Нод к %1$d нод назад от %2$d</string>
     <string name="traceroute_direct">Прямой</string>
     <string name="traceroute_duration">Продолжительность: %1$s с</string>
@@ -2144,6 +2151,7 @@
     <string name="traceroute_showing_nodes">Показаны %1$d/%2$d узлов</string>
     <string name="traceroute_traced_by">Отслеживается %1$s</string>
     <string name="traceroute_unknown_hop">Неизвестный хоп</string>
+    <string name="traceroute_waiting">Ожидание ответа</string>
     <string name="track_and_share_locations">Отслеживать и делиться местоположением</string>
     <string name="track_point">точка отслеживания</string>
     <!-- TRAFFIC -->
