@@ -91,6 +91,7 @@ class DeviceModelBananaTest {
         val bounds = assertNotNull(GlbBounds.parse(banana))
         assertEquals(0.185f, bounds.max[1] - bounds.min[1], 0.002f)
         assertEquals(0.100f, bounds.max[0] - bounds.min[0], 0.002f)
+        assertEquals(0.044f, bounds.max[2] - bounds.min[2], 0.002f)
         assertEquals(0f, bounds.min[1])
         val notice = GlbBounds.copyright(banana).orEmpty()
         assertTrue("Keistutis" in notice && "CC0" in notice, "notice was $notice")
@@ -205,6 +206,18 @@ class DeviceModelBananaTest {
                 JsonObject(json + ("meshes" to JsonArray(meshes)))
             }
         assertNull(GlbMerge.append(device, morphing, at, null), "added with morph targets")
+
+        val skinned =
+            withJson(banana) { json -> JsonObject(json + ("skins" to Json.parseToJsonElement("""[{"joints":[0]}]"""))) }
+        assertNull(GlbMerge.append(device, skinned, at, null), "added with a skin")
+
+        val sparse =
+            withJson(banana) { json ->
+                val accessors = json.getValue("accessors").jsonArray
+                val first = accessors.first().jsonObject + ("sparse" to Json.parseToJsonElement("""{"count":1}"""))
+                JsonObject(json + ("accessors" to JsonArray(listOf(JsonObject(first)) + accessors.drop(1))))
+            }
+        assertNull(GlbMerge.append(device, sparse, at, null), "added with sparse data")
     }
 
     /** [glb] with its JSON chunk replaced by [transform] of it, the binary chunk kept. */
