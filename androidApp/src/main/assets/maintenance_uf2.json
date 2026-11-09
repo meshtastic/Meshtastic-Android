@@ -144,5 +144,103 @@
     "muzi-base",
     "heltec-mesh-node-t096",
     "heltec-mesh-node-t1"
-  ]
+  ],
+  "otafixBleDfuByTarget": {
+    "rak4631": {
+      "otafixBoardSlug": "wiscore_rak4631_board",
+      "softDevice": "6.1.1",
+      "bleModel": "WisBlock RAK4631",
+      "sha256": "6241730ee6c376ea5907d7cd0a672455528129379baf72936ed395fe64446cbf"
+    },
+    "rak_wismeshtag": {
+      "otafixBoardSlug": "wismesh_tag",
+      "softDevice": "6.1.1",
+      "bleModel": "WisMesh Tag",
+      "sha256": "1a0ff214449d13394e502f36d60acdfa3ffca5d19ca678c8b9ea695817b8ff9a"
+    },
+    "t-echo": {
+      "otafixBoardSlug": "lilygo_techo",
+      "softDevice": "6.1.1",
+      "bleModel": "T-Echo v1.0",
+      "sha256": "8ee0e1e17c5cec0e3cd6a6efce0a9ef37c653d6afe4758f9bd88327f0a14976e"
+    },
+    "heltec-mesh-node-t114": {
+      "otafixBoardSlug": "heltec_t114",
+      "softDevice": "6.1.1",
+      "bleModel": "HT-n5262",
+      "sha256": "25b31ecef1e8db50608ca96f2311e69de60ae7882ba9475b0e9f21e9c57ff447"
+    },
+    "nrf52_promicro_diy_tcxo": {
+      "otafixBoardSlug": "promicro_nrf52840",
+      "softDevice": "6.1.1",
+      "bleModel": "ProMicro NRF52840",
+      "sha256": "48d264e02a4d0cdbabed165094b5047f6789748c79c3deb2e3a7b3327407ed59"
+    },
+    "thinknode_m1": {
+      "otafixBoardSlug": "thinknode_m1",
+      "softDevice": "6.1.1",
+      "bleModel": "ThinkNodeM1",
+      "sha256": "76e86ac0d4c7dfcd5de471e06a316ffacc546092935d7d7329b8d5c6c0d9ed78"
+    },
+    "thinknode_m3": {
+      "otafixBoardSlug": "thinknode_m3",
+      "softDevice": "6.1.1",
+      "bleModel": "ThinkNode-M3",
+      "sha256": "4f872127ecb9480e449a153e9d6a3aaed96f6f5789d3b5c903178231a6be1489"
+    },
+    "thinknode_m6": {
+      "otafixBoardSlug": "thinknode_m6",
+      "softDevice": "6.1.1",
+      "bleModel": "ThinkNodeM6",
+      "sha256": "4b46d09e889dad117bd5dc3a649c1c763d97aa60859f2cef0a599598f5f7f0d3"
+    },
+    "tracker-t1000-e": {
+      "otafixBoardSlug": "t1000_e",
+      "softDevice": "7.3.0",
+      "bleModel": "T1000-E",
+      "sha256": "47f05b19c19f83b7477827e64e381c1e0cd56f1c0b1b4bab636e554bd42fc744"
+    },
+    "seeed_wio_tracker_L1": {
+      "otafixBoardSlug": "wio_tracker_l1",
+      "softDevice": "7.3.0",
+      "bleModel": "Wio Tracker L1",
+      "sha256": "a5a7405eb180bceb24e47d47ae8f39ffa2cf884240e1f284511da5008c12368c"
+    },
+    "seeed_wio_tracker_L1_Pro_1W": {
+      "otafixBoardSlug": "wio_tracker_l1_pro_1w",
+      "softDevice": "7.3.0",
+      "bleModel": "Wio Tracker L1 Pro 1W",
+      "sha256": "8cd313b971fe432349d4ec69f0f052f79fd418255bab2259f9c664b408f61f62"
+    },
+    "seeed_solar_node": {
+      "otafixBoardSlug": "sensecap_solar_p1",
+      "softDevice": "7.3.0",
+      "bleModel": "SenseCAP Solar Node P1",
+      "sha256": "eb16854674abe214773d23b0654c79029ea8664f311f27ecee250141484753c1"
+    },
+    "seeed_mesh_tracker_X1": {
+      "otafixBoardSlug": "mesh_tracker_x1",
+      "softDevice": "7.3.0",
+      "bleModel": "MeshTracker-X1",
+      "sha256": "f787a699ef9cc15e2a8ce636a880b477d6849630b7497cb5d8ba68a97a1382ab"
+    },
+    "muzi-base": {
+      "otafixBoardSlug": "muzi_base",
+      "softDevice": "6.1.1",
+      "bleModel": "muzi Base",
+      "sha256": "d730455fac3bd430e6e03375f2c4291d78f79b8cc0b8b2d07643487e18be0205"
+    },
+    "heltec-mesh-node-t096": {
+      "otafixBoardSlug": "heltec_t096",
+      "softDevice": "6.1.1",
+      "bleModel": "Tracker",
+      "sha256": "0ed125d9eb89f42cd5b83fb88a968caff215f05728a74101436c89ee075f3ea0"
+    },
+    "heltec-mesh-node-t1": {
+      "otafixBoardSlug": "heltec_t1",
+      "softDevice": "6.1.1",
+      "bleModel": "T1",
+      "sha256": "4b76a6843659b93bca90e71d72ad8f999f6f17c80322d46b5eac9b3357ad60e0"
+    }
+  }
 }
