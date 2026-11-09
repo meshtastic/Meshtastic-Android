@@ -79,6 +79,17 @@ class DefaultFirmwareUpdateManager(
         )
     }
 
+    override suspend fun upgradeBootloaderOverBle(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        address: String,
+        bootloader: BootloaderDfuZip,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): FirmwareArtifact? = radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
+        check(radioPrefs.isBle() && hardware.isNrf52Arc) { "BLE bootloader upgrade needs an nRF52 node on BLE" }
+        secureDfuHandler.upgradeBootloader(release, hardware, address, bootloader, updateState)
+    }
+
     internal fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
             if (hardware.isEsp32Arc) {

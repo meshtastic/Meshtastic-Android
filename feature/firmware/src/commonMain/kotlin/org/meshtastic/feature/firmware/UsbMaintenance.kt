@@ -220,6 +220,23 @@ internal fun usbMaintenanceGate(
 }
 
 /**
+ * The package a BLE bootloader upgrade would install, or `null` when none is offered: only an nRF52 node on BLE, with a
+ * release selected to reinstall, whose `DeviceMetadata.bootloader_version` reports a bootloader older than the latest.
+ * A node that reports no version gets no BLE offer; USB still serves it.
+ */
+internal fun bleBootloaderUpgradeFor(
+    manifest: MaintenanceUf2Manifest,
+    hardware: DeviceHardware,
+    updateMethod: FirmwareUpdateMethod,
+    hasRelease: Boolean,
+    bootloader: BootloaderStatus?,
+): BootloaderDfuZip? {
+    val outdated = bootloader != null && bootloader.latest != null && !bootloader.isCurrent
+    if (updateMethod !is FirmwareUpdateMethod.Ble || !hardware.isNrf52Arc || !hasRelease || !outdated) return null
+    return bootloaderDfuZipFor(manifest, hardware.effectiveTarget, hardware.softDeviceVariant)
+}
+
+/**
  * What a mounted UF2 bootloader volume says about itself, read from its `INFO_UF2.TXT`.
  *
  * @property boardId The `Board-ID:` line — unique per board, and stable across bootloader vintages.

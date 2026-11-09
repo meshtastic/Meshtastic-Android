@@ -82,6 +82,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
@@ -97,6 +98,7 @@ import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_available
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_installed
+import org.meshtastic.core.resources.firmware_maintenance_ble_upgrade_text
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_last_fault
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_latest_hint
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date
@@ -240,6 +242,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 },
                 onPickVolume = volumePickerLauncher,
                 onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
+                onBleBootloaderUpgrade = viewModel::startBleBootloaderUpgrade,
                 onConfirmBootloaderUpgrade = viewModel::confirmBootloaderUpgrade,
                 onSkipBootloaderUpgrade = viewModel::skipBootloaderUpgrade,
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
@@ -595,6 +598,16 @@ private fun ReadyState(
             deviceName = device.displayName,
             latestBootloader = state.maintenance.latestBootloader,
             onBootloaderUpgrade = actions.onBootloaderUpgrade,
+        )
+        Spacer(Modifier.height(16.dp))
+    }
+
+    if (state.bleBootloaderUpgrade != null && !state.isRecovery) {
+        UsbMaintenanceCard(
+            deviceName = device.displayName,
+            latestBootloader = null,
+            onBootloaderUpgrade = actions.onBleBootloaderUpgrade,
+            confirmText = Res.string.firmware_maintenance_ble_upgrade_text,
         )
         Spacer(Modifier.height(16.dp))
     }
@@ -997,14 +1010,19 @@ private fun BootloaderVersionLines(bootloader: BootloaderStatus) {
  * on.
  */
 @Composable
-internal fun UsbMaintenanceCard(deviceName: String, latestBootloader: String?, onBootloaderUpgrade: () -> Unit) {
+internal fun UsbMaintenanceCard(
+    deviceName: String,
+    latestBootloader: String?,
+    onBootloaderUpgrade: () -> Unit,
+    confirmText: StringResource = Res.string.firmware_maintenance_upgrade_confirm_text,
+) {
     var showUpgradeConfirmation by rememberSaveable { mutableStateOf(false) }
 
     if (showUpgradeConfirmation) {
         MeshtasticDialog(
             onDismiss = { showUpgradeConfirmation = false },
             title = stringResource(Res.string.firmware_maintenance_upgrade_confirm_title),
-            message = stringResource(Res.string.firmware_maintenance_upgrade_confirm_text, deviceName),
+            message = stringResource(confirmText, deviceName),
             confirmText = stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action),
             onConfirm = {
                 showUpgradeConfirmation = false

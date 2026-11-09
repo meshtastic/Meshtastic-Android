@@ -37,16 +37,7 @@ private val json = Json {
  */
 @Suppress("ThrowsCount")
 internal fun parseDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage {
-    val manifestBytes =
-        entries["manifest.json"] ?: throw DfuException.InvalidPackage("manifest.json not found in DFU zip")
-
-    val manifest =
-        runCatching { json.decodeFromString<DfuManifest>(manifestBytes.decodeToString()) }
-            .getOrElse { e ->
-                @OptIn(ExperimentalSerializationApi::class)
-                val detail = (e as? JsonDecodingException)?.shortMessage ?: e.message
-                throw DfuException.InvalidPackage("Failed to parse manifest.json: $detail")
-            }
+    val manifest = decodeDfuManifest(entries)
 
     // Require an application image rather than accepting whatever primaryEntry promotes. A bootloader- or
     // SoftDevice-only package has imageCount == 1, so it slipped past the warning below and was uploaded with
@@ -77,4 +68,49 @@ internal fun parseDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage 
 
     Logger.i { "DFU: Extracted zip — init packet ${initPacket.size}B, firmware ${firmware.size}B" }
     return DfuZipPackage(initPacket = initPacket, firmware = firmware)
+}
+
+/**
+ * Parse a Nordic legacy DFU .zip carrying exactly a `softdevice_bootloader` image, the package each Meshtastic nRF52
+ * Bootloader release ships per board. The `.bin` is the SoftDevice followed by the bootloader, so the manifest's
+ * `sd_size` and `bl_size` must both be present and add up to its length: they are what `START_DFU` announces, and the
+ * bootloader splits the image at `sd_size`.
+ *
+ * @throws DfuException.InvalidPackage when the package carries anything else or its sizes do not match.
+ */
+@Suppress("ThrowsCount")
+internal fun parseBootloaderDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage {
+    val content = decodeDfuManifest(entries).manifest
+    val entry =
+        content.softdeviceBootloader
+            ?: throw DfuException.InvalidPackage("manifest.json declares no 'softdevice_bootloader' image")
+    if (content.imageCount > 1) {
+        throw DfuException.InvalidPackage("Bootloader package must carry only 'softdevice_bootloader'")
+    }
+    val sdSize = entry.sdSize
+    val blSize = entry.blSize
+    if (sdSize == null || blSize == null || sdSize <= 0 || blSize <= 0) {
+        throw DfuException.InvalidPackage("'softdevice_bootloader' needs positive sd_size and bl_size")
+    }
+    val initPacket =
+        entries[entry.datFile] ?: throw DfuException.InvalidPackage("Init packet '${entry.datFile}' not found in zip")
+    val firmware =
+        entries[entry.binFile] ?: throw DfuException.InvalidPackage("Firmware '${entry.binFile}' not found in zip")
+    if (sdSize.toLong() + blSize != firmware.size.toLong()) {
+        throw DfuException.InvalidPackage(
+            "sd_size $sdSize + bl_size $blSize does not match '${entry.binFile}' (${firmware.size} bytes)",
+        )
+    }
+    return DfuZipPackage(initPacket, firmware, DfuImage.SoftDeviceBootloader(sdSize, blSize))
+}
+
+private fun decodeDfuManifest(entries: Map<String, ByteArray>): DfuManifest {
+    val manifestBytes =
+        entries["manifest.json"] ?: throw DfuException.InvalidPackage("manifest.json not found in DFU zip")
+    return runCatching { json.decodeFromString<DfuManifest>(manifestBytes.decodeToString()) }
+        .getOrElse { e ->
+            @OptIn(ExperimentalSerializationApi::class)
+            val detail = (e as? JsonDecodingException)?.shortMessage ?: e.message
+            throw DfuException.InvalidPackage("Failed to parse manifest.json: $detail")
+        }
 }
