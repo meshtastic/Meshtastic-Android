@@ -329,6 +329,11 @@ class FirmwareUpdateViewModel(
                 // maintenance gate.
                 maintenanceUf2Repository.reconcile()
                 val maintenanceUf2Manifest = maintenanceUf2Repository.getSnapshot()
+                val bootloader =
+                    bootloaderStatus(
+                        nodeRepository.ourNodeInfo.value?.metadata?.bootloader_version ?: 0,
+                        maintenanceUf2Manifest,
+                    )
 
                 val releaseFlow =
                     if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -389,7 +394,9 @@ class FirmwareUpdateViewModel(
                                 updateMethod = firmwareUpdateMethod,
                                 hasRelease = release != null,
                                 platformSupportsMaintenance = usbManager.supportsUf2Maintenance,
+                                bootloader = bootloader,
                             ),
+                            bootloader = bootloader,
                         )
                 }
             }

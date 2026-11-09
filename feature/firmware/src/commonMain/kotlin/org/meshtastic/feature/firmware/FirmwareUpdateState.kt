@@ -66,6 +66,8 @@ sealed interface FirmwareUpdateState {
          * decision stays unit-testable — the same shape as [showBootloaderWarning].
          */
         val maintenance: UsbMaintenanceGate = UsbMaintenanceGate(),
+        /** The bootloader the connected device reports, on any transport; `null` when it reports none. */
+        val bootloader: BootloaderStatus? = null,
     ) : FirmwareUpdateState
 
     /** Firmware file is being downloaded from the release server. */
