@@ -97,7 +97,7 @@ internal fun UsbMaintenanceCardPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(24.dp)) {
-                UsbMaintenanceCard(
+                BootloaderUpgradeCard(
                     deviceName = "RAK4631",
                     latestBootloader = "0.9.2-OTAFIX2.5",
                     onBootloaderUpgrade = {},

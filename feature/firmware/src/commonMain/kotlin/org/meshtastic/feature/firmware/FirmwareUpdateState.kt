@@ -93,8 +93,13 @@ sealed interface FirmwareUpdateState {
     /** The device did not reconnect within the expected timeout after flashing. */
     data object VerificationFailed : FirmwareUpdateState
 
-    /** An error occurred at any stage of the update pipeline. */
-    data class Error(val error: UiText) : FirmwareUpdateState
+    /**
+     * An error occurred at any stage of the update pipeline.
+     *
+     * @property nothingWritten True when the device was never written to and boots its application as before, so no
+     *   recovery is owed.
+     */
+    data class Error(val error: UiText, val nothingWritten: Boolean = false) : FirmwareUpdateState
 
     /**
      * The firmware update completed and the device reconnected successfully.
@@ -152,12 +157,16 @@ internal fun FirmwareUpdateState.toUpdateProgress(): FirmwareUpdateProgress? = w
     FirmwareUpdateState.Verifying ->
         FirmwareUpdateProgress(UiText.Resource(Res.string.firmware_update_verifying), percent = null)
 
+    // A handler's unverified Success is the moment before Verifying; reporting nothing would blink the
+    // notification.
+    is FirmwareUpdateState.Success ->
+        if (verified) null else FirmwareUpdateProgress(UiText.Resource(Res.string.firmware_update_verifying), null)
+
     FirmwareUpdateState.Idle,
     FirmwareUpdateState.Checking,
     is FirmwareUpdateState.Ready,
     FirmwareUpdateState.VerificationFailed,
     is FirmwareUpdateState.Error,
-    is FirmwareUpdateState.Success,
     is FirmwareUpdateState.AwaitingFileSave,
     is FirmwareUpdateState.ReviewingBootloader,
     -> null

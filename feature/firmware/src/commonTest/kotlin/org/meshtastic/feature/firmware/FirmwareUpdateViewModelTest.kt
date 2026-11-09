@@ -356,6 +356,84 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `retrying verification waits for the device again without flashing it again`() = runTest {
+        advanceUntilIdle()
+        var flashes = 0
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                flashes++
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.VerificationFailed>(viewModel.state.value)
+
+        viewModel.retryVerification()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Verifying>(viewModel.state.value)
+        radioController.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Success>(viewModel.state.value)
+        assertEquals(1, flashes)
+    }
+
+    @Test
+    fun `verification waits for the device to report the installed release`() = runTest {
+        val release = FirmwareRelease(id = "v2.8.3.771efca", title = "2.8.3", zipUrl = "url", releaseNotes = "")
+        every { firmwareReleaseRepository.stableRelease } returns flowOf(release)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        radioController.setConnectionState(ConnectionState.Connected)
+        runCurrent()
+        assertIs<FirmwareUpdateState.Verifying>(viewModel.state.value, "the old firmware is still reporting")
+
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "2.8.3.771efca", pioEnv = "tbeam"),
+        )
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Success>(viewModel.state.value)
+    }
+
+    @Test
+    fun `release ids map to the version the device reports`() {
+        assertEquals("2.8.3.771efca", FirmwareRelease(id = "v2.8.3.771efca").reportedVersion())
+        assertEquals(null, FirmwareRelease(id = "1").reportedVersion())
+        assertEquals(null, FirmwareRelease(id = "v2.7.17").reportedVersion())
+    }
+
+    @Test
+    fun `an error that wrote nothing retires the recovery record`() = runTest {
+        advanceUntilIdle()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("refused"), nothingWritten = true))
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertEquals(UiText.DynamicString("refused"), (viewModel.state.value as FirmwareUpdateState.Error).error)
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
     fun `startUpdate without wipe never factory-resets`() = runTest {
         advanceUntilIdle()
 
@@ -453,55 +531,6 @@ class FirmwareUpdateViewModelTest {
         val readyState = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(readyState)
         assertFalse(readyState.showBootloaderWarning)
-    }
-
-    @Test
-    fun `the BLE bootloader upgrade action hands the offered package to the manager`() = runTest {
-        val hardware =
-            DeviceHardware(
-                hwModel = 1,
-                architecture = "nrf52840",
-                platformioTarget = "rak4631",
-                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
-            )
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
-            Result.success(hardware)
-        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
-        every { radioPrefs.devName } returns MutableStateFlow("RAK4631")
-        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
-            MaintenanceUf2Manifest(
-                otafixReleaseTag = "2.6.0",
-                otafixBase = "https://example.com",
-                otafixBleDfuByTarget =
-                mapOf(
-                    "rak4631" to
-                        OtafixBleDfuEntry(
-                            otafixBoardSlug = "wiscore_rak4631_board",
-                            softDevice = "6.1.1",
-                            bleModel = "WisBlock RAK4631",
-                            sha256 = "00",
-                        ),
-                ),
-            )
-        nodeRepository.setOurNode(
-            TestDataFactory.createTestNode(num = 123, userId = "!1234abcd")
-                .copy(metadata = DeviceMetadata.Builder().bootloader_version(0x000902).build()),
-        )
-        var requested: BootloaderDfuZip? = null
-        everySuspend { firmwareUpdateManager.upgradeBootloaderOverBle(any(), any(), any(), any(), any()) }
-            .calls {
-                requested = it.args[3] as BootloaderDfuZip
-                null
-            }
-        viewModel = createViewModel()
-        advanceUntilIdle()
-        val offered = assertNotNull((viewModel.state.value as FirmwareUpdateState.Ready).bleBootloaderUpgrade)
-
-        viewModel.startBleBootloaderUpgrade()
-        advanceUntilIdle()
-
-        assertEquals(offered, requested, "state after start: ${viewModel.state.value}")
-        assertEquals("wiscore_rak4631_board_bootloader-2.6.0_s140_6.1.1.zip", requested?.fileName)
     }
 
     @Test
@@ -668,6 +697,55 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `the BLE bootloader upgrade action hands the offered package to the manager`() = runTest {
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52840",
+                platformioTarget = "rak4631",
+                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        every { radioPrefs.devName } returns MutableStateFlow("RAK4631")
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(
+                otafixReleaseTag = "2.6.0",
+                otafixBase = "https://example.com",
+                otafixBleDfuByTarget =
+                mapOf(
+                    "rak4631" to
+                        OtafixBleDfuEntry(
+                            otafixBoardSlug = "wiscore_rak4631_board",
+                            softDevice = "6.1.1",
+                            bleModel = "WisBlock RAK4631",
+                            sha256 = "00",
+                        ),
+                ),
+            )
+        nodeRepository.setOurNode(
+            TestDataFactory.createTestNode(num = 123, userId = "!1234abcd")
+                .copy(metadata = DeviceMetadata.Builder().bootloader_version(0x000902).build()),
+        )
+        var requested: BootloaderDfuZip? = null
+        everySuspend { firmwareUpdateManager.upgradeBootloaderOverBle(any(), any(), any(), any(), any()) }
+            .calls {
+                requested = it.args[3] as BootloaderDfuZip
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val offered = assertNotNull((viewModel.state.value as FirmwareUpdateState.Ready).bleBootloaderUpgrade)
+
+        viewModel.startBleBootloaderUpgrade()
+        advanceUntilIdle()
+
+        assertEquals(offered, requested, "state after start: ${viewModel.state.value}")
+        assertEquals("wiscore_rak4631_board_bootloader-2.6.0_s140_6.1.1.zip", requested?.fileName)
+    }
+
+    @Test
     fun `update method is Unknown for serial ESP32`() = runTest {
         // ESP32 over serial is not supported — should yield Unknown
         val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
@@ -735,6 +813,37 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `a recovery re-flash that wrote nothing keeps the record for the still stranded device`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        everySuspend { firmwareUpdateManager.recoverDfuDevice(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("offline"), nothingWritten = true))
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+        assertNull(radioController.lastSetDeviceAddress, "a stranded device is not rebound")
     }
 
     @Test

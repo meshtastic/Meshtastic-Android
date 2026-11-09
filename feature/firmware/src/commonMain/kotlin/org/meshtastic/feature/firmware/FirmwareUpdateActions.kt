@@ -35,6 +35,8 @@ data class FirmwareUpdateActions(
     val onConfirmLocalFile: () -> Unit,
     val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,
+    /** Waits again for the flashed device to come back, without flashing it again. */
+    val onRetryVerification: () -> Unit,
     val onCancel: () -> Unit,
     /** Opens Chirpy Hop over the screen while an update runs. */
     val onPlayChirpyHop: () -> Unit,
