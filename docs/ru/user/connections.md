@@ -1,7 +1,7 @@
 ---
 title: Соединения
 nav_order: 2
-last_updated: 2026-11-04
+last_updated: 2026-11-08
 description: Подключите свой телефон или настольный компьютер к ноде Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -27,6 +27,12 @@ Bluetooth Low Energy является наиболее распростране�
 5. Android попросит выполнить сопряжение. Если у твоей ноды имеется экран, то отображается шестизначный PIN-код. Введите его в диалоговом окне Android. Если у ноды нет экрана, PIN-код — `123456`.
 
 ![Сканирование Bluetooth-устройств с обнаружением нод в списке](../../assets/screenshots/connections_bluetooth_scan.png)
+
+### Connecting from a QR code or NFC tag
+
+Some nodes come with a connect code, printed on a label or shown on the node's screen. Scan it with your phone's camera, hold the phone to an NFC tag holding the same link, or tap the scan icon at the top of the **Connect** tab. The app asks whether to connect and shows the node's address, plus its pairing PIN when the code has one. Tap **Connect** and the app copies the PIN and pairs. Up to Android 16 the app enters the PIN for you; on Android 17 the pairing dialog asks, and you paste it.
+
+A code that isn't a Meshtastic connect code, or one with an address the app can't use, connects to nothing.
 
 Чтобы изменить метод сопряжения или включить Bluetooth для ноды, которая поставляется с выключенным Bluetooth, открой **Настройки → Конфигурация устройства → Bluetooth**. См. [Настройки — Радио и Пользователь](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
