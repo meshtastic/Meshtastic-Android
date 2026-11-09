@@ -170,8 +170,8 @@ def config_for(channel, flavor_key):
 
 def deep_link(channel, flavor_key):
     blob = json.dumps(config_for(channel, flavor_key), separators=(",", ":"))
-    # Only the JSON payload is percent-encoded; the scheme prefix stays literal.
-    return f"{REDIRECT}obtainium://app/{quote(blob, safe='')}"
+    # The redirect page rejects a literal `obtainium://` in `r`, so the scheme is encoded too.
+    return f"{REDIRECT}{quote('obtainium://', safe='')}app/{quote(blob, safe='')}"
 
 
 def render_table(channels=None, label_of=None):
