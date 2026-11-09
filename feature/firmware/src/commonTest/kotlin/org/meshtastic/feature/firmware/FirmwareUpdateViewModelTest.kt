@@ -49,6 +49,7 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.OtafixBleDfuEntry
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -76,6 +77,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -451,6 +453,55 @@ class FirmwareUpdateViewModelTest {
         val readyState = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(readyState)
         assertFalse(readyState.showBootloaderWarning)
+    }
+
+    @Test
+    fun `the BLE bootloader upgrade action hands the offered package to the manager`() = runTest {
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52840",
+                platformioTarget = "rak4631",
+                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        every { radioPrefs.devName } returns MutableStateFlow("RAK4631")
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(
+                otafixReleaseTag = "2.6.0",
+                otafixBase = "https://example.com",
+                otafixBleDfuByTarget =
+                mapOf(
+                    "rak4631" to
+                        OtafixBleDfuEntry(
+                            otafixBoardSlug = "wiscore_rak4631_board",
+                            softDevice = "6.1.1",
+                            bleModel = "WisBlock RAK4631",
+                            sha256 = "00",
+                        ),
+                ),
+            )
+        nodeRepository.setOurNode(
+            TestDataFactory.createTestNode(num = 123, userId = "!1234abcd")
+                .copy(metadata = DeviceMetadata.Builder().bootloader_version(0x000902).build()),
+        )
+        var requested: BootloaderDfuZip? = null
+        everySuspend { firmwareUpdateManager.upgradeBootloaderOverBle(any(), any(), any(), any(), any()) }
+            .calls {
+                requested = it.args[3] as BootloaderDfuZip
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val offered = assertNotNull((viewModel.state.value as FirmwareUpdateState.Ready).bleBootloaderUpgrade)
+
+        viewModel.startBleBootloaderUpgrade()
+        advanceUntilIdle()
+
+        assertEquals(offered, requested, "state after start: ${viewModel.state.value}")
+        assertEquals("wiscore_rak4631_board_bootloader-2.6.0_s140_6.1.1.zip", requested?.fileName)
     }
 
     @Test

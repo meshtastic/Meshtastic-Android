@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
+import kotlinx.serialization.json.Json
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.OtafixBleDfuEntry
@@ -121,6 +122,25 @@ class BleBootloaderUpgradeGateTest {
         assertNull(bootloaderDfuZipFor(badSd, "rak4631", null))
         val badSlug = manifest.copy(otafixBleDfuByTarget = mapOf("rak4631" to row.copy(otafixBoardSlug = "../x")))
         assertNull(bootloaderDfuZipFor(badSlug, "rak4631", null))
+    }
+
+    @Test
+    fun manifestsWithoutBlePackagesStillParseAndOfferNothing() {
+        val json = Json { ignoreUnknownKeys = true }
+        val old = json.decodeFromString<MaintenanceUf2Manifest>("""{"otafixReleaseTag":"2.6.0","otafixBase":"b"}""")
+        assertEquals(emptyMap(), old.otafixBleDfuByTarget)
+        assertNull(bootloaderDfuZipFor(old, "rak4631", null))
+
+        val current =
+            json.decodeFromString<MaintenanceUf2Manifest>(
+                """
+                {"otafixReleaseTag":"2.6.0","otafixBase":"b","otafixBleDfuByTarget":{"rak4631":{
+                "otafixBoardSlug":"wiscore_rak4631_board","softDevice":"6.1.1","bleModel":"WisBlock RAK4631",
+                "sha256":"6241730ee6c376ea5907d7cd0a672455528129379baf72936ed395fe64446cbf"}}}
+                """
+                    .trimIndent(),
+            )
+        assertEquals(manifest.otafixBleDfuByTarget, current.otafixBleDfuByTarget)
     }
 
     @Test
