@@ -146,8 +146,7 @@ private val ALL_MODULES_FULL =
     )
 
 /** Android-only modules that don't apply the KMP plugin. */
-private val ANDROID_ONLY_MODULES =
-    setOf(":androidApp", ":core:barcode", ":core:nfc", ":feature:widget", ":feature:xr")
+private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":core:nfc", ":feature:widget", ":feature:xr")
 
 /**
  * Modules excluded from Dokka aggregation.
