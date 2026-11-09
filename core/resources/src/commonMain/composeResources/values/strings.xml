@@ -712,7 +712,7 @@
     <string name="firmware_gate_message">This radio's firmware (%1$s) is older than the minimum this app supports (%2$s). Update the firmware to keep using the app. Latest stable firmware version: %3$s</string>
     <string name="firmware_gate_title">Firmware update required</string>
     <string name="firmware_gate_update">Update firmware</string>
-    <string name="firmware_maintenance_ble_upgrade_text">Upgrades the bootloader on %1$s over Bluetooth, then reinstalls the firmware. This takes about ten minutes; keep the phone close and the device powered.</string>
+    <string name="firmware_maintenance_ble_upgrade_text">Upgrades the bootloader on %1$s over Bluetooth, then reinstalls the firmware. This takes about ten minutes. Unplug the device from USB first and keep the phone close: with a cable attached, the new bootloader waits on USB instead of Bluetooth.</string>
     <string name="firmware_maintenance_bootloader_available">Latest: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Installed: %1$s</string>
     <string name="firmware_maintenance_bootloader_last_fault">Bootloader reported a fault: %1$s</string>
@@ -750,7 +750,7 @@
     <string name="firmware_update_bootloader_installing">Installing bootloader. The device restarts on its own; this takes a few minutes.</string>
     <string name="firmware_update_bootloader_latest">Latest Bootloader: %1$s</string>
     <string name="firmware_update_bootloader_mismatch">The bootloader reports %1$s, but this package is for %2$s. Nothing was written.</string>
-    <string name="firmware_update_bootloader_not_back">The device did not come back after the bootloader install. Connect it over USB to finish.</string>
+    <string name="firmware_update_bootloader_not_back">The device did not come back over Bluetooth after the bootloader install. If it is on USB, it is waiting there as a drive: install the firmware over USB, or unplug it, reset it and use recovery.</string>
     <string name="firmware_update_bootloader_not_upgraded">Firmware reinstalled, but the bootloader reports %1$s instead of %2$s.</string>
     <string name="firmware_update_bootloader_older_than">Bootloader: older than %1$s</string>
     <string name="firmware_update_bootloader_unverified">Bootloader package %1$s failed verification. Nothing was written.</string>
