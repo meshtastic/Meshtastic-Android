@@ -405,6 +405,7 @@ device_model_banana_for_scale
 device_model_capture
 device_model_capture_failed
 device_model_capture_saved
+device_model_in_space_hint
 device_model_load_failed
 device_model_rest_face_down
 device_model_rest_face_up

@@ -444,6 +444,7 @@
     <string name="device_model_capture">Take a picture</string>
     <string name="device_model_capture_failed">Couldn't save the picture</string>
     <string name="device_model_capture_saved">Saved to Pictures</string>
+    <string name="device_model_in_space_hint">It's beside the app, at real size. Pinch and drag it to move it.</string>
     <string name="device_model_load_failed">Couldn't load the 3D model</string>
     <string name="device_model_rest_face_down">Face down</string>
     <string name="device_model_rest_face_up">Face up</string>

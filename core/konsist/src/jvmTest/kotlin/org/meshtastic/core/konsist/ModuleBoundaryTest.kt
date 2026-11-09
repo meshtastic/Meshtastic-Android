@@ -29,10 +29,15 @@ class ModuleBoundaryTest {
 
     /**
      * The MapLibre renderer draws feature:map's shared map model and map-terrain's elevation tiles. Coverage samples
-     * the same elevation tiles and computes the estimate feature:map's Site Planner form describes.
+     * the same elevation tiles and computes the estimate feature:map's Site Planner form describes. The XR viewer
+     * stands feature:node's device model and banana in the room.
      */
     private val allowedFeatureImports =
-        mapOf("map-maplibre" to setOf("map", "map-terrain"), "coverage" to setOf("map", "map-terrain"))
+        mapOf(
+            "map-maplibre" to setOf("map", "map-terrain"),
+            "coverage" to setOf("map", "map-terrain"),
+            "xr" to setOf("node"),
+        )
 
     private val sourceFiles = Konsist.scopeFromProject().files.filterNot { it.isNestedAgentWorktree() }
 
