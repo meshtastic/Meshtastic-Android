@@ -48,6 +48,7 @@ import androidx.xr.runtime.math.BoundingBox
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Quaternion
 import androidx.xr.runtime.math.Vector3
+import androidx.xr.runtime.math.Vector4
 import androidx.xr.scenecore.AlphaMode
 import androidx.xr.scenecore.CustomMesh
 import androidx.xr.scenecore.Entity
@@ -219,6 +220,7 @@ private fun TerrainEntities(
         val root = createRoot(session, built.geometry)
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
+        material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
         val meshes = listOf(built.terrain, built.bezel).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion)
@@ -291,7 +293,7 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
         VertexLayout.Builder()
             .addAttribute(VertexAttribute.POSITION, VertexAttributeType.FLOAT3)
             .addAttribute(VertexAttribute.NORMAL, VertexAttributeType.FLOAT3)
-            .addAttribute(VertexAttribute.COLOR, VertexAttributeType.FLOAT4)
+            .addAttribute(VertexAttribute.COLOR, VertexAttributeType.UBYTE4_NORM)
             .build()
     var minX = Float.MAX_VALUE
     var minY = Float.MAX_VALUE

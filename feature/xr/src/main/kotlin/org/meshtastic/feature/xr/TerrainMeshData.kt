@@ -27,6 +27,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -40,13 +41,13 @@ internal class TerrainMeshData(
     val vertexCount: Int
         get() = positions.size / 3
 
-    /** Interleaved position, normal and color as floats: the layout [BYTES_PER_VERTEX] bytes per vertex. */
+    /** Interleaved position and normal floats, then color as four normalized bytes: [BYTES_PER_VERTEX] bytes each. */
     fun vertexBuffer(): ByteBuffer {
         val buffer = ByteBuffer.allocateDirect(vertexCount * BYTES_PER_VERTEX).order(ByteOrder.nativeOrder())
         for (i in 0 until vertexCount) {
             for (k in 0 until 3) buffer.putFloat(positions[i * 3 + k])
             for (k in 0 until 3) buffer.putFloat(normals[i * 3 + k])
-            for (k in 0 until 4) buffer.putFloat(colors[i * 4 + k])
+            for (k in 0 until 4) buffer.put((colors[i * 4 + k].coerceIn(0f, 1f) * MAX_BYTE).roundToInt().toByte())
         }
         return buffer.also { it.flip() }
     }
@@ -58,7 +59,8 @@ internal class TerrainMeshData(
     }
 
     companion object {
-        const val BYTES_PER_VERTEX = 40
+        const val BYTES_PER_VERTEX = 28
+        private const val MAX_BYTE = 255f
     }
 }
 
