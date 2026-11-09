@@ -46,10 +46,20 @@ class LinkableAddressTest {
     }
 
     @Test
-    fun `serial and demo addresses still link`() {
-        assertTrue(isLinkableAddress("s/dev/ttyUSB0"))
-        assertTrue(isLinkableAddress("m"))
-        assertTrue(isLinkableAddress("mshowcase"))
+    fun `serial and demo addresses still link while Demo Mode is unlocked`() {
+        assertTrue(isLinkableAddress("s/dev/ttyUSB0", virtualAllowed = true))
+        assertTrue(isLinkableAddress("m", virtualAllowed = true))
+        assertTrue(isLinkableAddress("mshowcase", virtualAllowed = true))
+        assertTrue(isLinkableAddress("r", virtualAllowed = true))
+    }
+
+    @Test
+    fun `demo addresses are rejected while Demo Mode is locked`() {
+        listOf("m", "mshowcase", "r").forEach {
+            assertFalse(isLinkableAddress(it, virtualAllowed = false), "'$it' should be rejected")
+        }
+        assertTrue(isLinkableAddress("s/dev/ttyUSB0", virtualAllowed = false))
+        assertTrue(isLinkableAddress("xAA:BB:CC:DD:EE:FF", virtualAllowed = false))
     }
 
     @Test

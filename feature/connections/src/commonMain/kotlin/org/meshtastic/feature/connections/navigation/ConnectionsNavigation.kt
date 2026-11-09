@@ -68,9 +68,10 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         // or `n` to disconnect, and a BLE address may carry the node's pairing PIN. The `connections` path is a
         // verified https://meshtastic.org app link, so any web page can fire one at us — confirm before re-pointing or
         // dropping the radio connection. Only a debug launch switch skips it.
+        val admits = { address: String -> isLinkableAddress(address, scanModel.showMockTransport.value) }
         var pendingAddress by
             rememberSaveable(key.address, key.pin) {
-                mutableStateOf(key.address?.takeIf { it.isNotBlank() && isLinkableAddress(it) })
+                mutableStateOf(key.address?.takeIf { it.isNotBlank() && admits(it) })
             }
         var pendingPinParam by rememberSaveable(key.address, key.pin) { mutableStateOf(key.pin) }
         // The debug launch switch covers the link the app was started with, never a code scanned afterwards.
@@ -83,7 +84,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         val showToast = rememberShowToastResource()
 
         val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
-            val link = contents?.let(::connectLinkFrom)
+            val link = contents?.let(::connectLinkFrom)?.takeIf { it.address?.let(admits) == true }
             if (link != null) {
                 pendingAddress = link.address
                 pendingPinParam = link.pin

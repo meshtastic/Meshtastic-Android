@@ -37,9 +37,10 @@ private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
 /**
  * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails this
- * opens the Connections screen without asking to connect.
+ * opens the Connections screen without asking to connect. Demo addresses link only while [virtualAllowed], so a link
+ * cannot drop a real radio for a demo transport that would then refuse to start.
  */
-fun isLinkableAddress(address: String): Boolean {
+fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean {
     val rest = address.drop(1)
     return when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
         InterfaceId.BLUETOOTH -> BLE_ADDRESS.matches(rest)
@@ -50,8 +51,9 @@ fun isLinkableAddress(address: String): Boolean {
 
         InterfaceId.MOCK,
         InterfaceId.REPLAY,
-        InterfaceId.SERIAL,
-        -> true
+        -> virtualAllowed
+
+        InterfaceId.SERIAL -> true
 
         null -> false
     }
