@@ -35,6 +35,9 @@ private const val BLE_PAIRING_PIN_LENGTH = 6
 
 private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
+// The forms TcpTransport splits: `host`, `host:port`, or a bracketed IPv6 literal with an optional port.
+private val TCP_ADDRESS = Regex("""(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]]+)(:\d{1,5})?""")
+
 /**
  * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails this
  * opens the Connections screen without asking to connect. Demo addresses link only while [virtualAllowed], so a link
@@ -47,13 +50,13 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
 
         InterfaceId.NOP -> rest.isEmpty()
 
-        InterfaceId.TCP -> rest.isNotBlank()
+        InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
 
         InterfaceId.MOCK,
         InterfaceId.REPLAY,
         -> virtualAllowed
 
-        InterfaceId.SERIAL -> true
+        InterfaceId.SERIAL -> rest.isNotBlank()
 
         null -> false
     }

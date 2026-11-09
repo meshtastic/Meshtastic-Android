@@ -35,8 +35,18 @@ class LinkableAddressTest {
     fun `a TCP address needs a host`() {
         assertTrue(isLinkableAddress("t192.168.1.20:4403"))
         assertTrue(isLinkableAddress("tmeshtastic.local"))
-        assertFalse(isLinkableAddress("t"))
-        assertFalse(isLinkableAddress("t "))
+        assertTrue(isLinkableAddress("t[fe80::1]:4403"))
+        assertTrue(isLinkableAddress("t[fe80::1]"))
+        listOf("t", "t ", "t:4403", "t[]:4403", "tfe80::1", "t192.168.1.20:", "thost:port").forEach {
+            assertFalse(isLinkableAddress(it), "'$it' should be rejected")
+        }
+    }
+
+    @Test
+    fun `a serial address needs a port name`() {
+        assertTrue(isLinkableAddress("s/dev/ttyUSB0"))
+        assertFalse(isLinkableAddress("s"))
+        assertFalse(isLinkableAddress("s "))
     }
 
     @Test
