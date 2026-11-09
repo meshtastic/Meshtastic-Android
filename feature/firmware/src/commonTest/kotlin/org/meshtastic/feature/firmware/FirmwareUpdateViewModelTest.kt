@@ -48,6 +48,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.MaintenanceUf2Manifest
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.FirmwareUpdateProgress
@@ -66,6 +67,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.DeviceMetadata
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -417,6 +419,36 @@ class FirmwareUpdateViewModelTest {
         val dismissedState = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(dismissedState)
         assertFalse(dismissedState.showBootloaderWarning, "Bootloader warning should be dismissed")
+    }
+
+    @Test
+    fun `bootloader warning hidden when the device reports the latest bootloader`() = runTest {
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52",
+                platformioTarget = "tbeam",
+                requiresBootloaderUpgradeForOta = true,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(otafixReleaseTag = "2.6.0")
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "2.8.3", pioEnv = "tbeam"),
+        )
+        nodeRepository.setOurNode(
+            Node(num = 123, metadata = DeviceMetadata.Builder().bootloader_version(0x020600).build()),
+        )
+        everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val readyState = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(readyState)
+        assertFalse(readyState.showBootloaderWarning)
     }
 
     @Test

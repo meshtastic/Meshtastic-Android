@@ -384,7 +384,8 @@ class FirmwareUpdateViewModel(
                             showBootloaderWarning =
                             deviceHardware.requiresBootloaderUpgradeForOta == true &&
                                 !dismissed &&
-                                radioPrefs.isBle(),
+                                radioPrefs.isBle() &&
+                                bootloader?.isCurrent != true,
                             updateMethod = firmwareUpdateMethod,
                             currentFirmwareVersion = ourNode.firmwareVersion,
                             maintenance =

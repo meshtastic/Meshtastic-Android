@@ -712,11 +712,11 @@
     <string name="firmware_gate_message">This radio's firmware (%1$s) is older than the minimum this app supports (%2$s). Update the firmware to keep using the app. Latest stable firmware version: %3$s</string>
     <string name="firmware_gate_title">Firmware update required</string>
     <string name="firmware_gate_update">Update firmware</string>
-    <string name="firmware_maintenance_ble_upgrade_text">Upgrades the bootloader on %1$s over Bluetooth, then reinstalls the firmware. This takes about ten minutes. Unplug the device from USB first and keep the phone close: with a cable attached, the new bootloader waits on USB instead of Bluetooth.</string>
+    <string name="firmware_maintenance_ble_upgrade_text">Upgrades the bootloader on %1$s over Bluetooth, then reinstalls the firmware. Takes about ten minutes. Unplug USB first: with a cable attached, the new bootloader waits on USB.</string>
     <string name="firmware_maintenance_bootloader_available">Latest: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Installed: %1$s</string>
     <string name="firmware_maintenance_bootloader_last_fault">Bootloader reported a fault: %1$s</string>
-    <string name="firmware_maintenance_bootloader_latest_hint">Latest version: %1$s. The installed version is shown once the device restarts into update mode.</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Latest: %1$s. The installed version shows once the device restarts into update mode.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Bootloader is up to date</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Nothing to upgrade. The firmware is reinstalled next, which restarts the device.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">The erase file was copied but the device didn't start erasing. Nothing has been changed yet. Unplug the device, double-press its reset button, and try again.</string>
@@ -730,12 +730,12 @@
     <string name="firmware_maintenance_unknown_softdevice">This app can't confirm which Bluetooth stack this device uses, so erasing it isn't safe. Use the web flasher at flasher.meshtastic.org instead.</string>
     <string name="firmware_maintenance_unsupported_device">This device doesn't support erasing from the app.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Upgrade bootloader</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">This installs an upgraded bootloader on %1$s, which makes future Bluetooth updates much faster. The firmware is reinstalled afterwards.\n\nDon't disconnect the device while this runs.</string>
+    <string name="firmware_maintenance_upgrade_confirm_text">Installs a faster bootloader on %1$s, then reinstalls the firmware. Keep the device connected until it finishes.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Upgrade bootloader?</string>
     <string name="firmware_maintenance_wrong_destination">That location isn't the device's update drive, so nothing was written to the device. Select the removable drive that appears when the device is in update mode.</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_recovery_banner">Finish updating %1$s</string>
-    <string name="firmware_recovery_ble_failed">Couldn't finish the update over Bluetooth. This device's stock bootloader can't reliably complete an interrupted update over the air. Connect it to a computer with USB and re-flash it using the vendor's serial DFU tool (for example adafruit-nrfutil) to recover the device.</string>
+    <string name="firmware_recovery_ble_failed">Couldn't finish over Bluetooth. This stock bootloader can't resume an interrupted update. Connect it over USB and reflash it with a serial DFU tool such as adafruit-nrfutil.</string>
     <string name="firmware_recovery_button">Resume firmware update</string>
     <string name="firmware_recovery_dismiss">Dismiss firmware recovery</string>
     <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
@@ -747,10 +747,10 @@
     <string name="firmware_update_battery_low">Battery too low (%1$d%). Please charge your device before updating.</string>
     <string name="firmware_update_bootloader_downloading">Downloading bootloader...</string>
     <string name="firmware_update_bootloader_installed">Bootloader: %1$s</string>
-    <string name="firmware_update_bootloader_installing">Installing bootloader. The device restarts on its own; this takes a few minutes.</string>
+    <string name="firmware_update_bootloader_installing">Installing bootloader. This takes a few minutes.</string>
     <string name="firmware_update_bootloader_latest">Latest Bootloader: %1$s</string>
-    <string name="firmware_update_bootloader_mismatch">The bootloader reports %1$s, but this package is for %2$s. Nothing was written.</string>
-    <string name="firmware_update_bootloader_not_back">The device did not come back over Bluetooth after the bootloader install. If it is on USB, it is waiting there as a drive: install the firmware over USB, or unplug it, reset it and use recovery.</string>
+    <string name="firmware_update_bootloader_mismatch">Bootloader reports %1$s, but this package is for %2$s. Nothing was written.</string>
+    <string name="firmware_update_bootloader_not_back">The device didn't come back over Bluetooth. On USB it waits as a drive: install the firmware there, or unplug it, reset it and use recovery.</string>
     <string name="firmware_update_bootloader_not_upgraded">Firmware reinstalled, but the bootloader reports %1$s instead of %2$s.</string>
     <string name="firmware_update_bootloader_older_than">Bootloader: older than %1$s</string>
     <string name="firmware_update_bootloader_unverified">Bootloader package %1$s failed verification. Nothing was written.</string>
@@ -801,7 +801,7 @@
     <string name="firmware_update_ota_failed">OTA update failed: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">This device's OTA loader rejected the requested update method: %1$s</string>
     <string name="firmware_update_preparing_flash">Preparing device: erasing flash. This can take up to a minute...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, the vendor's bootloader .zip has to be flashed with a serial DFU tool such as adafruit-nrfutil — copying that .zip to the device's drive won't work. Alternatively, connect this device over USB and use the bootloader upgrade in this app.</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Copying the RAK bootloader .zip to the drive won't work. Use the bootloader upgrade in this app, or a serial DFU tool such as adafruit-nrfutil.</string>
     <string name="firmware_update_rebooting">Rebooting to DFU...</string>
     <string name="firmware_update_release_notes">Release Notes</string>
     <string name="firmware_update_requires_bin">%1$s requires a target-matching .bin file.</string>
@@ -813,7 +813,7 @@
     <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device's DFU drive.</string>
     <string name="firmware_update_searching_device">Searching for OTA device on the network...</string>
     <string name="firmware_update_select_file">Select Local File</string>
-    <string name="firmware_update_slow_bootloader_hint">Updates are slow on this device's bootloader. Flashing the Meshtastic nRF52 Bootloader enables much faster BLE updates.</string>
+    <string name="firmware_update_slow_bootloader_hint">Updates are slow on this bootloader. The Meshtastic nRF52 Bootloader makes Bluetooth updates much faster.</string>
     <string name="firmware_update_source_local">Source: Local File</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_start_timed_out">The update could not start in time. Try the update again.</string>
@@ -832,7 +832,7 @@
     <string name="firmware_update_unsupported_transport">Firmware updates are not supported over this connection for this device. Connect a different way (e.g. Bluetooth) to update.</string>
     <string name="firmware_update_unsupported_update_method">Local firmware files are not supported for this update method.</string>
     <string name="firmware_update_uploading">Uploading firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s often ships with a bootloader that can't take Bluetooth updates. Upgrade the bootloader first.</string>
     <string name="firmware_update_usb_failed">USB Update failed</string>
     <string name="firmware_update_usb_instruction_text">Your device has rebooted into DFU mode and should appear as a USB drive (e.g., RAK4631).\n\nWhen the file picker opens, please select the root of that drive to save the firmware file.</string>
     <string name="firmware_update_usb_instruction_title">Select DFU USB Drive</string>
