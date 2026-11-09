@@ -82,17 +82,16 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         val scope = rememberCoroutineScope()
         val showToast = rememberShowToastResource()
 
-        val barcodeScanner =
-            LocalBarcodeScannerProvider.current { contents ->
-                val link = contents?.let(::connectLinkFrom)
-                if (link != null) {
-                    pendingAddress = link.address
-                    pendingPinParam = link.pin
-                    pendingFromScan = true
-                } else if (contents != null) {
-                    scope.launch { showToast(Res.string.connect_code_invalid) }
-                }
+        val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
+            val link = contents?.let(::connectLinkFrom)
+            if (link != null) {
+                pendingAddress = link.address
+                pendingPinParam = link.pin
+                pendingFromScan = true
+            } else if (contents != null) {
+                scope.launch { showToast(Res.string.connect_code_invalid) }
             }
+        }
         val scannerSupported = LocalBarcodeScannerSupported.current
         val onScanConnectCode = barcodeScanner::startScan.takeIf { scannerSupported }
 
@@ -133,19 +132,20 @@ private val connectLinkPrefixes = listOf("$DEEP_LINK_BASE_URI/connections", "htt
 
 /**
  * The connect link a scanned QR code holds, or `null` when it holds anything else, including a `connections` link
- * without a usable address. Only Meshtastic's own hosts count: unlike an OS link, a scanned code has passed no
- * intent filter.
+ * without a usable address. Only Meshtastic's own hosts count: unlike an OS link, a scanned code has passed no intent
+ * filter.
  */
 internal fun connectLinkFrom(contents: String): ConnectionsRoute.Connections? {
     val text = contents.trim()
-    if (connectLinkPrefixes.none { text.startsWith(it, ignoreCase = true) }) return null
     val uri =
-        try {
-            CommonUri.parse(text)
-        } catch (_: IllegalArgumentException) {
-            return null
+        text.takeIf { candidate -> connectLinkPrefixes.any { candidate.startsWith(it, ignoreCase = true) } }?.let {
+            try {
+                CommonUri.parse(it)
+            } catch (_: IllegalArgumentException) {
+                null
+            }
         }
-    val link = DeepLinkRouter.route(uri)?.lastOrNull() as? ConnectionsRoute.Connections
+    val link = uri?.let(DeepLinkRouter::route)?.lastOrNull() as? ConnectionsRoute.Connections
     return link?.takeIf { it.address?.let(::isLinkableAddress) == true }
 }
 

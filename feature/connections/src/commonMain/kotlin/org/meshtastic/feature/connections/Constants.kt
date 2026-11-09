@@ -36,19 +36,23 @@ private const val BLE_PAIRING_PIN_LENGTH = 6
 private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
 /**
- * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails
- * this opens the Connections screen without asking to connect.
+ * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails this
+ * opens the Connections screen without asking to connect.
  */
 fun isLinkableAddress(address: String): Boolean {
     val rest = address.drop(1)
     return when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
         InterfaceId.BLUETOOTH -> BLE_ADDRESS.matches(rest)
+
         InterfaceId.NOP -> rest.isEmpty()
+
         InterfaceId.TCP -> rest.isNotBlank()
+
         InterfaceId.MOCK,
         InterfaceId.REPLAY,
         InterfaceId.SERIAL,
         -> true
+
         null -> false
     }
 }
