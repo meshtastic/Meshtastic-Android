@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>fitsInSingleTile</title>
+    <title>OnboardingFeature</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-map-terrain::org.meshtastic.feature.map.terrain/TerrainTileMath/fitsInSingleTile/#kotlin.Int#org.meshtastic.feature.map.terrain.GeoBounds/PointingToDeclaration//787934393">
-  <div class="breadcrumbs"><a href="../../index.html">feature-map-terrain</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.terrain</a><span class="delimiter">/</span><a href="index.html">TerrainTileMath</a><span class="delimiter">/</span><span class="current">fitsInSingleTile</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-ui::org.meshtastic.core.ui.component/OnboardingFeature/OnboardingFeature/#androidx.compose.ui.graphics.vector.ImageVector#org.jetbrains.compose.resources.StringResource?#org.jetbrains.compose.resources.StringResource/PointingToDeclaration//-920980536">
+  <div class="breadcrumbs"><a href="../../index.html">core-ui</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ui.component</a><span class="delimiter">/</span><a href="index.html">OnboardingFeature</a><span class="delimiter">/</span><span class="current">OnboardingFeature</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>fits</span><wbr><span>In</span><wbr><span>Single</span><wbr><span><span>Tile</span></span></h1>
+    <h1 class="cover"><span>Onboarding</span><wbr><span><span>Feature</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="fits-in-single-tile.html"><span class="token function">fitsInSingleTile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bounds<span class="token operator">: </span><a href="../-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/commonMain/kotlin/org/meshtastic/feature/map/terrain/TerrainTileMath.kt#L106">source</a>)</span></span></div><p class="paragraph">Whether <a href="fits-in-single-tile.html">bounds</a> fits entirely inside a single tile at <a href="fits-in-single-tile.html">zoom</a> — used for Mapterhorn's regional-archive gate.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">icon<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/vector/ImageVector.html">ImageVector</a><span class="token punctuation">, </span></span><span class="parameter ">titleRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">subtitleRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/OnboardingPage.kt#L91">source</a>)</span></span></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

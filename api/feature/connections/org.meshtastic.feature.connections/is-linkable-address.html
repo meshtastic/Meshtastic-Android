@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>TerrainTileFetcher</title>
+    <title>isLinkableAddress</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,8 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
-                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/jvmAndroidMain">jvmAndroid</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:connections/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -54,16 +53,9 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":feature:connections/commonMain" data-filter=":feature:connections/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
-                            </label>
-                        </li>
-                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
-                            <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/jvmAndroidMain" data-filter=":feature:map-terrain/jvmAndroidMain">
-                                <span class="checkbox--icon"></span>
-                                jvmAndroid
                             </label>
                         </li>
                 </ul>
@@ -97,14 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-map-terrain::org.meshtastic.feature.map.terrain//TerrainTileFetcher/#kotlin.String/PointingToDeclaration//-1536397446">
-  <div class="breadcrumbs"><a href="../index.html">feature-map-terrain</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.map.terrain</a><span class="delimiter">/</span><span class="current">TerrainTileFetcher</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature-connections::org.meshtastic.feature.connections//isLinkableAddress/#kotlin.String#kotlin.Boolean/PointingToDeclaration//-1202228022">
+  <div class="breadcrumbs"><a href="../index.html">feature-connections</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.connections</a><span class="delimiter">/</span><span class="current">isLinkableAddress</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Terrain</span><wbr><span>Tile</span><wbr><span><span>Fetcher</span></span></h1>
+    <h1 class="cover"><span>is</span><wbr><span>Linkable</span><wbr><span><span>Address</span></span></h1>
   </div>
-  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain" data-active="" data-toggle=":feature:map-terrain/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":feature:map-terrain/jvmAndroidMain" data-filterable-set=":feature:map-terrain/jvmAndroidMain" data-toggle=":feature:map-terrain/jvmAndroidMain">jvmAndroid</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="-terrain-tile-fetcher.html"><span class="token function">TerrainTileFetcher</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pmtilesUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-terrain-tile-fetcher/index.html">TerrainTileFetcher</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/commonMain/kotlin/org/meshtastic/feature/map/terrain/TerrainTileFetcher.kt#L30">source</a>)</span></span></div><p class="paragraph">Opens the remote PMTiles archive at <a href="-terrain-tile-fetcher.html">pmtilesUrl</a>.</p></div><div class="content sourceset-dependent-content" data-togglable=":feature:map-terrain/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-terrain-tile-fetcher.html"><span class="token function">TerrainTileFetcher</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pmtilesUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-terrain-tile-fetcher/index.html">TerrainTileFetcher</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/jvmAndroidMain/kotlin/org/meshtastic/feature/map/terrain/TerrainTileFetcher.jvmAndroid.kt#L27">source</a>)</span></span></div><p class="paragraph">Opens the remote PMTiles archive at <a href="-terrain-tile-fetcher.html">pmtilesUrl</a>.</p></div>  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-linkable-address.html"><span class="token function">isLinkableAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">virtualAllowed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/connections/src/commonMain/kotlin/org/meshtastic/feature/connections/Constants.kt#L43">source</a>)</span></span></div><p class="paragraph">Whether a deep link's <a href="is-linkable-address.html">address</a> names a transport this app knows, in a form it can connect to. A link that fails this opens the Connections screen without asking to connect. Demo addresses link only while <a href="is-linkable-address.html">virtualAllowed</a>, so a link cannot drop a real radio for a demo transport that would then refuse to start.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
