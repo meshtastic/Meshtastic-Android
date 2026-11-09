@@ -29,6 +29,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.validSecondsOrNull
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.asEntity
@@ -39,6 +40,7 @@ import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.withAdcVoltage
 import org.meshtastic.core.model.util.withLegacyOneWireTemperatures
 import org.meshtastic.core.model.util.withOneWireTemperature
@@ -115,7 +117,9 @@ open class MeshLogRepositoryImpl(
                     it.meshLogDao().getLogsFrom(logId, PortNum.TELEMETRY_APP.value, DEFAULT_MAX_LOGS)
                 }
                 .distinctUntilChanged()
-                .mapLatest { list -> list.map { it.asExternalModel() }.mapNotNull(::parseTelemetryLog) }
+                .mapLatest { list ->
+                    list.map { it.asExternalModel() }.mapNotNull(::parseTelemetryLog).sortedByDescending { it.time }
+                }
         }
         .flowOn(dispatchers.io)
 
@@ -160,7 +164,10 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                wb.time = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
+                val fallbackTime = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
+                val telemetryTime = validSecondsOrNull(telemetry.time, maxValidTime = fallbackTime)
+                val packetTime = validSecondsOrNull(log.fromRadio.packet?.rxTimeOrNull(), maxValidTime = fallbackTime)
+                wb.time = telemetryTime ?: packetTime ?: fallbackTime
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }
             .build()
