@@ -80,8 +80,9 @@ around you, with the number of nodes heard on each.
   follow when they serve your area, from a directory the app refreshes from the Meshtastic API.
 - **Active topics** lists every other root heard. Roots under your state or city come first, then
   roots in neighboring states, then the rest.
-- **Custom topic** takes any root the node accepts: up to 31 ASCII characters, no leading or
-  trailing slash, no `+` or `#`.
+- **Custom topic** takes any root the node accepts: up to 31 bytes (letters like æ, ø and å take
+  two), no leading or trailing slash, no `+` or `#`. Suggestions keep your place's own letters, so
+  a root like `msh/EU_868/NO/Østlandet` is offered and saved as written.
 
 The finder only subscribes and publishes nothing. Picking a topic fills in the root topic field,
 and nothing reaches the node until you save. It needs the LoRa region to be set. Without a
