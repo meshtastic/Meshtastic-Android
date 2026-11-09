@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.xr
 
+import android.graphics.drawable.BitmapDrawable
 import android.widget.ImageView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.runtime.Session
-import androidx.xr.runtime.math.FloatSize2d
+import androidx.xr.runtime.math.IntSize2d
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Vector3
 import androidx.xr.scenecore.GltfModel
@@ -71,6 +72,7 @@ import org.meshtastic.feature.node.component.BananaToggle
 import org.meshtastic.feature.node.component.toBitmap
 import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
+import kotlin.math.roundToInt
 
 /** On an XR headset, the device model stands in the room instead of in [fallback]'s phone AR view. */
 fun spatialDeviceModelViewer(fallback: DeviceModelArViewer?): DeviceModelArViewer = SpatialOrFallbackViewer(fallback)
@@ -191,13 +193,22 @@ private fun DeviceModelInSpace(
 private fun DeviceScreenPanel(session: Session, device: GltfModelEntity?, glass: GlbBounds?, frame: MirrorFrame?) {
     val context = LocalContext.current
     val view = remember { ImageView(context).apply { scaleType = ImageView.ScaleType.FIT_XY } }
-    SideEffect { frame?.toBitmap()?.let(view::setImageBitmap) }
+    SideEffect {
+        frame?.toBitmap()?.let { bitmap ->
+            // Nearest neighbor keeps the display's pixels square instead of smearing them.
+            view.setImageDrawable(BitmapDrawable(view.resources, bitmap).apply { setFilterBitmap(false) })
+        }
+    }
     LaunchedEffect(session, device, glass) {
         val parent = device ?: return@LaunchedEffect
         val bounds = glass ?: return@LaunchedEffect
-        val size = FloatSize2d(bounds.max[0] - bounds.min[0], bounds.max[1] - bounds.min[1])
+        val width = bounds.max[0] - bounds.min[0]
+        val height = bounds.max[1] - bounds.min[1]
         val at = Vector3(bounds.center[0], bounds.center[1], bounds.max[2] + SCREEN_LIFT_METERS)
-        val panel = PanelEntity.create(session, view, size, SCREEN_NAME, Pose(at), parent)
+        // Made in pixels, so the glass gets a sharp texture, then shrunk to the glass's real size.
+        val pixels = IntSize2d(SCREEN_PIXELS_WIDE, (SCREEN_PIXELS_WIDE * height / width).roundToInt())
+        val panel = PanelEntity.create(session, view, pixels, SCREEN_NAME, Pose(at), parent)
+        panel.setScale(width / panel.size.width)
         try {
             awaitCancellation()
         } finally {
@@ -288,6 +299,7 @@ private suspend fun loadModel(session: Session, glb: ByteArray, name: String): G
 private const val MODEL_NAME = "device"
 private const val BANANA_NAME = "banana"
 private const val SCREEN_NAME = "screen"
+private const val SCREEN_PIXELS_WIDE = 512
 private const val SCREEN_LIFT_METERS = 0.0005f
 private const val CLEARANCE_METERS = 0.25f
 private const val DROP_FRACTION = 0.25f
