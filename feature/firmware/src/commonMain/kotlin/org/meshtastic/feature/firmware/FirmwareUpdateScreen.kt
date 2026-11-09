@@ -96,9 +96,9 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_maintenance_ble_upgrade_text
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_available
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_installed
-import org.meshtastic.core.resources.firmware_maintenance_ble_upgrade_text
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_last_fault
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_latest_hint
 import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date

@@ -41,8 +41,8 @@ data class MaintenanceUf2Manifest(
  * [DeviceHardware.platformioTarget]: BLE cannot read the drive's Board-ID, so the running node's target picks the row
  * and the bootloader's own DIS Model Number must then equal [bleModel] before anything is written.
  *
- * @property softDevice The SoftDevice the package carries, as [SoftDeviceVariant.fromWire] reads it. It must equal
- *   the installed one: an app linked for the other SoftDevice does not boot.
+ * @property softDevice The SoftDevice the package carries, as [SoftDeviceVariant.fromWire] reads it. It must equal the
+ *   installed one: an app linked for the other SoftDevice does not boot.
  * @property bleModel The bootloader's `BLEDIS_MODEL`, read back from DIS 0x2A24 in DFU mode.
  * @property sha256 Digest of the release's `<otafixBoardSlug>_bootloader-<tag>_s140_<softDevice>.zip`.
  */

@@ -509,6 +509,9 @@ internal fun requireBootloaderMatches(identity: BootloaderIdentity, asset: Bootl
     }
 }
 
+private suspend fun readIdentity(transport: DfuUploadTransport): BootloaderIdentity =
+    (transport as? LegacyDfuTransport)?.readBootloaderIdentity() ?: BootloaderIdentity(null, null)
+
 private fun DfuUploadResult.throwOnFailure() {
     if (this is DfuUploadResult.Failure) throw error
 }
@@ -625,12 +628,12 @@ class SecureDfuHandler(
     }
 
     /**
-     * Installs [asset]'s SoftDevice and bootloader over Legacy DFU, waits out the bootloader's own swap, then reinstalls
-     * [release]'s application, which staging the new images erased. Both packages are downloaded and checked before
-     * the device leaves its application, and nothing is written unless the bootloader's DIS reports the board and
-     * SoftDevice [asset] was built for.
+     * Installs [asset]'s SoftDevice and bootloader over Legacy DFU, waits out the bootloader's own swap, then
+     * reinstalls [release]'s application, which staging the new images erased. Both packages are downloaded and checked
+     * before the device leaves its application, and nothing is written unless the bootloader's DIS reports the board
+     * and SoftDevice [asset] was built for.
      */
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "ThrowsCount")
     suspend fun upgradeBootloader(
         release: FirmwareRelease,
         hardware: DeviceHardware,
@@ -788,9 +791,6 @@ class SecureDfuHandler(
             bootloaderZip?.let { withContext(NonCancellable) { firmwareFileHandler.deleteFile(it) } }
         }
     }
-
-    private suspend fun readIdentity(transport: DfuUploadTransport): BootloaderIdentity =
-        (transport as? LegacyDfuTransport)?.readBootloaderIdentity() ?: BootloaderIdentity(null, null)
 
     /**
      * Scans for the Legacy DFU service at [target] or MAC+1 until the bootloader re-advertises after activating a new
@@ -970,7 +970,7 @@ class SecureDfuHandler(
     }
 
     /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */
-    @Suppress("LongParameterList", "CyclomaticComplexMethod")
+    @Suppress("LongParameterList", "CyclomaticComplexMethod", "ThrowsCount")
     private suspend fun runUploadSession(
         protocol: DfuProtocolKind,
         target: String,

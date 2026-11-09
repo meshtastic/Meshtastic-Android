@@ -156,6 +156,7 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      * Download a bootloader's SoftDevice+bootloader DFU package and check it against its pinned digest. A mismatch
      * deletes the file and returns `null`, with no fallback, for the same reason as [retrieveMaintenanceUf2].
      */
+    @Suppress("ReturnCount") // guard clauses: every failure path must abort before a destructive write
     internal open suspend fun retrieveBootloaderDfuZip(
         asset: BootloaderDfuZip,
         onProgress: (Float) -> Unit,
@@ -172,7 +173,7 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val actualDigest =
             FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(fileHandler.readBytes(artifact)))
         if (!actualDigest.equals(asset.sha256, ignoreCase = true)) {
-            Logger.e { "Bootloader package ${asset.fileName} digest mismatch (expected ${asset.sha256}, got $actualDigest)" }
+            Logger.e { "Bootloader package ${asset.fileName} digest mismatch (expected ${asset.sha256})" }
             fileHandler.deleteFile(artifact)
             return null
         }

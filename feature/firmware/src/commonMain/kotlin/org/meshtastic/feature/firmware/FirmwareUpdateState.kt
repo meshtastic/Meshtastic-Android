@@ -68,7 +68,7 @@ sealed interface FirmwareUpdateState {
         val maintenance: UsbMaintenanceGate = UsbMaintenanceGate(),
         /** The bootloader the connected device reports, on any transport; `null` when it reports none. */
         val bootloader: BootloaderStatus? = null,
-        /** The package a BLE bootloader upgrade would install; `null` when none is offered (see [bleBootloaderUpgradeFor]). */
+        /** The package a BLE bootloader upgrade would install; `null` when none is offered. */
         val bleBootloaderUpgrade: BootloaderDfuZip? = null,
     ) : FirmwareUpdateState
 

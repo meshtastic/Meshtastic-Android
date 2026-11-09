@@ -210,12 +210,11 @@ class DfuZipParserTest {
         assertTrue(packageResult.initPacket.contentEquals(byteArrayOf(0x03)))
     }
 
-    private fun sdBlEntries(manifest: String, bin: ByteArray = ByteArray(10)) =
-        mapOf(
-            "manifest.json" to manifest.trimIndent().encodeToByteArray(),
-            "sd_bl.bin" to bin,
-            "sd_bl.dat" to ByteArray(14),
-        )
+    private fun sdBlEntries(manifest: String, bin: ByteArray = ByteArray(10)) = mapOf(
+        "manifest.json" to manifest.trimIndent().encodeToByteArray(),
+        "sd_bl.bin" to bin,
+        "sd_bl.dat" to ByteArray(14),
+    )
 
     private val sdBlManifest =
         """

@@ -128,6 +128,7 @@ internal fun legacyStartPayload(image: DfuImage): ByteArray = byteArrayOf(
 /** The image-sizes write that follows `START_DFU` for an [image] whose `.bin` is [firmwareSize] bytes. */
 internal fun legacyImageSizesPayload(image: DfuImage, firmwareSize: Int): ByteArray = when (image) {
     DfuImage.Application -> legacyImageSizesPayload(appSize = firmwareSize)
+
     is DfuImage.SoftDeviceBootloader ->
         legacyImageSizesPayload(appSize = 0, softDeviceSize = image.sdSize, bootloaderSize = image.blSize)
 }

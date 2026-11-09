@@ -333,9 +333,12 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
     class StartTimedOut(budget: Duration) : DfuException("START not accepted within $budget of entering DFU mode")
 
     /** The bootloader in DFU mode is not the board or SoftDevice the package was built for. Nothing was written. */
-    class BootloaderMismatch(val reported: BootloaderIdentity, val expectedModel: String, val expectedSoftDevice: String) :
-        DfuException(
-            "Bootloader reports model '${reported.model}' and '${reported.firmwareRevision}', " +
-                "package is for '$expectedModel' with S140 $expectedSoftDevice",
-        )
+    class BootloaderMismatch(
+        val reported: BootloaderIdentity,
+        val expectedModel: String,
+        val expectedSoftDevice: String,
+    ) : DfuException(
+        "Bootloader reports model '${reported.model}' and '${reported.firmwareRevision}', " +
+            "package is for '$expectedModel' with S140 $expectedSoftDevice",
+    )
 }

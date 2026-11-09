@@ -519,7 +519,8 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    /** Upgrades the bootloader over BLE with the package the Ready state offers, then reinstalls the selected release. */
+    /** Upgrades the bootloader over BLE with the Ready state's package, then reinstalls the selected release. */
+    @Suppress("ReturnCount") // preconditions; each missing one must abort before the device is rebooted
     fun startBleBootloaderUpgrade() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return

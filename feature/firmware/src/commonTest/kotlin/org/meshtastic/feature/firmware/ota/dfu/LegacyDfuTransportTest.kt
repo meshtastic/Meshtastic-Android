@@ -614,13 +614,9 @@ class LegacyDfuTransportTest {
             // First packet write is the 12-byte image sizes payload (after START_DFU).
             if (!imageSizesWritten) {
                 imageSizesWritten = true
-                // Parse appSize from bytes 8..11 (LE u32).
+                // The image is sd + bl + app bytes long (three LE u32s), as the bootloader counts it.
                 if (data.size >= 12) {
-                    expectedFirmwareSize =
-                        (data[8].toInt() and 0xFF) or
-                        ((data[9].toInt() and 0xFF) shl 8) or
-                        ((data[10].toInt() and 0xFF) shl 16) or
-                        ((data[11].toInt() and 0xFF) shl 24)
+                    expectedFirmwareSize = data.readIntLe(0) + data.readIntLe(4) + data.readIntLe(8)
                 }
                 return listOf(startResponse())
             }
