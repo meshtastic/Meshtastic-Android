@@ -109,6 +109,9 @@ import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
 import org.meshtastic.core.resources.firmware_update_alpha
+import org.meshtastic.core.resources.firmware_update_bootloader_installed
+import org.meshtastic.core.resources.firmware_update_bootloader_latest
+import org.meshtastic.core.resources.firmware_update_bootloader_older_than
 import org.meshtastic.core.resources.firmware_update_checking
 import org.meshtastic.core.resources.firmware_update_confirm_file_button
 import org.meshtastic.core.resources.firmware_update_confirm_file_message
@@ -409,6 +412,7 @@ private fun FirmwareUpdateScaffold(
                     release = selectedRelease,
                     currentFirmwareVersion = currentVersion,
                     selectedReleaseType = selectedReleaseType,
+                    bootloader = (state as? FirmwareUpdateState.Ready)?.bootloader,
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -892,11 +896,12 @@ private fun ReleaseNotesCard(releaseNotes: String) {
 }
 
 @Composable
-private fun DeviceInfoCard(
+internal fun DeviceInfoCard(
     deviceHardware: DeviceHardware,
     release: FirmwareRelease?,
     currentFirmwareVersion: String? = null,
     selectedReleaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
+    bootloader: BootloaderStatus? = null,
 ) {
     val target = deviceHardware.hwModelSlug.ifEmpty { deviceHardware.platformioTarget }
 
@@ -945,6 +950,38 @@ private fun DeviceInfoCard(
                 text = "$label$version",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
+            )
+            bootloader?.let { BootloaderVersionLines(it) }
+        }
+    }
+}
+
+/** Installed bootloader against the latest release, as the running device reports it in its metadata. */
+@Composable
+private fun BootloaderVersionLines(bootloader: BootloaderStatus) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text =
+            when (val installed = bootloader.installed) {
+                is InstalledBootloader.Known ->
+                    stringResource(Res.string.firmware_update_bootloader_installed, installed.version.toString())
+
+                InstalledBootloader.OlderThanFirstNumbered ->
+                    stringResource(
+                        Res.string.firmware_update_bootloader_older_than,
+                        FIRST_NUMBERED_BOOTLOADER.toString(),
+                    )
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        bootloader.latest?.let {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.firmware_update_bootloader_latest, it.toString()),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -1008,8 +1045,8 @@ internal fun BootloaderFaultLine(fault: BootloaderFault) {
 }
 
 /**
- * Installed against latest bootloader, read from the drive before an upgrade is written. The running firmware cannot
- * report its bootloader, so this is the first point the app knows the installed version.
+ * Installed against latest bootloader, read from the drive before an upgrade is written. The drive's full tag tells
+ * pre-2.6.0 builds apart, which the running firmware's packed `bootloader_version` cannot.
  */
 @Composable
 internal fun BootloaderReviewState(versions: BootloaderVersions, onUpgrade: () -> Unit, onSkip: () -> Unit) {

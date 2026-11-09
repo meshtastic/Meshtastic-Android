@@ -148,8 +148,8 @@ internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText
  * @property eraseRefusal Non-null when erase is shown but cannot run; the reason is displayed and the action disabled.
  * @property showBootloaderUpgrade Whether a bootloader-upgrade action is offered. Absent (not refused) when no image is
  *   mapped for the board — an unmapped board is a coverage gap, not a safety decision the user can act on.
- * @property latestBootloader The OTAFIX release the upgrade installs, shown next to the action. The installed version
- *   is unknowable here: only the mounted drive reports it.
+ * @property latestBootloader The OTAFIX release the upgrade installs, shown next to the action only while the device
+ *   reports no bootloader version; otherwise the device card shows installed against latest.
  */
 data class UsbMaintenanceGate(
     val show: Boolean = false,
@@ -180,6 +180,8 @@ data class BootloaderVersions(val installed: String?, val available: String) {
  * @param platformSupportsMaintenance Whether this platform can run the sequence at all
  *   ([FirmwareUsbManager.supportsUf2Maintenance]). Hidden rather than refused: a platform with no UF2 maintenance flow
  *   is shaped like the wrong transport, not like data the user could go and fix.
+ * @param bootloader What the running device reports, or `null` when it reports nothing. Only a bootloader known to be
+ *   at or past the latest release withdraws the upgrade.
  */
 internal fun usbMaintenanceGate(
     manifest: MaintenanceUf2Manifest,
@@ -187,6 +189,7 @@ internal fun usbMaintenanceGate(
     updateMethod: FirmwareUpdateMethod,
     hasRelease: Boolean,
     platformSupportsMaintenance: Boolean,
+    bootloader: BootloaderStatus? = null,
 ): UsbMaintenanceGate {
     val uf2Architecture = hardware.isNrf52Arc || hardware.isRp2040Arc
     if (!platformSupportsMaintenance || updateMethod !is FirmwareUpdateMethod.Usb || !uf2Architecture || !hasRelease) {
@@ -205,12 +208,14 @@ internal fun usbMaintenanceGate(
 
     // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
     // — which image gets written is decided later from the Board-ID the drive reports.
-    val showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget)
+    val showBootloaderUpgrade =
+        hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget) && bootloader?.isCurrent != true
     return UsbMaintenanceGate(
         show = true,
         eraseRefusal = eraseRefusal,
         showBootloaderUpgrade = showBootloaderUpgrade,
-        latestBootloader = manifest.otafixReleaseTag.takeIf { showBootloaderUpgrade && it.isNotBlank() },
+        latestBootloader =
+        manifest.otafixReleaseTag.takeIf { showBootloaderUpgrade && bootloader == null && it.isNotBlank() },
     )
 }
 

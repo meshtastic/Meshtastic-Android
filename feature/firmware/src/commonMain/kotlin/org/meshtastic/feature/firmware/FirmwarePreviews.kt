@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
@@ -103,6 +105,45 @@ internal fun UsbMaintenanceCardPreview() {
             }
         }
     }
+}
+
+@Composable
+private fun DeviceInfoCardPreviewContent(bootloader: BootloaderStatus?) {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp)) {
+                DeviceInfoCard(
+                    deviceHardware =
+                    DeviceHardware(hwModelSlug = "RAK4631", platformioTarget = "rak4631", displayName = "RAK4631"),
+                    release = FirmwareRelease(title = "2.8.3"),
+                    currentFirmwareVersion = "2.8.3",
+                    bootloader = bootloader,
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+internal fun DeviceInfoCardBootloaderCurrentPreview() {
+    DeviceInfoCardPreviewContent(
+        BootloaderStatus(InstalledBootloader.Known(KotlinVersion(2, 6, 0)), latest = KotlinVersion(2, 6, 0)),
+    )
+}
+
+@PreviewLightDark
+@Composable
+internal fun DeviceInfoCardBootloaderOlderPreview() {
+    DeviceInfoCardPreviewContent(
+        BootloaderStatus(InstalledBootloader.OlderThanFirstNumbered, latest = KotlinVersion(2, 6, 0)),
+    )
+}
+
+@PreviewLightDark
+@Composable
+internal fun DeviceInfoCardBootloaderUnreportedPreview() {
+    DeviceInfoCardPreviewContent(bootloader = null)
 }
 
 @PreviewLightDark
