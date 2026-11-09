@@ -63,7 +63,7 @@ import androidx.xr.scenecore.scene
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -111,7 +111,7 @@ private class BuiltTerrain(
  * letters, and a zoom slider in an orbiter. Draws nothing without 3D content, so it only shows in Full Space.
  */
 @Composable
-fun SpatialTerrainMap(positions: List<LatLon>, modifier: Modifier = Modifier) {
+fun SpatialTerrainMap(positions: List<LatLon>, buildDispatcher: CoroutineDispatcher, modifier: Modifier = Modifier) {
     val session = LocalSession.current
     if (session == null || !LocalSpatialCapabilities.current.isContent3dEnabled) return
     val nodes = remember(positions) { positions.mapIndexed { i, p -> SpatialNodeSnapshot(i.toLong(), p) } }
@@ -129,7 +129,15 @@ fun SpatialTerrainMap(positions: List<LatLon>, modifier: Modifier = Modifier) {
     var wheel by remember { mutableStateOf<Entity?>(null) }
     val http = remember { HttpClient() }
 
-    TerrainEntities(session, circle, http, motion, onWheel = { wheel = it }, onStatus = { status = it })
+    TerrainEntities(
+        session,
+        circle,
+        http,
+        motion,
+        buildDispatcher,
+        onWheel = { wheel = it },
+        onStatus = { status = it },
+    )
     WheelFrames(wheel, motion)
 
     if (maxZoom > 1) {
@@ -190,6 +198,7 @@ private fun TerrainEntities(
     circle: SpatialCircle,
     http: HttpClient,
     motion: SpatialWheelMotion,
+    buildDispatcher: CoroutineDispatcher,
     onWheel: (Entity?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
@@ -199,7 +208,7 @@ private fun TerrainEntities(
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(Dispatchers.Default) { buildTerrain(circle, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -219,7 +228,7 @@ private fun TerrainEntities(
             awaitCancellation()
         } finally {
             wheelChanged(null)
-            (entities + plate + wheel + root).forEach { it.dispose() }
+            (entities + plate + wheel + root).forEach { it.parent = null }
             meshes.forEach { it.close() }
             material.close()
         }

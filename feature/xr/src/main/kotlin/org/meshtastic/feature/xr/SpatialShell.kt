@@ -37,6 +37,7 @@ import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.compose.spatial.Orbiter
 import androidx.xr.compose.spatial.OrbiterPosition
 import androidx.xr.scenecore.scene
+import kotlinx.coroutines.CoroutineDispatcher
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.xr_full_space
@@ -54,8 +55,9 @@ import org.meshtastic.feature.map.terrain.spatial.LatLon
  */
 @Composable
 fun SpatialShell(
+    nodePositions: List<LatLon>,
+    buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
-    nodePositions: List<LatLon> = emptyList(),
     content: @Composable () -> Unit,
 ) {
     val spatial = LocalSpatialCapabilities.current.isSpatialUiEnabled
@@ -72,7 +74,7 @@ fun SpatialShell(
                     }
                 }
             }
-            if (mapShown) SpatialTerrainMap(nodePositions)
+            if (mapShown) SpatialTerrainMap(nodePositions, buildDispatcher)
         } else {
             SpaceToggle(
                 inFullSpace = false,
