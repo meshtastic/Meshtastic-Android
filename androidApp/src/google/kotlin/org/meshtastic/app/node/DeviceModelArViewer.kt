@@ -139,6 +139,7 @@ import org.meshtastic.feature.node.component.DeviceScreenNode
 import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
 import org.meshtastic.feature.node.model.RestPose
+import org.meshtastic.feature.node.model.facingYawDegrees
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
@@ -234,6 +235,8 @@ private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, banana: ByteArr
     var anchor by remember { mutableStateOf<Anchor?>(null) }
     // Saved across a rotation; the anchor cannot be, since the activity's new ARCore session starts unplaced.
     var yawDegrees by rememberSaveable { mutableFloatStateOf(0f) }
+    // Set where the device lands, turning its front to the camera so the banana stands on the viewer's left.
+    var facingDegrees by remember { mutableFloatStateOf(0f) }
     var pose by rememberSaveable { mutableStateOf(RestPose.Upright) }
     val bounds = remember(glb) { GlbBounds.parse(glb) }
     var latestFrame by remember { mutableStateOf<Frame?>(null) }
@@ -285,7 +288,11 @@ private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, banana: ByteArr
                     if (node == null && frame != null) {
                         placementHit(frame, event.x, event.y, instantPlacement = true)?.let { hit ->
                             anchor?.detach()
-                            anchor = hit.createAnchor()
+                            val placedAnchor = hit.createAnchor()
+                            val toCamera = placedAnchor.pose.inverse().compose(frame.camera.pose)
+                            facingDegrees = facingYawDegrees(toCamera.tx(), toCamera.tz())
+                            yawDegrees = 0f
+                            anchor = placedAnchor
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
                     }
@@ -317,22 +324,24 @@ private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, banana: ByteArr
                         // Moving is a new tap and scaling would break real size, so the drag's yaw and the rest pose
                         // are the only edits. The yaw wraps the pose so it always turns about the surface's up.
                         val offset = bounds?.let(pose::offset) ?: floatArrayOf(0f, 0f, 0f)
-                        Node(rotation = Rotation(y = yawDegrees)) {
-                            ModelNode(
-                                modelInstance = instance,
-                                position = Position(offset[0], offset[1], offset[2]),
-                                rotation = Rotation(x = pose.pitchDegrees, z = pose.rollDegrees),
-                            ) {
-                                val glassMin = screen.glassMin
-                                val glassMax = screen.glassMax
-                                val frame = screen.frame
-                                if (glassMin != null && glassMax != null && frame != null) {
-                                    DeviceScreenNode(glassMin, glassMax, frame)
+                        Node(rotation = Rotation(y = facingDegrees)) {
+                            Node(rotation = Rotation(y = yawDegrees)) {
+                                ModelNode(
+                                    modelInstance = instance,
+                                    position = Position(offset[0], offset[1], offset[2]),
+                                    rotation = Rotation(x = pose.pitchDegrees, z = pose.rollDegrees),
+                                ) {
+                                    val glassMin = screen.glassMin
+                                    val glassMax = screen.glassMax
+                                    val frame = screen.frame
+                                    if (glassMin != null && glassMax != null && frame != null) {
+                                        DeviceScreenNode(glassMin, glassMax, frame)
+                                    }
                                 }
                             }
+                            // Outside the drag's yaw, so the device turns beside a banana that stays put.
+                            if (banana != null && bounds != null) BananaNode(modelLoader, banana, bounds, pose)
                         }
-                        // Outside the yaw, so the device turns beside a banana that stays put.
-                        if (banana != null && bounds != null) BananaNode(modelLoader, banana, bounds, pose)
                     }
                 }
             }

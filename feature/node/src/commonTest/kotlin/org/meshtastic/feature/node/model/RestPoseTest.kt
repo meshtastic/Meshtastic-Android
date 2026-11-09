@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.node.model
 
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -64,6 +67,18 @@ class RestPoseTest {
             FloatArray(3) { rotated.min[it] + offset[it] },
             FloatArray(3) { rotated.max[it] + offset[it] },
         )
+    }
+
+    @Test
+    fun facingTurnsTheFrontTowardTheViewer() {
+        assertNear(0f, facingYawDegrees(0f, 1f), "viewer in front")
+        assertNear(90f, facingYawDegrees(1f, 0f), "viewer to the right")
+        assertNear(-90f, facingYawDegrees(-1f, 0f), "viewer to the left")
+        assertNear(180f, abs(facingYawDegrees(0f, -1f)), "viewer behind")
+        // A turn of yaw about +Y carries +Z to (sin yaw, cos yaw): back onto the viewer's direction.
+        val yaw = facingYawDegrees(0.3f, -0.4f) * PI.toFloat() / 180f
+        assertNear(0.6f, sin(yaw), "x toward viewer")
+        assertNear(-0.8f, cos(yaw), "z toward viewer")
     }
 
     private fun assertNear(expected: Float, actual: Float, what: String) =
