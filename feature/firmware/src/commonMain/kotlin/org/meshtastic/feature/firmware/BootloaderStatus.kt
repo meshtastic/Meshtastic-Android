@@ -58,13 +58,14 @@ internal fun decodeBootloaderVersion(packed: Int): InstalledBootloader? {
 }
 
 /** Parses a release tag that is exactly `x.y.z`; anything else has no order to compare against. */
-internal fun parsePlainBootloaderVersion(tag: String): KotlinVersion? {
-    if (!PLAIN_VERSION.matches(tag)) return null
-    val (major, minor, patch) = tag.split('.').map { it.toIntOrNull() ?: return null }
-    val valid = listOf(major, minor, patch).all { it in 0..KotlinVersion.MAX_COMPONENT_VALUE }
-    return if (valid) KotlinVersion(major, minor, patch) else null
-}
+internal fun parsePlainBootloaderVersion(tag: String): KotlinVersion? = tag.takeIf { PLAIN_VERSION.matches(it) }
+    ?.split('.')
+    ?.map { it.toIntOrNull() ?: -1 }
+    ?.takeIf { parts -> parts.all { it in 0..KotlinVersion.MAX_COMPONENT_VALUE } }
+    ?.let { (major, minor, patch) -> KotlinVersion(major, minor, patch) }
 
 /** Null when the device reports no bootloader version, which leaves the screen as it was before the field existed. */
 internal fun bootloaderStatus(packed: Int, manifest: MaintenanceUf2Manifest): BootloaderStatus? =
-    decodeBootloaderVersion(packed)?.let { BootloaderStatus(it, parsePlainBootloaderVersion(manifest.otafixReleaseTag)) }
+    decodeBootloaderVersion(packed)?.let { installed ->
+        BootloaderStatus(installed, parsePlainBootloaderVersion(manifest.otafixReleaseTag))
+    }

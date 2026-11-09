@@ -40,15 +40,14 @@ class BootloaderStatusTest {
 
     private fun packed(major: Int, minor: Int, patch: Int) = (major shl 16) or (minor shl 8) or patch
 
-    private fun gate(bootloader: BootloaderStatus?) =
-        usbMaintenanceGate(
-            manifest = manifest,
-            hardware = rak4631,
-            updateMethod = FirmwareUpdateMethod.Usb,
-            hasRelease = true,
-            platformSupportsMaintenance = true,
-            bootloader = bootloader,
-        )
+    private fun gate(bootloader: BootloaderStatus?) = usbMaintenanceGate(
+        manifest = manifest,
+        hardware = rak4631,
+        updateMethod = FirmwareUpdateMethod.Usb,
+        hasRelease = true,
+        platformSupportsMaintenance = true,
+        bootloader = bootloader,
+    )
 
     @Test
     fun `zero reports no bootloader`() {

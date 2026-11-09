@@ -109,12 +109,12 @@ import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
 import org.meshtastic.core.resources.firmware_update_alpha
-import org.meshtastic.core.resources.firmware_update_checking
-import org.meshtastic.core.resources.firmware_update_confirm_file_button
-import org.meshtastic.core.resources.firmware_update_confirm_file_message
 import org.meshtastic.core.resources.firmware_update_bootloader_installed
 import org.meshtastic.core.resources.firmware_update_bootloader_latest
 import org.meshtastic.core.resources.firmware_update_bootloader_older_than
+import org.meshtastic.core.resources.firmware_update_checking
+import org.meshtastic.core.resources.firmware_update_confirm_file_button
+import org.meshtastic.core.resources.firmware_update_confirm_file_message
 import org.meshtastic.core.resources.firmware_update_confirm_file_title
 import org.meshtastic.core.resources.firmware_update_currently_installed
 import org.meshtastic.core.resources.firmware_update_device
@@ -959,26 +959,31 @@ internal fun DeviceInfoCard(
 /** Installed bootloader against the latest release, as the running device reports it in its metadata. */
 @Composable
 private fun BootloaderVersionLines(bootloader: BootloaderStatus) {
-    Spacer(Modifier.height(8.dp))
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        text =
-        when (val installed = bootloader.installed) {
-            is InstalledBootloader.Known ->
-                stringResource(Res.string.firmware_update_bootloader_installed, installed.version.toString())
-            InstalledBootloader.OlderThanFirstNumbered ->
-                stringResource(Res.string.firmware_update_bootloader_older_than, FIRST_NUMBERED_BOOTLOADER.toString())
-        },
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    bootloader.latest?.let {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(Res.string.firmware_update_bootloader_latest, it.toString()),
+            text =
+            when (val installed = bootloader.installed) {
+                is InstalledBootloader.Known ->
+                    stringResource(Res.string.firmware_update_bootloader_installed, installed.version.toString())
+
+                InstalledBootloader.OlderThanFirstNumbered ->
+                    stringResource(
+                        Res.string.firmware_update_bootloader_older_than,
+                        FIRST_NUMBERED_BOOTLOADER.toString(),
+                    )
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        bootloader.latest?.let {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.firmware_update_bootloader_latest, it.toString()),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
