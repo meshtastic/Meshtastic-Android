@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -332,11 +333,9 @@ class FirmwareUpdateViewModel(
                 // maintenance gate.
                 maintenanceUf2Repository.reconcile()
                 val maintenanceUf2Manifest = maintenanceUf2Repository.getSnapshot()
-                val bootloader =
-                    bootloaderStatus(
-                        nodeRepository.ourNodeInfo.value?.metadata?.bootloader_version ?: 0,
-                        maintenanceUf2Manifest,
-                    )
+                // Metadata is persisted after the handshake, so the first read can still be the previous session's.
+                val bootloaderVersionFlow =
+                    nodeRepository.ourNodeInfo.map { it?.metadata?.bootloader_version ?: 0 }.distinctUntilChanged()
 
                 val releaseFlow =
                     if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -344,8 +343,9 @@ class FirmwareUpdateViewModel(
                     } else {
                         firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
                     }
-                releaseFlow.collectLatest { release ->
+                releaseFlow.combine(bootloaderVersionFlow, ::Pair).collectLatest { (release, bootloaderVersion) ->
                     _selectedRelease.value = release
+                    val bootloader = bootloaderStatus(bootloaderVersion, maintenanceUf2Manifest)
 
                     val dismissed = bootloaderWarningDataSource.isDismissed(address)
                     val firmwareUpdateMethod =

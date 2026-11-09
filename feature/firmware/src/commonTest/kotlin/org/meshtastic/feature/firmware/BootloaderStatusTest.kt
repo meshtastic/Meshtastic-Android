@@ -22,6 +22,7 @@ import org.meshtastic.core.model.SoftDeviceVariant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -66,6 +67,12 @@ class BootloaderStatusTest {
     }
 
     @Test
+    fun `a major past one byte reads as unreported rather than truncated`() {
+        assertNull(decodeBootloaderVersion(0x01000001))
+        assertNull(decodeBootloaderVersion(-1))
+    }
+
+    @Test
     fun `0_9_2 means older than the first numbered release`() {
         assertEquals(InstalledBootloader.OlderThanFirstNumbered, decodeBootloaderVersion(packed(0, 9, 2)))
     }
@@ -89,9 +96,16 @@ class BootloaderStatusTest {
 
     @Test
     fun `older and pre-2_6_0 bootloaders are not current`() {
-        assertFalse(bootloaderStatus(packed(2, 5, 9), manifest)?.isCurrent == true)
-        assertFalse(bootloaderStatus(packed(0, 9, 2), manifest)?.isCurrent == true)
-        assertFalse(bootloaderStatus(packed(0, 8, 0), manifest)?.isCurrent == true)
+        listOf(
+            packed(2, 5, 9) to InstalledBootloader.Known(KotlinVersion(2, 5, 9)),
+            packed(0, 9, 2) to InstalledBootloader.OlderThanFirstNumbered,
+            packed(0, 8, 0) to InstalledBootloader.Known(KotlinVersion(0, 8, 0)),
+        )
+            .forEach { (value, installed) ->
+                val status = assertNotNull(bootloaderStatus(value, manifest))
+                assertEquals(installed, status.installed)
+                assertFalse(status.isCurrent)
+            }
     }
 
     @Test
@@ -103,6 +117,8 @@ class BootloaderStatusTest {
         assertNull(parsePlainBootloaderVersion(""))
         assertNull(parsePlainBootloaderVersion("2.6"))
         assertNull(parsePlainBootloaderVersion("2.6.0.1"))
+        assertNull(parsePlainBootloaderVersion("256.0.0"))
+        assertNull(parsePlainBootloaderVersion("99999999999.0.0"))
     }
 
     @Test
@@ -127,6 +143,18 @@ class BootloaderStatusTest {
     @Test
     fun `an unparseable latest tag keeps the usb upgrade`() {
         val oddManifest = manifest.copy(otafixReleaseTag = "0.9.2-OTAFIX2.5")
-        assertTrue(gate(bootloaderStatus(packed(2, 6, 0), oddManifest)).showBootloaderUpgrade)
+        val status = assertNotNull(bootloaderStatus(packed(2, 6, 0), oddManifest))
+        assertNull(status.latest)
+        val gate =
+            usbMaintenanceGate(
+                manifest = oddManifest,
+                hardware = rak4631,
+                updateMethod = FirmwareUpdateMethod.Usb,
+                hasRelease = true,
+                platformSupportsMaintenance = true,
+                bootloader = status,
+            )
+        assertTrue(gate.showBootloaderUpgrade)
+        assertNull(gate.latestBootloader, "a reported bootloader drops the restart hint the unreported path keeps")
     }
 }

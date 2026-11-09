@@ -41,15 +41,11 @@ private const val MAJOR_SHIFT = 16
 private const val MINOR_SHIFT = 8
 private val PLAIN_VERSION = Regex("""\d+\.\d+\.\d+""")
 
-/** Decodes `major << 16 | minor << 8 | patch`; 0 means the device reports no bootloader version. */
+/** Decodes `major << 16 | minor << 8 | patch`; 0, or a major past one byte, reads as no reported version. */
 internal fun decodeBootloaderVersion(packed: Int): InstalledBootloader? {
-    if (packed == 0) return null
-    val version =
-        KotlinVersion(
-            (packed ushr MAJOR_SHIFT) and BYTE_MASK,
-            (packed ushr MINOR_SHIFT) and BYTE_MASK,
-            packed and BYTE_MASK,
-        )
+    val major = packed ushr MAJOR_SHIFT
+    if (packed == 0 || major > BYTE_MASK) return null
+    val version = KotlinVersion(major, (packed ushr MINOR_SHIFT) and BYTE_MASK, packed and BYTE_MASK)
     return if (version == SHARED_LEGACY_BOOTLOADER) {
         InstalledBootloader.OlderThanFirstNumbered
     } else {

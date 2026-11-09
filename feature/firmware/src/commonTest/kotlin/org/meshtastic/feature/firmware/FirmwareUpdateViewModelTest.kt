@@ -49,6 +49,7 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.FirmwareUpdateProgress
@@ -75,6 +76,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -655,6 +657,41 @@ class FirmwareUpdateViewModelTest {
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(state)
         assertIs<FirmwareUpdateMethod.Usb>(state.updateMethod)
+    }
+
+    @Test
+    fun `bootloader metadata that arrives after the check withdraws the usb upgrade`() = runTest {
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52840",
+                platformioTarget = "rak4631",
+                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(otafixReleaseTag = "2.6.0", otafixSupportedTargets = listOf("rak4631"))
+        every { usbManager.supportsUf2Maintenance } returns true
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val before = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(before)
+        assertNull(before.bootloader)
+        assertTrue(before.maintenance.showBootloaderUpgrade)
+
+        val node = nodeRepository.ourNodeInfo.value!!
+        val metadata = DeviceMetadata.Builder().also { it.bootloader_version = (2 shl 16) or (6 shl 8) }.build()
+        nodeRepository.setOurNode(node.copy(metadata = metadata))
+        advanceUntilIdle()
+
+        val after = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(after)
+        assertEquals(InstalledBootloader.Known(KotlinVersion(2, 6, 0)), after.bootloader?.installed)
+        assertFalse(after.maintenance.showBootloaderUpgrade)
     }
 
     @Test
