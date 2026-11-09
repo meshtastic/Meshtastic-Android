@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.float
@@ -39,6 +40,7 @@ import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
+import org.meshtastic.feature.node.model.GlbMerge
 import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -168,6 +170,53 @@ class DeviceModelBananaTest {
 
         viewModel.setBanana(false)
         assertNull(viewModel.withBanana.value)
+    }
+
+    @Test
+    fun `a file the merge cannot carry over is refused rather than half merged`() = runTest {
+        val device = Res.readBytes(DeviceModelViewModel.CHIRPY_MODEL)
+        val banana = Res.readBytes(BananaForScale.MODEL)
+        val at = floatArrayOf(0f, 0f, 0f)
+        assertNotNull(GlbMerge.append(device, banana, at, null))
+
+        val version1 = { glb: ByteArray -> glb.copyOf().also { it[4] = 1 } }
+        assertNull(GlbMerge.append(version1(device), banana, at, null), "base GLB 1")
+        assertNull(GlbMerge.append(device, version1(banana), at, null), "added GLB 1")
+
+        val twoBuffers =
+            withJson(device) { json ->
+                val buffers = json.getValue("buffers").jsonArray
+                JsonObject(json + ("buffers" to JsonArray(buffers + buffers.first())))
+            }
+        assertNull(GlbMerge.append(twoBuffers, banana, at, null), "base with a second buffer")
+
+        val morphing =
+            withJson(banana) { json ->
+                val meshes =
+                    json.getValue("meshes").jsonArray.map { mesh ->
+                        val primitives =
+                            mesh.jsonObject.getValue("primitives").jsonArray.map {
+                                JsonObject(
+                                    it.jsonObject + ("targets" to Json.parseToJsonElement("""[{"POSITION":0}]""")),
+                                )
+                            }
+                        JsonObject(mesh.jsonObject + ("primitives" to JsonArray(primitives)))
+                    }
+                JsonObject(json + ("meshes" to JsonArray(meshes)))
+            }
+        assertNull(GlbMerge.append(device, morphing, at, null), "added with morph targets")
+    }
+
+    /** [glb] with its JSON chunk replaced by [transform] of it, the binary chunk kept. */
+    private fun withJson(glb: ByteArray, transform: (JsonObject) -> JsonObject): ByteArray {
+        val le = { offset: Int -> ByteBuffer.wrap(glb, offset, 4).order(ByteOrder.LITTLE_ENDIAN).int }
+        val jsonLength = le(12)
+        val bin = glb.copyOfRange(20 + jsonLength, glb.size)
+        val text =
+            transform(gltf(glb)).toString().encodeToByteArray().let { it + ByteArray((4 - it.size % 4) % 4) { 0x20 } }
+        val out = ByteBuffer.allocate(20 + text.size + bin.size).order(ByteOrder.LITTLE_ENDIAN)
+        out.putInt(le(0)).putInt(le(4)).putInt(20 + text.size + bin.size).putInt(text.size).putInt(le(16))
+        return out.put(text).put(bin).array()
     }
 
     private fun gltf(glb: ByteArray): JsonObject {

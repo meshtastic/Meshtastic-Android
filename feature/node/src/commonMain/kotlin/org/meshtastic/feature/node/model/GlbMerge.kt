@@ -35,12 +35,14 @@ import kotlinx.serialization.json.jsonPrimitive
  */
 object GlbMerge {
     /**
-     * [base] with [added] moved by [translation], and [copyright] as the file's notice. Null when either is not a
-     * self-contained GLB, or [added] uses something this does not carry over (extensions, skins, sparse data, files).
+     * [base] with [added] moved by [translation], and [copyright] as the file's notice. Null when either is not a GLB 2
+     * with one embedded buffer, or [added] uses something this does not carry over (extensions, skins, morph targets,
+     * sparse data, files).
      */
     fun append(base: ByteArray, added: ByteArray, translation: FloatArray, copyright: String?): ByteArray? =
         runCatching {
-            val first = GlbFile.read(base) ?: return null
+            // The merged file has one buffer, the base's binary chunk followed by the added one's.
+            val first = GlbFile.read(base)?.takeIf { it.hasOneEmbeddedBuffer() } ?: return null
             val second = GlbFile.read(added)?.takeIf { it.isPlain() } ?: return null
             val binOffset = first.bin.size.paddedTo4()
             val bin = first.bin.copyOf(binOffset) + second.bin
@@ -80,13 +82,18 @@ object GlbMerge {
     private fun GlbFile.isPlain(): Boolean {
         val unsupported =
             listOf("extensionsUsed", "skins", "animations", "cameras").any { json.arrayOf(it).isNotEmpty() }
+        val morphs =
+            json.arrayOf("meshes").any { mesh ->
+                mesh.jsonObject.arrayOf("primitives").any { "targets" in it.jsonObject }
+            }
         val external =
-            json.arrayOf("buffers").size != 1 ||
-                json.arrayOf("buffers").any { "uri" in it.jsonObject } ||
-                json.arrayOf("images").any { "uri" in it.jsonObject } ||
+            json.arrayOf("images").any { "uri" in it.jsonObject } ||
                 json.arrayOf("accessors").any { "sparse" in it.jsonObject }
-        return !unsupported && !external
+        return hasOneEmbeddedBuffer() && !unsupported && !morphs && !external
     }
+
+    private fun GlbFile.hasOneEmbeddedBuffer(): Boolean =
+        json.arrayOf("buffers").singleOrNull()?.let { "uri" !in it.jsonObject } == true
 
     private fun GlbFile.rootNodes(): List<Int> {
         val scene = json["scene"]?.jsonPrimitive?.intOrNull ?: 0
@@ -219,7 +226,8 @@ private class GlbFile(val json: JsonObject, val bin: ByteArray) {
         /** Null for anything but a GLB 2 with a JSON chunk and a binary chunk. */
         fun read(glb: ByteArray): GlbFile? {
             val textStart = HEADER_BYTES + CHUNK_HEADER_BYTES
-            val isGlb = glb.size >= textStart && glb.readIntLe(0) == GLB_MAGIC
+            val isGlb =
+                glb.size >= textStart && glb.readIntLe(0) == GLB_MAGIC && glb.readIntLe(INT_BYTES) == GLB_VERSION
             val textLength = if (isGlb) glb.readIntLe(HEADER_BYTES) else -1
             val binHeader = textStart + textLength
             val binStart = binHeader + CHUNK_HEADER_BYTES

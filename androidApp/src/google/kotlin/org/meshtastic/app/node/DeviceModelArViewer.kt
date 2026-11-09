@@ -171,6 +171,7 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
         screenMax: FloatArray?,
         screenFrame: MirrorFrame?,
         banana: ByteArray?,
+        bananaShown: Boolean,
         onBananaShownChange: (Boolean) -> Unit,
     ) = DeviceModelAr(
         glb,
@@ -178,7 +179,7 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
         notice,
         onDismiss,
         ArScreen(screenMin, screenMax, screenFrame),
-        ArBanana(banana, onBananaShownChange),
+        ArBanana(banana?.takeIf { bananaShown }, bananaShown, onBananaShownChange),
     )
 }
 
@@ -485,7 +486,7 @@ private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit, bana
                 modifier = Modifier.padding(start = 8.dp).weight(1f),
             )
             BananaToggle(
-                checked = banana.glb != null,
+                checked = banana.shown,
                 onCheckedChange = banana.onShownChange,
                 colors =
                 IconButtonDefaults.iconToggleButtonColors(
@@ -566,5 +567,5 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 /** The display glass in model coordinates and the live frame to draw on it; all null when there is nothing to show. */
 private class ArScreen(val glassMin: FloatArray?, val glassMax: FloatArray?, val frame: MirrorFrame?)
 
-/** The banana's GLB while it is shown, and the toggle that shows or hides it. */
-private class ArBanana(val glb: ByteArray?, val onShownChange: (Boolean) -> Unit)
+/** The banana's GLB while it is shown and loaded, whether it was asked for, and the toggle that shows or hides it. */
+private class ArBanana(val glb: ByteArray?, val shown: Boolean, val onShownChange: (Boolean) -> Unit)

@@ -141,12 +141,14 @@ fun DeviceModelDialog(
                 arViewer?.Content(
                     glb = it.glb,
                     title = title,
-                    notice = it.copyright,
+                    // With the banana merged in, its notice carries both credits.
+                    notice = (shown as? DeviceModelState.Ready)?.copyright ?: it.copyright,
                     onDismiss = { inAr = false },
                     screenMin = it.screen?.min,
                     screenMax = it.screen?.max,
                     screenFrame = screenFrame,
-                    banana = banana?.takeIf { bananaShown },
+                    banana = banana,
+                    bananaShown = bananaShown,
                     onBananaShownChange = { shown -> bananaShown = shown },
                 )
             }
