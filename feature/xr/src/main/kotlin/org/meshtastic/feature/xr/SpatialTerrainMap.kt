@@ -230,11 +230,20 @@ private fun TerrainEntities(
             awaitCancellation()
         } finally {
             wheelChanged(null)
-            (entities + plate + wheel + root).forEach { it.parent = null }
-            meshes.forEach { it.close() }
-            material.close()
+            destroy(entities + plate + wheel + root, meshes, material)
         }
     }
+}
+
+/**
+ * Entities go before the meshes and material they borrow: the native side aborts if either is released while an entity
+ * still holds it, and detaching an entity does not release it.
+ */
+@Suppress("DEPRECATION")
+private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: KhronosUnlitMaterial) {
+    entities.forEach { it.dispose() }
+    meshes.forEach { it.close() }
+    material.close()
 }
 
 /** A root beside the main panel's right edge, scaled so the table is its real size whatever the panel's scale. */
