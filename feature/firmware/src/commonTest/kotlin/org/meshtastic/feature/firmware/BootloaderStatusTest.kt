@@ -66,6 +66,12 @@ class BootloaderStatusTest {
     }
 
     @Test
+    fun `a major past one byte reads as unreported rather than truncated`() {
+        assertNull(decodeBootloaderVersion(0x01000001))
+        assertNull(decodeBootloaderVersion(-1))
+    }
+
+    @Test
     fun `0_9_2 means older than the first numbered release`() {
         assertEquals(InstalledBootloader.OlderThanFirstNumbered, decodeBootloaderVersion(packed(0, 9, 2)))
     }
@@ -103,6 +109,8 @@ class BootloaderStatusTest {
         assertNull(parsePlainBootloaderVersion(""))
         assertNull(parsePlainBootloaderVersion("2.6"))
         assertNull(parsePlainBootloaderVersion("2.6.0.1"))
+        assertNull(parsePlainBootloaderVersion("256.0.0"))
+        assertNull(parsePlainBootloaderVersion("99999999999.0.0"))
     }
 
     @Test
