@@ -33,11 +33,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.state.LaunchOptions
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ConnectionsRoute
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.connect
+import org.meshtastic.core.resources.connect_code_invalid
 import org.meshtastic.core.resources.deep_link_connect_message
 import org.meshtastic.core.resources.deep_link_connect_title
 import org.meshtastic.core.resources.deep_link_connect_with_pin_message
@@ -45,10 +49,14 @@ import org.meshtastic.core.resources.deep_link_disconnect_message
 import org.meshtastic.core.resources.deep_link_disconnect_title
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.blePairingPinFor
+import org.meshtastic.feature.connections.isLinkableAddress
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoute.Connections]. */
@@ -60,19 +68,39 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         // or `n` to disconnect, and a BLE address may carry the node's pairing PIN. The `connections` path is a
         // verified https://meshtastic.org app link, so any web page can fire one at us — confirm before re-pointing or
         // dropping the radio connection. Only a debug launch switch skips it.
+        val admits = { address: String -> isLinkableAddress(address, scanModel.showMockTransport.value) }
         var pendingAddress by
-            rememberSaveable(key.address, key.pin) { mutableStateOf(key.address?.takeIf(String::isNotBlank)) }
-        val pendingPin = blePairingPinFor(key.address, key.pin)
+            rememberSaveable(key.address, key.pin) {
+                mutableStateOf(key.address?.takeIf { it.isNotBlank() && admits(it) })
+            }
+        var pendingPinParam by rememberSaveable(key.address, key.pin) { mutableStateOf(key.pin) }
+        // The debug launch switch covers the link the app was started with, never a code scanned afterwards.
+        var pendingFromScan by rememberSaveable(key.address, key.pin) { mutableStateOf(false) }
+        val pendingPin = blePairingPinFor(pendingAddress, pendingPinParam)
         val launchOptions = koinInject<LaunchOptions>()
         // Not the prompt's own scope: the prompt leaves composition as soon as it is answered.
         val clipboard = LocalClipboard.current
         val scope = rememberCoroutineScope()
+        val showToast = rememberShowToastResource()
+
+        val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
+            val link = contents?.let(::connectLinkFrom)?.takeIf { it.address?.let(admits) == true }
+            if (link != null) {
+                pendingAddress = link.address
+                pendingPinParam = link.pin
+                pendingFromScan = true
+            } else if (contents != null) {
+                scope.launch { showToast(Res.string.connect_code_invalid) }
+            }
+        }
+        val scannerSupported = LocalBarcodeScannerSupported.current
+        val onScanConnectCode = barcodeScanner::startScan.takeIf { scannerSupported }
 
         pendingAddress?.let { address ->
             DeepLinkConnectPrompt(
                 address = address,
                 pin = pendingPin,
-                skipConfirmation = launchOptions.skipDeepLinkConfirmation,
+                skipConfirmation = launchOptions.skipDeepLinkConfirmation && !pendingFromScan,
                 onApply = {
                     if (it == NO_DEVICE_SELECTED) {
                         scanModel.disconnect()
@@ -96,8 +124,32 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
             onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },
+            onScanConnectCode = onScanConnectCode,
         )
     }
+}
+
+private val connectLinkPrefixes = listOf("$DEEP_LINK_BASE_URI/connections", "https://meshtastic.org/connections")
+
+/**
+ * The connect link a scanned QR code holds, or `null` when it holds anything else, including a `connections` link
+ * without a usable address. Only Meshtastic's own hosts count: unlike an OS link, a scanned code has passed no intent
+ * filter.
+ */
+internal fun connectLinkFrom(contents: String): ConnectionsRoute.Connections? {
+    val text = contents.trim()
+    val uri =
+        text
+            .takeIf { candidate -> connectLinkPrefixes.any { candidate.startsWith(it, ignoreCase = true) } }
+            ?.let {
+                try {
+                    CommonUri.parse(it)
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
+            }
+    val link = uri?.let(DeepLinkRouter::route)?.lastOrNull() as? ConnectionsRoute.Connections
+    return link?.takeIf { it.address?.let(::isLinkableAddress) == true }
 }
 
 /**

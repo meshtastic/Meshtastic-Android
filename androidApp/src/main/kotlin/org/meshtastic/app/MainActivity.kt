@@ -316,14 +316,10 @@ class MainActivity : AppCompatActivity() {
                         NfcAdapter.EXTRA_NDEF_MESSAGES,
                         NdefMessage::class.java,
                     )
-                if (rawMessages != null) {
-                    for (rawMsg in rawMessages) {
-                        val msg = rawMsg as NdefMessage
-                        for (record in msg.records) {
-                            record.toUri()?.let { handleMeshtasticUri(it) }
-                        }
-                    }
-                }
+                // Android matched the intent filter on the first record only, so a later record on the same tag must
+                // not be routed too.
+                val firstUri = rawMessages?.firstOrNull()?.let { it as NdefMessage }?.records?.firstOrNull()?.toUri()
+                (appLinkData ?: firstUri)?.let { handleMeshtasticUri(it) }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {

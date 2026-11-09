@@ -288,6 +288,7 @@ configure_critical_alerts
 configure_location_permissions
 configure_notification_permissions
 connect
+connect_code_invalid
 connect_radio_for_remote_admin
 connect_radio_to_change_settings
 connected
@@ -1854,6 +1855,7 @@ scan
 scan_bluetooth_devices
 scan_channels_nfc
 scan_channels_qr
+scan_connect_code
 scan_network_devices
 scan_nfc
 scan_nfc_text
