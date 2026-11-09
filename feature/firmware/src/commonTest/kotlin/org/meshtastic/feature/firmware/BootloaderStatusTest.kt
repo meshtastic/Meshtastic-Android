@@ -61,6 +61,11 @@ class BootloaderStatusTest {
     }
 
     @Test
+    fun `the value a RAK4631 on bootloader 2_6_0 reports decodes to 2_6_0`() {
+        assertEquals(InstalledBootloader.Known(KotlinVersion(2, 6, 0)), decodeBootloaderVersion(132608))
+    }
+
+    @Test
     fun `0_9_2 means older than the first numbered release`() {
         assertEquals(InstalledBootloader.OlderThanFirstNumbered, decodeBootloaderVersion(packed(0, 9, 2)))
     }

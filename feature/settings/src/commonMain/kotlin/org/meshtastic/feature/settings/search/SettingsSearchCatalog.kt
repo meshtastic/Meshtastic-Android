@@ -121,7 +121,10 @@ object SettingsSearchCatalog {
      * so a message the schema starts labelling cannot quietly go missing from search.
      */
     private val notSearchable: Map<String, String> =
-        mapOf("trafficmanagement" to "no settings screen offers these fields yet")
+        mapOf(
+            "trafficmanagement" to "no settings screen offers these fields yet",
+            "clientnotification" to "notification types the device raises, not settings",
+        )
 
     /**
      * Keys that name an enum *value* rather than a field, so search does not offer "Long Fast" as though it were a
