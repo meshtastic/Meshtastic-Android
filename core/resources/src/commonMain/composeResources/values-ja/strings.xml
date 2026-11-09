@@ -555,7 +555,6 @@
     <string name="firmware_gate_update">ファームウェアを更新</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="firmware_recovery_banner">%1$s の更新を完了</string>
-    <string name="firmware_recovery_ble_failed">Bluetooth 経由で更新を完了できませんでした。このデバイスの標準ブートローダーは、中断された更新を OTA で確実に完了できません。デバイスを復旧するには、USB でコンピューターに接続し、ベンダーのシリアル DFU ツール（例：adafruit-nrfutil）を使って再書き込みしてください。</string>
     <string name="firmware_recovery_button">ファームウェア更新を再開</string>
     <string name="firmware_recovery_dismiss">ファームウェアの復旧を閉じる</string>
     <string name="firmware_recovery_explanation">このデバイスは、完了しなかったファームウェア更新によりブートローダーモードになっています。近くに置いておくと、更新を完了するために再書き込みされます。</string>
@@ -632,7 +631,6 @@
     <string name="firmware_update_unsupported_transport">このデバイスでは、この接続方法でのファームウェア更新はサポートされていません。更新するには別の方法（例：Bluetooth）で接続してください。</string>
     <string name="firmware_update_unsupported_update_method">この更新方法では、ローカルのファームウェアファイルはサポートされていません。</string>
     <string name="firmware_update_uploading">ファームウェアをアップロードしています…</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s は通常、OTA 更新に対応していないブートローダーを搭載して出荷されます。OTA で書き込む前に、USB 経由で OTA 対応のブートローダーを書き込む必要がある場合があります。</string>
     <string name="firmware_update_usb_failed">USB 更新に失敗しました</string>
     <string name="firmware_update_usb_instruction_text">デバイスが DFU モードで再起動し、USB ドライブとして表示されているはずです（例：RAK4631）。\n\nファイル選択画面が開いたら、そのドライブのルートを選択してファームウェアファイルを保存してください。</string>
     <string name="firmware_update_usb_instruction_title">DFU USB ドライブを選択</string>

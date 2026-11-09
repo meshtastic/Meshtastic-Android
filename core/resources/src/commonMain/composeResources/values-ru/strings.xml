@@ -710,7 +710,6 @@
     <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
     <string name="firmware_maintenance_bootloader_last_fault">Загрузчик сообщил об ошибке: %1$s</string>
-    <string name="firmware_maintenance_bootloader_latest_hint">Последняя версия: %1$s. Установленная версия отображается после перезагрузки устройства в режиме обновления.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Загрузчик обновлён</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Обновлять нечего. Далее переустанавливается прошивка, что приведёт к перезагрузке устройства.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
@@ -724,12 +723,10 @@
     <string name="firmware_maintenance_unknown_softdevice">Это приложение не может подтвердить, какой стек Bluetooth использует это устройство, поэтому его стирание небезопасно. Вместо этого используй веб-флешер на flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">Это устройство не поддерживает стирание из приложения.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Обновить загрузчик</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">Это устанавливает обновлённый загрузчик на %1$s, что значительно ускоряет будущие обновления по Bluetooth. После этого прошивка переустанавливается.\n\nНе отключай устройство во время выполнения.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Обновить загрузчик?</string>
     <string name="firmware_maintenance_wrong_destination">Это расположение не является диском обновления устройства, поэтому на устройство ничего не записано. Выбери съёмный диск, который появляется, когда устройство находится в режиме обновления.</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
     <string name="firmware_recovery_banner">Завершение обновления %1$s</string>
-    <string name="firmware_recovery_ble_failed">Не удалось завершить обновление через Bluetooth. Стоковый загрузчик этого устройства не может надежно завершить прерванное обновление по воздуху. Подключи его к компьютеру через USB и перепрошей с помощью фирменного серийного DFU-инструмента (например, adafruit-nrfutil), чтобы восстановить устройство.</string>
     <string name="firmware_recovery_button">Возобновить обновление прошивки</string>
     <string name="firmware_recovery_dismiss">Отменить восстановление прошивки</string>
     <string name="firmware_recovery_explanation">Это устройство находится в режиме загрузчика из-за того, что обновление прошивки не завершилось. Держи его рядом, и оно будет перепрошито для завершения обновления.</string>
@@ -785,7 +782,6 @@
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
     <string name="firmware_update_preparing_flash">Подготовка устройства: стирание флеш-памяти. Это может занять до минуты...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 загрузчик .zip от производителя необходимо прошить с помощью последовательного инструмента DFU, такого как adafruit-nrfutil — копирование этого .zip на диск устройства не сработает. Либо подключи это устройство по USB и используйте обновление загрузчика в этом приложении.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
     <string name="firmware_update_requires_bin">Для %1$s требуется файл .bin.</string>
@@ -797,7 +793,6 @@
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
-    <string name="firmware_update_slow_bootloader_hint">Загрузка обновлений в загрузчик этого устройства происходит медленно. Установка загрузчика Meshtastic nRF52 позволяет значительно ускорить загрузку обновлений по Bluetooth.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_start_timed_out">Не удалось запустить обновление. Попробуй обновить снова.</string>
@@ -816,7 +811,6 @@
     <string name="firmware_update_unsupported_transport">Обновления прошивки не поддерживаются через это соединение для данного устройства. Подключитесь другим способом (например, через Bluetooth), чтобы обновить.</string>
     <string name="firmware_update_unsupported_update_method">Локальные файлы прошивки для этого метода обновления не поддерживаются.</string>
     <string name="firmware_update_uploading">Загрузка прошивки...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="firmware_update_usb_failed">Ошибка обновления USB</string>
     <string name="firmware_update_usb_instruction_text">Ваше устройство перезагрузилось в режим DFU и должно отображаться как USB-накопитель (например, RAK4631).\n\nКогда откроется окно выбора файлов, пожалуйста, выберите корневой каталог этого диска, чтобы сохранить файл прошивки.</string>
     <string name="firmware_update_usb_instruction_title">Выберите DFU USB-диск</string>

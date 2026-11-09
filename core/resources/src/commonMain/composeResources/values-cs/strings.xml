@@ -567,12 +567,10 @@
     <string name="firmware_maintenance_unknown_softdevice">Tato aplikace nemůže ověřit, který Bluetooth zásobník zařízení používá, takže jeho vymazání není bezpečné. Místo toho použijte nástroj pro nahrání firmwaru na flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">Toto zařízení nepodporuje vymazání z aplikace.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Aktualizovat bootloader</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">Do zařízení %1$s se nainstaluje nový bootloader, který výrazně urychlí budoucí aktualizace přes Bluetooth. Poté se znovu nainstaluje firmware.\n\nBěhem procesu zařízení neodpojujte.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Aktualizovat bootloader?</string>
     <string name="firmware_maintenance_wrong_destination">Toto umístění není aktualizační disk zařízení, takže do zařízení nebylo nic zapsáno. Vyberte vyměnitelný disk, který se zobrazí, když je zařízení v režimu aktualizace.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="firmware_recovery_banner">Dokončit aktualizaci %1$s</string>
-    <string name="firmware_recovery_ble_failed">Aktualizaci se nepodařilo dokončit přes Bluetooth. Původní bootloader tohoto zařízení nedokáže spolehlivě dokončit přerušenou bezdrátovou aktualizaci. Připojte zařízení k počítači pomocí USB a znovu nahrajte firmware pomocí sériového DFU nástroje výrobce (například adafruit-nrfutil), aby bylo zařízení obnoveno.</string>
     <string name="firmware_recovery_button">Pokračovat v aktualizaci firmware</string>
     <string name="firmware_recovery_dismiss">Zrušit obnovení firmwaru</string>
     <string name="firmware_recovery_explanation">Toto zařízení je v režimu bootloaderu po nedokončené aktualizaci firmwaru. Nechte jej poblíž a firmware bude znovu nahrán, aby se aktualizace dokončila.</string>
@@ -625,7 +623,6 @@
     <string name="firmware_update_ota_failed">Aktualizace OTA selhala: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA zavaděč tohoto zařízení odmítl požadovaný způsob aktualizace: %1$s</string>
     <string name="firmware_update_preparing_flash">Příprava zařízení: mazání flash paměti. Může trvat až minutu...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">U zařízení RAK WisBlock RAK4631 je nutné bootloader výrobce ve formátu .zip nahrát pomocí sériového DFU nástroje, jako je adafruit-nrfutil – pouhé zkopírování souboru .zip na disk zařízení nebude fungovat. Případně připojte zařízení přes USB a použijte funkci aktualizace bootloaderu v této aplikaci.</string>
     <string name="firmware_update_rebooting">Restartuji do DFU...</string>
     <string name="firmware_update_release_notes">Poznámky k vydání</string>
     <string name="firmware_update_requires_bin">Pro zařízení %1$s je vyžadován soubor .bin určený pro tento model.</string>
@@ -652,7 +649,6 @@
     <string name="firmware_update_unsupported_transport">Přes toto připojení nelze u tohoto zařízení provést aktualizaci firmwaru. Připojte se jiným způsobem (například přes Bluetooth).</string>
     <string name="firmware_update_unsupported_update_method">Tento způsob aktualizace nepodporuje místní soubory s firmwarem.</string>
     <string name="firmware_update_uploading">Nahrávám firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s je obvykle dodáván s bootloaderem, který nepodporuje OTA aktualizace. Před nahráváním přes OTA může být nutné nejprve přes USB nahrát bootloader s podporou OTA.</string>
     <string name="firmware_update_usb_failed">Aktualizace přes USB selhala</string>
     <string name="firmware_update_usb_instruction_text">Vaše zařízení bylo restartováno do režimu DFU a mělo by se zobrazit jako USB disk (např. RAK4631).\n\nKdyž se otevře výběr souboru, vyberte prosím kořenový adresář pro uložení souboru firmwaru.</string>
     <string name="firmware_update_usb_instruction_title">Vyberte DFU USB disk</string>

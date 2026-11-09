@@ -447,7 +447,6 @@
     <string name="firmware_gate_update">Актуализиране на фърмуера</string>
     <string name="firmware_maintenance_bootloader_available">Последен: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Инсталиран: %1$s</string>
-    <string name="firmware_maintenance_bootloader_latest_hint">Последна версия: %1$s. Инсталираната версия се показва, след като устройството се рестартира в режим на актуализация.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Буутлоудърът е актуален</string>
     <string name="firmware_maintenance_no_release">Първо изберете версия на фърмуера, за да може устройството да бъде преинсталирано след изтриване.</string>
     <string name="firmware_maintenance_unsupported_device">Това устройство не поддържа изтриване от приложението.</string>
@@ -517,7 +516,6 @@
     <string name="firmware_update_unsupported_transport">Актуализациите на фърмуера не се поддържат чрез тази връзка за това устройство. За да извършите актуализация, използвайте друг начин на свързване (напр. Bluetooth).</string>
     <string name="firmware_update_unsupported_update_method">Локални файлове с фърмуер не се поддържат за този метод на актуализация.</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s обикновено се доставя с буутлоудър, който не поддържа OTA актуализации. Може да се наложи да флашнете OTA - съвместим буутлоудър през USB, преди да флашнете OTA.</string>
     <string name="firmware_update_usb_failed">Актуализацията през USB не е успешна</string>
     <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
     <string name="firmware_update_validating">Валидиране на фърмуера...</string>

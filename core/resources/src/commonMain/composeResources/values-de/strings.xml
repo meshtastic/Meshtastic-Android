@@ -518,7 +518,6 @@
     <string name="firmware_gate_title">Firmware-Aktualisierung erforderlich</string>
     <string name="firmware_gate_update">Firmware updaten</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
-    <string name="firmware_recovery_ble_failed">Das Update konnte nicht über Bluetooth abgeschlossen werden. Der Standard-Bootloader dieses Geräts kann ein unterbrochenes Over-the-Air-Update nicht zuverlässig zu Ende führen. Schließen Sie das Gerät per USB an einen Computer an und flashen Sie es neu mit dem seriellen DFU-Tool des Herstellers (z. B. adafruit-nrfutil), um es wiederherzustellen.</string>
     <string name="firmware_recovery_button">Firmware-Update fortführen</string>
     <string name="firmware_too_old">Firmware Aktualisierung erforderlich.</string>
     <string name="firmware_update_almost_there">Fast fertig...</string>
@@ -587,7 +586,6 @@
     <string name="firmware_update_unsupported_transport">Firmware Updates sind auf diesem Gerät über diese Verbindung nicht unterstützt. Verbinde dich auf eine andere Art (z.B. Bluetooth) zum Updaten.</string>
     <string name="firmware_update_unsupported_update_method">Lokale Firmware-Dateien sind für diese Update-Methode nicht unterstützt.</string>
     <string name="firmware_update_uploading">Firmware aktualisieren...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="firmware_update_usb_failed">USB Aktualisierung fehlgeschlagen</string>
     <string name="firmware_update_usb_instruction_text">Ihr Gerät wurde im DFU Modus neu gestartet und sollte als USB Laufwerk (z. B. RAK4631) angezeigt werden.\n\nWenn sich die Dateiauswahl öffnet, wählen Sie bitte das Stammverzeichnis dieses Laufwerks aus, um die Firmware Datei zu speichern.</string>
     <string name="firmware_update_usb_instruction_title">DFU USB Laufwerk auswählen</string>
