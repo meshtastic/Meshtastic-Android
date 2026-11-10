@@ -45,12 +45,20 @@ class ParticulateAxisRangeTest {
 
     @Test
     fun co2IsOnItsOwnAxis() {
-        assertEquals(
-            listOf(false, false, false, true, false),
-            AirQuality.entries.map {
+        val onEndAxis =
+            AirQuality.entries.filter {
                 it.axisPosition == com.patrykandpatrick.vico.compose.cartesian.axis.Axis.Position.Vertical.End
-            },
-        )
+            }
+
+        assertEquals(listOf(AirQuality.CO2), onEndAxis)
+    }
+
+    @Test
+    fun theStartAxisCarriesAUnitOnlyWhenItsSeriesShareOne() {
+        assertEquals("µg/m³", startAxisUnit(listOf(AirQuality.PM1_0, AirQuality.PM2_5, AirQuality.CO2)))
+        assertEquals("", startAxisUnit(listOf(AirQuality.PM2_5, AirQuality.AQI)))
+        assertEquals("", startAxisUnit(listOf(AirQuality.AQI)))
+        assertEquals("", startAxisUnit(listOf(AirQuality.CO2)))
     }
 
     @Test

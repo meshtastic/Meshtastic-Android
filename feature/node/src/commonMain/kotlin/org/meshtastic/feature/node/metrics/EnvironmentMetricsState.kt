@@ -260,6 +260,16 @@ internal fun environmentAxisRange(
     else -> null
 }
 
+private const val WHOLE_LABEL_MIN_SPAN = 8.0
+private const val ONE_DECIMAL_LABEL_MIN_SPAN = 0.8
+
+/** Decimal places for axis labels over a Y range [span] wide, so neighboring ticks never round to the same text. */
+internal fun axisLabelDecimals(span: Double): Int = when {
+    span >= WHOLE_LABEL_MIN_SPAN -> 0
+    span >= ONE_DECIMAL_LABEL_MIN_SPAN -> 1
+    else -> 2
+}
+
 /**
  * @param metrics the [List] of [Telemetry]
  * @param shouldPlot a [List] the size of [Environment] used to determine if a metric should be plotted

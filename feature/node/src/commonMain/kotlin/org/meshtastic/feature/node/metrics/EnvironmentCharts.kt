@@ -49,6 +49,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.meshtastic.core.common.util.MeasureUnitKind
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.VOLT_SYMBOL
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.UnitConversions
@@ -372,7 +373,10 @@ private fun EnvironmentGroupChart(
         startAxis =
         VerticalAxis.rememberStart(
             label = ChartStyling.rememberAxisLabel(color = axisColor),
-            valueFormatter = { _, value, _ -> formatString("%.0f", value) + unit },
+            valueFormatter = { context, value, position ->
+                val decimals = axisLabelDecimals(context.ranges.getYRange(position).length)
+                NumberFormatter.format(value, decimals) + unit
+            },
         ),
         bottomAxis = CommonCharts.rememberBottomTimeAxis(),
         marker = marker,

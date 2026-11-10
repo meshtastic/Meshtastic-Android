@@ -95,7 +95,7 @@ enum class Iaq(val color: Color, val label: StringResource, val range: IntRange)
 }
 
 fun getIaq(iaq: Int): Iaq? = when {
-    iaq < 0 -> null
+    iaq == Int.MIN_VALUE -> null
     iaq in Iaq.Excellent.range -> Iaq.Excellent
     iaq in Iaq.Good.range -> Iaq.Good
     iaq in Iaq.LightlyPolluted.range -> Iaq.LightlyPolluted

@@ -145,6 +145,10 @@ internal fun particulateAxisRange(dataMax: Double): Pair<Double, Double> {
 internal fun particulateAxisLabel(value: Double, unit: String): String =
     "${NumberFormatter.format(value.coerceAtLeast(0.0).toFloat(), 0)} $unit".trimEnd()
 
+/** Unit for the start axis: the one unit its series share, or "" when they mix, as µg/m³ and the unitless AQI do. */
+internal fun startAxisUnit(plotted: Collection<AirQuality>): String =
+    plotted.filter { it != AirQuality.CO2 }.map { it.unit }.distinct().singleOrNull().orEmpty()
+
 private val particulateRangeProvider =
     object : CartesianLayerRangeProvider {
         override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = particulateAxisRange(maxY).first
@@ -359,13 +363,7 @@ private fun AirQualityChart(
         val nonNullLayers = remember(chartLayers) { chartLayers.filterNotNull() }
         val hasParticulateAxis = layers.any { (metric, _) -> metric != AirQuality.CO2 }
         val hasCo2Axis = layers.any { (metric, _) -> metric == AirQuality.CO2 }
-        val startAxisUnit =
-            layers
-                .map { (metric, _) -> metric }
-                .filter { it != AirQuality.CO2 && it != AirQuality.AQI }
-                .map { it.unit }
-                .firstOrNull()
-                .orEmpty()
+        val startAxisUnit = startAxisUnit(layers.map { (metric, _) -> metric })
 
         if (nonNullLayers.isNotEmpty()) {
             GenericMetricChart(

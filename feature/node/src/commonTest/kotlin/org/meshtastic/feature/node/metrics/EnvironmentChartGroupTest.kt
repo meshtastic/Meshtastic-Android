@@ -129,6 +129,15 @@ class EnvironmentChartGroupTest {
     }
 
     @Test
+    fun narrowAxesGetEnoughDecimalsToTellTicksApart() {
+        assertEquals(0, axisLabelDecimals(100.0))
+        assertEquals(0, axisLabelDecimals(8.0))
+        assertEquals(1, axisLabelDecimals(2.0))
+        assertEquals(1, axisLabelDecimals(0.8))
+        assertEquals(2, axisLabelDecimals(0.3))
+    }
+
+    @Test
     fun otherGroupsAutoscale() {
         assertNull(environmentAxisRange(EnvironmentChartGroup.LUX, 0.0, 800.0))
         assertNull(environmentAxisRange(EnvironmentChartGroup.WIND, 0.0, 12.0))
