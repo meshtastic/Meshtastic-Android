@@ -135,6 +135,7 @@ class SchemaFieldCoverageTest {
             "Config.SecurityConfig.private_key",
             "Config.SecurityConfig.public_key",
             "Config.SecurityConfig.serial_enabled",
+            "Config.TransportConfig.enabled",
             "ModuleConfig.AmbientLightingConfig.blue",
             "ModuleConfig.AmbientLightingConfig.current",
             "ModuleConfig.AmbientLightingConfig.green",

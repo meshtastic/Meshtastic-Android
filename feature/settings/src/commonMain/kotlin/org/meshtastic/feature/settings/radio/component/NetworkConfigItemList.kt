@@ -71,6 +71,7 @@ import org.meshtastic.core.resources.schema_network_wifi_enabled_description
 import org.meshtastic.core.resources.schema_network_wifi_psk
 import org.meshtastic.core.resources.schema_network_wifi_ssid
 import org.meshtastic.core.resources.schema_network_wifi_ssid_description
+import org.meshtastic.core.resources.schema_transport_enabled
 import org.meshtastic.core.resources.udp_enabled
 import org.meshtastic.core.resources.wifi_config
 import org.meshtastic.core.resources.wifi_ip
@@ -92,6 +93,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.TransportConfig.Transport
 import org.meshtastic.proto.enabled_protocols
 
 /** The one network field the Ethernet card renders; every other non-Wi-Fi field lives in the advanced card. */
@@ -115,6 +117,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val networkConfig = state.radioConfig.network ?: Config.NetworkConfig.Builder().build()
     val formState = rememberConfigState(initialValue = networkConfig)
+    val transportConfig = state.radioConfig.transport ?: Config.TransportConfig.Builder().build()
+    val transportState = rememberConfigState(initialValue = transportConfig)
+    val supportedTransports = state.metadata?.supported_transports.orEmpty()
 
     var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showScanErrorDialog) {
@@ -179,9 +184,10 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { transportState.isDirty },
+        onDiscard = { transportState.reset() },
         onSave = {
-            val config = Config.Builder().also { wb -> wb.network = it }.build()
-            viewModel.setConfig(config)
+            viewModel.setConfigs(networkSaveConfigs(it, networkConfig, transportState.value, transportConfig))
         },
     ) {
         // Display device connection status
@@ -325,7 +331,17 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     },
                 )
                 HorizontalDivider()
-                if (capabilities.offers(Config.NetworkConfig.enabled_protocols)) {
+                if (supportedTransports.isNotEmpty()) {
+                    TransportSwitches(
+                        supported = supportedTransports,
+                        enabledTransports = transportState.value.enabled,
+                        enabled = state.connected,
+                        onEnabledTransportsChange = { transports ->
+                            transportState.value =
+                                transportState.value.newBuilder().also { wb -> wb.enabled = transports }.build()
+                        },
+                    )
+                } else if (capabilities.offers(Config.NetworkConfig.enabled_protocols)) {
                     // One switch per bearer bit, so a firmware or node that carries more bits shows more switches.
                     protocolFlagSwitches(formState.value.enabled_protocols).forEach { flagSwitch ->
                         val isUdp = flagSwitch.flag == Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST
@@ -429,5 +445,32 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 }
             }
         }
+    }
+}
+
+/** One switch per transport the node lists, each backed by its entry in `transport.enabled`. */
+@Composable
+private fun TransportSwitches(
+    supported: List<Transport>,
+    enabledTransports: List<Transport>,
+    enabled: Boolean,
+    onEnabledTransportsChange: (List<Transport>) -> Unit,
+) {
+    transportSwitches(supported, enabledTransports).forEach { transportSwitch ->
+        val transport = transportSwitch.transport
+        SwitchPreference(
+            title = transport.schemaLabelRes()?.let { stringResource(it) } ?: transport.name,
+            modifier = Modifier.settingsField(Res.string.schema_transport_enabled),
+            summary =
+            if (transport == Transport.TRANSPORT_MULTICAST_UDP) {
+                stringResource(Res.string.config_network_udp_enabled_summary)
+            } else {
+                ""
+            },
+            checked = transportSwitch.checked,
+            onCheckedChange = { on -> onEnabledTransportsChange(toggleTransport(enabledTransports, transport, on)) },
+            enabled = enabled,
+        )
+        HorizontalDivider()
     }
 }

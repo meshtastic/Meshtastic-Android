@@ -92,7 +92,7 @@ object SettingsSearchCatalog {
             ConfigRoute.DEVICE.route to listOf("device"),
             ConfigRoute.POSITION.route to listOf("position"),
             ConfigRoute.POWER.route to listOf("power"),
-            ConfigRoute.NETWORK.route to listOf("network"),
+            ConfigRoute.NETWORK.route to listOf("network", "transport"),
             ConfigRoute.DISPLAY.route to listOf("display"),
             ConfigRoute.LORA.route to listOf("lora"),
             ConfigRoute.BLUETOOTH.route to listOf("bluetooth"),
