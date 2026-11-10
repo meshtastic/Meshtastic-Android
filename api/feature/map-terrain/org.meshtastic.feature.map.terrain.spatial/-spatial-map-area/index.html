@@ -1,0 +1,284 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SpatialMapArea</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map-terrain::org.meshtastic.feature.map.terrain.spatial/SpatialMapArea///PointingToDeclaration//787934393">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map-terrain</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.terrain.spatial</a><span class="delimiter">/</span><span class="current">SpatialMapArea</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Spatial</span><wbr><span>Map</span><wbr><span><span>Area</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">SpatialMapArea</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/commonMain/kotlin/org/meshtastic/feature/map/terrain/spatial/SpatialMapArea.kt#L43">source</a>)</span></span></div><p class="paragraph">Which circle the spatial map shows. The circle is rebuilt only when it has to be: a node outside it, or the mesh having shrunk well inside it, so the terrain is not rebuilt on every refresh.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-2107233469%2FClasslikes%2F787934393" anchor-label="Fitted" id="-2107233469%2FClasslikes%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fitted/index.html"><span><span>Fitted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2107233469%2FClasslikes%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-fitted/index.html">Fitted</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-spatial-node-snapshot/index.html">SpatialNodeSnapshot</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>outsideCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The nodes the map shows and how many were left out.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-747910031%2FClasslikes%2F787934393" anchor-label="Selection" id="-747910031%2FClasslikes%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-selection/index.html"><span><span>Selection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-747910031%2FClasslikes%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-selection/index.html">Selection</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>coordinates<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-lat-lon/index.html">LatLon</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>outsideCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-844332658%2FProperties%2F787934393" anchor-label="MAX_RADIUS_METERS" id="-844332658%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-a-x_-r-a-d-i-u-s_-m-e-t-e-r-s.html"><span>MAX_</span><wbr><span>RADIUS_</span><wbr><span>METERS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-844332658%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-a-x_-r-a-d-i-u-s_-m-e-t-e-r-s.html">MAX_RADIUS_METERS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Nodes farther than this from the anchor are left out: a mesh with MQTT nodes on another continent cannot be a one-meter model.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1987090143%2FProperties%2F787934393" anchor-label="MINIMUM_REBUILD_INTERVAL_MILLIS" id="1987090143%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-i-n-i-m-u-m_-r-e-b-u-i-l-d_-i-n-t-e-r-v-a-l_-m-i-l-l-i-s.html"><span>MINIMUM_</span><wbr><span>REBUILD_</span><wbr><span>INTERVAL_</span><wbr><span>MILLIS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1987090143%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-i-n-i-m-u-m_-r-e-b-u-i-l-d_-i-n-t-e-r-v-a-l_-m-i-l-l-i-s.html">MINIMUM_REBUILD_INTERVAL_MILLIS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1278634469%2FProperties%2F787934393" anchor-label="SHRINK_RATIO" id="-1278634469%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-h-r-i-n-k_-r-a-t-i-o.html"><span>SHRINK_</span><wbr><span>RATIO</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1278634469%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-h-r-i-n-k_-r-a-t-i-o.html">SHRINK_RATIO</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.5</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1169759968%2FFunctions%2F787934393" anchor-label="downloadedMapCircle" id="1169759968%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="downloaded-map-circle.html"><span>downloaded</span><wbr><span>Map</span><wbr><span><span>Circle</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1169759968%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="downloaded-map-circle.html"><span class="token function">downloadedMapCircle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">regions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-spatial-offline-region/index.html">SpatialOfflineRegion</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-spatial-circle/index.html">SpatialCircle</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">With no node positions, the circle around the newest offline map the user downloaded, so the table shows that place. The map the app keeps for the mesh itself is left out.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-915142271%2FFunctions%2F787934393" anchor-label="fit" id="-915142271%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fit.html"><span><span>fit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-915142271%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="fit.html"><span class="token function">fit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-spatial-node-snapshot/index.html">SpatialNodeSnapshot</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">pinned<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptySet()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-fitted/index.html">SpatialMapArea.Fitted</a></div><div class="brief "><p class="paragraph">The nodes the map shows: when some are too far from the connected radio, those are left out, except <a href="fit.html">pinned</a> ones. With no connected radio every node stays.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="210431159%2FFunctions%2F787934393" anchor-label="meshCircle" id="210431159%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mesh-circle.html"><span>mesh</span><wbr><span><span>Circle</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="210431159%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="mesh-circle.html"><span class="token function">meshCircle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-spatial-node-snapshot/index.html">SpatialNodeSnapshot</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-spatial-circle/index.html">SpatialCircle</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The circle around the whole mesh, before any zoom: what terrain downloads cover.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-789705447%2FFunctions%2F787934393" anchor-label="next" id="-789705447%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="next.html"><span><span>next</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-789705447%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="next.html"><span class="token function">next</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">current<span class="token operator">: </span><a href="../-spatial-circle/index.html">SpatialCircle</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">candidate<span class="token operator">: </span><a href="../-spatial-circle/index.html">SpatialCircle</a><span class="token punctuation">, </span></span><span class="parameter ">nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-lat-lon/index.html">LatLon</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">lastChangeMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">nowMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-spatial-circle/index.html">SpatialCircle</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The circle to use next: null to keep the current one.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-710138784%2FFunctions%2F787934393" anchor-label="select" id="-710138784%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="select.html"><span><span>select</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-710138784%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="select.html"><span class="token function">select</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">coordinates<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-lat-lon/index.html">LatLon</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">anchor<span class="token operator">: </span><a href="../-lat-lon/index.html">LatLon</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-selection/index.html">SpatialMapArea.Selection</a></div><div class="brief "><p class="paragraph">The coordinates that fit around the anchor (the connected radio, else the centroid).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

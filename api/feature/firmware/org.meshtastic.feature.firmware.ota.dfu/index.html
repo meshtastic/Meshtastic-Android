@@ -99,7 +99,22 @@
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="tableheader">Types</h2>
-        <div class="table"><a data-name="-1259597509%2FClasslikes%2F-803617142" anchor-label="DfuException" id="-1259597509%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+        <div class="table"><a data-name="2070452884%2FClasslikes%2F-803617142" anchor-label="BootloaderIdentity" id="2070452884%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bootloader-identity/index.html"><span>Bootloader</span><wbr><span><span>Identity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2070452884%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-bootloader-identity/index.html">BootloaderIdentity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>model<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>firmwareRevision<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">What a bootloader in DFU mode says about itself over DIS; each field is null when absent or unreadable.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1259597509%2FClasslikes%2F-803617142" anchor-label="DfuException" id="-1259597509%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -110,6 +125,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-dfu-exception/index.html">DfuException</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-exception/index.html">Exception</a></div><div class="brief "><p class="paragraph">Errors specific to the Nordic Secure DFU protocol.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-860462545%2FClasslikes%2F-803617142" anchor-label="DfuImage" id="-860462545%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-dfu-image/index.html"><span>Dfu</span><wbr><span><span>Image</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-860462545%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-dfu-image/index.html">DfuImage</a></div><div class="brief "><p class="paragraph">Which images a DFU package's single <code class="lang-kotlin">.bin</code> carries, and so what <code class="lang-kotlin">START_DFU</code> announces.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -154,7 +184,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-dfu-zip-package/index.html">DfuZipPackage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>initPacket<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>firmware<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Contents extracted from a Nordic DFU .zip package.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-dfu-zip-package/index.html">DfuZipPackage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>initPacket<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>firmware<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>image<span class="token operator">: </span><a href="-dfu-image/index.html">DfuImage</a><span class="token operator"> = </span>DfuImage.Application</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Contents extracted from a Nordic DFU .zip package.</p></div></div></div>
                 </div>
               </div>
             </div>

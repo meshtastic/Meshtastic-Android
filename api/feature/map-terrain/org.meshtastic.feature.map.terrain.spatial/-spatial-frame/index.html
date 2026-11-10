@@ -1,0 +1,333 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SpatialFrame</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map-terrain::org.meshtastic.feature.map.terrain.spatial/SpatialFrame///PointingToDeclaration//787934393">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map-terrain</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.terrain.spatial</a><span class="delimiter">/</span><span class="current">SpatialFrame</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Spatial</span><wbr><span><span>Frame</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">SpatialFrame</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>bounds<span class="token operator">: </span><a href="../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/commonMain/kotlin/org/meshtastic/feature/map/terrain/spatial/SpatialFrame.kt#L46">source</a>)</span></span></div><p class="paragraph">The local frame a spatial map is built in: meters from the center of a geographic box, with x east, y up and z south (north is away from a viewer standing south of the model). The box is small enough that a flat-earth conversion around its center is accurate to well under a meter, which is finer than any mesh position.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1849609385%2FConstructors%2F787934393" anchor-label="SpatialFrame" id="-1849609385%2FConstructors%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-spatial-frame.html"><span>Spatial</span><wbr><span><span>Frame</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1849609385%2FConstructors%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1315405619%2FClasslikes%2F787934393" anchor-label="Companion" id="-1315405619%2FClasslikes%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1315405619%2FClasslikes%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="506585983%2FProperties%2F787934393" anchor-label="bounds" id="506585983%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="bounds.html"><span><span>bounds</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="506585983%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="bounds.html">bounds</a><span class="token operator">: </span><a href="../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1233700051%2FProperties%2F787934393" anchor-label="centerLatitude" id="1233700051%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="center-latitude.html"><span>center</span><wbr><span><span>Latitude</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1233700051%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="center-latitude.html">centerLatitude</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1169609004%2FProperties%2F787934393" anchor-label="centerLongitude" id="1169609004%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="center-longitude.html"><span>center</span><wbr><span><span>Longitude</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1169609004%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="center-longitude.html">centerLongitude</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="524791609%2FProperties%2F787934393" anchor-label="depthMeters" id="524791609%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="depth-meters.html"><span>depth</span><wbr><span><span>Meters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="524791609%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="depth-meters.html">depthMeters</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Depth (north-south) of the box in meters.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1120190916%2FProperties%2F787934393" anchor-label="metersPerDegreeLongitude" id="1120190916%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="meters-per-degree-longitude.html"><span>meters</span><wbr><span>Per</span><wbr><span>Degree</span><wbr><span><span>Longitude</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1120190916%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="meters-per-degree-longitude.html">metersPerDegreeLongitude</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Meters per degree of longitude at the center latitude.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2111744982%2FProperties%2F787934393" anchor-label="widthMeters" id="2111744982%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="width-meters.html"><span>width</span><wbr><span><span>Meters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2111744982%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="width-meters.html">widthMeters</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Width (east-west) of the box in meters.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1998567555%2FFunctions%2F787934393" anchor-label="coordinate" id="1998567555%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="coordinate.html"><span><span>coordinate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1998567555%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="coordinate.html"><span class="token function">coordinate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">x<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">z<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-lat-lon/index.html">LatLon</a></div><div class="brief "><p class="paragraph">The coordinate at a local x/z position.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1687997520%2FFunctions%2F787934393" anchor-label="latitudeAtMercatorFraction" id="1687997520%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="latitude-at-mercator-fraction.html"><span>latitude</span><wbr><span>At</span><wbr><span>Mercator</span><wbr><span><span>Fraction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1687997520%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="latitude-at-mercator-fraction.html"><span class="token function">latitudeAtMercatorFraction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">v<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Latitude at a Mercator fraction (0 = north edge, 1 = south edge) of the box.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1971260643%2FFunctions%2F787934393" anchor-label="localPosition" id="-1971260643%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="local-position.html"><span>local</span><wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1971260643%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="local-position.html"><span class="token function">localPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">coordinate<span class="token operator">: </span><a href="../-lat-lon/index.html">LatLon</a><span class="token punctuation">, </span></span><span class="parameter ">altitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-vec3/index.html">Vec3</a></div><br><div class="symbol monospace"><span class="token keyword">fun </span><a href="local-position.html"><span class="token function">localPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">altitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-vec3/index.html">Vec3</a></div><div class="brief "><p class="paragraph">Local position of a coordinate at a height in meters above sea level.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1942606370%2FFunctions%2F787934393" anchor-label="longitudeAtFraction" id="1942606370%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="longitude-at-fraction.html"><span>longitude</span><wbr><span>At</span><wbr><span><span>Fraction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1942606370%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="longitude-at-fraction.html"><span class="token function">longitudeAtFraction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">u<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="812144214%2FFunctions%2F787934393" anchor-label="mercatorFraction" id="812144214%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mercator-fraction.html"><span>mercator</span><wbr><span><span>Fraction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="812144214%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="mercator-fraction.html"><span class="token function">mercatorFraction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Fraction (0...1) across the box, west to east and north to south, in Web Mercator. Used to line vertices up with a Mercator map image of the same box. Returns (u, v).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

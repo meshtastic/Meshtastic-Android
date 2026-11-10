@@ -1,0 +1,310 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Companion</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map-terrain::org.meshtastic.feature.map.terrain.spatial/SpatialTerrainAutoDecision.Companion///PointingToDeclaration//787934393">
+  <div class="breadcrumbs"><a href="../../../index.html">feature-map-terrain</a><span class="delimiter">/</span><a href="../../index.html">org.meshtastic.feature.map.terrain.spatial</a><span class="delimiter">/</span><a href="../index.html">SpatialTerrainAutoDecision</a><span class="delimiter">/</span><span class="current">Companion</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Companion</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-terrain/src/commonMain/kotlin/org/meshtastic/feature/map/terrain/spatial/SpatialTerrainDownload.kt#L96">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-394265605%2FProperties%2F787934393" anchor-label="BASEMAP_BYTES_PER_SQUARE_KM" id="-394265605%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-a-s-e-m-a-p_-b-y-t-e-s_-p-e-r_-s-q-u-a-r-e_-k-m.html"><span>BASEMAP_</span><wbr><span>BYTES_</span><wbr><span>PER_</span><wbr><span>SQUARE_</span><wbr><span>KM</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-394265605%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-a-s-e-m-a-p_-b-y-t-e-s_-p-e-r_-s-q-u-a-r-e_-k-m.html">BASEMAP_BYTES_PER_SQUARE_KM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Rough size of the street map per km². Urban areas, so rural meshes come in well under it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-401729295%2FProperties%2F787934393" anchor-label="COVERAGE_THRESHOLD" id="-401729295%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-v-e-r-a-g-e_-t-h-r-e-s-h-o-l-d.html"><span>COVERAGE_</span><wbr><span>THRESHOLD</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401729295%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-v-e-r-a-g-e_-t-h-r-e-s-h-o-l-d.html">COVERAGE_THRESHOLD</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">1.0</span></div><div class="brief "><p class="paragraph">Every sample must be covered: the volume should show relief edge to edge.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-648500120%2FProperties%2F787934393" anchor-label="MANAGER" id="-648500120%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-a-n-a-g-e-r.html"><span><span>MANAGER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-648500120%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-a-n-a-g-e-r.html">MANAGER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The owner tag the spatial map puts on the offline region it keeps.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1513925199%2FProperties%2F787934393" anchor-label="MAX_SPAN_METERS" id="-1513925199%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-a-x_-s-p-a-n_-m-e-t-e-r-s.html"><span>MAX_</span><wbr><span>SPAN_</span><wbr><span>METERS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1513925199%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-a-x_-s-p-a-n_-m-e-t-e-r-s.html">MAX_SPAN_METERS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="119080865%2FProperties%2F787934393" anchor-label="REGIONAL_MAX_SPAN_METERS" id="119080865%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-r-e-g-i-o-n-a-l_-m-a-x_-s-p-a-n_-m-e-t-e-r-s.html"><span>REGIONAL_</span><wbr><span>MAX_</span><wbr><span>SPAN_</span><wbr><span>METERS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="119080865%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-g-i-o-n-a-l_-m-a-x_-s-p-a-n_-m-e-t-e-r-s.html">REGIONAL_MAX_SPAN_METERS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Areas this small (per side) also get the regional high-resolution extract.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1147340303%2FProperties%2F787934393" anchor-label="TERRAIN_BYTES_PER_SQUARE_KM" id="-1147340303%2FProperties%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-e-r-r-a-i-n_-b-y-t-e-s_-p-e-r_-s-q-u-a-r-e_-k-m.html"><span>TERRAIN_</span><wbr><span>BYTES_</span><wbr><span>PER_</span><wbr><span>SQUARE_</span><wbr><span>KM</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1147340303%2FProperties%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-e-r-r-a-i-n_-b-y-t-e-s_-p-e-r_-s-q-u-a-r-e_-k-m.html">TERRAIN_BYTES_PER_SQUARE_KM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Rough size of global z0-12 terrain per km². The manager re-checks the real plan.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="2123878917%2FFunctions%2F787934393" anchor-label="estimatedBasemapBytes" id="2123878917%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="estimated-basemap-bytes.html"><span>estimated</span><wbr><span>Basemap</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2123878917%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="estimated-basemap-bytes.html"><span class="token function">estimatedBasemapBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="354130114%2FFunctions%2F787934393" anchor-label="estimatedBytes" id="354130114%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="estimated-bytes.html"><span>estimated</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="354130114%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="estimated-bytes.html"><span class="token function">estimatedBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Streets plus terrain.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1669013553%2FFunctions%2F787934393" anchor-label="estimatedTerrainBytes" id="-1669013553%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="estimated-terrain-bytes.html"><span>estimated</span><wbr><span>Terrain</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1669013553%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="estimated-terrain-bytes.html"><span class="token function">estimatedTerrainBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1362342183%2FFunctions%2F787934393" anchor-label="includesRegional" id="1362342183%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="includes-regional.html"><span>includes</span><wbr><span><span>Regional</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1362342183%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="includes-regional.html"><span class="token function">includesRegional</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1064003677%2FFunctions%2F787934393" anchor-label="make" id="-1064003677%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="make.html"><span><span>make</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1064003677%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="make.html"><span class="token function">make</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">box<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token punctuation">, </span></span><span class="parameter ">regions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../-spatial-offline-region/index.html">SpatialOfflineRegion</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">isBusy<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">backoff<span class="token operator">: </span><a href="../../-spatial-terrain-backoff/index.html">SpatialTerrainBackoff</a><span class="token punctuation">, </span></span><span class="parameter ">nowMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">growOnly<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">streetsTooLarge<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">limits<span class="token operator">: </span><a href="../../-spatial-storage-limits/index.html">SpatialStorageLimits</a><span class="token operator"> = </span>SpatialStorageLimits()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">SpatialTerrainAutoDecision</a></div><div class="brief "><p class="paragraph"><a href="make.html">streetsTooLarge</a> is an area whose street map was over the per-map limit: inside it, terrain alone counts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1964359316%2FFunctions%2F787934393" anchor-label="smallerAreas" id="-1964359316%2FFunctions%2F787934393" data-filterable-set=":feature:map-terrain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-terrain/commonMain" data-filterable-set=":feature:map-terrain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="smaller-areas.html"><span>smaller</span><wbr><span><span>Areas</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1964359316%2FFunctions%2F787934393"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-terrain/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="smaller-areas.html"><span class="token function">smallerAreas</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">target<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token punctuation">, </span></span><span class="parameter ">box<span class="token operator">: </span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The smaller areas that still cover <a href="smaller-areas.html">box</a>, to try in turn when the street map for <a href="smaller-areas.html">target</a> is over the per-map limit (the estimate is rough; the manager checks the real plan).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

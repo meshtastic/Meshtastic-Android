@@ -169,6 +169,7 @@ org.meshtastic.feature.map.maplibre.style
 org.meshtastic.feature.map.maplibre.terrain
 module:feature-map-terrain
 org.meshtastic.feature.map.terrain
+org.meshtastic.feature.map.terrain.spatial
 module:feature-messaging
 org.meshtastic.feature.messaging
 org.meshtastic.feature.messaging.component
@@ -217,3 +218,5 @@ org.meshtastic.feature.wifiprovision.domain
 org.meshtastic.feature.wifiprovision.model
 org.meshtastic.feature.wifiprovision.navigation
 org.meshtastic.feature.wifiprovision.ui
+module:feature-xr
+org.meshtastic.feature.xr
