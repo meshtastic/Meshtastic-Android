@@ -340,6 +340,11 @@ private class TableStage(
     private val handle: CustomMesh,
 ) {
     private var ground: (() -> Unit)? = null
+
+    /** Set once the table is out of the scene: the frame loop can hold it a frame longer and must not turn it. */
+    var isGone = false
+        private set
+
     private val hung = ArrayList<Entity>()
 
     /** Takes on an entity hung on the root, so it goes before the root does if nothing lets it go sooner. */
@@ -368,6 +373,7 @@ private class TableStage(
 
     /** The ground first: the native side aborts if the material goes while an entity still holds it. */
     fun dispose() {
+        isGone = true
         clear()
         destroy(hung.toList(), emptyList())
         hung.clear()
@@ -447,7 +453,7 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
             // As tall as what is on it, measured free of the panel's current height.
             Box(
                 Modifier.wrapContentHeight(align = Alignment.Top, unbounded = true).onSizeChanged {
-                    if (it.height > 0 && it.height != panel.sizeInPixels.height) {
+                    if (!table.isGone && it.height > 0 && it.height != panel.sizeInPixels.height) {
                         panel.sizeInPixels = IntSize2d(width, it.height)
                         place()
                     }
@@ -479,7 +485,8 @@ private fun TableFrames(
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0.0 else (now - last) / NANOS_PER_SECOND
                 last = now
-                if (motion.step(dt)) table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
+                val turned = motion.step(dt)
+                if (turned && !table.isGone) table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
                 comets?.step(dt, demo)
             }
         }
@@ -547,6 +554,7 @@ private fun TerrainEntities(
         // dispose them.
         val ground = createGround(session, table, built, models)
         val shown = table.show {
+            ground.comets?.retire()
             destroy(ground.entities, ground.meshes)
             models.forEach { it.close() }
         }

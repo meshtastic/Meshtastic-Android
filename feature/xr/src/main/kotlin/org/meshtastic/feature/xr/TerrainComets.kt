@@ -121,14 +121,24 @@ internal class TerrainComets(private val links: Map<Long, Comet>, private val ro
     private var next = 0
     private var demoClock = 0.0
     private var demoNext = 0
+    private var retired = false
+
+    /**
+     * Called before the comets' entities are taken out of the scene. The frame loop can still hold these comets for a
+     * frame after that, and moving an entity that is gone is an error.
+     */
+    fun retire() {
+        retired = true
+    }
 
     /** The radio heard this node. */
     fun heard(node: Long) {
-        links[node]?.send()
+        if (!retired) links[node]?.send()
     }
 
     /** [demo] sends a comet down each link in turn, for a map of made-up nodes that are never heard. */
     fun step(dt: Double, demo: Boolean) {
+        if (retired) return
         links.values.forEach { it.step(dt) }
         route.forEach { it.step(dt) }
         if (route.isNotEmpty() && route.none { it.isFlying }) {
