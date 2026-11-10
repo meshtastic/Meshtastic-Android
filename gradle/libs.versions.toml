@@ -334,7 +334,7 @@ bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref 
 # tooling is meant to catch going forward.
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "3.0-alpha-10-SNAPSHOT" }
 
-usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.11.0" }
+usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.12.0" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
