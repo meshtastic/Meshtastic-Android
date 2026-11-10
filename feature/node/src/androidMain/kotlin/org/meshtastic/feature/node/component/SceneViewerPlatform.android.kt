@@ -174,7 +174,7 @@ private const val PIXEL_ON = 0xFFE8F4FF.toInt()
 private const val PIXEL_OFF = 0xFF05070A.toInt()
 
 /** MONO_VLSB only: byte `(y / 8) * width + x`, bit `y % 8`. */
-private fun MirrorFrame.toBitmap(): Bitmap? {
+fun MirrorFrame.toBitmap(): Bitmap? {
     if (format != MirrorFormat.MONO_VLSB || pixels.size < (height + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE * width) {
         return null
     }

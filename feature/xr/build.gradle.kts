@@ -27,8 +27,13 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.repository)
     implementation(projects.core.resources)
     implementation(projects.core.ui)
+    implementation(projects.feature.node)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.kermit)
 
     implementation(libs.compose.multiplatform.ui)
     implementation(libs.compose.multiplatform.foundation)
