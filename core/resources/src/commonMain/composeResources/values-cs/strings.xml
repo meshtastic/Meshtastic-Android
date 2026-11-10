@@ -1715,6 +1715,7 @@
     <string name="write_nfc_subtext">Zápisem se tento odkaz uloží na NFC štítek, ke kterému může kdokoli přiložit telefon.</string>
     <string name="write_nfc_success">Zapsáno do tagu</string>
     <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
+    <!-- XR -->
     <string name="you">Vy</string>
     <string name="zoom_in">Přiblížit</string>
     <string name="zoom_out">Oddálit</string>

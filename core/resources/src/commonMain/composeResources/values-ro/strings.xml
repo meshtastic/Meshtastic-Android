@@ -1026,5 +1026,6 @@
     <string name="wind_lull">Vânt critic</string>
     <string name="wind_speed">Viteza vântului</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Tu</string>
 </resources>
