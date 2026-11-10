@@ -69,4 +69,24 @@ class TerrainMeshDataTest {
 
         assertEquals(listOf(radio, other), withLocalAnchor(listOf(radio, other)))
     }
+
+    @Test
+    fun `relief is stretched toward an eighth of the width and capped`() {
+        // 1500 m of relief across 100 km would be 1.5% of the width; 0.12 needs 8x, which the cap holds to 6.
+        assertEquals(6.0, reliefExaggeration(1_500.0, 100_000.0), 1e-9)
+        // 2000 m across 50 km: 0.12 * 50 000 / 2000 = 3.
+        assertEquals(3.0, reliefExaggeration(2_000.0, 50_000.0), 1e-9)
+        // Steep ground close in keeps the floor, and flat ground has nothing to stretch.
+        assertEquals(1.5, reliefExaggeration(1_000.0, 4_000.0), 1e-9)
+        assertEquals(1.5, reliefExaggeration(0.0, 4_000.0), 1e-9)
+    }
+
+    @Test
+    fun `a disk is closed and every index is in range`() {
+        val disk = MeshAccumulator().apply { disk(0.5f, -0.01f, 0f, Rgb(0.1f, 0.1f, 0.1f), segments = 8) }.build()
+
+        // Per segment: a top and a bottom triangle and a side quad.
+        assertEquals(8 * 12, disk.indices.size)
+        assertTrue(disk.indices.all { it in 0 until disk.vertexCount })
+    }
 }

@@ -109,6 +109,7 @@ private class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
     val bezel: TerrainMeshData,
+    val pins: TerrainMeshData?,
     val flat: Boolean,
 )
 
@@ -144,6 +145,7 @@ fun SpatialTerrainMap(
     TerrainEntities(
         session,
         circle,
+        nodes,
         http,
         motion,
         buildDispatcher,
@@ -225,6 +227,7 @@ private fun WheelFrames(wheel: Entity?, motion: SpatialWheelMotion) {
 private fun TerrainEntities(
     session: Session,
     circle: SpatialCircle,
+    nodes: List<SpatialNodeSnapshot>,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
@@ -234,6 +237,8 @@ private fun TerrainEntities(
 ) {
     val wheelChanged by rememberUpdatedState(onWheel)
     val statusChanged by rememberUpdatedState(onStatus)
+    // Read when a build starts: a node update alone must not rebuild the map.
+    val pinned by rememberUpdatedState(nodes)
     // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
     val mainExecutor = remember {
         val handler = Handler(Looper.getMainLooper())
@@ -243,7 +248,7 @@ private fun TerrainEntities(
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -257,7 +262,7 @@ private fun TerrainEntities(
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
         val root = createRoot(session, built.geometry).also { it.contentDescription = description }
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
-        val meshes = listOf(built.terrain, built.bezel).map { createMesh(session, it) }
+        val meshes = listOfNotNull(built.terrain, built.bezel, built.pins).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
         wheelChanged(wheel)
@@ -306,8 +311,9 @@ private fun createPlate(
     mainExecutor: Executor,
 ): Plate {
     val acc = MeshAccumulator()
-    val radius = diskRadius + SpatialWheelLayout.GAP + SpatialWheelLayout.BEZEL_WIDTH
-    acc.box(0f, -PLATE_HALF, 0f, radius * PLATE_FILL, PLATE_HALF, radius * PLATE_FILL, Rgb(0.1f, 0.1f, 0.12f))
+    // Out past the knobs, so the ring around the wheel is there to point at and drag.
+    val radius = diskRadius + SpatialWheelLayout.REACH + PLATE_MARGIN
+    acc.disk(radius, PLATE_TOP - 2 * PLATE_HALF, PLATE_TOP, Rgb(0.1f, 0.1f, 0.12f))
     val mesh = createMesh(session, acc.build())
     val entity = MeshEntity.create(session, mesh, listOf(material), 0, Pose.Identity, root)
     var drag: SpatialWheelDrag? = null
@@ -366,7 +372,11 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
         .build()
 }
 
-private suspend fun buildTerrain(circle: SpatialCircle, http: HttpClient): BuiltTerrain {
+private suspend fun buildTerrain(
+    circle: SpatialCircle,
+    nodes: List<SpatialNodeSnapshot>,
+    http: HttpClient,
+): BuiltTerrain {
     val frame = SpatialFrame(circle.bounds)
     val source = MapterhornElevationSource(http)
     val plan =
@@ -376,12 +386,20 @@ private suspend fun buildTerrain(circle: SpatialCircle, http: HttpClient): Built
             dataMaxZoom = minOf(source.finestDataZoom(), MapterhornEndpoints.TILES_MAX_ZOOM),
         )
     val grid = SpatialHeightGrid.sample(frame, plan, source).cleaned()
-    val transform = SpatialModelTransform(frame, grid.baseElevation.toDouble(), grid.maxElevation.toDouble())
+    val relief = (grid.maxElevation - grid.baseElevation).toDouble()
+    val transform =
+        SpatialModelTransform(
+            frame,
+            grid.baseElevation.toDouble(),
+            grid.maxElevation.toDouble(),
+            verticalExaggeration = reliefExaggeration(relief, maxOf(frame.widthMeters, frame.depthMeters)),
+        )
     val geometry = SpatialTerrainGeometry(grid, transform)
     return BuiltTerrain(
         geometry = geometry,
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble()),
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
+        pins = pinMeshData(geometry, nodes, circle),
         flat = !grid.hasAnyTerrain,
     )
 }
@@ -395,6 +413,9 @@ private const val TABLE_VOLUME_METERS = 0.8f
 private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
-private const val PLATE_FILL = 1.02f
+private const val PLATE_MARGIN = 0.012f
+
+/** Under the terrain's skirt and the bezel, which reach this far below the ground. */
+private const val PLATE_TOP = -0.02f
 private const val NANOS_PER_SECOND = 1_000_000_000.0
 private const val MILLIS_PER_SECOND = 1_000.0
