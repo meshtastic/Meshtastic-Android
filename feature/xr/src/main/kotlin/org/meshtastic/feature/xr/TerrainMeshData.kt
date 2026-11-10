@@ -19,8 +19,6 @@
 package org.meshtastic.feature.xr
 
 import org.meshtastic.feature.map.terrain.spatial.SpatialBezelMesh
-import org.meshtastic.feature.map.terrain.spatial.SpatialCircle
-import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.map.terrain.spatial.SpatialTerrainGeometry
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelLayout
 import java.nio.ByteBuffer
@@ -308,22 +306,6 @@ internal fun bezelMeshData(diskRadius: Float, rimTop: Float): TerrainMeshData {
     return acc.build()
 }
 
-/** A pin standing on the ground at each node inside [circle], or null when there are none. */
-internal fun pinMeshData(
-    geometry: SpatialTerrainGeometry,
-    nodes: List<SpatialNodeSnapshot>,
-    circle: SpatialCircle,
-): TerrainMeshData? {
-    val acc = MeshAccumulator()
-    for (node in nodes) {
-        if (!circle.contains(node.coordinate)) continue
-        val foot = geometry.surfacePosition(node.coordinate)
-        acc.box(foot.x, foot.y + PIN_HEIGHT / 2, foot.z, PIN_STALK, PIN_HEIGHT / 2, PIN_STALK, LETTER)
-        acc.sphere(foot.x, foot.y + PIN_HEIGHT, foot.z, PIN_RADIUS, if (node.isConnectedRadio) NORTH else PIN)
-    }
-    return acc.build().takeIf { it.vertexCount > 0 }
-}
-
 /**
  * How far to stretch heights so the relief stands [TARGET_RELIEF] of the map's width tall. A mesh tens of kilometers
  * wide is otherwise a sheet of paper; the cap keeps plains from turning into spikes.
@@ -346,9 +328,6 @@ private const val TERRAIN_SKIRT = 0.02f
 private const val SPOKE_STEPS = 6
 private const val LETTER_LIFT = 0.0006f
 private const val LETTER_SCALE = 0.7f
-private const val PIN_HEIGHT = 0.03f
-private const val PIN_STALK = 0.0012f
-private const val PIN_RADIUS = 0.007f
 private const val TARGET_RELIEF = 0.12
 private const val MIN_EXAGGERATION = 1.5
 private const val MAX_EXAGGERATION = 6.0
@@ -365,5 +344,4 @@ private val SKIRT = Rgb(0.28f, 0.22f, 0.17f)
 private val BEZEL = Rgb(0.16f, 0.17f, 0.2f)
 private val KNOB = Rgb(0.7f, 0.72f, 0.76f)
 private val LETTER = Rgb(0.92f, 0.92f, 0.94f)
-private val PIN = Rgb(0.4f, 0.92f, 0.56f)
 private val NORTH = Rgb(0.95f, 0.45f, 0.2f)

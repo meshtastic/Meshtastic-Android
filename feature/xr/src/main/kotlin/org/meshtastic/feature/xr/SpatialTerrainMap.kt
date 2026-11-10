@@ -122,7 +122,8 @@ private class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
     val bezel: TerrainMeshData,
-    val pins: TerrainMeshData?,
+    val markers: TerrainMeshData?,
+    val labels: TerrainLabels?,
     /** JPEG to drape over [terrain], null to draw it in its elevation colors. */
     val image: ByteArray?,
     val flat: Boolean,
@@ -317,10 +318,17 @@ private fun TerrainEntities(
             }
         val root = createRoot(session, built.geometry, tipped).also { it.contentDescription = description }
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
-        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.pins)
+        val labels =
+            built.labels?.let { labels ->
+                val atlas = withContext(buildDispatcher) { LabelAtlas.draw(labels.names) }
+                val glb = terrainGlb(labels.mesh, atlas, "image/png")
+                GltfModel.create(session, glb, "labels")
+            }
+        val models = listOfNotNull(model, labels)
+        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.markers)
         val meshes = plain.map { createMesh(session, it) }
         val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
-        val entities = drawn + listOfNotNull(model?.let { GltfModelEntity.create(session, it, Pose.Identity, wheel) })
+        val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
         wheelChanged(wheel)
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
@@ -329,7 +337,7 @@ private fun TerrainEntities(
         } finally {
             wheelChanged(null)
             destroy(entities + plate.entity + wheel + root, meshes + plate.mesh, material)
-            model?.close()
+            models.forEach { it.close() }
         }
     }
 }
@@ -465,11 +473,13 @@ private suspend fun buildTerrain(
         )
     val geometry = SpatialTerrainGeometry(grid, transform)
     val image = draped?.await()
+    val markers = nodeMarkers(geometry, nodes, circle)
     BuiltTerrain(
         geometry = geometry,
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
-        pins = pinMeshData(geometry, nodes, circle),
+        markers = markerMeshData(markers),
+        labels = terrainLabels(markers),
         image = image,
         flat = !grid.hasAnyTerrain,
     )

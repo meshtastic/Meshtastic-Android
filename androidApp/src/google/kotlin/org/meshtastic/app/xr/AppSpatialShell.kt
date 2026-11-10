@@ -23,11 +23,15 @@ import androidx.compose.runtime.remember
 import org.koin.compose.koinInject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.ui.component.Quality
+import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
+import org.meshtastic.feature.map.terrain.spatial.SpatialSignal
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.xr.SpatialShell
 import org.meshtastic.feature.xr.TerrainImagery
+import org.meshtastic.proto.Config
 
 /** The 2D map's raster basemaps, satellite first: it reads best on a relief model. */
 private val terrainImagery: List<TerrainImagery> =
@@ -43,6 +47,21 @@ private val terrainImagery: List<TerrainImagery> =
             )
         }
 
+private val INFRASTRUCTURE_ROLES =
+    setOf(
+        Config.DeviceConfig.Role.ROUTER,
+        Config.DeviceConfig.Role.ROUTER_LATE,
+        Config.DeviceConfig.Role.REPEATER,
+        Config.DeviceConfig.Role.CLIENT_BASE,
+    )
+
+private fun signalOf(snr: Float): SpatialSignal = when (determineSignalQuality(snr, modemPreset = null)) {
+    Quality.GOOD -> SpatialSignal.GOOD
+    Quality.FAIR -> SpatialSignal.FAIR
+    Quality.BAD -> SpatialSignal.BAD
+    Quality.NONE -> SpatialSignal.NONE
+}
+
 @Composable
 fun AppSpatialShell(content: @Composable () -> Unit) {
     val repository = koinInject<NodeRepository>()
@@ -57,6 +76,14 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                         id = it.num.toLong(),
                         coordinate = LatLon(it.latitude, it.longitude),
                         isConnectedRadio = it.num == ours?.num,
+                        shortName = it.user.short_name,
+                        color = it.colors.second,
+                        isOnline = it.isOnline,
+                        isFavorite = it.isFavorite,
+                        viaMqtt = it.viaMqtt,
+                        hopsAway = it.hopsAway,
+                        signal = it.snr.takeIf { snr -> snr != Float.MAX_VALUE }?.let(::signalOf),
+                        isInfrastructure = it.user.role in INFRASTRUCTURE_ROLES,
                     )
                 }
         }
