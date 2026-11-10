@@ -96,6 +96,11 @@ class IndoorAirQualityLabelTest {
     }
 
     @Test
+    fun `a uint32 reading that wraps negative is above the scale`() {
+        assertEquals(Iaq.ExtremelyPolluted, getIaq(-1))
+    }
+
+    @Test
     fun `an unset IAQ has no band`() {
         assertEquals(null, getIaq(Int.MIN_VALUE))
     }

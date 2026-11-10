@@ -98,6 +98,28 @@ class EnvironmentChartGroupTest {
     }
 
     @Test
+    fun eachGroupHoldsExactlyTheMetricsOfItsUnit() {
+        val groups =
+            groupEnvironmentMetrics(Environment.entries).associate { (group, metrics) -> group to metrics.toSet() }
+
+        val expected =
+            mapOf(
+                EnvironmentChartGroup.TEMPERATURE to
+                    (Environment.oneWireTemperatures + Environment.TEMPERATURE + Environment.SOIL_TEMPERATURE).toSet(),
+                EnvironmentChartGroup.HUMIDITY to setOf(Environment.HUMIDITY, Environment.SOIL_MOISTURE),
+                EnvironmentChartGroup.PRESSURE to setOf(Environment.BAROMETRIC_PRESSURE),
+                EnvironmentChartGroup.IAQ to setOf(Environment.IAQ),
+                EnvironmentChartGroup.GAS_RESISTANCE to setOf(Environment.GAS_RESISTANCE),
+                EnvironmentChartGroup.LUX to setOf(Environment.LUX),
+                EnvironmentChartGroup.UV_LUX to setOf(Environment.UV_LUX),
+                EnvironmentChartGroup.WIND to setOf(Environment.WIND_SPEED),
+                EnvironmentChartGroup.RADIATION to setOf(Environment.RADIATION),
+                EnvironmentChartGroup.VOLTAGE to Environment.adcVoltages.toSet(),
+            )
+        assertEquals(expected, groups)
+    }
+
+    @Test
     fun temperatureAxisIsPaddedAroundTheDataAndNotZeroBased() {
         val (min, max) = environmentAxisRange(EnvironmentChartGroup.TEMPERATURE, 10.0, 30.0)!!
 

@@ -80,6 +80,16 @@ class PowerChannelTest {
     }
 
     @Test
+    fun aCurrentOnlyChannelIsListedAndItsSilentNeighborIsNot() {
+        val pm = PowerMetrics.Builder().also { it.ch2_current = 12.5f }.build()
+
+        assertEquals(listOf(PowerChannel.TWO), reportingPowerChannels(pm))
+        val texts = powerChannelTexts(PowerChannel.TWO.voltage(pm), PowerChannel.TWO.current(pm))
+        assertNull(texts.voltage)
+        assertEquals("12.5 mA", texts.current)
+    }
+
+    @Test
     fun aNodeThatReportsNothingListsNoChannel() {
         assertEquals(emptyList(), reportingPowerChannels(PowerMetrics.Builder().build()))
         assertEquals(emptyList(), reportingPowerChannels(null))
