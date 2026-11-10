@@ -21,12 +21,9 @@ import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
 import org.meshtastic.node.transport.TransportAvailability
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.Config.NetworkConfig.ProtocolFlags
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NodeStatusUiTest {

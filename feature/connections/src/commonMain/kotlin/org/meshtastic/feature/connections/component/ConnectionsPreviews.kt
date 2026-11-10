@@ -47,9 +47,8 @@ import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.DeviceListItem
 import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
-import org.meshtastic.feature.connections.ui.components.NodeStatusCard
-
 import org.meshtastic.feature.connections.ui.components.LiveUpdateCard
+import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase

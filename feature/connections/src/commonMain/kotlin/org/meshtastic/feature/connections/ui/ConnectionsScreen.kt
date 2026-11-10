@@ -162,8 +162,8 @@ import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
-import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
+import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.loraSummary
 import org.meshtastic.proto.Config
