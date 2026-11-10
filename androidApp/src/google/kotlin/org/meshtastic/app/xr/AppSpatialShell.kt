@@ -17,9 +17,32 @@
 package org.meshtastic.app.xr
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import org.koin.compose.koinInject
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.feature.map.terrain.spatial.LatLon
+import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.xr.SpatialShell
 
 @Composable
-@NonRestartableComposable
-fun AppSpatialShell(content: @Composable () -> Unit) = SpatialShell(content = content)
+fun AppSpatialShell(content: @Composable () -> Unit) {
+    val repository = koinInject<NodeRepository>()
+    val nodes by repository.nodeDBbyNum.collectAsState()
+    val ours by repository.ourNodeInfo.collectAsState()
+    val snapshots =
+        remember(nodes, ours) {
+            nodes.values
+                .filter { it.validPosition != null }
+                .map {
+                    SpatialNodeSnapshot(
+                        id = it.num.toLong(),
+                        coordinate = LatLon(it.latitude, it.longitude),
+                        isConnectedRadio = it.num == ours?.num,
+                    )
+                }
+        }
+    SpatialShell(nodes = snapshots, buildDispatcher = koinInject<CoroutineDispatchers>().default, content = content)
+}

@@ -30,10 +30,14 @@ dependencies {
     implementation(projects.core.repository)
     implementation(projects.core.resources)
     implementation(projects.core.ui)
+    implementation(projects.feature.mapTerrain)
     implementation(projects.feature.node)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.kermit)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
 
     implementation(libs.compose.multiplatform.ui)
     implementation(libs.compose.multiplatform.foundation)
@@ -44,4 +48,8 @@ dependencies {
     implementation(libs.androidx.xr.compose)
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.scenecore)
+
+    testImplementation(kotlin("test-junit"))
+    // configureTestOptions() turns on useJUnitPlatform(), so the vintage engine is what runs JUnit 4 tests.
+    testRuntimeOnly(libs.junit.vintage.engine)
 }
