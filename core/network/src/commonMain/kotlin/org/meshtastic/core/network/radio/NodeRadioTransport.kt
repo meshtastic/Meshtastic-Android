@@ -31,10 +31,11 @@ import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.EmbeddedNode
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
-import org.meshtastic.node.host.ProtocolFlagBits
 import org.meshtastic.node.phoneapi.nodeDefaults
 import org.meshtastic.node.store.file.nodeFileStores
+import org.meshtastic.node.transport.TransportKeys
 import org.meshtastic.proto.BackupPreferences
+import org.meshtastic.proto.Config.TransportConfig.Transport
 import org.meshtastic.proto.HardwareModel
 
 /**
@@ -148,20 +149,27 @@ internal fun embeddedNode(
     defaults = firstRunDefaults(),
     logger = logger,
     positionSource = bearers.positionSource,
-    hardwareModel = HardwareModel.NODE_KMP,
+    // VIRTUAL_NODE, by number until the protobufs pin names it (protobufs#1126).
+    hardwareModel = HardwareModel.fromValue(VIRTUAL_NODE) ?: HardwareModel.PRIVATE_HW,
 )
+
+private const val VIRTUAL_NODE = 254
 
 /**
  * A fresh install starts with the three bearers that need no hardware on: UDP, BLE advertisements and the GATT peer.
- * Firmware ships with `enabled_protocols` at 0, but a phone node with every bearer off is deaf, so the host seeds it.
+ * Firmware's first boot enables LoRa and UDP only, but a phone node with its BLE bearers off is deaf to the radios
+ * beside it, so the host seeds them. LoRa is listed as firmware lists it: the unset region alone keeps it off the air.
  */
 internal fun firstRunDefaults(): BackupPreferences = nodeDefaults {
-    network {
-        newBuilder()
-            .enabled_protocols(
-                ProtocolFlagBits.UDP_BROADCAST or ProtocolFlagBits.BLE_BROADCAST or ProtocolFlagBits.BLE_GATT_PEER,
-            )
-            .build()
+    transport {
+        TransportKeys.section(
+            listOf(
+                Transport.TRANSPORT_LORA,
+                Transport.TRANSPORT_MULTICAST_UDP,
+                Transport.TRANSPORT_BLE_ADV,
+                Transport.TRANSPORT_BLE_GATT,
+            ),
+        )
     }
 }
 
