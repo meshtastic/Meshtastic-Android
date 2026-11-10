@@ -175,13 +175,7 @@ fun DeviceList(
                     onSelectDevice = onSelectDevice,
                 )
 
-            DeviceType.NODE ->
-                nodeSection(
-                    localNode = localNode,
-                    connectionState = connectionState,
-                    selectedDevice = selectedDevice,
-                    onSelectDevice = onSelectDevice,
-                )
+            DeviceType.NODE -> nodeSection(localNode, connectionState, selectedDevice, onSelectDevice)
         }
         if (virtualDevices.isNotEmpty()) {
             virtualSection(

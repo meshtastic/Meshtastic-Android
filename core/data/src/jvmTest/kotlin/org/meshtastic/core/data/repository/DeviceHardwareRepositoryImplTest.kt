@@ -189,7 +189,7 @@ class DeviceHardwareRepositoryImplTest {
             repository.getDeviceHardwareByModel(hwModel = DeviceHardwareRepositoryImpl.APP_NODE_HW_MODEL).getOrThrow()
 
         assertEquals("Meshtastic app node", hardware?.displayName)
-        assertEquals("NODE_KMP", hardware?.hwModelSlug)
+        assertEquals("VIRTUAL_NODE", hardware?.hwModelSlug)
         assertEquals(false, hardware?.activelySupported)
     }
 
