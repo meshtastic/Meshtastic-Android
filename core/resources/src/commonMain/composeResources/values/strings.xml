@@ -453,8 +453,6 @@
     <string name="device_model_view">View 3D model</string>
     <string name="device_model_view_in_space">View in your space</string>
     <string name="device_sleeping">Device sleeping</string>
-    <string name="xr_full_space">Full Space</string>
-    <string name="xr_home_space">Home Space</string>
     <string name="device_storage_ui_title">Device Storage &amp; UI (Read-Only)</string>
     <string name="device_theme_language">Theme: %1$s, Language: %2$s</string>
     <string name="dew_point">Dew Point</string>
@@ -2360,6 +2358,8 @@
     <string name="write_nfc_subtext">Writing saves this link to an NFC tag anyone can tap.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
+    <string name="xr_full_space">Full Space</string>
+    <string name="xr_home_space">Home Space</string>
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
