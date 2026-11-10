@@ -23,16 +23,16 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -46,22 +46,28 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
-import androidx.xr.compose.spatial.Orbiter
-import androidx.xr.compose.spatial.OrbiterPosition
 import androidx.xr.runtime.Session
 import androidx.xr.runtime.math.BoundingBox
 import androidx.xr.runtime.math.FloatSize3d
+import androidx.xr.runtime.math.IntSize2d
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Quaternion
 import androidx.xr.runtime.math.Vector3
@@ -77,6 +83,7 @@ import androidx.xr.scenecore.KhronosUnlitMaterial
 import androidx.xr.scenecore.MeshEntity
 import androidx.xr.scenecore.MeshSubsetTopology
 import androidx.xr.scenecore.MovableComponent
+import androidx.xr.scenecore.PanelEntity
 import androidx.xr.scenecore.Space
 import androidx.xr.scenecore.VertexAttribute
 import androidx.xr.scenecore.VertexAttributeType
@@ -118,7 +125,9 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialZoom
 import java.util.Locale
 import java.util.concurrent.Executor
 import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sin
 
 private enum class TerrainStatus {
     Loading,
@@ -179,7 +188,7 @@ fun SpatialTerrainMap(
     val maxZoom = SpatialZoom.maximumZoom(full.radiusMeters)
     val circle = SpatialZoom.circle(full, maxZoom.pow(committed.toDouble()), null)
     val motion = remember { SpatialWheelMotion() }
-    var scene by remember { mutableStateOf<TableScene?>(null) }
+    var comets by remember { mutableStateOf<TerrainComets?>(null) }
     val http = remember { HttpClient() }
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
@@ -195,28 +204,23 @@ fun SpatialTerrainMap(
     val demo = remember(context) { debugSwitch(context, "MeshXrCity") || debugSwitch(context, "MeshXrPeaks") }
     DisposableEffect(http) { onDispose { http.close() } }
 
+    val stage = rememberTableStage(session, motion, tipped, stringResource(Res.string.xr_terrain_map))
     TerrainEntities(
+        stage,
         session,
         circle,
         nodes,
-        layer,
-        raised,
-        units.takeIf { contoursShown },
-        route,
+        TerrainLayers(layer, raised, units.takeIf { contoursShown }, route),
         http,
-        motion,
         buildDispatcher,
-        tipped = tipped,
-        description = stringResource(Res.string.xr_terrain_map),
-        onScene = { scene = it },
+        onComets = { comets = it },
         onStatus = { status = it },
     )
-    TableFrames(scene, motion, nodes, demo)
+    TableFrames(stage, comets, motion, nodes, demo)
 
-    Orbiter(position = OrbiterPosition.TopCenter()) {
+    TableControls(stage, session) {
         MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
             LayerChips(imagery, layer, onSelect = { layerId = it?.id }) {
-                // First, so they are not scrolled out of sight behind the basemaps.
                 ToggleChip(stringResource(Res.string.map_offline_terrain_contours), contoursShown) {
                     contoursShown = !contoursShown
                 }
@@ -261,11 +265,11 @@ internal fun withLocalAnchor(nodes: List<SpatialNodeSnapshot>): List<SpatialNode
     return nodes.map { if (it.id == anchor.id) it.copy(isConnectedRadio = true) else it }
 }
 
-/** The orbiter's card: [content], then who to credit for what is on the table. */
+/** The control panel's face: [content], then who to credit for what is on the table. */
 @Composable
 private fun MapControls(credits: List<String>, content: @Composable () -> Unit) {
-    Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp, max = 560.dp)) {
+    Surface(tonalElevation = 3.dp) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
             content()
             if (credits.isNotEmpty()) {
                 Text(credits.joinToString(" · "), style = MaterialTheme.typography.labelLarge)
@@ -287,7 +291,8 @@ private fun LayerChips(
     onSelect: (TerrainImagery?) -> Unit,
     overlays: @Composable () -> Unit,
 ) {
-    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    // Wrapped onto as many rows as they need: a row that scrolls is hard to work with a pointed ray.
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         overlays()
         for (layer in imagery) {
             FilterChip(
@@ -320,8 +325,140 @@ private fun Notice(text: String, modifier: Modifier = Modifier, alignment: Align
     }
 }
 
-/** The wheel everything on the table turns with, and the comets that fly over it, none with animations off. */
-private class TableScene(val wheel: Entity, val comets: TerrainComets?)
+/**
+ * The table itself, which stays where the user put it while the ground on it is rebuilt: the root with its grab bar,
+ * the plate the wheel is turned by, the wheel everything on the ground turns with, and the material they all share.
+ *
+ * @param uiScale what a panel hung on [root] is scaled by to come out the size of the app's own panel
+ */
+private class TableStage(
+    val root: Entity,
+    val wheel: Entity,
+    val material: KhronosUnlitMaterial,
+    val uiScale: Float,
+    private val plate: Plate,
+    private val handle: CustomMesh,
+) {
+    private var ground: (() -> Unit)? = null
+    private val hung = ArrayList<Entity>()
+
+    /** Takes on an entity hung on the root, so it goes before the root does if nothing lets it go sooner. */
+    fun hang(entity: Entity) {
+        hung += entity
+    }
+
+    fun letGo(entity: Entity) {
+        if (hung.remove(entity)) destroy(listOf(entity), emptyList())
+    }
+
+    /** Puts a new ground on the table in place of any there. [remove] takes it off again. */
+    fun show(remove: () -> Unit): Any {
+        clear()
+        ground = remove
+        return remove
+    }
+
+    /** Takes the ground off, [shown] alone when given: a build that was replaced must not take off its successor. */
+    fun clear(shown: Any? = null) {
+        val remove = ground ?: return
+        if (shown != null && shown !== remove) return
+        ground = null
+        remove()
+    }
+
+    /** The ground first: the native side aborts if the material goes while an entity still holds it. */
+    fun dispose() {
+        clear()
+        destroy(hung.toList(), emptyList())
+        hung.clear()
+        destroy(listOf(plate.entity, wheel, root), listOf(plate.mesh, handle))
+        material.close()
+    }
+}
+
+/** Null until the table is in the scene. It is made once, not with each ground, so a rebuild leaves it where it is. */
+@Composable
+private fun rememberTableStage(
+    session: Session,
+    motion: SpatialWheelMotion,
+    tipped: Boolean,
+    description: String,
+): TableStage? {
+    var stage by remember { mutableStateOf<TableStage?>(null) }
+    // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
+    val mainExecutor = remember {
+        val handler = Handler(Looper.getMainLooper())
+        Executor { handler.post(it) }
+    }
+    LaunchedEffect(session, tipped) {
+        // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
+        val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
+        material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
+        val handle = createMesh(session, handleMeshData(TABLE_DISK_RADIUS))
+        val root = createRoot(session, tipped, handle, material)
+        root.entity.contentDescription = description
+        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root.entity)
+        val plate = createPlate(session, root.entity, TABLE_DISK_RADIUS, material, motion, mainExecutor)
+        val made = TableStage(root.entity, wheel, material, root.uiScale, plate, handle)
+        stage = made
+        try {
+            awaitCancellation()
+        } finally {
+            stage = null
+            made.dispose()
+        }
+    }
+    return stage
+}
+
+/**
+ * The map's controls on a panel of the table's own, below its front edge and leaning back to face the user. It is a
+ * child of the table, so it goes where the table is moved, and it is there while the ground is rebuilt.
+ */
+@Composable
+private fun TableControls(stage: TableStage?, session: Session, content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val composition = rememberCompositionContext()
+    // A view outside the activity's own tree finds neither of these by itself, and Compose will not start without.
+    val lifecycle = LocalLifecycleOwner.current
+    val savedState = LocalSavedStateRegistryOwner.current
+    val shown by rememberUpdatedState(content)
+    DisposableEffect(stage) {
+        val table = stage ?: return@DisposableEffect onDispose {}
+        val width = (CONTROLS_WIDTH_DP * context.resources.displayMetrics.density).toInt()
+        val view = ComposeView(context)
+        view.setViewTreeLifecycleOwner(lifecycle)
+        view.setViewTreeSavedStateRegistryOwner(savedState)
+        val panel =
+            PanelEntity.create(session, view, IntSize2d(width, width / 2), "map controls", Pose.Identity, table.root)
+        panel.setScale(table.uiScale)
+        table.hang(panel)
+        fun place() {
+            // Its top edge under the grab bar, the rest hanging forward and down from there.
+            val half = panel.size.height * table.uiScale / 2
+            val lean = CONTROLS_LEAN_DEGREES * PI.toFloat() / 180f
+            val top = Vector3(0f, CONTROLS_TOP, TABLE_DISK_RADIUS + SpatialWheelLayout.REACH + CONTROLS_GAP)
+            val middle = Vector3(top.x, top.y - half * cos(lean), top.z + half * sin(lean))
+            panel.setPose(Pose(middle, Quaternion.fromAxisAngle(Vector3.Right, -CONTROLS_LEAN_DEGREES)))
+        }
+        place()
+        view.setParentCompositionContext(composition)
+        view.setContent {
+            // As tall as what is on it, measured free of the panel's current height.
+            Box(
+                Modifier.wrapContentHeight(align = Alignment.Top, unbounded = true).onSizeChanged {
+                    if (it.height > 0 && it.height != panel.sizeInPixels.height) {
+                        panel.sizeInPixels = IntSize2d(width, it.height)
+                        place()
+                    }
+                },
+            ) {
+                shown()
+            }
+        }
+        onDispose { table.letGo(panel) }
+    }
+}
 
 /**
  * Once per frame, steps the wheel's ease and coast and turns the entity to match, and moves the comets. A node whose
@@ -329,66 +466,59 @@ private class TableScene(val wheel: Entity, val comets: TerrainComets?)
  */
 @Composable
 private fun TableFrames(
-    scene: TableScene?,
+    stage: TableStage?,
+    comets: TerrainComets?,
     motion: SpatialWheelMotion,
     nodes: List<SpatialNodeSnapshot>,
     demo: Boolean,
 ) {
-    LaunchedEffect(scene) {
-        val table = scene ?: return@LaunchedEffect
+    LaunchedEffect(stage, comets) {
+        val table = stage ?: return@LaunchedEffect
         var last = 0L
         while (true) {
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0.0 else (now - last) / NANOS_PER_SECOND
                 last = now
                 if (motion.step(dt)) table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
-                table.comets?.step(dt, demo)
+                comets?.step(dt, demo)
             }
         }
     }
-    val heard = remember(scene) { HashMap<Long, Int>() }
-    LaunchedEffect(scene, nodes) {
+    val heard = remember(comets) { HashMap<Long, Int>() }
+    LaunchedEffect(comets, nodes) {
         for (node in nodes) {
             val before = heard.put(node.id, node.lastHeard)
-            if (before != null && before != node.lastHeard) scene?.comets?.heard(node.id)
+            if (before != null && before != node.lastHeard) comets?.heard(node.id)
         }
     }
 }
 
+/** Builds the ground for [circle] and [layers] and puts it on [stage]'s wheel, again whenever either changes. */
 @Composable
 private fun TerrainEntities(
+    stage: TableStage?,
     session: Session,
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
-    imagery: TerrainImagery?,
-    buildings: TerrainBuildingSource?,
-    contours: ContourUnits?,
-    route: TerrainRoute?,
+    layers: TerrainLayers,
     http: HttpClient,
-    motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
-    tipped: Boolean,
-    description: String,
-    onScene: (TableScene?) -> Unit,
+    onComets: (TerrainComets?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
-    val sceneChanged by rememberUpdatedState(onScene)
+    val cometsChanged by rememberUpdatedState(onComets)
     val statusChanged by rememberUpdatedState(onStatus)
     // Read when a build starts: a node update alone must not rebuild the map.
     val pinned by rememberUpdatedState(nodes)
-    // Keyed on whether there is one, not on which: the caller may hand over a new instance on any recomposition.
-    val buildingSource by rememberUpdatedState(buildings)
-    // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
-    val mainExecutor = remember {
-        val handler = Handler(Looper.getMainLooper())
-        Executor { handler.post(it) }
-    }
-    LaunchedEffect(session, circle, imagery, buildings != null, contours, route) {
+    // Keyed on whether there are buildings, not on which source: the caller may hand over a new one on any
+    // recomposition.
+    val current by rememberUpdatedState(layers)
+    LaunchedEffect(stage, circle, layers.imagery, layers.buildings != null, layers.contours, layers.route) {
+        val table = stage ?: return@LaunchedEffect
         statusChanged(TerrainStatus.Loading)
-        val layers = TerrainLayers(imagery, buildingSource, contours, route)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, layers, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, current, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -397,53 +527,60 @@ private fun TerrainEntities(
                 statusChanged(TerrainStatus.Failed)
                 return@LaunchedEffect
             }
-        // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
-        val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
-        material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
-        // A draped terrain is a model: SceneCore takes a run-time image only inside one.
-        val model =
+        val models = ArrayList<GltfModel>()
+        try {
+            // A draped terrain is a model: SceneCore takes a run-time image only inside one.
             built.image?.let { image ->
                 val glb = withContext(buildDispatcher) { terrainGlb(built.terrain, image, "image/jpeg") }
-                GltfModel.create(session, glb, "terrain")
+                models += GltfModel.create(session, glb, "terrain")
             }
-        val handle = createMesh(session, handleMeshData(built.geometry.transform.diskRadius))
-        val root = createRoot(session, built.geometry, tipped, handle, material)
-        root.contentDescription = description
-        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
-        val labels =
             built.labels?.let { labels ->
                 val atlas = withContext(buildDispatcher) { LabelAtlas.draw(labels.names) }
                 val glb = terrainGlb(labels.mesh, atlas, "image/png", cutout = true)
-                GltfModel.create(session, glb, "labels")
+                models += GltfModel.create(session, glb, "labels")
             }
-        val models = listOfNotNull(model, labels)
-        val plain =
-            listOfNotNull(
-                built.terrain.takeIf { model == null },
-                built.skirt,
-                built.bezel,
-                built.markers,
-                built.buildings,
-                built.contours,
-            )
-        val meshes = plain.map { createMesh(session, it) }
-        val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
-        val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, wheel) }
-        val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
-        // Nothing flies with animations turned off in the system settings.
-        val comets = if (ValueAnimator.areAnimatorsEnabled()) createComets(session, built, wheel, material) else null
-        val flying = comets?.entities.orEmpty()
-        sceneChanged(TableScene(wheel, comets?.comets))
+        } catch (e: CancellationException) {
+            models.forEach { it.close() }
+            throw e
+        }
+        // Nothing suspends from here to the hand-over: a cancel in between would leave entities with nothing to
+        // dispose them.
+        val ground = createGround(session, table, built, models)
+        val shown = table.show {
+            destroy(ground.entities, ground.meshes)
+            models.forEach { it.close() }
+        }
+        cometsChanged(ground.comets)
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
         try {
             awaitCancellation()
         } finally {
-            sceneChanged(null)
-            val borrowed = meshes + comets?.meshes.orEmpty() + plate.mesh + handle
-            destroy(flying + entities + plate.entity + wheel + root, borrowed, material)
-            models.forEach { it.close() }
+            cometsChanged(null)
+            table.clear(shown)
         }
     }
+}
+
+/** What one build put on the wheel. */
+private class Ground(val entities: List<Entity>, val meshes: List<CustomMesh>, val comets: TerrainComets?)
+
+private fun createGround(session: Session, table: TableStage, built: BuiltTerrain, models: List<GltfModel>): Ground {
+    val material = table.material
+    val plain =
+        listOfNotNull(
+            built.terrain.takeIf { built.image == null },
+            built.skirt,
+            built.bezel,
+            built.markers,
+            built.buildings,
+            built.contours,
+        )
+    val meshes = plain.map { createMesh(session, it) }
+    val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, table.wheel) }
+    val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, table.wheel) }
+    // Nothing flies with animations turned off in the system settings.
+    val comets = if (ValueAnimator.areAnimatorsEnabled()) createComets(session, built, table.wheel, material) else null
+    return Ground(comets?.entities.orEmpty() + entities, meshes + comets?.meshes.orEmpty(), comets?.comets)
 }
 
 /**
@@ -451,10 +588,9 @@ private fun TerrainEntities(
  * still holds it, and detaching an entity does not release it.
  */
 @Suppress("DEPRECATION")
-private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: KhronosUnlitMaterial) {
+private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>) {
     entities.forEach { it.dispose() }
     meshes.forEach { it.close() }
-    material.close()
 }
 
 /**
@@ -462,22 +598,17 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: 
  * draws the grab bar at the table's front: the system moves an entity by its own shape, so pinching the bar carries the
  * whole table, and the ring around the wheel is left for turning it.
  */
-private fun createRoot(
-    session: Session,
-    geometry: SpatialTerrainGeometry,
-    tipped: Boolean,
-    handle: CustomMesh,
-    material: KhronosUnlitMaterial,
-): Entity {
+private fun createRoot(session: Session, tipped: Boolean, handle: CustomMesh, material: KhronosUnlitMaterial): Root {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
     val scale = panel.getScale(Space.ACTIVITY)
-    val fit = SpatialVolumeFit(TABLE_VOLUME_METERS, TABLE_VOLUME_METERS, geometry.transform.diskRadius)
+    val fit = SpatialVolumeFit(TABLE_VOLUME_METERS, TABLE_VOLUME_METERS, TABLE_DISK_RADIUS)
     val reach = fit.diskRadius + SpatialWheelLayout.REACH + TABLE_GAP_METERS
     val at = Vector3((size.width / 2f + reach / scale), -size.height * DROP_FRACTION, 0f)
     val pose =
         if (tipped) {
-            // Below the panel and in front of it, its far side tipped up toward the camera.
+            // In front of the panel's lower half, its far side tipped up, so the console's camera sees the table
+            // and the controls under its front edge.
             val below = Vector3(0f, -size.height / 2f - TIPPED_DROP_METERS / scale, TIPPED_FORWARD_METERS / scale)
             Pose(below, Quaternion.fromAxisAngle(Vector3.Right, TIPPED_DEGREES))
         } else {
@@ -488,12 +619,15 @@ private fun createRoot(
     // Not scaled with distance: the table keeps its size wherever it is put.
     val movable = MovableComponent.createSystemMovable(session, false)
     // The system draws its move bar around this box, in the root's own units.
-    val across = 2 * (geometry.transform.diskRadius + SpatialWheelLayout.REACH)
+    val across = 2 * (TABLE_DISK_RADIUS + SpatialWheelLayout.REACH)
     movable.size = FloatSize3d(across, MOVE_BOX_HEIGHT, across)
     val attached = root.addComponent(movable)
     Logger.d { "Terrain table movable attached: $attached" }
-    return root
+    return Root(root, scale / fit.scale)
 }
+
+/** The table's root, and what undoes its scale for a panel hung on it. */
+private class Root(val entity: Entity, val uiScale: Float)
 
 /** The comets, their entities and the one mesh each color of comet shares. */
 private class CometEntities(val comets: TerrainComets, val entities: List<Entity>, val meshes: List<CustomMesh>)
@@ -695,6 +829,13 @@ private fun yawRotation(radians: Float): Quaternion =
     Quaternion.fromAxisAngle(Vector3.Up, radians * 180f / PI.toFloat())
 
 private const val MAX_TRIANGLES = 90_000
+
+/** The map is a circle in a square one model unit on a side, whatever ground it shows. */
+private const val TABLE_DISK_RADIUS = 0.5f
+private const val CONTROLS_WIDTH_DP = 480
+private const val CONTROLS_LEAN_DEGREES = 35f
+private const val CONTROLS_TOP = -0.08f
+private const val CONTROLS_GAP = 0.05f
 private const val MAX_LINK_COMETS = 24
 private const val TABLE_VOLUME_METERS = 0.8f
 private const val TABLE_GAP_METERS = 0.12f
@@ -706,7 +847,7 @@ private const val HANDLE_GAP = 0.04f
 private const val HANDLE_DROP = 0.03f
 private const val HANDLE_HALF_LENGTH = 0.1f
 private const val HANDLE_HALF = 0.008f
-private const val TIPPED_DROP_METERS = 0.3f
+private const val TIPPED_DROP_METERS = -0.3f
 private const val TIPPED_FORWARD_METERS = 0.35f
 private const val TIPPED_DEGREES = 50f
 
