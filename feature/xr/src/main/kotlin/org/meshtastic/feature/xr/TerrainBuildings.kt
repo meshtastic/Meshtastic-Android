@@ -32,7 +32,7 @@ import kotlin.math.sqrt
  *
  * @param minHeightMeters where a part starts above the ground, for the upper floors of a tower
  * @param isPart a piece of a building drawn in parts, like a tower's legs, deck and spire
- * @param holes courtyards. The mesh fills them in; they only keep a part standing in one from hiding the building
+ * @param holes courtyards, left open in the roof and walled round
  */
 data class BuildingFootprint(
     val outline: List<LatLon>,
@@ -72,7 +72,14 @@ internal object TerrainBuildings {
     private const val DEGREE_SCALE = 1e5
     private val WALLS = Rgb(0.86f, 0.86f, 0.84f)
 
-    private class Placed(val outline: List<Vec2>, val bottom: Float, val top: Float, val area: Float)
+    /** [outline] runs in order of increasing angle, x toward z, and each of [holes] the other way round. */
+    private class Placed(
+        val outline: List<Vec2>,
+        val holes: List<List<Vec2>>,
+        val bottom: Float,
+        val top: Float,
+        val area: Float,
+    )
 
     /**
      * Walls and a flat roof for each building, standing on the lowest ground under its outline and raised by the
@@ -89,24 +96,25 @@ internal object TerrainBuildings {
         val acc = MeshAccumulator()
         var triangles = 0
         for (building in placed) {
-            val roof = triangulate(building.outline)
-            val cost = 2 * building.outline.size + roof.size / 3
+            val corners = Courtyards.cut(building.outline, building.holes)
+            val roof = triangulate(corners)
+            val cost = 2 * (building.outline.size + building.holes.sumOf { it.size }) + roof.size / 3
             if (triangles + cost > triangleBudget) break
             triangles += cost
-            acc.building(building, roof)
+            acc.building(building, corners, roof)
         }
         return acc.build().takeIf { it.vertexCount > 0 }
     }
 
     private fun place(footprint: BuildingFootprint, geometry: SpatialTerrainGeometry): Placed? {
         val transform = geometry.transform
-        val corners =
-            outline(
-                footprint.outline.map {
-                    val p = transform.position(it, transform.baseElevation)
-                    Vec2(p.x, p.z)
-                },
-            )
+        fun ring(points: List<LatLon>) = outline(
+            points.map {
+                val p = transform.position(it, transform.baseElevation)
+                Vec2(p.x, p.z)
+            },
+        )
+        val corners = ring(footprint.outline)
         val area = signedArea(corners)
         val limit = transform.diskRadius * DISK_SHARE
         if (corners.size < 3 || area == 0f || corners.any { hypot(it.x, it.y) > limit }) return null
@@ -117,25 +125,31 @@ internal object TerrainBuildings {
         return Placed(
             // Corners in order of increasing angle, x toward z, the order the faces expect.
             outline = if (area < 0) corners.reversed() else corners,
+            holes =
+            footprint.holes
+                .map(::ring)
+                .filter { it.size >= 3 && signedArea(it) != 0f }
+                .map { if (signedArea(it) > 0) it.reversed() else it },
             bottom = ground + (minHeight * heightScale).toFloat(),
             top = ground + (height * heightScale).toFloat(),
             area = abs(area),
         )
     }
 
-    private fun MeshAccumulator.building(building: Placed, roof: IntArray) {
-        val outline = building.outline
+    private fun MeshAccumulator.building(building: Placed, corners: List<Vec2>, roof: IntArray) {
         // Seen from above the outline runs the other way round, so each triangle is turned over.
         val turned =
             IntArray(roof.size) {
                 val corner = it % 3
                 roof[it - corner + if (corner == 0) 0 else 3 - corner]
             }
-        val top = outline.map { floatArrayOf(it.x, building.top, it.y) }
+        val top = corners.map { floatArrayOf(it.x, building.top, it.y) }
         face(top, turned, 0f, 1f, 0f, WALLS.scaled(bakedLight(0f, 1f, 0f)))
-        for (i in outline.indices) {
-            val p = outline[i]
-            val q = outline[(i + 1) % outline.size]
+        // A courtyard's ring runs the other way, so its walls face into it.
+        val edges = (listOf(building.outline) + building.holes).flatMap { ring -> ring.indices.map { ring to it } }
+        for ((ring, i) in edges) {
+            val p = ring[i]
+            val q = ring[(i + 1) % ring.size]
             val length = sqrt((q.x - p.x) * (q.x - p.x) + (q.y - p.y) * (q.y - p.y))
             val nx = (q.y - p.y) / length
             val nz = -(q.x - p.x) / length
@@ -276,8 +290,44 @@ internal object TerrainBuildings {
         return cross(a, b, c) > 0 &&
             remaining.none { j ->
                 val p = outline[j]
-                j != ia && j != ib && j != ic && cross(a, b, p) >= 0 && cross(b, c, p) >= 0 && cross(c, a, p) >= 0
+                // A corner a courtyard's cut repeats is the ear's own corner, not one inside it.
+                val own = j == ia || j == ib || j == ic || p == a || p == b || p == c
+                !own && cross(a, b, p) >= 0 && cross(b, c, p) >= 0 && cross(c, a, p) >= 0
             }
+    }
+}
+
+/**
+ * Joins courtyards into an outline so one run of corners goes round both: out along a cut to the courtyard, round it,
+ * and back along the same cut.
+ */
+private object Courtyards {
+    private const val CUTS_TRIED = 8
+
+    /** [outer] with each of [holes] cut in. A courtyard no cut can reach without crossing an edge is roofed over. */
+    fun cut(outer: List<Vec2>, holes: List<List<Vec2>>): List<Vec2> {
+        var ring = outer
+        for (hole in holes) ring = joined(ring, hole, holes) ?: ring
+        return ring
+    }
+
+    private fun joined(ring: List<Vec2>, hole: List<Vec2>, holes: List<List<Vec2>>): List<Vec2>? {
+        // Each of the courtyard's corners with the outline's corner nearest it, the shortest few of those tried.
+        val (i, j) =
+            hole.indices
+                .map { j -> ring.indices.minBy { distance(ring[it], hole[j]) } to j }
+                .sortedBy { (i, j) -> distance(ring[i], hole[j]) }
+                .take(CUTS_TRIED)
+                .firstOrNull { (i, j) -> (holes + listOf(ring)).none { crosses(ring[i], hole[j], it) } } ?: return null
+        val round = List(hole.size + 1) { hole[(j + it) % hole.size] }
+        return ring.subList(0, i + 1) + round + ring.subList(i, ring.size)
+    }
+
+    /** Whether the cut from [a] to [b] crosses an edge of [ring]. Edges that only touch an end of it do not count. */
+    private fun crosses(a: Vec2, b: Vec2, ring: List<Vec2>): Boolean = ring.indices.any {
+        val c = ring[it]
+        val d = ring[(it + 1) % ring.size]
+        cross(a, b, c) * cross(a, b, d) < 0 && cross(c, d, a) * cross(c, d, b) < 0
     }
 }
 

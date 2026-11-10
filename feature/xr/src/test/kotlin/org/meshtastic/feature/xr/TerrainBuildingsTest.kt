@@ -112,6 +112,41 @@ class TerrainBuildingsTest {
         }
     }
 
+    /** The area of the triangles facing straight up, in model units. */
+    private fun roofArea(mesh: TerrainMeshData): Float {
+        var area = 0f
+        for (t in mesh.indices.indices step 3) {
+            if (mesh.normals[mesh.indices[t] * 3 + 1] != 1f) continue
+            val (a, b, c) = List(3) { k -> List(3) { mesh.positions[mesh.indices[t + k] * 3 + it] } }
+            area += abs((b[0] - a[0]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[0] - a[0])) / 2
+        }
+        return area
+    }
+
+    @Test
+    fun `a courtyard is left open in the roof and walled round`() {
+        val geometry = geometry
+        val solid = BuildingFootprint(square(47.610, -122.326, 0.0006), heightMeters = 30.0)
+        val ring = solid.copy(holes = listOf(square(47.6102, -122.3258, 0.0002)))
+
+        val filled = assertNotNull(TerrainBuildings.meshData(listOf(solid), geometry))
+        val open = assertNotNull(TerrainBuildings.meshData(listOf(ring), geometry))
+
+        // Round the outline and the courtyard, joined by a cut that repeats a corner of each.
+        assertEquals(4 + 4 + 2 + (4 + 4) * 4, open.vertexCount)
+        assertEquals((8 + (4 + 4) * 2) * 3, open.indices.size)
+        assertEquals(roofArea(filled) * 8 / 9, roofArea(open), roofArea(filled) * 1e-3f)
+        // The courtyard's walls face its middle, the outer walls away from it.
+        val middle = geometry.surfacePosition(LatLon(47.6103, -122.3257))
+        val inward =
+            (0 until open.vertexCount).count { v ->
+                val out = List(3) { open.normals[v * 3 + it] }
+                val from = listOf(open.positions[v * 3] - middle.x, 0f, open.positions[v * 3 + 2] - middle.z)
+                out[1] == 0f && out[0] * from[0] + out[2] * from[2] < 0
+            }
+        assertEquals(4 * 4, inward)
+    }
+
     @Test
     fun `a building past the disk is left out and the largest are kept within the budget`() {
         val geometry = geometry
