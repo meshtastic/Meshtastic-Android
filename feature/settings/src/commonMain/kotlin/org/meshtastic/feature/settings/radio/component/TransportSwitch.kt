@@ -39,8 +39,8 @@ internal fun toggleTransport(current: List<Transport>, transport: Transport, on:
 }
 
 /**
- * The sections a Network save writes: only the ones that changed. Transport goes first, because the node reboots on the
- * network write.
+ * The sections a Network save writes: only the ones that changed, transport first. Firmware schedules a reboot on
+ * either write, so both go out before it happens.
  */
 internal fun networkSaveConfigs(
     network: Config.NetworkConfig,
