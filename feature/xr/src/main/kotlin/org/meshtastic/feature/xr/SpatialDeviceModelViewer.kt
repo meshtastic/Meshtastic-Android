@@ -214,7 +214,8 @@ private fun DeviceScreenPanel(session: Session, device: GltfModelEntity?, glass:
         try {
             awaitCancellation()
         } finally {
-            panel.parent = null
+            // Disposing the device disposes its children, so the panel may already be gone.
+            if (!panel.isDisposed) panel.parent = null
         }
     }
 }
