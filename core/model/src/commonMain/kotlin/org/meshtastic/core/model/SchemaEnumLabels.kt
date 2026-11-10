@@ -29,9 +29,9 @@ import org.meshtastic.proto.Team
 // Do not edit: change the schema, then run sync.
 
 /**
- * The schema's label for this enum value, or null where the schema does not name it. A picker shows this in
- * place of the constant's Kotlin name, and falls back to that name when it is null, so a value the schema has
- * not reached still renders.
+ * The schema's label for this enum value, or null where the schema does not name it. A picker shows this in place of
+ * the constant's Kotlin name, and falls back to that name when it is null, so a value the schema has not reached still
+ * renders.
  */
 @Suppress("CyclomaticComplexMethod")
 fun Enum<*>.schemaLabelRes(): StringResource? = when (this) {
@@ -73,9 +73,9 @@ fun Enum<*>.schemaDescriptionRes(): StringResource? = when (this) {
 }
 
 /**
- * The resource prefix every value of a labelled enum shares, one per enum. A consumer that has to tell an enum
- * value's resource from a field's - settings search, which indexes fields and not the values they offer - reads
- * this rather than keeping its own copy of the list.
+ * The resource prefix every value of a labelled enum shares, one per enum. A consumer that has to tell an enum value's
+ * resource from a field's - settings search, which indexes fields and not the values they offer - reads this rather
+ * than keeping its own copy of the list.
  */
 val schemaEnumValuePrefixes: Set<String> =
     setOf(
@@ -104,8 +104,7 @@ val schemaEnumValuePrefixes: Set<String> =
         "schema_team_",
     )
 
-private fun Enum<*>.schemaLabel(prefix: String): StringResource? =
-    Res.allStringResources[prefix + name.lowercase()]
+private fun Enum<*>.schemaLabel(prefix: String): StringResource? = Res.allStringResources[prefix + name.lowercase()]
 
 private fun Enum<*>.schemaDescription(prefix: String): StringResource? =
     Res.allStringResources[prefix + name.lowercase() + "_description"]

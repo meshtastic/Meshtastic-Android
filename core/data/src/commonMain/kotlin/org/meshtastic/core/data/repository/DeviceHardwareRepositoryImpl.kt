@@ -43,7 +43,6 @@ import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
-import org.meshtastic.proto.HardwareModel
 import kotlin.time.Duration.Companion.minutes
 
 /**
