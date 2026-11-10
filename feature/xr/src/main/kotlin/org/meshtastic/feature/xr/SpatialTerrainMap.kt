@@ -72,6 +72,7 @@ import androidx.xr.scenecore.InteractableComponent
 import androidx.xr.scenecore.KhronosUnlitMaterial
 import androidx.xr.scenecore.MeshEntity
 import androidx.xr.scenecore.MeshSubsetTopology
+import androidx.xr.scenecore.MovableComponent
 import androidx.xr.scenecore.Space
 import androidx.xr.scenecore.VertexAttribute
 import androidx.xr.scenecore.VertexAttributeType
@@ -318,7 +319,9 @@ private fun TerrainEntities(
                 val glb = withContext(buildDispatcher) { terrainGlb(built.terrain, image, "image/jpeg") }
                 GltfModel.create(session, glb, "terrain")
             }
-        val root = createRoot(session, built.geometry, tipped).also { it.contentDescription = description }
+        val handle = createMesh(session, handleMeshData(built.geometry.transform.diskRadius))
+        val root = createRoot(session, built.geometry, tipped, handle, material)
+        root.contentDescription = description
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
         val labels =
             built.labels?.let { labels ->
@@ -338,7 +341,7 @@ private fun TerrainEntities(
             awaitCancellation()
         } finally {
             wheelChanged(null)
-            destroy(entities + plate.entity + wheel + root, meshes + plate.mesh, material)
+            destroy(entities + plate.entity + wheel + root, meshes + plate.mesh + handle, material)
             models.forEach { it.close() }
         }
     }
@@ -355,8 +358,18 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: 
     material.close()
 }
 
-/** A root beside the main panel's right edge, scaled so the table is its real size whatever the panel's scale. */
-private fun createRoot(session: Session, geometry: SpatialTerrainGeometry, tipped: Boolean): Entity {
+/**
+ * A root beside the main panel's right edge, scaled so the table is its real size whatever the panel's scale. The root
+ * draws the grab bar at the table's front: the system moves an entity by its own shape, so pinching the bar carries the
+ * whole table, and the ring around the wheel is left for turning it.
+ */
+private fun createRoot(
+    session: Session,
+    geometry: SpatialTerrainGeometry,
+    tipped: Boolean,
+    handle: CustomMesh,
+    material: KhronosUnlitMaterial,
+): Entity {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
     val scale = panel.getScale(Space.ACTIVITY)
@@ -371,7 +384,19 @@ private fun createRoot(session: Session, geometry: SpatialTerrainGeometry, tippe
         } else {
             Pose(at)
         }
-    return Entity.create(session, "terrain-map", pose, panel).also { it.setScale(fit.scale / scale) }
+    val root = MeshEntity.create(session, handle, listOf(material), 0, pose, panel)
+    root.setScale(fit.scale / scale)
+    // Not scaled with distance: the table keeps its size wherever it is put.
+    root.addComponent(MovableComponent.createSystemMovable(session, false))
+    return root
+}
+
+/** A bar under the table's front edge, like a window's grab bar, in model units. */
+private fun handleMeshData(diskRadius: Float): TerrainMeshData {
+    val acc = MeshAccumulator()
+    val front = diskRadius + SpatialWheelLayout.REACH + HANDLE_GAP
+    acc.box(0f, PLATE_TOP - HANDLE_DROP, front, HANDLE_HALF_LENGTH, HANDLE_HALF, HANDLE_HALF, Rgb(0.82f, 0.84f, 0.88f))
+    return acc.build()
 }
 
 /**
@@ -497,6 +522,10 @@ private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
 private const val PLATE_MARGIN = 0.012f
+private const val HANDLE_GAP = 0.04f
+private const val HANDLE_DROP = 0.03f
+private const val HANDLE_HALF_LENGTH = 0.1f
+private const val HANDLE_HALF = 0.008f
 private const val TIPPED_DROP_METERS = 0.3f
 private const val TIPPED_FORWARD_METERS = 0.35f
 private const val TIPPED_DEGREES = 50f
