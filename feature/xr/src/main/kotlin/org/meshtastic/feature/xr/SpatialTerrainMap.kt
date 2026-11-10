@@ -58,6 +58,7 @@ import androidx.xr.compose.spatial.Orbiter
 import androidx.xr.compose.spatial.OrbiterPosition
 import androidx.xr.runtime.Session
 import androidx.xr.runtime.math.BoundingBox
+import androidx.xr.runtime.math.FloatSize3d
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Quaternion
 import androidx.xr.runtime.math.Vector3
@@ -387,7 +388,12 @@ private fun createRoot(
     val root = MeshEntity.create(session, handle, listOf(material), 0, pose, panel)
     root.setScale(fit.scale / scale)
     // Not scaled with distance: the table keeps its size wherever it is put.
-    root.addComponent(MovableComponent.createSystemMovable(session, false))
+    val movable = MovableComponent.createSystemMovable(session, false)
+    // The system draws its move bar around this box, in the root's own units.
+    val across = 2 * (geometry.transform.diskRadius + SpatialWheelLayout.REACH)
+    movable.size = FloatSize3d(across, MOVE_BOX_HEIGHT, across)
+    val attached = root.addComponent(movable)
+    Logger.d { "Terrain table movable attached: $attached" }
     return root
 }
 
@@ -522,6 +528,7 @@ private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
 private const val PLATE_MARGIN = 0.012f
+private const val MOVE_BOX_HEIGHT = 0.3f
 private const val HANDLE_GAP = 0.04f
 private const val HANDLE_DROP = 0.03f
 private const val HANDLE_HALF_LENGTH = 0.1f
