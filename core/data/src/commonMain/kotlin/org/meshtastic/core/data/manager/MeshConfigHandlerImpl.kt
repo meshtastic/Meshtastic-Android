@@ -192,6 +192,7 @@ internal fun Config.summarize(): String = when {
     lora != null -> "lora"
     bluetooth != null -> "bluetooth"
     security != null -> "security"
+    transport != null -> "transport"
     sessionkey != null -> "sessionkey"
     device_ui != null -> "device_ui"
     else -> "unknown"

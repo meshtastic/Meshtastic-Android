@@ -616,33 +616,38 @@ open class RadioConfigViewModel(
         }
     }
 
-    fun setConfig(config: Config) {
+    fun setConfig(config: Config) = setConfigs(listOf(config))
+
+    /** Writes each section in list order under one save, for a screen that edits more than one section. */
+    fun setConfigs(configs: List<Config>) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setConfig") {
-            _radioConfigState.update { state ->
-                state.copy(
-                    radioConfig =
-                    state.radioConfig
-                        .newBuilder()
-                        .also { wb ->
-                            wb.device = config.device ?: state.radioConfig.device
-                            wb.position = config.position ?: state.radioConfig.position
-                            wb.power = config.power ?: state.radioConfig.power
-                            wb.network = config.network ?: state.radioConfig.network
-                            wb.display = config.display ?: state.radioConfig.display
-                            // LoRa is intentionally NOT applied optimistically: the firmware can clamp or
-                            // region-swap
-                            // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the
-                            // device's
-                            // actual value. It is re-read from the device when the LoRa screen is next opened.
-                            wb.bluetooth = config.bluetooth ?: state.radioConfig.bluetooth
-                            wb.security = config.security ?: state.radioConfig.security
-                        }
-                        .build(),
-                )
+            configs.forEach { config ->
+                _radioConfigState.update { state ->
+                    state.copy(
+                        radioConfig =
+                        state.radioConfig
+                            .newBuilder()
+                            .also { wb ->
+                                wb.device = config.device ?: state.radioConfig.device
+                                wb.position = config.position ?: state.radioConfig.position
+                                wb.power = config.power ?: state.radioConfig.power
+                                wb.network = config.network ?: state.radioConfig.network
+                                wb.display = config.display ?: state.radioConfig.display
+                                // LoRa is intentionally NOT applied optimistically: the firmware can clamp or
+                                // region-swap (e.g. EU sibling) a LoRa write and applies it live, so the form must
+                                // reflect the device's actual value. It is re-read from the device when the LoRa
+                                // screen is next opened.
+                                wb.bluetooth = config.bluetooth ?: state.radioConfig.bluetooth
+                                wb.security = config.security ?: state.radioConfig.security
+                                wb.transport = config.transport ?: state.radioConfig.transport
+                            }
+                            .build(),
+                    )
+                }
+                expectRestartIfLocal(config.saveRebootBehavior())
+                radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
             }
-            expectRestartIfLocal(config.saveRebootBehavior())
-            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
         }
     }
 
@@ -958,6 +963,16 @@ open class RadioConfigViewModel(
         if (route == ConfigRoute.NETWORK) {
             safeLaunch(tag = "getConnectionStatus") {
                 radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerReadRequestId)
+            }
+            // Firmware that lists no transports predates the section and never answers the get.
+            if (radioConfigState.value.metadata?.supported_transports?.isNotEmpty() == true) {
+                safeLaunch(tag = "getTransportConfig") {
+                    radioConfigUseCase.getConfig(
+                        destNum,
+                        AdminMessage.ConfigType.TRANSPORT_CONFIG.value,
+                        onRequestId = ::registerReadRequestId,
+                    )
+                }
             }
         }
         safeLaunch(tag = "getConfig") {
@@ -1387,6 +1402,7 @@ open class RadioConfigViewModel(
                                 wb.lora = response.lora ?: state.radioConfig.lora
                                 wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
                                 wb.security = response.security ?: state.radioConfig.security
+                                wb.transport = response.transport ?: state.radioConfig.transport
                             }
                             .build(),
                     )

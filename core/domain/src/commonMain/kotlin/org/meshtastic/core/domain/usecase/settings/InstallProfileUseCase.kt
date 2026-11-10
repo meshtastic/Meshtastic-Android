@@ -68,18 +68,17 @@ constructor(
         // session open or allow the rest of the profile to be partially applied.
         val channelSet = profile.channel_url?.takeIf { it.isNotBlank() }?.let(::parseProfileChannelSet)
         val desiredLoraConfig = channelSet?.lora_config ?: profile.config?.lora
-        val replacementPlan =
-            channelSet?.let {
-                try {
-                    it.toChannelReplacementPlan(
-                        currentSettings = emptyList(),
-                        fallbackLoraConfig = profile.config?.lora ?: currentLoraConfig,
-                        requirePrimary = true,
-                    )
-                } catch (e: IllegalArgumentException) {
-                    throw MalformedMeshtasticUrlException("Invalid channel set in device profile", e)
-                }
+        val replacementPlan = channelSet?.let {
+            try {
+                it.toChannelReplacementPlan(
+                    currentSettings = emptyList(),
+                    fallbackLoraConfig = profile.config?.lora ?: currentLoraConfig,
+                    requirePrimary = true,
+                )
+            } catch (e: IllegalArgumentException) {
+                throw MalformedMeshtasticUrlException("Invalid channel set in device profile", e)
             }
+        }
         val loraConfigToWrite = desiredLoraConfig?.takeIf { it != currentLoraConfig }
 
         radioController.editSettings(destNum) {
@@ -133,6 +132,7 @@ constructor(
             lc.display?.let { setConfig(Config.Builder().also { wb -> wb.display = it }.build()) }
             lc.bluetooth?.let { setConfig(Config.Builder().also { wb -> wb.bluetooth = it }.build()) }
             lc.security?.let { setConfig(Config.Builder().also { wb -> wb.security = it }.build()) }
+            lc.transport?.let { setConfig(Config.Builder().also { wb -> wb.transport = it }.build()) }
         }
     }
 
