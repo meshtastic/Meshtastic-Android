@@ -1841,8 +1841,8 @@
     <string name="remote_shell_modifier_locked">Locked</string>
     <string name="remote_shell_modifier_once">Applies to the next key</string>
     <string name="remote_shell_more_options">More options</string>
-    <string name="remote_shell_no_reply">No reply from the node. It must list your radio's public key as an admin key, and be in range.</string>
-    <string name="remote_shell_no_reply_reason">Could not open the session (%1$s). The node must list your radio's public key as an admin key, and be in range.</string>
+    <string name="remote_shell_no_reply">No reply from the node. It must have DMShell turned on in its config.yaml, list your radio's public key as an admin key, and be in range.</string>
+    <string name="remote_shell_no_reply_reason">Could not open the session (%1$s). The node must have DMShell turned on in its config.yaml, list your radio's public key as an admin key, and be in range.</string>
     <string name="remote_shell_open">Open terminal</string>
     <string name="remote_shell_open_description">Opens a shell on this node, starting a remote admin session first if needed</string>
     <string name="remote_shell_reconnect">Reconnect</string>
