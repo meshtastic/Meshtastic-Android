@@ -49,8 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
@@ -120,7 +123,38 @@ internal enum class AirQuality(val labelRes: StringResource, val unit: String, v
     }
 
     fun getValue(sample: AirQualitySample): Float? = getValue(sample.telemetry, sample.aqi)
+
+    /** CO2 (ppm) is on its own axis so it cannot flatten the µg/m³ series. */
+    val axisPosition: Axis.Position.Vertical
+        get() = if (this == CO2) Axis.Position.Vertical.End else Axis.Position.Vertical.Start
 }
+
+private const val PARTICULATE_OFFSET_FRACTION = 0.05
+private const val PARTICULATE_MIN_OFFSET = 1.0
+
+/**
+ * Y bounds for the particulate axis: zero-based, with a small offset below so a zero reading is not drawn on the bottom
+ * edge.
+ */
+internal fun particulateAxisRange(dataMax: Double): Pair<Double, Double> {
+    val top = maxOf(dataMax, PARTICULATE_MIN_OFFSET)
+    return -maxOf(top * PARTICULATE_OFFSET_FRACTION, PARTICULATE_MIN_OFFSET) to top
+}
+
+/** Axis label for a particulate tick. The offset tick below zero reads "0", and Vico rejects a blank label. */
+internal fun particulateAxisLabel(value: Double, unit: String): String =
+    "${NumberFormatter.format(value.coerceAtLeast(0.0).toFloat(), 0)} $unit".trimEnd()
+
+/** Unit for the start axis: the one unit its series share, or "" when they mix, as µg/m³ and the unitless AQI do. */
+internal fun startAxisUnit(plotted: Collection<AirQuality>): String =
+    plotted.filter { it != AirQuality.CO2 }.map { it.unit }.distinct().singleOrNull().orEmpty()
+
+private val particulateRangeProvider =
+    object : CartesianLayerRangeProvider {
+        override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = particulateAxisRange(maxY).first
+
+        override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) = particulateAxisRange(maxY).second
+    }
 
 /** An air quality [telemetry] reading paired with the NowCast [aqi] as of its own timestamp (null if unavailable). */
 internal data class AirQualitySample(val telemetry: Telemetry, val aqi: Int?)
@@ -321,17 +355,44 @@ private fun AirQualityChart(
                 LineCartesianLayer.LineProvider.series(
                     ChartStyling.createStyledLine(metric.color, ChartStyling.THIN_LINE_WIDTH_DP),
                 ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
+                verticalAxisPosition = metric.axisPosition,
+                rangeProvider = if (metric == AirQuality.CO2) null else particulateRangeProvider,
             )
         }
 
         val nonNullLayers = remember(chartLayers) { chartLayers.filterNotNull() }
+        val hasParticulateAxis = layers.any { (metric, _) -> metric != AirQuality.CO2 }
+        val hasCo2Axis = layers.any { (metric, _) -> metric == AirQuality.CO2 }
+        val startAxisUnit = startAxisUnit(layers.map { (metric, _) -> metric })
 
         if (nonNullLayers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
                 modifier = chartModifier,
                 layers = nonNullLayers,
+                startAxis =
+                if (hasParticulateAxis) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(),
+                        valueFormatter = { _, value, _ ->
+                            particulateAxisLabel(value, startAxisUnit)
+                        },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (hasCo2Axis) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = AirQuality.CO2.color),
+                        valueFormatter = { _, value, _ ->
+                            "${NumberFormatter.format(value.toFloat(), 0)} ${AirQuality.CO2.unit}"
+                        },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
                 selectedX = selectedX,
                 onPointSelected = onSelectPoint,

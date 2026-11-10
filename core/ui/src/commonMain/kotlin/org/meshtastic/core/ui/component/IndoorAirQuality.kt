@@ -54,7 +54,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_icon
 import org.meshtastic.core.resources.close
-import org.meshtastic.core.resources.iaq_level_dangerously_polluted
 import org.meshtastic.core.resources.iaq_level_excellent
 import org.meshtastic.core.resources.iaq_level_extremely_polluted
 import org.meshtastic.core.resources.iaq_level_good
@@ -76,7 +75,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ThumbUp
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
 import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQGood
@@ -91,10 +89,9 @@ enum class Iaq(val color: Color, val label: StringResource, val range: IntRange)
     Good(IAQGood, Res.string.iaq_level_good, 51..100),
     LightlyPolluted(IAQLightlyPolluted, Res.string.iaq_level_lightly_polluted, 101..150),
     ModeratelyPolluted(IAQModeratelyPolluted, Res.string.iaq_level_moderately_polluted, 151..200),
-    HeavilyPolluted(IAQHeavilyPolluted, Res.string.iaq_level_heavily_polluted, 201..300),
-    SeverelyPolluted(IAQSeverelyPolluted, Res.string.iaq_level_severely_polluted, 301..400),
-    ExtremelyPolluted(IAQExtremelyPolluted, Res.string.iaq_level_extremely_polluted, 401..500),
-    DangerouslyPolluted(IAQDangerouslyPolluted, Res.string.iaq_level_dangerously_polluted, 501..Int.MAX_VALUE),
+    HeavilyPolluted(IAQHeavilyPolluted, Res.string.iaq_level_heavily_polluted, 201..250),
+    SeverelyPolluted(IAQSeverelyPolluted, Res.string.iaq_level_severely_polluted, 251..350),
+    ExtremelyPolluted(IAQExtremelyPolluted, Res.string.iaq_level_extremely_polluted, 351..Int.MAX_VALUE),
 }
 
 fun getIaq(iaq: Int): Iaq? = when {
@@ -105,8 +102,7 @@ fun getIaq(iaq: Int): Iaq? = when {
     iaq in Iaq.ModeratelyPolluted.range -> Iaq.ModeratelyPolluted
     iaq in Iaq.HeavilyPolluted.range -> Iaq.HeavilyPolluted
     iaq in Iaq.SeverelyPolluted.range -> Iaq.SeverelyPolluted
-    iaq in Iaq.ExtremelyPolluted.range -> Iaq.ExtremelyPolluted
-    else -> Iaq.DangerouslyPolluted
+    else -> Iaq.ExtremelyPolluted
 }
 
 @Composable

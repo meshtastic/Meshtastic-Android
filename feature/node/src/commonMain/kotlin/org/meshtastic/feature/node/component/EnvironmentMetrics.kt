@@ -129,7 +129,7 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
                 add(
                     VectorMetricInfo(
                         label = Res.string.gas_resistance,
-                        value = "${NumberFormatter.format(gr, 0)} MΩ",
+                        value = "${NumberFormatter.format(gr, 2)} MΩ",
                         icon = MeshtasticIcons.Particulate,
                     )
                         .asGroup(),

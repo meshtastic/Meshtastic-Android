@@ -90,7 +90,12 @@ private enum class PowerMetric(val color: Color) {
     VOLTAGE(Gold),
 }
 
-private enum class PowerChannel(val strRes: StringResource) {
+// PowerMetrics.ch4-ch8 are deprecated in the proto: protobufs#877 moved multi-channel ADC readings to
+// EnvironmentMetrics.adc_voltage_ch0-7, which this app already reads and graphs. These reads stay because
+// firmware predating that move still reports on ch4-ch8, and dropping them would blank the channels those
+// devices show today. Delete them, and PowerChannel.FOUR..EIGHT, once the proto removes the fields.
+// Note the migration covers voltage only - ch4-ch8 *current* has no successor field at all.
+internal enum class PowerChannel(val strRes: StringResource) {
     ONE(Res.string.channel_1),
     TWO(Res.string.channel_2),
     THREE(Res.string.channel_3),
@@ -99,7 +104,50 @@ private enum class PowerChannel(val strRes: StringResource) {
     SIX(Res.string.channel_6),
     SEVEN(Res.string.channel_7),
     EIGHT(Res.string.channel_8),
+    ;
+
+    /** The reported voltage in volts, or null when this channel did not report one. */
+    @Suppress("CyclomaticComplexMethod", "DEPRECATION")
+    fun voltage(pm: org.meshtastic.proto.PowerMetrics): Float? = when (this) {
+        ONE -> pm.ch1_voltage
+        TWO -> pm.ch2_voltage
+        THREE -> pm.ch3_voltage
+        FOUR -> pm.ch4_voltage
+        FIVE -> pm.ch5_voltage
+        SIX -> pm.ch6_voltage
+        SEVEN -> pm.ch7_voltage
+        EIGHT -> pm.ch8_voltage
+    }
+
+    /** The reported current in milliamps, or null when this channel did not report one. */
+    @Suppress("CyclomaticComplexMethod", "DEPRECATION")
+    fun current(pm: org.meshtastic.proto.PowerMetrics): Float? = when (this) {
+        ONE -> pm.ch1_current
+        TWO -> pm.ch2_current
+        THREE -> pm.ch3_current
+        FOUR -> pm.ch4_current
+        FIVE -> pm.ch5_current
+        SIX -> pm.ch6_current
+        SEVEN -> pm.ch7_current
+        EIGHT -> pm.ch8_current
+    }
 }
+
+/** The user's label for a power channel, or [fallback] ("Channel N") when it is missing or blank. */
+internal fun powerChannelLabel(customLabel: String?, fallback: String): String =
+    customLabel?.takeIf { it.isNotBlank() } ?: fallback
+
+/** The channels in [metrics] that report a voltage or a current, in channel order. */
+internal fun reportingPowerChannels(metrics: org.meshtastic.proto.PowerMetrics?): List<PowerChannel> =
+    PowerChannel.entries.filter { metrics != null && (it.voltage(metrics) != null || it.current(metrics) != null) }
+
+/** Display text for the halves a channel reported; a half it did not report is null, never "0". */
+internal data class PowerChannelTexts(val voltage: String?, val current: String?)
+
+internal fun powerChannelTexts(voltage: Float?, current: Float?) = PowerChannelTexts(
+    voltage = voltage?.let { MetricFormatter.voltage(it) },
+    current = current?.let { MetricFormatter.current(it) },
+)
 
 private val LEGEND_DATA =
     listOf(
@@ -123,7 +171,9 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 data.any { !retrieveVoltage(channel, it).isNaN() || !retrieveCurrent(channel, it).isNaN() }
             }
         }
-    var selectedChannel by rememberSaveable { mutableStateOf(PowerChannel.ONE) }
+    var chosenChannel by rememberSaveable { mutableStateOf<PowerChannel?>(null) }
+    val selectedChannel =
+        chosenChannel?.takeIf { it in availableChannels } ?: availableChannels.firstOrNull() ?: PowerChannel.ONE
     val channelLabels = state.node?.powerChannelLabels.orEmpty()
 
     BaseMetricScreen(
@@ -153,8 +203,8 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                         val customLabel = channelLabels.getOrNull(channel.ordinal).orEmpty()
                         FilterChip(
                             selected = selectedChannel == channel,
-                            onClick = { selectedChannel = channel },
-                            label = { Text(customLabel.ifBlank { stringResource(channel.strRes) }) },
+                            onClick = { chosenChannel = channel },
+                            label = { Text(powerChannelLabel(customLabel, stringResource(channel.strRes))) },
                         )
                     }
                 }
@@ -255,8 +305,8 @@ private fun PowerMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color) {
-                        currentColor -> "$currentLabel: ${MetricFormatter.current(value.toFloat(), 0)}"
-                        voltageColor -> "$voltageLabel: ${MetricFormatter.voltage(value.toFloat(), 1)}"
+                        currentColor -> "$currentLabel: ${MetricFormatter.current(value.toFloat(), 1)}"
+                        voltageColor -> "$voltageLabel: ${MetricFormatter.voltage(value.toFloat(), 2)}"
                         else -> NumberFormatter.format(value.toFloat(), 1)
                     }
                 },
@@ -366,8 +416,7 @@ private fun PowerMetricsCard(
 
                 val pm = telemetry.power_metrics
                 if (pm != null) {
-                    PowerChannelsRow1(pm, channelLabels)
-                    PowerChannelsExtraRows(pm, channelLabels)
+                    PowerChannelsRows(pm, channelLabels)
                 }
             }
         }
@@ -375,140 +424,37 @@ private fun PowerMetricsCard(
 }
 
 @Composable
-private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-        if (pm.ch1_current != null || pm.ch1_voltage != null) {
-            PowerChannelColumn(
-                Res.string.channel_1,
-                channelLabels.getOrNull(PowerChannel.ONE.ordinal),
-                pm.ch1_voltage ?: 0f,
-                pm.ch1_current ?: 0f,
-            )
-        }
-        if (pm.ch2_current != null || pm.ch2_voltage != null) {
-            PowerChannelColumn(
-                Res.string.channel_2,
-                channelLabels.getOrNull(PowerChannel.TWO.ordinal),
-                pm.ch2_voltage ?: 0f,
-                pm.ch2_current ?: 0f,
-            )
-        }
-        if (pm.ch3_current != null || pm.ch3_voltage != null) {
-            PowerChannelColumn(
-                Res.string.channel_3,
-                channelLabels.getOrNull(PowerChannel.THREE.ordinal),
-                pm.ch3_voltage ?: 0f,
-                pm.ch3_current ?: 0f,
-            )
-        }
-    }
-}
-
-// PowerMetrics.ch4-ch8 are deprecated in the proto: protobufs#877 moved multi-channel ADC readings to
-// EnvironmentMetrics.adc_voltage_ch0-7, which this app already reads and graphs. These reads stay because
-// firmware predating that move still reports on ch4-ch8, and dropping them would blank the channels those
-// devices show today. Delete them, and PowerChannel.FOUR..EIGHT, once the proto removes the fields.
-// Note the migration covers voltage only - ch4-ch8 *current* has no successor field at all.
-@Composable
-@Suppress("CyclomaticComplexMethod", "DEPRECATION")
-private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
-    val hasCh456 =
-        hasChannelData(pm.ch4_voltage, pm.ch4_current) ||
-            hasChannelData(pm.ch5_voltage, pm.ch5_current) ||
-            hasChannelData(pm.ch6_voltage, pm.ch6_current)
-    val hasCh78 = hasChannelData(pm.ch7_voltage, pm.ch7_current) || hasChannelData(pm.ch8_voltage, pm.ch8_current)
-
-    if (hasCh456) {
-        Spacer(modifier = Modifier.height(4.dp))
+private fun PowerChannelsRows(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
+    reportingPowerChannels(pm).chunked(CHANNELS_PER_ROW).forEachIndexed { index, row ->
+        if (index > 0) Spacer(modifier = Modifier.height(4.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            if (hasChannelData(pm.ch4_voltage, pm.ch4_current)) {
+            row.forEach { channel ->
                 PowerChannelColumn(
-                    Res.string.channel_4,
-                    channelLabels.getOrNull(PowerChannel.FOUR.ordinal),
-                    pm.ch4_voltage ?: 0f,
-                    pm.ch4_current ?: 0f,
-                )
-            }
-            if (hasChannelData(pm.ch5_voltage, pm.ch5_current)) {
-                PowerChannelColumn(
-                    Res.string.channel_5,
-                    channelLabels.getOrNull(PowerChannel.FIVE.ordinal),
-                    pm.ch5_voltage ?: 0f,
-                    pm.ch5_current ?: 0f,
-                )
-            }
-            if (hasChannelData(pm.ch6_voltage, pm.ch6_current)) {
-                PowerChannelColumn(
-                    Res.string.channel_6,
-                    channelLabels.getOrNull(PowerChannel.SIX.ordinal),
-                    pm.ch6_voltage ?: 0f,
-                    pm.ch6_current ?: 0f,
-                )
-            }
-        }
-    }
-    if (hasCh78) {
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            if (hasChannelData(pm.ch7_voltage, pm.ch7_current)) {
-                PowerChannelColumn(
-                    Res.string.channel_7,
-                    channelLabels.getOrNull(PowerChannel.SEVEN.ordinal),
-                    pm.ch7_voltage ?: 0f,
-                    pm.ch7_current ?: 0f,
-                )
-            }
-            if (hasChannelData(pm.ch8_voltage, pm.ch8_current)) {
-                PowerChannelColumn(
-                    Res.string.channel_8,
-                    channelLabels.getOrNull(PowerChannel.EIGHT.ordinal),
-                    pm.ch8_voltage ?: 0f,
-                    pm.ch8_current ?: 0f,
+                    title = powerChannelLabel(channelLabels.getOrNull(channel.ordinal), stringResource(channel.strRes)),
+                    voltage = channel.voltage(pm),
+                    current = channel.current(pm),
                 )
             }
         }
     }
 }
 
-private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage != null || current != null
+private const val CHANNELS_PER_ROW = 3
 
 @Composable
-private fun PowerChannelColumn(titleRes: StringResource, customLabel: String?, voltage: Float, current: Float) {
+private fun PowerChannelColumn(title: String, voltage: Float?, current: Float?) {
+    val texts = powerChannelTexts(voltage, current)
     Column {
-        Text(
-            text = customLabel?.takeIf { it.isNotBlank() } ?: stringResource(titleRes),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-        )
-        MetricValueRow(color = PowerMetric.VOLTAGE.color, text = MetricFormatter.voltage(voltage))
-        MetricValueRow(color = PowerMetric.CURRENT.color, text = MetricFormatter.current(current))
+        Text(text = title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        texts.voltage?.let { MetricValueRow(color = PowerMetric.VOLTAGE.color, text = it) }
+        texts.current?.let { MetricValueRow(color = PowerMetric.CURRENT.color, text = it) }
     }
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
-@Suppress("CyclomaticComplexMethod", "DEPRECATION") // ch4-ch8: see PowerChannelsExtraRows
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float =
-    when (channelSelected) {
-        PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
-        PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
-        PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
-        PowerChannel.FOUR -> telemetry.power_metrics?.ch4_voltage ?: Float.NaN
-        PowerChannel.FIVE -> telemetry.power_metrics?.ch5_voltage ?: Float.NaN
-        PowerChannel.SIX -> telemetry.power_metrics?.ch6_voltage ?: Float.NaN
-        PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_voltage ?: Float.NaN
-        PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_voltage ?: Float.NaN
-    }
+    telemetry.power_metrics?.let { channelSelected.voltage(it) } ?: Float.NaN
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
-@Suppress("CyclomaticComplexMethod", "DEPRECATION") // ch4-ch8: see PowerChannelsExtraRows
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float =
-    when (channelSelected) {
-        PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
-        PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
-        PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
-        PowerChannel.FOUR -> telemetry.power_metrics?.ch4_current ?: Float.NaN
-        PowerChannel.FIVE -> telemetry.power_metrics?.ch5_current ?: Float.NaN
-        PowerChannel.SIX -> telemetry.power_metrics?.ch6_current ?: Float.NaN
-        PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_current ?: Float.NaN
-        PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_current ?: Float.NaN
-    }
+    telemetry.power_metrics?.let { channelSelected.current(it) } ?: Float.NaN
