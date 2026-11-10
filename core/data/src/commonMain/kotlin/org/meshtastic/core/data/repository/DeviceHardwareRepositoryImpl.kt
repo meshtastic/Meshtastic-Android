@@ -279,12 +279,12 @@ class DeviceHardwareRepositoryImpl(
         architecture = "kmp",
         displayName = "Meshtastic app node",
         hwModel = APP_NODE_HW_MODEL,
-        hwModelSlug = "NODE_KMP",
+        hwModelSlug = "VIRTUAL_NODE",
     )
 
     companion object {
-        /** The app itself as a node, from protobufs #1126. */
-        internal val APP_NODE_HW_MODEL: Int = HardwareModel.NODE_KMP.value
+        /** The app itself as a node: `VIRTUAL_NODE`, by number until the protobufs pin names it (protobufs #1126). */
+        internal const val APP_NODE_HW_MODEL: Int = 254
 
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
         private val FAILED_REFRESH_RETRY_INTERVAL_MS = 15.minutes.inWholeMilliseconds

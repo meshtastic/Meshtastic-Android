@@ -48,7 +48,9 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
     return when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
         InterfaceId.BLUETOOTH -> BLE_ADDRESS.matches(rest)
 
-        InterfaceId.NOP -> rest.isEmpty()
+        InterfaceId.NOP,
+        InterfaceId.NODE,
+        -> rest.isEmpty()
 
         InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
 

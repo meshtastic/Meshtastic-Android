@@ -130,7 +130,7 @@ fun DeviceListItem(
             is DeviceListEntry.Tcp -> Res.string.network
             is DeviceListEntry.Mock -> Res.string.add
             is DeviceListEntry.Replay -> Res.string.add
-            is DeviceListEntry.LocalNode -> stringResource(Res.string.this_device)
+            is DeviceListEntry.LocalNode -> Res.string.this_device
         }
     val contentDescription by
         produceState<String?>(null, descriptionRes, resourceEnvironment) {

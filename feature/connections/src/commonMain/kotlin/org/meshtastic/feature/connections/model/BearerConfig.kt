@@ -17,33 +17,7 @@
 package org.meshtastic.feature.connections.model
 
 import org.meshtastic.node.host.Bearer
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.Config.NetworkConfig.ProtocolFlags
-
-/** The `network.enabled_protocols` bit that drives this bearer, or null when no bit does. */
-internal val Bearer.protocolFlag: ProtocolFlags?
-    get() =
-        when (this) {
-            Bearer.UDP -> ProtocolFlags.UDP_BROADCAST
-            Bearer.BLE_ADV -> ProtocolFlags.BLE_BROADCAST
-            Bearer.GATT -> ProtocolFlags.BLE_GATT_PEER
-            else -> null
-        }
 
 /** MQTT is set up on its own module screen, so the card leaves it out. */
 internal val Bearer.onCard: Boolean
     get() = this != Bearer.MQTT
-
-/**
- * A card switch either persists a host bearer in the node or flips the bearer's `enabled_protocols` bit. LoRa follows
- * `lora.region`, which has no off position that keeps the region, so it has no switch.
- */
-internal val Bearer.switchable: Boolean
-    get() = !fromConfig || protocolFlag != null
-
-/** This network section with [flag] set or cleared and every other bit and field untouched. */
-internal fun Config.NetworkConfig.withProtocol(flag: ProtocolFlags, on: Boolean): Config.NetworkConfig = newBuilder()
-    .also { wb ->
-        wb.enabled_protocols = if (on) enabled_protocols or flag.value else enabled_protocols and flag.value.inv()
-    }
-    .build()

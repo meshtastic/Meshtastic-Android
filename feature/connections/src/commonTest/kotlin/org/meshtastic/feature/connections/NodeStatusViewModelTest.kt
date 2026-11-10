@@ -25,14 +25,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.network.radio.NodeStatusRepository
-import org.meshtastic.core.testing.FakeRadioConfigRepository
-import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.Config.NetworkConfig.ProtocolFlags
-import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -64,24 +59,8 @@ class NodeStatusViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val repository = FakeRepository()
-    private val radioController = FakeRadioController()
-    private val radioConfigRepository = FakeRadioConfigRepository()
 
-    private fun viewModel() = NodeStatusViewModel(repository, radioController, radioConfigRepository)
-
-    private fun cacheNetwork(flags: Int, ntpServer: String = "") {
-        val network =
-            Config.NetworkConfig.Builder()
-                .also { wb ->
-                    wb.enabled_protocols = flags
-                    wb.ntp_server = ntpServer
-                }
-                .build()
-        radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().also { wb -> wb.network = network }.build())
-    }
-
-    private val allFlags =
-        ProtocolFlags.UDP_BROADCAST.value or ProtocolFlags.BLE_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value
+    private fun viewModel() = NodeStatusViewModel(repository)
 
     @BeforeTest
     fun setUp() {
@@ -116,57 +95,23 @@ class NodeStatusViewModelTest {
         assertEquals(listOf(Bearer.AUDIO to true), repository.hostBearerWrites)
         assertEquals(1, repository.refreshes)
         assertEquals(1, repository.usbRequests)
-        assertTrue(radioController.localConfigs.isEmpty())
     }
 
     @Test
-    fun `a config bearer switch writes its enabled_protocols bit as the Network screen does`() = runTest(dispatcher) {
-        cacheNetwork(allFlags, ntpServer = "pool.example")
-        viewModel().setBearer(Bearer.UDP, false)
-        val network = radioController.localConfigs.single().network
-        assertEquals(
-            ProtocolFlags.BLE_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value,
-            network?.enabled_protocols,
-        )
-        assertEquals("pool.example", network?.ntp_server)
-        assertTrue(repository.hostBearerWrites.isEmpty())
-    }
-
-    @Test
-    fun `quick switches build on the last write while the cache lags`() = runTest(dispatcher) {
-        cacheNetwork(allFlags)
+    fun `every bearer with a transport entry is switched in the node`() = runTest(dispatcher) {
         val viewModel = viewModel()
         viewModel.setBearer(Bearer.UDP, false)
         viewModel.setBearer(Bearer.GATT, false)
+        viewModel.setBearer(Bearer.LORA, true)
         assertEquals(
-            listOf(
-                ProtocolFlags.BLE_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value,
-                ProtocolFlags.BLE_BROADCAST.value,
-            ),
-            radioController.localConfigs.map { it.network?.enabled_protocols },
+            listOf(Bearer.UDP to false, Bearer.GATT to false, Bearer.LORA to true),
+            repository.hostBearerWrites,
         )
     }
 
     @Test
-    fun `a changed cache wins over the last write`() = runTest(dispatcher) {
-        cacheNetwork(allFlags)
-        val viewModel = viewModel()
-        viewModel.setBearer(Bearer.UDP, false)
-        cacheNetwork(ProtocolFlags.UDP_BROADCAST.value)
-        viewModel.setBearer(Bearer.BLE_ADV, true)
-        assertEquals(
-            ProtocolFlags.UDP_BROADCAST.value or ProtocolFlags.BLE_BROADCAST.value,
-            radioController.localConfigs.last().network?.enabled_protocols,
-        )
-    }
-
-    @Test
-    fun `LoRa and MQTT switch nothing`() = runTest(dispatcher) {
-        cacheNetwork(allFlags)
-        val viewModel = viewModel()
-        viewModel.setBearer(Bearer.LORA, false)
-        viewModel.setBearer(Bearer.MQTT, true)
-        assertTrue(radioController.localConfigs.isEmpty())
+    fun `MQTT switches nothing`() = runTest(dispatcher) {
+        viewModel().setBearer(Bearer.MQTT, true)
         assertTrue(repository.hostBearerWrites.isEmpty())
     }
 }
