@@ -913,7 +913,6 @@
     <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
-    <string name="iaq_level_dangerously_polluted">Dangerously Polluted</string>
     <string name="iaq_level_excellent">Excellent</string>
     <string name="iaq_level_extremely_polluted">Extremely Polluted</string>
     <string name="iaq_level_good">Good</string>

@@ -102,7 +102,10 @@ internal fun MetricCardFlow(
 private fun MetricCard(metric: MetricInfo, valueColor: Color?) {
     val cardModifier = Modifier.fillMaxWidth()
     val label =
-        metric.channelNumber?.let { stringResource(Res.string.metric_channel_label, stringResource(metric.label), it) }
+        metric.customLabel
+            ?: metric.channelNumber?.let {
+                stringResource(Res.string.metric_channel_label, stringResource(metric.label), it)
+            }
             ?: stringResource(metric.label)
     val resolvedValueColor = valueColor ?: MaterialTheme.colorScheme.onSurface
     when (metric) {

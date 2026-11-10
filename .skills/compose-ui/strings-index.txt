@@ -871,7 +871,6 @@ i_know_what_i_m_doing
 ### IAQ ###
 iaq
 iaq_definition
-iaq_level_dangerously_polluted
 iaq_level_excellent
 iaq_level_extremely_polluted
 iaq_level_good

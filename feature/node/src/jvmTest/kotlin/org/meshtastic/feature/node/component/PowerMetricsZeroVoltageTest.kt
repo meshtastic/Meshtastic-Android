@@ -43,25 +43,50 @@ class PowerMetricsZeroVoltageTest {
                 }
                 .build(),
         )
-        onNodeWithText("0.00V").assertIsDisplayed()
-        onNodeWithText("0.0mA").assertIsDisplayed()
+        onNodeWithText("0.00 V").assertIsDisplayed()
+        onNodeWithText("0.0 mA").assertIsDisplayed()
     }
 
     @Test
     fun absentChannelIsHidden() = runComposeUiTest {
         setPowerMetrics(PowerMetricsProto.Builder().build())
-        onNodeWithText("0.00V").assertDoesNotExist()
-        onNodeWithText("0.0mA").assertDoesNotExist()
+        onNodeWithText("0.00 V").assertDoesNotExist()
+        onNodeWithText("0.0 mA").assertDoesNotExist()
     }
 
     @Test
     fun reportedVoltageWithoutCurrentShowsVoltageOnly() = runComposeUiTest {
         setPowerMetrics(PowerMetricsProto.Builder().also { wb -> wb.ch1_voltage = 3.7f }.build())
-        onNodeWithText("3.70V").assertIsDisplayed()
-        onNodeWithText("0.0mA").assertDoesNotExist()
+        onNodeWithText("3.70 V").assertIsDisplayed()
+        onNodeWithText("0.0 mA").assertDoesNotExist()
     }
 
-    private fun ComposeUiTest.setPowerMetrics(metrics: PowerMetricsProto) = setContent {
-        MaterialTheme { PowerMetrics(node = Node(num = 1, powerMetrics = metrics)) }
+    @Test
+    fun reportedCurrentWithoutVoltageShowsCurrentOnly() = runComposeUiTest {
+        setPowerMetrics(PowerMetricsProto.Builder().also { wb -> wb.ch2_current = 12.5f }.build())
+        onNodeWithText("12.5 mA").assertIsDisplayed()
+        onNodeWithText("0.00 V").assertDoesNotExist()
     }
+
+    @Test
+    fun customLabelReplacesTheChannelName() = runComposeUiTest {
+        setPowerMetrics(
+            PowerMetricsProto.Builder().also { wb -> wb.ch2_voltage = 4.1f }.build(),
+            labels = listOf("", "Solar"),
+        )
+        onNodeWithText("Solar").assertIsDisplayed()
+    }
+
+    @Test
+    fun channelsBeyondThreeAreShown() = runComposeUiTest {
+        setPowerMetrics(PowerMetricsProto.Builder().also { wb -> wb.ch8_voltage = 5.25f }.build())
+        onNodeWithText("5.25 V").assertIsDisplayed()
+    }
+
+    private fun ComposeUiTest.setPowerMetrics(metrics: PowerMetricsProto, labels: List<String> = emptyList()) =
+        setContent {
+            MaterialTheme {
+                PowerMetrics(node = Node(num = 1, powerMetrics = metrics, powerChannelLabels = labels))
+            }
+        }
 }

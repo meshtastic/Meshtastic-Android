@@ -244,9 +244,14 @@ private fun DeviceMetricsChart(
                     val formatted = NumberFormatter.format(value, 1)
                     when (color) {
                         batteryColor -> formatString(percentValueTemplate, batteryLabel, formatted)
-                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, formatted)
+
+                        voltageColor ->
+                            formatString(voltageValueTemplate, voltageLabel, NumberFormatter.format(value, 2))
+
                         chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, formatted)
+
                         airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, formatted)
+
                         else -> formatString(numericValueTemplate, formatted)
                     }
                 },
