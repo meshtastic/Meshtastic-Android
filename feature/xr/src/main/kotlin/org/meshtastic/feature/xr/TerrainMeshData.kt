@@ -39,6 +39,7 @@ internal class TerrainMeshData(
     val normals: FloatArray,
     val colors: FloatArray,
     val indices: IntArray,
+    val uvs: FloatArray = FloatArray(positions.size / 3 * 2),
 ) {
     val vertexCount: Int
         get() = positions.size / 3
@@ -224,7 +225,12 @@ internal data class Rgb(val r: Float, val g: Float, val b: Float) {
 }
 
 /** The terrain surface and skirt as colored vertices, the light and the elevation ramp baked in. */
-internal fun terrainMeshData(geometry: SpatialTerrainGeometry, lowest: Double, highest: Double): TerrainMeshData {
+internal fun terrainMeshData(
+    geometry: SpatialTerrainGeometry,
+    lowest: Double,
+    highest: Double,
+    textured: Boolean = false,
+): TerrainMeshData {
     val count = geometry.positions.size / 3
     val surface = geometry.columns * geometry.rows
     val colors = FloatArray(count * 4)
@@ -235,7 +241,13 @@ internal fun terrainMeshData(geometry: SpatialTerrainGeometry, lowest: Double, h
                 SKIRT
             } else {
                 val altitude = geometry.transform.altitude(geometry.positions[i * 3 + 1])
-                val ground = if (altitude <= WATER_LEVEL_METERS) WATER else ramp(((altitude - lowest) / span).toFloat())
+                val ground =
+                    // With an image draped on, it carries the color and the vertex keeps only the light.
+                    when {
+                        textured -> WHITE
+                        altitude <= WATER_LEVEL_METERS -> WATER
+                        else -> ramp(((altitude - lowest) / span).toFloat())
+                    }
                 val nx = geometry.normals[i * 3]
                 val ny = geometry.normals[i * 3 + 1]
                 val nz = geometry.normals[i * 3 + 2]
@@ -246,7 +258,10 @@ internal fun terrainMeshData(geometry: SpatialTerrainGeometry, lowest: Double, h
         colors[i * 4 + 2] = color.b
         colors[i * 4 + 3] = 1f
     }
-    return TerrainMeshData(geometry.positions, geometry.normals, colors, geometry.indices)
+    // The geometry puts north at v = 1; an image's first row is north, and glTF's v = 0 is that row.
+    val source = geometry.textureCoordinates
+    val uvs = FloatArray(count * 2) { if (it % 2 == 0) source[it] else 1f - source[it] }
+    return TerrainMeshData(geometry.positions, geometry.normals, colors, geometry.indices, uvs)
 }
 
 /** The bezel ring, its compass letters and the eight handles, all in model units. */
@@ -340,6 +355,7 @@ private const val MAX_EXAGGERATION = 6.0
 
 /** From the north-west and above, the way a printed relief map is lit, normalized. */
 private val LIGHT = floatArrayOf(-0.5f, 0.75f, -0.43f)
+private val WHITE = Rgb(1f, 1f, 1f)
 private val WATER = Rgb(0.2f, 0.42f, 0.62f)
 private val LOWLAND = Rgb(0.36f, 0.56f, 0.34f)
 private val MIDLAND = Rgb(0.62f, 0.55f, 0.36f)

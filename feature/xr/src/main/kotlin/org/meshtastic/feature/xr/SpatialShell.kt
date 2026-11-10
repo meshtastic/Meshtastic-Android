@@ -62,6 +62,7 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 @Composable
 fun SpatialShell(
     nodes: List<SpatialNodeSnapshot>,
+    imagery: List<TerrainImagery>,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -86,7 +87,7 @@ fun SpatialShell(
                     }
                 }
             }
-            if (mapShown) SpatialTerrainMap(nodes, buildDispatcher)
+            if (mapShown) SpatialTerrainMap(nodes, imagery, buildDispatcher)
         } else {
             SpaceToggle(
                 inFullSpace = false,

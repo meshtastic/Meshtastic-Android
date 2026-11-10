@@ -25,7 +25,23 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.xr.SpatialShell
+import org.meshtastic.feature.xr.TerrainImagery
+
+/** The 2D map's raster basemaps, satellite first: it reads best on a relief model. */
+private val terrainImagery: List<TerrainImagery> =
+    (listOf(MapTileCatalogue.EsriImagery) + MapTileCatalogue.basemaps)
+        .distinctBy { it.id }
+        .map {
+            TerrainImagery(
+                id = it.id,
+                label = it.label,
+                tileUrl = it.spec.tiles.first(),
+                maxZoom = it.spec.maxZoom,
+                attribution = it.spec.attributionHtml.orEmpty().replace(Regex("<[^>]+>"), "").replace("&copy;", "©"),
+            )
+        }
 
 @Composable
 fun AppSpatialShell(content: @Composable () -> Unit) {
@@ -44,5 +60,10 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                     )
                 }
         }
-    SpatialShell(nodes = snapshots, buildDispatcher = koinInject<CoroutineDispatchers>().default, content = content)
+    SpatialShell(
+        nodes = snapshots,
+        imagery = terrainImagery,
+        buildDispatcher = koinInject<CoroutineDispatchers>().default,
+        content = content,
+    )
 }

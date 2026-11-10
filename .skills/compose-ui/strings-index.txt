@@ -2286,6 +2286,7 @@ xr_full_space
 xr_home_space
 xr_terrain_empty
 xr_terrain_flat
+xr_terrain_layer_elevation
 xr_terrain_loading
 xr_terrain_map
 xr_terrain_unavailable

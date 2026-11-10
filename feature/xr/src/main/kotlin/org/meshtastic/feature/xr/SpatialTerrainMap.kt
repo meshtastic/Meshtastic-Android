@@ -20,11 +20,17 @@ package org.meshtastic.feature.xr
 
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -37,6 +43,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -57,6 +64,8 @@ import androidx.xr.runtime.math.Vector4
 import androidx.xr.scenecore.AlphaMode
 import androidx.xr.scenecore.CustomMesh
 import androidx.xr.scenecore.Entity
+import androidx.xr.scenecore.GltfModel
+import androidx.xr.scenecore.GltfModelEntity
 import androidx.xr.scenecore.InputEvent
 import androidx.xr.scenecore.InteractableComponent
 import androidx.xr.scenecore.KhronosUnlitMaterial
@@ -71,12 +80,15 @@ import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.xr_terrain_empty
 import org.meshtastic.core.resources.xr_terrain_flat
+import org.meshtastic.core.resources.xr_terrain_layer_elevation
 import org.meshtastic.core.resources.xr_terrain_loading
 import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.resources.xr_terrain_unavailable
@@ -111,6 +123,8 @@ private class BuiltTerrain(
     val terrain: TerrainMeshData,
     val bezel: TerrainMeshData,
     val pins: TerrainMeshData?,
+    /** JPEG to drape over [terrain], null to draw it in its elevation colors. */
+    val image: ByteArray?,
     val flat: Boolean,
 )
 
@@ -121,6 +135,7 @@ private class BuiltTerrain(
 @Composable
 fun SpatialTerrainMap(
     nodes: List<SpatialNodeSnapshot>,
+    imagery: List<TerrainImagery>,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
 ) {
@@ -141,6 +156,8 @@ fun SpatialTerrainMap(
     val motion = remember { SpatialWheelMotion() }
     var wheel by remember { mutableStateOf<Entity?>(null) }
     val http = remember { HttpClient() }
+    var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
+    val layer = imagery.firstOrNull { it.id == layerId }
     val context = LocalContext.current
     val tipped = remember(context) { opensMapAtLaunch(context) }
     DisposableEffect(http) { onDispose { http.close() } }
@@ -149,6 +166,7 @@ fun SpatialTerrainMap(
         session,
         circle,
         nodes,
+        layer,
         http,
         motion,
         buildDispatcher,
@@ -159,16 +177,20 @@ fun SpatialTerrainMap(
     )
     WheelFrames(wheel, motion)
 
-    if (maxZoom > 1) {
+    if (maxZoom > 1 || imagery.isNotEmpty()) {
         Orbiter(position = OrbiterPosition.TopCenter()) {
             Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
-                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp)) {
-                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
-                    Slider(
-                        value = slider,
-                        onValueChange = { slider = it },
-                        onValueChangeFinished = { committed = slider },
-                    )
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp, max = 560.dp)) {
+                    if (imagery.isNotEmpty()) LayerChips(imagery, layer, onSelect = { layerId = it?.id })
+                    if (maxZoom > 1) {
+                        Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
+                        Slider(
+                            value = slider,
+                            onValueChange = { slider = it },
+                            onValueChangeFinished = { committed = slider },
+                        )
+                    }
+                    layer?.let { Text(it.attribution, style = MaterialTheme.typography.labelLarge) }
                 }
             }
         }
@@ -195,6 +217,27 @@ internal fun withLocalAnchor(nodes: List<SpatialNodeSnapshot>): List<SpatialNode
         dLat * dLat + dLon * dLon
     }
     return nodes.map { if (it.id == anchor.id) it.copy(isConnectedRadio = true) else it }
+}
+
+/** One chip per basemap, and one for the plain elevation colors. */
+@Composable
+private fun LayerChips(imagery: List<TerrainImagery>, selected: TerrainImagery?, onSelect: (TerrainImagery?) -> Unit) {
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        for (layer in imagery) {
+            FilterChip(
+                selected = layer.id == selected?.id,
+                onClick = { onSelect(layer) },
+                label = { Text(layer.label) },
+                modifier = Modifier.heightIn(min = XrTargetSize),
+            )
+        }
+        FilterChip(
+            selected = selected == null,
+            onClick = { onSelect(null) },
+            label = { Text(stringResource(Res.string.xr_terrain_layer_elevation)) },
+            modifier = Modifier.heightIn(min = XrTargetSize),
+        )
+    }
 }
 
 @Composable
@@ -232,6 +275,7 @@ private fun TerrainEntities(
     session: Session,
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
+    imagery: TerrainImagery?,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
@@ -249,11 +293,11 @@ private fun TerrainEntities(
         val handler = Handler(Looper.getMainLooper())
         Executor { handler.post(it) }
     }
-    LaunchedEffect(session, circle) {
+    LaunchedEffect(session, circle, imagery) {
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -265,10 +309,18 @@ private fun TerrainEntities(
         // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
+        // A draped terrain is a model: SceneCore takes a run-time image only inside one.
+        val model =
+            built.image?.let { image ->
+                val glb = withContext(buildDispatcher) { terrainGlb(built.terrain, image, "image/jpeg") }
+                GltfModel.create(session, glb, "terrain")
+            }
         val root = createRoot(session, built.geometry, tipped).also { it.contentDescription = description }
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
-        val meshes = listOfNotNull(built.terrain, built.bezel, built.pins).map { createMesh(session, it) }
-        val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
+        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.pins)
+        val meshes = plain.map { createMesh(session, it) }
+        val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
+        val entities = drawn + listOfNotNull(model?.let { GltfModelEntity.create(session, it, Pose.Identity, wheel) })
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
         wheelChanged(wheel)
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
@@ -277,6 +329,7 @@ private fun TerrainEntities(
         } finally {
             wheelChanged(null)
             destroy(entities + plate.entity + wheel + root, meshes + plate.mesh, material)
+            model?.close()
         }
     }
 }
@@ -388,9 +441,12 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
 private suspend fun buildTerrain(
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
+    imagery: TerrainImagery?,
     http: HttpClient,
-): BuiltTerrain {
+): BuiltTerrain = coroutineScope {
     val frame = SpatialFrame(circle.bounds)
+    // Fetched while the elevation is sampled.
+    val draped = imagery?.let { async { terrainImage(frame.bounds, it, http) } }
     val source = MapterhornElevationSource(http)
     val plan =
         SpatialHeightGrid.plan(
@@ -408,11 +464,13 @@ private suspend fun buildTerrain(
             verticalExaggeration = reliefExaggeration(relief, maxOf(frame.widthMeters, frame.depthMeters)),
         )
     val geometry = SpatialTerrainGeometry(grid, transform)
-    return BuiltTerrain(
+    val image = draped?.await()
+    BuiltTerrain(
         geometry = geometry,
-        terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble()),
+        terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
         pins = pinMeshData(geometry, nodes, circle),
+        image = image,
         flat = !grid.hasAnyTerrain,
     )
 }
