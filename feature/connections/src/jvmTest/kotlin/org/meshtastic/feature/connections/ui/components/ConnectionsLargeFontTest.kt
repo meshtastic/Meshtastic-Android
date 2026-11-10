@@ -59,11 +59,25 @@ import kotlin.test.fail
 @OptIn(ExperimentalTestApi::class)
 class ConnectionsLargeFontTest {
 
+    // Four segments leave a 360dp phone 82dp each, less than "Bluetooth" and its icon need, so labels show from the
+    // width where all four fit.
     @Test
     fun transportSelectorShowsLabelsThatFitAtDefaultFontScale() = runComposeUiTest {
-        setPhoneContent(fontScale = 1f) { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+        setPhoneContent(fontScale = 1f, width = FOUR_LABEL_WIDTH) {
+            TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+        }
 
         assertLabelsFitTheirSegments()
+    }
+
+    @Test
+    fun transportSelectorFallsBackToNamedIconsOnAPhoneAtDefaultFontScale() = runComposeUiTest {
+        setPhoneContent(fontScale = 1f) { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+
+        for (label in TRANSPORT_LABELS) {
+            onNodeWithText(label).assertDoesNotExist()
+            onNodeWithContentDescription(label).assertIsDisplayed()
+        }
     }
 
     // The fallback is chosen per layout, not once: a selector that starts too narrow for its labels shows icons, and
@@ -86,7 +100,7 @@ class ConnectionsLargeFontTest {
             onNodeWithContentDescription(label).assertIsDisplayed()
         }
 
-        width = 328.dp
+        width = FOUR_LABEL_WIDTH
         waitForIdle()
 
         assertLabelsFitTheirSegments()
@@ -106,7 +120,7 @@ class ConnectionsLargeFontTest {
     // line rather than at the top of that slot once the label grows taller than the 18dp icon.
     @Test
     fun transportSelectorIconsStayCenteredOnTheirLabelsAtDoubleFontScale() = runComposeUiTest {
-        setPhoneContent(fontScale = 2f, width = 600.dp) {
+        setPhoneContent(fontScale = 2f, width = FOUR_LABEL_WIDTH * 2) {
             TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
         }
 
@@ -202,7 +216,10 @@ class ConnectionsLargeFontTest {
         "lines=${layout.lineCount} size=${layout.size} overflow=${layout.hasVisualOverflow}"
 }
 
-private val TRANSPORT_LABELS = listOf("Bluetooth", "Network", "USB")
+private val TRANSPORT_LABELS = listOf("Bluetooth", "Network", "USB", "This device")
+
+/** Wide enough for four labeled segments at default font scale: a 480dp window less the screen's side padding. */
+private val FOUR_LABEL_WIDTH = 448.dp
 
 private const val FIELD_HORIZONTAL_PADDING_PX = 32f
 
