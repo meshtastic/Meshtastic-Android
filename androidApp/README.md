@@ -36,6 +36,7 @@ Debug builds take the application ID `com.geeksville.mesh.<flavor>.debug`, so th
 graph TB
   :androidApp[androidApp]:::android-application
   :androidApp -.-> :feature:map-maplibre
+  :androidApp -.-> :feature:xr
   :androidApp -.-> :feature:map-terrain
   :androidApp -.-> :core:ble
   :androidApp -.-> :core:common
