@@ -34,6 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -283,7 +285,16 @@ fun EnvironmentMetricsChart(
                             isFahrenheit = isFahrenheit,
                             isImperial = isImperial,
                             marker = marker,
-                            vicoScrollState = if (index == 0) vicoScrollState else rememberVicoScrollState(),
+                            vicoScrollState =
+                            if (index == 0) {
+                                vicoScrollState
+                            } else {
+                                rememberVicoScrollState(
+                                    autoScroll = Scroll.Absolute.End,
+                                    autoScrollCondition = AutoScrollCondition.OnModelGrowth,
+                                )
+                            },
+                            followsSelection = index != 0,
                             selectedX = selectedX,
                             onPointSelected = onPointSelected,
                             modifier = Modifier.fillMaxWidth().height(groupHeight).padding(horizontal = 8.dp),
@@ -314,11 +325,18 @@ private fun EnvironmentGroupChart(
     isImperial: Boolean,
     marker: CartesianMarker,
     vicoScrollState: VicoScrollState,
+    followsSelection: Boolean,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
+    // The screen scrolls the first chart on a log-row tap; the others follow the same selection.
+    LaunchedEffect(selectedX) {
+        if (followsSelection && selectedX != null) {
+            vicoScrollState.animateScroll(Scroll.Absolute.x(selectedX, CommonCharts.SCROLL_BIAS))
+        }
+    }
     LaunchedEffect(metrics, metricData, isImperial) {
         modelProducer.runTransaction {
             metrics.forEach { metric ->

@@ -52,4 +52,13 @@ class ParticulateAxisRangeTest {
             },
         )
     }
+
+    @Test
+    fun theOffsetTickLabelIsNeverBlank() {
+        val (min, _) = particulateAxisRange(dataMax = 40.0)
+
+        assertEquals("0 µg/m³", particulateAxisLabel(min, "µg/m³"))
+        assertEquals("0", particulateAxisLabel(min, ""))
+        assertEquals("30 µg/m³", particulateAxisLabel(30.0, "µg/m³"))
+    }
 }

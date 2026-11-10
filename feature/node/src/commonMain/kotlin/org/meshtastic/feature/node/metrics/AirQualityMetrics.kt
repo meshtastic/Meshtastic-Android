@@ -141,6 +141,10 @@ internal fun particulateAxisRange(dataMax: Double): Pair<Double, Double> {
     return -maxOf(top * PARTICULATE_OFFSET_FRACTION, PARTICULATE_MIN_OFFSET) to top
 }
 
+/** Axis label for a particulate tick. The offset tick below zero reads "0", and Vico rejects a blank label. */
+internal fun particulateAxisLabel(value: Double, unit: String): String =
+    "${NumberFormatter.format(value.coerceAtLeast(0.0).toFloat(), 0)} $unit".trimEnd()
+
 private val particulateRangeProvider =
     object : CartesianLayerRangeProvider {
         override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = particulateAxisRange(maxY).first
@@ -373,11 +377,7 @@ private fun AirQualityChart(
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(),
                         valueFormatter = { _, value, _ ->
-                            if (value < 0.0) {
-                                ""
-                            } else {
-                                "${NumberFormatter.format(value.toFloat(), 0)} $startAxisUnit".trimEnd()
-                            }
+                            particulateAxisLabel(value, startAxisUnit)
                         },
                     )
                 } else {
