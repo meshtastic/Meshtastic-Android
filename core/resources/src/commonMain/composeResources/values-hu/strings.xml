@@ -769,5 +769,6 @@
     <!-- WIND -->
     <string name="wind">Szél</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Te</string>
 </resources>

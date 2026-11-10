@@ -1621,6 +1621,7 @@
     <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
+    <!-- XR -->
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>

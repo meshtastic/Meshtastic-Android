@@ -516,6 +516,7 @@
     <!-- WIND -->
     <string name="wind">바람</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">나</string>
     <string name="zoom_in">확대</string>
     <string name="zoom_out">축소</string>

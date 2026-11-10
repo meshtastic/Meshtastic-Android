@@ -1308,6 +1308,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="wind_lull">風停</string>
     <string name="wind_speed">風速</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">縮小</string>

@@ -530,5 +530,6 @@
     <!-- WIND -->
     <string name="wind">Rüzgar</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Siz</string>
 </resources>

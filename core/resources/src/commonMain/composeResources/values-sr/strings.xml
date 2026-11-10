@@ -494,5 +494,6 @@
     <!-- WIND -->
     <string name="wind_speed">Брзина ветра</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Ти</string>
 </resources>

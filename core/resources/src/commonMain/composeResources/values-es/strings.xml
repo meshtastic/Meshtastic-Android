@@ -775,5 +775,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- WIND -->
     <string name="wind">Viento</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Usted</string>
 </resources>

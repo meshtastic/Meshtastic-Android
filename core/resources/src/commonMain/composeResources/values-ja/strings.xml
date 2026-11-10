@@ -1594,5 +1594,6 @@
     <string name="write_nfc_failed">タグに書き込めませんでした。書き込み可能な空の NFC タグを使い、動かさずに近づけてください。</string>
     <string name="write_nfc_success">タグに書き込みました</string>
     <string name="write_nfc_text">書き込み可能な NFC タグをスマートフォンの背面に近づけてください。</string>
+    <!-- XR -->
     <string name="you">あなた</string>
 </resources>

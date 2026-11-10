@@ -1780,6 +1780,7 @@
     <string name="write_nfc_failed">Sildile ei õnnestunud kirjutada. Kasuta kirjutatavat, tühja NFC silti ja hoia seda paigal.</string>
     <string name="write_nfc_success">Kirjutatud sildile</string>
     <string name="write_nfc_text">Hoia kirjutatavat NFC silti telefoni tagakülje vastas.</string>
+    <!-- XR -->
     <string name="you">Sina</string>
     <string name="zoom_in">Zoomi sisse</string>
     <string name="zoom_out">Zoomi välja</string>
