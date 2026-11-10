@@ -192,18 +192,20 @@ private fun DeviceModelInSpace(
 @Composable
 private fun DeviceScreenPanel(session: Session, device: GltfModelEntity?, glass: GlbBounds?, frame: MirrorFrame?) {
     val context = LocalContext.current
-    val view = remember { ImageView(context).apply { scaleType = ImageView.ScaleType.FIT_XY } }
-    SideEffect {
-        frame?.toBitmap()?.let { bitmap ->
-            // Nearest neighbor keeps the display's pixels square instead of smearing them.
-            view.setImageDrawable(BitmapDrawable(view.resources, bitmap).apply { setFilterBitmap(false) })
+    // A panel keeps its view parented, so each panel gets its own.
+    val view = remember(session, device, glass) { ImageView(context).apply { scaleType = ImageView.ScaleType.FIT_XY } }
+    // Nearest neighbor keeps the display's pixels square instead of smearing them; decoded once per frame.
+    val screen =
+        remember(frame, view) {
+            frame?.toBitmap()?.let { bitmap -> BitmapDrawable(view.resources, bitmap).apply { setFilterBitmap(false) } }
         }
-    }
+    SideEffect { screen?.let(view::setImageDrawable) }
     LaunchedEffect(session, device, glass) {
         val parent = device ?: return@LaunchedEffect
         val bounds = glass ?: return@LaunchedEffect
         val width = bounds.max[0] - bounds.min[0]
         val height = bounds.max[1] - bounds.min[1]
+        if (width <= 0f || height <= 0f) return@LaunchedEffect
         val at = Vector3(bounds.center[0], bounds.center[1], bounds.max[2] + SCREEN_LIFT_METERS)
         // Made in pixels, so the glass gets a sharp texture, then shrunk to the glass's real size.
         val pixels = IntSize2d(SCREEN_PIXELS_WIDE, (SCREEN_PIXELS_WIDE * height / width).roundToInt())
