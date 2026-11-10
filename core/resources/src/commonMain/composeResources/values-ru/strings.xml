@@ -905,7 +905,6 @@
     <!-- IAQ -->
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
-    <string name="iaq_level_dangerously_polluted">Опасно загрязнённый</string>
     <string name="iaq_level_excellent">Отлично</string>
     <string name="iaq_level_extremely_polluted">Чрезвычайно загрязненный</string>
     <string name="iaq_level_good">Хороший</string>
