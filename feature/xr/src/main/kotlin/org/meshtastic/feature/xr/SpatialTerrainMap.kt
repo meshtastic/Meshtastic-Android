@@ -577,7 +577,7 @@ private suspend fun buildTerrain(
         geometry = geometry,
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
         skirt = if (image != null) skirtMeshData(geometry) else null,
-        bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
+        bezel = bezelMeshData(transform.diskRadius),
         markers = markerMeshData(markers),
         buildings = raised,
         contours = lines,

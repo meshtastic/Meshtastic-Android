@@ -300,10 +300,14 @@ internal fun skirtMeshData(geometry: SpatialTerrainGeometry): TerrainMeshData? {
     )
 }
 
-/** The bezel ring, its compass letters and the eight handles, all in model units. */
-internal fun bezelMeshData(diskRadius: Float, rimTop: Float): TerrainMeshData {
+/**
+ * The bezel ring, its compass letters and the eight handles, all in model units. Its top is level with the map's lowest
+ * ground, so the terrain stands on the table and no wall hides low ground at the edge.
+ */
+internal fun bezelMeshData(diskRadius: Float): TerrainMeshData {
     val acc = MeshAccumulator()
-    val top = min(rimTop + SpatialWheelLayout.BEZEL_LIFT, SpatialWheelLayout.MAXIMUM_TOP).coerceAtLeast(MIN_BEZEL_TOP)
+    val top = BEZEL_TOP
+    val middle = (top - TERRAIN_SKIRT) / 2
     acc.append(
         SpatialBezelMesh(
             innerRadius = diskRadius + SpatialWheelLayout.GAP,
@@ -337,9 +341,9 @@ internal fun bezelMeshData(diskRadius: Float, rimTop: Float): TerrainMeshData {
         for (step in 0..SPOKE_STEPS) {
             val along = spokeStart + (knobDistance - spokeStart) * step / SPOKE_STEPS
             val at = SpatialWheelLayout.point(along, angle)
-            acc.sphere(at.x, top / 2, at.y, SpatialWheelLayout.SPOKE_RADIUS, BEZEL, rings = 4, segments = 6)
+            acc.sphere(at.x, middle, at.y, SpatialWheelLayout.SPOKE_RADIUS, BEZEL, rings = 4, segments = 6)
         }
-        acc.sphere(knob.x, top / 2, knob.y, SpatialWheelLayout.KNOB_RADIUS, KNOB)
+        acc.sphere(knob.x, middle, knob.y, SpatialWheelLayout.KNOB_RADIUS, KNOB)
     }
     return acc.build()
 }
@@ -365,7 +369,7 @@ private fun ramp(t: Float): Rgb = when {
 
 private const val WATER_LEVEL_METERS = 0.5
 private const val AMBIENT = 0.45f
-private const val MIN_BEZEL_TOP = 0.012f
+private const val BEZEL_TOP = 0f
 private const val TERRAIN_SKIRT = 0.02f
 private const val SPOKE_STEPS = 6
 private const val LETTER_LIFT = 0.0006f
