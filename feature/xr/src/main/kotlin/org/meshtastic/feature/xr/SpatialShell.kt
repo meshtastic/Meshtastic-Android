@@ -65,6 +65,7 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialSignal
 fun SpatialShell(
     nodes: List<SpatialNodeSnapshot>,
     imagery: List<TerrainImagery>,
+    buildings: TerrainBuildingSource?,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -91,8 +92,9 @@ fun SpatialShell(
             }
             if (mapShown) {
                 SpatialTerrainMap(
-                    if (openAtLaunch && Log.isLoggable("MeshXrPeaks", Log.DEBUG)) PEAKS else nodes,
+                    if (openAtLaunch) debugNodes() ?: nodes else nodes,
                     imagery,
+                    buildings,
                     buildDispatcher,
                 )
             }
@@ -128,10 +130,23 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
 internal fun opensMapAtLaunch(context: Context): Boolean =
     context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 && Log.isLoggable("MeshXrMap", Log.DEBUG)
 
-/**
- * With `log.tag.MeshXrPeaks DEBUG` set as well, the map shows these made-up nodes around Mount Rainier instead of the
- * mesh, to check relief, towers and links on ground that has some.
- */
+/** Made-up nodes in place of the mesh, when one of the switches below is set on top of the map hook. */
+private fun debugNodes(): List<SpatialNodeSnapshot>? = when {
+    Log.isLoggable("MeshXrPeaks", Log.DEBUG) -> PEAKS
+    Log.isLoggable("MeshXrCity", Log.DEBUG) -> CITY
+    else -> null
+}
+
+/** `log.tag.MeshXrCity DEBUG`: downtown Seattle, a circle small enough for a downloaded basemap's buildings. */
+private val CITY =
+    listOf(
+        SpatialNodeSnapshot(1, LatLon(47.6062, -122.3321), isConnectedRadio = true, shortName = "DOWN"),
+        SpatialNodeSnapshot(2, LatLon(47.6205, -122.3493), shortName = "NDL", hopsAway = 0),
+        SpatialNodeSnapshot(3, LatLon(47.5952, -122.3316), shortName = "STA", hopsAway = 1),
+        SpatialNodeSnapshot(4, LatLon(47.6131, -122.3166), shortName = "CAPH", hopsAway = 1, isInfrastructure = true),
+    )
+
+/** `log.tag.MeshXrPeaks DEBUG`: around Mount Rainier, to check relief, towers and links on ground that has some. */
 private val PEAKS =
     listOf(
         SpatialNodeSnapshot(1, LatLon(46.786, -121.735), isConnectedRadio = true, shortName = "PARA"),

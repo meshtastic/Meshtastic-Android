@@ -20,7 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import org.meshtastic.app.map.offline.pmtiles.OfflineBuildings
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.component.Quality
@@ -30,8 +35,10 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.map.terrain.spatial.SpatialSignal
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.xr.SpatialShell
+import org.meshtastic.feature.xr.TerrainBuildingSource
 import org.meshtastic.feature.xr.TerrainImagery
 import org.meshtastic.proto.Config
+import java.io.File
 
 /** The 2D map's raster basemaps, satellite first: it reads best on a relief model. */
 private val terrainImagery: List<TerrainImagery> =
@@ -87,10 +94,22 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                     )
                 }
         }
+    val dispatchers = koinInject<CoroutineDispatchers>()
+    val context = LocalContext.current
+    // Checked once: a region downloaded while the shell is up offers its buildings the next time the app opens.
+    val buildings =
+        remember(context, dispatchers) {
+            val store = OfflineRegionStore(File(context.filesDir, OfflineRegionStore.DIRECTORY))
+            TerrainBuildingSource(OfflineRegionExtractor.ATTRIBUTION) { bounds ->
+                withContext(dispatchers.io) { OfflineBuildings.footprints(bounds, store) }
+            }
+                .takeIf { OfflineBuildings.available(store) }
+        }
     SpatialShell(
         nodes = snapshots,
         imagery = terrainImagery,
-        buildDispatcher = koinInject<CoroutineDispatchers>().default,
+        buildings = buildings,
+        buildDispatcher = dispatchers.default,
         content = content,
     )
 }

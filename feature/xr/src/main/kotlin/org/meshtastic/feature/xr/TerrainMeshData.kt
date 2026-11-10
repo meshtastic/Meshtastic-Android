@@ -88,6 +88,13 @@ internal class MeshAccumulator {
         indices.addAll(listOf(base, base + 1, base + 2, base, base + 2, base + 3))
     }
 
+    /** A flat face: [corners] as xyz, filled by [triangles] of corner indices, all facing [nx], [ny], [nz]. */
+    fun face(corners: List<FloatArray>, triangles: IntArray, nx: Float, ny: Float, nz: Float, color: Rgb) {
+        val base = count
+        corners.forEach { vertex(it[0], it[1], it[2], nx, ny, nz, color) }
+        triangles.forEach { indices.add(base + it) }
+    }
+
     fun box(cx: Float, cy: Float, cz: Float, hx: Float, hy: Float, hz: Float, color: Rgb) {
         fun p(sx: Int, sy: Int, sz: Int) = floatArrayOf(cx + sx * hx, cy + sy * hy, cz + sz * hz)
         quad(listOf(p(-1, 1, 1), p(1, 1, 1), p(1, 1, -1), p(-1, 1, -1)), 0f, 1f, 0f, color)
@@ -249,7 +256,7 @@ internal fun terrainMeshData(
                 val nx = geometry.normals[i * 3]
                 val ny = geometry.normals[i * 3 + 1]
                 val nz = geometry.normals[i * 3 + 2]
-                ground.scaled(AMBIENT + (1 - AMBIENT) * max(0f, nx * LIGHT[0] + ny * LIGHT[1] + nz * LIGHT[2]))
+                ground.scaled(bakedLight(nx, ny, nz))
             }
         colors[i * 4] = color.r
         colors[i * 4 + 1] = color.g
@@ -314,6 +321,10 @@ internal fun reliefExaggeration(reliefMeters: Double, spanMeters: Double): Doubl
     if (reliefMeters <= 0 || spanMeters <= 0) return MIN_EXAGGERATION
     return (TARGET_RELIEF * spanMeters / reliefMeters).coerceIn(MIN_EXAGGERATION, MAX_EXAGGERATION)
 }
+
+/** How bright a face with this normal is under the map's fixed light, which the unlit material cannot work out. */
+internal fun bakedLight(nx: Float, ny: Float, nz: Float): Float =
+    AMBIENT + (1 - AMBIENT) * max(0f, nx * LIGHT[0] + ny * LIGHT[1] + nz * LIGHT[2])
 
 private fun ramp(t: Float): Rgb = when {
     t < 0.35f -> LOWLAND.mix(MIDLAND, t / 0.35f)

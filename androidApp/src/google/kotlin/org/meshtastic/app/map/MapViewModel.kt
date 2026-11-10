@@ -512,7 +512,7 @@ class MapViewModel(
     // --- Offline vector regions (PMTiles-extracted) ---
 
     // Offline properties exposed as internal StateFlow for composable consumption
-    internal val offlineRegionStore = OfflineRegionStore(File(application.filesDir, "offline_regions"))
+    internal val offlineRegionStore = OfflineRegionStore(File(application.filesDir, OfflineRegionStore.DIRECTORY))
 
     // A single shared instance, not one per download call: OfflineRegionExtractor's mutex only serializes concurrent
     // downloads against each other if they all go through the same instance.

@@ -84,6 +84,8 @@ internal class OfflineRegionStore(private val baseDir: File) {
     }
 
     companion object {
+        /** Under the app's files directory. */
+        const val DIRECTORY = "offline_regions"
         private val LOG = Logger.withTag("OfflineRegionStore")
     }
 }

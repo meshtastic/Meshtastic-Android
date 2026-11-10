@@ -89,6 +89,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.xr_terrain_buildings
 import org.meshtastic.core.resources.xr_terrain_empty
 import org.meshtastic.core.resources.xr_terrain_flat
 import org.meshtastic.core.resources.xr_terrain_layer_elevation
@@ -96,6 +97,7 @@ import org.meshtastic.core.resources.xr_terrain_loading
 import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.resources.xr_terrain_unavailable
 import org.meshtastic.core.resources.xr_terrain_zoom
+import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.terrain.spatial.SpatialCircle
 import org.meshtastic.feature.map.terrain.spatial.SpatialFrame
@@ -126,6 +128,7 @@ private class BuiltTerrain(
     val terrain: TerrainMeshData,
     val bezel: TerrainMeshData,
     val markers: TerrainMeshData?,
+    val buildings: TerrainMeshData?,
     val labels: TerrainLabels?,
     /** JPEG to drape over [terrain], null to draw it in its elevation colors. */
     val image: ByteArray?,
@@ -140,6 +143,7 @@ private class BuiltTerrain(
 fun SpatialTerrainMap(
     nodes: List<SpatialNodeSnapshot>,
     imagery: List<TerrainImagery>,
+    buildings: TerrainBuildingSource?,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
 ) {
@@ -162,6 +166,8 @@ fun SpatialTerrainMap(
     val http = remember { HttpClient() }
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
+    var buildingsShown by rememberSaveable { mutableStateOf(true) }
+    val raised = buildings?.takeIf { buildingsShown }
     val context = LocalContext.current
     // `log.tag.MeshXrTip DEBUG` on top of the map hook: for a console screenshot, which sees the table edge on.
     val tipped = remember(context) { opensMapAtLaunch(context) && Log.isLoggable("MeshXrTip", Log.DEBUG) }
@@ -172,6 +178,7 @@ fun SpatialTerrainMap(
         circle,
         nodes,
         layer,
+        raised,
         http,
         motion,
         buildDispatcher,
@@ -182,20 +189,16 @@ fun SpatialTerrainMap(
     )
     WheelFrames(wheel, motion)
 
-    if (maxZoom > 1 || imagery.isNotEmpty()) {
+    if (maxZoom > 1 || imagery.isNotEmpty() || buildings != null) {
         Orbiter(position = OrbiterPosition.TopCenter()) {
-            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
-                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp, max = 560.dp)) {
-                    if (imagery.isNotEmpty()) LayerChips(imagery, layer, onSelect = { layerId = it?.id })
-                    if (maxZoom > 1) {
-                        Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
-                        Slider(
-                            value = slider,
-                            onValueChange = { slider = it },
-                            onValueChangeFinished = { committed = slider },
-                        )
-                    }
-                    layer?.let { Text(it.attribution, style = MaterialTheme.typography.labelLarge) }
+            MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
+                if (imagery.isNotEmpty() || buildings != null) {
+                    val shown = buildingsShown.takeIf { buildings != null }
+                    LayerChips(imagery, layer, onSelect = { layerId = it?.id }, shown, { buildingsShown = it })
+                }
+                if (maxZoom > 1) {
+                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
+                    Slider(slider, onValueChange = { slider = it }, onValueChangeFinished = { committed = slider })
                 }
             }
         }
@@ -224,10 +227,41 @@ internal fun withLocalAnchor(nodes: List<SpatialNodeSnapshot>): List<SpatialNode
     return nodes.map { if (it.id == anchor.id) it.copy(isConnectedRadio = true) else it }
 }
 
-/** One chip per basemap, and one for the plain elevation colors. */
+/** The orbiter's card: [content], then who to credit for what is on the table. */
 @Composable
-private fun LayerChips(imagery: List<TerrainImagery>, selected: TerrainImagery?, onSelect: (TerrainImagery?) -> Unit) {
+private fun MapControls(credits: List<String>, content: @Composable () -> Unit) {
+    Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp, max = 560.dp)) {
+            content()
+            if (credits.isNotEmpty()) {
+                Text(credits.joinToString(" · "), style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+}
+
+/**
+ * A chip that raises the buildings when [buildings] is not null, then one per basemap and one for the plain elevation
+ * colors.
+ */
+@Composable
+private fun LayerChips(
+    imagery: List<TerrainImagery>,
+    selected: TerrainImagery?,
+    onSelect: (TerrainImagery?) -> Unit,
+    buildings: Boolean?,
+    onBuildings: (Boolean) -> Unit,
+) {
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // First, so it is not scrolled out of sight behind the basemaps.
+        if (buildings != null) {
+            FilterChip(
+                selected = buildings,
+                onClick = { onBuildings(!buildings) },
+                label = { Text(stringResource(Res.string.xr_terrain_buildings)) },
+                modifier = Modifier.heightIn(min = XrTargetSize),
+            )
+        }
         for (layer in imagery) {
             FilterChip(
                 selected = layer.id == selected?.id,
@@ -281,6 +315,7 @@ private fun TerrainEntities(
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
     imagery: TerrainImagery?,
+    buildings: TerrainBuildingSource?,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
@@ -293,16 +328,18 @@ private fun TerrainEntities(
     val statusChanged by rememberUpdatedState(onStatus)
     // Read when a build starts: a node update alone must not rebuild the map.
     val pinned by rememberUpdatedState(nodes)
+    // Keyed on whether there is one, not on which: the caller may hand over a new instance on any recomposition.
+    val buildingSource by rememberUpdatedState(buildings)
     // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
     val mainExecutor = remember {
         val handler = Handler(Looper.getMainLooper())
         Executor { handler.post(it) }
     }
-    LaunchedEffect(session, circle, imagery) {
+    LaunchedEffect(session, circle, imagery, buildings != null) {
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, buildingSource, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -331,7 +368,7 @@ private fun TerrainEntities(
                 GltfModel.create(session, glb, "labels")
             }
         val models = listOfNotNull(model, labels)
-        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.markers)
+        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.markers, built.buildings)
         val meshes = plain.map { createMesh(session, it) }
         val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, wheel) }
@@ -483,11 +520,13 @@ private suspend fun buildTerrain(
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
     imagery: TerrainImagery?,
+    buildings: TerrainBuildingSource?,
     http: HttpClient,
 ): BuiltTerrain = coroutineScope {
     val frame = SpatialFrame(circle.bounds)
     // Fetched while the elevation is sampled.
     val draped = imagery?.let { async { terrainImage(frame.bounds, it, http) } }
+    val footprints = buildings?.let { async { footprintsOrNone(it, frame.bounds) } }
     val source = MapterhornElevationSource(http)
     val plan =
         SpatialHeightGrid.plan(
@@ -512,10 +551,21 @@ private suspend fun buildTerrain(
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
         markers = markerMeshData(markers),
+        buildings = footprints?.await()?.let { TerrainBuildings.meshData(it, geometry) },
         labels = terrainLabels(markers),
         image = image,
         flat = !grid.hasAnyTerrain,
     )
+}
+
+/** The map is drawn without buildings when they cannot be read. */
+private suspend fun footprintsOrNone(source: TerrainBuildingSource, bounds: GeoBounds): List<BuildingFootprint> = try {
+    source.footprints(bounds)
+} catch (e: CancellationException) {
+    throw e
+} catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+    Logger.w { "Buildings could not be read: ${e::class.simpleName}" }
+    emptyList()
 }
 
 /** A rotation about +y by [radians], the sense the wheel's yaw is in. */
