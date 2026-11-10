@@ -1284,7 +1284,7 @@
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
     <string name="routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
     <string name="routing_error_no_route">Nessun percorso</string>
-    <string name="routing_error_none">Confermato</string>
+    <string name="routing_error_none">Consegnato al destinatario</string>
     <string name="routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
     <string name="routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
     <string name="routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>

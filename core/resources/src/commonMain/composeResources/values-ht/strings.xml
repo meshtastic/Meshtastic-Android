@@ -234,7 +234,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rekòmanse avèk yon refi negatif</string>
     <string name="routing_error_no_route">Pa gen wout</string>
-    <string name="routing_error_none">Rekonekte</string>
     <string name="routing_error_timeout">Tan pase</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="save">Sove</string>

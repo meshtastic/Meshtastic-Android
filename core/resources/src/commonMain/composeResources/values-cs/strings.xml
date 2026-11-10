@@ -1375,7 +1375,7 @@
     <string name="routing_error_got_nak">Obdrženo negativní potvrzení</string>
     <string name="routing_error_max_retransmit">Nepodařilo se doručit do mesh sítě</string>
     <string name="routing_error_no_route">Žádná trasa</string>
-    <string name="routing_error_none">Potvrzený příjem</string>
+    <string name="routing_error_none">Doručeno příjemci</string>
     <string name="routing_error_not_authorized">Neautorizováno</string>
     <string name="routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
     <string name="routing_error_pki_send_fail_public_key">Klíč příjemce není k dispozici</string>

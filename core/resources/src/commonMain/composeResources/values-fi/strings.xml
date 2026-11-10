@@ -1471,7 +1471,7 @@
     <string name="routing_error_no_interface">Ei radioliitäntää</string>
     <string name="routing_error_no_response">Ei sovellusvastausta</string>
     <string name="routing_error_no_route">Ei reittiä</string>
-    <string name="routing_error_none">Vahvistettu</string>
+    <string name="routing_error_none">Toimitettu vastaanottajalle</string>
     <string name="routing_error_not_authorized">Ei valtuuksia</string>
     <string name="routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
     <string name="routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>

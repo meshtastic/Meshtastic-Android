@@ -1281,7 +1281,7 @@
     <string name="routing_error_got_nak">相手が正常に受信できませんでした</string>
     <string name="routing_error_max_retransmit">メッシュへの配信に失敗しました</string>
     <string name="routing_error_no_route">ルートがありません</string>
-    <string name="routing_error_none">相手の受信を確認しました</string>
+    <string name="routing_error_none">受信者に配信済み</string>
     <string name="routing_error_pki_failed">暗号化メッセージを送信できませんでした</string>
     <string name="routing_error_pki_send_fail_public_key">受信者の鍵を利用できません</string>
     <string name="routing_error_pki_unknown_pubkey">受信者にあなたの鍵が必要です</string>

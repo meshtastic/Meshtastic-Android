@@ -1300,7 +1300,7 @@
     <string name="routing_error_got_nak">接收到否定确认</string>
     <string name="routing_error_max_retransmit">发送至MESH失败</string>
     <string name="routing_error_no_route">无路径</string>
-    <string name="routing_error_none">已确认</string>
+    <string name="routing_error_none">正在发送</string>
     <string name="routing_error_pki_failed">无法发送加密消息</string>
     <string name="routing_error_pki_send_fail_public_key">接收方密钥不可用</string>
     <string name="routing_error_pki_unknown_pubkey">接收方需要你的密钥</string>

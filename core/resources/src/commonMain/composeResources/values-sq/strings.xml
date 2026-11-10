@@ -241,7 +241,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Marrë një njohje negative</string>
     <string name="routing_error_no_route">Nuk ka rrugë</string>
-    <string name="routing_error_none">Pranuar</string>
     <string name="routing_error_timeout">Koha e skaduar</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
     <string name="save">Ruaj</string>

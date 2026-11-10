@@ -1193,7 +1193,7 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
     <string name="routing_error_no_route">Keine Route</string>
-    <string name="routing_error_none">Bestätigt</string>
+    <string name="routing_error_none">An den Empfänger zugestellt</string>
     <string name="routing_error_pki_failed">Konnte verschlüsselte Nachricht nicht senden</string>
     <string name="routing_error_pki_send_fail_public_key">Empfängerschlüssel nicht verfügbar</string>
     <string name="routing_error_pki_unknown_pubkey">Empfänger benötigt deinen Schlüssel</string>

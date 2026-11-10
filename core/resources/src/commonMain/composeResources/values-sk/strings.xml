@@ -385,7 +385,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Prijaté negatívne potvrdenie</string>
     <string name="routing_error_no_route">Žiadna trasa</string>
-    <string name="routing_error_none">Potvrdené</string>
     <string name="routing_error_timeout">Časový limit</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>

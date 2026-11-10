@@ -1428,7 +1428,7 @@
     <string name="routing_error_no_interface">Raadioliides puudub</string>
     <string name="routing_error_no_response">Rakendus ei vasta</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
-    <string name="routing_error_none">Kinnitatud</string>
+    <string name="routing_error_none">Saajale kätte toimetatud</string>
     <string name="routing_error_not_authorized">Pole autoriseeritud</string>
     <string name="routing_error_pki_failed">Krüptitud sõnumi saatmine ebaõnnestus</string>
     <string name="routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
