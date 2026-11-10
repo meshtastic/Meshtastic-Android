@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package org.meshtastic.feature.xr
 
@@ -58,10 +58,50 @@ internal fun nodeMarkers(
     nodes.filter { circle.contains(it.coordinate) }.map { NodeMarker(it, geometry.surfacePosition(it.coordinate)) }
 
 /**
- * A pin for each node in its own color, a tower for a router, repeater or client base, and an arc from the connected
- * radio to each node it hears directly, colored by how well. Null with no nodes in view.
+ * A trace route to draw: the nodes a request passed on its way out, the radio first, and the ones the answer passed on
+ * its way back.
  */
-internal fun markerMeshData(markers: List<NodeMarker>): TerrainMeshData? {
+data class TerrainRoute(val forward: List<Long>, val back: List<Long>)
+
+/** The way a comet flies in from each node the radio hears directly, in the link's color, by node. */
+internal fun linkPaths(markers: List<NodeMarker>): Map<Long, CometPath> {
+    val radio = markers.firstOrNull { it.node.isConnectedRadio } ?: return emptyMap()
+    return markers
+        .filter { it.node.isDirect }
+        .associate { it.node.id to CometPath(listOf(it.top to radio.top), signalColor(it.node.signal)) }
+}
+
+/**
+ * The way out and the way back of [route], in the 2D map's colors for them. A hop with no marker is passed over, so the
+ * line carries on to the next one that has. Each way keeps to the right of its own direction, so the two run side by
+ * side instead of one hiding the other.
+ */
+internal fun routePaths(markers: List<NodeMarker>, route: TerrainRoute?): List<CometPath> {
+    route ?: return emptyList()
+    val tops = markers.associate { it.node.id to it.top }
+    fun legs(hops: List<Long>) = hops
+        .mapNotNull { tops[it] }
+        .zipWithNext()
+        .filter { (a, b) -> a != b }
+        .map { (a, b) ->
+            val dx = b.x - a.x
+            val dz = b.z - a.z
+            val length = sqrt(dx * dx + dz * dz).coerceAtLeast(1e-6f)
+            val sx = -dz / length * ROUTE_SHIFT
+            val sz = dx / length * ROUTE_SHIFT
+            Vec3(a.x + sx, a.y, a.z + sz) to Vec3(b.x + sx, b.y, b.z + sz)
+        }
+    return listOf(CometPath(legs(route.forward), ROUTE_OUT), CometPath(legs(route.back), ROUTE_BACK)).filter {
+        it.legs.isNotEmpty()
+    }
+}
+
+/**
+ * A pin for each node in its own color, a tower for a router, repeater or client base, an arc from the connected radio
+ * to each node it hears directly, colored by how well, and [route] over them, its way out drawn the heavier. Null with
+ * no nodes in view.
+ */
+internal fun markerMeshData(markers: List<NodeMarker>, route: TerrainRoute? = null): TerrainMeshData? {
     val acc = MeshAccumulator()
     for (marker in markers) {
         val foot = marker.foot
@@ -82,23 +122,31 @@ internal fun markerMeshData(markers: List<NodeMarker>): TerrainMeshData? {
     val radio = markers.firstOrNull { it.node.isConnectedRadio }
     if (radio != null) {
         for (marker in markers) {
-            if (marker.node.isDirect) acc.arc(radio.top, marker.top, signalColor(marker.node.signal))
+            if (marker.node.isDirect) acc.arc(radio.top, marker.top, ARC_HALF_WIDTH, signalColor(marker.node.signal))
         }
+    }
+    for ((index, path) in routePaths(markers, route).withIndex()) {
+        val half = if (index == 0) ROUTE_OUT_HALF_WIDTH else ROUTE_BACK_HALF_WIDTH
+        path.legs.forEach { (from, to) -> acc.arc(from, to, half, path.color) }
     }
     return acc.build().takeIf { it.vertexCount > 0 }
 }
 
-/** A thin four-sided rod from [from] to [to] that rises in the middle, so it clears the ground between them. */
-private fun MeshAccumulator.arc(from: Vec3, to: Vec3, color: Rgb) {
+/** A point [t] of the way along the arc from [from] to [to], which rises in the middle to clear the ground. */
+internal fun arcPoint(from: Vec3, to: Vec3, t: Float): Vec3 {
     val dx = to.x - from.x
     val dy = to.y - from.y
     val dz = to.z - from.z
     val lift = min(ARC_MAX_LIFT, ARC_LIFT_SHARE * sqrt(dx * dx + dz * dz))
+    return Vec3(from.x + dx * t, from.y + dy * t + lift * sin(PI.toFloat() * t), from.z + dz * t)
+}
+
+/** A thin four-sided rod along the arc from [from] to [to]. */
+private fun MeshAccumulator.arc(from: Vec3, to: Vec3, half: Float, color: Rgb) {
     var last = from
     for (step in 1..ARC_STEPS) {
-        val t = step.toFloat() / ARC_STEPS
-        val next = Vec3(from.x + dx * t, from.y + dy * t + lift * sin(PI.toFloat() * t), from.z + dz * t)
-        rod(last, next, ARC_HALF_WIDTH, color)
+        val next = arcPoint(from, to, step.toFloat() / ARC_STEPS)
+        rod(last, next, half, color)
         last = next
     }
 }
@@ -141,13 +189,16 @@ private fun FloatArray.normalized(): FloatArray {
     return FloatArray(3) { this[it] / length }
 }
 
-private fun signalColor(signal: SpatialSignal?): Rgb = when (signal) {
-    SpatialSignal.GOOD -> Rgb(0.3f, 0.85f, 0.4f)
-    SpatialSignal.FAIR -> Rgb(0.95f, 0.85f, 0.25f)
-    SpatialSignal.BAD -> Rgb(0.98f, 0.55f, 0.2f)
-    SpatialSignal.NONE -> Rgb(0.9f, 0.25f, 0.25f)
-    null -> Rgb(0.7f, 0.72f, 0.76f)
+/** The app's signal colors, as the node list's signal bars show them; gray when the radio gave no reading. */
+internal fun signalColor(signal: SpatialSignal?): Rgb = when (signal) {
+    SpatialSignal.GOOD -> rgb(0x3FB86D)
+    SpatialSignal.FAIR -> rgb(0xE8A33E)
+    SpatialSignal.BAD -> rgb(0xE07000)
+    SpatialSignal.NONE -> rgb(0xE05252)
+    null -> Rgb(0.5f, 0.52f, 0.56f)
 }
+
+private fun rgb(hex: Int) = Rgb((hex shr 16 and 0xFF) / 255f, (hex shr 8 and 0xFF) / 255f, (hex and 0xFF) / 255f)
 
 private fun Int.toRgb() = Rgb(Color.red(this) / 255f, Color.green(this) / 255f, Color.blue(this) / 255f)
 
@@ -279,10 +330,16 @@ private const val ARC_STEPS = 14
 private const val ARC_MAX_LIFT = 0.06f
 private const val ARC_LIFT_SHARE = 0.18f
 private const val ARC_HALF_WIDTH = 0.0009f
+private const val ROUTE_OUT_HALF_WIDTH = 0.0016f
+private const val ROUTE_BACK_HALF_WIDTH = 0.0013f
+private const val ROUTE_SHIFT = 0.003f
 private const val LABEL_HALF_WIDTH = 0.017f
 private const val LABEL_HALF_HEIGHT = LABEL_HALF_WIDTH * LabelAtlas.CELL_HEIGHT / LabelAtlas.CELL_WIDTH
 private const val LABEL_OFFSET = 0.016f
 
+/** The 2D map's trace route colors: orange out, blue back. */
+private val ROUTE_OUT = rgb(0xE86A00)
+private val ROUTE_BACK = rgb(0x0081C7)
 private val PIN = Rgb(0.4f, 0.92f, 0.56f)
 private val STALK = Rgb(0.92f, 0.92f, 0.94f)
 private val RADIO = Rgb(0.95f, 0.45f, 0.2f)

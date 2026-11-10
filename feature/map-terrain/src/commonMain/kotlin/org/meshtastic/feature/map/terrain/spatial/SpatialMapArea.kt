@@ -36,6 +36,7 @@ enum class SpatialSignal {
  * @param hopsAway hops from the connected radio, negative when unknown
  * @param signal how the connected radio hears it, null when it has not heard it
  * @param isInfrastructure a router, repeater or client base, which stands as a tower
+ * @param lastHeard when the connected radio last heard it, in seconds since 1970
  */
 data class SpatialNodeSnapshot(
     val id: Long,
@@ -49,6 +50,7 @@ data class SpatialNodeSnapshot(
     val hopsAway: Int = -1,
     val signal: SpatialSignal? = null,
     val isInfrastructure: Boolean = false,
+    val lastHeard: Int = 0,
 ) {
     /** Heard by the connected radio itself, over the air: the two are joined by a link. */
     val isDirect: Boolean

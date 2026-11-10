@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.xr
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -137,6 +138,9 @@ private class BuiltTerrain(
     val buildings: TerrainMeshData?,
     val contours: TerrainMeshData?,
     val labels: TerrainLabels?,
+    /** Where a comet flies in from each node the radio hears, and along each way of the trace route. */
+    val links: Map<Long, CometPath>,
+    val routes: List<CometPath>,
     /** JPEG to drape over [terrain], null to draw it in its elevation colors. */
     val image: ByteArray?,
     val flat: Boolean,
@@ -151,6 +155,7 @@ fun SpatialTerrainMap(
     nodes: List<SpatialNodeSnapshot>,
     imagery: List<TerrainImagery>,
     buildingSource: TerrainBuildingSource?,
+    route: TerrainRoute?,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
 ) {
@@ -174,7 +179,7 @@ fun SpatialTerrainMap(
     val maxZoom = SpatialZoom.maximumZoom(full.radiusMeters)
     val circle = SpatialZoom.circle(full, maxZoom.pow(committed.toDouble()), null)
     val motion = remember { SpatialWheelMotion() }
-    var wheel by remember { mutableStateOf<Entity?>(null) }
+    var scene by remember { mutableStateOf<TableScene?>(null) }
     val http = remember { HttpClient() }
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
@@ -186,6 +191,8 @@ fun SpatialTerrainMap(
     // `log.tag.MeshXrContours DEBUG` on top of the map hook starts with the lines on, as nothing can press the chip.
     var contoursShown by rememberSaveable { mutableStateOf(debugSwitch(context, "MeshXrContours")) }
     val units = remember(context) { contourUnits(context.resources.configuration.locales[0]) }
+    // Made-up nodes are never heard, so their comets are sent in turn.
+    val demo = remember(context) { debugSwitch(context, "MeshXrCity") || debugSwitch(context, "MeshXrPeaks") }
     DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(
@@ -195,15 +202,16 @@ fun SpatialTerrainMap(
         layer,
         raised,
         units.takeIf { contoursShown },
+        route,
         http,
         motion,
         buildDispatcher,
         tipped = tipped,
         description = stringResource(Res.string.xr_terrain_map),
-        onWheel = { wheel = it },
+        onScene = { scene = it },
         onStatus = { status = it },
     )
-    WheelFrames(wheel, motion)
+    TableFrames(scene, motion, nodes, demo)
 
     Orbiter(position = OrbiterPosition.TopCenter()) {
         MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
@@ -224,6 +232,11 @@ fun SpatialTerrainMap(
             }
         }
     }
+    StatusNotice(status, modifier)
+}
+
+@Composable
+private fun StatusNotice(status: TerrainStatus, modifier: Modifier = Modifier) {
     when (status) {
         TerrainStatus.Loading -> Notice(stringResource(Res.string.xr_terrain_loading), modifier)
         TerrainStatus.Flat -> Notice(stringResource(Res.string.xr_terrain_flat), modifier, Alignment.BottomCenter)
@@ -307,18 +320,37 @@ private fun Notice(text: String, modifier: Modifier = Modifier, alignment: Align
     }
 }
 
-/** Steps the wheel's ease and coast once per frame and turns the entity to match. */
+/** The wheel everything on the table turns with, and the comets that fly over it, none with animations off. */
+private class TableScene(val wheel: Entity, val comets: TerrainComets?)
+
+/**
+ * Once per frame, steps the wheel's ease and coast and turns the entity to match, and moves the comets. A node whose
+ * last-heard time has changed since the last look sends its comet in.
+ */
 @Composable
-private fun WheelFrames(wheel: Entity?, motion: SpatialWheelMotion) {
-    LaunchedEffect(wheel) {
-        val entity = wheel ?: return@LaunchedEffect
+private fun TableFrames(
+    scene: TableScene?,
+    motion: SpatialWheelMotion,
+    nodes: List<SpatialNodeSnapshot>,
+    demo: Boolean,
+) {
+    LaunchedEffect(scene) {
+        val table = scene ?: return@LaunchedEffect
         var last = 0L
         while (true) {
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0.0 else (now - last) / NANOS_PER_SECOND
                 last = now
-                if (motion.step(dt)) entity.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
+                if (motion.step(dt)) table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
+                table.comets?.step(dt, demo)
             }
+        }
+    }
+    val heard = remember(scene) { HashMap<Long, Int>() }
+    LaunchedEffect(scene, nodes) {
+        for (node in nodes) {
+            val before = heard.put(node.id, node.lastHeard)
+            if (before != null && before != node.lastHeard) scene?.comets?.heard(node.id)
         }
     }
 }
@@ -331,15 +363,16 @@ private fun TerrainEntities(
     imagery: TerrainImagery?,
     buildings: TerrainBuildingSource?,
     contours: ContourUnits?,
+    route: TerrainRoute?,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
     tipped: Boolean,
     description: String,
-    onWheel: (Entity?) -> Unit,
+    onScene: (TableScene?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
-    val wheelChanged by rememberUpdatedState(onWheel)
+    val sceneChanged by rememberUpdatedState(onScene)
     val statusChanged by rememberUpdatedState(onStatus)
     // Read when a build starts: a node update alone must not rebuild the map.
     val pinned by rememberUpdatedState(nodes)
@@ -350,11 +383,12 @@ private fun TerrainEntities(
         val handler = Handler(Looper.getMainLooper())
         Executor { handler.post(it) }
     }
-    LaunchedEffect(session, circle, imagery, buildings != null, contours) {
+    LaunchedEffect(session, circle, imagery, buildings != null, contours, route) {
         statusChanged(TerrainStatus.Loading)
+        val layers = TerrainLayers(imagery, buildingSource, contours, route)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, buildingSource, contours, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, layers, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -396,13 +430,17 @@ private fun TerrainEntities(
         val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
-        wheelChanged(wheel)
+        // Nothing flies with animations turned off in the system settings.
+        val comets = if (ValueAnimator.areAnimatorsEnabled()) createComets(session, built, wheel, material) else null
+        val flying = comets?.entities.orEmpty()
+        sceneChanged(TableScene(wheel, comets?.comets))
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
         try {
             awaitCancellation()
         } finally {
-            wheelChanged(null)
-            destroy(entities + plate.entity + wheel + root, meshes + plate.mesh + handle, material)
+            sceneChanged(null)
+            val borrowed = meshes + comets?.meshes.orEmpty() + plate.mesh + handle
+            destroy(flying + entities + plate.entity + wheel + root, borrowed, material)
             models.forEach { it.close() }
         }
     }
@@ -455,6 +493,29 @@ private fun createRoot(
     val attached = root.addComponent(movable)
     Logger.d { "Terrain table movable attached: $attached" }
     return root
+}
+
+/** The comets, their entities and the one mesh each color of comet shares. */
+private class CometEntities(val comets: TerrainComets, val entities: List<Entity>, val meshes: List<CustomMesh>)
+
+/** A hidden comet on the wheel for each link, the first [MAX_LINK_COMETS] of them, and each way of the trace route. */
+private fun createComets(
+    session: Session,
+    built: BuiltTerrain,
+    wheel: Entity,
+    material: KhronosUnlitMaterial,
+): CometEntities {
+    val meshes = HashMap<Rgb, CustomMesh>()
+    val entities = ArrayList<Entity>()
+    fun comet(path: CometPath): Comet {
+        val mesh = meshes.getOrPut(path.color) { createMesh(session, cometMeshData(path.color)) }
+        val entity = MeshEntity.create(session, mesh, listOf(material), 0, Pose.Identity, wheel)
+        entity.setEnabled(false)
+        entities += entity
+        return Comet(path, entity)
+    }
+    val links = built.links.entries.take(MAX_LINK_COMETS).associate { it.key to comet(it.value) }
+    return CometEntities(TerrainComets(links, built.routes.map(::comet)), entities, meshes.values.toList())
 }
 
 /** A bar under the table's front edge, like a window's grab bar, in model units. */
@@ -539,14 +600,23 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
         .build()
 }
 
+/** What to draw on the ground: the image over it, the buildings, the contour lines and a trace route. */
+private class TerrainLayers(
+    val imagery: TerrainImagery?,
+    val buildings: TerrainBuildingSource?,
+    val contours: ContourUnits?,
+    val route: TerrainRoute?,
+)
+
 private suspend fun buildTerrain(
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
-    imagery: TerrainImagery?,
-    buildings: TerrainBuildingSource?,
-    contours: ContourUnits?,
+    layers: TerrainLayers,
     http: HttpClient,
 ): BuiltTerrain = coroutineScope {
+    val imagery = layers.imagery
+    val buildings = layers.buildings
+    val contours = layers.contours
     val frame = SpatialFrame(circle.bounds)
     // Fetched while the elevation is sampled.
     val draped = imagery?.let { async { terrainImage(frame.bounds, it, http) } }
@@ -578,10 +648,12 @@ private suspend fun buildTerrain(
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
         skirt = if (image != null) skirtMeshData(geometry) else null,
         bezel = bezelMeshData(transform.diskRadius),
-        markers = markerMeshData(markers),
+        markers = markerMeshData(markers, layers.route),
         buildings = raised,
         contours = lines,
         labels = terrainLabels(markers),
+        links = linkPaths(markers),
+        routes = routePaths(markers, layers.route),
         image = image,
         flat = !grid.hasAnyTerrain,
     )
@@ -623,6 +695,7 @@ private fun yawRotation(radians: Float): Quaternion =
     Quaternion.fromAxisAngle(Vector3.Up, radians * 180f / PI.toFloat())
 
 private const val MAX_TRIANGLES = 90_000
+private const val MAX_LINK_COMETS = 24
 private const val TABLE_VOLUME_METERS = 0.8f
 private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f

@@ -17,9 +17,12 @@
 package org.meshtastic.app.xr
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
@@ -28,6 +31,7 @@ import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.feature.map.terrain.spatial.LatLon
@@ -37,6 +41,7 @@ import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.xr.SpatialShell
 import org.meshtastic.feature.xr.TerrainBuildingSource
 import org.meshtastic.feature.xr.TerrainImagery
+import org.meshtastic.feature.xr.TerrainRoute
 import org.meshtastic.proto.Config
 import java.io.File
 
@@ -91,6 +96,7 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                         hopsAway = it.hopsAway,
                         signal = it.snr.takeIf { snr -> snr != Float.MAX_VALUE }?.let(::signalOf),
                         isInfrastructure = it.user.role in INFRASTRUCTURE_ROLES,
+                        lastHeard = it.lastHeard,
                     )
                 }
         }
@@ -106,10 +112,19 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                 footprints = { bounds -> withContext(dispatchers.io) { OfflineBuildings.footprints(bounds, store) } },
             )
         }
+    // The screen that shows a trace route clears it, so the table keeps the last one that had a route.
+    val traced by koinInject<ServiceRepository>().tracerouteResponse.collectAsState()
+    var route by remember { mutableStateOf<TerrainRoute?>(null) }
+    LaunchedEffect(traced) {
+        traced
+            ?.takeIf { it.hasOverlay }
+            ?.let { route = TerrainRoute(it.forwardRoute.map(Int::toLong), it.returnRoute.map(Int::toLong)) }
+    }
     SpatialShell(
         nodes = snapshots,
         imagery = terrainImagery,
         buildings = buildings,
+        route = route,
         buildDispatcher = dispatchers.default,
         content = content,
     )

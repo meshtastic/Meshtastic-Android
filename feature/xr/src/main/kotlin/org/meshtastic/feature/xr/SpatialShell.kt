@@ -66,6 +66,7 @@ fun SpatialShell(
     nodes: List<SpatialNodeSnapshot>,
     imagery: List<TerrainImagery>,
     buildings: TerrainBuildingSource?,
+    route: TerrainRoute?,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -91,10 +92,12 @@ fun SpatialShell(
                 }
             }
             if (mapShown) {
+                val made = if (openAtLaunch) debugNodes() else null
                 SpatialTerrainMap(
-                    if (openAtLaunch) debugNodes() ?: nodes else nodes,
+                    made ?: nodes,
                     imagery,
                     buildings,
+                    if (made === CITY) CITY_ROUTE else route,
                     buildDispatcher,
                 )
             }
@@ -137,14 +140,20 @@ private fun debugNodes(): List<SpatialNodeSnapshot>? = when {
     else -> null
 }
 
+private val GOOD = SpatialSignal.GOOD
+private val BAD = SpatialSignal.BAD
+
 /** `log.tag.MeshXrCity DEBUG`: downtown Seattle, a circle small enough for a downloaded basemap's buildings. */
 private val CITY =
     listOf(
         SpatialNodeSnapshot(1, LatLon(47.6062, -122.3321), isConnectedRadio = true, shortName = "DOWN"),
-        SpatialNodeSnapshot(2, LatLon(47.6205, -122.3493), shortName = "NDL", hopsAway = 0),
-        SpatialNodeSnapshot(3, LatLon(47.5952, -122.3316), shortName = "STA", hopsAway = 1),
+        SpatialNodeSnapshot(2, LatLon(47.6205, -122.3493), shortName = "NDL", hopsAway = 0, signal = GOOD),
+        SpatialNodeSnapshot(3, LatLon(47.5952, -122.3316), shortName = "STA", hopsAway = 0, signal = BAD),
         SpatialNodeSnapshot(4, LatLon(47.6131, -122.3166), shortName = "CAPH", hopsAway = 1, isInfrastructure = true),
     )
+
+/** A trace route over [CITY]: out by way of NDL to CAPH, and straight back. */
+private val CITY_ROUTE = TerrainRoute(forward = listOf(1, 2, 4), back = listOf(4, 1))
 
 /** `log.tag.MeshXrPeaks DEBUG`: around Mount Rainier, to check relief, towers and links on ground that has some. */
 private val PEAKS =
