@@ -202,112 +202,70 @@ private fun rgb(hex: Int) = Rgb((hex shr 16 and 0xFF) / 255f, (hex shr 8 and 0xF
 
 private fun Int.toRgb() = Rgb(Color.red(this) / 255f, Color.green(this) / 255f, Color.blue(this) / 255f)
 
-/** Node chips: a mesh of flat quads, one per chip, and where each one is drawn in the atlas. */
-internal class TerrainLabels(val mesh: TerrainMeshData, val names: List<Pair<String, Rgb>>)
+/** A node chip: the node's short name and color, and where the middle of the chip stands above its pin. */
+internal class TerrainChip(val name: String, val color: Rgb, val at: Vec3)
 
 /**
- * The 2D map's node chip lying flat on top of each marker that has a short name, the connected radio, favorites and
- * towers first, at most [LabelAtlas.CAPACITY]. They are textured quads in one model rather than a panel each: a scene
- * of dozens of panels is costly, and one image is not.
+ * The 2D map's node chip for each marker that has a short name, the connected radio, favorites and towers first, at
+ * most [MAX_CHIPS]. Each stands upright just above its pin. A chip is an entity of its own, so it can be turned to face
+ * the front whichever way the wheel is.
  */
-internal fun terrainLabels(markers: List<NodeMarker>): TerrainLabels? {
-    val chosen =
-        markers
-            .filter { it.node.shortName.isNotBlank() }
-            .sortedBy {
-                when {
-                    it.node.isConnectedRadio -> 0
-                    it.node.isFavorite -> 1
-                    it.node.isInfrastructure -> 2
-                    it.node.isOnline -> 3
-                    else -> 4
-                }
-            }
-            .take(LabelAtlas.CAPACITY)
-    if (chosen.isEmpty()) return null
-    val positions = ArrayList<Float>()
-    val uvs = ArrayList<Float>()
-    val indices = ArrayList<Int>()
-    for ((index, marker) in chosen.withIndex()) {
-        val cell = LabelAtlas.cell(index)
-        val x = marker.top.x
-        val y = marker.top.y + CHIP_LIFT
-        val z = marker.top.z
-        // South-west, south-east, north-east, north-west: counter-clockwise seen from above.
-        val corners =
-            listOf(
-                Triple(x - LABEL_HALF_WIDTH, z + LABEL_HALF_HEIGHT, cell.left to cell.bottom),
-                Triple(x + LABEL_HALF_WIDTH, z + LABEL_HALF_HEIGHT, cell.right to cell.bottom),
-                Triple(x + LABEL_HALF_WIDTH, z - LABEL_HALF_HEIGHT, cell.right to cell.top),
-                Triple(x - LABEL_HALF_WIDTH, z - LABEL_HALF_HEIGHT, cell.left to cell.top),
-            )
-        val base = positions.size / 3
-        for ((px, pz, uv) in corners) {
-            positions.addAll(listOf(px, y, pz))
-            uvs.addAll(listOf(uv.first, uv.second))
+internal fun terrainChips(markers: List<NodeMarker>): List<TerrainChip> = markers
+    .filter { it.node.shortName.isNotBlank() }
+    .sortedBy {
+        when {
+            it.node.isConnectedRadio -> 0
+            it.node.isFavorite -> 1
+            it.node.isInfrastructure -> 2
+            it.node.isOnline -> 3
+            else -> 4
         }
-        indices.addAll(listOf(base, base + 1, base + 2, base, base + 2, base + 3))
     }
-    val count = positions.size / 3
-    val mesh =
-        TerrainMeshData(
-            positions = positions.toFloatArray(),
-            normals = FloatArray(count * 3) { if (it % 3 == 1) 1f else 0f },
-            colors = FloatArray(count * 4) { 1f },
-            indices = indices.toIntArray(),
-            uvs = uvs.toFloatArray(),
-        )
-    return TerrainLabels(mesh, chosen.map { it.node.shortName to it.color })
+    .take(MAX_CHIPS)
+    .map {
+        TerrainChip(it.node.shortName, it.color, Vec3(it.top.x, it.top.y + CHIP_LIFT + CHIP_HALF_HEIGHT, it.top.z))
+    }
+
+/** One upright quad about its own middle, facing +z, with the whole of an image on it: every chip is this shape. */
+internal fun chipMeshData(): TerrainMeshData {
+    val w = CHIP_HALF_WIDTH
+    val h = CHIP_HALF_HEIGHT
+    return TerrainMeshData(
+        positions = floatArrayOf(-w, -h, 0f, w, -h, 0f, w, h, 0f, -w, h, 0f),
+        normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+        colors = FloatArray(16) { 1f },
+        indices = intArrayOf(0, 1, 2, 0, 2, 3),
+        // An image's first row is the top.
+        uvs = floatArrayOf(0f, 1f, 1f, 1f, 1f, 0f, 0f, 0f),
+    )
 }
 
-/** The grid the label texts are drawn into. */
-internal object LabelAtlas {
-    const val WIDTH = 1024
-    const val HEIGHT = 512
-    const val CELL_WIDTH = 160
-    const val CELL_HEIGHT = 56
-    private const val COLUMNS = WIDTH / CELL_WIDTH
-    const val CAPACITY = COLUMNS * (HEIGHT / CELL_HEIGHT)
-
-    /** A cell's edges as texture coordinates, v down from the image's first row. */
-    class Cell(val left: Float, val top: Float, val right: Float, val bottom: Float)
-
-    fun cell(index: Int): Cell {
-        val x = index % COLUMNS * CELL_WIDTH
-        val y = index / COLUMNS * CELL_HEIGHT
-        return Cell(
-            x.toFloat() / WIDTH,
-            y.toFloat() / HEIGHT,
-            (x + CELL_WIDTH).toFloat() / WIDTH,
-            (y + CELL_HEIGHT).toFloat() / HEIGHT,
-        )
-    }
+/** A chip's image: its name on a plate. */
+internal object ChipImage {
+    const val WIDTH = 320
+    const val HEIGHT = 112
 
     /**
-     * Each name in the middle of its cell as PNG, drawn as the 2D map draws a node chip: a rounded plate in the node's
-     * color, as wide as its name, with the name in black or white, whichever reads on that color. Clear around it.
+     * The name in the middle as PNG, drawn as the 2D map draws a node chip: a rounded plate in the node's color, as
+     * wide as its name, with the name in black or white, whichever reads on that color. Clear around it.
      */
-    fun draw(names: List<Pair<String, Rgb>>): ByteArray {
+    fun draw(name: String, color: Rgb): ByteArray {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val plate = Paint(Paint.ANTI_ALIAS_FLAG)
         val text =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                textSize = CELL_HEIGHT * TEXT_SHARE
+                textSize = HEIGHT * TEXT_SHARE
                 typeface = Typeface.DEFAULT_BOLD
                 textAlign = Paint.Align.CENTER
             }
-        for ((index, name) in names.withIndex()) {
-            val middle = index % COLUMNS * CELL_WIDTH + CELL_WIDTH / 2f
-            val y = (index / COLUMNS * CELL_HEIGHT).toFloat()
-            val half = (text.measureText(name.first) / 2 + PADDING).coerceIn(MIN_HALF_WIDTH, CELL_WIDTH / 2f)
-            val (r, g, b) = name.second
-            plate.color = Color.rgb((r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt())
-            canvas.drawRoundRect(middle - half, y, middle + half, y + CELL_HEIGHT, CORNER, CORNER, plate)
-            text.color = if (isLight(name.second)) Color.BLACK else Color.WHITE
-            val baseline = y + CELL_HEIGHT / 2f - (text.descent() + text.ascent()) / 2f
-            canvas.drawText(name.first, middle, baseline, text)
-        }
+        val middle = WIDTH / 2f
+        val half = (text.measureText(name) / 2 + PADDING).coerceIn(MIN_HALF_WIDTH, WIDTH / 2f)
+        plate.color = Color.rgb((color.r * 255).toInt(), (color.g * 255).toInt(), (color.b * 255).toInt())
+        canvas.drawRoundRect(middle - half, 0f, middle + half, HEIGHT.toFloat(), CORNER, CORNER, plate)
+        text.color = if (isLight(color)) Color.BLACK else Color.WHITE
+        val baseline = HEIGHT / 2f - (text.descent() + text.ascent()) / 2f
+        canvas.drawText(name, middle, baseline, text)
         val out = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         bitmap.recycle()
@@ -317,10 +275,10 @@ internal object LabelAtlas {
     /** The rule the app's node colors use to pick black text over white. */
     fun isLight(color: Rgb): Boolean = 0.299f * color.r + 0.587f * color.g + 0.114f * color.b > 0.5f
 
-    // The 2D chip is 28 dp high with 8 dp corners and padding and is at least 64 dp wide; a cell is twice that scale.
-    private const val CORNER = 16f
-    private const val PADDING = 16f
-    private const val MIN_HALF_WIDTH = 64f
+    // The 2D chip is 28 dp high, with 8 dp corners and padding, and at least 64 dp wide: four pixels to the dp here.
+    private const val CORNER = 32f
+    private const val PADDING = 32f
+    private const val MIN_HALF_WIDTH = 128f
     private const val TEXT_SHARE = 0.55f
 }
 
@@ -341,8 +299,11 @@ private const val ARC_HALF_WIDTH = 0.0009f
 private const val ROUTE_OUT_HALF_WIDTH = 0.0016f
 private const val ROUTE_BACK_HALF_WIDTH = 0.0013f
 private const val ROUTE_SHIFT = 0.003f
-private const val LABEL_HALF_WIDTH = 0.017f
-private const val LABEL_HALF_HEIGHT = LABEL_HALF_WIDTH * LabelAtlas.CELL_HEIGHT / LabelAtlas.CELL_WIDTH
+private const val CHIP_HALF_WIDTH = 0.017f
+private const val CHIP_HALF_HEIGHT = CHIP_HALF_WIDTH * ChipImage.HEIGHT / ChipImage.WIDTH
+
+/** The most chips on the table: each is an entity and an image of its own. */
+private const val MAX_CHIPS = 18
 
 /** Above the ball at the top of the pin, the connected radio's larger one included. */
 private const val CHIP_LIFT = 0.011f

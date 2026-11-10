@@ -146,7 +146,7 @@ private class BuiltTerrain(
     val markers: TerrainMeshData?,
     val buildings: TerrainMeshData?,
     val contours: TerrainMeshData?,
-    val labels: TerrainLabels?,
+    val chips: List<TerrainChip>,
     /** Where a comet flies in from each node the radio hears, and along each way of the trace route. */
     val links: Map<Long, CometPath>,
     val routes: List<CometPath>,
@@ -188,7 +188,7 @@ fun SpatialTerrainMap(
     val maxZoom = SpatialZoom.maximumZoom(full.radiusMeters)
     val circle = SpatialZoom.circle(full, maxZoom.pow(committed.toDouble()), null)
     val motion = remember { SpatialWheelMotion() }
-    var comets by remember { mutableStateOf<TerrainComets?>(null) }
+    var ground by remember { mutableStateOf<Ground?>(null) }
     val http = remember { HttpClient() }
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
@@ -212,11 +212,12 @@ fun SpatialTerrainMap(
         nodes,
         TerrainLayers(layer, raised, units.takeIf { contoursShown }, route),
         http,
+        motion,
         buildDispatcher,
-        onComets = { comets = it },
+        onGround = { ground = it },
         onStatus = { status = it },
     )
-    TableFrames(stage, comets, motion, nodes, demo)
+    TableFrames(stage, ground, motion, nodes, demo)
 
     TableControls(stage, session) {
         MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
@@ -329,16 +330,29 @@ private fun Notice(text: String, modifier: Modifier = Modifier, alignment: Align
  * The table itself, which stays where the user put it while the ground on it is rebuilt: the root with its grab bar,
  * the plate the wheel is turned by, the wheel everything on the ground turns with, and the material they all share.
  *
- * @param uiScale what a panel hung on [root] is scaled by to come out the size of the app's own panel
+ * @param rootScale the root's scale in the main panel's units
  */
 private class TableStage(
     val root: Entity,
     val wheel: Entity,
     val material: KhronosUnlitMaterial,
-    val uiScale: Float,
+    val rootScale: Float,
     private val plate: Plate,
     private val handle: CustomMesh,
 ) {
+    /** Puts the controls where the root is now; set while they are up. */
+    var placeControls: (() -> Unit)? = null
+    private var rootPose: Pose? = null
+
+    /** The root's pose in the main panel's frame, as of now. */
+    fun currentRootPose(): Pose = root.getPose().also { rootPose = it }
+
+    /** The system moves the root without telling the app, so each frame asks where it is and moves the controls. */
+    fun followRoot() {
+        if (isGone) return
+        if (root.getPose() != rootPose) placeControls?.invoke()
+    }
+
     private var ground: (() -> Unit)? = null
 
     /** Set once the table is out of the scene: the frame loop can hold it a frame longer and must not turn it. */
@@ -347,7 +361,7 @@ private class TableStage(
 
     private val hung = ArrayList<Entity>()
 
-    /** Takes on an entity hung on the root, so it goes before the root does if nothing lets it go sooner. */
+    /** Takes on an entity that goes with the table, so it goes before the root does if nothing lets it go sooner. */
     fun hang(entity: Entity) {
         hung += entity
     }
@@ -405,7 +419,7 @@ private fun rememberTableStage(
         root.entity.contentDescription = description
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root.entity)
         val plate = createPlate(session, root.entity, TABLE_DISK_RADIUS, material, motion, mainExecutor)
-        val made = TableStage(root.entity, wheel, material, root.uiScale, plate, handle)
+        val made = TableStage(root.entity, wheel, material, root.scale, plate, handle)
         stage = made
         try {
             awaitCancellation()
@@ -418,8 +432,9 @@ private fun rememberTableStage(
 }
 
 /**
- * The map's controls on a panel of the table's own, below its front edge and leaning back to face the user. It is a
- * child of the table, so it goes where the table is moved, and it is there while the ground is rebuilt.
+ * The map's controls on a panel below the table's front edge, leaning back to face the user, which goes where the table
+ * is moved and is there while the ground is rebuilt. It is not a child of the table: a drag on a child of a movable
+ * entity, the zoom slider's, moves the entity, so the panel is placed beside it and follows its pose instead.
  */
 @Composable
 private fun TableControls(stage: TableStage?, session: Session, content: @Composable () -> Unit) {
@@ -435,18 +450,21 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
         val view = ComposeView(context)
         view.setViewTreeLifecycleOwner(lifecycle)
         view.setViewTreeSavedStateRegistryOwner(savedState)
-        val panel =
-            PanelEntity.create(session, view, IntSize2d(width, width / 2), "map controls", Pose.Identity, table.root)
-        panel.setScale(table.uiScale)
+        val main = session.scene.mainPanelEntity
+        val panel = PanelEntity.create(session, view, IntSize2d(width, width / 2), "map controls", Pose.Identity, main)
         table.hang(panel)
         fun place() {
-            // Its top edge under the grab bar, the rest hanging forward and down from there.
-            val half = panel.size.height * table.uiScale / 2
+            // In the main panel's units, from the root's pose: the top edge under the grab bar, the rest hanging
+            // forward and down from there.
+            val root = table.currentRootPose()
+            val half = panel.size.height / 2
             val lean = CONTROLS_LEAN_DEGREES * PI.toFloat() / 180f
             val top = Vector3(0f, CONTROLS_TOP, TABLE_DISK_RADIUS + SpatialWheelLayout.REACH + CONTROLS_GAP)
-            val middle = Vector3(top.x, top.y - half * cos(lean), top.z + half * sin(lean))
-            panel.setPose(Pose(middle, Quaternion.fromAxisAngle(Vector3.Right, -CONTROLS_LEAN_DEGREES)))
+            val middle = top * table.rootScale + Vector3(0f, -half * cos(lean), half * sin(lean))
+            val leaning = Quaternion.fromAxisAngle(Vector3.Right, -CONTROLS_LEAN_DEGREES)
+            panel.setPose(Pose(root.transformPoint(middle), root.rotation * leaning))
         }
+        table.placeControls = ::place
         place()
         view.setParentCompositionContext(composition)
         view.setContent {
@@ -462,7 +480,10 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
                 shown()
             }
         }
-        onDispose { table.letGo(panel) }
+        onDispose {
+            table.placeControls = null
+            table.letGo(panel)
+        }
     }
 }
 
@@ -473,12 +494,12 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
 @Composable
 private fun TableFrames(
     stage: TableStage?,
-    comets: TerrainComets?,
+    ground: Ground?,
     motion: SpatialWheelMotion,
     nodes: List<SpatialNodeSnapshot>,
     demo: Boolean,
 ) {
-    LaunchedEffect(stage, comets) {
+    LaunchedEffect(stage, ground) {
         val table = stage ?: return@LaunchedEffect
         var last = 0L
         while (true) {
@@ -486,16 +507,20 @@ private fun TableFrames(
                 val dt = if (last == 0L) 0.0 else (now - last) / NANOS_PER_SECOND
                 last = now
                 val turned = motion.step(dt)
-                if (turned && !table.isGone) table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
-                comets?.step(dt, demo)
+                if (turned && !table.isGone) {
+                    table.wheel.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
+                    ground?.faceFront(motion.shown)
+                }
+                table.followRoot()
+                ground?.comets?.step(dt, demo)
             }
         }
     }
-    val heard = remember(comets) { HashMap<Long, Int>() }
-    LaunchedEffect(comets, nodes) {
+    val heard = remember(ground) { HashMap<Long, Int>() }
+    LaunchedEffect(ground, nodes) {
         for (node in nodes) {
             val before = heard.put(node.id, node.lastHeard)
-            if (before != null && before != node.lastHeard) comets?.heard(node.id)
+            if (before != null && before != node.lastHeard) ground?.comets?.heard(node.id)
         }
     }
 }
@@ -509,11 +534,12 @@ private fun TerrainEntities(
     nodes: List<SpatialNodeSnapshot>,
     layers: TerrainLayers,
     http: HttpClient,
+    motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
-    onComets: (TerrainComets?) -> Unit,
+    onGround: (Ground?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
-    val cometsChanged by rememberUpdatedState(onComets)
+    val groundChanged by rememberUpdatedState(onGround)
     val statusChanged by rememberUpdatedState(onStatus)
     // Read when a build starts: a node update alone must not rebuild the map.
     val pinned by rememberUpdatedState(nodes)
@@ -534,45 +560,79 @@ private fun TerrainEntities(
                 statusChanged(TerrainStatus.Failed)
                 return@LaunchedEffect
             }
+        // The draped terrain is a model: SceneCore takes a run-time image only inside one. So is each chip.
         val models = ArrayList<GltfModel>()
+        val chipModels = ArrayList<Pair<TerrainChip, GltfModel>>()
         try {
-            // A draped terrain is a model: SceneCore takes a run-time image only inside one.
             built.image?.let { image ->
                 val glb = withContext(buildDispatcher) { terrainGlb(built.terrain, image, "image/jpeg") }
                 models += GltfModel.create(session, glb, "terrain")
             }
-            built.labels?.let { labels ->
-                val atlas = withContext(buildDispatcher) { LabelAtlas.draw(labels.names) }
-                val glb = terrainGlb(labels.mesh, atlas, "image/png", cutout = true)
-                models += GltfModel.create(session, glb, "labels")
+            val quad = chipMeshData()
+            for (chip in built.chips) {
+                val png = withContext(buildDispatcher) { ChipImage.draw(chip.name, chip.color) }
+                val glb = terrainGlb(quad, png, "image/png", cutout = true)
+                chipModels += chip to GltfModel.create(session, glb, "chip")
             }
         } catch (e: CancellationException) {
             models.forEach { it.close() }
+            chipModels.forEach { it.second.close() }
             throw e
         }
         // Nothing suspends from here to the hand-over: a cancel in between would leave entities with nothing to
         // dispose them.
-        val ground = createGround(session, table, built, models)
+        val ground = createGround(session, table, built, models, chipModels, motion.shown)
         val shown = table.show {
-            ground.comets?.retire()
+            ground.retire()
             destroy(ground.entities, ground.meshes)
             models.forEach { it.close() }
+            chipModels.forEach { it.second.close() }
         }
-        cometsChanged(ground.comets)
+        groundChanged(ground)
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
         try {
             awaitCancellation()
         } finally {
-            cometsChanged(null)
+            groundChanged(null)
             table.clear(shown)
         }
     }
 }
 
-/** What one build put on the wheel. */
-private class Ground(val entities: List<Entity>, val meshes: List<CustomMesh>, val comets: TerrainComets?)
+/** A chip's entity and where it stands on the wheel. */
+private class ChipEntity(val entity: Entity, val at: Vector3)
 
-private fun createGround(session: Session, table: TableStage, built: BuiltTerrain, models: List<GltfModel>): Ground {
+/** What one build put on the wheel. */
+private class Ground(
+    val entities: List<Entity>,
+    val meshes: List<CustomMesh>,
+    val comets: TerrainComets?,
+    private val chips: List<ChipEntity>,
+) {
+    private var retired = false
+
+    /** Called before the entities are taken out of the scene: the frame loop can hold this a frame longer. */
+    fun retire() {
+        retired = true
+        comets?.retire()
+    }
+
+    /** Turns each chip against the wheel, which is [yaw] round, so it faces the front whichever way the map is. */
+    fun faceFront(yaw: Float) {
+        if (retired) return
+        val against = yawRotation(-yaw)
+        for (chip in chips) chip.entity.setPose(Pose(chip.at, against))
+    }
+}
+
+private fun createGround(
+    session: Session,
+    table: TableStage,
+    built: BuiltTerrain,
+    models: List<GltfModel>,
+    chipModels: List<Pair<TerrainChip, GltfModel>>,
+    yaw: Float,
+): Ground {
     val material = table.material
     val plain =
         listOfNotNull(
@@ -586,9 +646,19 @@ private fun createGround(session: Session, table: TableStage, built: BuiltTerrai
     val meshes = plain.map { createMesh(session, it) }
     val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, table.wheel) }
     val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, table.wheel) }
+    val against = yawRotation(-yaw)
+    val chips = chipModels.map { (chip, model) ->
+        val at = Vector3(chip.at.x, chip.at.y, chip.at.z)
+        ChipEntity(GltfModelEntity.create(session, model, Pose(at, against), table.wheel), at)
+    }
     // Nothing flies with animations turned off in the system settings.
     val comets = if (ValueAnimator.areAnimatorsEnabled()) createComets(session, built, table.wheel, material) else null
-    return Ground(comets?.entities.orEmpty() + entities, meshes + comets?.meshes.orEmpty(), comets?.comets)
+    return Ground(
+        comets?.entities.orEmpty() + chips.map { it.entity } + entities,
+        meshes + comets?.meshes.orEmpty(),
+        comets?.comets,
+        chips,
+    )
 }
 
 /**
@@ -631,11 +701,11 @@ private fun createRoot(session: Session, tipped: Boolean, handle: CustomMesh, ma
     movable.size = FloatSize3d(across, MOVE_BOX_HEIGHT, across)
     val attached = root.addComponent(movable)
     Logger.d { "Terrain table movable attached: $attached" }
-    return Root(root, scale / fit.scale)
+    return Root(root, fit.scale / scale)
 }
 
-/** The table's root, and what undoes its scale for a panel hung on it. */
-private class Root(val entity: Entity, val uiScale: Float)
+/** The table's root, and its scale in the main panel's units. */
+private class Root(val entity: Entity, val scale: Float)
 
 /** The comets, their entities and the one mesh each color of comet shares. */
 private class CometEntities(val comets: TerrainComets, val entities: List<Entity>, val meshes: List<CustomMesh>)
@@ -793,7 +863,7 @@ private suspend fun buildTerrain(
         markers = markerMeshData(markers, layers.route),
         buildings = raised,
         contours = lines,
-        labels = terrainLabels(markers),
+        chips = terrainChips(markers),
         links = linkPaths(markers),
         routes = routePaths(markers, layers.route),
         image = image,

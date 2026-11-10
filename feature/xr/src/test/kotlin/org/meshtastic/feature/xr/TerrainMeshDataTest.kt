@@ -64,8 +64,8 @@ class TerrainMeshDataTest {
 
     @Test
     fun `a chip's name is black on a light node color and white on a dark one`() {
-        assertTrue(LabelAtlas.isLight(Rgb(0.9f, 0.9f, 0.2f)))
-        assertTrue(!LabelAtlas.isLight(Rgb(0.2f, 0.1f, 0.6f)))
+        assertTrue(ChipImage.isLight(Rgb(0.9f, 0.9f, 0.2f)))
+        assertTrue(!ChipImage.isLight(Rgb(0.2f, 0.1f, 0.6f)))
     }
 
     @Test
