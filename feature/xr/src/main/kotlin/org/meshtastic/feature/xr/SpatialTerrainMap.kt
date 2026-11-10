@@ -57,6 +57,7 @@ import androidx.xr.scenecore.InteractableComponent
 import androidx.xr.scenecore.KhronosUnlitMaterial
 import androidx.xr.scenecore.MeshEntity
 import androidx.xr.scenecore.MeshSubsetTopology
+import androidx.xr.scenecore.Space
 import androidx.xr.scenecore.VertexAttribute
 import androidx.xr.scenecore.VertexAttributeType
 import androidx.xr.scenecore.VertexLayout
@@ -250,7 +251,7 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: 
 private fun createRoot(session: Session, geometry: SpatialTerrainGeometry): Entity {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
-    val scale = panel.getScale(androidx.xr.scenecore.Space.ACTIVITY)
+    val scale = panel.getScale(Space.ACTIVITY)
     val fit = SpatialVolumeFit(TABLE_VOLUME_METERS, TABLE_VOLUME_METERS, geometry.transform.diskRadius)
     val reach = fit.diskRadius + SpatialWheelLayout.REACH + TABLE_GAP_METERS
     val at = Vector3((size.width / 2f + reach / scale), -size.height * DROP_FRACTION, 0f)
