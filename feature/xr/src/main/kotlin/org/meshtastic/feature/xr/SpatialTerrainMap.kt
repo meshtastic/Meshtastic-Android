@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.xr
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -90,6 +91,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.map_offline_terrain_contours
 import org.meshtastic.core.resources.xr_terrain_buildings
 import org.meshtastic.core.resources.xr_terrain_empty
 import org.meshtastic.core.resources.xr_terrain_flat
@@ -112,6 +114,7 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialWheelDrag
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelLayout
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelMotion
 import org.meshtastic.feature.map.terrain.spatial.SpatialZoom
+import java.util.Locale
 import java.util.concurrent.Executor
 import kotlin.math.PI
 import kotlin.math.pow
@@ -127,9 +130,12 @@ private enum class TerrainStatus {
 private class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
+    /** The table's side, apart from [terrain] when an image is draped on it. */
+    val skirt: TerrainMeshData?,
     val bezel: TerrainMeshData,
     val markers: TerrainMeshData?,
     val buildings: TerrainMeshData?,
+    val contours: TerrainMeshData?,
     val labels: TerrainLabels?,
     /** JPEG to drape over [terrain], null to draw it in its elevation colors. */
     val image: ByteArray?,
@@ -176,7 +182,10 @@ fun SpatialTerrainMap(
     val raised = buildings?.takeIf { buildingsShown }
     val context = LocalContext.current
     // `log.tag.MeshXrTip DEBUG` on top of the map hook: for a console screenshot, which sees the table edge on.
-    val tipped = remember(context) { opensMapAtLaunch(context) && Log.isLoggable("MeshXrTip", Log.DEBUG) }
+    val tipped = remember(context) { debugSwitch(context, "MeshXrTip") }
+    // `log.tag.MeshXrContours DEBUG` on top of the map hook starts with the lines on, as nothing can press the chip.
+    var contoursShown by rememberSaveable { mutableStateOf(debugSwitch(context, "MeshXrContours")) }
+    val units = remember(context) { contourUnits(context.resources.configuration.locales[0]) }
     DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(
@@ -185,6 +194,7 @@ fun SpatialTerrainMap(
         nodes,
         layer,
         raised,
+        units.takeIf { contoursShown },
         http,
         motion,
         buildDispatcher,
@@ -195,17 +205,22 @@ fun SpatialTerrainMap(
     )
     WheelFrames(wheel, motion)
 
-    if (maxZoom > 1 || imagery.isNotEmpty() || buildings != null) {
-        Orbiter(position = OrbiterPosition.TopCenter()) {
-            MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
-                if (imagery.isNotEmpty() || buildings != null) {
-                    val shown = buildingsShown.takeIf { buildings != null }
-                    LayerChips(imagery, layer, onSelect = { layerId = it?.id }, shown, { buildingsShown = it })
+    Orbiter(position = OrbiterPosition.TopCenter()) {
+        MapControls(credits = listOfNotNull(layer?.attribution, raised?.attribution).distinct()) {
+            LayerChips(imagery, layer, onSelect = { layerId = it?.id }) {
+                // First, so they are not scrolled out of sight behind the basemaps.
+                ToggleChip(stringResource(Res.string.map_offline_terrain_contours), contoursShown) {
+                    contoursShown = !contoursShown
                 }
-                if (maxZoom > 1) {
-                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
-                    Slider(slider, onValueChange = { slider = it }, onValueChangeFinished = { committed = slider })
+                if (buildings != null) {
+                    ToggleChip(stringResource(Res.string.xr_terrain_buildings), buildingsShown) {
+                        buildingsShown = !buildingsShown
+                    }
                 }
+            }
+            if (maxZoom > 1) {
+                Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
+                Slider(slider, onValueChange = { slider = it }, onValueChangeFinished = { committed = slider })
             }
         }
     }
@@ -246,28 +261,21 @@ private fun MapControls(credits: List<String>, content: @Composable () -> Unit) 
     }
 }
 
-/**
- * A chip that raises the buildings when [buildings] is not null, then one per basemap and one for the plain elevation
- * colors.
- */
+@Composable
+private fun ToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(selected, onClick, label = { Text(label) }, modifier = Modifier.heightIn(min = XrTargetSize))
+}
+
+/** [overlays], the chips for what is drawn over the ground, then one per basemap and one for the elevation colors. */
 @Composable
 private fun LayerChips(
     imagery: List<TerrainImagery>,
     selected: TerrainImagery?,
     onSelect: (TerrainImagery?) -> Unit,
-    buildings: Boolean?,
-    onBuildings: (Boolean) -> Unit,
+    overlays: @Composable () -> Unit,
 ) {
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        // First, so it is not scrolled out of sight behind the basemaps.
-        if (buildings != null) {
-            FilterChip(
-                selected = buildings,
-                onClick = { onBuildings(!buildings) },
-                label = { Text(stringResource(Res.string.xr_terrain_buildings)) },
-                modifier = Modifier.heightIn(min = XrTargetSize),
-            )
-        }
+        overlays()
         for (layer in imagery) {
             FilterChip(
                 selected = layer.id == selected?.id,
@@ -322,6 +330,7 @@ private fun TerrainEntities(
     nodes: List<SpatialNodeSnapshot>,
     imagery: TerrainImagery?,
     buildings: TerrainBuildingSource?,
+    contours: ContourUnits?,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
@@ -341,11 +350,11 @@ private fun TerrainEntities(
         val handler = Handler(Looper.getMainLooper())
         Executor { handler.post(it) }
     }
-    LaunchedEffect(session, circle, imagery, buildings != null) {
+    LaunchedEffect(session, circle, imagery, buildings != null, contours) {
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, buildingSource, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, imagery, buildingSource, contours, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -374,7 +383,15 @@ private fun TerrainEntities(
                 GltfModel.create(session, glb, "labels")
             }
         val models = listOfNotNull(model, labels)
-        val plain = listOfNotNull(built.terrain.takeIf { model == null }, built.bezel, built.markers, built.buildings)
+        val plain =
+            listOfNotNull(
+                built.terrain.takeIf { model == null },
+                built.skirt,
+                built.bezel,
+                built.markers,
+                built.buildings,
+                built.contours,
+            )
         val meshes = plain.map { createMesh(session, it) }
         val drawn = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val entities = drawn + models.map { GltfModelEntity.create(session, it, Pose.Identity, wheel) }
@@ -527,6 +544,7 @@ private suspend fun buildTerrain(
     nodes: List<SpatialNodeSnapshot>,
     imagery: TerrainImagery?,
     buildings: TerrainBuildingSource?,
+    contours: ContourUnits?,
     http: HttpClient,
 ): BuiltTerrain = coroutineScope {
     val frame = SpatialFrame(circle.bounds)
@@ -552,17 +570,34 @@ private suspend fun buildTerrain(
     val geometry = SpatialTerrainGeometry(grid, transform)
     val image = draped?.await()
     val markers = nodeMarkers(geometry, nodes, circle)
+    val lines = contours?.let { TerrainContours.meshData(geometry, it, onImage = image != null) }
+    val raised = footprints?.await()?.let { TerrainBuildings.meshData(it, geometry) }
+    Logger.d { "Terrain triangles: contours ${lines.triangleCount}, buildings ${raised.triangleCount}" }
     BuiltTerrain(
         geometry = geometry,
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble(), image != null),
+        skirt = if (image != null) skirtMeshData(geometry) else null,
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
         markers = markerMeshData(markers),
-        buildings = footprints?.await()?.let { TerrainBuildings.meshData(it, geometry) },
+        buildings = raised,
+        contours = lines,
         labels = terrainLabels(markers),
         image = image,
         flat = !grid.hasAnyTerrain,
     )
 }
+
+private val TerrainMeshData?.triangleCount: Int
+    get() = if (this == null) 0 else indices.size / 3
+
+/** A `log.tag.<tag> DEBUG` switch, read only where the map hook is on. */
+private fun debugSwitch(context: Context, tag: String) = opensMapAtLaunch(context) && Log.isLoggable(tag, Log.DEBUG)
+
+/** Round feet where the locale measures in them, round meters everywhere else. */
+internal fun contourUnits(locale: Locale): ContourUnits =
+    if (locale.country.uppercase(Locale.ROOT) in IMPERIAL_COUNTRIES) ContourUnits.Imperial else ContourUnits.Metric
+
+private val IMPERIAL_COUNTRIES = setOf("US", "LR", "MM")
 
 private suspend fun hasBuildings(source: TerrainBuildingSource): Boolean = try {
     source.available()

@@ -266,7 +266,38 @@ internal fun terrainMeshData(
     // The geometry puts north at v = 1; an image's first row is north, and glTF's v = 0 is that row.
     val source = geometry.textureCoordinates
     val uvs = FloatArray(count * 2) { if (it % 2 == 0) source[it] else 1f - source[it] }
-    return TerrainMeshData(geometry.positions, geometry.normals, colors, geometry.indices, uvs)
+    if (!textured) return TerrainMeshData(geometry.positions, geometry.normals, colors, geometry.indices, uvs)
+    // The top alone: the skirt shares the edge's texture coordinates, so an image would run down it in streaks.
+    return TerrainMeshData(
+        geometry.positions.copyOf(surface * 3),
+        geometry.normals.copyOf(surface * 3),
+        colors.copyOf(surface * 4),
+        geometry.indices.copyOf(geometry.surfaceTriangleCount * 3),
+        uvs.copyOf(surface * 2),
+    )
+}
+
+/** The table's side in one color, for a terrain whose top is drawn apart with an image on it. */
+internal fun skirtMeshData(geometry: SpatialTerrainGeometry): TerrainMeshData? {
+    val surface = geometry.columns * geometry.rows
+    val count = geometry.positions.size / 3 - surface
+    if (count == 0) return null
+    val colors = FloatArray(count * 4)
+    for (i in 0 until count) {
+        val at = (surface + i) * 3
+        val color = SKIRT.scaled(bakedLight(geometry.normals[at], geometry.normals[at + 1], geometry.normals[at + 2]))
+        colors[i * 4] = color.r
+        colors[i * 4 + 1] = color.g
+        colors[i * 4 + 2] = color.b
+        colors[i * 4 + 3] = 1f
+    }
+    val first = geometry.surfaceTriangleCount * 3
+    return TerrainMeshData(
+        geometry.positions.copyOfRange(surface * 3, geometry.positions.size),
+        geometry.normals.copyOfRange(surface * 3, geometry.normals.size),
+        colors,
+        IntArray(geometry.indices.size - first) { geometry.indices[first + it] - surface },
+    )
 }
 
 /** The bezel ring, its compass letters and the eight handles, all in model units. */
