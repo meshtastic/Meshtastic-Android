@@ -46,9 +46,14 @@ data class BuildingFootprint(
  * Where the terrain map gets its buildings.
  *
  * @param attribution plain text, shown while buildings are up
+ * @param available whether there are any to offer, asked each time the map opens
  * @param footprints the buildings in a box, empty when the box is too wide for any to show
  */
-class TerrainBuildingSource(val attribution: String, val footprints: suspend (GeoBounds) -> List<BuildingFootprint>)
+class TerrainBuildingSource(
+    val attribution: String,
+    val available: suspend () -> Boolean,
+    val footprints: suspend (GeoBounds) -> List<BuildingFootprint>,
+)
 
 /** Building outlines raised to their heights and stood on the terrain, as one mesh. */
 internal object TerrainBuildings {

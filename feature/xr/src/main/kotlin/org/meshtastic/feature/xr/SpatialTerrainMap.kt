@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -143,10 +144,15 @@ private class BuiltTerrain(
 fun SpatialTerrainMap(
     nodes: List<SpatialNodeSnapshot>,
     imagery: List<TerrainImagery>,
-    buildings: TerrainBuildingSource?,
+    buildingSource: TerrainBuildingSource?,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
 ) {
+    // Null until the source says it has some, so the chip is only offered when it does something.
+    val buildings by
+        produceState<TerrainBuildingSource?>(null, buildingSource) {
+            value = buildingSource?.takeIf { hasBuildings(it) }
+        }
     val session = LocalSession.current
     if (session == null || !LocalSpatialCapabilities.current.isContent3dEnabled) return
     // Taken once the first position arrives: node updates after that must not move the circle, reset the zoom or
@@ -556,6 +562,15 @@ private suspend fun buildTerrain(
         image = image,
         flat = !grid.hasAnyTerrain,
     )
+}
+
+private suspend fun hasBuildings(source: TerrainBuildingSource): Boolean = try {
+    source.available()
+} catch (e: CancellationException) {
+    throw e
+} catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+    Logger.w { "Buildings could not be checked: ${e::class.simpleName}" }
+    false
 }
 
 /** The map is drawn without buildings when they cannot be read. */

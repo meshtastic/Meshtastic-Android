@@ -96,14 +96,15 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
         }
     val dispatchers = koinInject<CoroutineDispatchers>()
     val context = LocalContext.current
-    // Checked once: a region downloaded while the shell is up offers its buildings the next time the app opens.
     val buildings =
         remember(context, dispatchers) {
-            val store = OfflineRegionStore(File(context.filesDir, OfflineRegionStore.DIRECTORY))
-            TerrainBuildingSource(OfflineRegionExtractor.ATTRIBUTION) { bounds ->
-                withContext(dispatchers.io) { OfflineBuildings.footprints(bounds, store) }
-            }
-                .takeIf { OfflineBuildings.available(store) }
+            // Made on first use: the store touches the disk, and this composes on phones too.
+            val store by lazy { OfflineRegionStore(File(context.filesDir, OfflineRegionStore.DIRECTORY)) }
+            TerrainBuildingSource(
+                attribution = OfflineRegionExtractor.ATTRIBUTION,
+                available = { withContext(dispatchers.io) { OfflineBuildings.available(store) } },
+                footprints = { bounds -> withContext(dispatchers.io) { OfflineBuildings.footprints(bounds, store) } },
+            )
         }
     SpatialShell(
         nodes = snapshots,
