@@ -146,11 +146,15 @@ private val BAD = SpatialSignal.BAD
 /** `log.tag.MeshXrCity DEBUG`: downtown Seattle, a circle small enough for a downloaded basemap's buildings. */
 private val CITY =
     listOf(
-        SpatialNodeSnapshot(1, LatLon(47.6062, -122.3321), isConnectedRadio = true, shortName = "DOWN"),
-        SpatialNodeSnapshot(2, LatLon(47.6205, -122.3493), shortName = "NDL", hopsAway = 0, signal = GOOD),
-        SpatialNodeSnapshot(3, LatLon(47.5952, -122.3316), shortName = "STA", hopsAway = 0, signal = BAD),
-        SpatialNodeSnapshot(4, LatLon(47.6131, -122.3166), shortName = "CAPH", hopsAway = 1, isInfrastructure = true),
+        city(1, 47.6062, -122.3321, "DOWN", 0xFF7886EE).copy(isConnectedRadio = true),
+        city(2, 47.6205, -122.3493, "NDL", 0xFFF2C14E).copy(hopsAway = 0, signal = GOOD),
+        city(3, 47.5952, -122.3316, "STA", 0xFF2A9D8F).copy(hopsAway = 0, signal = BAD),
+        city(4, 47.6131, -122.3166, "CAPH", 0xFF8E3B8C).copy(hopsAway = 1, isInfrastructure = true),
     )
+
+/** A made-up node in a color of its own, as a real node's number gives it one. */
+private fun city(id: Long, latitude: Double, longitude: Double, name: String, color: Long) =
+    SpatialNodeSnapshot(id, LatLon(latitude, longitude), shortName = name, color = color.toInt())
 
 /** A trace route over [CITY]: out by way of NDL to CAPH, and straight back. */
 private val CITY_ROUTE = TerrainRoute(forward = listOf(1, 2, 4), back = listOf(4, 1))
