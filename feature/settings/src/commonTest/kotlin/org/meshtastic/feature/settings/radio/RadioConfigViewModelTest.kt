@@ -27,6 +27,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verify.VerifyMode.Companion.order
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -163,6 +164,76 @@ class RadioConfigViewModelTest {
         advanceUntilIdle()
 
         verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
+    }
+
+    @Test
+    fun `NETWORK route reads the transport config when the node lists transports`() = runTest {
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb -> wb.supported_transports = listOf(Config.TransportConfig.Transport.TRANSPORT_LORA) }
+                .build()
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build(), metadata = metadata)
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel(destNum = 123)
+
+        viewModel.setResponseStateLoading(ConfigRoute.NETWORK)
+        advanceUntilIdle()
+
+        verifySuspend { radioConfigUseCase.getConfig(123, AdminMessage.ConfigType.NETWORK_CONFIG.value, any()) }
+        verifySuspend { radioConfigUseCase.getConfig(123, AdminMessage.ConfigType.TRANSPORT_CONFIG.value, any()) }
+    }
+
+    @Test
+    fun `NETWORK route skips the transport config when the node lists no transports`() = runTest {
+        val node =
+            Node(
+                num = 123,
+                user = User.Builder().also { wb -> wb.id = "!123" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.8.2" }.build(),
+            )
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel(destNum = 123)
+
+        viewModel.setResponseStateLoading(ConfigRoute.NETWORK)
+        advanceUntilIdle()
+
+        verifySuspend { radioConfigUseCase.getConfig(123, AdminMessage.ConfigType.NETWORK_CONFIG.value, any()) }
+        verifySuspend(exactly(0)) {
+            radioConfigUseCase.getConfig(any(), AdminMessage.ConfigType.TRANSPORT_CONFIG.value, any())
+        }
+    }
+
+    @Test
+    fun `setConfigs writes each section in order and keeps both in the form state`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        val transport =
+            Config.Builder()
+                .also { wb ->
+                    wb.transport =
+                        Config.TransportConfig.Builder()
+                            .also { tb -> tb.enabled = listOf(Config.TransportConfig.Transport.TRANSPORT_LORA) }
+                            .build()
+                }
+                .build()
+        val network =
+            Config.Builder()
+                .also { wb ->
+                    wb.network = Config.NetworkConfig.Builder().also { nb -> nb.wifi_enabled = true }.build()
+                }
+                .build()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        viewModel.setConfigs(listOf(transport, network))
+        advanceUntilIdle()
+
+        assertEquals(transport.transport, viewModel.radioConfigState.value.radioConfig.transport)
+        assertEquals(network.network, viewModel.radioConfigState.value.radioConfig.network)
+        verifySuspend(order) {
+            radioConfigUseCase.setConfig(123, transport, any())
+            radioConfigUseCase.setConfig(123, network, any())
+        }
     }
 
     @Test

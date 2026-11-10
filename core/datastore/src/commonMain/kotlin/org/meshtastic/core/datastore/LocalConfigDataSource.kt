@@ -53,6 +53,7 @@ class LocalConfigDataSource(private val localConfigStore: CoreLocalConfigDataSto
             config.lora != null -> current.newBuilder().also { wb -> wb.lora = config.lora }.build()
             config.bluetooth != null -> current.newBuilder().also { wb -> wb.bluetooth = config.bluetooth }.build()
             config.security != null -> current.newBuilder().also { wb -> wb.security = config.security }.build()
+            config.transport != null -> current.newBuilder().also { wb -> wb.transport = config.transport }.build()
             else -> current
         }
     }
