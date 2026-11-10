@@ -168,6 +168,7 @@ class MeshServiceOrchestratorTest {
             connectionManager = connectionManager,
             dispatchers = dispatchers,
             localNetworkAccess = localNetworkAccess,
+            lastBleNodeRecorder = {},
         )
     }
 
@@ -537,9 +538,10 @@ class MeshServiceOrchestratorTest {
         // Pre-warm the resource: the first read completes on compose-resources' own Dispatchers.Default scope, so an
         // un-warmed lookup lands after the assertions (see ScannerViewModelTest's warmScanFailureStrings). The same
         // safeCatchingAll-with-fallback shape as production keeps the expected text identical either way.
-        val expectedMessage =
-            safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
-                .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT)
+        val expectedMessage = safeCatchingAll {
+            getStringSuspend(Res.string.local_network_permission_denied_hint)
+        }
+            .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT)
         val orchestrator =
             createOrchestrator(
                 currentDeviceAddressFlow = MutableStateFlow<String?>("t192.168.1.100"),

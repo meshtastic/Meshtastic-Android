@@ -32,6 +32,15 @@ class SettingsSearchMatcherTest {
     )
 
     @Test
+    fun aRankedResultKeepsTheFieldKeyOfTheControlItNames() {
+        val hopLimit = entry("Hop limit").copy(fieldKey = "schema_lora_hop_limit")
+
+        val ranked = SettingsSearchMatcher.rank(listOf(entry("Hops"), hopLimit), "hop limit")
+
+        assertEquals("schema_lora_hop_limit", ranked.single().fieldKey)
+    }
+
+    @Test
     fun blankQueryMatchesNothing() {
         assertEquals(emptyList(), SettingsSearchMatcher.rank(listOf(entry("Hop limit")), "   "))
     }

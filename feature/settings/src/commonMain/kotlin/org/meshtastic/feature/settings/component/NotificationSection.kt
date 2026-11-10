@@ -23,11 +23,15 @@ import org.meshtastic.core.resources.app_notifications
 import org.meshtastic.core.resources.meshtastic_low_battery_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
+import org.meshtastic.core.resources.meshtastic_reactions_notifications
+import org.meshtastic.core.resources.meshtastic_waypoints_notifications
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.BatteryAlert
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.PersonAdd
+import org.meshtastic.core.ui.icon.PinDrop
 
 /**
  * Notification settings section with in-app toggles. Primarily used on platforms without system notification channels.
@@ -40,6 +44,10 @@ fun NotificationSection(
     onToggleNodeEvents: (Boolean) -> Unit,
     lowBatteryEnabled: Boolean,
     onToggleLowBattery: (Boolean) -> Unit,
+    reactionsEnabled: Boolean,
+    onToggleReactions: (Boolean) -> Unit,
+    newWaypointsEnabled: Boolean,
+    onToggleNewWaypoints: (Boolean) -> Unit,
 ) {
     ExpressiveSection(title = stringResource(Res.string.app_notifications)) {
         SwitchListItem(
@@ -59,6 +67,18 @@ fun NotificationSection(
             leadingIcon = MeshtasticIcons.BatteryAlert,
             checked = lowBatteryEnabled,
             onClick = { onToggleLowBattery(!lowBatteryEnabled) },
+        )
+        SwitchListItem(
+            text = stringResource(Res.string.meshtastic_reactions_notifications),
+            leadingIcon = MeshtasticIcons.AddReaction,
+            checked = reactionsEnabled,
+            onClick = { onToggleReactions(!reactionsEnabled) },
+        )
+        SwitchListItem(
+            text = stringResource(Res.string.meshtastic_waypoints_notifications),
+            leadingIcon = MeshtasticIcons.PinDrop,
+            checked = newWaypointsEnabled,
+            onClick = { onToggleNewWaypoints(!newWaypointsEnabled) },
         )
     }
 }

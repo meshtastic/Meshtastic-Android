@@ -21,8 +21,8 @@ import org.meshtastic.proto.MeshPacket
 
 /** Interface for handling traceroute responses from the mesh. */
 interface TracerouteHandler {
-    /** Records the start time for a traceroute request. */
-    fun recordStartTime(requestId: Int)
+    /** Records the start time for a traceroute request sent to [destination]. */
+    fun recordStartTime(requestId: Int, destination: Int)
 
     /**
      * Processes a traceroute packet.

@@ -292,6 +292,7 @@
     <string name="debug_store_logs_summary">Deaktivieren, um das Schreiben von Netzprotokollen auf die Festplatte zu überspringen</string>
     <string name="debug_store_logs_title">Netzprotokolle speichern</string>
     <string name="debug_tab_packets">Pakete</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_title">Mit diesem Gerät verbinden?</string>
     <string name="deep_link_disconnect_title">Von deinem Gerät trennen?</string>
     <string name="default_">Standard</string>
@@ -514,8 +515,9 @@
     <string name="firmware_edition">Firmware-Version</string>
     <string name="firmware_event_ended_banner">%1$s ist vorbei. Kehre zur standard Meshtastic Firmware zurück, um die normalen Funktionen wiederherzustellen.</string>
     <string name="firmware_event_ended_button">Firmware updaten</string>
+    <string name="firmware_gate_title">Firmware-Aktualisierung erforderlich</string>
+    <string name="firmware_gate_update">Firmware updaten</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
-    <string name="firmware_recovery_ble_failed">Das Update konnte nicht über Bluetooth abgeschlossen werden. Der Standard-Bootloader dieses Geräts kann ein unterbrochenes Over-the-Air-Update nicht zuverlässig zu Ende führen. Schließen Sie das Gerät per USB an einen Computer an und flashen Sie es neu mit dem seriellen DFU-Tool des Herstellers (z. B. adafruit-nrfutil), um es wiederherzustellen.</string>
     <string name="firmware_recovery_button">Firmware-Update fortführen</string>
     <string name="firmware_too_old">Firmware Aktualisierung erforderlich.</string>
     <string name="firmware_update_almost_there">Fast fertig...</string>
@@ -584,7 +586,6 @@
     <string name="firmware_update_unsupported_transport">Firmware Updates sind auf diesem Gerät über diese Verbindung nicht unterstützt. Verbinde dich auf eine andere Art (z.B. Bluetooth) zum Updaten.</string>
     <string name="firmware_update_unsupported_update_method">Lokale Firmware-Dateien sind für diese Update-Methode nicht unterstützt.</string>
     <string name="firmware_update_uploading">Firmware aktualisieren...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="firmware_update_usb_failed">USB Aktualisierung fehlgeschlagen</string>
     <string name="firmware_update_usb_instruction_text">Ihr Gerät wurde im DFU Modus neu gestartet und sollte als USB Laufwerk (z. B. RAK4631) angezeigt werden.\n\nWenn sich die Dateiauswahl öffnet, wählen Sie bitte das Stammverzeichnis dieses Laufwerks aus, um die Firmware Datei zu speichern.</string>
     <string name="firmware_update_usb_instruction_title">DFU USB Laufwerk auswählen</string>
@@ -597,7 +598,6 @@
     <string name="fixed_position">Fester Standort</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Freier Speicher</string>
     <string name="free_memory_description">Verfügbarer Systemspeicher in Bytes</string>
     <string name="freq">Frequenz</string>
     <string name="gas_resistance">Gaswiderstand</string>
@@ -626,8 +626,10 @@
     <string name="i_agree">Ich stimme zu.</string>
     <string name="i_agree_to_share_my_location">Ich habe das oben stehende gelesen und verstanden. Ich willige ein in die unverschlüsselte Übertragung der Daten meines Nodes.</string>
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Innenluftqualität) relativer IAQ-Wert gemessen von Bosch BME680.</string>
+    <string name="iaq_level_good">Gut</string>
     <string name="icon_meanings">Symbolbedeutung</string>
     <string name="ignore">Ignorieren</string>
     <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>
@@ -674,6 +676,10 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Lizenzierter Amateurfunker</string>
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkt</string>
+    <string name="live_update_distance">%1$s Abwesend</string>
+    <string name="live_update_unread">%1$d ungelesen</string>
     <!-- LOAD -->
     <string name="load">Last</string>
     <string name="load_15_min">Last 15 Min</string>
@@ -736,6 +742,7 @@
     <string name="logs">Protokolle</string>
     <string name="long_name">Langer Name</string>
     <string name="longitude">Längengrad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Niedriger Akkustand</string>
@@ -803,6 +810,9 @@
     <string name="mesh_beacon_target_channel_index">Kanal</string>
     <string name="mesh_beacon_target_default">Standardwert</string>
     <string name="mesh_beacon_target_remove">Ziel entfernen</string>
+    <string name="mesh_hud_cardinal_east">E</string>
+    <string name="mesh_hud_cardinal_north">N</string>
+    <string name="mesh_hud_cardinal_south">S</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->
@@ -838,6 +848,13 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimum</string>
     <string name="minimum_wake_time_seconds">Minimale Aufwachzeit</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Zurück</string>
+    <string name="mirror_key_down">Runter</string>
+    <string name="mirror_key_left">Links</string>
+    <string name="mirror_key_ok">Ok</string>
+    <string name="mirror_key_right">Rechts</string>
+    <string name="mirror_key_up">Hoch</string>
     <string name="modem_preset">Voreinstellungen</string>
     <string name="module_settings">Moduleinstellungen</string>
     <string name="modules_already_unlocked">Module sind bereits freigeschaltet</string>
@@ -866,6 +883,9 @@
     <string name="mqtt_status_reconnecting">Erneut verbinden…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Erneut verbinden (Versuch %1$d) - %2$s</string>
     <string name="mqtt_test_connection">Verbindung testen</string>
+    <string name="mqtt_topic_finder_connecting">Wird verbunden…</string>
+    <string name="mqtt_topic_finder_level_country">Land</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
     <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgeräte Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>
     <!-- MUTE -->
@@ -965,7 +985,6 @@
     <string name="nodes_empty_searching_title">Suche nach Knoten</string>
     <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="nodes_unheard_remove">Entfernen</string>
-    <string name="noise_floor">Lärmboden</string>
     <string name="noise_floor_definition">Das vom Funkempfänger gemessene HF-Hintergrundrauschen. Niedrigere Werte deuten in der Regel auf eine störungsärmere Empfangsumgebung hin; -85 dBm ist ein Referenzwert für eine hohe Auslastung, kein fester Schwellenwert für einen Ausfall.</string>
     <string name="noise_floor_no_reading">Lärmboden: kein Wert</string>
     <string name="none">Nichts (deaktiviert)</string>
@@ -1090,7 +1109,9 @@
     <string name="quick_chat_new">Neuer Schnell-Chat</string>
     <string name="quick_chat_show">Schnell-Chat Menü anzeigen</string>
     <string name="radiation">Strahlung</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Geräteeinstellungen</string>
+    <string name="radio_setup_name_headline">Anzeigename</string>
     <string name="rainfall_1h">Regen (1 Std.)</string>
     <string name="rainfall_24h">Regen (24 Std.)</string>
     <string name="range_test">Reichweitentest</string>
@@ -1238,8 +1259,6 @@
     <string name="share_to">Teile mit…</string>
     <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="short_name">Kurzname</string>
-    <string name="should_update">Um von den neuesten Fehlerkorrekturen und Funktionen zu profitieren, aktualisieren Sie bitte Ihre Node-Firmware.\n\nneueste stabile Firmware-Version: %1$s</string>
-    <string name="should_update_firmware">Firmware-Update empfohlen.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Bedeutung der Verschlüsselung</string>
     <string name="show_iaq_legend">Legende für Luftqualität anzeigen</string>
@@ -1301,6 +1320,7 @@
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Neu erstellen</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Status</string>
     <string name="tak_server_status_off">Aus</string>
@@ -1434,6 +1454,8 @@
     <string name="weight">Gewicht</string>
     <string name="what_is_meshtastic">Was ist Meshtastic?</string>
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Schlecht</string>
     <!-- WIFI -->
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>

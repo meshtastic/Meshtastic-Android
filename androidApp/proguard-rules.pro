@@ -60,10 +60,24 @@
 -keepnames class org.meshtastic.app.analytics.GooglePlatformAnalytics*
 -keepnames class co.touchlab.kermit.**
 
+# A stable name keeps withDb timeouts in one Crashlytics/Datadog issue across builds.
+-keepnames class org.meshtastic.core.database.DatabaseOperationTimeoutException
+
+# DatabaseManager.withDb names its caller in slow and timeout logs by the callback's lambda class (`Owner$method$N`).
+-keepnames class org.meshtastic.core.data.**$*
+-keepnames class org.meshtastic.core.database.**$*
+
 # ---- Networking (transitive references from Ktor on Android) ----------------
 
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
+
+# ---- BouncyCastle (per-install TAK server certificates) -----------------------
+# :core:takserver instantiates `BouncyCastleProvider` directly and asks it for the
+# PKCS12 KeyStore and SHA256withRSA signer by name; the provider resolves those
+# algorithm classes reflectively, so R8 must keep them.
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
 -dontwarn org.openjsse.**
 
 # ---- AppSearch / AppFunctions generated document factories ------------------

@@ -1502,7 +1502,7 @@
     "hwModelSlug": "STATION_G3",
     "platformioTarget": "station-g3",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Station G3",
     "tags": [
@@ -1675,7 +1675,7 @@
     "hwModelSlug": "HELTEC_RC32",
     "platformioTarget": "heltec-rc32",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RC32",
     "tags": [
@@ -1692,7 +1692,7 @@
     "hwModelSlug": "HELTEC_RC52",
     "platformioTarget": "heltec-rc52",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RC52",
     "tags": [
@@ -1708,7 +1708,7 @@
     "hwModelSlug": "HELTEC_RCC6",
     "platformioTarget": "heltec-rcc6",
     "architecture": "esp32-c6",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec RCC6",
     "tags": [
@@ -1758,14 +1758,14 @@
     "hwModelSlug": "RAK4631",
     "platformioTarget": "rak_wismesh_pocket",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "RAK WisMesh Pocket V3",
     "tags": [
       "RAK"
     ],
     "images": [
-      "rak4631.svg"
+      "rak_wismesh_pocket.svg"
     ],
     "requiresDfu": true
   },
@@ -1804,11 +1804,11 @@
   {
     "hwModel": 137,
     "hwModelSlug": "SEEED_WIO_TRACKER_L2",
-    "platformioTarget": "seeed-wio-tracker-l2",
+    "platformioTarget": "seeed_wio_tracker_L2",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
-    "displayName": "Seeed Wio Tracker L2 Pro",
+    "displayName": "Seeed Wio Tracker L2",
     "tags": [
       "Seeed"
     ],
@@ -1816,6 +1816,7 @@
       "seeed_wio_tracker_l2.svg"
     ],
     "requiresDfu": true,
+    "hasMui": true,
     "partitionScheme": "16MB"
   },
   {
@@ -1833,5 +1834,49 @@
       "axiometa-genesis-mini.svg"
     ],
     "isMaker": true
+  },
+  {
+    "hwModel": 146,
+    "hwModelSlug": "MESHPAGER_X2",
+    "platformioTarget": "seeed_meshpager_x2",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "requiresDfu": true,
+    "hasMui": true,
+    "partitionScheme": "16MB",
+    "displayName": "Seeed MeshPager X2",
+    "tags": [
+      "Seeed"
+    ]
+  },
+  {
+    "hwModel": 151,
+    "hwModelSlug": "NODARA",
+    "platformioTarget": "nodara",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Radioddity Nodara",
+    "tags": [
+      "Radioddity"
+    ],
+    "requiresDfu": true
+  },
+  {
+    "hwModel": 105,
+    "hwModelSlug": "WISMESH_TAG",
+    "platformioTarget": "rak_wismesh_pod",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "RAKwireless WisMesh Pod",
+    "tags": [
+      "RAK"
+    ],
+    "images": [
+      "wismesh_pod.svg"
+    ],
+    "requiresDfu": true
   }
 ]

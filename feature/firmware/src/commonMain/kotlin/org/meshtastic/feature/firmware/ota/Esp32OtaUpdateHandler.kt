@@ -38,7 +38,6 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
-import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_erasing
 import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.resources.firmware_update_hash_rejected
@@ -49,14 +48,12 @@ import org.meshtastic.core.resources.firmware_update_searching_device
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
-import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
-import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
 private const val REBOOT_MODE_BLE = 1
@@ -350,25 +347,9 @@ class Esp32OtaUpdateHandler(
         )
         firmwareFileHandler.importFromUri(firmwareUri)
     } else {
-        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-
-        updateState(
-            FirmwareUpdateState.Downloading(
-                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
-            ),
-        )
-
         val firmwareFile =
-            firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
-                updateState(
-                    FirmwareUpdateState.Downloading(
-                        ProgressState(
-                            message = UiText.DynamicString(downloadingMsg),
-                            progress = progress,
-                            details = formatTransferPercent(progress),
-                        ),
-                    ),
-                )
+            downloadWithProgress(updateState) { onProgress ->
+                firmwareRetriever.retrieveEsp32Firmware(release, hardware, onProgress)
             }
 
         if (firmwareFile == null) {

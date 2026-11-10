@@ -78,8 +78,23 @@ class FakeMeshLogRepository :
 
     override fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = MutableStateFlow(emptyList())
 
-    override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> =
-        MutableStateFlow(emptyList())
+    override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> = logsFlow.map {
+        it.filter { log ->
+            val packet = log.fromRadio.packet
+            log.fromNum == MeshLog.NODE_NUM_LOCAL &&
+                log.portNum == portNum.value &&
+                packet?.to == targetNodeNum &&
+                packet.decoded?.want_response == true
+        }
+    }
+
+    override fun getInboundRequestLogs(portNum: PortNum): Flow<List<MeshLog>> = logsFlow.map {
+        it.filter { log ->
+            log.fromNum != MeshLog.NODE_NUM_LOCAL &&
+                log.portNum == portNum.value &&
+                log.fromRadio.packet?.decoded?.want_response == true
+        }
+    }
 
     override fun getMyNodeInfo(): Flow<MyNodeInfo?> = MutableStateFlow(null)
 

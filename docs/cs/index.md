@@ -14,7 +14,7 @@ Pomocí navigace v postranním panelu si můžete procházet **Uživatelskou př
 
 | Příručka                                         | Popis                                                          |
 | ------------------------------------------------ | -------------------------------------------------------------- |
-| [Začínáme](user/onboarding)                      | Připojte své první rádio a pošlete zprávu                      |
+| [Začínáme](user/onboarding)                      | Connect your first node and send a message                     |
 | [Zprávy a kanály](user/messages-and-channels)    | Vysílání kanálů, přímé zprávy, reakce a šifrování              |
 | [Uzel](user/nodes)                               | Porozumění seznamu uzlů mesh sítě                              |
 | [Měřič signálu](user/signal-meter)               | Jak funguje měřič kvality signálu LoRa                         |
@@ -23,4 +23,4 @@ Pomocí navigace v postranním panelu si můžete procházet **Uživatelskou př
 | [Architektura](developer/architecture)           | Přehled architektury aplikace pro přispěvatele                 |
 | [Přispívání do projektu](developer/contributing) | Pojmenování větví, postup práce s PR a příkazy pro ověření     |
 
-> Tato dokumentace je generována ze stejného zdroje Markdownu, který používá prohlížeč **Nápovědy a dokumentace** přímo v aplikaci.
+Tato dokumentace je generována ze stejného zdroje Markdownu, který používá prohlížeč **Nápovědy a dokumentace** přímo v aplikaci.

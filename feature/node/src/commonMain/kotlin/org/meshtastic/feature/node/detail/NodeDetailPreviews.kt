@@ -60,6 +60,7 @@ fun NodeDetailContentRemotePreview() {
                 onAction = {},
                 onFirmwareSelect = {},
                 onSaveNotes = { _, _ -> },
+                onSaveDisplayName = { _, _ -> },
             )
         }
     }
@@ -82,6 +83,7 @@ fun NodeDetailContentLocalPreview() {
                 onAction = {},
                 onFirmwareSelect = {},
                 onSaveNotes = { _, _ -> },
+                onSaveDisplayName = { _, _ -> },
             )
         }
     }
@@ -97,6 +99,7 @@ fun NodeDetailContentLoadingPreview() {
                 onAction = {},
                 onFirmwareSelect = {},
                 onSaveNotes = { _, _ -> },
+                onSaveDisplayName = { _, _ -> },
             )
         }
     }
@@ -120,6 +123,7 @@ fun NodeDetailContentMinimalPreview() {
                 onAction = {},
                 onFirmwareSelect = {},
                 onSaveNotes = { _, _ -> },
+                onSaveDisplayName = { _, _ -> },
             )
         }
     }

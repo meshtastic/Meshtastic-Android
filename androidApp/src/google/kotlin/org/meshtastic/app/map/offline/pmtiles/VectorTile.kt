@@ -20,7 +20,9 @@ package org.meshtastic.app.map.offline.pmtiles
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoIntegerType
 import kotlinx.serialization.protobuf.ProtoNumber
+import kotlinx.serialization.protobuf.ProtoType
 
 /**
  * The Mapbox Vector Tile schema (mapbox/vector-tile-spec, v2.1) — the format every layer of a Protomaps PMTiles basemap
@@ -47,13 +49,25 @@ internal data class VectorTile(@ProtoNumber(3) val layers: List<Layer> = emptyLi
 
     @Serializable
     internal data class Feature(
-        @ProtoNumber(1) val id: Long = 0,
+        @ProtoNumber(1) val id: Long? = null,
         @ProtoNumber(2) val tags: List<Int> = emptyList(),
         @ProtoNumber(3) val type: Int = GEOM_UNKNOWN,
         @ProtoNumber(4) val geometry: List<Int> = emptyList(),
-    )
+    ) {
+        /** Resolves the `tags` key/value index pairs against the owning [layer]'s tables. */
+        fun properties(layer: Layer): Map<String, Any> = buildMap {
+            tags
+                .chunked(2)
+                .filter { it.size == 2 }
+                .forEach { (keyIndex, valueIndex) ->
+                    val key = layer.keys.getOrNull(keyIndex)
+                    val value = layer.values.getOrNull(valueIndex)?.toAny()
+                    if (key != null && value != null) put(key, value)
+                }
+        }
+    }
 
-    /** Exactly one field is set in a valid tile; attribute values are unused by the offline renderer today. */
+    /** Exactly one field is set in a valid tile. */
     @Serializable
     internal data class Value(
         @ProtoNumber(1) val stringValue: String? = null,
@@ -61,9 +75,12 @@ internal data class VectorTile(@ProtoNumber(3) val layers: List<Layer> = emptyLi
         @ProtoNumber(3) val doubleValue: Double? = null,
         @ProtoNumber(4) val intValue: Long? = null,
         @ProtoNumber(5) val uintValue: Long? = null,
-        @ProtoNumber(6) val sintValue: Long? = null,
+        @ProtoNumber(6) @ProtoType(ProtoIntegerType.SIGNED) val sintValue: Long? = null,
         @ProtoNumber(7) val boolValue: Boolean? = null,
-    )
+    ) {
+        /** The set field as a String, Float, Double, Long or Boolean. */
+        fun toAny(): Any? = stringValue ?: doubleValue ?: floatValue ?: intValue ?: uintValue ?: sintValue ?: boolValue
+    }
 
     internal companion object {
         const val DEFAULT_EXTENT = 4096

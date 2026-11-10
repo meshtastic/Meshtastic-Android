@@ -5,7 +5,7 @@ This script owns:
 
   1. the one-tap deep-link tables in the project README and the developer guide,
   2. the per-flavor Obtainium import files in this directory, and
-  3. with --refresh, the "currently published" channel table in the guide.
+  3. with --refresh, the "currently published" channel table in the project README.
 
 Two kinds of staleness, two modes:
 
@@ -170,8 +170,8 @@ def config_for(channel, flavor_key):
 
 def deep_link(channel, flavor_key):
     blob = json.dumps(config_for(channel, flavor_key), separators=(",", ":"))
-    # Only the JSON payload is percent-encoded; the scheme prefix stays literal.
-    return f"{REDIRECT}obtainium://app/{quote(blob, safe='')}"
+    # The redirect page rejects a literal `obtainium://` in `r`, so the scheme is encoded too.
+    return f"{REDIRECT}{quote('obtainium://', safe='')}app/{quote(blob, safe='')}"
 
 
 def render_table(channels=None, label_of=None):

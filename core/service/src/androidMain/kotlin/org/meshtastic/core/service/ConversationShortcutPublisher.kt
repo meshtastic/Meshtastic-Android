@@ -31,12 +31,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.NodeRepository
@@ -88,11 +90,20 @@ class ConversationShortcutPublisher(
                 // Combine the message DB (recency + DM peers) with the channel config (names). Ranking both by
                 // last-activity time lets launchers / Android Auto surface the *recently active* conversations first
                 // (the shortcut display cap is small), instead of an arbitrary slice of stale channels.
-                combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow) { contacts, channelSet ->
-                    rankConversationsByRecency(contacts, channelSet)
+                // DM labels come from the node's display name, so a rename alone has to republish too.
+                val displayNames =
+                    nodeRepository.nodeDBbyNum
+                        .map { db -> db.mapValues { it.value.displayName } }
+                        .distinctUntilChanged()
+                combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow, displayNames) {
+                        contacts,
+                        channelSet,
+                        names,
+                    ->
+                    rankConversationsByRecency(contacts, channelSet) to names
                 }
                     .distinctUntilChanged()
-                    .collect { conversations -> publishShortcuts(conversations) }
+                    .collect { (conversations, _) -> publishShortcuts(conversations) }
             }
     }
 
@@ -171,7 +182,7 @@ class ConversationShortcutPublisher(
         // the raw contactKey is a user-traceable identifier and must stay confined to internal ids and deep-link
         // metadata (privacy-first convention).
         val shortName = node?.user?.short_name?.takeIf { it.isNotBlank() }
-        val longName = node?.user?.long_name?.takeIf { it.isNotBlank() }
+        val longName = node?.effectiveLongName?.takeIf { it.isNotBlank() }
         val label = longName ?: shortName ?: getStringSuspend(Res.string.unknown_username)
 
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.

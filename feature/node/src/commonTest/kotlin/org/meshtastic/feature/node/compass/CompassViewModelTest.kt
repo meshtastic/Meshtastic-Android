@@ -33,6 +33,10 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -168,7 +172,7 @@ class CompassViewModelTest {
                     .build(),
             )
 
-        assertEquals("± 12 m", state.errorRadiusText)
+        assertEquals("12 m", state.errorRadiusText)
     }
 
     @Test
@@ -188,7 +192,7 @@ class CompassViewModelTest {
                     .build(),
             )
 
-        assertEquals("± 25 m", state.errorRadiusText)
+        assertEquals("25 m", state.errorRadiusText)
     }
 
     @Test
@@ -207,7 +211,7 @@ class CompassViewModelTest {
                     .build(),
             )
 
-        assertEquals("± 8 m", state.errorRadiusText)
+        assertEquals("8 m", state.errorRadiusText)
     }
 
     @Test
@@ -225,7 +229,7 @@ class CompassViewModelTest {
                     .build(),
             )
 
-        assertEquals("± 729 m", state.errorRadiusText)
+        assertEquals("729 m", state.errorRadiusText)
     }
 
     @Test
@@ -264,7 +268,7 @@ class CompassViewModelTest {
                 location = PhoneLocation(1.0, 1.0, 0.0, 1000L),
             )
 
-        assertEquals("± 12 m", state.errorRadiusText)
+        assertEquals("12 m", state.errorRadiusText)
         assertNotNull(state.angularErrorDeg)
         assertEquals(180f, state.angularErrorDeg)
     }
@@ -286,7 +290,7 @@ class CompassViewModelTest {
                 location = PhoneLocation(1.0, 1.0, 0.0, 1000L),
             )
 
-        assertEquals("± 12 m", state.errorRadiusText)
+        assertEquals("12 m", state.errorRadiusText)
         assertNotNull(state.angularErrorDeg)
         assertEquals(85.4f, state.angularErrorDeg, 0.5f)
     }

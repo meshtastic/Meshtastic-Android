@@ -21,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
@@ -52,8 +53,10 @@ import org.meshtastic.core.resources.telemetry_config
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -75,17 +78,19 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = ModuleConfig.Builder().also { wb -> wb.telemetry = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.TELEMETRY.route)) {
             TitledCard(title = stringResource(Res.string.telemetry_config)) {
                 if (capabilities.offers(ModuleConfig.TelemetryConfig.device_telemetry_enabled)) {
                     SwitchPreference(
                         title = stringResource(Res.string.schema_telemetry_device_telemetry_enabled),
+                        modifier = Modifier.settingsField(Res.string.schema_telemetry_device_telemetry_enabled),
                         summary = stringResource(Res.string.schema_telemetry_device_telemetry_enabled_description),
                         checked = formState.value.device_telemetry_enabled,
                         enabled = state.connected,
@@ -100,6 +105,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val items = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_device_update_interval),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_device_update_interval),
                     summary = stringResource(Res.string.schema_telemetry_device_update_interval_description),
                     selectedItem = formState.value.device_update_interval.toLong(),
                     enabled = state.connected,
@@ -112,6 +118,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_measurement_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_environment_measurement_enabled),
                     summary = stringResource(Res.string.schema_telemetry_environment_measurement_enabled_description),
                     checked = formState.value.environment_measurement_enabled,
                     enabled = state.connected,
@@ -125,6 +132,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val envItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_update_interval),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_environment_update_interval),
                     summary = stringResource(Res.string.schema_telemetry_environment_update_interval_description),
                     selectedItem = formState.value.environment_update_interval.toLong(),
                     enabled = state.connected,
@@ -140,6 +148,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_screen_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_environment_screen_enabled),
                     summary = stringResource(Res.string.schema_telemetry_environment_screen_enabled_description),
                     checked = formState.value.environment_screen_enabled,
                     enabled = state.connected,
@@ -152,6 +161,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_display_fahrenheit),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_environment_display_fahrenheit),
                     summary = stringResource(Res.string.schema_telemetry_environment_display_fahrenheit_description),
                     checked = formState.value.environment_display_fahrenheit,
                     enabled = state.connected,
@@ -164,6 +174,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_air_quality_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_air_quality_enabled),
                     summary = stringResource(Res.string.schema_telemetry_air_quality_enabled_description),
                     checked = formState.value.air_quality_enabled,
                     enabled = state.connected,
@@ -177,6 +188,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val airItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_air_quality_interval),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_air_quality_interval),
                     summary = stringResource(Res.string.schema_telemetry_air_quality_interval_description),
                     selectedItem = formState.value.air_quality_interval.toLong(),
                     enabled = state.connected,
@@ -189,6 +201,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_power_measurement_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_power_measurement_enabled),
                     summary = stringResource(Res.string.schema_telemetry_power_measurement_enabled_description),
                     checked = formState.value.power_measurement_enabled,
                     enabled = state.connected,
@@ -202,6 +215,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val powerItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_power_update_interval),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_power_update_interval),
                     summary = stringResource(Res.string.schema_telemetry_power_update_interval_description),
                     selectedItem = formState.value.power_update_interval.toLong(),
                     enabled = state.connected,
@@ -214,6 +228,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_power_screen_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_telemetry_power_screen_enabled),
                     summary = stringResource(Res.string.schema_telemetry_power_screen_enabled_description),
                     checked = formState.value.power_screen_enabled,
                     enabled = state.connected,

@@ -29,15 +29,24 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_copying
-import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_flashing
 import org.meshtastic.core.resources.firmware_update_rebooting
 import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_usb_failed
-import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.feature.firmware.ota.formatTransferPercent
+import org.meshtastic.feature.firmware.ota.downloadWithProgress
 
 private const val USB_REBOOT_DELAY = 5000L
+
+/** Asks the node to reboot into its UF2 bootloader and gives the drive time to enumerate. */
+private suspend fun rebootToUf2Bootloader(
+    radioController: RadioController,
+    nodeRepository: NodeRepository,
+    updateState: (FirmwareUpdateState) -> Unit,
+) {
+    updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))))
+    radioController.rebootToDfu(nodeRepository.myNodeInfo.value?.myNodeNum ?: 0, radioController.generatePacketId())
+    delay(USB_REBOOT_DELAY)
+}
 
 /**
  * One leg of a multi-pass USB/UF2 sequence.
@@ -86,24 +95,9 @@ internal suspend fun performUsbMaintenance(
     updateState: (FirmwareUpdateState) -> Unit,
     retrieveUsbFirmware: suspend (FirmwareRelease, DeviceHardware, (Float) -> Unit) -> FirmwareArtifact?,
 ): List<UsbFileSavePass> {
-    val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-    updateState(
-        FirmwareUpdateState.Downloading(ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)),
-    )
-
     val firmware =
         try {
-            retrieveUsbFirmware(release, hardware) { progress ->
-                updateState(
-                    FirmwareUpdateState.Downloading(
-                        ProgressState(
-                            message = UiText.DynamicString(downloadingMsg),
-                            progress = progress,
-                            details = formatTransferPercent(progress),
-                        ),
-                    ),
-                )
-            }
+            downloadWithProgress(updateState) { onProgress -> retrieveUsbFirmware(release, hardware, onProgress) }
         } catch (e: CancellationException) {
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -114,7 +108,8 @@ internal suspend fun performUsbMaintenance(
     if (firmware == null) {
         updateState(
             FirmwareUpdateState.Error(
-                UiText.DynamicString(getStringSuspend(Res.string.firmware_update_retrieval_failed)),
+                UiText.Resource(Res.string.firmware_update_retrieval_failed),
+                nothingWritten = true,
             ),
         )
         return emptyList()
@@ -126,12 +121,7 @@ internal suspend fun performUsbMaintenance(
             UsbMaintenanceRequest.BootloaderUpgrade -> UsbFileSaveStep.BootloaderUpgrade
         }
 
-    updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))))
-    radioController.rebootToDfu(
-        nodeRepository.myNodeInfo.value?.myNodeNum ?: 0,
-        radioController.generatePacketId(),
-    )
-    delay(USB_REBOOT_DELAY)
+    rebootToUf2Bootloader(radioController, nodeRepository, updateState)
 
     val passes =
         listOf(
@@ -178,6 +168,7 @@ private const val CDC_DTR_HOLD_MS = 2_000L
  *
  * @property unblockCdc Opens the erase firmware's CDC port with DTR asserted so it stops waiting and formats. Returns
  *   false when no port could be claimed.
+ * @property onVolumeRead Called with what every accepted volume reports, before anything is written to it.
  */
 internal class UsbPassWriter(
     private val fileHandler: FirmwareFileHandler,
@@ -185,6 +176,7 @@ internal class UsbPassWriter(
     private val retrieveMaintenanceUf2: suspend (MaintenanceUf2, (Float) -> Unit) -> FirmwareArtifact?,
     private val awaitDeviceDetach: suspend (Long) -> Boolean,
     private val unblockCdc: suspend (waitMillis: Long, holdMillis: Long) -> Boolean,
+    private val onVolumeRead: (MaintenanceVolume) -> Unit = {},
 ) {
 
     /**
@@ -204,7 +196,7 @@ internal class UsbPassWriter(
         val volume =
             when (inspection) {
                 is VolumeInspection.Rejected -> return UsbPassResult.Refused(inspection.reason)
-                is VolumeInspection.Accepted -> inspection.volume
+                is VolumeInspection.Accepted -> inspection.volume.also(onVolumeRead)
             }
 
         val resolved =
@@ -265,7 +257,11 @@ internal class UsbPassWriter(
     suspend fun review(treeUri: CommonUri): BootloaderReview =
         when (val inspection = inspectMaintenanceVolume(treeUri, fileHandler)) {
             is VolumeInspection.Rejected -> BootloaderReview.Refused(inspection.reason)
-            is VolumeInspection.Accepted -> reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)
+
+            is VolumeInspection.Accepted -> {
+                onVolumeRead(inspection.volume)
+                reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)
+            }
         }
 
     /** Either the image to write, or the result to return instead. */
@@ -296,19 +292,9 @@ internal class UsbPassWriter(
                 is MaintenanceImageChoice.Refused -> ImageResolution.Failed(UsbPassResult.Refused(choice.reason))
 
                 is MaintenanceImageChoice.Resolved -> {
-                    val downloadingMsg =
-                        getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
                     val artifact =
-                        retrieveMaintenanceUf2(choice.asset) { progress ->
-                            updateState(
-                                FirmwareUpdateState.Downloading(
-                                    ProgressState(
-                                        message = UiText.DynamicString(downloadingMsg),
-                                        progress = progress,
-                                        details = formatTransferPercent(progress),
-                                    ),
-                                ),
-                            )
+                        downloadWithProgress(updateState) { onProgress ->
+                            retrieveMaintenanceUf2(choice.asset, onProgress)
                         }
                     artifact?.let {
                         ImageResolution.Ready(it, requiresCdcUnblock = choice.asset.requiresCdcUnblock)
@@ -353,21 +339,8 @@ internal suspend fun performUsbUpdate(
 ): FirmwareArtifact? {
     var cleanupArtifact: FirmwareArtifact? = null
     return try {
-        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-
-        updateState(
-            FirmwareUpdateState.Downloading(
-                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
-            ),
-        )
-
         if (firmwareUri != null) {
-            updateState(
-                FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))),
-            )
-            val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
-            radioController.rebootToDfu(myNodeNum, radioController.generatePacketId())
-            delay(USB_REBOOT_DELAY)
+            rebootToUf2Bootloader(radioController, nodeRepository, updateState)
 
             val sourceArtifact =
                 FirmwareArtifact(uri = firmwareUri, fileName = firmwareUri.pathSegments.lastOrNull() ?: "firmware.uf2")
@@ -375,32 +348,19 @@ internal suspend fun performUsbUpdate(
             null
         } else {
             val firmwareFile =
-                retrieveUsbFirmware(release, hardware) { progress ->
-                    updateState(
-                        FirmwareUpdateState.Downloading(
-                            ProgressState(
-                                message = UiText.DynamicString(downloadingMsg),
-                                progress = progress,
-                                details = formatTransferPercent(progress),
-                            ),
-                        ),
-                    )
-                }
+                downloadWithProgress(updateState) { onProgress -> retrieveUsbFirmware(release, hardware, onProgress) }
             cleanupArtifact = firmwareFile
 
             if (firmwareFile == null) {
                 updateState(
                     FirmwareUpdateState.Error(
-                        UiText.DynamicString(getStringSuspend(Res.string.firmware_update_retrieval_failed)),
+                        UiText.Resource(Res.string.firmware_update_retrieval_failed),
+                        nothingWritten = true,
                     ),
                 )
                 null
             } else {
-                val processingState = ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))
-                updateState(FirmwareUpdateState.Processing(processingState))
-                val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
-                radioController.rebootToDfu(myNodeNum, radioController.generatePacketId())
-                delay(USB_REBOOT_DELAY)
+                rebootToUf2Bootloader(radioController, nodeRepository, updateState)
 
                 val fileName = firmwareFile.fileName ?: "firmware.uf2"
                 val fileSaveState = FirmwareUpdateState.AwaitingFileSave(firmwareFile, fileName)
@@ -412,8 +372,7 @@ internal suspend fun performUsbUpdate(
         throw e
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         Logger.e(e) { "USB Update failed" }
-        val usbFailedMsg = getStringSuspend(Res.string.firmware_update_usb_failed)
-        updateState(FirmwareUpdateState.Error(UiText.DynamicString(e.message ?: usbFailedMsg)))
+        updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_usb_failed)))
         cleanupArtifact
     }
 }

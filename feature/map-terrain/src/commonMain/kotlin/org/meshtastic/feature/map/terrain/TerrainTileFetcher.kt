@@ -22,9 +22,12 @@ package org.meshtastic.feature.map.terrain
  */
 interface TerrainTileFetcher : AutoCloseable {
 
+    /** The archive's version as the server reports it (its ETag), or `null` if it gave none. */
+    val version: String?
+
     /** Raw tile bytes (WebP, Terrarium-encoded) at [zoom]/[x]/[y] — google/osm XYZ convention — or `null` if absent. */
     fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
 }
 
-/** Opens the remote PMTiles archive at [pmtilesUrl]. */
-expect fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher
+/** Opens the remote PMTiles archive at [pmtilesUrl], or returns `null` when the host has no archive there (404). */
+expect fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher?

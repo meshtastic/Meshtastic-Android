@@ -36,7 +36,7 @@ class KableBluetoothRepository : BluetoothRepository {
         return false // Bonding not supported on desktop yet
     }
 
-    override suspend fun bond(device: BleDevice) {
-        // No-op
+    override suspend fun bond(device: BleDevice, pin: String?) {
+        // No-op: the desktop OS pairs during the GATT connection and prompts for the PIN itself.
     }
 }

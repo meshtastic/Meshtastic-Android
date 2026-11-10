@@ -235,6 +235,7 @@
     <string name="debug_store_logs_title">Spara meshnätsloggar</string>
     <string name="debug_tab_app_logs">Applikationsloggar</string>
     <string name="debug_tab_packets">Paket</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_title">Anslut till enheten?</string>
     <string name="deep_link_disconnect_title">Koppla från enheten?</string>
     <string name="default_">Förvald</string>
@@ -403,6 +404,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Fast programvaruversion</string>
+    <string name="firmware_gate_title">Uppdatering av firmware krävs</string>
     <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="firmware_recovery_banner">Uppdatering slutförd %1$s</string>
     <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
@@ -459,7 +461,6 @@
     <string name="format_italic">Kursiv</string>
     <string name="format_link">Länk</string>
     <string name="format_strikethrough">Genomstruken</string>
-    <string name="free_memory">Ledigt minne</string>
     <string name="free_memory_description">Tillgängligt systemminne som byte</string>
     <string name="freq">Frekv.</string>
     <string name="gas_resistance">Gasmotstånd</string>
@@ -490,8 +491,10 @@
     <string name="i_agree">Jag godkänner.</string>
     <string name="i_agree_to_share_my_location">Jag har läst och förstått ovanstående. Jag samtycker till okrypterad överföring av mina noddata via MQTT</string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relativ skala IAQ värdet mätt med Bosch BME600. Värdeintervall 0-500.</string>
+    <string name="iaq_level_good">Bra</string>
     <string name="icon_meanings">Ikonbetydelser</string>
     <string name="ignore">Ignorera</string>
     <string name="ignore_add">Lägg till '%1$s' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
@@ -533,6 +536,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkt</string>
+    <string name="live_update_distance">%1$s bort</string>
     <!-- LOAD -->
     <string name="load">Ladda</string>
     <string name="load_15_min">Ladda 15 min</string>
@@ -578,6 +584,7 @@
     <string name="logs">Loggar</string>
     <string name="long_name">Långt namn</string>
     <string name="longitude">Longitud</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Lågt batteri</string>
@@ -654,6 +661,9 @@
     <string name="messages">Meddelanden</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Tillbaka</string>
+    <string name="mirror_key_ok">Okej</string>
     <string name="modem_preset">Förval</string>
     <string name="module_settings">Modul konfiguration</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
@@ -673,6 +683,8 @@
     <string name="mqtt_status_reconnecting">Återansluter…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Återansluter (försök %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Testa anslutningen</string>
+    <string name="mqtt_topic_finder_connecting">Ansluter…</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
     <!-- MUTE -->
@@ -868,7 +880,9 @@
     <string name="quick_chat_new">Ny snabbchatt</string>
     <string name="quick_chat_show">Visa snabbchattsmenyn</string>
     <string name="radiation">Strålning</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfiguration av radioenhet</string>
+    <string name="radio_setup_name_headline">Visningsnamn</string>
     <string name="rainfall_1h">Regn (1t)</string>
     <string name="rainfall_24h">Regn (24t)</string>
     <string name="range_test">Räckvidd</string>
@@ -1013,8 +1027,6 @@
     <string name="share_to">Dela med…</string>
     <string name="share_your_location_in_real_time">Dela din plats i realtid och håll din grupp samordnad med integrerade GPS-funktioner.</string>
     <string name="short_name">Kort namn</string>
-    <string name="should_update">För att dra nytta av de senaste rättelserna och funktionerna, vänligen uppdatera din nods fasta programvara.\n\nSenaste stabila fasta programvaruversion: %1$s</string>
-    <string name="should_update_firmware">Uppdatering av fast programvara rekommenderas.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Krypteringsnycklars betydelser</string>
     <string name="show_layer">Visa lager</string>
@@ -1073,6 +1085,7 @@
     <string name="tak_server">TAK-server</string>
     <string name="tak_server_enabled">Aktivera lokal TAK-server</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Förnya</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Status</string>
     <string name="tak_server_status_off">Av</string>
@@ -1179,6 +1192,8 @@
     <string name="waypoint_new">Ny vägpunkt</string>
     <string name="waypoint_received">Mottagen vägpunkt: %1$s</string>
     <string name="weight">Vikt</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Dålig</string>
     <!-- WIFI -->
     <string name="wifi_provision_available_networks">Tillgängliga nätverk</string>
     <string name="wifi_provision_connect_failed">Kunde inte ansluta: %1$s</string>

@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import co.touchlab.kermit.platformLogWriter
 import org.meshtastic.core.common.log.InMemoryLogBuffer
+import org.meshtastic.feature.map.maplibre.installMapLibreLogging
 
 /**
  * Sends Kermit output to the console and to [InMemoryLogBuffer], which the Debug screen views and exports. Release
@@ -28,4 +29,5 @@ import org.meshtastic.core.common.log.InMemoryLogBuffer
 internal fun installDesktopLogging(isDebug: Boolean) {
     Logger.setMinSeverity(if (isDebug) Severity.Verbose else Severity.Info)
     Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+    installMapLibreLogging()
 }

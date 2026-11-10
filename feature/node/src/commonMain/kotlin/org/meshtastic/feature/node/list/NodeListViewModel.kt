@@ -36,6 +36,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -51,7 +53,7 @@ import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -170,6 +172,15 @@ class NodeListViewModel(
             }
         }
 
+    /** The nodes the unheard banner offers for removal: see [selectRemovableUnheardNodes], less the ones kept. */
+    val unheardBannerNodes: StateFlow<List<Node>> =
+        combine(unfilteredNodeList, ourNodeInfo, nodeFilterPreferences.keptUnheardNodes) { nodes, ourNode, kept ->
+            selectRemovableUnheardNodes(nodes, ourNode?.num).filterNot { it.num in kept }
+        }
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    fun keepUnheardNodes(nodes: List<Node>) = nodeFilterPreferences.keepUnheardNodes(nodes.mapTo(HashSet()) { it.num })
+
     private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
 
     /** Maps hw_model int value → device image URL from the flasher CDN. */
@@ -185,11 +196,29 @@ class NodeListViewModel(
                 }
             }
         }
+        // A kept node that is heard again leaves the kept set, so a later LoRa change offers it again. Reads the raw
+        // rows, and only once they are authoritative: unfilteredNodeList shows every node heard until then.
+        viewModelScope.launch {
+            combine(nodeRepository.getNodes(), unheardFilterAllowed, nodeFilterPreferences.keptUnheardNodes) {
+                    nodes,
+                    authoritative,
+                    kept,
+                ->
+                if (!authoritative || kept.isEmpty()) {
+                    emptySet()
+                } else {
+                    nodes.filter { it.num in kept && it.heardOnCurrentLora }.mapTo(HashSet()) { it.num }
+                }
+            }
+                .collect { heardAgain ->
+                    if (heardAgain.isNotEmpty()) nodeFilterPreferences.forgetKeptUnheardNodes(heardAgain)
+                }
+        }
     }
 
     private suspend fun resolveDeviceImageUrl(hwModel: Int) {
         val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull() ?: return
-        val imageFile = hw.images?.getOrNull(1) ?: hw.images?.getOrNull(0) ?: return
+        val imageFile = hw.heroImageFile ?: return
         val url = "$FLASHER_DEVICE_IMAGE_BASE_URL$imageFile"
         _deviceImageUrls.value = _deviceImageUrls.value + (hwModel to url)
     }
@@ -216,9 +245,13 @@ class NodeListViewModel(
 
     fun ignoreNode(node: Node) = nodeManagementActions.requestIgnoreNode(viewModelScope, node)
 
+    fun setNodeDisplayName(nodeNum: Int, displayName: String) {
+        safeLaunch(tag = "setNodeDisplayName") { nodeManagementActions.setNodeDisplayName(nodeNum, displayName) }
+    }
+
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
-    fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
+    fun removeNodes(nodes: List<Node>) = nodeManagementActions.requestRemoveNodes(viewModelScope, nodes)
 
     /** Returns the contact key for navigating to a direct message conversation with this node. */
     fun getDirectMessageRoute(node: Node): String {
@@ -228,9 +261,12 @@ class NodeListViewModel(
         return "${channel}${node.user.id}"
     }
 
+    /** Start time of the last traceroute, shared with the detail buttons: firmware allows one per 30 s window. */
+    val lastTracerouteTime: StateFlow<Long?> = nodeRequestActions.lastTracerouteTime
+
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
-        safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
+        safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.effectiveLongName) }
     }
 
     companion object {

@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
@@ -36,8 +37,10 @@ import org.meshtastic.core.resources.clear_position_track_message
 import org.meshtastic.core.resources.clear_position_track_title
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.export_gpx
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -46,13 +49,19 @@ import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 
 @Composable
-fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
+fun PositionLogScreen(
+    viewModel: MetricsViewModel,
+    onNavigateUp: () -> Unit,
+    /** Null hides the mesh view button, for platforms with no camera. */
+    onOpenMeshHud: (() -> Unit)? = null,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val positions = state.positionLogs
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
-    val nodeName = state.node?.user?.long_name ?: ""
-    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
+    val nodeName = state.node?.effectiveLongName.orEmpty()
+    val gpxTrackName = gpxTrackName(state.node)
+    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, gpxTrackName) }
     val hasTrackPoint = remember(positions) { positions.any { it.hasFix() } }
 
     val trackMap = LocalNodeTrackMapProvider.current
@@ -67,6 +76,14 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         timeProvider = { it.time.toDouble() },
         onExportCsv = { exportPositionLauncher("position.csv", "text/csv") },
         extraActions = {
+            if (hasTrackPoint && onOpenMeshHud != null) {
+                IconButton(onClick = onOpenMeshHud) {
+                    Icon(
+                        imageVector = MeshtasticIcons.CenterFocusStrong,
+                        contentDescription = stringResource(Res.string.mesh_hud_open),
+                    )
+                }
+            }
             if (hasTrackPoint) {
                 IconButton(onClick = { exportGpxLauncher("track.gpx", "application/gpx+xml") }) {
                     Icon(

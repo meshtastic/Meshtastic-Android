@@ -49,10 +49,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_icon
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.iaq_level_dangerously_polluted
+import org.meshtastic.core.resources.iaq_level_excellent
+import org.meshtastic.core.resources.iaq_level_extremely_polluted
+import org.meshtastic.core.resources.iaq_level_good
+import org.meshtastic.core.resources.iaq_level_heavily_polluted
+import org.meshtastic.core.resources.iaq_level_lightly_polluted
+import org.meshtastic.core.resources.iaq_level_moderately_polluted
+import org.meshtastic.core.resources.iaq_level_range
+import org.meshtastic.core.resources.iaq_level_range_open
+import org.meshtastic.core.resources.iaq_level_severely_polluted
 import org.meshtastic.core.resources.iaq_value
 import org.meshtastic.core.resources.indoor_air_quality_iaq
 import org.meshtastic.core.resources.preview_dot
@@ -75,15 +86,15 @@ import org.meshtastic.core.ui.theme.IAQColors.IAQModeratelyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQSeverelyPolluted
 
 @Suppress("MagicNumber")
-enum class Iaq(val color: Color, val description: String, val range: IntRange) {
-    Excellent(IAQExcellent, "Excellent", 0..50),
-    Good(IAQGood, "Good", 51..100),
-    LightlyPolluted(IAQLightlyPolluted, "Lightly Polluted", 101..150),
-    ModeratelyPolluted(IAQModeratelyPolluted, "Moderately Polluted", 151..200),
-    HeavilyPolluted(IAQHeavilyPolluted, "Heavily Polluted", 201..300),
-    SeverelyPolluted(IAQSeverelyPolluted, "Severely Polluted", 301..400),
-    ExtremelyPolluted(IAQExtremelyPolluted, "Extremely Polluted", 401..500),
-    DangerouslyPolluted(IAQDangerouslyPolluted, "Dangerously Polluted", 501..Int.MAX_VALUE),
+enum class Iaq(val color: Color, val label: StringResource, val range: IntRange) {
+    Excellent(IAQExcellent, Res.string.iaq_level_excellent, 0..50),
+    Good(IAQGood, Res.string.iaq_level_good, 51..100),
+    LightlyPolluted(IAQLightlyPolluted, Res.string.iaq_level_lightly_polluted, 101..150),
+    ModeratelyPolluted(IAQModeratelyPolluted, Res.string.iaq_level_moderately_polluted, 151..200),
+    HeavilyPolluted(IAQHeavilyPolluted, Res.string.iaq_level_heavily_polluted, 201..300),
+    SeverelyPolluted(IAQSeverelyPolluted, Res.string.iaq_level_severely_polluted, 301..400),
+    ExtremelyPolluted(IAQExtremelyPolluted, Res.string.iaq_level_extremely_polluted, 401..500),
+    DangerouslyPolluted(IAQDangerouslyPolluted, Res.string.iaq_level_dangerously_polluted, 501..Int.MAX_VALUE),
 }
 
 fun getIaq(iaq: Int): Iaq? = when {
@@ -98,10 +109,16 @@ fun getIaq(iaq: Int): Iaq? = when {
     else -> Iaq.DangerouslyPolluted
 }
 
-private fun getIaqDescriptionWithRange(iaqEnum: Iaq): String = if (iaqEnum.range.last == Int.MAX_VALUE) {
-    "${iaqEnum.description} (${iaqEnum.range.first}+)"
+@Composable
+private fun iaqDescriptionWithRange(iaqEnum: Iaq): String = if (iaqEnum.range.last == Int.MAX_VALUE) {
+    stringResource(Res.string.iaq_level_range_open, stringResource(iaqEnum.label), iaqEnum.range.first)
 } else {
-    "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})"
+    stringResource(
+        Res.string.iaq_level_range,
+        stringResource(iaqEnum.label),
+        iaqEnum.range.first,
+        iaqEnum.range.last,
+    )
 }
 
 enum class IaqDisplayMode {
@@ -177,7 +194,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                 IaqDisplayMode.Text -> {
                     val legendLabel = stringResource(Res.string.show_iaq_legend)
                     Text(
-                        text = getIaqDescriptionWithRange(iaqEnum),
+                        text = iaqDescriptionWithRange(iaqEnum),
                         fontSize = 12.sp,
                         modifier =
                         Modifier.clickable(
@@ -202,7 +219,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
                     )
-                    Text(text = iaqEnum.description)
+                    Text(text = stringResource(iaqEnum.label))
                 }
 
                 IaqDisplayMode.Gradient -> {
@@ -222,7 +239,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                             color = iaqEnum.color,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = iaqEnum.description, fontSize = 12.sp)
+                        Text(text = stringResource(iaqEnum.label), fontSize = 12.sp)
                     }
                 }
             }
@@ -238,10 +255,6 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
     }
 }
 
-// Assuming Iaq is an enum class with color and description properties
-// and that it conforms to CaseIterable.
-// Replace with your actual implementation
-
 @Composable
 fun IAQScale(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {
@@ -250,7 +263,7 @@ fun IAQScale(modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(modifier = Modifier.size(20.dp, 15.dp).clip(RoundedCornerShape(5.dp)).background(iaq.color))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(getIaqDescriptionWithRange(iaq), style = MaterialTheme.typography.bodyMedium)
+                Text(iaqDescriptionWithRange(iaq), style = MaterialTheme.typography.bodyMedium)
             }
             Spacer(modifier = Modifier.height(4.dp))
         }

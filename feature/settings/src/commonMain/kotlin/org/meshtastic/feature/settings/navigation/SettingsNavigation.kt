@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -33,6 +34,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.parameter.parametersOf
@@ -82,6 +84,9 @@ import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
 import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
+import org.meshtastic.feature.settings.radio.setup.RadioSetupScreen
+import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
+import org.meshtastic.feature.settings.search.SettingsFieldFocus
 import kotlin.reflect.KClass
 
 /**
@@ -244,6 +249,7 @@ private fun NavKey.usesRadioConfigSettingsSession(): Boolean = this is SettingsR
     this == SettingsRoute.DeviceConfiguration ||
     this == SettingsRoute.ModuleConfiguration ||
     this == SettingsRoute.Administration ||
+    this is SettingsRoute.RadioSetup ||
     ConfigRoute.entries.any { it.route == this } ||
     ModuleRoute.entries.any { it.route == this }
 
@@ -295,6 +301,15 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         AdministrationScreen(
             viewModel = radioConfigViewModelProvider(null),
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
+    }
+
+    entry<SettingsRoute.RadioSetup> { args ->
+        RadioSetupScreen(
+            viewModel = radioConfigViewModelProvider(null),
+            boundAddress = args.address,
+            onDone = dropUnlessResumed { backStack.removeLastOrNull() },
+            onNavigate = backStack::addSettingsRoute,
         )
     }
 
@@ -477,6 +492,8 @@ fun <R : Route> EntryProviderScope<NavKey>.configComposable(
         // connect-time repository snapshot, so their route refresh stays non-blocking and does not flash a 0% overlay.
         remember(viewModel, routeInfo) { viewModel.ensureLoadingForRemote().let { true } }
         LaunchedEffect(viewModel, routeInfo) { viewModel.loadConfigRoute(routeInfo) }
-        content(viewModel)
+        CompositionLocalProvider(LocalSettingsFieldFocus provides koinInject<SettingsFieldFocus>()) {
+            content(viewModel)
+        }
     }
 }

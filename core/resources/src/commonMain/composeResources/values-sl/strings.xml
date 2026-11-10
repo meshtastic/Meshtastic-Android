@@ -61,6 +61,7 @@
     <string name="copy">Kopiraj</string>
     <!-- DEBUG -->
     <string name="debug_panel">Plošča za odpravljanje napak</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Izbriši</string>
     <string name="delete_for_everyone">Izbriši za vse</string>
@@ -98,6 +99,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Zastarela programska oprema</string>
     <string name="firmware_old">Vdelana programska oprema radijskega sprejemnika je za pogovor s to aplikacijo prestara. Za več informacij o tem glejte<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodnik za namestitev strojne programske opreme</a>.</string>
     <string name="firmware_too_old">Zastarela programska oprema.</string>
     <string name="firmware_update_failed">Posodobitev neuspešna</string>
@@ -105,8 +107,10 @@
     <!-- GEOFENCE -->
     <string name="good">Dober</string>
     <string name="hops_away">Skokov stran</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kakovost zraka v zaprtih prostorih) relativna vrednost IAQ na lestvici, izmerjena z Bosch BME680. Razpon vrednosti 0–500.</string>
+    <string name="iaq_level_good">Dober</string>
     <string name="ignore">Prezri</string>
     <string name="ignore_add">Dodaj '%1$s' na prezrto listo?</string>
     <string name="ignore_remove">Odstrani '%1$s' iz prezrte liste?</string>
@@ -118,6 +122,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Neposreden</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -126,6 +132,7 @@
     <string name="locked">Zaklenjeno</string>
     <!-- LOG -->
     <string name="logs">Dnevniki</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Upravitelj predpomnilnika</string>
     <string name="map_cache_size">Trenutna velikost predpomnilnika</string>
@@ -155,9 +162,12 @@
     <string name="message_delivery_status">Stanje poslanega sporočila</string>
     <string name="message_input_label">Sporočilo</string>
     <string name="message_status_queued">V čakalni vrsti za pošiljanje</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">V redu</string>
     <string name="module_settings">Nastavitev modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Prekinjeno</string>
+    <string name="mqtt_topic_finder_level_region">Regija</string>
     <string name="must_set_region">Nastavitev regije!</string>
     <string name="must_update">To aplikacijo morate posodobiti v trgovini Google Play (ali Github). Žal se ne more povezati s tem radiem.</string>
     <!-- MUTE -->
@@ -212,7 +222,9 @@
     <string name="quick_chat_edit">Uredi hitri klepet</string>
     <string name="quick_chat_instant">Pošlji takoj</string>
     <string name="quick_chat_new">Novi hitri klepet</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Nastavitev radia</string>
+    <string name="radio_setup_name_headline">Ime</string>
     <string name="reboot">Ponovni zagon</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administracija na daljavo</string>
@@ -290,6 +302,8 @@
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_new">Nova točka poti</string>
     <string name="waypoint_received">Prejeta točka poti: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Slab</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP naslov</string>
     <!-- WIND -->

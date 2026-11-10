@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre.geojson
 
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.maplibre.spatialk.geojson.Feature
@@ -24,7 +25,10 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
+import org.meshtastic.feature.map.NodeStack
+import org.meshtastic.feature.map.stackBadgeLabel
 
 /** Formats an `@ColorInt` ARGB value as the `#rrggbb` string MapLibre expressions parse. */
 @Suppress("MagicNumber")
@@ -40,33 +44,52 @@ internal fun Int.toCssHex(): String {
  * ocean" jump on the OSMdroid map.
  */
 fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject?> =
-    FeatureCollection(
-        nodes.mapNotNull { node ->
-            node.validPosition ?: return@mapNotNull null
-            val (foreground, background) = node.colors
-            Feature(
-                geometry = Point(Position(longitude = node.longitude, latitude = node.latitude)),
-                properties =
-                buildJsonObject {
-                    put(NodeFeatureKeys.NODE_NUM, node.num)
-                    put(NodeFeatureKeys.SHORT_NAME, node.user.short_name)
-                    put(NodeFeatureKeys.LONG_NAME, node.user.long_name)
-                    put(NodeFeatureKeys.IS_FAVORITE, node.isFavorite)
-                    put(NodeFeatureKeys.IS_ONLINE, node.isOnline)
-                    put(NodeFeatureKeys.IS_SELF, myNodeNum != null && node.num == myNodeNum)
-                    put(NodeFeatureKeys.FOREGROUND, foreground.toCssHex())
-                    put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
-                    put(NodeFeatureKeys.LAST_HEARD, node.lastHeard)
-                    // Omitted rather than written as 0.0 when the node reports no precision: 0 is a real
-                    // radius, and a reader cannot tell the difference. GeoCircle drops such nodes instead.
-                    precisionRadiusMetersOrNull(node.position.precision_bits)?.let {
-                        put(NodeFeatureKeys.PRECISION_METERS, it)
-                    }
-                    put(NodeFeatureKeys.CHIP, node.toNodeChip().featureValue())
-                },
-            )
+    FeatureCollection(nodes.mapNotNull { it.toFeature(myNodeNum) })
+
+/** One feature per stack, drawn as its top node and carrying every member for the stack's list. */
+fun stacksToFeatureCollection(stacks: List<NodeStack>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject?> =
+    FeatureCollection(stacks.mapNotNull { stack -> stack.top.toFeature(myNodeNum, stack.members) })
+
+private fun Node.toFeature(myNodeNum: Int?, stackMembers: List<Node> = emptyList()): Feature<Point, JsonObject?>? {
+    validPosition ?: return null
+    val (foreground, background) = colors
+    return Feature(
+        geometry = Point(Position(longitude = longitude, latitude = latitude)),
+        properties =
+        buildJsonObject {
+            put(NodeFeatureKeys.NODE_NUM, num)
+            put(NodeFeatureKeys.SHORT_NAME, user.short_name)
+            put(NodeFeatureKeys.LONG_NAME, effectiveLongName)
+            put(NodeFeatureKeys.IS_FAVORITE, isFavorite)
+            put(NodeFeatureKeys.IS_ONLINE, isOnline)
+            put(NodeFeatureKeys.IS_SELF, myNodeNum != null && num == myNodeNum)
+            put(NodeFeatureKeys.FOREGROUND, foreground.toCssHex())
+            put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
+            put(NodeFeatureKeys.LAST_HEARD, lastHeard)
+            // Omitted rather than written as 0.0 when the node reports no precision: 0 is a real
+            // radius, and a reader cannot tell the difference. GeoCircle drops such nodes instead.
+            precisionRadiusMetersOrNull(position.precision_bits)?.let { put(NodeFeatureKeys.PRECISION_METERS, it) }
+            put(NodeFeatureKeys.CHIP, toNodeChip().featureValue())
+            if (stackMembers.size > 1) {
+                put(NodeFeatureKeys.STACK_COUNT, stackBadgeLabel(stackMembers.size))
+                put(NodeFeatureKeys.STACK_MEMBERS, stackMembers.toMemberJson())
+            }
         },
     )
+}
+
+private fun List<Node>.toMemberJson(): String = buildJsonArray {
+    forEach { member ->
+        add(
+            buildJsonObject {
+                put(NodeFeatureKeys.NODE_NUM, member.num)
+                put(NodeFeatureKeys.SHORT_NAME, member.user.short_name)
+                put(NodeFeatureKeys.LONG_NAME, member.effectiveLongName)
+            },
+        )
+    }
+}
+    .toString()
 
 /**
  * One distinct chip appearance. Two markers that look identical only need drawing once.

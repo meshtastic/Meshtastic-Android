@@ -14,7 +14,7 @@ Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Kä
 
 | Opas                                                                | Kuvaus                                                                      |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [Aloittaminen](user/onboarding)                                     | Yhdistä radioon ja lähetä viesti                                            |
+| [Aloittaminen](user/onboarding)                                     | Connect your first node and send a message                                  |
 | [Viestit & kanavat](user/messages-and-channels) | Kanavaviestit, yksityisviestit, reaktiot ja salaus                          |
 | [Radiot](user/nodes)                                                | Mesh-verkon radioluettelon ymmärtäminen                                     |
 | [Signaalimittari](user/signal-meter)                                | Miten LoRa-signaalin laatumittari toimii                                    |
@@ -23,4 +23,4 @@ Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Kä
 | [Arkkitehtuuri](developer/architecture)                             | Yleiskatsaus sovelluksen arkkitehtuuriin kehittäjille                       |
 | [Osallistuminen kehitystyöhön](developer/contributing)              | Haarojen nimeäminen, PR-työnkulku ja tarkistuskomennot                      |
 
-> Tämä dokumentaatio perustuu samoihin Markdown-lähdetiedostoihin kuin sovelluksen sisäinen **Ohje ja dokumentaatio** -osio.
+Tämä dokumentaatio perustuu samoihin Markdown-lähdetiedostoihin kuin sovelluksen sisäinen **Ohje ja dokumentaatio** -osio.

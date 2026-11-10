@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -67,6 +67,7 @@ suspend fun LocalCoverage.sweepPolar(
     radials: Int = DEFAULT_RADIALS,
     rings: Int = DEFAULT_RINGS,
     profileStepKm: Double = DEFAULT_PROFILE_STEP_KM,
+    dispatcher: CoroutineDispatcher = coverageComputeDispatcher,
 ): PolarCoverage {
     require(radials >= MIN_RADIALS) { "radials must be >= $MIN_RADIALS, got $radials" }
     require(rings >= MIN_RINGS) { "rings must be >= $MIN_RINGS, got $rings" }
@@ -84,11 +85,10 @@ suspend fun LocalCoverage.sweepPolar(
     // scales with cores. Each writes its own disjoint slice of `out`, so there is nothing to guard.
     // The dispatcher is explicit: a caller on runBlocking or the main thread would otherwise hand
     // every radial to that one confined thread and the sweep would stay serial.
-    @Suppress("InjectDispatcher")
     coroutineScope {
         (0 until radials)
             .map { b ->
-                async(Dispatchers.Default) {
+                async(dispatcher) {
                     val bearing = FULL_CIRCLE * b / radials
                     // One walk per bearing: every ring on this radial is a prefix of this profile.
                     val lats = DoubleArray(profilePoints)

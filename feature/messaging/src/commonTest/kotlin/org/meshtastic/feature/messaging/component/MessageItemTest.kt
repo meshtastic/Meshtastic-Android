@@ -369,7 +369,7 @@ class MessageItemTest {
         val meshTime = 1_700_000_000_000L
         val message =
             localMessage(node = testNode, status = MessageStatus.RECEIVED).copy(time = "compact", meshTime = meshTime)
-        val expectedTimestamp = DateFormatter.formatDateTime(meshTime)
+        val expectedTimestamp = DateFormatter.formatDateTimeShort(meshTime)
 
         setContent {
             MessageItem(

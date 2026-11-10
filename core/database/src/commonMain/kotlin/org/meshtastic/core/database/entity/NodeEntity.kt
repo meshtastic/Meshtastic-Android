@@ -19,6 +19,7 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Embedded
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
@@ -68,6 +69,7 @@ fun Node.toEntity() = NodeEntity(
     paxcounter = paxcounter,
     publicKey = publicKey,
     notes = notes,
+    displayName = displayName,
     powerChannelLabels = powerChannelLabels,
     manuallyVerified = manuallyVerified,
     nodeStatus = nodeStatus,
@@ -129,6 +131,7 @@ data class NodeEntity(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
+    @ColumnInfo(name = "display_name", defaultValue = "") var displayName: String = "",
     @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
@@ -164,24 +167,32 @@ data class NodeEntity(
      */
     @ColumnInfo(name = "new_public_key") var newPublicKey: ByteString? = null,
 ) {
+    // Room 3.1 maps a property without a backing field as a column, so each derived value here must be ignored.
+    @Ignore
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
 
+    @Ignore
     val environmentMetrics: org.meshtastic.proto.EnvironmentMetrics?
         get() = environmentTelemetry.environment_metrics
 
+    @Ignore
     val powerMetrics: org.meshtastic.proto.PowerMetrics?
         get() = powerTelemetry.power_metrics
 
+    @Ignore
     val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
         get() = airQualityTelemetry.air_quality_metrics
 
+    @Ignore
     val soilWaterMetrics: org.meshtastic.proto.SoilWaterMetrics?
         get() = soilWaterTelemetry.soil_water_metrics
 
+    @Ignore
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
 
+    @Ignore
     val hasPKC
         get() = (publicKey ?: user.public_key).size > 0
 
@@ -192,6 +203,7 @@ data class NodeEntity(
     }
 
     /** true if the device was heard from recently */
+    @Ignore
     val isOnline: Boolean
         get() {
             return lastHeard > onlineTimeThreshold()
@@ -231,6 +243,7 @@ data class NodeEntity(
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
+        displayName = displayName,
         powerChannelLabels = powerChannelLabels,
         manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,

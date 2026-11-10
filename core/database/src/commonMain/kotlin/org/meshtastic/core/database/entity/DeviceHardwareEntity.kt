@@ -70,7 +70,7 @@ fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
     hasMui = hasMui,
     hwModel = hwModel,
     hwModelSlug = hwModelSlug,
-    images = images,
+    images = images?.filterNot { it.isModelFile() },
     isMaker = isMaker,
     partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
@@ -82,3 +82,6 @@ fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
     supportLevel = supportLevel,
     tags = tags,
 )
+
+// The registry lists each board's 3D models after its illustrations; callers index this list as illustrations only.
+private fun String.isModelFile(): Boolean = endsWith(".usdz", ignoreCase = true) || endsWith(".glb", ignoreCase = true)

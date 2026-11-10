@@ -1,8 +1,8 @@
 ---
 title: Rakenduse funktsioonid
 nav_order: 19
-last_updated: 2026-08-30
-description: Ava kärgvõrgu funktsioonid Androidi süsteemile ja seadme tehisintellektil põhinevatele assistentidele (nt Gemini), et nad saaksid kärgvõrgu töövooge käivitada rakendust avamata.
+last_updated: 2026-10-21
+description: Expose mesh capabilities to the Android system and on-device AI assistants such as Gemini, so they can run mesh workflows without opening the app.
 aliases:
   - rakenduse funktsioonid
   - süsteemi-ti
@@ -25,7 +25,7 @@ Control App Functions from **Settings → System AI**. The screen has:
 
 > ⚠️ **Important:** App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, **Send message** included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn **Allow AI access** off.
 
-Funktsioonid on rühmitatud kirjutamis- (Write) sektsiooni (funktsioonid, mis midagi muudavad või andmeid kärgvõrgule saadavad) ja lugemis- (Read) sektsiooni (funktsioonid, mis ainult teavet tagastavad).
+The functions are grouped into a **Write functions** section (functions that change something or send data to your mesh) and a **Read functions** section (functions that only return information).
 
 ![Rakenduse funktsioonide ekraan põhi- ja funktsioonipõhiste lülititega](../../assets/screenshots/app-functions_settings.png)
 
@@ -33,22 +33,22 @@ The screenshot has **Send message** and **Get recent messages** switched off to 
 
 ### Kirjutamis funktsioonid
 
-| Funktsioon       | What it does                                                                                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Send message** | Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short. |
+| Funktsioon       | What it does                                                                                                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Send message** | Sends a text message to a contact (direct message) or to a channel. It refuses text over 228 bytes, and sends at most five messages a minute, so keep assistant-composed messages short. |
 
 ### Lugemis funktsioonid
 
-| Funktsioon              | What it returns                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **Get mesh status**     | Whether you're connected to a radio, and how many nodes are online. |
-| **Get node list**       | Teie kärgvõrgu sõlmede loend.                                       |
-| **Get channel info**    | Teave kanalite kohta.                                               |
-| **Get device status**   | Ühendatud raadio olek.                                              |
-| **Get node details**    | Detailed information about a specific node.                         |
-| **Get mesh metrics**    | Telemetry and metrics from your mesh.                               |
-| **Get recent messages** | Recent messages from your conversations.                            |
-| **Get unread summary**  | A summary of unread messages.                                       |
+| Funktsioon              | What it returns                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Get mesh status**     | Whether you're connected to a node, and how many nodes are online. |
+| **Get node list**       | Teie kärgvõrgu sõlmede loend.                                      |
+| **Get channel info**    | Teave kanalite kohta.                                              |
+| **Get device status**   | Status of your connected node.                                     |
+| **Get node details**    | Detailed information about a specific node.                        |
+| **Get mesh metrics**    | Telemetry and metrics from your mesh.                              |
+| **Get recent messages** | Recent messages from your conversations.                           |
+| **Get unread summary**  | A summary of unread messages.                                      |
 
 ## Privacy
 

@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -87,6 +88,24 @@ class NotificationPrefsImpl(private val dataStore: UiDataStore, dispatchers: Cor
         scope.launch { dataStore.edit { it[KEY_LOW_BATTERY_ENABLED] = enabled } }
     }
 
+    override val reactionsEnabled: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_REACTIONS_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setReactionsEnabled(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_REACTIONS_ENABLED] = enabled } }
+    }
+
+    override suspend fun loadReactionsEnabled(): Boolean = dataStore.data.first()[KEY_REACTIONS_ENABLED] ?: true
+
+    override val newWaypointsEnabled: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_NEW_WAYPOINTS_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setNewWaypointsEnabled(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_NEW_WAYPOINTS_ENABLED] = enabled } }
+    }
+
+    override suspend fun loadNewWaypointsEnabled(): Boolean = dataStore.data.first()[KEY_NEW_WAYPOINTS_ENABLED] ?: true
+
     // Stored as an insertion-ordered CSV of ints (DataStore has no int-set key, and a plain set can't express age).
     // Ordering lets us evict the oldest opt-in once capped; non-numeric leftovers are ignored on read.
     override val geofenceAlertOptIns: StateFlow<Set<Int>> =
@@ -120,6 +139,8 @@ class NotificationPrefsImpl(private val dataStore: UiDataStore, dispatchers: Cor
         private val KEY_NODE_EVENTS_ENABLED = booleanPreferencesKey("notif_node_events_enabled")
         private val KEY_NODE_EVENTS_AUTO_DISABLED = booleanPreferencesKey("notif_node_events_auto_disabled_event")
         private val KEY_LOW_BATTERY_ENABLED = booleanPreferencesKey("notif_low_battery_enabled")
+        private val KEY_REACTIONS_ENABLED = booleanPreferencesKey("notif_reactions_enabled")
+        private val KEY_NEW_WAYPOINTS_ENABLED = booleanPreferencesKey("notif_new_waypoints_enabled")
         private val KEY_GEOFENCE_ALERT_OPT_INS = stringPreferencesKey("notif_geofence_alert_opt_ins")
     }
 }

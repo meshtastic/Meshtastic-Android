@@ -20,9 +20,7 @@ import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.Team
 import org.meshtastic.proto.User
 
-// Port 8089 is the standard TAK TLS port. Matches the iOS implementation so that
-// a single exported data package (containing truststore.p12 + client.p12) works for
-// both Meshtastic-iOS and Meshtastic-Android without reconfiguration in ATAK/iTAK.
+// Port 8089 is the standard TAK TLS port. Matches the iOS implementation.
 internal const val DEFAULT_TAK_PORT = 8089
 
 // Default contact endpoint for mesh peers (the real endpoint is never carried over
@@ -32,9 +30,13 @@ internal const val DEFAULT_TAK_PORT = 8089
 // so directed messages never reach the mesh while broadcast PLI still works.
 internal const val DEFAULT_TAK_ENDPOINT = "*:-1:stcp"
 
-// Bundled certificate password — matches iOS (`"meshtastic"`). Used for the
-// server.p12 / client.p12 PKCS#12 files shipped under `tak_certs/` on the classpath.
-internal const val TAK_BUNDLED_CERT_PASSWORD = "meshtastic"
+// Per-install TAK PKI (see TakCertificateGenerator in jvmAndroidMain). RSA-2048 keeps
+// the PKCS#12 containers importable by every ATAK / iTAK release that accepted the
+// previous bundled material; the random password protects the exported containers and
+// is written to the .pref alongside them.
+internal const val TAK_CERT_KEY_BITS = 2048
+internal const val TAK_CERT_VALIDITY_DAYS = 10L * 365L
+internal const val TAK_CERT_PASSWORD_LENGTH = 32
 internal const val DEFAULT_TAK_TEAM_NAME = "Cyan"
 internal const val DEFAULT_TAK_ROLE_NAME = "Team Member"
 internal const val DEFAULT_TAK_BATTERY = 100

@@ -28,8 +28,8 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
   - `ConcurrentHashMap` -> `atomicfu` or Mutex-guarded `mutableMapOf()`.
   - `java.util.concurrent.locks.*` -> `kotlinx.coroutines.sync.Mutex`.
   - `java.io.*` -> `Okio` (`BufferedSource`/`BufferedSink`).
-- **Networking:** Pure **Ktor**. No OkHttp. Ktor `Logging` plugin for debugging.
-- **HTTP Configuration:** Use `HttpClientDefaults` from `core:network` for shared base URL (`API_BASE_URL`), timeouts, and retry constants. Both Android (`NetworkModule`) and Desktop (`DesktopKoinModule`) HttpClient instances must use these. Feature API services use relative paths; `DefaultRequest` sets the base URL.
+- **Networking:** Pure **Ktor** in shared code. The Android host's `HttpClient` runs on Ktor's OkHttp engine (the platform `HttpURLConnection` engine crashes on canceled gzip reads); desktop uses the Java engine. The one direct OkHttp use is the google flavor's map-tile client (`MapTileHttpClient`); add no others. Ktor `Logging` plugin for debugging.
+- **HTTP Configuration:** Use `HttpClientDefaults` from `core:network` for shared base URL (`API_BASE_URL`), timeouts, and retry constants. Both the Android (`androidApp/.../di/NetworkModule.kt`) and Desktop (`desktopApp/.../di/DesktopRuntimeModule.kt`) `HttpClient` instances must use these. Feature API services use relative paths; `DefaultRequest` sets the base URL.
 - **BLE:** Route through `core:ble` using **Kable**.
 - **Room KMP:** Use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder`.
 
@@ -39,7 +39,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract to `commonMain`. Examples: `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BaseRadioTransportFactory`.
 
 ## 5. Dependency Catalog Aliases
-- **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`.
+- **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`. `commonMain` takes an `androidx-*` alias only where AndroidX publishes the artifact as KMP itself: `androidx-navigation3-runtime`, DataStore, Room, SQLite bundled and Paging.
 - **Compose Multiplatform:** Version catalog aliases for Compose Multiplatform artifacts use the `compose-multiplatform-*` prefix (e.g., `compose-multiplatform-material3`, `compose-multiplatform-foundation`). Never use plain `androidx.compose` dependencies in `commonMain`.
 - **Dependencies:** Always check `gradle/libs.versions.toml` before assuming a library is available.
 

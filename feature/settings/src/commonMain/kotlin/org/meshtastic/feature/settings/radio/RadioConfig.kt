@@ -23,22 +23,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.koin.compose.koinInject
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
+import org.meshtastic.core.resources.app_database_backup_no_device
+import org.meshtastic.core.resources.backup_app_database
 import org.meshtastic.core.resources.backup_restore
 import org.meshtastic.core.resources.clean_node_database_title
 import org.meshtastic.core.resources.configuration
+import org.meshtastic.core.resources.connect_radio_to_change_settings
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.device_configuration
 import org.meshtastic.core.resources.discovery_local_mesh
@@ -55,8 +62,10 @@ import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.message_device_managed
 import org.meshtastic.core.resources.module_settings
 import org.meshtastic.core.resources.nodedb_reset
+import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.reboot_into_dfu
+import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.resources.set_time
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.resources.tak_server
@@ -67,6 +76,7 @@ import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
+import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Settings
@@ -83,27 +93,55 @@ fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    databaseBackupAvailable: Boolean = true,
+    onBackupDatabase: () -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
-    val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
+    val waiting = state.responseState.isWaiting()
+    val enabled = radioActionRowsEnabled(state.connected, waiting, isManaged)
+    val readable = radioConfigRowsReadable(state.connected, state.isLocal, waiting, isManaged)
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ExpressiveSection(title = stringResource(Res.string.configuration)) {
             if (isManaged) {
                 ManagedMessage()
+            } else if (!state.connected && state.isLocal) {
+                Text(
+                    text = stringResource(Res.string.connect_radio_to_change_settings),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            RadioConfigContent(enabled, onRouteClick)
-            DeviceConfigContent(enabled, onNavigate)
-            ModuleSettingsContent(enabled, onNavigate)
+            if (state.isLocal) SetUpRadioContent(enabled, onNavigate)
+            RadioConfigContent(readable, onRouteClick)
+            DeviceConfigContent(readable, onNavigate)
+            ModuleSettingsContent(readable, onNavigate)
             AdministrationContent(enabled, onNavigate)
         }
 
         if (state.isLocal) {
-            BackupRestoreSection(isManaged, enabled, onImport, onExport)
+            BackupRestoreSection(
+                isManaged = isManaged,
+                enabled = enabled,
+                onImport = onImport,
+                onExport = onExport,
+                databaseBackupAvailable = databaseBackupAvailable,
+                onBackupDatabase = onBackupDatabase,
+                onRestoreDatabase = onRestoreDatabase,
+            )
             AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
         }
     }
 }
+
+/** Rows that open an editor: the local radio's stored snapshot stays readable while disconnected. */
+internal fun radioConfigRowsReadable(connected: Boolean, isLocal: Boolean, isWaiting: Boolean, isManaged: Boolean) =
+    (connected || isLocal) && !isWaiting && !isManaged
+
+/** Rows that act on the radio itself and need a live connection. */
+internal fun radioActionRowsEnabled(connected: Boolean, isWaiting: Boolean, isManaged: Boolean) =
+    connected && !isWaiting && !isManaged
 
 @Composable
 private fun ColumnScope.RadioConfigContent(enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
@@ -115,6 +153,24 @@ private fun ColumnScope.RadioConfigContent(enabled: Boolean, onRouteClick: (Enum
         ) {
             onRouteClick(it)
         }
+    }
+}
+
+/** The guided setup, local only: it is bound to the connected radio's address and never writes to a remote node. */
+@Composable
+private fun ColumnScope.SetUpRadioContent(
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+    nodeManager: NodeManager = koinInject(),
+) {
+    val identity by nodeManager.connectionIdentity.collectAsStateWithLifecycle()
+    ListItem(
+        text = stringResource(Res.string.radio_setup_title),
+        leadingIcon = MeshtasticIcons.Language,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        enabled = enabled && identity != null,
+    ) {
+        onNavigate(SettingsRoute.RadioSetup(identity?.address))
     }
 }
 
@@ -143,7 +199,15 @@ private fun ColumnScope.ModuleSettingsContent(enabled: Boolean, onNavigate: (Rou
 }
 
 @Composable
-private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport: () -> Unit, onExport: () -> Unit) {
+private fun BackupRestoreSection(
+    isManaged: Boolean,
+    enabled: Boolean,
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    databaseBackupAvailable: Boolean,
+    onBackupDatabase: () -> Unit,
+    onRestoreDatabase: () -> Unit,
+) {
     ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
         if (isManaged) {
             ManagedMessage()
@@ -160,6 +224,25 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
             leadingIcon = MeshtasticIcons.Upload,
             enabled = enabled,
             onClick = onExport,
+        )
+        if (!databaseBackupAvailable) {
+            Text(
+                text = stringResource(Res.string.app_database_backup_no_device),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        ListItem(
+            text = stringResource(Res.string.backup_app_database),
+            leadingIcon = MeshtasticIcons.Upload,
+            enabled = databaseBackupAvailable,
+            onClick = onBackupDatabase,
+        )
+        ListItem(
+            text = stringResource(Res.string.restore_app_database),
+            leadingIcon = MeshtasticIcons.Download,
+            enabled = databaseBackupAvailable,
+            onClick = onRestoreDatabase,
         )
     }
 }
@@ -216,8 +299,8 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
         )
 
-        // Always enabled: the Debug Panel reads app-local logs only — no radio connection,
-        // pending config response, or managed-mode restriction applies to it.
+        // Always enabled so logs stay reachable with no radio attached. Anything on this route that
+        // is NOT read-only must gate itself: it does not inherit `enabled` (see DisplayMirrorViewModel).
         ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = MeshtasticIcons.BugReport,

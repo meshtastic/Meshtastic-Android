@@ -39,6 +39,7 @@ import org.meshtastic.core.resources.loading
 import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.DeviceActions
 import org.meshtastic.feature.node.component.DeviceLinksSection
+import org.meshtastic.feature.node.component.DisplayNameSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
@@ -57,8 +58,10 @@ fun NodeDetailContent(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
+    onSaveDisplayName: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    trackedInLiveUpdate: Boolean? = null,
 ) {
     Crossfade(targetState = uiState.node != null, label = "NodeDetailContent", modifier = modifier) { isNodePresent ->
         if (isNodePresent && uiState.node != null) {
@@ -70,6 +73,8 @@ fun NodeDetailContent(
                 onAction = onAction,
                 onFirmwareSelect = onFirmwareSelect,
                 onSaveNotes = onSaveNotes,
+                onSaveDisplayName = onSaveDisplayName,
+                trackedInLiveUpdate = trackedInLiveUpdate,
             )
         } else {
             val loadingDescription = stringResource(Res.string.loading)
@@ -93,7 +98,9 @@ fun NodeDetailList(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
+    onSaveDisplayName: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
+    trackedInLiveUpdate: Boolean? = null,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -110,6 +117,8 @@ fun NodeDetailList(
                 onRequestUserInfo = {
                     onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node)))
                 },
+                hasDeviceModel = uiState.metricsState.hasDeviceModel,
+                onOpenDeviceModel = { onAction(NodeDetailAction.OpenDeviceModel(it)) },
             )
         }
         if (uiState.metricsState.deviceLinks.isNotEmpty()) {
@@ -128,8 +137,10 @@ fun NodeDetailList(
                 isLocal = uiState.metricsState.isLocal,
                 hasConversation = uiState.hasConversation,
                 airQualityHistory = uiState.metricsState.airQualityMetrics,
+                trackedInLiveUpdate = trackedInLiveUpdate,
             )
         }
+        item { DisplayNameSection(node = node, onSaveDisplayName = onSaveDisplayName) }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
         if (!uiState.metricsState.isManaged) {
             item {

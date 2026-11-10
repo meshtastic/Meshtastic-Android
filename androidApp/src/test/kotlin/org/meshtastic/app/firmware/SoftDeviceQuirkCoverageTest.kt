@@ -45,7 +45,7 @@ class SoftDeviceQuirkCoverageTest {
      * from. Present in the asset with no `softDevice` value, which makes the refusal deliberate and greppable rather
      * than an oversight. Remove an entry here once its variant lands upstream.
      */
-    private val knownUnmapped = setOf(130) // THINKNODE_M8
+    private val knownUnmapped = emptySet<Int>()
 
     private val json = Json { ignoreUnknownKeys = true }
 

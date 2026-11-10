@@ -1,6 +1,6 @@
 ---
 name: design-standards
-description: Apply the Meshtastic design standards on Android - brand colours, Material 3 tokens, MeshtasticIcons and accessibility - with the upstream `meshtastic/design` standards as the source of truth. Use this whenever you choose a colour, icon, spacing value or contrast level, and before claiming a screen matches the design.
+description: Apply the Meshtastic design standards on Android - brand colors, Material 3 tokens, MeshtasticIcons and accessibility - with the upstream `meshtastic/design` standards as the source of truth. Use this whenever you choose a color, icon, spacing value or contrast level, and before claiming a screen matches the design.
 ---
 
 # Skill: Meshtastic Design Standards
@@ -25,23 +25,25 @@ Before implementing any UI:
 The upstream standards define M3 role mappings (Section 8). In this codebase:
 - Theme is defined in `core/ui/` — the `AppTheme` composable (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/theme/Theme.kt`)
 - Use M3 tokens (`MaterialTheme.colorScheme.primary`, `.surface`, etc.) — never raw hex values
-- Dynamic color (Android 12+): on by default via `dynamicColorScheme()` (`AppTheme(dynamicColor = true)` for all flavors); the Android `actual` is gated by SDK ≥ S, while desktop/iOS return null
+- Dynamic color (Android 12+) is opt-in: the theme picker's Dynamic option stores `MODE_DYNAMIC`, and `MainActivity` passes `AppTheme(dynamicColor = theme == MODE_DYNAMIC)`. The default theme follows the system with the brand scheme. The Android `dynamicColorScheme()` actual is gated by SDK ≥ S; desktop and iOS return null.
 
 ### Brand Colors → Compose
+The M3 roles map to palette steps, not to the two brand colors directly (`Color.kt`, upstream Section 8):
+
 | Standard Name | Hex | Compose Usage |
 |---------------|-----|---------------|
-| Primary | `#2C2D3C` | `MaterialTheme.colorScheme.primary` |
-| Accent | `#67EA94` | `MaterialTheme.colorScheme.tertiary` (never as text on light bg) |
-| Green 600 | `#3FB86D` | Use for success text on light backgrounds |
-| Error | `#E05252` | `MaterialTheme.colorScheme.error` |
-| Link | `#9BA8E0` | Blue 400 — for clickable text |
+| Primary (Neutral 800) | `#2C2D3C` | `onSurface` / `onBackground` in light mode, not `colorScheme.primary` |
+| Accent (Green 500) | `#67EA94` | `colorScheme.primary` in dark mode; light `primary` is Green 700 `#2D8F52`. Never text on a light background |
+| Green 600 | `#3FB86D` | Success text on light backgrounds |
+| Error 500 | `#E05252` | Brand error for non-text indicators; `colorScheme.error` is Error 600 `#BA1A1A` light and Error 300 `#FFB4AB` dark |
+| Link | `#5C6BC0` / `#9BA8E0` | Blue 600 light, Blue 400 dark, for clickable text |
 
-> Raw palette defined in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/theme/CustomColors.kt` (e.g. `N800`, `G500`, `G600`, `E500`, `B400`) — reference the M3 token, not the raw `CustomColors` entry, in UI code.
+> Raw palette defined in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/theme/CustomColors.kt` (e.g. `N800`, `G500`, `G600`, `G700`, `E500`, `B400`); the scheme values are in `Color.kt`. Reference the M3 token, not the raw `CustomColors` entry, in UI code.
 
 ### Key Rules (Android-specific)
 - **Icons:** Use `MeshtasticIcons` (from `core/ui/icon/`), not `material.icons.Icons`
-- **Touch targets:** 44×44dp minimum (M3 default is 48dp — compliant)
-- **Typography:** Default body = 16sp. Support Dynamic Type via `MaterialTheme.typography`
+- **Touch targets:** 44×44dp minimum (M3 default is 48dp, which complies)
+- **Typography:** Default body = 16sp. Scale with the system font size (upstream asks for up to 200% without clipping) via `MaterialTheme.typography`
 - **Message bubbles:** Use `onSurface` for text color, never node identity colors
 
 ## 3. App Icons

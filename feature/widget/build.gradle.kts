@@ -35,10 +35,16 @@ android {
 dependencies {
     implementation(projects.core.common)
     implementation(projects.core.model)
+    implementation(projects.core.navigation)
     implementation(projects.core.resources)
     implementation(projects.core.repository)
+    implementation(projects.core.ui)
 
     implementation(libs.compose.multiplatform.ui) // LocalConfiguration, LocalDensity
+    implementation(libs.compose.multiplatform.foundation)
+    implementation(libs.compose.multiplatform.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.datastore.preferences) // Glance per-instance state; Glance ships it runtime-only
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.preview)
@@ -47,6 +53,7 @@ dependencies {
     implementation(libs.compose.multiplatform.resources)
     implementation(libs.kermit)
 
+    testImplementation(projects.core.testing)
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.glance.testing)
     testImplementation(libs.androidx.glance.appwidget.testing)

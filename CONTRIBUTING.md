@@ -8,7 +8,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - **Keep each change focused** — one concern per commit.
 - **Test your changes** thoroughly before submitting a pull request.
 - **Submit a pull request** (PR) with a clear description of your changes and the problem they solve.
-- If you are addressing an existing issue, please reference it in your PR (e.g., `Fixes #123`).
+- If you are addressing an existing issue, reference it in your PR (for example, `Fixes #123`).
 - First-time contributors are asked to sign the CLA — the CLA-assistant bot will prompt you on your first PR.
 
 ## Code Style
@@ -20,7 +20,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - Write clear, descriptive variable and function names.
 - Add comments where necessary, especially for complex logic.
 - Keep methods and classes focused and concise.
-- **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
+- **Strings:** Use localized strings via the **Compose Multiplatform Resource** library in `:core:resources`.
   - Do **not** use the legacy `androidApp/src/main/res/values/strings.xml`.
   - **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
   - **Schema strings:** every label and description in the protobufs field metadata is generated into
@@ -47,11 +47,12 @@ Meshtastic-Android uses [Detekt](https://detekt.dev/) for static code analysis a
 
 ### Testing
 
-Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI tests to ensure code quality and reliability.
+Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented tests to ensure code quality and reliability.
 
-- **Unit tests** are located in the `src/test/` directory of each module.
-- **Compose UI Tests (JVM)** are preferred for component testing and are also located in `src/test/` using **Robolectric**.
-- **Instrumented tests** (including full E2E UI tests) are located in `src/androidTest/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
+- **KMP module tests** live in `src/commonTest/`, with platform-specific ones in `src/jvmTest/` and `src/androidHostTest/`. `commonTest` runs on the JVM and, in modules that declare `withHostTest`, as Android host tests.
+- **Pure Android/JVM module tests** (`androidApp`, `desktopApp`, `core:barcode`, `feature:widget`, `schema-strings`) live in `src/test/`, using **Robolectric** where they need Android.
+- **Compose UI tests** use the Compose Multiplatform `runComposeUiTest` API in `commonTest` or `jvmTest`, and are preferred over instrumented tests for component testing.
+- **Instrumented tests** live in `src/androidDeviceTest/` (`core:database`, `core:model`).
 
 #### Guidelines for Testing
 
@@ -61,12 +62,12 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
   - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`) — neither `test` nor `allTests` alone is sufficient; both must pass.
   - `./gradlew kmpSmokeCompile` when touching any KMP module, to compile the non-Android targets the unit tests don't cover and assemble the device-test APKs
   - `./gradlew connectedAndroidTest` for instrumented tests
-- For UI components, write Robolectric Compose tests where possible for faster execution.
+- For UI components, write JVM Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.
 
 ## Pull Requests
 
-- Branches use conventional-commit style prefixes, e.g. `feat/<topic>`:
+- Branches use conventional-commit style prefixes, for example `feat/<topic>`:
     - `feat/` — new user-visible behavior
     - `fix/` — bug fixes
     - `chore/` — tooling, deps, CI, cleanup
@@ -76,6 +77,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
     - `refactor/` — code structure changes
     - `test/` — test additions or fixes
     - `deps/` — dependency updates
+- The branch prefix and a conventional-commit PR title set the PR's changelog label automatically.
 - Spec-driven work takes no prefix from that list: a numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form `YYYYMMDD-HHMMSS-feature-name` created by `/speckit.git.feature`. Both are valid.
 - `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.

@@ -32,6 +32,7 @@ import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.NordicDfu
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -39,24 +40,13 @@ internal const val DEFAULT_SCAN_RETRY_COUNT = 3
 internal val DEFAULT_SCAN_RETRY_DELAY: Duration = 2.seconds
 internal val DEFAULT_SCAN_TIMEOUT: Duration = 10.seconds
 
-private const val MAC_PARTS_COUNT = 6
-private const val HEX_RADIX = 16
-private const val BYTE_MASK = 0xFF
-
 /**
  * Increment the last byte of a BLE MAC address by one.
  *
  * Both ESP32 (OTA) and nRF52 (DFU) devices advertise with the original MAC + 1 after rebooting into their respective
  * firmware-update modes.
  */
-@Suppress("ReturnCount")
-internal fun calculateMacPlusOne(macAddress: String): String {
-    val parts = macAddress.split(":")
-    if (parts.size != MAC_PARTS_COUNT) return macAddress
-    val lastByte = parts[MAC_PARTS_COUNT - 1].toIntOrNull(HEX_RADIX) ?: return macAddress
-    val incremented = ((lastByte + 1) and BYTE_MASK).toString(HEX_RADIX).uppercase().padStart(2, '0')
-    return "${parts.take(MAC_PARTS_COUNT - 1).joinToString(":")}:$incremented"
-}
+internal fun calculateMacPlusOne(macAddress: String): String = NordicDfu.bootloaderAddress(macAddress)
 
 /**
  * Scan for a BLE device matching [predicate] with retry logic.

@@ -1,7 +1,7 @@
 ---
 title: Метрики ноды
 nav_order: 5
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Панели телеметрии для каждой ноды mesh-сети — состояние устройства, датчики окружающей среды, качество воздуха, качество сигнала, питание, трассировка и история местоположения.
 aliases:
   - metrics
@@ -91,14 +91,14 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 ![Показания качества воздуха с цветовой кодировкой уровня CO₂](../../assets/screenshots/node-metrics_air_quality.png)
 
-Кнопка журнала/метрик качества воздуха появляется на экране сведений о ноде **только в том случае, если нода передала телеметрию о качестве воздуха**. В режиме просмотра качества воздуха ты можешь:
+The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. В режиме просмотра качества воздуха ты можешь:
 
 - Выбрать **временной интервал** для графиков.
 - Фильтровать с помощью **кнопок метрик** — отображаются только те метрики, по которым есть данные.
 - **Обновить / запросить** последнюю телеметрию о качестве воздуха.
 - **Экспортировать в CSV** для анализа в электронных таблицах.
 
-> 💡 **Совет:** Для получения метрик качества воздуха на удалённой ноде должен быть установлен совместимый датчик. См. [Телеметрия и датчики](telemetry-and-sensors) для получения информации о поддерживаемом оборудовании.
+See [Telemetry & Sensors](telemetry-and-sensors) for supported air-quality hardware.
 
 ## Качество сигнала
 
@@ -109,11 +109,10 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 | Сигнал/шум                | Отношение сигнал/шум (SNR) (чем выше, тем лучше)                        |
 | RSSI                      | Индикатор уровня принимаемого сигнала (Rssi) (чем ближе к 0, тем лучше) |
 | Уровень собственных шумов | Местный фоновый радиочастотный шум в дБм (чем более отрицательное значение, тем тише)      |
-| Количество хопов          | Количество хопов в mesh-сети для последнего сообщения                                                         |
 
 ### Оценка качества сигнала
 
-Качество сигнала оценивается по **SNR относительно минимального уровня демодуляции активного пресета LoRa-модема**, а не по фиксированным порогам — конкретное значение SNR означает разное на разных пресетах (например, −15 дБ нормально для LongSlow, но неприемлемо для ShortFast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. В противном случае RSSI отображается только на экране. In the table, _limit_ is the preset's SNR limit.
+Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (for example, −16 dB rates Good on Long Fast but None on Short Fast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. В противном случае RSSI отображается только на экране. In the table, _limit_ is the preset's SNR limit.
 
 | Качество    | Критерии                         |
 | ----------- | -------------------------------- |
@@ -124,9 +123,9 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 См. [Понимание измерителя сигнала](signal-meter) для полного объяснения.
 
-Локальная статистика твоего подключённого радио также отображается в разделе "Качество сигнала", когда она доступна. Эти журналы включают уровень шума, счётчики трафика, счётчики ретрансляций, количество нод в сети и время работы радио. График уровня шума использует пунктирную опорную линию на уровне -85 дБм, чтобы помочь определить загруженность радиоэфира.
+Local Stats from your connected node are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and uptime. The noise floor chart uses a dashed reference line at −85 dBm to help identify a busy RF environment.
 
-- **Request** — ask the connected radio for a fresh Local Stats telemetry report
+- **Request** — ask the connected node for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
 - **Save** — export the visible Local Stats history as CSV
 
@@ -145,7 +144,7 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 Трассировка показывает путь сообщения через mesh-сеть:
 
-1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node. The app sends at most one traceroute every 30 seconds, to any node, and **Trace Route** in the node list's touch & hold menu shares that cooldown.
 2. Приложение отправляет запрос трассировки целевой ноде.
 3. Results show each hop with its SNR.
 
@@ -153,20 +152,27 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
+A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`.
+
+The history also keeps traceroutes this app didn't request:
+
+- **Observed** marks a response from this node to a request made elsewhere, such as one started from your node's own screen. It has hop counts but no round-trip time, and its points on the chart are hollow rings.
+- **Traced by** _node_ marks a traceroute that node ran to yours. It shows the inbound route with the SNR of each hop, but no return route, no round-trip time, and no map, and it stays off the chart.
+
 A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## Журнал местоположения
 
-Исторические данные о местоположении для нод, которые делятся своими координатами:
+The chart button on the **Position** row opens the node's position history: its track on a map, and a list of every position report with latitude, longitude, satellites in view, altitude, speed, heading, and timestamp. From the app bar you can:
 
-- GPS координаты
-- Высота
-- Скорость (при движении)
-- Временная метка для каждого отчёта о местоположении
+- **Export GPX** to save the track as a GPX file. Reports without a GPS fix are left out.
+- Save the list as CSV.
+- **Clear** the recorded track, after a confirmation. This can't be undone.
+- Ask a remote node for a fresh position.
 
 ## Информация об окружении
 
-Показывает, какие ноды данная нода может слышать напрямую — полезно для понимания топологии mesh-сети.
+Показывает, какие ноды данная нода может слышать напрямую — полезно для понимания топологии mesh-сети. The **Neighbor Info** row appears once that node's neighbor list has reached the app. See [Local Mesh Discovery](discovery#neighbor-info) for turning the module on.
 
 ## Метрики хоста
 

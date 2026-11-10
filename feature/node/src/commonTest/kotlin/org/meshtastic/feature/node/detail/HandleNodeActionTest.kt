@@ -165,5 +165,6 @@ class HandleNodeActionTest {
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
         snackbarManager = snackbarManager,
+        nakWatcher = testNakWatcher(),
     )
 }

@@ -20,7 +20,7 @@ import android.content.Context
 import android.os.Build
 import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionManager
-import androidx.appfunctions.metadata.AppFunctionName
+import androidx.appfunctions.AppFunctionName
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

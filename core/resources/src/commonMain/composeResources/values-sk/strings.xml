@@ -100,6 +100,7 @@
     <string name="debug_search_clear">Vymazať vyhľadávanie</string>
     <string name="debug_search_next">Ďalšia zhoda</string>
     <string name="debug_search_prev">Predošlá zhoda</string>
+    <!-- DEEP -->
     <string name="default_">Predvolené</string>
     <!-- DELETE -->
     <string name="delete">Vymazať</string>
@@ -156,6 +157,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Nutná aktualizácia firmvéru</string>
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a>.</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru.</string>
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
@@ -170,8 +172,10 @@
     <string name="hide_password">Skryť heslo</string>
     <string name="hops_away">Počet skokov</string>
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalita vzduchu v interiéri) relatívna hodnota IAQ meraná prístrojom Bosch BME680. Rozsah hodnôt 0–500.</string>
+    <string name="iaq_level_good">Dobrý</string>
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
@@ -185,6 +189,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Priamo</string>
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>
     <!-- LOCAL -->
@@ -207,6 +213,7 @@
     </plurals>
     <string name="logs">Záznamy</string>
     <string name="long_name">Dlhé Meno</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery_message">Uzol %1$s má slabú batériu (%2$d%)</string>
@@ -250,11 +257,13 @@
     <string name="message_input_label">Správa</string>
     <string name="message_status_queued">Vo fronte na odoslanie</string>
     <string name="messages">Správy</string>
+    <!-- MIRROR -->
     <string name="module_settings">Konfigurácia modulu</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_connected">Pripojený</string>
     <string name="mqtt_status_disconnected">Odpojené</string>
+    <string name="mqtt_topic_finder_level_region">Región</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/installation">Meshtastic docs</a>.</string>
     <!-- MUTE -->
@@ -339,7 +348,9 @@
     <string name="quick_chat_instant">Okamžite pošli</string>
     <string name="quick_chat_new">Nový rýchly čet</string>
     <string name="radiation">Radiácia</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfigurácia vysielača</string>
+    <string name="radio_setup_name_headline">Názov</string>
     <string name="range_test">Test dosahu</string>
     <string name="reboot">Reštartovať</string>
     <!-- REMOTE -->
@@ -454,6 +465,8 @@
     <string name="waypoint_new">Nový cieľový bod</string>
     <string name="waypoint_received">Prijatý cieľový bod: %1$s</string>
     <string name="weight">Hmotnosť</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Zlý</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Používateľské meno</string>

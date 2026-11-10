@@ -148,8 +148,8 @@ internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText
  * @property eraseRefusal Non-null when erase is shown but cannot run; the reason is displayed and the action disabled.
  * @property showBootloaderUpgrade Whether a bootloader-upgrade action is offered. Absent (not refused) when no image is
  *   mapped for the board — an unmapped board is a coverage gap, not a safety decision the user can act on.
- * @property latestBootloader The OTAFIX release the upgrade installs, shown next to the action. The installed version
- *   is unknowable here: only the mounted drive reports it.
+ * @property latestBootloader The OTAFIX release the upgrade installs, shown next to the action only while the device
+ *   reports no bootloader version; otherwise the device card shows installed against latest.
  */
 data class UsbMaintenanceGate(
     val show: Boolean = false,
@@ -180,6 +180,8 @@ data class BootloaderVersions(val installed: String?, val available: String) {
  * @param platformSupportsMaintenance Whether this platform can run the sequence at all
  *   ([FirmwareUsbManager.supportsUf2Maintenance]). Hidden rather than refused: a platform with no UF2 maintenance flow
  *   is shaped like the wrong transport, not like data the user could go and fix.
+ * @param bootloader What the running device reports, or `null` when it reports nothing. Only a bootloader known to be
+ *   at or past the latest release withdraws the upgrade.
  */
 internal fun usbMaintenanceGate(
     manifest: MaintenanceUf2Manifest,
@@ -187,6 +189,7 @@ internal fun usbMaintenanceGate(
     updateMethod: FirmwareUpdateMethod,
     hasRelease: Boolean,
     platformSupportsMaintenance: Boolean,
+    bootloader: BootloaderStatus? = null,
 ): UsbMaintenanceGate {
     val uf2Architecture = hardware.isNrf52Arc || hardware.isRp2040Arc
     if (!platformSupportsMaintenance || updateMethod !is FirmwareUpdateMethod.Usb || !uf2Architecture || !hasRelease) {
@@ -205,13 +208,32 @@ internal fun usbMaintenanceGate(
 
     // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
     // — which image gets written is decided later from the Board-ID the drive reports.
-    val showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget)
+    val showBootloaderUpgrade =
+        hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget) && bootloader?.isCurrent != true
     return UsbMaintenanceGate(
         show = true,
         eraseRefusal = eraseRefusal,
         showBootloaderUpgrade = showBootloaderUpgrade,
-        latestBootloader = manifest.otafixReleaseTag.takeIf { showBootloaderUpgrade && it.isNotBlank() },
+        latestBootloader =
+        manifest.otafixReleaseTag.takeIf { showBootloaderUpgrade && bootloader == null && it.isNotBlank() },
     )
+}
+
+/**
+ * The package a BLE bootloader upgrade would install, or `null` when none is offered: only an nRF52 node on BLE, with a
+ * release selected to reinstall, whose `DeviceMetadata.bootloader_version` reports a bootloader older than the latest.
+ * A node that reports no version gets no BLE offer; USB still serves it.
+ */
+internal fun bleBootloaderUpgradeFor(
+    manifest: MaintenanceUf2Manifest,
+    hardware: DeviceHardware,
+    updateMethod: FirmwareUpdateMethod,
+    hasRelease: Boolean,
+    bootloader: BootloaderStatus?,
+): BootloaderDfuZip? {
+    val outdated = bootloader != null && bootloader.latest != null && !bootloader.isCurrent
+    if (updateMethod !is FirmwareUpdateMethod.Ble || !hardware.isNrf52Arc || !hasRelease || !outdated) return null
+    return bootloaderDfuZipFor(manifest, hardware.effectiveTarget, hardware.softDeviceVariant)
 }
 
 /**
@@ -225,12 +247,14 @@ internal fun usbMaintenanceGate(
  *   silently ignore the file, so `null` means "use the SoftDevice-specific sketch", never "refuse".
  * @property bootloaderVersion The installed bootloader's version, from the `UF2 Bootloader` line. The running firmware
  *   cannot report it, so this drive is the only place the app learns it.
+ * @property lastFault The fault the bootloader recorded since its last drive session, from its `Last-Fault:` line.
  */
 internal data class MaintenanceVolume(
     val boardId: String,
     val softDevice: SoftDeviceVariant?,
     val factoryEraseFamily: Long? = null,
     val bootloaderVersion: String? = null,
+    val lastFault: BootloaderFault? = null,
 )
 
 /** Outcome of vetting a user-picked volume before anything is written to it. */
@@ -264,6 +288,7 @@ internal suspend fun inspectMaintenanceVolume(treeUri: CommonUri, fileHandler: F
             softDevice = parseUf2SoftDevice(info),
             factoryEraseFamily = parseUf2FactoryEraseFamily(info),
             bootloaderVersion = parseUf2BootloaderVersion(info),
+            lastFault = parseUf2LastFault(info),
         ),
     )
 }
@@ -335,6 +360,7 @@ internal fun chooseMaintenanceImage(
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(manifest, volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
-            ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
+        otafixUf2ForBoardId(manifest, volume.boardId, hardware.effectiveTarget)?.let {
+            MaintenanceImageChoice.Resolved(it)
+        } ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

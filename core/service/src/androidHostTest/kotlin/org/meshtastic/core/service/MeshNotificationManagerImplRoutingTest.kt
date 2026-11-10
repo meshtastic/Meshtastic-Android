@@ -39,6 +39,9 @@ import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.notificationId
+import org.meshtastic.core.testing.FakeLiveUpdatePrefs
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
+import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DuplicatedPublicKey
@@ -381,6 +384,9 @@ class MeshNotificationManagerImplRoutingTest {
         radioConfigRepository = lazy { error("Not used in this test") },
         radioOperationLock = RadioOperationLock(),
         firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+        liveUpdatePrefs = FakeLiveUpdatePrefs(),
+        meshPrefs = FakeMeshPrefs(),
+        localeUnitsProvider = FakeLocaleUnitsProvider(),
         scope = scope.asServiceScope(),
     )
 

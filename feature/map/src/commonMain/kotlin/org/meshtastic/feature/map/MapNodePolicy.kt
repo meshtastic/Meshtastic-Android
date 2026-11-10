@@ -17,8 +17,7 @@
 package org.meshtastic.feature.map
 
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.ONLINE_WINDOW_SECONDS
-import org.meshtastic.proto.Config
+import org.meshtastic.core.model.passesMapFilter
 
 /**
  * Which nodes a map shows, and which of them draws on top.
@@ -50,9 +49,9 @@ object MapNodePolicy {
      * Pure so it can be tested without a renderer: the filter rules are the part users notice when they go wrong, and
      * they should not need a GPU to verify.
      *
-     * Your own node is exempt from both filters. You are always on your own map, whether or not you have favourited
+     * Your own node is exempt from both filters. You are always on your own map, whether or not you have favorited
      * yourself and whether or not you have heard from yourself lately — the Google map has always done this, and the
-     * MapLibre map's own copy of these rules did not, so filtering to favourites there hid you from yourself.
+     * MapLibre map's own copy of these rules did not, so filtering to favorites there hid you from yourself.
      *
      * Nodes without a fix are dropped up front. They cannot be drawn, and leaving them in drags a camera that fits to
      * these bounds toward (0, 0) — which is how the OSMdroid map used to open in the Atlantic.
@@ -62,63 +61,10 @@ object MapNodePolicy {
         filterState: BaseMapViewModel.MapFilterState,
         nowSeconds: Long,
         myNodeNum: Int?,
-    ): List<Node> = nodes.filter { node ->
-        node.validPosition != null && (node.num == myNodeNum || node.passesFilters(filterState, nowSeconds))
+    ): List<Node> {
+        val filter = filterState.toNodeMapFilter()
+        return nodes.filter { node ->
+            node.validPosition != null && (node.num == myNodeNum || node.passesMapFilter(filter, nowSeconds))
+        }
     }
-
-    /**
-     * One node against every filter.
-     *
-     * The node-level rules match the node list's query exactly, because they carry its labels: direct means `hopsAway
-     * == 0` — a node whose distance was never measured (-1) is not direct — and unknown means a node that has not sent
-     * a short name.
-     *
-     * [BaseMapViewModel.MapFilterState.showIgnored] is the one place the map deliberately differs. The node list
-     * segregates (`isIgnored == showIgnored`, so switching it on shows *only* ignored nodes); here it reads literally
-     * and adds them, because a map of nothing but ignored nodes is not a view anyone asked for.
-     */
-    private fun Node.passesFilters(filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): Boolean {
-        val secondsSinceHeard = nowSeconds - lastHeard
-        return passesIdentityFilters(filterState) &&
-            passesSecurityFilters(filterState) &&
-            passesReachabilityFilters(filterState, secondsSinceHeard)
-    }
-
-    /** Who the node is: favourited, ignored, its role, and whether its name has arrived yet. */
-    private fun Node.passesIdentityFilters(filterState: BaseMapViewModel.MapFilterState): Boolean =
-        (!filterState.onlyFavorites || isFavorite) &&
-            (!isIgnored || filterState.showIgnored) &&
-            user.role !in filterState.excludedRoles &&
-            (filterState.includeUnknown || user.short_name.isNotEmpty())
-
-    /** How the node is reachable: online, hop count, bearer, and how recently it was heard. */
-    private fun Node.passesReachabilityFilters(
-        filterState: BaseMapViewModel.MapFilterState,
-        secondsSinceHeard: Long,
-    ): Boolean {
-        val cutoff = filterState.lastHeardFilter.seconds
-        return (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
-            (!filterState.onlyDirect || (hopsAway == 0 && !viaMqtt)) &&
-            (!filterState.excludeMqtt || !viaMqtt) &&
-            (cutoff == LastHeardFilter.Any.seconds || secondsSinceHeard <= cutoff)
-    }
-
-    /**
-     * The two security filters (design#149).
-     *
-     * Signing reads the raw flag rather than the version-gated indicator: the filter answers "has the radio verified
-     * this node's signature", which is what the badge beside it claims. Encrypted excludes a stored key that stopped
-     * matching — a mismatch is not a key you can safely encrypt to.
-     */
-    private fun Node.passesSecurityFilters(filterState: BaseMapViewModel.MapFilterState): Boolean =
-        (!filterState.onlySigned || signsPackets) && (!filterState.onlyEncrypted || (hasPKC && !mismatchKey))
 }
-
-/**
- * Resolves persisted role names back to roles, dropping any the current protobufs no longer define.
- *
- * Names rather than ordinals, and forgiving of names it does not know: a set written by a newer build (or a role
- * removed from the protos) must not throw on the way back in.
- */
-fun decodeExcludedRoles(names: Set<String>): Set<Config.DeviceConfig.Role> =
-    names.mapNotNullTo(mutableSetOf()) { name -> Config.DeviceConfig.Role.entries.firstOrNull { it.name == name } }

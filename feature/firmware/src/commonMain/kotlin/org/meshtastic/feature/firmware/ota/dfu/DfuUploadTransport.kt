@@ -69,6 +69,9 @@ enum class DfuUploadPhase {
     /** Start request sent; the bootloader is erasing flash and will not accept data until it has finished. */
     PREPARING,
 
-    /** The bootloader accepted the start; firmware bytes are streaming and progress callbacks follow. */
+    /** The bootloader accepted the start, so the old application is gone; init parameters follow before streaming. */
+    STARTED,
+
+    /** Firmware bytes are streaming and progress callbacks follow. */
     STREAMING,
 }

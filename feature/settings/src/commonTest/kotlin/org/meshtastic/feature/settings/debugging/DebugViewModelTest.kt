@@ -27,6 +27,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -71,21 +72,22 @@ class DebugViewModelTest {
         meshLogPrefs.setRetentionDays(7)
         meshLogPrefs.setLoggingEnabled(true)
 
-        viewModel =
-            DebugViewModel(
-                meshLogRepository = meshLogRepository,
-                nodeRepository = nodeRepository,
-                meshLogPrefs = meshLogPrefs,
-                setMeshLogSettingsUseCase =
-                SetMeshLogSettingsUseCase(
-                    meshLogRepository,
-                    meshLogPrefs,
-                    FakeApplicationCoroutineScope(testDispatcher),
-                ),
-                alertManager = alertManager,
-                dispatchers = dispatchers,
-            )
+        viewModel = newViewModel(dispatchers)
     }
+
+    private fun newViewModel(dispatchers: CoroutineDispatchers) = DebugViewModel(
+        meshLogRepository = meshLogRepository,
+        nodeRepository = nodeRepository,
+        meshLogPrefs = meshLogPrefs,
+        setMeshLogSettingsUseCase =
+        SetMeshLogSettingsUseCase(
+            meshLogRepository,
+            meshLogPrefs,
+            FakeApplicationCoroutineScope(testDispatcher),
+        ),
+        alertManager = alertManager,
+        dispatchers = dispatchers,
+    )
 
     @AfterTest
     fun tearDown() {
@@ -185,6 +187,62 @@ class DebugViewModelTest {
         runCurrent()
         viewModel.searchState.value.searchText shouldBe ""
         viewModel.searchState.value.hasMatches shouldBe false
+    }
+
+    @Test
+    fun `typing a search query runs the match on the default dispatcher`() = runTest {
+        val defaultDispatcher = StandardTestDispatcher(testScheduler)
+        val vm = newViewModel(CoroutineDispatchers(testDispatcher, testDispatcher, defaultDispatcher))
+        vm.updateFilteredLogs(listOf(DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Apple")))
+
+        vm.searchManager.setSearchText("Apple")
+
+        vm.searchState.value.searchText shouldBe "Apple"
+        vm.searchState.value.hasMatches shouldBe false
+
+        runCurrent()
+
+        vm.searchState.value.allMatches.size shouldBe 1
+        vm.viewModelScope.cancel()
+    }
+
+    @Test
+    fun `a search result for text that has since changed is dropped`() {
+        val manager = LogSearchManager()
+        manager.setSearchText("App")
+        manager.setSearchText("Apple")
+
+        manager.applyMatches("App", listOf(LogSearchManager.SearchMatch(0, 0, 2, "message")))
+
+        manager.searchState.value.searchText shouldBe "Apple"
+        manager.searchState.value.hasMatches shouldBe false
+    }
+
+    @Test
+    fun `a new query clears the previous matches until its own search finishes`() {
+        val manager = LogSearchManager()
+        manager.setSearchText("App")
+        manager.applyMatches("App", listOf(LogSearchManager.SearchMatch(0, 0, 2, "message")))
+        manager.goToNextMatch()
+
+        manager.setSearchText("Apple")
+
+        manager.searchState.value.searchText shouldBe "Apple"
+        manager.searchState.value.hasMatches shouldBe false
+        manager.searchState.value.allMatches shouldBe emptyList()
+        manager.searchState.value.currentMatchIndex shouldBe -1
+    }
+
+    @Test
+    fun `setting the same query again keeps its matches`() {
+        val manager = LogSearchManager()
+        manager.setSearchText("App")
+        manager.applyMatches("App", listOf(LogSearchManager.SearchMatch(0, 0, 2, "message")))
+
+        manager.setSearchText("App")
+
+        manager.searchState.value.hasMatches shouldBe true
+        manager.searchState.value.allMatches.size shouldBe 1
     }
 
     @Test

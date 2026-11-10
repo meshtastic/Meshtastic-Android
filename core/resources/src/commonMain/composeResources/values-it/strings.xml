@@ -297,6 +297,7 @@
     <string name="debug_store_logs_title">Memorizza i log della mesh</string>
     <string name="debug_tab_app_logs">Registri app</string>
     <string name="debug_tab_packets">Pacchetti</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Un link sta chiedendo a questa app di connettersi al dispositivo in %1$s. Continua solo se ti fidi della provenienza del link.</string>
     <string name="deep_link_connect_title">Connettersi a questo dispositivo?</string>
     <string name="deep_link_disconnect_message">Un link sta chiedendo a questa app di disconnettersi dal tuo dispositivo. Continua solo se ti fidi della provenienza del link.</string>
@@ -461,7 +462,6 @@
     <string name="doc_keywords_telemetry">telemetria,sensore,temperatura,umidità,pressione,alimentazione</string>
     <string name="doc_keywords_translate">traduzione,crowdin,localizzazione,lingua,i18n,contribuire</string>
     <string name="doc_keywords_units">unità,lingua,metrico,imperiale,temperatura,distanza</string>
-    <string name="doc_keywords_widget">widget,schermata home,statistiche locali,glance,batteria,utilizzo</string>
     <string name="doc_search_placeholder">Cerca nella documentazione…</string>
     <string name="doc_section_developer">Guida per sviluppatori</string>
     <string name="doc_section_user">Guida utente</string>
@@ -549,9 +549,10 @@
     <string name="firmware_edition">Edizione Firmware</string>
     <string name="firmware_event_ended_banner">%1$s è terminato. Torna al firmware Meshtastic standard per ripristinare le funzioni normali.</string>
     <string name="firmware_event_ended_button">Aggiorna il firmware</string>
+    <string name="firmware_gate_title">Aggiornamento del firmware necessario</string>
+    <string name="firmware_gate_update">Aggiorna il firmware</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all'installazione del firmware</a>.</string>
     <string name="firmware_recovery_banner">Completa l'aggiornamento di %1$s</string>
-    <string name="firmware_recovery_ble_failed">Impossibile completare l'aggiornamento via Bluetooth. Il bootloader di serie di questo dispositivo non è in grado di completare in modo affidabile un aggiornamento interrotto via etere. Collegalo a un computer con un cavo USB e riprogrammalo con lo strumento DFU seriale del produttore (per esempio adafruit-nrfutil) per recuperarlo.</string>
     <string name="firmware_recovery_button">Riprendi l'aggiornamento del firmware</string>
     <string name="firmware_recovery_dismiss">Ignora il ripristino del firmware</string>
     <string name="firmware_recovery_explanation">Questo dispositivo è in modalità bootloader a causa di un aggiornamento firmware non completato. Tienilo nelle vicinanze e verrà riprogrammato per completare l'aggiornamento.</string>
@@ -614,7 +615,6 @@
     <string name="firmware_update_save_dfu_file">Salva il file .uf2 sull'unità DFU del dispositivo.</string>
     <string name="firmware_update_searching_device">Ricerca del dispositivo OTA sulla rete...</string>
     <string name="firmware_update_select_file">Seleziona File Locale</string>
-    <string name="firmware_update_slow_bootloader_hint">Gli aggiornamenti sono lenti con il bootloader di questo dispositivo. Installare il bootloader OTAFIX consente aggiornamenti BLE molto più veloci.</string>
     <string name="firmware_update_source_local">Origine: file locale</string>
     <string name="firmware_update_stable">Stabile</string>
     <string name="firmware_update_starting_dfu">Avvio modalità DFU...</string>
@@ -630,7 +630,6 @@
     <string name="firmware_update_unsupported_transport">Gli aggiornamenti firmware non sono supportati su questa connessione per questo dispositivo. Connettiti in un altro modo (ad esempio Bluetooth) per aggiornare.</string>
     <string name="firmware_update_unsupported_update_method">I file firmware locali non sono supportati per questo metodo di aggiornamento.</string>
     <string name="firmware_update_uploading">Caricamento del firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s di solito viene fornito con un bootloader che non supporta gli aggiornamenti OTA. Potrebbe essere necessario flashare tramite USB un bootloader con funzione OTA prima di flashare tramite OTA.</string>
     <string name="firmware_update_usb_failed">Aggiornamento USB non riuscito</string>
     <string name="firmware_update_usb_instruction_text">Il dispositivo è stato riavviato in modalità DFU e dovrebbe apparire come un disco USB (ad es. RAK4631).\n\nQuando il selettore di file si apre, selezionare la cartella principale (root) dell'unità per salvare il file con il firmware.</string>
     <string name="firmware_update_usb_instruction_title">Selezionare il Disco DFU USB</string>
@@ -648,7 +647,6 @@
     <string name="format_italic">Corsivo</string>
     <string name="format_link">Link</string>
     <string name="format_strikethrough">Barrato</string>
-    <string name="free_memory">Memoria libera</string>
     <string name="free_memory_description">Memoria di sistema disponibile in byte</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
@@ -693,8 +691,10 @@
     <string name="i_agree">Sono d’accordo.</string>
     <string name="i_agree_to_share_my_location">Ho letto e accetto quanto sopra. Acconsento volontariamente alla trasmissione non crittografata dei dati del mio nodo tramite MQTT</string>
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualità dell'aria interna) scala relativa del valore della qualità dell'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
+    <string name="iaq_level_good">Buono</string>
     <string name="icon_meanings">Significato delle icone</string>
     <string name="ignore">Ignora</string>
     <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati?</string>
@@ -747,6 +747,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamatore con licenza (Ham)</string>
     <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Diretto</string>
+    <string name="live_update_distance">distante %1$s</string>
     <!-- LOAD -->
     <string name="load">Carico</string>
     <string name="load_15_min">Carico 15m</string>
@@ -820,6 +823,7 @@
     <string name="logs">Registri</string>
     <string name="long_name">Nome Lungo</string>
     <string name="longitude">Longitudine</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Livello batteria basso</string>
@@ -896,6 +900,9 @@
     <string name="mesh_beacon_target_default">Predefinito</string>
     <string name="mesh_beacon_target_remove">Rimuovi destinazione</string>
     <string name="mesh_beacon_targets">Destinazioni della trasmissione</string>
+    <string name="mesh_hud_cardinal_east">E</string>
+    <string name="mesh_hud_cardinal_north">N</string>
+    <string name="mesh_hud_cardinal_south">S</string>
     <string name="mesh_map_location">Posizione sulla mappa della Mesh</string>
     <string name="mesh_map_location_description">Abilita l'indicatore blu per il tuo telefono sulla mappa della mesh.</string>
     <!-- MESHTASTIC -->
@@ -933,6 +940,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Tempo minimo di risveglio</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Indietro</string>
+    <string name="mirror_key_ok">Ok</string>
     <string name="modem_preset">Preset</string>
     <string name="module_settings">Impostazioni moduli</string>
     <string name="modules_already_unlocked">Moduli già sbloccati</string>
@@ -958,6 +968,9 @@
     <string name="mqtt_status_reconnecting">Riconnessione…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Riconnessione (tentativo %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Prova la connessione</string>
+    <string name="mqtt_topic_finder_connecting">Connessione…</string>
+    <string name="mqtt_topic_finder_level_country">Paese</string>
+    <string name="mqtt_topic_finder_level_region">Regione</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="must_update">È necessario aggiornare questa applicazione nell'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <!-- MUTE -->
@@ -1057,7 +1070,6 @@
     <string name="nodes_empty_searching_title">Ricerca dei nodi</string>
     <string name="nodes_queued_for_deletion">%1$d nodi in coda per l'eliminazione:</string>
     <string name="nodes_unheard_remove">Elimina</string>
-    <string name="noise_floor">Rumore di fondo</string>
     <string name="noise_floor_definition">Il rumore RF di fondo misurato dal ricevitore radio. Valori più bassi indicano di solito un ambiente di ricezione più silenzioso; −85 dBm è un riferimento di ambiente trafficato, non una soglia di guasto.</string>
     <string name="noise_floor_no_reading">Rumore di fondo: nessuna lettura</string>
     <string name="none">Nessuno (disattiva)</string>
@@ -1187,7 +1199,9 @@
     <string name="quick_chat_new">Nuova chat rapida</string>
     <string name="quick_chat_show">Mostra menu della chat rapida</string>
     <string name="radiation">Radiazione</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Impostazioni dispositivo</string>
+    <string name="radio_setup_name_headline">Nome semplificato</string>
     <string name="rainfall_1h">Pioggia (1h)</string>
     <string name="rainfall_24h">Pioggia (24h)</string>
     <string name="range_test">Test Distanza</string>
@@ -1343,8 +1357,6 @@
     <string name="share_to">Condividi con…</string>
     <string name="share_your_location_in_real_time">Condividi la tua posizione in tempo reale e mantieni il tuo gruppo coordinato con le funzionalità GPS integrate.</string>
     <string name="short_name">Nome Breve</string>
-    <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
-    <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Significato Chiave Di Crittografia</string>
     <string name="show_iaq_legend">Mostra legenda qualità dell'aria</string>
@@ -1411,6 +1423,7 @@
     <string name="tak_server">Server TAK</string>
     <string name="tak_server_enabled">Abilita server TAK locale</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">Rigenera</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Stato</string>
     <string name="tak_server_status_off">Disattivato</string>
@@ -1545,6 +1558,8 @@
     <string name="waypoint_new">Nuovo waypoint</string>
     <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
     <string name="weight">Peso</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Scarso</string>
     <!-- WIFI -->
     <string name="wifi_devices">Provisioning Wi-Fi per mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Reti disponibili</string>

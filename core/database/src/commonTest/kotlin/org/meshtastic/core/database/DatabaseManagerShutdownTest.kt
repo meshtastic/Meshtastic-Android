@@ -113,11 +113,10 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
         manager.switchActiveDatabase("addrA")
         val workStarted = CompletableDeferred<Unit>()
         val releaseWork = CompletableDeferred<Unit>()
-        val blockedWork =
-            manager.launchManagerWorkForTest {
-                workStarted.complete(Unit)
-                withContext(NonCancellable) { releaseWork.await() }
-            }
+        val blockedWork = manager.launchManagerWorkForTest {
+            workStarted.complete(Unit)
+            withContext(NonCancellable) { releaseWork.await() }
+        }
         workStarted.await()
 
         val closeJob = launch { manager.close() }
@@ -228,42 +227,6 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
     }
 
     @Test
-    fun timeoutRecoveryCannotReopenWhileClosing() = runTest(testDispatcher) {
-        manager.switchActiveDatabase("addrA")
-        val callbackStarted = CompletableDeferred<Unit>()
-        val releaseFailure = CompletableDeferred<Unit>()
-        val writerJob = async {
-            try {
-                manager.withDb<Unit> {
-                    callbackStarted.complete(Unit)
-                    releaseFailure.await()
-                    throw roomPoolTimeout()
-                }
-                null
-            } catch (failure: IllegalStateException) {
-                failure
-            }
-        }
-        callbackStarted.await()
-        val buildsBeforeClose = manager.builtDatabases.size
-        val closeJob = launch { manager.close() }
-        runCurrent()
-        assertFalse(manager.debugAcceptingWrites())
-
-        releaseFailure.complete(Unit)
-        val failure = writerJob.await()
-        closeJob.join()
-
-        assertNotNull(failure)
-        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
-        assertEquals(
-            buildsBeforeClose,
-            manager.builtDatabases.size,
-            "closing must suppress timeout recovery reopen",
-        )
-    }
-
-    @Test
     fun closeBeforeCurrentDbInitializationDoesNotBuildDefaultPool() = runTest(testDispatcher) {
         assertTrue(manager.builtDatabases.isEmpty())
 
@@ -304,43 +267,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
     }
 
     @Test
-    fun timeoutRecoveryReopensTheLazyDefaultPool() = runTest(testDispatcher) {
-        val original = manager.currentDb.value
-        manager.switchActiveDatabase("addrA")
-        manager.switchActiveDatabase(null)
-        assertTrue(manager.currentDb.value === original, "the default pool should be cached before recovery")
-        var invocationCount = 0
-
-        val result = runCatching {
-            manager.withDb<Unit> {
-                invocationCount += 1
-                throw roomPoolTimeout()
-            }
-        }
-
-        assertNotNull(result.exceptionOrNull())
-        assertEquals(1, invocationCount, "default-pool recovery must not replay the callback")
-        val reopened = manager.currentDb.value
-        assertTrue(reopened !== original, "the lazily registered default pool should be replaceable")
-
-        var laterCallDb: MeshtasticDatabase? = null
-        manager.withDb<Unit> { database -> laterCallDb = database }
-        assertTrue(laterCallDb === reopened)
-
-        manager.switchActiveDatabase("addrA")
-        manager.switchActiveDatabase(null)
-        assertTrue(
-            manager.currentDb.value === reopened,
-            "switching back to default must not republish the failed pool",
-        )
-
-        manager.close()
-        assertEquals(1, manager.closedDatabases.count { it === original })
-        assertEquals(1, manager.closedDatabases.count { it === reopened })
-    }
-
-    @Test
-    fun flowPoolTimeoutReopensAndRelatchesWithoutRepeatingTheFailedPool() = runTest(testDispatcher) {
+    fun flowStallReopensAndRelatchesWithoutRepeatingTheFailedPool() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
         val original = manager.currentDb.value
         var originalQueries = 0
@@ -351,7 +278,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
                     if (database === original) {
                         flow<String> {
                             originalQueries += 1
-                            throw roomPoolTimeout()
+                            throw stalledFlow()
                         }
                     } else {
                         flowOf("recovered")
@@ -429,13 +356,13 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
                         flow {
                             successfulEmissions += 1
                             emit(Unit)
-                            throw roomPoolTimeout()
+                            throw stalledFlow()
                         }
                     }
                     .first { false }
             }
 
-        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertTrue(failure.message.orEmpty().contains("no first emission"))
         assertEquals(MAX_FLOW_POOL_RECOVERIES_PER_WINDOW + 1, successfulEmissions)
         assertEquals(
             buildsBeforeRecovery + MAX_FLOW_POOL_RECOVERIES_PER_WINDOW,
@@ -458,7 +385,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
                     .observeCurrentDb {
                         flow {
                             emit(Unit)
-                            throw roomPoolTimeout()
+                            throw stalledFlow()
                         }
                     }
                     .first { false }
@@ -472,7 +399,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
         val value =
             manager
                 .observeCurrentDb { database ->
-                    if (database === wedged) flow<String> { throw roomPoolTimeout() } else flowOf("recovered")
+                    if (database === wedged) flow<String> { throw stalledFlow() } else flowOf("recovered")
                 }
                 .first()
 
@@ -494,7 +421,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
             val wedged = manager.currentDb.value
             manager
                 .observeCurrentDb { database ->
-                    if (database === wedged) flow<String> { throw roomPoolTimeout() } else flowOf("ok")
+                    if (database === wedged) flow<String> { throw stalledFlow() } else flowOf("ok")
                 }
                 .first()
         }
@@ -524,13 +451,13 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
                     .observeCurrentDb<Unit> {
                         flow {
                             queryAttempts += 1
-                            throw roomPoolTimeout()
+                            throw stalledFlow()
                         }
                     }
                     .first()
             }
 
-        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertTrue(failure.message.orEmpty().contains("no first emission"))
         assertEquals(MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES + 1, queryAttempts)
         assertEquals(
             buildsBeforeRecovery + MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES,
@@ -540,7 +467,7 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
     }
 
     @Test
-    fun flowPoolTimeoutRetainsItsOriginalFailureAfterShutdownClearsCurrentPublication() = runTest(testDispatcher) {
+    fun flowStallRetainsItsOriginalFailureAfterShutdownClearsCurrentPublication() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
         val buildsBeforeFailure = manager.builtDatabases.size
 
@@ -550,13 +477,13 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
                     .observeCurrentDb<Unit> {
                         flow {
                             manager.close()
-                            throw roomPoolTimeout()
+                            throw stalledFlow()
                         }
                     }
                     .first()
             }
 
-        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertTrue(failure.message.orEmpty().contains("no first emission"))
         assertEquals(buildsBeforeFailure, manager.builtDatabases.size, "shutdown must suppress Flow pool recovery")
     }
 
@@ -581,13 +508,16 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
     }
 
     @Test
-    fun timeoutRecoveryFailureDoesNotMaskOriginalCallbackFailure() = runTest(testDispatcher) {
+    fun flowRecoveryFailureDoesNotMaskOriginalStall() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
         manager.failNextBuildWith = IllegalStateException("forced reopen failure")
 
-        val failure = assertFailsWith<IllegalStateException> { manager.withDb<Unit> { throw roomPoolTimeout() } }
+        val failure =
+            assertFailsWith<DbFlowStalledException> {
+                manager.observeCurrentDb<Unit> { flow { throw stalledFlow() } }.first()
+            }
 
-        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertTrue(failure.message.orEmpty().contains("no first emission"))
         assertNull(manager.failNextBuildWith, "the reopen attempt should consume its injected failure")
     }
 
@@ -595,17 +525,24 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
     fun detachedReopenedPoolIsClosedDuringOrderlyShutdown() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
         val original = manager.currentDb.value
-        var invocationCount = 0
+        var originalQueries = 0
 
-        val firstResult = runCatching {
-            manager.withDb<Unit> {
-                invocationCount += 1
-                throw roomPoolTimeout()
-            }
-        }
+        val value =
+            manager
+                .observeCurrentDb { database ->
+                    if (database === original) {
+                        flow<String> {
+                            originalQueries += 1
+                            throw stalledFlow()
+                        }
+                    } else {
+                        flowOf("recovered")
+                    }
+                }
+                .first()
 
-        assertNotNull(firstResult.exceptionOrNull())
-        assertEquals(1, invocationCount, "pool recovery must not replay a callback that already started")
+        assertEquals("recovered", value)
+        assertEquals(1, originalQueries, "recovery must not replay the query on the stalled pool")
         val reopened = manager.currentDb.value
         assertTrue(reopened !== original)
         assertEquals(

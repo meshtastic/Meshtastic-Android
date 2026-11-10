@@ -25,17 +25,14 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.xmlpull.v1.XmlPullParser
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
- * Pins what the merged google-flavor manifest tells Google Play about Android Auto. Play reviews the app against the
- * car quality guidelines from this declaration alone, and it rejected Open and Production builds that also declared an
- * androidx.car.app service ("Category not permitted"), so notification messaging must stay the only thing declared.
+ * Pins that the merged google-flavor manifest declares no Android Auto support. Play puts every track through the car
+ * quality review on the `com.google.android.gms.car.application` entry alone, and it does not accept Meshtastic in an
+ * Auto category, so any declaration gets the update rejected.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [34])
@@ -44,29 +41,15 @@ class AndroidAutoManifestTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `the app declares Android Auto notification messaging and nothing else`() {
+    fun `the app declares no Android Auto support`() {
         val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-        val descriptor = info.metaData.getInt(CAR_APPLICATION)
-        assertNotEquals(0, descriptor, "$CAR_APPLICATION must point at @xml/automotive_app_desc")
-
-        var root: String? = null
-        val uses = mutableListOf<String?>()
-        val parser = context.resources.getXml(descriptor)
-        while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.eventType != XmlPullParser.START_TAG) continue
-            when (parser.depth) {
-                1 -> root = parser.name
-                2 -> if (parser.name == "uses") uses += parser.getAttributeValue(null, "name")
-            }
-        }
-        assertEquals("automotiveApp", root)
-        assertEquals(listOf<String?>("notification"), uses)
+        assertFalse(info.metaData?.containsKey(CAR_APPLICATION) == true, "$CAR_APPLICATION puts the app in Auto review")
     }
 
     @Test
     fun `no Android for Cars App Library service is declared`() {
         val carAppServices = context.packageManager.queryIntentServices(Intent(CAR_APP_SERVICE), 0)
-        assertTrue(carAppServices.isEmpty(), "a templated car app service is Closed-track only and fails Play review")
+        assertTrue(carAppServices.isEmpty(), "a car app service puts the app in Auto review")
     }
 
     @Test

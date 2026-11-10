@@ -19,11 +19,16 @@ package org.meshtastic.app.map.tiles
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.Tile
 import com.google.android.gms.maps.model.TileProvider
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.meshtastic.feature.map.tiles.RadarSmoothRequest
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.smoothedRadarTileSize
 import org.meshtastic.feature.map.tiles.tileUrl
 import java.io.IOException
+import kotlin.coroutines.EmptyCoroutineContext
 
 private val logger = Logger.withTag("RasterTileProvider")
 
@@ -41,7 +46,32 @@ class RasterTileProvider(private val spec: RasterTileSpec, private val client: O
         // NO_TILE means "there is definitively nothing here" and is cached as such; a zoom outside the source's range
         // is exactly that, whereas a failed fetch below is not and must stay retryable.
         val url = spec.tileUrl(x, y, zoom) ?: return TileProvider.NO_TILE
-        return fetch(url)
+        // A smoothed tile that fails stays a failure: falling back to the plain tile would leave a blocky one cached
+        // beside its smooth neighbors.
+        val smooth = RadarSmoothRequest.from(url)
+        return if (smooth == null) fetch(url) else smoothed(smooth)
+    }
+
+    // Google calls this off the main thread, so blocking on the render is the same wait the plain fetch below has.
+    private fun smoothed(request: RadarSmoothRequest): Tile? = runBlocking {
+        try {
+            request.render(EmptyCoroutineContext, ::fetchBytes)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            logger.d(e) { "Radar tile render failed" }
+            null
+        }
+    }
+        ?.let { Tile(smoothedRadarTileSize(spec.tileSize), smoothedRadarTileSize(spec.tileSize), it) }
+
+    private fun fetchBytes(url: String): ByteArray? = try {
+        client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+            if (response.isSuccessful) response.body.bytes() else null
+        }
+    } catch (e: IOException) {
+        logger.d(e) { "Radar cell fetch failed" }
+        null
     }
 
     private fun fetch(url: String): Tile? = try {

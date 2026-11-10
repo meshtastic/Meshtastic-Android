@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -57,6 +56,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
@@ -121,7 +121,7 @@ fun NodeItemCompact(
     tempInFahrenheit: Boolean = false,
     deviceImageUrl: String? = null,
 ) {
-    val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
+    val longName = thatNode.effectiveLongName.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
     val isThisNode = remember(thisNode, thatNode) { thisNode?.num == thatNode.num }
@@ -186,19 +186,19 @@ fun NodeItemCompact(
                 onLongClick = onLongClick,
             )
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            // Column 1: Chip + Battery (fixed width)
+            // Column 1: Chip + Battery
             Column(
-                modifier = Modifier.widthIn(min = 90.dp),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 NodeChip(node = thatNode)
                 if (showPower && (thatNode.batteryLevel ?: 0) > 0) {
-                    MaterialBatteryInfo(
+                    MaterialBatteryCompactInfo(
                         level = thatNode.batteryLevel ?: 0,
                         voltage = thatNode.voltage ?: 0f,
                         contentColor = contentColor,
@@ -268,7 +268,7 @@ private fun CompactNameRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         NodeSecurityIcons(thatNode, iconSize = 18.dp, isThisNode = isThisNode)
         Text(

@@ -51,6 +51,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = ModuleConfig.Builder().also { wb -> wb.remote_hardware = it }.build()

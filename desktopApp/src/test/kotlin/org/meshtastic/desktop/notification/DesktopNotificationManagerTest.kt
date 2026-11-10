@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.desktop.DesktopNotificationManager
 import kotlin.test.Test
@@ -64,6 +65,65 @@ class DesktopNotificationManagerTest {
 
         assertFalse(dispatched)
         assertEquals(0, sender.sent.size, "Message notification should have been suppressed")
+    }
+
+    @Test
+    fun `reaction notifications are suppressed when reactions are off and messages stay on`() = runTest {
+        val sender = FakeNativeSender()
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setReactionsEnabled(false) }, sender)
+
+        val reaction =
+            manager.dispatch(Notification(title = "A", message = "x", category = Notification.Category.Reaction))
+        val message =
+            manager.dispatch(Notification(title = "B", message = "y", category = Notification.Category.Message))
+
+        assertFalse(reaction)
+        assertTrue(message)
+        assertEquals(listOf("B"), sender.sent.map { it.title })
+    }
+
+    @Test
+    fun `waypoint notifications are suppressed when new waypoints are off`() = runTest {
+        val sender = FakeNativeSender()
+        val manager =
+            DesktopNotificationManager(FakeNotificationPrefs().apply { setNewWaypointsEnabled(false) }, sender)
+
+        val dispatched =
+            manager.dispatch(Notification(title = "W", message = "pin", category = Notification.Category.Waypoint))
+
+        assertFalse(dispatched)
+        assertEquals(0, sender.sent.size)
+    }
+
+    /** Prefs whose StateFlows still hold the pre-load default (true) while the persisted values are false. */
+    private class NotYetLoadedPrefs(private val fake: FakeNotificationPrefs = FakeNotificationPrefs()) :
+        NotificationPrefs by fake {
+        override suspend fun loadReactionsEnabled() = false
+
+        override suspend fun loadNewWaypointsEnabled() = false
+    }
+
+    @Test
+    fun `stored false suppresses the first reaction and waypoint dispatch before the StateFlows load`() = runTest {
+        val sender = FakeNativeSender()
+        val prefs = NotYetLoadedPrefs()
+        assertTrue(prefs.reactionsEnabled.value)
+        assertTrue(prefs.newWaypointsEnabled.value)
+        val manager = DesktopNotificationManager(prefs, sender)
+
+        assertFalse(manager.dispatch(Notification("A", "x", category = Notification.Category.Reaction)))
+        assertFalse(manager.dispatch(Notification("B", "y", category = Notification.Category.Waypoint)))
+        assertEquals(0, sender.sent.size)
+    }
+
+    @Test
+    fun `reaction and waypoint notifications dispatch by default`() = runTest {
+        val sender = FakeNativeSender()
+        val manager = DesktopNotificationManager(FakeNotificationPrefs(), sender)
+
+        assertTrue(manager.dispatch(Notification("A", "x", category = Notification.Category.Reaction)))
+        assertTrue(manager.dispatch(Notification("B", "y", category = Notification.Category.Waypoint)))
+        assertEquals(2, sender.sent.size)
     }
 
     @Test

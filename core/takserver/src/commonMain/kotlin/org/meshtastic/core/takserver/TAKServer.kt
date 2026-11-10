@@ -19,13 +19,14 @@ package org.meshtastic.core.takserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.TakCertificateStore
 
 /**
  * Platform-agnostic contract for the Meshtastic TAK server.
  *
- * The production implementation on Android / JVM runs a TLS (mTLS) listener on port [DEFAULT_TAK_PORT] (8089) using the
- * bundled server identity. This matches the Meshtastic-Apple (iOS) implementation so that a single exported `.zip` data
- * package is valid for ATAK on Android AND iTAK on iOS without re-configuration.
+ * The production implementation on Android / JVM runs a TLS (mTLS) listener on port [DEFAULT_TAK_PORT] (8089) using a
+ * per-install server identity issued by a private CA on first start (see [TakCertificateProvider]). The exported `.zip`
+ * data package carries that install's client identity and CA, so it is only valid against this install.
  *
  * The interface deliberately hides the platform socket / TLS primitives so that `commonMain` code
  * (`TAKServerManagerImpl`, DI, tests) can depend on it without pulling `javax.net.ssl.*` into the common source set.
@@ -36,8 +37,17 @@ interface TAKServer {
     val isSupported: Boolean
         get() = true
 
+    /** The per-install certificates this listener authenticates with. */
+    val certificates: TakCertificateProvider
+
     /** Observable count of currently-connected TAK clients (ATAK/iTAK). */
     val connectionCount: StateFlow<Int>
+
+    /**
+     * Observable count of connections rejected since the listener started because the client did not present this
+     * install's certificate. Surfaces the "ATAK still has the old data package" migration state in the UI.
+     */
+    val rejectedConnectionCount: StateFlow<Int>
 
     /** Callback invoked on the IO dispatcher for every inbound CoT message from a client. */
     var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)?
@@ -67,6 +77,10 @@ interface TAKServer {
 
 /**
  * Platform factory for [TAKServer]. The JVM/Android implementation lives in `jvmAndroidMain` and uses JSSE
- * (`SSLServerSocket`) with the bundled `server.p12` identity and `ca.pem` client trust store.
+ * (`SSLServerSocket`) with the per-install identity kept in [certificateStore].
  */
-expect fun createTAKServer(dispatchers: CoroutineDispatchers, port: Int = DEFAULT_TAK_PORT): TAKServer
+expect fun createTAKServer(
+    dispatchers: CoroutineDispatchers,
+    certificateStore: TakCertificateStore,
+    port: Int = DEFAULT_TAK_PORT,
+): TAKServer

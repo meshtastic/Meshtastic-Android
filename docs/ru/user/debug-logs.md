@@ -1,7 +1,7 @@
 ---
 title: Отладочные журналы
 nav_order: 22
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Просматривайте и экспортируйте отладочные журналы приложения из самого приложения, а также прикрепляйте их к задаче на GitHub для помощи в диагностике ошибок — без необходимости в adb.
 aliases:
   - debug-logs
@@ -22,10 +22,19 @@ If you're filing an issue, export your logs (see [Exporting](#exporting)) and at
 
 Панель отладки содержит две вкладки:
 
-- **Пакеты** — декодированный трафик mesh-сети, который ваше радио отправило и получило (сообщения уровня протокола). Полезно для диагностики поведения mesh-сети и маршрутизации.
+- **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). Полезно для диагностики поведения mesh-сети и маршрутизации.
 - **Журналы приложения** — собственный диагностический журнал приложения (Android _logcat_), включая предупреждения, ошибки и трассировки стека самого приложения. Обычно именно это требуется для отчёта об ошибке.
 
 Каждая вкладка имеет собственную кнопку **экспорта** и создаёт отдельный файл, поэтому вы можете сохранить тот, который нужен — или сразу оба.
+
+## Viewing packets
+
+The **Packets** tab lists each logged packet; tap one to expand it, including its decoded payload where there is one.
+
+- **Search** — type in **Search in logs…** to highlight matches, and step between them with the arrows.
+- **Filters** — add your own text filters, or pick from **Preset Filters**: your own node ID, the broadcast address `!ffffffff`, `decoded`, today's date, and each port name. The match toggle switches between matching any filter and matching all of them.
+- **Settings** — the gear icon shows **Store mesh logs**, which turns writing packets to the log on or off, and **MeshLog retention period**, from one hour to a year, or **Never delete logs**.
+- **Clear Logs** — the delete icon removes every stored packet, after you confirm.
 
 ## Просмотр журналов приложения
 
@@ -52,4 +61,4 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 ## Связанные темы
 
 - [Справка и встроенная документация](help-and-docs) — чтение этой документации офлайн внутри приложения
-- [Подключения](connections) — если проблема в первую очередь связана с подключением к вашему радио
+- [Connections](connections) — if the problem is getting connected to your node in the first place

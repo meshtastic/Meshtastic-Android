@@ -321,6 +321,7 @@
     <string name="debug_store_logs_title">Salvesta võrgusõlme logiid</string>
     <string name="debug_tab_app_logs">Rakenduse logi</string>
     <string name="debug_tab_packets">Paketid</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Link palub rakendusel luua ühendus seadmega aadressil %1$s. Jätka ainult siis, kui sa usaldad lingi päritolu.</string>
     <string name="deep_link_connect_title">Kas ühendada selle seadmega?</string>
     <string name="deep_link_disconnect_message">Link palub sellel rakendusel seadmest lahti ühendada. Jätka ainult siis, kui usaldad lingi allikat.</string>
@@ -486,7 +487,6 @@
     <string name="doc_keywords_telemetry">telemeetria,andur,temperatuur,niiskus,rõhk,võimsus</string>
     <string name="doc_keywords_translate">tõlkimine,rahvahulk,lokaliseerimine,keel,i18n,panusta</string>
     <string name="doc_keywords_units">ühikud,lokaat,meetriline,imperial,temperatuur,vahemaa</string>
-    <string name="doc_keywords_widget">vidin,avakuva,kohalik statistika,vaade,aku,kasutus</string>
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
     <string name="doc_section_user">Kasutusjuhend</string>
@@ -591,6 +591,8 @@
     <string name="firmware_edition">Püsivara versioon</string>
     <string name="firmware_event_ended_banner">%1$s on lõppenud. Tavapäraste funktsioonide taastamiseks naaske standardse Meshtastic püsivara juurde.</string>
     <string name="firmware_event_ended_button">Värskenda püsivara</string>
+    <string name="firmware_gate_title">Püsivara värskendus on vajalik</string>
+    <string name="firmware_gate_update">Värskenda püsivara</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Kustutusfail kopeeriti, kuid seade ei alustanud kustutamist. Midagi pole veel muutunud. Eemaldage seade vooluvõrgust, vajutage kaks korda lähtestamisnuppu ja proovige uuesti.</string>
     <string name="firmware_maintenance_copy_failed">Faili ei õnnestunud seadme kettale kopeerida. Veendu, et ketas on endiselt ühendatud ja proovi uuesti.</string>
     <string name="firmware_maintenance_data_unavailable">Kustutatavate piltide loend pole praegu saadaval. Kontrolli oma ühendust ja proovi uuesti või kasuta veebipõhist paigaldust aadressil flasher.meshtastic.org.</string>
@@ -602,12 +604,10 @@
     <string name="firmware_maintenance_unknown_softdevice">See rakendus ei saa kinnitada, millist sinihamba protokolli see seade kasutab, seega pole selle kustutamine ohutu. Kasuta selle asemel veebipõhist uuendust aadressil flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">See seade ei toeta rakenduse sisest kustutamist.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Uuenda alglaadurit</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">See paigaldab seadmesse %1$s uuendatud alglaaduri, mis muudab tulevased Bluetoothi ​​värskendused palju kiiremaks. Püsivara paigaldatakse pärast uuesti.\n\nÄrge ühendage seadet selle töötamise ajal lahti.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Kas uuendada alglaadurit?</string>
     <string name="firmware_maintenance_wrong_destination">See asukoht ei ole seadme uuendusketas, seega ei kirjutatud seadmesse midagi. Valige eemaldatav ketas, mis kuvatakse, kui seade on uuendusrežiimis.</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
     <string name="firmware_recovery_banner">Lõpeta värskendamine: %1$s</string>
-    <string name="firmware_recovery_ble_failed">Sinihamba ​​kaudu värskendust ei õnnestunud lõpule viia. Selle seadme alglaadur ei suuda katkenud värskendust õhu kaudu usaldusväärselt lõpule viia. Ühenda see USB kaudu arvutiga ja püsivarauuenda see uuesti tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil) abil, et seade taastada.</string>
     <string name="firmware_recovery_button">Jätka püsivara värskendamist</string>
     <string name="firmware_recovery_dismiss">Keela püsivara taastamine</string>
     <string name="firmware_recovery_explanation">See seade on püsivara värskenduse tõttu alglaaduri režiimis, mis ei ole lõppenud. Hoidke seda läheduses ja see püsivarauuendatakse uuesti värskenduse lõpuleviimiseks.</string>
@@ -662,7 +662,6 @@
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
     <string name="firmware_update_preparing_flash">Seadme ettevalmistamine: välkmälu kustutamine. See võib võtta kuni minuti...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul tuleb tootja alglaaduri .zip-fail paigaldada jadapordi DFU-tööriistaga, näiteks adafruit-nrfutil – selle .zip-faili kopeerimine seadme kettale ei toimi. Teise võimalusena ühendage seade USB kaudu ja kasutage selle rakenduse alglaaduri uuendust.</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_release_notes">Väljalaske märkmed</string>
     <string name="firmware_update_requires_bin">%1$s nõuab sihtmärgile vastavat .bin faili.</string>
@@ -674,7 +673,6 @@
     <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme DFU-kettale.</string>
     <string name="firmware_update_searching_device">Otsin võrgust OTA seadet...</string>
     <string name="firmware_update_select_file">Vali kohalik fail</string>
-    <string name="firmware_update_slow_bootloader_hint">Seadme alglaaduri värskendused on aeglased. OTAFIX alglaaduri püsivarauuendus võimaldab palju kiiremaid BLE värskendusi.</string>
     <string name="firmware_update_source_local">Allikas: kohalik fail</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
@@ -691,7 +689,6 @@
     <string name="firmware_update_unsupported_transport">Selle seadme püsivara värskendus ei toetata üle selle ühenduse. Värskendamiseks loo ühendus muul viisil (nt sinihamba ​​kaudu).</string>
     <string name="firmware_update_unsupported_update_method">See värskendusmeetod ei toeta kohalikke püsivara faile.</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
     <string name="firmware_update_usb_instruction_text">Seade on taaskäivitatud DFU režiimis ja kuvatakse USB kettana (nt RAK4631).\n\nKui failivalija avaneb, vali püsivara faili salvestamiseks selle ketta juurkaust.</string>
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
@@ -713,7 +710,6 @@
     <string name="format_italic">Italic</string>
     <string name="format_link">Ühendus</string>
     <string name="format_strikethrough">Läbikriipsutus</string>
-    <string name="free_memory">Vaba mälumaht</string>
     <string name="free_memory_description">Saadaolev süsteemimälu baitides</string>
     <string name="freq">Sagedus</string>
     <string name="gas_resistance">Gaasi surve</string>
@@ -759,8 +755,11 @@
     <string name="i_agree">Nõustun.</string>
     <string name="i_agree_to_share_my_location">Olen ülaltoodu läbi lugenud ja sellest aru saanud. Annan vabatahtlikult nõusoleku oma sõlmeandmete krüpteerimata edastamiseks MQTT kaudu</string>
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Siseõhu kvaliteet (IAQ) on suhtelise skaala väärtus, näiteks mõõtes Bosch BME680 abil. Väärtuste vahemik 0–500.</string>
+    <string name="iaq_level_excellent">Suurepärane</string>
+    <string name="iaq_level_good">Hea</string>
     <string name="icon_meanings">Ikooni tähendused</string>
     <string name="ignore">Eira</string>
     <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>
@@ -823,6 +822,10 @@
     <string name="licensed_mode_enable_title">Litsentsitud (ERAU) režiimi lubamine?</string>
     <string name="licensed_mode_enable_warning">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – ja see püsivara ei saa seda allkirjastada, seega ei saa teised sõlmed kontrollida, kas see pärineb sinult. See ei ühildu Meshtasticu vaikevõrguga ja vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
     <string name="licensed_mode_enable_warning_signed">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – kuid see on digitaalselt allkirjastatud, võimaldades teistel sõlmedel kontrollida, kas see pärineb sinult. Sõlme number võib üks kord muutuda, et see vastaks identiteedivõtmele, seega võivad lemmikud, sõnumiajalugu, kaughaldus ja teised sõlmed seda esialgu uuena käsitleda; sina vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Otsene</string>
+    <string name="live_update_distance">%1$s kaugusel</string>
+    <string name="live_update_unread">%1$d lugemata</string>
     <!-- LOAD -->
     <string name="load">Lae</string>
     <string name="load_15_min">Lae 15 min</string>
@@ -899,6 +902,7 @@
     <string name="logs">Logi kirjet</string>
     <string name="long_name">Täis nimi</string>
     <string name="longitude">Pikkuskraad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Madal akutase</string>
@@ -1045,6 +1049,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Minimaalne ärkveloleku aeg</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Tagasi</string>
+    <string name="mirror_key_ok">Olgu</string>
     <string name="modem_preset">Eelseadistused</string>
     <string name="module_settings">Mooduli sätted</string>
     <string name="modules_already_unlocked">Moodulid juba avatud</string>
@@ -1074,6 +1081,8 @@
     <string name="mqtt_status_reconnecting">Taas ühendan…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Ühendan uuesti (katse %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Test ühendus</string>
+    <string name="mqtt_topic_finder_connecting">Ühendan…</string>
+    <string name="mqtt_topic_finder_level_region">Regioon</string>
     <string name="must_set_region">Pead valima regiooni!</string>
     <string name="must_update">Pead seda rakendust rakenduste poes (või Github) värskendama. See on liiga vana selle raadio püsivara jaoks. Loe selle kohta lisateavet meie <a href="https://meshtastic.org/docs/software/android/installation"> dokumentatsioonist </a>.</string>
     <!-- MUTE -->
@@ -1179,7 +1188,6 @@
     <string name="nodes_empty_searching_title">Otsin võrgusõlmi</string>
     <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="nodes_unheard_remove">Eemalda</string>
-    <string name="noise_floor">Müratase</string>
     <string name="noise_floor_definition">Raadiovastuvõtja poolt mõõdetud RF taustamüra. Madalamad väärtused näitavad tavaliselt vaiksemat vastuvõtukeskkonda; -85 dBm on võrdluspunkt, mitte tõsise rikke lävi.</string>
     <string name="noise_floor_no_reading">Müratase: Näitu pole</string>
     <string name="none">Puudub (pole kasutatud)</string>
@@ -1327,7 +1335,9 @@
     <string name="quick_chat_new">Uus kiirvestlus</string>
     <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
     <string name="radiation">Radiatsioon</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Raadio sätted</string>
+    <string name="radio_setup_name_headline">Kasutajasõbralik nimi</string>
     <string name="rainfall_1h">Vihm (1h)</string>
     <string name="rainfall_24h">Vihm (24h)</string>
     <string name="range_test">Ulatustest</string>
@@ -1494,8 +1504,6 @@
     <string name="share_to">Jaga…</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="short_name">Lühi nimi</string>
-    <string name="should_update">Uusimate paranduste ja funktsioonide kasutamiseks värskendage oma sõlme püsivara.\n\nUusim stabiilne püsivara versioon: %1$s</string>
-    <string name="should_update_firmware">Soovitatav püsivara värskendamine.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
     <string name="show_full_message_timestamps">Kuva täieliku sõnumi ajatemplid</string>
@@ -1725,6 +1733,9 @@
     <string name="weight">Kaal</string>
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Halb</string>
+    <string name="widget_packets_received">Kätte saadud</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>

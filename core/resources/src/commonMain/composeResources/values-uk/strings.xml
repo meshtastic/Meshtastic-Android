@@ -220,6 +220,7 @@
     <string name="debug_store_logs_title">Сховище для логування</string>
     <string name="debug_tab_app_logs">Журнали програми</string>
     <string name="debug_tab_packets">Пакетів</string>
+    <!-- DEEP -->
     <string name="default_">За замовчуванням</string>
     <!-- DELETE -->
     <string name="delete">Видалити</string>
@@ -361,6 +362,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Прошивка</string>
     <string name="firmware_edition">Тип прошивки</string>
+    <string name="firmware_gate_title">Потрібне оновлення прошивки</string>
     <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Для отримання додаткової інформації дивіться <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш посібник із встановлення мікропрограми</a>.</string>
     <string name="firmware_too_old">Потрібне оновлення прошивки.</string>
     <string name="firmware_update_almost_there">Майже готово...</string>
@@ -409,7 +411,6 @@
     <string name="firmware_update_unknown_hardware">Невідома модель обладнання: %1$d</string>
     <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_uploading">Завантаження прошивки...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s зазвичай постачається із завантажувачем, який не підтримує оновлення OTA. Вам може знадобитися завантажувач з можливістю оновлень OTA через USB перед прошиванням OTA.</string>
     <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні "Зберегти як", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_usb_instruction_title">Оберіть USB DFU накопичувач</string>
     <string name="firmware_update_validating">Перевірка прошивки...</string>
@@ -425,7 +426,6 @@
     <string name="format_italic">Курсив</string>
     <string name="format_link">Посилання</string>
     <string name="format_strikethrough">Закреслений</string>
-    <string name="free_memory">Вільна пам'ять</string>
     <string name="free_memory_description">Доступно системної пам'яті в байтах</string>
     <string name="freq">Част</string>
     <string name="gas_resistance">Опір газового сенсора</string>
@@ -450,8 +450,10 @@
     <string name="i_agree">Погоджуюся.</string>
     <string name="i_agree_to_share_my_location">Я прочитав і розумію, текст вище. Я добровільно даю згоду на незашифровану передачу даних мого вузла через MQTT</string>
     <string name="i_know_what_i_m_doing">Я знаю, що роблю.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Якість повітря в приміщенні) відносна шкала IAQ за вимірюваннями Bosch BME680. Діапазон значень: 0–500.</string>
+    <string name="iaq_level_good">Хороший</string>
     <string name="icon_meanings">Значення іконок</string>
     <string name="ignore">Ігнорувати</string>
     <string name="ignore_add">Додати '%1$s' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
@@ -494,6 +496,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Ліцензований радіоаматор (Ham)</string>
     <string name="licensed_amateur_radio_text">Включення цієї опції вимикає шифрування і не сумісне зі стандартною мережею Meshtastic.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Прямий</string>
+    <string name="live_update_distance">%1$s від вас</string>
     <!-- LOAD -->
     <string name="load">Завантажити</string>
     <string name="load_15_min">Навантаження 15 хвилин</string>
@@ -541,6 +546,7 @@
     <string name="logs">Журнали подій</string>
     <string name="long_name">Довга назва</string>
     <string name="longitude">Довгота</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Низький заряд батареї</string>
@@ -616,6 +622,9 @@
     <string name="micrograms_per_cubic_meter">мкг/м³</string>
     <string name="min">Мінімум</string>
     <string name="minimum_wake_time_seconds">Мінімальний час в робочому режимі</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_ok">Гаразд</string>
     <string name="modem_preset">Пресети</string>
     <string name="module_settings">Налаштування модуля</string>
     <string name="modules_already_unlocked">Модулі вже розблоковано</string>
@@ -640,6 +649,8 @@
     <string name="mqtt_status_reconnecting">Роз'єднання…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Роз'єднання (спроба %1$d) - %2$s</string>
     <string name="mqtt_test_connection">Перевірка зʼєднання</string>
+    <string name="mqtt_topic_finder_connecting">З'єднання…</string>
+    <string name="mqtt_topic_finder_level_region">Регіон</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
     <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
     <!-- MUTE -->
@@ -835,7 +846,9 @@
     <string name="quick_chat_new">Новий швидкий чат</string>
     <string name="quick_chat_show">Показати меню швидкого чату</string>
     <string name="radiation">Радіація</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Налаштування пристрою</string>
+    <string name="radio_setup_name_headline">Дружня назва</string>
     <string name="rainfall_1h">Дощ (1 год)</string>
     <string name="rainfall_24h">Дощ (24 год)</string>
     <string name="range_test">Тест дальності</string>
@@ -970,8 +983,6 @@
     <string name="share_to">Поділитися з…</string>
     <string name="share_your_location_in_real_time">Діліться своїм місцезнаходженням у реальному часі та координуйте групу завдяки вбудованим функціям GPS.</string>
     <string name="short_name">Коротка назва</string>
-    <string name="should_update">Щоб скористатися найновішими виправленнями помилок та функціями, оновіть прошивку вашого вузла.\n\nОстання стабільна версія прошивки: %1$s</string>
-    <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Значення ключа шифрування</string>
     <string name="show_layer">Показати шар</string>
@@ -1010,6 +1021,7 @@
     <string name="system_settings">Системі налаштування</string>
     <!-- TAK -->
     <string name="tak_server">Сервер TAK</string>
+    <string name="tak_server_regenerate_certs_confirm">Перегенерувати</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1111,6 +1123,8 @@
     <string name="waypoint_new">Новий мітка</string>
     <string name="waypoint_received">Отримано точку маршруту: %1$s</string>
     <string name="weight">Вага</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Поганий</string>
     <!-- WIFI -->
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Доступні мережі</string>

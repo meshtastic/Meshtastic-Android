@@ -3551,7 +3551,7 @@ class NodeManagerImplTest {
 
             // Session A is superseded by session B, which reports the capability and installs unheard nodes.
             sessionASuperseded = true
-            nodeManager.setFirmwareVersion("9.9.9", sessionB)
+            nodeManager.setFirmwareVersion("2.8.1", sessionB)
             val unheard = listOf(0x11, 0x22)
             unheard.forEach { num ->
                 nodeManager.installNodeInfo(

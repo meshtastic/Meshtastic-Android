@@ -16,6 +16,7 @@
  */
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
@@ -37,6 +38,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
+            implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
@@ -48,6 +50,8 @@ kotlin {
             implementation(projects.feature.mapTerrain)
 
             implementation(libs.kotlinx.collections.immutable)
+            // The radar smoothing fetches NOAA's cells through the app's shared client.
+            implementation(libs.ktor.client.core)
             // The KML conversion cache lives on disk; Okio is how common code reaches it.
             implementation(libs.okio)
             // Imported layers can name an icon image by URL; Coil fetches and decodes it.

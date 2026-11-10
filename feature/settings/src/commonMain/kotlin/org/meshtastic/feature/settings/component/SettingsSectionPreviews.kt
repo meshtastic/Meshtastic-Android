@@ -34,6 +34,10 @@ fun NotificationSectionPreview() {
                 onToggleNodeEvents = {},
                 lowBatteryEnabled = false,
                 onToggleLowBattery = {},
+                reactionsEnabled = true,
+                onToggleReactions = {},
+                newWaypointsEnabled = true,
+                onToggleNewWaypoints = {},
             )
         }
     }

@@ -18,6 +18,7 @@ package org.meshtastic.core.data.ai
 
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 
@@ -38,8 +39,8 @@ class FuzzyNameResolver(
         val nodes = nodeRepository.nodeDBbyNum.value
         val candidates =
             nodes.values
-                .filter { it.user.long_name.isNotBlank() }
-                .map { NameCandidate(it.user.long_name, it.num, it.user.id) }
+                .filter { it.effectiveLongName.isNotBlank() }
+                .map { NameCandidate(it.effectiveLongName, it.num, it.user.id) }
 
         return matchName(query, candidates)
     }
@@ -87,12 +88,13 @@ class FuzzyNameResolver(
     private fun matchName(query: String, candidates: List<NameCandidate>): NodeNameResult {
         if (candidates.isEmpty()) return NodeNameResult.NotFound
 
-        // Exact match first (case-insensitive)
-        candidates
-            .firstOrNull { it.name.equals(query, ignoreCase = true) }
-            ?.let {
-                return NodeNameResult.Found(it.nodeNum, it.userId)
-            }
+        // Exact match first (case-insensitive). A display name can repeat another node's name, so a shared one is
+        // ambiguous rather than whichever node the map yields first.
+        val exact = candidates.filter { it.name.equals(query, ignoreCase = true) }.distinctBy { it.nodeNum }
+        if (exact.isNotEmpty()) {
+            return exact.singleOrNull()?.let { NodeNameResult.Found(it.nodeNum, it.userId) }
+                ?: NodeNameResult.Ambiguous(exact.map { it.name })
+        }
 
         // Fuzzy match using longest common substring
         val minScore = (query.length * MATCH_THRESHOLD).toInt().coerceAtLeast(1)

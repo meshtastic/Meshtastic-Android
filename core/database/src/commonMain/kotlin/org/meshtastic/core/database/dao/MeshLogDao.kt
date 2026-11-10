@@ -66,6 +66,16 @@ interface MeshLogDao {
     @Query(LOGS_FROM_QUERY)
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
+    /** Retrieves [MeshLog]s on 'port_num' (PortNum) from any node except [excludeFromNum]. */
+    @Query(
+        """
+        SELECT * FROM log
+        WHERE port_num = :portNum AND from_num != :excludeFromNum
+        ORDER BY received_date DESC LIMIT :maxItem
+        """,
+    )
+    fun getLogsOnPort(portNum: Int, excludeFromNum: Int, maxItem: Int): Flow<List<MeshLog>>
+
     @Insert suspend fun insert(log: MeshLog)
 
     /**
@@ -122,8 +132,7 @@ interface MeshLogDao {
           AND (:portNum = -1 OR port_num = :portNum)
           AND (
             :beforeReceivedDate IS NULL
-            OR received_date < :beforeReceivedDate
-            OR (received_date = :beforeReceivedDate AND uuid < :beforeUuid)
+            OR (received_date, uuid) < (:beforeReceivedDate, :beforeUuid)
           )
         ORDER BY received_date DESC, uuid DESC
         LIMIT :pageSize

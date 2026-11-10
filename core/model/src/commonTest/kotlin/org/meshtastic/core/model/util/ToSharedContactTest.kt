@@ -17,6 +17,7 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -50,6 +51,15 @@ class ToSharedContactTest {
     @Test
     fun `a contact already verified in person stays verified when relayed`() {
         assertTrue(node(manuallyVerified = true).toSharedContact(isOwnContact = false).manually_verified)
+    }
+
+    @Test
+    fun `a local display name never reaches the shared contact`() {
+        val shared = node().copy(displayName = "Secret").toSharedContact()
+
+        assertEquals("Seven", shared.user?.long_name)
+        assertFalse(SharedContact.ADAPTER.encode(shared).decodeToString().contains("Secret"))
+        assertFalse(shared.getSharedContactUrl().toString().contains("Secret"))
     }
 
     @Test

@@ -16,7 +16,11 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
@@ -67,5 +71,13 @@ class CustomMapLayersSheetTest {
         setContent { sheet(layer(isVisible = false)) }
 
         onNodeWithTag(layerOpacityTestTag("file:///layers/trail.kml")).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the sheet composes inside a vertically scrolling host`() = runComposeUiTest {
+        // Both layers sheets scroll as one container; a lazy list in here would throw on the unbounded height.
+        setContent { Column(Modifier.verticalScroll(rememberScrollState())) { sheet(layer()) } }
+
+        onNodeWithTag(layerOpacityTestTag("file:///layers/trail.kml")).assertIsDisplayed()
     }
 }

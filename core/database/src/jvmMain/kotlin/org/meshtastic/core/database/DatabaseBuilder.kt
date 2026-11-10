@@ -63,6 +63,9 @@ actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase
 /** Returns the JVM/Desktop directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path = desktopDataDir().toPath()
 
+/** Returns the JVM/Desktop path of the main database file for [dbName]. */
+actual fun getDatabaseFile(dbName: String): Path = File(desktopDataDir(), "$dbName.db").absolutePath.toPath()
+
 /** Deletes the database and its Room-associated files on JVM. */
 actual fun deleteDatabase(dbName: String) {
     val dir = desktopDataDir()

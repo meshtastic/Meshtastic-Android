@@ -22,6 +22,7 @@ import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -118,7 +119,7 @@ class AiFunctionProviderImpl(
         val totalCount = nodeRepository.totalNodeCount.first()
         val ourNode = nodeRepository.ourNodeInfo.value
         val batteryLevel = ourNode?.batteryLevel?.takeIf { it in 1..MAX_BATTERY_LEVEL }
-        val nodeName = ourNode?.user?.long_name?.takeIf { it.isNotBlank() }
+        val nodeName = ourNode?.effectiveLongName?.takeIf { it.isNotBlank() }
 
         MeshStatusResult(
             connectionState = connectionState.name,
@@ -141,7 +142,7 @@ class AiFunctionProviderImpl(
                 nodeMap.values.map { node ->
                     NodeSummary(
                         id = NodeAddress.numToDefaultId(node.num),
-                        name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
+                        name = node.effectiveLongName.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                         batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
                         lastHeard = node.lastHeard.toLong() * TimeConstants.MS_PER_SEC,
                         isOnline = node.isOnline,
@@ -194,7 +195,7 @@ class AiFunctionProviderImpl(
                     firmwareVersion = ourNode.metadata?.firmware_version ?: "Unknown",
                     batteryLevel = ourNode.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
                     chargingStatus = "UNKNOWN",
-                    deviceName = ourNode.user.long_name.takeIf { it.isNotBlank() },
+                    deviceName = ourNode.effectiveLongName.takeIf { it.isNotBlank() },
                     isActive = serviceRepository.connectionState.value == ConnectionState.Connected,
                 )
             GetDeviceStatusResult.Success(deviceStatus)
@@ -236,7 +237,7 @@ class AiFunctionProviderImpl(
                 NodeDetails(
                     id = NodeAddress.numToDefaultId(node.num),
                     userId = node.user.id,
-                    name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
+                    name = node.effectiveLongName.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                     batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
                     voltage = node.deviceMetrics.voltage,
                     hardwareModel = node.metadata?.hw_model?.name ?: "Unknown",
@@ -367,7 +368,7 @@ class AiFunctionProviderImpl(
                 val channelSet = radioConfigRepository.channelSetFlow.first()
                 val summaries = messages.map { msg ->
                     MessageSummary(
-                        senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
+                        senderName = msg.node.effectiveLongName.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
                         text = msg.text,
                         contactName = resolveContactDisplayName(msg, channelSet),
                         receivedTime = msg.receivedTime,
@@ -407,7 +408,7 @@ class AiFunctionProviderImpl(
                     } else {
                         val userId = lastPacket.from ?: ""
                         val node = nodeMap.values.find { it.user.id == userId }
-                        node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
+                        node?.effectiveLongName?.takeIf { it.isNotBlank() } ?: "Unknown"
                     }
 
                 ContactUnread(

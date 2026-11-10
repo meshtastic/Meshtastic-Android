@@ -41,12 +41,18 @@ data class MetricsState(
     val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
+    /** Responses from this node to traces our radio sent without this app asking. */
+    val tracerouteObserved: List<MeshLog> = emptyList(),
+    /** Traceroute requests this node sent to us, each carrying its inbound route. */
+    val tracerouteTracedBy: List<MeshLog> = emptyList(),
     val neighborInfoRequests: List<MeshLog> = emptyList(),
     val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     /** msh.to vendor/marketplace links for this device's hardware, region-filtered and sorted (vendor first). */
     val deviceLinks: List<DeviceLink> = emptyList(),
+    /** Whether the flasher serves a 3D model for [deviceHardware]'s hero illustration. */
+    val hasDeviceModel: Boolean = false,
     val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
@@ -63,7 +69,8 @@ data class MetricsState(
 
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
 
-    fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
+    fun hasTracerouteLogs() =
+        tracerouteRequests.isNotEmpty() || tracerouteObserved.isNotEmpty() || tracerouteTracedBy.isNotEmpty()
 
     fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
 

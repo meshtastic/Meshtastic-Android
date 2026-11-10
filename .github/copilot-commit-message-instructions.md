@@ -13,7 +13,10 @@ You are an expert Git maintainer enforcing Conventional Commits.
    - `style` (formatting, missing semi colons, etc; no production code change)
    - `refactor` (refactoring production code, e.g. KMP migration, extracting to commonMain)
    - `test` (adding missing tests, refactoring tests; no production code change)
-   - `chore` (updating grunt tasks etc; no production code change)
+   - `build` (Gradle, build-logic or toolchain changes)
+   - `ci` (GitHub workflows and CI scripts)
+   - `perf` (a production change that only improves performance)
+   - `chore` (dependencies, tooling and cleanup; no production code change)
 3. **Scope:** Use the module or logical component as the scope (e.g., `ui`, `navigation`, `ble`, `firmware`, `deps`, `ai`).
 4. **Subject line:** 
    - Use the imperative, present tense: "change" not "changed" nor "changes".

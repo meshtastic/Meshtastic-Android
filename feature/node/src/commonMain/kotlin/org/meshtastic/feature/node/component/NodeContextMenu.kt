@@ -25,34 +25,58 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
+import org.meshtastic.core.resources.edit_name
 import org.meshtastic.core.resources.ignore
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.message
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.set_display_name
+import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.trace_route
+import org.meshtastic.core.resources.traceroute_available_in
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
+import org.meshtastic.core.ui.icon.CenterFocusStrong
+import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
+import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Route
+import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
+import org.meshtastic.feature.node.model.canDirectMessage
+
+/** Mute is `toggle_muted_node` sent to our own node, so our firmware, not the muted node's, must support it. */
+internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true
 
 /**
- * Shared context menu for node actions (favorite, mute, message, trace route, ignore, remove).
+ * Shared context menu for node actions (message, display name, favorite, mute, trace route, compass, mesh view, ignore,
+ * remove). Message then display name lead on every client, and platform-only items sit before ignore (design#171).
  *
  * Used by both Android and Desktop adaptive node list screens.
  */
@@ -60,22 +84,44 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 fun NodeContextMenu(
     expanded: Boolean,
     node: Node,
+    ourNode: Node?,
     onFavorite: () -> Unit,
     onMute: () -> Unit,
     onMessage: () -> Unit,
     onTraceRoute: () -> Unit,
+    lastTracerouteTime: Long?,
     onIgnore: () -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
+    onOpenMeshView: () -> Unit = {},
+    onOpenCompass: () -> Unit = {},
+    onSetDisplayName: () -> Unit = {},
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            MessageMenuItem(node, onMessage, onDismiss)
+            MenuItem(
+                MeshtasticIcons.Edit,
+                stringResource(Res.string.set_display_name),
+                onSetDisplayName,
+                onDismiss,
+            )
             FavoriteMenuItem(node, onFavorite, onDismiss)
-            if (node.capabilities.canMuteNode) {
+            if (canMuteFrom(ourNode)) {
                 MuteMenuItem(node, onMute, onDismiss)
             }
-            MessageMenuItem(node, onMessage, onDismiss)
-            TraceRouteMenuItem(node, onTraceRoute, onDismiss)
+            TraceRouteMenuItem(node, lastTracerouteTime, onTraceRoute, onDismiss)
+            if (node.validPosition != null) {
+                MenuItem(MeshtasticIcons.Compass, stringResource(Res.string.open_compass), onOpenCompass, onDismiss)
+                if (rememberMeshHudSupported()) {
+                    MenuItem(
+                        MeshtasticIcons.CenterFocusStrong,
+                        stringResource(Res.string.mesh_hud_open),
+                        onOpenMeshView,
+                        onDismiss,
+                    )
+                }
+            }
         }
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
             IgnoreMenuItem(node, onIgnore, onDismiss)
@@ -84,21 +130,38 @@ fun NodeContextMenu(
     }
 }
 
-/** A menu of its own: favoriting, muting, messaging or removing yourself is meaningless (design#115). */
+/**
+ * A menu of its own: favoriting, muting, messaging or removing yourself is meaningless (design#115). Each action is
+ * absent, never disabled, when its callback is null: update status, edit the broadcast name in device settings, and
+ * share our contact.
+ */
 @Composable
-fun LocalNodeContextMenu(expanded: Boolean, onUpdateStatus: () -> Unit, onDismiss: () -> Unit) {
+fun LocalNodeContextMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onUpdateStatus: (() -> Unit)? = null,
+    onEditName: (() -> Unit)? = null,
+    onShareContact: (() -> Unit)? = null,
+) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-            DropdownMenuItem(
-                onClick = {
-                    onUpdateStatus()
-                    onDismiss()
-                },
-                leadingIcon = { Icon(imageVector = MeshtasticIcons.Notes, contentDescription = null) },
-                text = { Text(text = stringResource(Res.string.update_status)) },
-            )
+            onUpdateStatus?.let { LocalMenuItem(MeshtasticIcons.Notes, Res.string.update_status, it, onDismiss) }
+            onEditName?.let { LocalMenuItem(MeshtasticIcons.Edit, Res.string.edit_name, it, onDismiss) }
+            onShareContact?.let { LocalMenuItem(MeshtasticIcons.Share, Res.string.share_contact, it, onDismiss) }
         }
     }
+}
+
+@Composable
+private fun LocalMenuItem(icon: ImageVector, label: StringResource, onClick: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onClick()
+            onDismiss()
+        },
+        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
+        text = { Text(text = stringResource(label)) },
+    )
 }
 
 @Composable
@@ -169,22 +232,61 @@ private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> 
             onMessage()
             onDismiss()
         },
-        enabled = !node.isIgnored,
+        enabled = !node.isIgnored && node.canDirectMessage,
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Message, contentDescription = null) },
         text = { Text(text = stringResource(Res.string.message)) },
     )
 }
 
 @Composable
-private fun TraceRouteMenuItem(node: Node, onTraceRoute: () -> Unit, onDismiss: () -> Unit) {
+private fun TraceRouteMenuItem(
+    node: Node,
+    lastTracerouteTime: Long?,
+    onTraceRoute: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // Seconds until the radio takes another traceroute; 0 when it would take one now.
+    var secondsLeft by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(lastTracerouteTime) {
+        val endTime = (lastTracerouteTime ?: 0L) + COOL_DOWN_TIME_MS
+        secondsLeft = cooldownSecondsLeft(endTime)
+        while (secondsLeft > 0) {
+            delay(COOLDOWN_TICK_MS)
+            secondsLeft = cooldownSecondsLeft(endTime)
+        }
+    }
+    val coolingDown = secondsLeft > 0
     DropdownMenuItem(
         onClick = {
             onTraceRoute()
             onDismiss()
         },
-        enabled = !node.isIgnored,
+        enabled = !node.isIgnored && !coolingDown,
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Route, contentDescription = null) },
-        text = { Text(text = stringResource(Res.string.trace_route)) },
+        text = {
+            Text(
+                text =
+                if (coolingDown) {
+                    stringResource(Res.string.traceroute_available_in, secondsLeft.toInt())
+                } else {
+                    stringResource(Res.string.trace_route)
+                },
+            )
+        },
+    )
+}
+
+private const val COOLDOWN_TICK_MS = 500L
+
+@Composable
+private fun MenuItem(icon: ImageVector, text: String, onClick: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onClick()
+            onDismiss()
+        },
+        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
+        text = { Text(text = text) },
     )
 }
 

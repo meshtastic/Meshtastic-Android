@@ -127,6 +127,38 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
+    fun `a linked BLE address with a PIN bonds with that PIN, then arms the transport`() =
+        runTest(harness.testDispatcher) {
+            viewModel.connectToLinkedAddress(expectedFullAddress, pin = "123456")
+            testScheduler.advanceUntilIdle()
+
+            assertEquals(listOf(mac), harness.bluetoothRepository.bondCalls.map { it.address })
+            assertEquals(listOf<String?>("123456"), harness.bluetoothRepository.bondPins)
+            assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
+        }
+
+    @Test
+    fun `a linked BLE address without a PIN connects without bonding first`() = runTest(harness.testDispatcher) {
+        viewModel.connectToLinkedAddress(expectedFullAddress, pin = null)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(harness.bluetoothRepository.bondCalls.isEmpty())
+        assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
+    }
+
+    @Test
+    fun `a linked PIN that fails to bond does not arm the transport`() = runTest(harness.testDispatcher) {
+        // A wrong PIN ends the bond as BOND_NONE; like a tapped device, wait for the user to retry.
+        harness.bluetoothRepository.failBondWith(Exception("Bonding failed or rejected"))
+
+        viewModel.connectToLinkedAddress(expectedFullAddress, pin = "123456")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf<String?>("123456"), harness.bluetoothRepository.bondPins)
+        assertNull(harness.radioController.lastSetDeviceAddress)
+    }
+
+    @Test
     fun `generic bond failure does not arm the transport and surfaces an error`() = runTest(harness.testDispatcher) {
         // A failed pairing attempt should wait for another user action instead of immediately arming the transport,
         // which would call transport-side bond() and risk a duplicate PIN dialog or Android createBond() throttle.

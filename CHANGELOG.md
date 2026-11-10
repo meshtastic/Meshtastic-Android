@@ -8,10 +8,88 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.3-internal.7)
-Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
+*No changes yet.*
+<!-- UNRELEASED_END -->
 
-#### 🏗️ Features
+<!-- RELEASED_START -->
+
+## [2.8.4] - 2026-11-05
+
+### 🏗️ Features
+* feat(node): view a device's 3D model, and place it in AR on the google flavor by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7639
+* feat(map): AR mesh view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7659
+* feat(map): mesh view pictures, track direction and time fade, barometric height by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7719
+* feat(node): swap Chirpy into the device model viewer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7722
+* feat(map): take mesh view pictures through a CameraX overlay effect by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7726
+* feat(service): add a Quick Settings tile for the radio connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7662
+* feat(notifications): Live Update for mesh status or a tracked node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7664
+* feat(widget): add a Node Tracker home-screen widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7665
+* feat(tak): generate TAK certificates per install by @niccellular in https://github.com/meshtastic/Meshtastic-Android/pull/7731
+* feat(nodes): local display names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7763
+* feat(map): draw nodes at one spot as one counted chip on both maps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7762
+* feat(node): list traceroutes other nodes ran to us on our own node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7764
+* feat(debug): live device screen mirror with remote control (protobufs #1054) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6987
+* feat(firmware): pick the bootloader image by target under a shared Board-ID by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7805
+* feat(firmware): show the bootloader's Last-Fault line from INFO_UF2.TXT by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7804
+* fix(firmware): reset-prime a dropped Legacy DFU only on bootloaders before 2.6.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7806
+* feat(node): compact layout improvements by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7802
+* feat(node): the connected device's live screen on its 3D model by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7651
+* feat(connections): pair with a PIN from a connect link by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7856
+* feat(firmware): offer recovery for the last BLE node found stranded in its bootloader by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7842
+* feat(node): metrics voltage chart scale start at 3V by default by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7858
+* feat(widget): one branded design and real cell sizes for both widgets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7862
+* feat(database): log who holds the Room connection when an acquire times out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7875
+* feat(map): label Google map clusters with their exact count by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7896
+* feat(notifications): say where the Live Update shows and let it be stopped in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7901
+### 🖥️ Desktop
+* fix(coverage): Site Planner estimate placement, floor, offline terrain, threads and credit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7758
+* fix(desktop): scrollbar and Tab focus on radio config screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7899
+### 🛠️ Fixes
+* fix(settings): offer only presets and serial modes the firmware runs, label pairing modes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7709
+* fix(settings): make Disable LED Heartbeat mean what it says, cap MQTT password at 31 bytes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7708
+* fix(node): gate Mute on our own node's firmware, not the remote node's by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7710
+* fix(ui): translate indoor air quality levels, call the beacon's hardware a node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7711
+* fix(firmware): map NODARA (151) to SoftDevice 6.1.1 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7727
+* fix(node): say why AR cannot start instead of coaching forever by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7737
+* fix: prevent metric panes truncating on portrait tablets by @mvanhorn in https://github.com/meshtastic/Meshtastic-Android/pull/7698
+* fix: surface routing NAKs on remote admin and node requests by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7749
+* fix(coverage): Mapterhorn credit on MapLibre and antimeridian regions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7759
+* fix(connections): load connect-time card labels without blocking the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7775
+* fix(data): report a failed startup name backfill instead of crashing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7776
+* fix(database): move a corrupt device database aside instead of crash-looping by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7777
+* fix(database): apply a staged restore only at the first open of a database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7781
+* fix(map): draw weather radar smooth when zoomed in by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7779
+* fix(node): show the full firmware version in node details by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7770
+* fix(nodes): keep heard_on_current_lora current between handshakes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7785
+* fix(logging): write app logs to logcat on google release builds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7809
+* fix(usb): add Seeed XIAO nRF52840 Kit (239a:810b) to device filter by @koshiro in https://github.com/meshtastic/Meshtastic-Android/pull/7838
+* fix(usb): add remaining firmware USB IDs to device filter by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7841
+* fix(admin): accept admin responses only for requests the app sent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7847
+* fix(coverage): trace Site Planner bands as smooth outlines by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7860
+* fix(messaging): show MQTT origin on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7861
+* fix(node): disabled popup menu 'Message' option for unmessageable or unknown nodes by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7871
+* fix: stop 2.8.3 map crashes and the connect-list ANR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7873
+* fix(mqtt): accept topic aliases from brokers that send them unasked by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7876
+* fix(database): name every Flow query in the Room pool dump by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7878
+* fix(database): move a device database aside after a query finds it corrupt by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7874
+* fix(mirror): forward taps to MUI devices without a touch panel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7880
+* fix(debug): run the log search off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7891
+* fix(widget): size the readings to the real cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7902
+* fix(widget): pick the layout by breakpoint and the line budget by the reported cell by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7912
+### 📝 Other Changes
+* refactor(database): drop dead pool-timeout recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7782
+* refactor(database): use row-value comparison in getLogsSnapshotPage by @sergeich in https://github.com/meshtastic/Meshtastic-Android/pull/7870
+
+## New Contributors
+* @mvanhorn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7698
+* @vpolevikoff made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7802
+* @koshiro made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7838
+* @sergeich made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7870
+
+
+## [2.8.3] - 2026-10-20
+
+### 🏗️ Features
 * feat(network): a hidden showcase scenario for Demo Mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7377
 * feat(app): shell-only debug launch switches for onboarding and the trust dialog by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7375
 * feat(settings): raise the coding rate over a modem preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7405
@@ -23,7 +101,19 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(notifications): post reactions on their own channel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7507
 * feat(admin): add Reboot into DFU mode admin action for nRF52 nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7504
 * feat(remote-shell): mesh terminal for the firmware DMShell module by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6862
-#### 🖥️ Desktop
+* feat(firmware): play Chirpy Hop while a firmware update runs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7545
+* feat(settings): schema labels for presets and regions, keyword search, diy_only pins by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7544
+* feat(map): route MapLibre's log through Kermit on desktop by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7606
+* feat(settings): let radio settings be opened and read without a radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7621
+* feat(connections): keep an old radio connected and gate the app on the firmware update by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7623
+* feat(settings): region preset fallback and fixed-precision override frequency by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7626
+* feat(connections): show the LoRa preset and region on the connected radio card by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7625
+* feat(settings): land a search result on the control it names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7627
+* feat(settings): color picker and swatch for ambient lighting by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7619
+* feat(desktop): reactions and new waypoints notification toggles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7624
+* feat(settings): back up and restore the app database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7629
+* feat(node): record observed and inbound traceroutes in the node's history by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7643
+### 🖥️ Desktop
 * fix(mqtt): remove noop mqtt to allow the mqtt proxy to work on the desktop builds by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7400
 * fix(notifications): put every notification on its own channel and tap target by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7415
 * fix(database): delete old mesh logs in bounded batches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7423
@@ -32,7 +122,11 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(node): show the real traceroute map on desktop by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7425
 * refactor: keep one copy of shared code across platforms by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7432
 * fix(ui): localize UI strings, fix stale effect captures, one EmptyState by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7430
-#### 🛠️ Fixes
+* fix(notifications): end low-battery episodes when the tray is cleared by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7546
+* Fix/desktop linux tray by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7569
+* fix(desktop): keep LWJGL whole through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7605
+* fix(app): stop declaring Android Auto support by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7645
+### 🛠️ Fixes
 * fix(map): keep the node track map responsive on long tracks by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7373
 * fix(konsist): anchor the scanned-source inputs at the source roots by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7382
 * fix(map): frame the mesh clear of the map's own controls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7385
@@ -65,16 +159,31 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(analytics): drop the package from RUM view names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7525
 * fix(node): keep verified contacts verified by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7531
 * fix(settings): stop calling Balanced packet authenticity recommended by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7535
-#### 📝 Other Changes
+* fix(map): show offline manager loading and failure in the offline sheet by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7570
+* fix: frequency slot for non-ASCII channel names, mark auto slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7580
+* fix: restore key backups after a factory reset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7581
+* fix(ci): link protobufs bump summary PRs to the protobufs repo by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7595
+* fix(discovery): scan public presets on the default public channel and slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7600
+* fix(config): refresh the node DB after a live LoRa save by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7620
+* fix(node): name unknown traceroute hops by their node id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7628
+* fix(messaging): resend a failed message in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7622
+* fix(settings): land a search result on the row and highlight it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7637
+* fix(node): use the traceroute map colors in the traceroute chart by @garthvh in https://github.com/meshtastic/Meshtastic-Android/pull/7631
+* fix(settings): cap the long name at the 24 bytes firmware 2.8 keeps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7641
+* fix(node): show unknown traceroute hops as unknown and cool down long-press traceroute by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7640
+* fix(node): remember Keep on the unheard-nodes banner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7646
+* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
+* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
+* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
+* fix(node): remove every unheard node from the banner's Remove by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7667
+### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
 * refactor(ui): share the remote shell's keyboard sink from core/ui by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7526
 
 ## New Contributors
 * @Tha14 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7400
-<!-- UNRELEASED_END -->
 
-<!-- RELEASED_START -->
 
 ## [2.8.2] - 2026-09-26
 

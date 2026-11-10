@@ -115,8 +115,8 @@ class MapLibreMapViewProvider(
         DefaultWaypointEditor(request)
     },
     /**
-     * Runs a Site Planner session. Null hides the button entirely. The F-Droid app hosts the planner in a WebView;
-     * desktop hands the same form to the system browser. See [SitePlannerSession].
+     * Runs a Site Planner session. Null hides the button entirely. F-Droid and desktop compute the estimate on device
+     * and draw it on this map. See [SitePlannerSession].
      */
     private val sitePlanner: (@Composable (SitePlannerSession) -> Unit)? = null,
     /**
@@ -147,6 +147,7 @@ class MapLibreMapViewProvider(
         val location = rememberLocationControls()
         val waypoints = rememberWaypointEditing()
         val screen = rememberMapScreenState(waypointId = waypointId, sitePlannerNodeNum = sitePlannerNodeNum)
+        val layers = customLayers()
 
         val mapState =
             rememberMapScreenMapState(
@@ -155,7 +156,7 @@ class MapLibreMapViewProvider(
                 screen = screen,
                 waypoints = waypoints,
                 location = location,
-                customLayers = customLayers(),
+                customLayers = layers,
                 navigateToNodeDetails = navigateToNodeDetails,
             )
 
@@ -170,6 +171,7 @@ class MapLibreMapViewProvider(
                 mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
+                extraCredits = layers.mapNotNull { it.attributionHtml },
                 onMapLongClick = waypoints.onLongPress,
                 onMapClick = waypoints.onMapTap,
             )
@@ -341,9 +343,9 @@ private fun SitePlannerSlot(
     planner(
         SitePlannerSession(
             nodeNum = nodeNum,
-            mapCenter = { mapState.cameraPosition.target },
+            mapCenter = { mapState.cameraPosition.center },
             moveTo = { target ->
-                scope.launch { mapState.animateCamera(CameraUpdate(target = target), CameraAnimation.Ease()) }
+                scope.launch { mapState.animateCamera(CameraUpdate(center = target), CameraAnimation.Ease.Standard) }
             },
             onDismiss = onDismiss,
         ),
@@ -390,7 +392,7 @@ private fun BoxScope.MapToolbar(
             if (location.following) {
                 location.onToggleBearingLock()
             } else {
-                scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease()) }
+                scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease.Standard) }
             }
         },
         filterDropdownContent = {
@@ -434,7 +436,7 @@ private class LocationControls(
     val onToggleBearingLock: () -> Unit,
 ) {
     val bearingUpdate: BearingUpdate
-        get() = if (followingBearing) BearingUpdate.TRACK_HEADING else BearingUpdate.IGNORE
+        get() = if (followingBearing) BearingUpdate.TrackHeading else BearingUpdate.Ignore
 }
 
 /**

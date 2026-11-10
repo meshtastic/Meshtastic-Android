@@ -41,6 +41,7 @@ import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
@@ -268,29 +269,41 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult = if (packet.id == 0) {
-        Logger.w { "Rejecting awaited packet without an ID" }
-        AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
-    } else {
-        when (val admission = enqueuePacket(packet, awaitRouting = true)) {
-            is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
+    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult =
+        enqueueAndAwait(packet, expectedConnectionVersion = null)
 
-            QueueAdmission.TransportUnavailable -> {
-                Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: radio is not connected" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
-            }
+    override suspend fun sendToRadioAndAwaitResultForConnection(
+        packet: MeshPacket,
+        expectedConnectionVersion: Long,
+    ): AwaitedSendResult = enqueueAndAwait(packet, expectedConnectionVersion)
 
-            QueueAdmission.ScopeInactive -> {
-                Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
-            }
+    private suspend fun enqueueAndAwait(packet: MeshPacket, expectedConnectionVersion: Long?): AwaitedSendResult =
+        if (packet.id == 0) {
+            Logger.w { "Rejecting awaited packet without an ID" }
+            AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+        } else {
+            when (
+                val admission =
+                    enqueuePacket(packet, awaitRouting = true, expectedConnectionVersion = expectedConnectionVersion)
+            ) {
+                is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
 
-            QueueAdmission.DuplicateId -> {
-                Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
-                AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+                QueueAdmission.TransportUnavailable -> {
+                    Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: radio is not connected" }
+                    AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
+                }
+
+                QueueAdmission.ScopeInactive -> {
+                    Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
+                    AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
+                }
+
+                QueueAdmission.DuplicateId -> {
+                    Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
+                    AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
+                }
             }
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun awaitAdmittedPacket(packet: MeshPacket, pending: PendingResponse): AwaitedSendResult {
@@ -425,9 +438,11 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean) {
+    override suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean, from: Int?) {
         responseMutex.withLock {
             val pending = queueResponse[dataRequestId]?.takeIf { it.wasDispatched } ?: return@withLock
+            val to = pending.packet.to
+            if (complete && from != null && from != to && to != NodeAddress.NODENUM_BROADCAST) return@withLock
             pending.completeRouting(complete.toAwaitedSendStatus())
             removePendingIfTerminalLocked(dataRequestId, pending)
         }

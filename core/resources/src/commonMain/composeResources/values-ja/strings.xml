@@ -295,6 +295,7 @@
     <string name="debug_store_logs_title">メッシュログを保存</string>
     <string name="debug_tab_app_logs">アプリログ</string>
     <string name="debug_tab_packets">パケット</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">リンクが、%1$s のデバイスへの接続をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>
     <string name="deep_link_connect_title">このデバイスに接続しますか？</string>
     <string name="deep_link_disconnect_message">リンクが、デバイスからの切断をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>
@@ -462,7 +463,6 @@
     <string name="doc_keywords_telemetry">テレメトリ,センサー,温度,湿度,気圧,電源,telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">翻訳,Crowdin,ローカライズ,言語,i18n,貢献,translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">単位,ロケール,メートル法,ヤードポンド法,温度,距離,units,locale,metric,imperial,temperature,distance</string>
-    <string name="doc_keywords_widget">ウィジェット,ホーム画面,ローカル統計,バッテリー,使用率,widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_search_placeholder">ドキュメントを検索…</string>
     <string name="doc_section_developer">開発者ガイド</string>
     <string name="doc_section_user">ユーザーガイド</string>
@@ -551,9 +551,10 @@
     <string name="firmware_edition">ファームウェアエディション</string>
     <string name="firmware_event_ended_banner">%1$s は終了しました。通常の機能に戻すには、標準の Meshtastic ファームウェアに戻してください。</string>
     <string name="firmware_event_ended_button">ファームウェアを更新</string>
+    <string name="firmware_gate_title">ファームウェアの更新が必要です。</string>
+    <string name="firmware_gate_update">ファームウェアを更新</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="firmware_recovery_banner">%1$s の更新を完了</string>
-    <string name="firmware_recovery_ble_failed">Bluetooth 経由で更新を完了できませんでした。このデバイスの標準ブートローダーは、中断された更新を OTA で確実に完了できません。デバイスを復旧するには、USB でコンピューターに接続し、ベンダーのシリアル DFU ツール（例：adafruit-nrfutil）を使って再書き込みしてください。</string>
     <string name="firmware_recovery_button">ファームウェア更新を再開</string>
     <string name="firmware_recovery_dismiss">ファームウェアの復旧を閉じる</string>
     <string name="firmware_recovery_explanation">このデバイスは、完了しなかったファームウェア更新によりブートローダーモードになっています。近くに置いておくと、更新を完了するために再書き込みされます。</string>
@@ -616,7 +617,6 @@
     <string name="firmware_update_save_dfu_file">.uf2 ファイルをデバイスの DFU ドライブに保存してください。</string>
     <string name="firmware_update_searching_device">ネットワーク上で OTA デバイスを検索しています…</string>
     <string name="firmware_update_select_file">ローカルファイルを選択</string>
-    <string name="firmware_update_slow_bootloader_hint">このデバイスのブートローダーでは更新が遅くなります。OTAFIX ブートローダーを書き込むと、BLE 更新が大幅に高速化します。</string>
     <string name="firmware_update_source_local">ソース：ローカルファイル</string>
     <string name="firmware_update_stable">安定版</string>
     <string name="firmware_update_starting_dfu">DFU を開始しています…</string>
@@ -631,7 +631,6 @@
     <string name="firmware_update_unsupported_transport">このデバイスでは、この接続方法でのファームウェア更新はサポートされていません。更新するには別の方法（例：Bluetooth）で接続してください。</string>
     <string name="firmware_update_unsupported_update_method">この更新方法では、ローカルのファームウェアファイルはサポートされていません。</string>
     <string name="firmware_update_uploading">ファームウェアをアップロードしています…</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s は通常、OTA 更新に対応していないブートローダーを搭載して出荷されます。OTA で書き込む前に、USB 経由で OTA 対応のブートローダーを書き込む必要がある場合があります。</string>
     <string name="firmware_update_usb_failed">USB 更新に失敗しました</string>
     <string name="firmware_update_usb_instruction_text">デバイスが DFU モードで再起動し、USB ドライブとして表示されているはずです（例：RAK4631）。\n\nファイル選択画面が開いたら、そのドライブのルートを選択してファームウェアファイルを保存してください。</string>
     <string name="firmware_update_usb_instruction_title">DFU USB ドライブを選択</string>
@@ -649,7 +648,6 @@
     <string name="format_italic">斜体</string>
     <string name="format_link">リンク</string>
     <string name="format_strikethrough">取り消し線</string>
-    <string name="free_memory">空きメモリ</string>
     <string name="free_memory_description">利用可能なシステムメモリ（バイト単位）</string>
     <string name="freq">周波数</string>
     <string name="gas_resistance">ガス抵抗</string>
@@ -694,8 +692,10 @@
     <string name="i_agree">同意します。</string>
     <string name="i_agree_to_share_my_location">上記を読んで理解しています。MQTTを通じて自分のノードデータの暗号化されていない送信に自発的に同意します</string>
     <string name="i_know_what_i_m_doing">はい、了承します。</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
+    <string name="iaq_level_good">良</string>
     <string name="icon_meanings">アイコンの意味</string>
     <string name="ignore">無視</string>
     <string name="ignore_add">'%1$s'を無視リストに追加しますか？</string>
@@ -748,6 +748,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">アマチュア無線従事者 (ハム/HAM)</string>
     <string name="licensed_amateur_radio_text">このオプションを有効にすると、暗号化が無効になりデフォルトのMeshtasticネットワークと互換性が無くなります。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直接</string>
+    <string name="live_update_distance">%1$s 先</string>
     <!-- LOAD -->
     <string name="load">負荷</string>
     <string name="load_15_min">負荷 15分</string>
@@ -819,6 +822,7 @@
     <string name="logs">ログ</string>
     <string name="long_name">正式名称</string>
     <string name="longitude">経度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">バッテリー残量低下</string>
@@ -932,6 +936,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
     <string name="minimum_wake_time_seconds">最小起動時間</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">戻る</string>
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">プリセット</string>
     <string name="module_settings">追加機能の設定</string>
     <string name="modules_already_unlocked">モジュールはすでにロック解除されています</string>
@@ -961,6 +968,8 @@
     <string name="mqtt_status_reconnecting">再接続しています…</string>
     <string name="mqtt_status_reconnecting_with_attempt">再接続しています（試行 %1$d）：%2$s</string>
     <string name="mqtt_test_connection">接続をテスト</string>
+    <string name="mqtt_topic_finder_connecting">接続しています…</string>
+    <string name="mqtt_topic_finder_level_region">リージョン</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="must_update">アプリが古く、デバイスと通信ができません。アプリストアまたはGithubでアプリを更新してください。詳細は<a href="https://meshtastic.org/docs/software/android/installation">こちら</a> に記載されています。</string>
     <!-- MUTE -->
@@ -1060,7 +1069,6 @@
     <string name="nodes_empty_searching_title">ノードを検索中</string>
     <string name="nodes_queued_for_deletion">%1$d 件のノードが削除待ちです：</string>
     <string name="nodes_unheard_remove">削除</string>
-    <string name="noise_floor">ノイズフロア</string>
     <string name="noise_floor_definition">無線受信機が測定した背景の RF ノイズです。値が低いほど、通常は受信環境が静かであることを示します。-85 dBm は混雑の目安であり、明確な失敗のしきい値ではありません。</string>
     <string name="noise_floor_no_reading">ノイズフロア：測定値なし</string>
     <string name="none">なし（無効）</string>
@@ -1187,7 +1195,9 @@
     <string name="quick_chat_new">新規クイックチャット</string>
     <string name="quick_chat_show">クイックチャットメニューを表示</string>
     <string name="radiation">放射線</string>
+    <!-- RADIO -->
     <string name="radio_configuration">デバイスの設定</string>
+    <string name="radio_setup_name_headline">名前</string>
     <string name="rainfall_1h">降水量（1時間）</string>
     <string name="rainfall_24h">降水量（24時間）</string>
     <string name="range_test">レンジテスト</string>
@@ -1345,8 +1355,6 @@
     <string name="share_to">共有…</string>
     <string name="share_your_location_in_real_time">統合された GPS 機能で位置情報をリアルタイムに共有し、グループの連携を保ちます。</string>
     <string name="short_name">短縮名</string>
-    <string name="should_update">最新の修正や機能をご利用いただくために、お使いのノードのファームウェアをアップデートしてください。\n\n最新の安定ファームウェアバージョン: %1$s</string>
-    <string name="should_update_firmware">ファームウェアの更新を推奨します。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">暗号鍵の意味</string>
     <string name="show_iaq_legend">空気品質の凡例を表示</string>
@@ -1543,6 +1551,8 @@
     <string name="waypoint_new">新規ウェイポイント</string>
     <string name="waypoint_received">受信したウェイポイント: %1$s</string>
     <string name="weight">重さ</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">不良</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS の Wi-Fi プロビジョニング</string>
     <string name="wifi_provision_available_networks">利用可能なネットワーク</string>

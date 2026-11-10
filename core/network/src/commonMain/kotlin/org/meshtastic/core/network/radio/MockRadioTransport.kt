@@ -766,7 +766,7 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data) = FromRadio.Builder()
+    private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data, pkiEncrypted: Boolean = false) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 MeshPacket.Builder()
@@ -777,6 +777,7 @@ class MockRadioTransport(
                         wb.rx_time = nowSeconds.toInt()
                         wb.rx_snr = 1.5f
                         wb.decoded = data
+                        wb.pki_encrypted = pkiEncrypted
                     }
                     .build()
         }
@@ -831,6 +832,8 @@ class MockRadioTransport(
                         wb.request_id = reqId
                     }
                     .build(),
+                // Firmware answers remote admin over PKI; the app discards a remote response without it.
+                pkiEncrypted = fromIn != toIn,
             )
         callback.handleFromRadio(p.encode())
     }

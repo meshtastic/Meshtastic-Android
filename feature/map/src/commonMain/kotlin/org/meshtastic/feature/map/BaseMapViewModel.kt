@@ -30,7 +30,9 @@ import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.NodeMapFilter
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.decodeExcludedRoles
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -264,6 +266,19 @@ open class BaseMapViewModel(
                     excludeMqtt ||
                     !includeUnknown ||
                     lastHeardFilter != LastHeardFilter.Any
+
+        fun toNodeMapFilter() = NodeMapFilter(
+            onlyFavorites = onlyFavorites,
+            showIgnored = showIgnored,
+            excludedRoles = excludedRoles,
+            includeUnknown = includeUnknown,
+            onlyOnline = onlyOnline,
+            onlyDirect = onlyDirect,
+            excludeMqtt = excludeMqtt,
+            lastHeardSeconds = lastHeardFilter.seconds,
+            onlySigned = onlySigned,
+            onlyEncrypted = onlyEncrypted,
+        )
     }
 
     // One flow, one map: the store hands every filter back as a single value, so there is nothing to recombine.

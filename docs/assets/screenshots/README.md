@@ -18,8 +18,8 @@ Doc screenshots come from Compose Preview Screenshot Testing references in **two
   Holds atomic, dual-purpose components (signal/battery/hops info, list items, preference widgets,
   alerts) that are both regression-checked **and** used as doc images. Don't reframe these for docs.
 - **`:docs-screenshots`** — generate-only, **not** gated in CI. Holds doc-framed compositions whose
-  framing is tuned for the docs site (e.g. the firmware status crops, the connections BLE-scan /
-  empty-state crops). Reframing one here never churns the regression gate.
+  framing is tuned for the docs site (for example, the firmware status crops and the connections
+  BLE-scan crop). Reframing one here never churns the regression gate.
 
 `copyDocsScreenshots` (in `:screenshot-tests`) aggregates the reference images from **both** modules.
 
@@ -27,7 +27,7 @@ Doc screenshots come from Compose Preview Screenshot Testing references in **two
 
 After changing a UI component, regenerate references for whichever module owns the wrapper, then copy:
 
-```bash
+```shell
 ./gradlew :screenshot-tests:updateDebugScreenshotTest    # regression references
 ./gradlew :docs-screenshots:updateDebugScreenshotTest    # doc-framed composition references
 ./gradlew :screenshot-tests:copyDocsScreenshots          # refresh this directory from both
@@ -52,7 +52,7 @@ Commit the refreshed PNGs together with the reference-image changes.
 
 ## Naming Convention
 
-```
+```text
 {page-id}_{description}.png
 ```
 
@@ -63,7 +63,5 @@ Examples: `onboarding_welcome.png`, `connections_bluetooth_scan.png`, `discovery
 - PNG format, light-mode only (dark variants live in the reference directory)
 - Name screenshots to match the docs page they appear in
 - Keep filenames lowercase with underscores
-- Prefer CST-generated screenshots — they render real app composables, so they cannot drift from
-  reality. Avoid hand-pasted captures: a stray screenshot from another app slipped in this way
-  before (the old `connections_wifi_*.png` were from an unrelated WiFi-provisioning app, not
-  Meshtastic). If a manual capture is unavoidable, it must be a genuine Meshtastic-Android screen.
+- Prefer CST-generated screenshots: they render real app composables, so they can't drift from
+  the app. A manual capture, where one is unavoidable, must be a genuine Meshtastic-Android screen.

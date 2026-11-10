@@ -1,7 +1,7 @@
 ---
 title: Arendaja logid
 nav_order: 22
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Vaata ja ekspordi rakenduse arendajalogi rakenduse seest ning lisa GitHubi probleemile jäädvustus vigade diagnoosimiseks – adb-d pole vaja.
 aliases:
   - arendaja-logid
@@ -22,10 +22,19 @@ If you're filing an issue, export your logs (see [Exporting](#exporting)) and at
 
 Arendajapaneelil on kaks vahekaarti:
 
-- **Paketid** – dekodeeritud võrguliiklus, mida raadio on saatnud ja vastu võtnud (protokollitasemel sõnumid). Useful for diagnosing mesh and routing behavior.
+- **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
 - **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
 
 Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
+
+## Viewing packets
+
+The **Packets** tab lists each logged packet; tap one to expand it, including its decoded payload where there is one.
+
+- **Search** — type in **Search in logs…** to highlight matches, and step between them with the arrows.
+- **Filters** — add your own text filters, or pick from **Preset Filters**: your own node ID, the broadcast address `!ffffffff`, `decoded`, today's date, and each port name. The match toggle switches between matching any filter and matching all of them.
+- **Settings** — the gear icon shows **Store mesh logs**, which turns writing packets to the log on or off, and **MeshLog retention period**, from one hour to a year, or **Never delete logs**.
+- **Clear Logs** — the delete icon removes every stored packet, after you confirm.
 
 ## Viewing app logs
 
@@ -52,4 +61,4 @@ Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Raken
 ## Seotud teemad
 
 - [Abi ja rakendusesisesed dokumendid](help-and-docs) — selle dokumentatsiooni lugemine rakenduses võrguühenduseta
-- [Connections](connections) — if the problem is getting connected to your radio in the first place
+- [Connections](connections) — if the problem is getting connected to your node in the first place

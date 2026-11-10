@@ -1,6 +1,6 @@
 # Documentation Structure
 
-This directory contains the source documentation for the Meshtastic Android/Desktop/iOS app.
+This directory contains the source documentation for the Meshtastic Android and Desktop app.
 It serves three consumers:
 
 1. **In-app docs browser** — bundled via Compose Resources at build time
@@ -9,18 +9,21 @@ It serves three consumers:
 
 ## Locale Layout
 
-```
+```text
 docs/
-├── _config.yml, _data/, _layouts/, _sass/   ← Jekyll site infrastructure
+├── _config.yml, _data/, _includes/, _layouts/, _sass/   ← Jekyll site infrastructure
+├── assets/screenshots/                       ← Screenshots shared by every consumer
 ├── en/                                       ← English source (edit here)
 │   ├── user/                                 ← User Guide pages
-│   ├── developer/                            ← Developer Guide pages
+│   ├── developer/                            ← Developer Guide pages (English only)
 │   ├── index.md                              ← Site home page
 │   ├── user.md                               ← User Guide nav parent
 │   └── developer.md                          ← Developer Guide nav parent
 ├── fr/                                       ← French (Crowdin-generated)
+│   ├── index.md                              ← Translated home page
 │   └── user/                                 ← Translated user guide
 ├── de/                                       ← German (Crowdin-generated)
+│   ├── index.md
 │   └── user/
 └── ...                                       ← Other locales
 ```
@@ -39,15 +42,17 @@ docs/
   by [Crowdin](https://crowdin.com/project/meshtastic-android) and will be overwritten on sync.
   Contribute translations via Crowdin instead.
 - **Adding a page**: Create the `.md` file in `docs/en/user/` or `docs/en/developer/`, then
-  register it in `feature/docs/.../DocBundleLoader.kt` for in-app bundling.
+  register it in `feature/docs/.../DocBundleLoader.kt` for in-app bundling. The `docs-quality.yml`
+  workflow fails a pull request when a page and the loader disagree.
 
 ## How Translations Work
 
-1. English source files (`docs/en/user/*.md`) are uploaded to Crowdin as translation sources
+1. English source files (`docs/en/user/*.md` and `docs/en/index.md`) are uploaded to Crowdin as translation
+   sources; the developer guide stays English-only
 2. Volunteers translate via the Crowdin web UI
-3. Crowdin PRs land translated files at `docs/{locale}/user/*.md`, named like the app's `values-*` directories
-   (`fr`, `pt-rBR`, `b+sr+Latn`)
-4. At build time, the Gradle `syncTranslatedDocsToComposeResources` task bundles them into
+3. Crowdin PRs land translated files at `docs/{locale}/user/*.md` and `docs/{locale}/index.md`, named like
+   the app's `values-*` directories (`fr`, `pt-rBR`, `b+sr+Latn`)
+4. At build time, the Gradle `syncDocsToComposeResources` task bundles them into
    locale-qualified Compose Resources for the in-app reader
 5. The in-app `DocBundleLoader` tries the user's locale first, then falls back to English
 
@@ -93,5 +98,4 @@ Each deploy overlays only its own channels via `scripts/docs/publish-to-gh-pages
 so every other channel survives the next deploy. The header
 version dropdown (`_includes/version_switcher.html`) reads `/versions.json` at runtime;
 a separate header link points to the upstream docs at meshtastic.org. To backfill a
-release (e.g. after first enabling this), run the "Docs Release" workflow manually
-against the release tag.
+release, run the "Docs Release" workflow manually against the release tag.

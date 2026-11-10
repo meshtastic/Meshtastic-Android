@@ -24,17 +24,21 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -374,7 +378,71 @@ class ScannerViewModelTest {
         viewModel.dismissRecovery()
         testScheduler.advanceUntilIdle()
 
-        verifySuspend { harness.firmwareRecoveryDataSource.clear() }
+        verifySuspend { harness.firmwareRecoveryDataSource.dismiss() }
+    }
+
+    @Test
+    fun `a bootloader at the last BLE node MAC plus one is offered for recovery`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:02")
+
+        verifySuspend { harness.firmwareRecoveryDataSource.promoteLastBleNode("xAA:BB:CC:00:00:01") }
+        harness.clearViewModel(viewModel)
+    }
+
+    @Test
+    fun `a DFU advert at another address is not offered for recovery`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09")
+
+        verifySuspend(mode = VerifyMode.exactly(0)) { harness.firmwareRecoveryDataSource.promoteLastBleNode(any()) }
+        harness.clearViewModel(viewModel)
+    }
+
+    @Test
+    fun `a flapping link starts one bootloader scan per cooldown`() = runTest {
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09")
+
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        testScheduler.advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) }
+        harness.clearViewModel(viewModel)
+    }
+
+    @Test
+    fun `a disconnect with no saved node does not hold off the next bootloader scan`() = runTest {
+        val lastBleNode = MutableStateFlow<PendingFirmwareRecovery?>(null)
+        val viewModel = buildWithStrandedScan(advertisedAt = "AA:BB:CC:00:00:09", lastBleNode = lastBleNode)
+
+        lastBleNode.value = savedNode
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        testScheduler.advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) }
+        harness.clearViewModel(viewModel)
+    }
+
+    private val savedNode =
+        PendingFirmwareRecovery(
+            fullAddress = "xAA:BB:CC:00:00:01",
+            hwModel = 9,
+            pioEnv = "rak4631",
+            releaseType = "STABLE",
+            deviceName = "Base",
+        )
+
+    private fun buildWithStrandedScan(
+        advertisedAt: String,
+        lastBleNode: Flow<PendingFirmwareRecovery?> = flowOf(savedNode),
+    ): ScannerViewModel {
+        // The setUp ViewModel shares the scanner and connection state, so it would run bootloader scans of its own.
+        harness.clearViewModel(viewModel)
+        every { harness.firmwareRecoveryDataSource.lastBleNode } returns lastBleNode
+        every { bleScanner.scan(any(), NordicDfu.LEGACY_SERVICE_UUID, any()) } returns
+            flowOf(FakeBleDevice(address = advertisedAt, name = "4631_DFU"))
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        return harness.buildBase()
     }
 
     @Test

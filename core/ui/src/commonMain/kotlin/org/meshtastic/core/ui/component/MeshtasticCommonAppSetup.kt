@@ -31,13 +31,20 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  *
  * Platform hosts should invoke this near the root before rendering `MeshtasticNavDisplay`.
  */
+@Suppress("ViewModelForwarding")
 @Composable
 fun MeshtasticCommonAppSetup(
     uiViewModel: UIViewModel,
     onNavigateToTracerouteMap: (destinationNodeNum: Int, requestId: Int, logUuid: String?) -> Unit,
+    isFirmwareUpdateOpen: Boolean,
+    onUpdateFirmware: () -> Unit,
 ) {
     SharedDialogs(uiViewModel = uiViewModel)
-    FirmwareVersionCheck(viewModel = uiViewModel)
+    FirmwareVersionCheck(
+        viewModel = uiViewModel,
+        isFirmwareUpdateOpen = isFirmwareUpdateOpen,
+        onUpdateFirmware = onUpdateFirmware,
+    )
     AlertHost(alertManager = uiViewModel.alertManager)
     TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)
 }

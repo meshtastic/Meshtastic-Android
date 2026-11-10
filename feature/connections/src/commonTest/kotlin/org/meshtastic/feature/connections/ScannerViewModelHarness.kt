@@ -117,8 +117,9 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
             ): Flow<DiscoveredDevices> {
                 discoveryRequests += showMock to showReplay
                 return combine(baseDevicesFlow, resolvedList) { base, resolved ->
-                    val tcpDevices =
-                        resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
+                    val tcpDevices = resolved.map {
+                        DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}")
+                    }
                     base.copy(discoveredTcpDevices = tcpDevices)
                 }
             }
@@ -130,6 +131,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
         every { firmwareRecoveryDataSource.pending } returns flowOf(null)
+        every { firmwareRecoveryDataSource.lastBleNode } returns flowOf(null)
         every { networkRepository.resolvedList } returns resolvedServicesFlow
         every { networkRepository.networkAvailable } returns flowOf(true)
         // Default: a non-completing scan flow so the BLE scan stays "active" until explicitly cancelled.

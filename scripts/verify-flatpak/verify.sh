@@ -82,7 +82,7 @@ if [[ $SKIP_REGEN -eq 0 ]]; then
     (cd "$REPO_ROOT" && ./gradlew --no-build-cache \
         -Dgradle.user.home="$GRADLE_HOME_ISOLATED" \
         :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources)
-    cp "$REPO_ROOT/build/flatpak-ops-sources.json" "$SOURCES_JSON"
+    cp "$REPO_ROOT/build/flatpak-sources.json" "$SOURCES_JSON"
 elif [[ ! -f "$SOURCES_JSON" ]]; then
     fail "--skip-regen specified but $SOURCES_JSON does not exist."
 fi
@@ -107,6 +107,9 @@ fi
 #   flatpak-sources.json = the artifact we're validating
 step "Wiring overlay manifest + our flatpak-sources.json"
 cp "$OVERLAY" "$WORK/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+python3 "$REPO_ROOT/scripts/verify-flatpak/bump-flathub-manifest.py" --gradle-only \
+    "$WORK/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml" \
+    "$REPO_ROOT/gradle/wrapper/gradle-wrapper.properties"
 cp "$SOURCES_JSON" "$WORK/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
 
 if [[ $REBUILD_ONLY -eq 0 ]]; then

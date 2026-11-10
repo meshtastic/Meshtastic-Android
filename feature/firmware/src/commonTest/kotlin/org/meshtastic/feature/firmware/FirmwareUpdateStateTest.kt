@@ -84,4 +84,13 @@ class FirmwareUpdateStateTest {
         assertEquals(null, FirmwareUpdateState.AwaitingFileSave(uf2Artifact = null, fileName = null).toUpdateProgress())
         assertEquals(null, FirmwareUpdateState.Idle.toUpdateProgress())
     }
+
+    @Test
+    fun `an unverified success still reports progress until verification ends`() {
+        assertEquals(
+            FirmwareUpdateState.Verifying.toUpdateProgress(),
+            FirmwareUpdateState.Success(verified = false).toUpdateProgress(),
+        )
+        assertEquals(null, FirmwareUpdateState.Success(verified = true).toUpdateProgress())
+    }
 }

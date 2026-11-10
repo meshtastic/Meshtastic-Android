@@ -154,7 +154,7 @@ private fun rememberTelemetricFeatures(
         TelemetricFeature(
             titleRes = LogsType.TRACEROUTE.titleRes,
             icon = LogsType.TRACEROUTE.icon,
-            requestAction = { NodeMenuAction.TraceRoute(it) },
+            requestAction = if (isLocal) null else { n -> NodeMenuAction.TraceRoute(n) },
             logsType = LogsType.TRACEROUTE,
             cooldownTimestamp = lastTracerouteTime,
             isVisible = { !isLocal },

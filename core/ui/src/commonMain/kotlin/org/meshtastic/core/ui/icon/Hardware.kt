@@ -25,20 +25,36 @@ import org.meshtastic.core.resources.ic_bluetooth_connected
 import org.meshtastic.core.resources.ic_bluetooth_searching
 import org.meshtastic.core.resources.ic_build
 import org.meshtastic.core.resources.ic_cached
+import org.meshtastic.core.resources.ic_center_focus_strong
 import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_mesh_radio
 import org.meshtastic.core.resources.ic_nfc
+import org.meshtastic.core.resources.ic_photo_camera
 import org.meshtastic.core.resources.ic_settings_input_antenna
 import org.meshtastic.core.resources.ic_speaker_phone
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.ic_usb
 import org.meshtastic.core.resources.ic_usb_off
+import org.meshtastic.core.resources.ic_view_in_ar
 import org.meshtastic.core.resources.ic_wifi
 
 /** The maker hardware mark from meshtastic/design#160: a wrench, Material Symbols "build". */
 val MeshtasticIcons.Wrench: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_build)
+
+/** Material Symbols "view_in_ar": the entry to a device's 3D model. */
+val MeshtasticIcons.ViewInAr: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_view_in_ar)
+
+/** Material Symbols "photo_camera": capture the AR view. */
+val MeshtasticIcons.PhotoCamera: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_photo_camera)
+
+/** Material Symbols "center_focus_strong", a viewfinder: the camera mesh view. */
+val MeshtasticIcons.CenterFocusStrong: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_center_focus_strong)
+
 val MeshtasticIcons.BluetoothConnected: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bluetooth_connected)
 val MeshtasticIcons.BluetoothSearching: ImageVector

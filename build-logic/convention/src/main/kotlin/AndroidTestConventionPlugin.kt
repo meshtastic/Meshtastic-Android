@@ -17,8 +17,11 @@
 import com.android.build.api.dsl.TestExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.attributes.java.TargetJvmEnvironment
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.named
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.meshtastic.buildlogic.configureKotlinAndroidTest
 
 class AndroidTestConventionPlugin : Plugin<Project> {
@@ -27,6 +30,20 @@ class AndroidTestConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.test")
 
             extensions.configure<TestExtension> { configureKotlinAndroidTest(this) }
+
+            // AGP leaves the platform attributes off <variant>TestedApks, so KMP dependencies of the
+            // tested app resolve to their desktop JVM variants, and OS-split ones fail as ambiguous.
+            configurations.configureEach {
+                if (name.endsWith("TestedApks")) {
+                    attributes {
+                        attribute(
+                            TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+                            objects.named(TargetJvmEnvironment.ANDROID),
+                        )
+                        attribute(KotlinPlatformType.attribute, KotlinPlatformType.androidJvm)
+                    }
+                }
+            }
         }
     }
 }

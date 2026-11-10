@@ -110,7 +110,7 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
     FillLayer(
         id = "custom-${layer.id}-fill",
         source = source,
-        filter = geometryIsOneOf(GeometryType.Polygon, GeometryType.MultiPolygon),
+        filter = geometryIsOneOf(listOf(GeometryType.Polygon, GeometryType.MultiPolygon)),
         color = fill.convertToColor(const(CustomLayerBlue)),
         // The layer's own opacity scales whatever the feature asked for, rather than replacing it: an import that
         // styles some features translucent stays relatively translucent as the whole layer fades.
@@ -123,10 +123,12 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
         // for a 5dp border would silently get one pixel. The Google flavor honours the width, and so does this.
         filter =
         geometryIsOneOf(
-            GeometryType.LineString,
-            GeometryType.MultiLineString,
-            GeometryType.Polygon,
-            GeometryType.MultiPolygon,
+            listOf(
+                GeometryType.LineString,
+                GeometryType.MultiLineString,
+                GeometryType.Polygon,
+                GeometryType.MultiPolygon,
+            ),
         ),
         color = strokeColor,
         opacity = feature["stroke-opacity"].asNumber(const(1f)) * const(opacity),
@@ -135,7 +137,7 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
     CircleLayer(
         id = "custom-${layer.id}-point",
         source = source,
-        filter = geometryIsOneOf(GeometryType.Point, GeometryType.MultiPoint),
+        filter = geometryIsOneOf(listOf(GeometryType.Point, GeometryType.MultiPoint)),
         color = strokeColor,
         opacity = const(opacity),
         radius = const(POINT_RADIUS.dp),
@@ -243,7 +245,7 @@ private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGround
 private val CustomLayerBlue = Color(0xFF3F51B5)
 
 /** True for a feature whose geometry is any of [types]. */
-private fun geometryIsOneOf(vararg types: GeometryType): Expression<BooleanValue> =
+private fun geometryIsOneOf(types: List<GeometryType>): Expression<BooleanValue> =
     types.map { feature.geometryType() eq const(it) }.reduce { left, right -> left or right }
 
 /**

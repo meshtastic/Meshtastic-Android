@@ -225,7 +225,7 @@ class TracerouteChartTest {
     }
 
     @Test
-    fun multipleRequests_preservesOrder() {
+    fun multipleRequests_newestFirst() {
         val req1 = makeRequest(id = 1, receivedDateMillis = 3000L * MS_PER_SEC)
         val req2 = makeRequest(id = 2, receivedDateMillis = 4000L * MS_PER_SEC)
         val res1 = makeResult(requestId = 1, receivedDateMillis = 3005L * MS_PER_SEC)
@@ -234,8 +234,123 @@ class TracerouteChartTest {
         val points = resolveTraceroutePoints(listOf(req1, req2), listOf(res1, res2))
 
         assertEquals(2, points.size)
-        assertEquals(3000.0, points[0].timeSeconds)
-        assertEquals(4000.0, points[1].timeSeconds)
+        assertEquals(4000.0, points[0].timeSeconds)
+        assertEquals(3000.0, points[1].timeSeconds)
+    }
+
+    @Test
+    fun unrequestedResponse_isObservedWithHopsAndNoRoundTrip() {
+        val requests = listOf(makeRequest(id = 1, receivedDateMillis = 1000L * MS_PER_SEC))
+        val requested = makeResult(requestId = 1, receivedDateMillis = 1004L * MS_PER_SEC)
+        val unrequested = makeResult(requestId = 77, receivedDateMillis = 2000L * MS_PER_SEC)
+        val results = listOf(requested, unrequested)
+
+        val observed = observedTracerouteResponses(requests, results)
+        val points = resolveTraceroutePoints(requests, results, observed = observed)
+
+        assertEquals(listOf(unrequested), observed)
+        val observedPoint = points.first()
+        assertEquals(TracerouteKind.OBSERVED, observedPoint.kind)
+        assertNull(observedPoint.request)
+        assertEquals(unrequested, observedPoint.log)
+        assertEquals(77, observedPoint.requestId)
+        assertEquals(2000.0, observedPoint.timeSeconds)
+        assertEquals(1, observedPoint.forwardHops)
+        assertEquals(1, observedPoint.returnHops)
+        assertNull(observedPoint.roundTripSeconds)
+        val requestedPoint = points[1]
+        assertEquals(TracerouteKind.REQUESTED, requestedPoint.kind)
+        assertEquals(4.0, assertNotNull(requestedPoint.roundTripSeconds), 0.01)
+    }
+
+    @Test
+    fun zeroIdResponse_isObservedBecauseNoRequestCanMatchIt() {
+        val requests = listOf(makeRequest(id = 1, receivedDateMillis = 1000L * MS_PER_SEC))
+        val zeroId = makeResult(requestId = 0, receivedDateMillis = 2000L * MS_PER_SEC)
+
+        assertEquals(listOf(zeroId), observedTracerouteResponses(requests, listOf(zeroId)))
+    }
+
+    @Test
+    fun responseToARequestWeSent_isNotObserved() {
+        val requests = listOf(makeRequest(id = 5, receivedDateMillis = 1000L * MS_PER_SEC))
+        val results = listOf(makeResult(requestId = 5, receivedDateMillis = 1002L * MS_PER_SEC))
+
+        assertEquals(emptyList(), observedTracerouteResponses(requests, results))
+    }
+
+    @Test
+    fun requestFromTheNodeToUs_isTracedByWithInboundRouteOnly() {
+        val inbound =
+            makeInboundRequest(to = LOCAL_NODE, relays = listOf(3, 4), receivedDateMillis = 1500L * MS_PER_SEC)
+        val results = listOf(inbound, makeResult(requestId = 9, receivedDateMillis = 1000L * MS_PER_SEC))
+
+        val tracedBy = tracedByTracerouteRequests(results, ourNodeNum = LOCAL_NODE)
+        val point = resolveTraceroutePoints(emptyList(), results, tracedBy = tracedBy).single()
+
+        assertEquals(listOf(inbound), tracedBy)
+        assertEquals(TracerouteKind.TRACED_BY, point.kind)
+        val route = assertNotNull(point.route)
+        assertEquals(listOf(REMOTE_NODE, 3, 4, LOCAL_NODE), route.route)
+        assertEquals(listOf(DUMMY_SNR, DUMMY_SNR, DUMMY_SNR), route.snr_towards)
+        assertEquals(emptyList(), route.route_back)
+        assertNull(point.forwardHops)
+        assertNull(point.returnHops)
+        assertNull(point.roundTripSeconds)
+    }
+
+    @Test
+    fun requestFromTheNodeToSomeoneElse_isIgnored() {
+        val elsewhere = makeInboundRequest(to = 999, relays = emptyList(), receivedDateMillis = 1500L * MS_PER_SEC)
+
+        assertEquals(emptyList(), tracedByTracerouteRequests(listOf(elsewhere), ourNodeNum = LOCAL_NODE))
+    }
+
+    @Test
+    fun tracedBy_isEmptyUntilOurNodeIsKnown() {
+        val inbound = makeInboundRequest(to = LOCAL_NODE, relays = emptyList(), receivedDateMillis = 1L)
+
+        assertEquals(emptyList(), tracedByTracerouteRequests(listOf(inbound), ourNodeNum = null))
+    }
+
+    /** A traceroute request from [REMOTE_NODE] as it reaches the phone: every relay appended itself and its SNR. */
+    private fun makeInboundRequest(to: Int, relays: List<Int>, receivedDateMillis: Long): MeshLog {
+        val rd =
+            RouteDiscovery.Builder()
+                .also { wb ->
+                    wb.route = relays
+                    wb.snr_towards = List(relays.size + 1) { DUMMY_SNR }
+                }
+                .build()
+        return MeshLog(
+            uuid = "inbound-$receivedDateMillis",
+            message_type = "Packet",
+            received_date = receivedDateMillis,
+            raw_message = "",
+            fromNum = REMOTE_NODE,
+            portNum = PortNum.TRACEROUTE_APP.value,
+            fromRadio =
+            FromRadio.Builder()
+                .also { wb ->
+                    wb.packet =
+                        MeshPacket.Builder()
+                            .also { p ->
+                                p.from = REMOTE_NODE
+                                p.to = to
+                                p.decoded =
+                                    Data.Builder()
+                                        .also { d ->
+                                            d.portnum = PortNum.TRACEROUTE_APP
+                                            d.want_response = true
+                                            d.dest = to
+                                            d.payload = RouteDiscovery.ADAPTER.encode(rd).toByteString()
+                                        }
+                                        .build()
+                            }
+                            .build()
+                }
+                .build(),
+        )
     }
 
     @Test

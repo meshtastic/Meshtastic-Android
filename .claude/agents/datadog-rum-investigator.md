@@ -33,7 +33,7 @@ A Datadog RUM issue/error id or dashboard URL, an error signature / exception cl
 2. **Map versionCode → tag / commit / Play track.** Parse the `versionCode` out of the `name__versionCode__flavor` version tag, then follow the repo recipe — NEVER hand-arithmetic a build number into a commit:
    - Prefer `gh release list` / `gh release view` — release names embed the versionCode. Match it, then read the tag and target commit.
    - Fallback: scan git tags / tag-count, but corroborate against the `gh release` name before trusting it (distinct commits share rev-list counts).
-   - Determine the Play track from the tag channel suffix (`-internal.N`, `-closed.N`, production).
+   - Determine the Play track from the tag channel suffix (`-internal.N`, `-closed.N`, `-open.N`; a bare `vX.Y.Z` is production).
    - Establish whether the **latest shipped production build** is affected vs. only older un-updated installs — the single most important question for prioritization.
 
 3. **Locate the suspect code.** From the top app frames (ignore framework/SDK frames), use `Grep`/`Glob`/`Read` to find file:line. Note the KMP source set (commonMain vs androidMain) and owning module. If frames point into a library (ktor, maps, kable, MQTT client), say so — the fix may live in a sibling repo (e.g. MQTTastic-Client-KMP).

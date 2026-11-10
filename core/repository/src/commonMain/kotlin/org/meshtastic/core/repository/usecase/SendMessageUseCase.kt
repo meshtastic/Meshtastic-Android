@@ -53,6 +53,13 @@ interface SendMessageUseCase {
         contactKey: String = "0${NodeAddress.ID_BROADCAST}",
         replyId: Int? = null,
     ): SendMessageOutcome
+
+    /**
+     * Sends the stored message [uuid] again in place. The row keeps its uuid, timestamp, text and reply link and gets a
+     * fresh packet id and a queued status, so it stays where it was in the conversation and delivery status updates on
+     * it. A refused or failed send leaves the row as it was.
+     */
+    suspend fun resend(uuid: Long, contactKey: String): SendMessageOutcome
 }
 
 /** What [SendMessageUseCase] did with a message. */
@@ -60,7 +67,10 @@ sealed interface SendMessageOutcome {
     /** Saved to history and queued for delivery under mesh packet id [packetId]. */
     data class Queued(val packetId: Int) : SendMessageOutcome
 
-    /** Nothing was saved or sent: the conversation is retired, so its channel is no longer on the radio. */
+    /**
+     * Nothing was saved or sent: the conversation is retired (its channel is no longer on the radio) or the row is
+     * gone.
+     */
     data object Refused : SendMessageOutcome
 }
 
@@ -96,29 +106,7 @@ class SendMessageUseCaseImpl(
         val ourNode = nodeRepository.ourNodeInfo.value
         val fromId = ourNode?.user?.id ?: NodeAddress.ID_LOCAL
 
-        // Direct message side-effects: share the contact's public key (PKI) or
-        // favorite the node (legacy) before sending the first message.  PKI DMs use
-        // channel == PKC_CHANNEL_INDEX (8); legacy DMs have no channel prefix
-        // (channel == null).  Both formats target a specific node.
-        val isDirectMessage = channel == null || channel == NodeAddress.PKC_CHANNEL_INDEX
-        if (isDirectMessage) {
-            val destNode = nodeRepository.getNode(dest)
-            val fwVersion = ourNode?.metadata?.firmware_version
-            val isClientBase = ourNode?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE
-            val capabilities = Capabilities(fwVersion)
-
-            if (capabilities.canSendVerifiedContacts) {
-                // Best-effort: inform firmware of the destination's public key
-                // for its NodeDB cache.  The MeshPacket itself carries the key
-                // directly, so the message can be encrypted regardless.
-                sendSharedContact(destNode)
-            } else if (channel == null) {
-                // Legacy favoriting only applies to old-style DMs without PKI
-                if (!destNode.isFavorite && !isClientBase) {
-                    favoriteNode(destNode)
-                }
-            }
-        }
+        sendDirectMessageSideEffects(channel, dest, ourNode)
 
         // Apply homoglyph encoding
         val finalMessageText =
@@ -163,6 +151,50 @@ class SendMessageUseCaseImpl(
         }
 
         return SendMessageOutcome.Queued(packetId)
+    }
+
+    // Direct message side-effects: share the contact's public key (PKI) or favorite the node (legacy) before sending
+    // the first message. PKI DMs use channel == PKC_CHANNEL_INDEX (8); legacy DMs have no channel prefix
+    // (channel == null). Both formats target a specific node.
+    private suspend fun sendDirectMessageSideEffects(channel: Int?, dest: String, ourNode: Node?) {
+        val isDirectMessage = channel == null || channel == NodeAddress.PKC_CHANNEL_INDEX
+        if (!isDirectMessage) return
+        val destNode = nodeRepository.getNode(dest)
+        val fwVersion = ourNode?.metadata?.firmware_version
+        val isClientBase = ourNode?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE
+        val capabilities = Capabilities(fwVersion)
+
+        if (capabilities.canSendVerifiedContacts) {
+            // Best-effort: inform firmware of the destination's public key for its NodeDB cache. The MeshPacket
+            // itself carries the key directly, so the message can be encrypted regardless.
+            sendSharedContact(destNode)
+        } else if (channel == null) {
+            // Legacy favoriting only applies to old-style DMs without PKI
+            if (!destNode.isFavorite && !isClientBase) {
+                favoriteNode(destNode)
+            }
+        }
+    }
+
+    override suspend fun resend(uuid: Long, contactKey: String): SendMessageOutcome {
+        val parsedKey = ContactKey(contactKey)
+        if (parsedKey.isRetired) {
+            Logger.w { "Refusing to resend to a retired conversation" }
+            return SendMessageOutcome.Refused
+        }
+
+        val packetId = Random.nextInt(1, Int.MAX_VALUE)
+        // Side effects run only once the repository has found the row, so a missing message touches nothing.
+        val requeued =
+            packetRepository.resendMessage(uuid, packetId) {
+                sendDirectMessageSideEffects(
+                    parsedKey.channelOrNull,
+                    parsedKey.addressString,
+                    nodeRepository.ourNodeInfo.value,
+                )
+                messageQueue.enqueue(it)
+            }
+        return if (requeued == null) SendMessageOutcome.Refused else SendMessageOutcome.Queued(packetId)
     }
 
     // Both side effects are best-effort: the message still goes out if the radio rejects or drops them.

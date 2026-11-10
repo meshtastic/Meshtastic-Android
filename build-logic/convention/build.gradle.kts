@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.Usage
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -33,6 +35,18 @@ java {
 }
 
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
+
+// The conventions see AGP, KGP and friends as compileOnly, so TestKit fixtures get them from here instead. It
+// extends compileOnly rather than re-declaring the list, and stays off the jar's runtime classpath.
+val testkitPlugins by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    extendsFrom(configurations.compileOnly.get())
+    attributes {
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+    }
+}
 
 dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
@@ -63,6 +77,11 @@ dependencies {
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
+
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks {
@@ -70,6 +89,15 @@ tasks {
         enableStricterValidation = true
         failOnWarning = true
     }
+    test {
+        useJUnitPlatform()
+        systemProperty(
+            "meshtastic.versionCatalog",
+            layout.projectDirectory.file("../../gradle/libs.versions.toml").asFile.canonicalPath,
+        )
+        inputs.file("../../gradle/libs.versions.toml")
+    }
+    pluginUnderTestMetadata { pluginClasspath.from(testkitPlugins) }
 }
 
 // Isolated Projects forbids reaching into another project; ".." escapes the included build

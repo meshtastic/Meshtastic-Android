@@ -36,6 +36,8 @@ class CoverageGrid(
     val dbm: DoubleArray,
 ) {
     init {
+        // lonAt and latAt divide by width - 1 and height - 1.
+        require(width >= 2 && height >= 2) { "grid must be at least 2x2, got $width x $height" }
         require(dbm.size == width * height) { "dbm must be width*height, got ${dbm.size} for $width x $height" }
     }
 

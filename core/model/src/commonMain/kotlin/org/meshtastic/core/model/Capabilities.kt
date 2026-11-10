@@ -99,6 +99,9 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
     val supportsEsp32Ota = atLeast(V2_7_18)
 
+    /** Whether a LoRa config write applies without a reboot: v2.8.0 applies it live, older firmware restarts. */
+    val appliesLoraConfigLive = atLeast(V2_8_0)
+
     /**
      * Whether a `coding_rate` above the modem preset's own raises it while `use_preset` is on. Supported since firmware
      * v2.7.18 (meshtastic/firmware#9155); older firmware uses the preset's rate whatever is stored. `coding_rate` is
@@ -120,6 +123,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsLockdown = atLeast(V2_8_0)
 
     /**
+     * Bytes of owner long name the node keeps. Firmware v2.8.0 truncates every name it stores or sends to 24 bytes;
+     * `User.long_name` stays 40 wide on the wire only so older senders still decode. Earlier firmware keeps 39.
+     */
+    val maxLongNameBytes = if (atLeast(V2_8_0)) LONG_NAME_BYTES else LEGACY_LONG_NAME_BYTES
+
+    /**
      * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen), from the `since_firmware`
      * its `ModuleConfig` field declares. The proto is upstream but the firmware module traces to a community fork, so
      * an older radio would silently ignore the config the editor writes.
@@ -128,13 +137,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
 
     /**
      * Whether the node reports [NodeInfo.heard_on_current_lora] - whether it has heard each node over RF on the LoRa
-     * configuration it is using now. Gated to [UNRELEASED] until the firmware side ships. Older firmware never sends
-     * the field, and a proto3 bool defaults to false, so an ungated read marks every node as unheard.
+     * configuration it is using now, from 2.8.1. Older firmware never sends the field, and a proto3 bool defaults to
+     * false, so an ungated read marks every node as unheard.
      *
      * Deliberately outside [forceEnableAll]: every other capability being wrong in a debug build shows a UI the
      * firmware ignores, but this one being wrong persists false into the node DB and offers real nodes for removal.
      */
-    val supportsHeardOnCurrentLora = version != null && version >= UNRELEASED
+    val supportsHeardOnCurrentLora = version != null && version >= V2_8_1
 
     /**
      * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
@@ -143,10 +152,15 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     fun supportsRegion(region: RegionInfo): Boolean = region.minFirmware?.let { atLeast(it) } ?: true
 
     /**
-     * Whether this firmware's preset table contains [preset] ([ChannelOption.minFirmware]); older firmware silently
-     * falls back to LONG_FAST when sent an unknown preset, so the picker hides it.
+     * Whether this firmware's preset table contains [preset], from [ChannelOption.minFirmware] and
+     * [ChannelOption.removedInFirmware]. Firmware silently falls back to LONG_FAST when sent a preset its table lacks,
+     * so the picker hides it.
      */
-    fun supportsPreset(preset: ChannelOption): Boolean = preset.minFirmware?.let { atLeast(it) } ?: true
+    fun supportsPreset(preset: ChannelOption): Boolean {
+        val arrived = preset.minFirmware?.let { atLeast(it) } ?: true
+        val removed = preset.removedInFirmware?.let { !forceEnableAll && version != null && version >= it } ?: false
+        return arrived && !removed
+    }
 
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
@@ -155,7 +169,11 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_8_0 = DeviceVersion("2.8.0")
+        private val V2_8_1 = DeviceVersion("2.8.1")
         private val V2_8_2 = DeviceVersion("2.8.2")
         private val UNRELEASED = DeviceVersion("9.9.9")
+
+        private const val LONG_NAME_BYTES = 24 // firmware MAX_LONG_NAME_BYTES
+        private const val LEGACY_LONG_NAME_BYTES = 39 // User.long_name max_size:40
     }
 }

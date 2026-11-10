@@ -199,7 +199,11 @@ class LinuxNotificationSender(
 
         val category =
             when (notification.category) {
-                Notification.Category.Message -> "im.received"
+                Notification.Category.Message,
+                Notification.Category.Reaction,
+                -> "im.received"
+
+                Notification.Category.Waypoint -> "network"
 
                 Notification.Category.Battery -> "device.warning"
 

@@ -29,6 +29,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import org.meshtastic.core.model.FirmwareTarget
+import org.meshtastic.core.network.di.CoreNetworkModule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -66,6 +67,58 @@ class ApiServiceTest {
 
         try {
             assertNull(ApiServiceImpl(client).getNightlyFirmware())
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun `mqtt roots are fetched from the resource path and tolerate unknown fields`() = runTest {
+        var requestedPath: String? = null
+        val engine = MockEngine { request ->
+            requestedPath = request.url.encodedPath
+            respond(
+                content =
+                """
+                    {
+                      "entries": [{"root": "msh/US/MeshSTL", "name": "MeshSTL", "center": [38.581, -90.374],
+                                   "radiusKm": 50, "future": true}],
+                      "neighbors": {"US-TX": ["US-OK"], "US-OK": ["US-TX"]},
+                      "subdivisionSegments": {"US": {"washington": "WA"}},
+                      "generatedAt": "ignored"
+                    }
+                    """
+                    .trimIndent(),
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+            )
+        }
+        val client = HttpClient(engine) { install(ContentNegotiation) { json(CoreNetworkModule().provideJson()) } }
+
+        try {
+            val roots = ApiServiceImpl(client).getMqttRoots()
+
+            assertEquals("/resource/mqttRoots", requestedPath)
+            assertEquals(listOf(38.581, -90.374), roots.entries.single().center)
+            assertEquals(50.0, roots.entries.single().radiusKm)
+            assertEquals(listOf("US-OK"), roots.neighbors["US-TX"])
+            assertEquals("WA", roots.subdivisionSegments["US"]?.get("washington"))
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun `malformed mqtt roots fail the fetch`() = runTest {
+        val engine = MockEngine {
+            respond(
+                content = """{"entries": [{"name": "no root"}]}""",
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+            )
+        }
+        val client = HttpClient(engine) { install(ContentNegotiation) { json(CoreNetworkModule().provideJson()) } }
+
+        try {
+            assertFailsWith<Exception> { ApiServiceImpl(client).getMqttRoots() }
         } finally {
             client.close()
         }

@@ -332,6 +332,7 @@
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_tab_app_logs">Sovelluslokitiedot</string>
     <string name="debug_tab_packets">Paketit</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Linkki osoitteessa %1$s pyytää tätä sovellusta muodostamaan yhteyden laitteeseen. Jatka vain, jos luotat linkin lähteeseen.</string>
     <string name="deep_link_connect_title">Muodostetaanko yhteys tähän laitteeseen?</string>
     <string name="deep_link_disconnect_message">Linkki pyytää tätä sovellusta katkaisemaan yhteyden laitteeseesi. Jatka vain, jos luotat linkin lähteeseen.</string>
@@ -497,7 +498,6 @@
     <string name="doc_keywords_telemetry">telemetria, anturi, lämpötila, kosteus, ilmanpaine, virta</string>
     <string name="doc_keywords_translate">käännös, crowdin, lokalisointi, kieli, i18n, osallistu</string>
     <string name="doc_keywords_units">yksiköt, alueasetus, metriikka, imperiaalinen, lämpötila, etäisyys</string>
-    <string name="doc_keywords_widget">widget, aloitusnäyttö, paikalliset tilastot, yhdellä silmäyksellä, akku, käyttöaste</string>
     <string name="doc_search_placeholder">Hae documentaatiosta…</string>
     <string name="doc_section_developer">Kehittäjän opas</string>
     <string name="doc_section_user">Käyttöopas</string>
@@ -603,6 +603,8 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="firmware_event_ended_banner">%1$s on päättynyt. Palaa tavalliseen Meshtastic-laiteohjelmistoon palauttaaksesi normaalit ominaisuudet.</string>
     <string name="firmware_event_ended_button">Päivitä laiteohjelmisto</string>
+    <string name="firmware_gate_title">Laiteohjelmistopäivitys vaaditaan</string>
+    <string name="firmware_gate_update">Päivitä laiteohjelmisto</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Poistotiedosto kopioitiin, mutta laite ei aloittanut poistamista. Mitään ei ole vielä muutettu. Irrota laite, paina sen nollauspainiketta kahdesti ja yritä uudelleen.</string>
     <string name="firmware_maintenance_copy_failed">Tiedostoa ei voitu kopioida laitteen asemalle. Varmista, että asema on edelleen yhdistetty ja yritä uudelleen.</string>
     <string name="firmware_maintenance_data_unavailable">Laitteen tyhjennystiedostoja ei ole tällä hetkellä saatavilla. Tarkista yhteytesi ja yritä uudelleen tai käytä Web Flasheria osoitteessa flasher.meshtastic.org</string>
@@ -614,12 +616,10 @@
     <string name="firmware_maintenance_unknown_softdevice">Tämä sovellus ei pysty varmistamaan, mitä Bluetooth-pinoa tämä laite käyttää, joten poistaminen ei ole turvallista. Käytä sen sijaan verkkopohjaista Flasheria osoitteessa flasher.meshtastic.org</string>
     <string name="firmware_maintenance_unsupported_device">Tämä laite ei tue tyhjentämistä sovelluksesta.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Päivitä käynnistyslatain</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">Tämä asentaa päivitetyn käynnistyslataimen laitteeseen %1$s, mikä nopeuttaa tulevia Bluetooth-päivityksiä huomattavasti. \n\nSen jälkeen laiteohjelmisto asennetaan uudelleen. Älä irrota laitetta tämän aikana.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Päivitetäänkö käynnistyslatain?</string>
     <string name="firmware_maintenance_wrong_destination">Valittu sijainti ei ole laitteen päivitysasema, joten laitteelle ei kirjoitettu mitään. Valitse siirrettävä asema, joka tulee näkyviin, kun laite on päivitystilassa.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
-    <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
     <string name="firmware_recovery_button">Jatka laiteohjelmiston päivitystä</string>
     <string name="firmware_recovery_dismiss">Hylkää laiteohjelmiston palautus</string>
     <string name="firmware_recovery_explanation">Tämä laite on käynnistyslataustilassa keskeneräiseksi jääneen laiteohjelmistopäivityksen vuoksi. Pidä laite lähellä, niin päivitys suoritetaan loppuun.</string>
@@ -674,7 +674,6 @@
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
     <string name="firmware_update_preparing_flash">Valmistellaan laitetta: flash-muistia tyhjennetään. Tämä voi kestää jopa minuutin...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 -laitteessa valmistajan käynnistyslatain (.zip) on asennettava sarjaliitäntäisen DFU-työkalun, kuten adafruit-nrfutilin, avulla. Pelkkä .zip-tiedoston kopioiminen laitteen asemalle ei toimi. Vaihtoehtoisesti voit yhdistää laitteen USB:n kautta ja päivittää käynnistyslataimen tällä sovelluksella.</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_release_notes">Julkaisutiedot</string>
     <string name="firmware_update_requires_bin">%1$s edellyttää kohteeseen sopivaa .bin-tiedostoa.</string>
@@ -686,7 +685,6 @@
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_searching_device">Etsitään OTA-laitetta verkosta...</string>
     <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
-    <string name="firmware_update_slow_bootloader_hint">Päivitykset ovat hitaita tämän laitteen käynnistyslataimella. OTAFIX-käynnistyslataimen asentaminen mahdollistaa huomattavasti nopeammat bluetooth-päivitykset.</string>
     <string name="firmware_update_source_local">Lähde: Paikallinen tiedosto</string>
     <string name="firmware_update_stable">Vakaa</string>
     <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
@@ -703,7 +701,6 @@
     <string name="firmware_update_unsupported_transport">Laiteohjelmiston päivityksiä ei tueta tällä yhteystavalla kyseiselle laitteelle. Muodosta yhteys toisella tavalla (esim. Bluetoothin kautta) päivittääksesi laitteen.</string>
     <string name="firmware_update_unsupported_update_method">Paikallisia laiteohjelmistotiedostoja ei tueta tällä päivitystavalla.</string>
     <string name="firmware_update_uploading">Lähetetään laiteohjelmistostoa...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="firmware_update_usb_failed">USB-päivitys epäonnistui</string>
     <string name="firmware_update_usb_instruction_text">Laitteesi on käynnistynyt uudelleen DFU-tilaan ja sen pitäisi näkyä USB-asemana (esim. RAK4631).
 \n\nKun tiedostonvalitsin avautuu, valitse kyseisen aseman juurihakemisto tallentaaksesi laiteohjelmistotiedoston.</string>
@@ -726,7 +723,6 @@
     <string name="format_italic">Kursivoitu</string>
     <string name="format_link">Linkki</string>
     <string name="format_strikethrough">Yliviivattu</string>
-    <string name="free_memory">Vapaa muisti</string>
     <string name="free_memory_description">Käytettävissä oleva järjestelmämuisti tavuina</string>
     <string name="freq">Taajuus</string>
     <string name="gas_resistance">Kaasuvastus</string>
@@ -773,8 +769,11 @@
     <string name="i_agree">Hyväksyn.</string>
     <string name="i_agree_to_share_my_location">Olen lukenut ja ymmärtänyt yllä olevan. Annan suostumuksen laitetietojeni salaamattomaan lähettämiseen MQTT:n kautta</string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
+    <string name="iaq_level_excellent">Erinomainen</string>
+    <string name="iaq_level_good">Hyvä</string>
     <string name="icon_meanings">Kuvakkeiden merkitykset</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="ignore_add">Lisää '%1$s' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
@@ -837,6 +836,10 @@
     <string name="licensed_mode_enable_title">Otetaanko lisensoitu (HAM) tila käyttöön?</string>
     <string name="licensed_mode_enable_warning">Lisensoitu tila poistaa kanavien salausavaimet ja poistaa ylläpitokanavan käytöstä, jolloin kaikki liikenne lähetetään selväkielisenä ja on kaikkien luettavissa. Koska laiteohjelmisto ei voi allekirjoittaa liikennettä, muut radiot eivät voi varmistaa sen olevan peräisin sinulta. Tämä tila ei ole yhteensopiva oletusarvoisen Meshtastic-verkon kanssa, ja vastaat itse radioamatöörilupasi vaatimusten sekä paikallisten määräysten noudattamisesta.</string>
     <string name="licensed_mode_enable_warning_signed">Lisensoitu tila poistaa kanavien salausavaimet ja poistaa ylläpitokanavan käytöstä, jolloin kaikki liikenne lähetetään selväkielisenä kaikkien luettavaksi. Liikenne kuitenkin allekirjoitetaan digitaalisesti, joten muut radiot voivat varmistaa sen olevan peräisin sinulta. Radion tunnistenumero voi muuttua vastaamaan tunnistusavaintasi, jolloin suosikit, viestihistoria, etähallinta ja muut radiot saattavat käsitellä sitä uutena radiona. Vastaat itse radioamatöörilupasi vaatimusten ja paikallisten määräysten noudattamisesta.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Suora</string>
+    <string name="live_update_distance">%1$s pois</string>
+    <string name="live_update_unread">%1$d lukematonta</string>
     <!-- LOAD -->
     <string name="load">Lataa</string>
     <string name="load_15_min">Kuormitus (15 min)</string>
@@ -918,6 +921,7 @@
     <string name="logs">Lokitiedot</string>
     <string name="long_name">Pitkä nimi</string>
     <string name="longitude">Pituuspiiri</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Akku lähes tyhjä</string>
@@ -1005,7 +1009,6 @@
     <string name="mesh_beacon_preset_indicator">Lähellä olevan verkkokutsun ilmoittama</string>
     <string name="mesh_beacon_preset_none">ei mitään</string>
     <string name="mesh_beacon_region_label">Alue</string>
-    <string name="mesh_beacon_region_required">Määritä radion alue ennen majakan määrittämistä.</string>
     <string name="mesh_beacon_target">Kohde %1$d</string>
     <string name="mesh_beacon_target_add">Lisää kohde</string>
     <string name="mesh_beacon_target_channel_index">Kanava</string>
@@ -1076,6 +1079,9 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimi</string>
     <string name="minimum_wake_time_seconds">Vähimmäisherätyksen kesto</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Edellinen</string>
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Esiasetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
     <string name="modules_already_unlocked">Moduulit ovat jo käytettävissä</string>
@@ -1105,6 +1111,8 @@
     <string name="mqtt_status_reconnecting">Yhdistetään uudelleen…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Yhdistetään uudelleen (yritys %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Testaa yhteys</string>
+    <string name="mqtt_topic_finder_connecting">Yhdistetään…</string>
+    <string name="mqtt_topic_finder_level_region">Alue</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <!-- MUTE -->
@@ -1210,7 +1218,6 @@
     <string name="nodes_empty_searching_title">Etsitään radioita</string>
     <string name="nodes_queued_for_deletion">%1$d laitetta jonossa poistettavaksi:</string>
     <string name="nodes_unheard_remove">Poista</string>
-    <string name="noise_floor">Kohinataso</string>
     <string name="noise_floor_definition">Radion vastaanottimen mittaama taustakohinan taso. Mitä pienempi arvo, sitä vähemmän radiotaustakohinaa ympäristössä yleensä on. Arvoa -85 dBm pidetään vilkkaan radiokanavan viitearvona, mutta se ei tarkoita automaattisesti yhteysongelmaa tai toimintahäiriötä.</string>
     <string name="noise_floor_no_reading">Kohinataso: Ei mittaustulosta</string>
     <string name="none">Ei mitään (ei käytössä)</string>
@@ -1370,7 +1377,9 @@
     <string name="quick_chat_new">Uusi pikakeskustelu</string>
     <string name="quick_chat_show">Näytä pikaviestivalikko</string>
     <string name="radiation">Säteily</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radion asetukset</string>
+    <string name="radio_setup_name_headline">Käyttäjäystävällinen nimi</string>
     <string name="rainfall_1h">Sademäärä (1 tunti)</string>
     <string name="rainfall_24h">Sademäärä (24 h)</string>
     <string name="range_test">Kuuluvuustesti</string>
@@ -1538,8 +1547,6 @@
     <string name="share_to">Jaa…</string>
     <string name="share_your_location_in_real_time">Jaa sijaintisi reaaliaikaisesti ja varmista ryhmäsi yhteistoiminta GPS-toimintojen avulla.</string>
     <string name="short_name">Lyhytnimi</string>
-    <string name="should_update">Hyötyäksesi uusimmista korjauksista ja ominaisuuksista, päivitä firmware laiteohjelmistosi.\n\nUusin vakaa laiteohjelmistoversio: %1$s</string>
-    <string name="should_update_firmware">Laiteohjelmistopäivitystä suositellaan.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Salausavainten merkitykset</string>
     <string name="show_full_message_timestamps">Näytä viestien täydelliset aikaleimat</string>
@@ -1617,6 +1624,7 @@
     <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
     <string name="tak_server_mesh_to_cot_desc">Näytä Meshtastic-radiot ATAK-kartalla yhteystietoina</string>
     <string name="tak_server_permission_blocked">TAK-palvelin tarvitsee paikallisverkon käyttöoikeuden yhteyksien vastaanottamiseen, eikä Android enää pyydä sitä. Käyttöoikeus on nyt poistettu käytöstä – ota se käyttöön sovelluksen asetuksissa ja ota TAK-palvelin uudelleen käyttöön.</string>
+    <string name="tak_server_regenerate_certs_confirm">Luo uudelleen</string>
     <string name="tak_server_section">Palvelin</string>
     <string name="tak_server_status">Tila</string>
     <plurals name="tak_server_status_connected">
@@ -1776,6 +1784,9 @@
     <string name="weight">Paino</string>
     <string name="what_is_meshtastic">Mikä on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avoimen lähdekoodin, internetistä riippumaton ja hajautettu mesh-verkko, joka toimii edullisilla ja vähän virtaa kuluttavilla radioilla.</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Huono</string>
+    <string name="widget_packets_received">Vastaanotettu</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi-asetukset</string>
     <string name="wifi_devices">WiFi-määritys mPWRD-OS:lle</string>

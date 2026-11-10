@@ -318,6 +318,7 @@
     <string name="debug_store_logs_title">Uložit protokoly sítě</string>
     <string name="debug_tab_app_logs">Protokoly aplikace</string>
     <string name="debug_tab_packets">Pakety</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">Odkaz chce tuto aplikaci připojit k zařízení na adrese %1$s. Pokračujte pouze tehdy, pokud důvěřujete tomu, odkud odkaz pochází.</string>
     <string name="deep_link_connect_title">Připojit k tomuto zařízení?</string>
     <string name="deep_link_disconnect_message">Odkaz chce tuto aplikaci odpojit od vašeho zařízení. Pokračujte pouze tehdy, pokud důvěřujete tomu, odkud odkaz pochází.</string>
@@ -553,6 +554,8 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware edice</string>
     <string name="firmware_event_ended_button">Aktualizovat firmware</string>
+    <string name="firmware_gate_title">Vyžadována aktualizace firmwaru</string>
+    <string name="firmware_gate_update">Aktualizovat firmware</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Soubor byl zkopírován, ale zařízení nezačalo s mazáním. Zatím se nic nezměnilo. Odpojte zařízení, dvakrát stiskněte jeho resetovací tlačítko a zkuste to znovu.</string>
     <string name="firmware_maintenance_copy_failed">Soubor se nepodařilo zkopírovat na disk zařízení. Zkontrolujte, zda je disk stále připojený, a zkuste to znovu.</string>
     <string name="firmware_maintenance_data_unavailable">Seznam obrazů pro vymazání není momentálně k dispozici. Zkontrolujte připojení a zkuste to znovu, nebo použijte nástroj pro nahrání firmwaru na flasher.meshtastic.org.</string>
@@ -564,12 +567,10 @@
     <string name="firmware_maintenance_unknown_softdevice">Tato aplikace nemůže ověřit, který Bluetooth zásobník zařízení používá, takže jeho vymazání není bezpečné. Místo toho použijte nástroj pro nahrání firmwaru na flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">Toto zařízení nepodporuje vymazání z aplikace.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Aktualizovat bootloader</string>
-    <string name="firmware_maintenance_upgrade_confirm_text">Do zařízení %1$s se nainstaluje nový bootloader, který výrazně urychlí budoucí aktualizace přes Bluetooth. Poté se znovu nainstaluje firmware.\n\nBěhem procesu zařízení neodpojujte.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Aktualizovat bootloader?</string>
     <string name="firmware_maintenance_wrong_destination">Toto umístění není aktualizační disk zařízení, takže do zařízení nebylo nic zapsáno. Vyberte vyměnitelný disk, který se zobrazí, když je zařízení v režimu aktualizace.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="firmware_recovery_banner">Dokončit aktualizaci %1$s</string>
-    <string name="firmware_recovery_ble_failed">Aktualizaci se nepodařilo dokončit přes Bluetooth. Původní bootloader tohoto zařízení nedokáže spolehlivě dokončit přerušenou bezdrátovou aktualizaci. Připojte zařízení k počítači pomocí USB a znovu nahrajte firmware pomocí sériového DFU nástroje výrobce (například adafruit-nrfutil), aby bylo zařízení obnoveno.</string>
     <string name="firmware_recovery_button">Pokračovat v aktualizaci firmware</string>
     <string name="firmware_recovery_dismiss">Zrušit obnovení firmwaru</string>
     <string name="firmware_recovery_explanation">Toto zařízení je v režimu bootloaderu po nedokončené aktualizaci firmwaru. Nechte jej poblíž a firmware bude znovu nahrán, aby se aktualizace dokončila.</string>
@@ -622,7 +623,6 @@
     <string name="firmware_update_ota_failed">Aktualizace OTA selhala: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA zavaděč tohoto zařízení odmítl požadovaný způsob aktualizace: %1$s</string>
     <string name="firmware_update_preparing_flash">Příprava zařízení: mazání flash paměti. Může trvat až minutu...</string>
-    <string name="firmware_update_rak4631_bootloader_hint">U zařízení RAK WisBlock RAK4631 je nutné bootloader výrobce ve formátu .zip nahrát pomocí sériového DFU nástroje, jako je adafruit-nrfutil – pouhé zkopírování souboru .zip na disk zařízení nebude fungovat. Případně připojte zařízení přes USB a použijte funkci aktualizace bootloaderu v této aplikaci.</string>
     <string name="firmware_update_rebooting">Restartuji do DFU...</string>
     <string name="firmware_update_release_notes">Poznámky k vydání</string>
     <string name="firmware_update_requires_bin">Pro zařízení %1$s je vyžadován soubor .bin určený pro tento model.</string>
@@ -634,7 +634,6 @@
     <string name="firmware_update_save_dfu_file">Uložte soubor .uf2 na DFU jednotku svého zařízení.</string>
     <string name="firmware_update_searching_device">Vyhledávám zařízení podporující OTA v síti...</string>
     <string name="firmware_update_select_file">Vybrat soubor</string>
-    <string name="firmware_update_slow_bootloader_hint">Aktualizace jsou s bootloaderem tohoto zařízení pomalé. Nahráním bootloaderu OTAFIX výrazně urychlíte aktualizace přes Bluetooth (BLE).</string>
     <string name="firmware_update_source_local">Zdroj: lokální soubor</string>
     <string name="firmware_update_stable">Stabilní</string>
     <string name="firmware_update_starting_dfu">Spouštění DFU...</string>
@@ -650,7 +649,6 @@
     <string name="firmware_update_unsupported_transport">Přes toto připojení nelze u tohoto zařízení provést aktualizaci firmwaru. Připojte se jiným způsobem (například přes Bluetooth).</string>
     <string name="firmware_update_unsupported_update_method">Tento způsob aktualizace nepodporuje místní soubory s firmwarem.</string>
     <string name="firmware_update_uploading">Nahrávám firmware...</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s je obvykle dodáván s bootloaderem, který nepodporuje OTA aktualizace. Před nahráváním přes OTA může být nutné nejprve přes USB nahrát bootloader s podporou OTA.</string>
     <string name="firmware_update_usb_failed">Aktualizace přes USB selhala</string>
     <string name="firmware_update_usb_instruction_text">Vaše zařízení bylo restartováno do režimu DFU a mělo by se zobrazit jako USB disk (např. RAK4631).\n\nKdyž se otevře výběr souboru, vyberte prosím kořenový adresář pro uložení souboru firmwaru.</string>
     <string name="firmware_update_usb_instruction_title">Vyberte DFU USB disk</string>
@@ -667,7 +665,6 @@
     <string name="fixed_position">Pevná poloha</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Volná paměť</string>
     <string name="free_memory_description">Dostupná systémová paměť v bajtech</string>
     <string name="freq">Frekv</string>
     <string name="gas_resistance">Odpor plynu</string>
@@ -714,8 +711,10 @@
     <string name="i_agree">Souhlasím.</string>
     <string name="i_agree_to_share_my_location">Četl jsem a rozumím výše uvedenému. Dobrovolně souhlasím s nešifrovaným přenosem dat svého uzlu přes MQTT</string>
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Vnitřní kvalita ovzduší) relativní hodnota IAQ měřená Bosch BME680. Hodnota rozsahu 0–500.</string>
+    <string name="iaq_level_good">Silný</string>
     <string name="icon_meanings">Význam ikon</string>
     <string name="ignore">Ignorovat</string>
     <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>
@@ -773,6 +772,9 @@
     <string name="licensed_mode_enable_title">Povolit licencovaný režim (Ham)?</string>
     <string name="licensed_mode_enable_warning">Licencovaný režim odstraní šifrovací klíče kanálů a deaktivuje administrátorský kanál, takže veškerý provoz bude odesílán v otevřeném textu, který může kdokoli číst. Tento firmware jej navíc nemůže podepisovat, takže ostatní uzly nemohou ověřit, že pochází od vás. Tento režim není kompatibilní s výchozí sítí Meshtastic a nadále odpovídáte za dodržování podmínek své radioamatérské licence a místních předpisů.</string>
     <string name="licensed_mode_enable_warning_signed">Licencovaný režim odstraní šifrovací klíče kanálů a deaktivuje administrátorský kanál, takže veškerý provoz bude odesílán v otevřeném textu, který může kdokoli číst. Zprávy jsou však digitálně podepisovány, takže ostatní uzly mohou ověřit, že pocházejí od vás. Číslo vašeho uzlu se může jednou změnit tak, aby odpovídalo vašemu identifikačnímu klíči, takže oblíbené položky, historie zpráv, vzdálená správa a ostatní uzly jej mohou zpočátku považovat za nový uzel. Nadále odpovídáte za dodržování podmínek své radioamatérské licence a místních předpisů.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Přímý</string>
+    <string name="live_update_unread">%1$d nepřečtených</string>
     <!-- LOAD -->
     <string name="load">Zatížení</string>
     <string name="loading">Načítám</string>
@@ -849,6 +851,7 @@
     <string name="logs">Logy</string>
     <string name="long_name">Dlouhé jméno</string>
     <string name="longitude">Zeměpisná délka</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Nízký stav baterie</string>
@@ -999,6 +1002,9 @@
     <string name="micrograms_per_cubic_meter">μg/m3</string>
     <string name="min">Min</string>
     <string name="minimum_wake_time_seconds">Minimální doba probuzení</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Zpět</string>
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Předvolby</string>
     <string name="module_settings">Nastavení modulů</string>
     <string name="modules_already_unlocked">Moduly jsou již odemčeny</string>
@@ -1018,6 +1024,7 @@
     <string name="mqtt_status_inactive">Neaktivní</string>
     <string name="mqtt_status_reconnecting">Opětovné připojování…</string>
     <string name="mqtt_test_connection">Test připojení</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Musíte nastavit region!</string>
     <string name="must_update">Musíte aktualizovat aplikaci v obchodu Google Play (nebo z Githubu). Je příliš stará pro komunikaci s touto verzí firmware vysílače. Přečtěte si prosím naše <a href="https://meshtastic.org/docs/software/android/installation">dokumenty</a> na toto téma.</string>
     <!-- MUTE -->
@@ -1133,7 +1140,6 @@
     <string name="nodes_unheard_banner_one">1 uzel nebyl slyšen při vašem aktuálním nastavení LoRa</string>
     <string name="nodes_unheard_keep">Ponechat</string>
     <string name="nodes_unheard_remove">Odstranit</string>
-    <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
     <string name="noise_floor_no_reading">Úroveň šumu: bez měření</string>
     <string name="none">Žádný (zakázat)</string>
@@ -1293,7 +1299,9 @@
     <string name="quick_chat_new">Nový Rychlý chat</string>
     <string name="quick_chat_show">Zobrazit nabídku rychlého chatu</string>
     <string name="radiation">Radiace</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Nastavení zařízení</string>
+    <string name="radio_setup_name_headline">Přezdívka</string>
     <string name="rainfall_1h">Déšť (1h)</string>
     <string name="rainfall_24h">Déšť (24h)</string>
     <string name="range_test">Zkouška dosahu</string>
@@ -1451,8 +1459,6 @@
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
     <string name="shared_contact_no_public_key">Tento kontakt nemá žádný veřejný klíč, takže jej nelze importovat. Kontakt bez něj vymaže všechny klíče, které vaše rádio již pro daný uzel drží. Požádejte odesílatele, aby jej znovu sdílel, jakmile si jeho uzel vymění klíče.</string>
     <string name="short_name">Krátké jméno</string>
-    <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
-    <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <!-- SHOW -->
     <string name="show_full_message_timestamps">Zobrazovat úplná časová razítka zpráv</string>
     <string name="show_full_message_timestamps_summary">Vždy zobrazovat datum a čas v záhlaví konverzací a při akcích se zprávami</string>
@@ -1659,6 +1665,8 @@
     <string name="weight">Hmotnost</string>
     <string name="what_is_meshtastic">Co je Meshtastic?</string>
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Špatný</string>
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>

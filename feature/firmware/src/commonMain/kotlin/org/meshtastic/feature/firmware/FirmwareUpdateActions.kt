@@ -27,12 +27,16 @@ data class FirmwareUpdateActions(
     /** Pick the device's UF2 volume for a maintenance pass, which vets the drive before writing to it. */
     val onPickVolume: () -> Unit,
     val onBootloaderUpgrade: () -> Unit,
+    /** Upgrades the bootloader over BLE, then reinstalls the selected release. */
+    val onBleBootloaderUpgrade: () -> Unit,
     val onConfirmBootloaderUpgrade: () -> Unit,
     /** Leaves the bootloader as it is and moves on to reinstalling the firmware. */
     val onSkipBootloaderUpgrade: () -> Unit,
     val onConfirmLocalFile: () -> Unit,
     val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,
+    /** Waits again for the flashed device to come back, without flashing it again. */
+    val onRetryVerification: () -> Unit,
     val onCancel: () -> Unit,
     /** Opens Chirpy Hop over the screen while an update runs. */
     val onPlayChirpyHop: () -> Unit,

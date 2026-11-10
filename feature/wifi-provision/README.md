@@ -1,8 +1,8 @@
 # `:feature:wifi-provision`
 
-## WiFi Provisioning System — for mPWRD-OS
+## Wi-Fi Provisioning System for mPWRD-OS
 
-The `:feature:wifi-provision` module provides BLE-based WiFi provisioning for [mPWRD-OS](https://github.com/mPWRD-OS/mPWRD-OS) devices using the Nymea network manager protocol. mPWRD-OS is a community project that combines Armbian and Meshtastic for Linux-native mesh networking hardware. This module scans for provisioning-capable devices, retrieves available WiFi networks, and applies credentials — all over BLE via the Kable multiplatform library.
+The `:feature:wifi-provision` module provides BLE-based Wi-Fi provisioning for [mPWRD-OS](https://github.com/mPWRD-OS/mPWRD-OS) devices using the Nymea network manager protocol. mPWRD-OS is a community project that combines Armbian and Meshtastic for Linux-native mesh networking hardware. This module scans for provisioning-capable devices, retrieves available Wi-Fi networks, and applies credentials — all over BLE via the Kable multiplatform library.
 
 ### Architecture
 
@@ -22,17 +22,20 @@ sequenceDiagram
 
     Note over App: Phase 2: Connect
     App->>Device: BLE Connect
-    Device-->>App: Device name (confirmation)
+    App->>App: Show device name for confirmation
 
     Note over App, Device: Phase 3: Network List
-    App->>Device: GetNetworks command
-    Device-->>App: WiFi networks (deduplicated by SSID)
+    App->>Device: TriggerScan command (c=4)
+    App->>Device: GetNetworks command (c=0)
+    Device-->>App: Wi-Fi networks (deduplicated by SSID)
 
     Note over App, Device: Phase 4: Provision
-    App->>Device: Connect(SSID, password)
-    Device-->>App: NetworkingStatus response
-    App->>Device: Disconnect BLE
+    App->>Device: Connect or ConnectHidden (SSID, password)
+    Device-->>App: Response code, IP address when reported
+    App->>Device: GetConnection (c=5) if no IP came back
 ```
+
+The BLE connection stays open after provisioning, so the user can retry or pick another network; it is released when the user taps **Cancel** or leaves the screen. The flow is reached from the Android and Desktop settings screens and settings search (`WifiProvisionRoute`, registered by `wifiProvisionGraph()`).
 
 ### Key Classes
 
@@ -42,6 +45,11 @@ sequenceDiagram
 - `NymeaPacketCodec.kt`: Chunked BLE packet encoder/decoder with reassembly.
 - `NymeaProtocol.kt`: JSON serialization for Nymea network manager commands and responses.
 - `ProvisionStatusCard.kt`: Inline status feedback card (idle/success/failed) with Material 3 colors.
+- `NymeaBleConstants.kt`: The nymea GATT service and characteristic UUIDs.
+
+## Testing
+
+`./gradlew :feature:wifi-provision:allTests` covers the packet codec, the protocol JSON, the service against a fake BLE connection, SSID deduplication, and the ViewModel.
 
 ## Dependency Graph
 

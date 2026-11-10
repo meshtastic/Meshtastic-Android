@@ -29,8 +29,6 @@ data class SitePlannerParams(
     val rxSensitivityDbm: Double = DEFAULT_RX_SENSITIVITY_DBM,
     val rxHeightMeters: Double = DEFAULT_RX_HEIGHT_METERS,
     val maxRangeKm: Double = DEFAULT_MAX_RANGE_KM,
-    val minDbm: Double = DEFAULT_MIN_DBM,
-    val maxDbm: Double = DEFAULT_MAX_DBM,
     val overlayTransparency: Int = DEFAULT_OVERLAY_TRANSPARENCY,
 ) {
     companion object {
@@ -43,8 +41,6 @@ data class SitePlannerParams(
         const val DEFAULT_RX_SENSITIVITY_DBM: Double = -130.0
         const val DEFAULT_RX_HEIGHT_METERS: Double = 1.0
         const val DEFAULT_MAX_RANGE_KM: Double = 30.0
-        const val DEFAULT_MIN_DBM: Double = -130.0
-        const val DEFAULT_MAX_DBM: Double = -80.0
         const val DEFAULT_OVERLAY_TRANSPARENCY: Int = 50
 
         // ITU-R P.1812 is defined from 30 MHz to 6 GHz; the model rejects anything outside it.

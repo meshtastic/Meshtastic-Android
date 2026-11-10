@@ -30,26 +30,31 @@ import co.touchlab.kermit.Logger
  * There is deliberately no retry. Every context that can legally promote this app to the foreground already has its own
  * trigger, and the dominant one — the user opening the app — fires on every `MainActivity.onStart()`. A background
  * retry has no exemption the original caller lacked, so it can only fail again.
+ *
+ * @return whether the start was requested and accepted by the platform; false when it was skipped or refused.
  */
-fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTrigger) {
+fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTrigger): Boolean {
     val appInForeground = isAppInForeground()
     if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground)) {
         Logger.i {
             "Skipping MeshService start: trigger=$trigger is not permitted to start a foreground service while " +
                 "backgrounded. Waiting for the next user-visible start."
         }
-        return
+        return false
     }
 
     Logger.i { "Starting MeshService (trigger=$trigger, appInForeground=$appInForeground)" }
-    try {
+    return try {
         context.startForegroundService(createIntent(context))
+        true
     } catch (ex: IllegalStateException) {
         // ForegroundServiceStartNotAllowedException extends IllegalStateException (via ServiceStartNotAllowedException)
         // and only exists from API 31; catching the supertype keeps this call site free of an API-gated class
         // reference. The service was never created, so there is nothing to tear down here.
         Logger.w(ex) { "Rejected MeshService foreground start (trigger=$trigger)" }
+        false
     } catch (ex: SecurityException) {
         Logger.w(ex) { "Missing permission for MeshService foreground start (trigger=$trigger)" }
+        false
     }
 }

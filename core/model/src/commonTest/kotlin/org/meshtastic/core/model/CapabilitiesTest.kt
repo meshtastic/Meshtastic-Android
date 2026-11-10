@@ -47,9 +47,24 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsHeardOnCurrentLora_requires_V2_8_1_even_with_forceEnableAll() {
+        assertFalse(caps("2.8.0").supportsHeardOnCurrentLora)
+        assertTrue(caps("2.8.1").supportsHeardOnCurrentLora)
+        assertFalse(caps(null).supportsHeardOnCurrentLora)
+        assertFalse(Capabilities("2.8.0", forceEnableAll = true).supportsHeardOnCurrentLora)
+    }
+
+    @Test
     fun supportsLockdown_requires_V2_8_0() {
         assertFalse(caps("2.7.21").supportsLockdown)
         assertTrue(caps("2.8.0").supportsLockdown)
+    }
+
+    @Test
+    fun maxLongNameBytes_drops_to_24_at_V2_8_0() {
+        assertEquals(39, caps("2.7.21").maxLongNameBytes)
+        assertEquals(24, caps("2.8.0").maxLongNameBytes)
+        assertEquals(39, caps(null).maxLongNameBytes)
     }
 
     @Test
@@ -202,6 +217,21 @@ class CapabilitiesTest {
         assertFalse(caps(null).supportsPreset(ChannelOption.MEDIUM_TURBO))
         assertTrue(
             Capabilities(firmwareVersion = null, forceEnableAll = true).supportsPreset(ChannelOption.MEDIUM_TURBO),
+        )
+    }
+
+    @Test
+    fun supportsPreset_hides_VeryLongSlow_from_2_6_5_where_firmware_dropped_it() {
+        // firmware#6486 removed its modemPresetToParams case; 2.6.5 and later run LONG_FAST when sent it.
+        assertTrue(caps("2.6.4").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertFalse(caps("2.6.5").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertFalse(caps("2.8.0").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertEquals(
+            setOf(ChannelOption.VERY_LONG_SLOW),
+            ChannelOption.entries.filter { it.removedInFirmware != null }.toSet(),
+        )
+        assertTrue(
+            Capabilities(firmwareVersion = "2.8.0", forceEnableAll = true).supportsPreset(ChannelOption.VERY_LONG_SLOW),
         )
     }
 

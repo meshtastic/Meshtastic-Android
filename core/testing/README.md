@@ -1,4 +1,4 @@
-/*
+<!--
  * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+-->
 
 # `:core:testing`
 
@@ -56,7 +56,7 @@ class MyViewModelTest : CommonMyViewModelTest() {
 ```
 
 ### 3. Implement the Android Subclass in `androidHostTest`
-Use `@RunWith(RobolectricTestRunner::class)` and call `setupTestContext()` to initialize `ContextServices.app`.
+Use `@RunWith(RobolectricTestRunner::class)` and call `setupTestContext()` to initialize `ContextServices.app`. `setupTestContext()` is an `expect fun` and a no-op on the JVM, so shared setup in `commonTest` can also call it directly.
 
 ```kotlin
 @RunWith(RobolectricTestRunner::class)
@@ -72,9 +72,10 @@ class MyViewModelTest : CommonMyViewModelTest() {
 
 ## Key Components
 
-- **Test Doubles / Fakes**: Provides in-memory implementations of core repositories (e.g., `FakeNodeRepository`, `FakeMeshLogRepository`) to isolate components under test.
-- **Coroutines Testing**: Provides dispatchers and test rules that replace the main dispatcher with `TestDispatcher` to allow time-control and synchronous execution of coroutines in tests.
-- **Mokkery Support**: Integrated with the Mokkery compiler plugin to provide robust and unified mocking capabilities in `commonTest`.
+- **Test Doubles / Fakes**: Provides in-memory implementations of core contracts (e.g., `FakeNodeRepository`, `FakeMeshLogRepository`, `FakeRadioController`, `FakeServiceRepository`, `FakeRadioInterfaceService`) and a fake BLE stack (`FakeBleConnection`, `FakeBleScanner`, `FakeBluetoothRepository`) to isolate components under test. Many extend `BaseFake`.
+- **Test data and logs**: `TestDataFactory` builds nodes and packets; `CapturingLogWriter` records Kermit output for assertions.
+- **Coroutines Testing**: `runWithRenderScope` runs a test with a child scope on the test scheduler, and `runUntilSettled` drains the scheduler until a condition holds, for state that Compose resources load off the scheduler. The module also `api`-exports kotlinx-coroutines-test and Turbine.
+- **Mokkery**: The `meshtastic.kmp.library` convention plugin applies the Mokkery compiler plugin to every KMP module, so `commonTest` can mock without depending on this module for it.
 
 ## Usage
 Add this module to your `commonTest` source set dependencies in your KMP module's `build.gradle.kts`:

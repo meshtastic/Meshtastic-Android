@@ -46,7 +46,12 @@ import threading
 import time
 
 NIX_POISON = ["DEVELOPER_DIR", "SDKROOT", "CC", "CXX", "LD", "AR", "NM", "RANLIB", "STRIP", "NIX_CC"]
-JDK_GLOB = os.path.expanduser("~/.gradle/jdks/jetbrains_s_r_o_-25-*/*/Contents/Home")
+GRADLE_HOME = os.environ.get("GRADLE_USER_HOME") or os.path.expanduser("~/.gradle")
+# Gradle unpacks a JBR as <dir>/<bundle>/Contents/Home on macOS and as <dir> itself on Linux.
+JDK_GLOBS = [
+    os.path.join(GRADLE_HOME, "jdks", "jetbrains_s_r_o_-25-*", "*", "Contents", "Home"),
+    os.path.join(GRADLE_HOME, "jdks", "jetbrains_s_r_o_-25-*"),
+]
 
 
 def clean_env():
@@ -55,7 +60,12 @@ def clean_env():
     env["PATH"] = "/usr/bin:/bin:/usr/sbin:/sbin"
     import glob
 
-    jdks = sorted(glob.glob(JDK_GLOB))
+    jdks = sorted(
+        p
+        for g in JDK_GLOBS
+        for p in glob.glob(g)
+        if os.path.isfile(os.path.join(p, "bin", "java")) and os.access(os.path.join(p, "bin", "java"), os.X_OK)
+    )
     if jdks:
         env["JAVA_HOME"] = jdks[-1]
     return env

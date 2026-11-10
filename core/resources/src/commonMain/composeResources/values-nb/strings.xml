@@ -61,6 +61,7 @@
     <string name="copy">Kopier</string>
     <!-- DEBUG -->
     <string name="debug_panel">Feilsøkningspanel</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Slett</string>
     <string name="delete_for_everyone">Slett for alle brukere</string>
@@ -96,6 +97,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Firmwareoppdatering kreves</string>
     <string name="firmware_old">Radiofirmwaren er for gammel til å snakke med denne applikasjonen. For mer informasjon om dette se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår Firmware installasjonsveiledning</a>.</string>
     <string name="firmware_too_old">Firmwareoppdatering kreves.</string>
     <string name="firmware_update_failed">Oppdatering feilet</string>
@@ -103,8 +105,10 @@
     <!-- GEOFENCE -->
     <string name="good">Godt</string>
     <string name="hops_away">Hopp Unna</string>
+    <!-- IAQ -->
     <string name="iaq">Luftkvalitet</string>
     <string name="iaq_definition">(Innendørs luftkvalitet) relativ skala IAQ-verdi målt ved Bosch BME680. Verdi 0–500.</string>
+    <string name="iaq_level_good">Godt</string>
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
     <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>
@@ -116,6 +120,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkte</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -124,6 +130,7 @@
     <string name="locked">Låst</string>
     <!-- LOG -->
     <string name="logs">Logger</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_cache_size">Nåværende størrelse for mellomlager</string>
@@ -153,9 +160,12 @@
     <string name="message_delivery_status">Melding leveringsstatus</string>
     <string name="message_input_label">Melding</string>
     <string name="message_status_queued">I kø for å sende</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Ok</string>
     <string name="module_settings">Modul konfigurasjon</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Frakoblet</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Du må angi en region!</string>
     <string name="must_update">Du må oppdatere denne applikasjonen på Google Play store (eller Github). Den er for gammel til å snakke med denne radioen.</string>
     <!-- MUTE -->
@@ -210,7 +220,9 @@
     <string name="quick_chat_edit">Endre enkelchat</string>
     <string name="quick_chat_instant">Send øyeblikkelig</string>
     <string name="quick_chat_new">Ny enkelchat</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radiokonfigurasjon</string>
+    <string name="radio_setup_name_headline">Navn</string>
     <string name="reboot">Omstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Fjernadministrasjon</string>
@@ -286,6 +298,8 @@
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_new">Nytt veipunkt</string>
     <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Dårlig</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adresse</string>
     <!-- WIND -->

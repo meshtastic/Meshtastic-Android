@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.ui.util
+
+import androidx.compose.runtime.Composable
+
+/**
+ * Whether this device can show a Live Update (Android 16 and later), and whether the user has turned them off for the
+ * app in system settings, where [openSettings] takes them.
+ */
+data class LiveUpdateSupport(val available: Boolean, val turnedOff: Boolean, val openSettings: () -> Unit) {
+    companion object {
+        val Unavailable = LiveUpdateSupport(available = false, turnedOff = false, openSettings = {})
+    }
+}
+
+/** The current [LiveUpdateSupport], re-read whenever the screen resumes. */
+@Composable expect fun rememberLiveUpdateSupport(): LiveUpdateSupport

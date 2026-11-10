@@ -51,7 +51,7 @@ private const val ZOOM_BOTTOM_INSET = 56
  * somewhere else.
  *
  * Lifted clear of the wordmark and attribution button along the bottom edge, which every map shows. See
- * [MeshMapOrnaments] for why the main map carries the credit outright and the small maps behind the button.
+ * [meshMapOrnaments] for why the main map carries the credit outright and the small maps behind the button.
  */
 @Composable
 internal fun BoxScope.MapZoom(mapState: MapState, basemap: Basemap) {

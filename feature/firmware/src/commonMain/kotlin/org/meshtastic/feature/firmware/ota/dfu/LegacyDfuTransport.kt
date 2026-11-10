@@ -27,7 +27,6 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -35,11 +34,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -48,16 +43,15 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.COMMAND_TIMEOUT
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.STREAM_TIMEOUT
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
+import kotlin.uuid.Uuid
 
 /**
  * Kable-based transport for the Nordic **Legacy DFU** protocol (Nordic SDK 11/12 / Adafruit `BLEDfu`).
@@ -79,6 +73,7 @@ internal constructor(
     private val address: String,
     dispatcher: CoroutineDispatcher,
     private val streamProfile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+    private val image: DfuImage = DfuImage.Application,
 ) : DfuUploadTransport {
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "Legacy DFU")
@@ -118,69 +113,71 @@ internal constructor(
      * Best-effort reads the optional DFU Version characteristic to gate against unsupported old (SDK ≤ 6) bootloaders.
      */
     override suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
-        val dfuAddress = calculateMacPlusOne(address)
-        val targetAddresses = setOf(address, dfuAddress)
-        Logger.i { "Legacy DFU: Scanning for DFU mode device at ${targetAddresses.map { it.anonymize() }}..." }
-
         val device =
-            scanForDevice { d -> d.address in targetAddresses }
-                ?: throw DfuException.ConnectionFailed(
-                    "DFU mode device not found. Tried: ${targetAddresses.map { it.anonymize() }}",
-                )
-
-        Logger.i { "Legacy DFU: Found DFU mode device at ${device.address.anonymize()}, connecting..." }
-        dfuAdvertisedName = device.name
-
-        bleConnection.connectionState
-            .onEach { Logger.d { "Legacy DFU: Connection state → $it" } }
-            .launchIn(transportScope)
-
-        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
-        if (connected is BleConnectionState.Disconnected) {
-            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address.anonymize()}")
-        }
-
-        bleConnection.profile(LegacyDfuUuids.SERVICE) { service ->
-            val controlChar = service.characteristic(LegacyDfuUuids.CONTROL_POINT)
-
-            val subscribed = CompletableDeferred<Unit>()
-            service
-                .observe(controlChar) {
-                    Logger.d { "Legacy DFU: Control Point subscribed" }
-                    subscribed.complete(Unit)
-                }
-                .onEach { bytes ->
+            bleConnection.connectToDfuControlPoint(
+                address = address,
+                tag = "Legacy DFU",
+                serviceUuid = LegacyDfuUuids.SERVICE,
+                controlPoint = LegacyDfuUuids.CONTROL_POINT,
+                logScope = transportScope,
+                scan = ::scanForDevice,
+                onNotification = { bytes ->
                     val parsed = LegacyDfuResponse.parse(bytes)
                     Logger.d { "Legacy DFU: Notification → $parsed" }
                     notificationChannel.trySend(parsed)
+                },
+            ) { service ->
+                // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
+                val version = safeCatching {
+                    service.read(service.characteristic(LEGACY_DFU_VERSION_UUID))
                 }
-                .catch { e ->
-                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                    Logger.e(e) { "Legacy DFU: Control Point notification error" }
+                    .map { bytes ->
+                        if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
+                    }
+                    .getOrElse { -1 }
+                dfuVersion = version
+                Logger.i { "Legacy DFU: DFU Version characteristic = $version (-1 ⇒ absent / unreadable)" }
+                if (version in 1..MIN_SUPPORTED_DFU_VERSION - 1) {
+                    throw LegacyDfuException.UnsupportedBootloader(version)
                 }
-                .launchIn(this)
-
-            subscribed.await()
-            // Conservative settle after CCCD confirmation before issuing commands.
-            delay(SUBSCRIPTION_SETTLE)
-
-            // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
-            val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
-            val version = safeCatching {
-                service.read(versionChar)
             }
-                .map { bytes ->
-                    if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
-                }
-                .getOrElse { -1 }
-            dfuVersion = version
-            Logger.i { "Legacy DFU: DFU Version characteristic = $version (-1 ⇒ absent / unreadable)" }
-            if (version in 1..MIN_SUPPORTED_DFU_VERSION - 1) {
-                throw LegacyDfuException.UnsupportedBootloader(version)
-            }
+        dfuAdvertisedName = device.name
+    }
 
-            Logger.i { "Legacy DFU: Connected and ready (${device.address.anonymize()})" }
+    /**
+     * Bootloader version from the DIS Firmware Revision, read in [transferFirmware]; null when absent or unparseable.
+     */
+    private var bootloaderVersion: KotlinVersion? = null
+
+    /**
+     * Best-effort DIS read: a bootloader without DIS, or a read that stalls, leaves the version unknown. The outer
+     * [withTimeoutOrNull] is deliberate: a timeout inside `profile()` is a [CancellationException] that [safeCatching]
+     * rethrows, which would surface as cancellation of the upload.
+     */
+    private suspend fun readBootloaderVersion() {
+        val firmwareRevision = readDisString(FIRMWARE_REVISION_UUID)
+        bootloaderVersion = firmwareRevision?.let(::parseBootloaderVersion)
+        Logger.i { "Legacy DFU: DIS firmware revision = '${firmwareRevision ?: "?"}' (version=$bootloaderVersion)" }
+    }
+
+    /** The bootloader's DIS Model Number and Firmware Revision. Valid after [connectToDfuMode]. */
+    suspend fun readBootloaderIdentity(): BootloaderIdentity {
+        val identity =
+            BootloaderIdentity(
+                model = readDisString(MODEL_NUMBER_UUID),
+                firmwareRevision = readDisString(FIRMWARE_REVISION_UUID),
+            )
+        Logger.i { "Legacy DFU: bootloader identity $identity" }
+        return identity
+    }
+
+    private suspend fun readDisString(characteristic: Uuid): String? = withTimeoutOrNull(DIS_READ_TIMEOUT) {
+        safeCatching {
+            bleConnection.profile(DEVICE_INFORMATION_SERVICE_UUID) { service ->
+                service.read(service.characteristic(characteristic)).decodeToString().trimEnd('\u0000').trim()
+            }
         }
+            .getOrNull()
     }
 
     // ---------------------------------------------------------------------------
@@ -189,8 +186,8 @@ internal constructor(
 
     /**
      * Sends the legacy DFU init packet using the SDK 7+ extended-init flow:
-     * 1. `START_DFU [APP]` → device prepares.
-     * 2. Image sizes `[0u32, 0u32, appSize_u32]` on the Packet characteristic.
+     * 1. `START_DFU [type]` → device prepares.
+     * 2. Image sizes `[sd, bl, app]` on the Packet characteristic.
      * 3. `INIT_PARAMS_START` → init bytes on Packet → `INIT_PARAMS_COMPLETE`.
      *
      * The legacy init packet for an APP image is typically 14 bytes (SDK 7) or 32 bytes (SDK 11 with signature). Any
@@ -225,8 +222,8 @@ internal constructor(
      * Drives the full upload sequence (START, init-packet brackets, PRN setup, firmware stream, validate, activate).
      *
      * Sequence details:
-     * 1. `START_DFU [0x04]` (APP image only).
-     * 2. Image sizes payload on Packet char: `[0u32, 0u32, firmware.size_u32]`.
+     * 1. `START_DFU [type]`: `0x04` for an application, `0x03` for a SoftDevice+bootloader [image].
+     * 2. Image sizes payload on Packet char: `[0, 0, app]` or `[sd, bl, 0]`.
      * 3. Await START response.
      * 4. `INIT_PARAMS_START`, init bytes on Packet, `INIT_PARAMS_COMPLETE`. Await init response.
      * 5. `PRN_REQ [PRN_LE16]`. (No response.)
@@ -251,14 +248,17 @@ internal constructor(
             pendingInitPacket
                 ?: throw DfuException.TransferFailed("transferInitPacket must be called before transferFirmware")
         Logger.i { "Legacy DFU: Starting upload (init=${initPacket.size}B, firmware=${firmware.size}B)..." }
+        // Only upload sessions need the version (it gates the retry after a drop); reset-prime connects skip it.
+        readBootloaderVersion()
 
         // ── 1. START_DFU + image sizes on Packet, then response ─────────────
         // The bootloader erases the application region before it answers; without lazy erase that is tens of
         // seconds of silence, so tell the UI what the wait is.
         onPhase(DfuUploadPhase.PREPARING)
-        writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
-        writePacket(legacyImageSizesPayload(appSize = firmware.size))
+        writeControlPoint(legacyStartPayload(image))
+        writePacket(legacyImageSizesPayload(image, firmware.size))
         handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
+        onPhase(DfuUploadPhase.STARTED)
 
         // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
@@ -366,6 +366,7 @@ internal constructor(
                     totalBytes = firmware.size,
                     connectionState = state,
                     lastConfirmedBytes = streamLastPrnOffset,
+                    bootloaderVersion = bootloaderVersion,
                 )
             },
         ) {
@@ -403,6 +404,7 @@ internal constructor(
                                 connectionState = state,
                                 lastConfirmedBytes = streamLastPrnOffset,
                                 cause = e,
+                                bootloaderVersion = bootloaderVersion,
                             )
                         }
                         Logger.w(e) {
@@ -640,9 +642,6 @@ internal constructor(
     // ---------------------------------------------------------------------------
 
     companion object {
-        private val CONNECT_TIMEOUT = 15.seconds
-        private val COMMAND_TIMEOUT = 30.seconds
-
         /**
          * Best-effort timeout around the Legacy `RESET` (`0x06`) Control-Point write. Legacy bootloaders may disconnect
          * before the RESET write acknowledgement returns. A missing acknowledgement is ambiguous: the device may have
@@ -664,15 +663,7 @@ internal constructor(
          */
         private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
-        private val SUBSCRIPTION_SETTLE = 500.milliseconds
-
-        /**
-         * Wall-clock budget for a full firmware streaming session. Must comfortably exceed the upload duration for the
-         * largest expected image at the slowest realistic Legacy DFU throughput (~1-3 KB/s with 20-byte packets). The
-         * per-receipt and per-write watchdogs inside the loop catch real stalls; this cap is just a safety net so a
-         * hung profile block can't sit forever.
-         */
-        private val STREAM_TIMEOUT = 15.minutes
+        private val DIS_READ_TIMEOUT = 5.seconds
 
         /**
          * Per-receipt latency threshold above which a PRN wait is logged at WARN. The Legacy bootloader normally ACKs

@@ -150,6 +150,18 @@ class FakeNodeRepositoryTest {
     }
 
     @Test
+    fun `setNodeDisplayName persists and clears the display name`() = runTest {
+        val nodeNum = 1234
+        repository.upsert(Node(num = nodeNum))
+
+        repository.setNodeDisplayName(nodeNum, "Mine")
+        assertEquals("Mine", repository.nodeDBbyNum.value[nodeNum]?.displayName)
+
+        repository.setNodeDisplayName(nodeNum, "")
+        assertEquals("", repository.nodeDBbyNum.value[nodeNum]?.displayName)
+    }
+
+    @Test
     fun `clearNodeDB preserves favorites`() = runTest {
         val node1 = Node(num = 1, isFavorite = true)
         val node2 = Node(num = 2, isFavorite = false)

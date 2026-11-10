@@ -17,57 +17,43 @@
 package org.meshtastic.feature.map.terrain
 
 import ch.poole.geo.pmtiles.Constants
-import ch.poole.geo.pmtiles.HttpUrlConnectionChannel
 import ch.poole.geo.pmtiles.Reader
-import java.io.ByteArrayOutputStream
-import java.io.IOException
+import java.io.FileNotFoundException
 import java.net.URI
-import java.util.zip.GZIPInputStream
 
-actual fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher = PmtilesTerrainTileFetcher(pmtilesUrl)
+// The reader reads the archive header on construction, and HttpURLConnection reports a 404 as FileNotFoundException.
+actual fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher? = try {
+    PmtilesTerrainTileFetcher(pmtilesUrl)
+} catch (_: FileNotFoundException) {
+    null
+}
 
 /**
  * Backed by `ch.poole.geo.pmtiles:Reader` (MIT-licensed), the same library the base offline layer uses for Protomaps.
  */
 private class PmtilesTerrainTileFetcher(pmtilesUrl: String) : TerrainTileFetcher {
 
-    private val reader: Reader = Reader(HttpUrlConnectionChannel(URI(pmtilesUrl).toURL()))
+    private val channel = RangeCheckedHttpChannel(URI(pmtilesUrl).toURL())
+    private val reader: Reader = Reader(channel)
+
+    override val version: String?
+        get() = channel.etag
 
     override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? {
         val raw = reader.getTile(zoom, x, y) ?: return null
-        return if (reader.tileCompression == Constants.COMPRESSION_GZIP) gunzip(raw) else raw
+        return if (reader.tileCompression == Constants.COMPRESSION_GZIP) {
+            gunzipBounded(raw, MAX_DECOMPRESSED_TILE_BYTES)
+        } else {
+            raw
+        }
     }
 
     override fun close() {
         reader.close()
     }
 
-    /**
-     * Bounded, not a bare `GZIPInputStream(...).readBytes()`: `download.mapterhorn.com` is a fixed first-party URL, but
-     * a compromised or MITM'd response is still a real defense-in-depth gap — an unbounded gunzip is a classic zip-bomb
-     * vector. A Terrarium tile decodes to at most 256×256×4 bytes (~256KB); [MAX_DECOMPRESSED_TILE_BYTES] is a generous
-     * multiple of that, not a tight fit.
-     */
-    private fun gunzip(bytes: ByteArray): ByteArray {
-        GZIPInputStream(bytes.inputStream()).use { gzip ->
-            val buffer = ByteArray(GUNZIP_BUFFER_BYTES)
-            val output = ByteArrayOutputStream()
-            var totalRead = 0
-            while (true) {
-                val read = gzip.read(buffer)
-                if (read == -1) break
-                totalRead += read
-                if (totalRead > MAX_DECOMPRESSED_TILE_BYTES) {
-                    throw IOException("Decompressed terrain tile exceeds $MAX_DECOMPRESSED_TILE_BYTES bytes")
-                }
-                output.write(buffer, 0, read)
-            }
-            return output.toByteArray()
-        }
-    }
-
     private companion object {
+        /** A Terrarium tile decodes to at most 256×256×4 bytes; this is a generous multiple, not a tight fit. */
         private const val MAX_DECOMPRESSED_TILE_BYTES = 8 * 1024 * 1024
-        private const val GUNZIP_BUFFER_BYTES = 8192
     }
 }

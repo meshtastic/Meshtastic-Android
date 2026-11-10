@@ -80,6 +80,8 @@ class MeshService : Service() {
 
     private val nodeStatusRepository: NodeStatusRepository by inject()
 
+    private val quickSettingsTileController: QuickSettingsTileController by inject()
+
     private var isServiceInitialized = false
 
     /**
@@ -137,6 +139,7 @@ class MeshService : Service() {
         // Keep conversation shortcuts published for the whole service lifetime (not only during an Android Auto
         // session) so message notifications can link to them and get Conversations-section treatment on phones.
         conversationShortcutPublisher.startObserving(serviceScope)
+        quickSettingsTileController.startObserving()
 
         // Hold a wake lock for as long as — and no longer than — some radio operation is in flight.
         serviceScope.launch {

@@ -28,6 +28,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.MaintenanceUf2Manifest
+import org.meshtastic.core.model.MqttRootsResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -93,6 +94,12 @@ interface ApiService {
      * bytes before any write; that is unaffected by how this manifest itself is fetched.
      */
     suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest
+
+    /**
+     * Fetches the MQTT root directory (community roots, subdivision neighbors and geocoder segment names) the topic
+     * finder places a user with. Decodes directly to the same model the bundled asset seed uses.
+     */
+    suspend fun getMqttRoots(): MqttRootsResponse
 }
 
 /**
@@ -130,4 +137,6 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
 
     override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest =
         client.get("resource/maintenanceUf2").body()
+
+    override suspend fun getMqttRoots(): MqttRootsResponse = client.get("resource/mqttRoots").body()
 }

@@ -21,7 +21,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +33,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.Exceptions
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -122,4 +125,30 @@ abstract class CommonNodeRepositoryTest {
 
         assertEquals(remoteNodeNum, result)
     }
+
+    @Test
+    fun `a failing startup name backfill is reported instead of escaping the process scope`() =
+        runTest(testDispatcher) {
+            val failure = IllegalStateException("withDb callback did not finish")
+            val reported = mutableListOf<Throwable>()
+            val previousReporter = Exceptions.reporter
+            Exceptions.reporter = { throwable, _, _ -> reported += throwable }
+            try {
+                val failingWriteDataSource = mock<NodeInfoWriteDataSource>(MockMode.autofill)
+                everySuspend { failingWriteDataSource.backfillDenormalizedNames() } throws failure
+
+                NodeRepositoryImpl(
+                    lifecycleOwner.lifecycle,
+                    readDataSource,
+                    failingWriteDataSource,
+                    dispatchers,
+                    localStatsDataSource,
+                )
+
+                // Coroutine stack-trace recovery may report a copy, so compare what was reported, not identity.
+                assertEquals(listOf(failure.message), reported.map { it.message })
+            } finally {
+                Exceptions.reporter = previousReporter
+            }
+        }
 }

@@ -21,10 +21,27 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_downloading
 import org.meshtastic.core.resources.firmware_update_transfer_percent
 import org.meshtastic.core.resources.firmware_update_transfer_progress
+import org.meshtastic.feature.firmware.FirmwareUpdateState
+import org.meshtastic.feature.firmware.ProgressState
 
 private const val PERCENT_MAX = 100
+
+/**
+ * Runs [download], publishing [FirmwareUpdateState.Downloading] from zero with [message] and the percent as details.
+ */
+internal suspend fun <T> downloadWithProgress(
+    updateState: (FirmwareUpdateState) -> Unit,
+    message: UiText = UiText.Resource(Res.string.firmware_update_downloading),
+    download: suspend (onProgress: (Float) -> Unit) -> T,
+): T {
+    updateState(FirmwareUpdateState.Downloading(ProgressState(message, 0f)))
+    return download { progress ->
+        updateState(FirmwareUpdateState.Downloading(ProgressState(message, progress, formatTransferPercent(progress))))
+    }
+}
 
 /** Formats download or transfer progress as a translated bare percentage, e.g. `"42%"` in English. */
 internal fun formatTransferPercent(progress: Float): UiText =

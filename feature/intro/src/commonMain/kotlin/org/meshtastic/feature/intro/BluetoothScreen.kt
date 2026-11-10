@@ -37,6 +37,7 @@ import org.meshtastic.core.resources.permission_missing_31
 import org.meshtastic.core.resources.permission_missing_pre31
 import org.meshtastic.core.resources.share_location
 import org.meshtastic.core.resources.share_location_description
+import org.meshtastic.core.ui.component.OnboardingFeature
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.LocationOn
@@ -98,16 +99,16 @@ internal fun BluetoothScreen(
  * Split out so [BluetoothScreen] stays within the complexity budget and this stays about the platform difference.
  */
 @Composable
-private fun bluetoothScreenFeatures(requiresLocation: Boolean): List<FeatureUIData> = buildList {
+private fun bluetoothScreenFeatures(requiresLocation: Boolean): List<OnboardingFeature> = buildList {
     add(
-        FeatureUIData(
+        OnboardingFeature(
             icon = MeshtasticIcons.Bluetooth,
             titleRes = Res.string.bluetooth_feature_discovery,
             subtitleRes = Res.string.bluetooth_feature_discovery_description,
         ),
     )
     add(
-        FeatureUIData(
+        OnboardingFeature(
             icon = MeshtasticIcons.Antenna,
             titleRes = Res.string.bluetooth_feature_config,
             subtitleRes = Res.string.bluetooth_feature_config_description,
@@ -119,14 +120,14 @@ private fun bluetoothScreenFeatures(requiresLocation: Boolean): List<FeatureUIDa
     // scope they were never shown.
     if (requiresLocation) {
         add(
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.mesh_map_location,
                 subtitleRes = Res.string.mesh_map_location_description,
             ),
         )
         add(
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.share_location,
                 subtitleRes = Res.string.share_location_description,

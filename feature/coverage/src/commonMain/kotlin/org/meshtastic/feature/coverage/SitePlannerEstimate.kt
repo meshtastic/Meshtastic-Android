@@ -19,11 +19,10 @@ package org.meshtastic.feature.coverage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
-import org.koin.compose.koinInject
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.terrain.TerrainTileStore
 import kotlin.math.log10
@@ -32,33 +31,42 @@ import kotlin.math.log10
  * Computes a Site Planner estimate on this device: Mapterhorn terrain for the coverage disc, cached under [store], then
  * the ITU-R P.1812 sweep, returned as the styled GeoJSON iso-bands a map layer takes.
  *
+ * Terrain the network can't supply is read from [offlineTerrain], the downloaded map regions, so an estimate inside a
+ * region works without a connection.
+ *
  * Throws when terrain can't be fetched or a value is outside what P.1812 accepts. Cancellation propagates.
  */
 suspend fun estimateCoverageGeoJson(
     params: SitePlannerParams,
     store: TerrainTileStore,
     dispatcher: CoroutineDispatcher,
+    offlineTerrain: List<RegionTerrain> = emptyList(),
 ): String = withContext(dispatcher) {
     val site = params.toSite()
     // The bounds let the zoom drop for a wide disc, so its tiles fit the decoded cache.
-    MapterhornElevation(bounds = site.coverageBounds(), store = store).use { source ->
+    val source = MapterhornElevation(bounds = site.coverageBounds(), store = store, offline = offlineTerrain)
+    try {
         source.prefetch(site)
         LocalCoverage(source).sweepGrid(site).toGeoJson(params.toCoverageStyle())
+    } finally {
+        source.close()
+        withContext(NonCancellable) { source.forgetStandIns() }
     }
 }
 
-/** [estimateCoverageGeoJson] bound to the app's compute dispatcher and its coverage terrain cache. */
+/**
+ * [estimateCoverageGeoJson] bound to the coverage compute dispatcher and its coverage terrain cache, falling back to
+ * [offlineTerrain] when offline.
+ */
 @Composable
-fun rememberCoverageEstimate(): suspend (SitePlannerParams) -> String {
-    val dispatchers: CoroutineDispatchers = koinInject()
-    return remember(dispatchers) {
+fun rememberCoverageEstimate(offlineTerrain: List<RegionTerrain> = emptyList()): suspend (SitePlannerParams) -> String =
+    remember(offlineTerrain) {
         val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
         val estimate: suspend (SitePlannerParams) -> String = { params ->
-            estimateCoverageGeoJson(params, store, dispatchers.default)
+            estimateCoverageGeoJson(params, store, coverageComputeDispatcher, offlineTerrain)
         }
         estimate
     }
-}
 
 /**
  * Where coverage terrain is cached between launches. It's kept apart from downloaded offline map regions so a coverage
@@ -83,13 +91,19 @@ internal fun SitePlannerParams.toSite(): Site = Site(
     radiusKm = maxRangeKm,
 )
 
-/** The form's Display section: palette, the dBm range the ramp spans, and overlay transparency. */
+/**
+ * The form's Display section: palette and overlay transparency. The ramp starts at the receiver's sensitivity, so the
+ * outermost band is where a node can hear the site at all.
+ */
 internal fun SitePlannerParams.toCoverageStyle(): CoverageStyle = CoverageStyle.fromTransparency(
     palette = colorScale,
-    minDbm = minDbm,
-    maxDbm = maxDbm,
+    minDbm = rxSensitivityDbm,
+    maxDbm = rxSensitivityDbm + BAND_SPAN_DB,
     transparencyPercent = overlayTransparency,
 )
+
+/** The dB the six bands span above the sensitivity floor. */
+private const val BAND_SPAN_DB = 50.0
 
 internal fun wattsToDbm(watts: Double): Double {
     require(watts > 0.0) { "transmit power must be positive, got $watts W" }

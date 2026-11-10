@@ -141,6 +141,41 @@ class DeepLinkRouterTest {
         assertEquals(listOf(ConnectionsRoute.Connections("n")), route("/connections?address=n"))
     }
 
+    @Test
+    fun `connections with a BLE address and pin carries both`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            route("/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"),
+        )
+    }
+
+    @Test
+    fun `connections pin matches in either query order`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            route("/connections?pin=123456&address=xAA:BB:CC:DD:EE:FF"),
+        )
+    }
+
+    @Test
+    fun `connections https link with a pin routes like the custom scheme`() {
+        // The manufacturer QR code form: a verified meshtastic.org app link.
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = "123456")),
+            DeepLinkRouter.route(
+                CommonUri.parse("https://meshtastic.org/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"),
+            ),
+        )
+    }
+
+    @Test
+    fun `connections without a pin leaves it null`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections(address = "xAA:BB:CC:DD:EE:FF", pin = null)),
+            route("/connections?address=xAA:BB:CC:DD:EE:FF"),
+        )
+    }
+
     // endregion
 
     // region map
@@ -163,6 +198,11 @@ class DeepLinkRouterTest {
     @Test
     fun `map with invalid waypointId falls back to null`() {
         assertEquals(listOf(MapRoute.Map(waypointId = null)), route("/map/not-a-number"))
+    }
+
+    @Test
+    fun `map mesh-view opens the mesh view over the map`() {
+        assertEquals(listOf(MapRoute.Map(waypointId = null), MapRoute.MeshHud()), route("/map/mesh-view"))
     }
 
     // endregion
@@ -209,6 +249,32 @@ class DeepLinkRouterTest {
             listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PositionLog(destNum = 100)),
             route("/nodes/100/position"),
         )
+    }
+
+    @Test
+    fun `nodes mesh-view finds the node over its detail`() {
+        assertEquals(
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), MapRoute.MeshHud(focusNodeNum = 100)),
+            route("/nodes/100/mesh-view"),
+        )
+    }
+
+    @Test
+    fun `nodes position mesh-view shows the track over its position log`() {
+        assertEquals(
+            listOf(
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
+                NodeDetailRoute.PositionLog(destNum = 100),
+                MapRoute.MeshHud(focusNodeNum = 100, trackNodeNum = 100),
+            ),
+            route("/nodes/100/position/mesh-view"),
+        )
+    }
+
+    @Test
+    fun `nodes position mesh-view with a bad destNum opens the node list`() {
+        assertEquals(listOf(NodesRoute.Nodes), route("/nodes/abc/position/mesh-view"))
     }
 
     @Test

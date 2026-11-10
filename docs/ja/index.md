@@ -12,15 +12,15 @@ User and developer documentation for the Meshtastic Android and Desktop app, bui
 
 ## クイックリンク
 
-| ガイド                                       | 説明                                   |
-| ----------------------------------------- | ------------------------------------ |
-| [はじめに](user/onboarding)                   | 最初の無線機を接続してメッセージを送信する                |
-| [メッセージとチャンネル](user/messages-and-channels) | チャンネルのブロードキャスト、ダイレクトメッセージ、リアクション、暗号化 |
-| [ノード](user/nodes)                         | メッシュネットワークのノードリストを理解する               |
-| [信号メーター](user/signal-meter)               | LoRa の信号品質メーターの仕組み                   |
-| [単位とロケール](user/units-and-locale)          | 温度・距離・時刻が地域に合わせて変わる仕組み               |
-| [デスクトップアプリ](user/desktop)                 | Linux、macOS、Windows でのデスクトップ利用       |
-| [アーキテクチャ](developer/architecture)         | コントリビューター向けのアプリアーキテクチャ概要             |
-| [コントリビューション](developer/contributing)      | ブランチ命名、PR ワークフロー、検証コマンド              |
+| ガイド                                       | 説明                                         |
+| ----------------------------------------- | ------------------------------------------ |
+| [はじめに](user/onboarding)                   | Connect your first node and send a message |
+| [メッセージとチャンネル](user/messages-and-channels) | チャンネルのブロードキャスト、ダイレクトメッセージ、リアクション、暗号化       |
+| [ノード](user/nodes)                         | メッシュネットワークのノードリストを理解する                     |
+| [信号メーター](user/signal-meter)               | LoRa の信号品質メーターの仕組み                         |
+| [単位とロケール](user/units-and-locale)          | 温度・距離・時刻が地域に合わせて変わる仕組み                     |
+| [デスクトップアプリ](user/desktop)                 | Linux、macOS、Windows でのデスクトップ利用             |
+| [アーキテクチャ](developer/architecture)         | コントリビューター向けのアプリアーキテクチャ概要                   |
+| [コントリビューション](developer/contributing)      | ブランチ命名、PR ワークフロー、検証コマンド                    |
 
-> このドキュメントは、アプリ内の**ヘルプとドキュメント**ブラウザと同じ Markdown ソースから提供されています。
+このドキュメントは、アプリ内の**ヘルプとドキュメント**ブラウザと同じ Markdown ソースから提供されています。

@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.map.maplibre.component
 
-import org.maplibre.compose.offline.OfflineManagerState
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -26,28 +25,22 @@ class OfflineDownloadGateTest {
     private val style = "https://tiles.openfreemap.org/styles/liberty"
 
     @Test
-    fun `a ready manager with a vector style and tiles to fetch can download`() {
-        assertTrue(canDownloadOfflinePack(OfflineManagerState.Ready(emptySet()), style, estimate = 12L))
+    fun `ready storage with a vector style and tiles to fetch can download`() {
+        assertTrue(canDownloadOfflinePack(isReady = true, style, estimate = 12L))
     }
 
     @Test
-    fun `a manager still loading its database cannot download`() {
-        assertFalse(canDownloadOfflinePack(OfflineManagerState.Loading, style, estimate = 12L))
-    }
-
-    @Test
-    fun `a manager whose database failed to open cannot download`() {
-        val failed = OfflineManagerState.Failed(IllegalStateException("database is locked"))
-        assertFalse(canDownloadOfflinePack(failed, style, estimate = 12L))
+    fun `storage that is not ready cannot download`() {
+        assertFalse(canDownloadOfflinePack(isReady = false, style, estimate = 12L))
     }
 
     @Test
     fun `a raster basemap has no style to pack`() {
-        assertFalse(canDownloadOfflinePack(OfflineManagerState.Ready(emptySet()), styleUrl = null, estimate = 12L))
+        assertFalse(canDownloadOfflinePack(isReady = true, styleUrl = null, estimate = 12L))
     }
 
     @Test
     fun `an empty region has nothing to download`() {
-        assertFalse(canDownloadOfflinePack(OfflineManagerState.Ready(emptySet()), style, estimate = 0L))
+        assertFalse(canDownloadOfflinePack(isReady = true, style, estimate = 0L))
     }
 }

@@ -38,8 +38,11 @@ interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */
     val currentDb: StateFlow<MeshtasticDatabase>
 
-    /** Re-latches [query] whenever the active database changes. Production also recovers a wedged Room pool. */
-    fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T>
+    /**
+     * Re-latches [query] whenever the active database changes. Production also recovers a wedged Room pool. [name]
+     * labels the query in Room's pool-timeout dump; a query lambda's own class name is synthetic on Android.
+     */
+    fun <T> observeCurrentDb(name: String? = null, query: (MeshtasticDatabase) -> Flow<T>): Flow<T>
 
     /**
      * Execute one bounded read against the synchronously published current database without writer admission. The read

@@ -46,6 +46,7 @@ import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.TranslationSource
+import org.meshtastic.feature.docs.model.loadedTranslationSource
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.TranslationResult
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
@@ -188,7 +189,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 
     var content by remember { mutableStateOf<DocPageContent?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var translationSource by remember { mutableStateOf<TranslationSource>(TranslationSource.BUNDLED) }
+    var translationSource by remember { mutableStateOf<TranslationSource>(TranslationSource.UNTRANSLATED) }
 
     val locale = currentLocaleCode()
 
@@ -208,7 +209,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
             // Crowdin provided a localized version — use it directly
             wasCrowdinLocalized && loaded != null -> {
                 content = loaded
-                translationSource = TranslationSource.BUNDLED
+                translationSource = loadedTranslationSource(wasCrowdinLocalized)
                 isLoading = false
             }
 
@@ -216,7 +217,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
             locale != "en" && loaded != null -> {
                 // Show English content immediately while translation runs
                 content = loaded
-                translationSource = TranslationSource.BUNDLED
+                translationSource = loadedTranslationSource(wasCrowdinLocalized)
                 isLoading = false
 
                 val result =
@@ -238,7 +239,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
             // English locale or load failure
             else -> {
                 content = loaded
-                translationSource = TranslationSource.BUNDLED
+                translationSource = loadedTranslationSource(wasCrowdinLocalized)
                 isLoading = false
             }
         }

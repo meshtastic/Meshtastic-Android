@@ -21,9 +21,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transformLatest
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
@@ -34,10 +35,13 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
+import org.meshtastic.core.repository.DeviceModelRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -49,6 +53,8 @@ import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
+import org.meshtastic.feature.node.metrics.observedTracerouteResponses
+import org.meshtastic.feature.node.metrics.tracedByTracerouteRequests
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.DeviceProfile
@@ -65,6 +71,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val deviceLinkRepository: DeviceLinkRepository,
+    private val deviceModelRepository: DeviceModelRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
     private val localeUnitsProvider: LocaleUnitsProvider,
@@ -99,6 +106,12 @@ constructor(
                 meshLogRepository.getLogsFrom(effectiveNodeId, PortNum.NEIGHBORINFO_APP.value).onStart {
                     emit(emptyList())
                 },
+                // Traceroutes other nodes ran to us are logged under each tracer, so our own page gathers them all.
+                if (effectiveNodeId == MeshLog.NODE_NUM_LOCAL) {
+                    meshLogRepository.getInboundRequestLogs(PortNum.TRACEROUTE_APP).onStart { emit(emptyList()) }
+                } else {
+                    flowOf(emptyList())
+                },
             ) { args: Array<List<Any?>> ->
                 @Suppress("UNCHECKED_CAST")
                 LogsGroup(
@@ -108,6 +121,7 @@ constructor(
                     pax = args[3] as List<MeshLog>,
                     trRes = args[4] as List<MeshLog>,
                     niRes = args[5] as List<MeshLog>,
+                    trInbound = args[6] as List<MeshLog>,
                 )
             }
 
@@ -121,8 +135,8 @@ constructor(
                 IdentityGroup(ourNode, myInfo, profile)
             }
 
-        // 3. Device Hardware (+ msh.to links) — non-blocking Flow derived from stable (hwModel, pioEnv) key.
-        val hardwareAndLinksFlow: Flow<Pair<DeviceHardware?, List<DeviceLink>>> =
+        // 3. Device Hardware (+ msh.to links, 3D model) — non-blocking Flow derived from stable (hwModel, pioEnv) key.
+        val hardwareAndLinksFlow: Flow<HardwareGroup> =
             combine(nodeFlow, identityFlow) { node, identity ->
                 val isLocal = node.num == identity.ourNode?.num
                 val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
@@ -131,12 +145,16 @@ constructor(
                 .distinctUntilChanged()
                 .flatMapLatest { key -> deviceHardwareRepository.observeDeviceHardware(key.hwModel, key.target) }
                 .onStart { emit(null) }
-                .mapLatest { hw ->
+                .transformLatest { hw ->
                     val links =
                         hw?.platformioTarget
                             ?.takeIf { it.isNotBlank() }
                             ?.let { deviceLinkRepository.getLinksForTarget(it) } ?: emptyList()
-                    hw to links
+                    // The model check is a network round trip, so the hardware card never waits on it.
+                    emit(HardwareGroup(hw, links, hasModel = false))
+                    if (hw?.heroImageFile?.let { deviceModelRepository.hasModel(it) } == true) {
+                        emit(HardwareGroup(hw, links, hasModel = true))
+                    }
                 }
 
         // 4. Metadata & Request Timestamps
@@ -192,9 +210,7 @@ constructor(
             @Suppress("UNCHECKED_CAST")
             val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
 
-            @Suppress("UNCHECKED_CAST")
-            val hardwareAndLinks = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
-            val (hw, deviceLinks) = hardwareAndLinks
+            val (hw, deviceLinks, hasDeviceModel) = args[HARDWARE_INDEX] as HardwareGroup
 
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
@@ -210,6 +226,7 @@ constructor(
                     isLocal = isLocal,
                     deviceHardware = hw,
                     deviceLinks = deviceLinks,
+                    hasDeviceModel = hasDeviceModel,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
                     isFahrenheit = temperatureUnit == TemperatureUnit.FAHRENHEIT,
@@ -224,6 +241,9 @@ constructor(
                     paxMetrics = logs.pax,
                     tracerouteRequests = trReqs,
                     tracerouteResults = logs.trRes,
+                    tracerouteObserved = observedTracerouteResponses(trReqs, logs.trRes),
+                    tracerouteTracedBy =
+                    tracedByTracerouteRequests(if (isLocal) logs.trInbound else logs.trRes, identity.ourNode?.num),
                     neighborInfoRequests = niReqs,
                     neighborInfoResults = logs.niRes,
                     firmwareEdition = metadata.edition,
@@ -251,7 +271,7 @@ constructor(
 
             @Suppress("MagicNumber")
             val nodeName =
-                node.user.long_name.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                node.effectiveLongName.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
                     ?: UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
 
             NodeDetailUiState(
@@ -269,6 +289,8 @@ constructor(
 
     private data class HardwareKey(val hwModel: Int, val target: String?)
 
+    private data class HardwareGroup(val hardware: DeviceHardware?, val links: List<DeviceLink>, val hasModel: Boolean)
+
     private data class LogsGroup(
         val telemetry: List<Telemetry>,
         val packets: List<MeshPacket>,
@@ -276,6 +298,7 @@ constructor(
         val pax: List<MeshLog>,
         val trRes: List<MeshLog>,
         val niRes: List<MeshLog>,
+        val trInbound: List<MeshLog>,
     )
 
     private data class IdentityGroup(val ourNode: Node?, val myInfo: MyNodeInfo?, val profile: DeviceProfile)

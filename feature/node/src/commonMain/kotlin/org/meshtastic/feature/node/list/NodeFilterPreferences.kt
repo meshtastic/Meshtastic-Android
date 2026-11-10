@@ -39,6 +39,16 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val shouldShowRole = uiPrefs.shouldShowRole
     open val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
 
+    open val keptUnheardNodes = uiPrefs.keptUnheardNodes
+
+    open fun keepUnheardNodes(nodeNums: Set<Int>) {
+        uiPrefs.keepUnheardNodes(nodeNums)
+    }
+
+    open fun forgetKeptUnheardNodes(nodeNums: Set<Int>) {
+        uiPrefs.forgetKeptUnheardNodes(nodeNums)
+    }
+
     open val nodeSortOption =
         uiPrefs.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
 

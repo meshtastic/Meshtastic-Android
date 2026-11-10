@@ -153,6 +153,34 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
     }
 
     /**
+     * Download a bootloader's SoftDevice+bootloader DFU package and check it against its pinned digest. A mismatch
+     * deletes the file and returns `null`, with no fallback, for the same reason as [retrieveMaintenanceUf2].
+     */
+    @Suppress("ReturnCount") // guard clauses: every failure path must abort before a destructive write
+    internal open suspend fun retrieveBootloaderDfuZip(
+        asset: BootloaderDfuZip,
+        onProgress: (Float) -> Unit,
+    ): FirmwareArtifact? {
+        val artifact =
+            try {
+                fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Bootloader package download failed: ${asset.fileName}" }
+                null
+            } ?: return null
+        val actualDigest =
+            FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(fileHandler.readBytes(artifact)))
+        if (!actualDigest.equals(asset.sha256, ignoreCase = true)) {
+            Logger.e { "Bootloader package ${asset.fileName} digest mismatch (expected ${asset.sha256})" }
+            fileHandler.deleteFile(artifact)
+            return null
+        }
+        return artifact
+    }
+
+    /**
      * Download the ESP32 OTA firmware binary. Tries in order:
      * 1. `.mt.json` manifest resolution (2.7.17+) — the authoritative `app0` partition image.
      * 2. `firmware-<target>-<version>-update.bin` — the bare app image. Preferred over the plain `.bin` because on

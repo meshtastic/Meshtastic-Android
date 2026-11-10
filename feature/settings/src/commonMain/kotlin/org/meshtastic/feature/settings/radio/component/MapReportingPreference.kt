@@ -49,6 +49,7 @@ import org.meshtastic.core.resources.map_reporting_consent_header
 import org.meshtastic.core.resources.map_reporting_consent_text
 import org.meshtastic.core.resources.schema_mapreportsettings_publish_interval_secs
 import org.meshtastic.core.resources.schema_mapreportsettings_publish_interval_secs_description
+import org.meshtastic.core.resources.schema_mapreportsettings_should_report_location
 import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled
 import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled_description
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -80,6 +81,7 @@ fun MapReportingPreference(
         var showMapReportingWarning by rememberSaveable(mapReportingEnabled) { mutableStateOf(mapReportingEnabled) }
         SwitchPreference(
             title = stringResource(Res.string.schema_mqtt_map_reporting_enabled),
+            modifier = Modifier.settingsField(Res.string.schema_mqtt_map_reporting_enabled),
             summary = stringResource(Res.string.schema_mqtt_map_reporting_enabled_description),
             checked = showMapReportingWarning,
             enabled = enabled,
@@ -100,6 +102,7 @@ fun MapReportingPreference(
 
                 SwitchPreference(
                     title = stringResource(Res.string.i_agree),
+                    modifier = Modifier.settingsField(Res.string.schema_mapreportsettings_should_report_location),
                     summary = stringResource(Res.string.i_agree_to_share_my_location),
                     checked = shouldReportLocation,
                     enabled = enabled,
@@ -140,7 +143,9 @@ fun MapReportingPreference(
                     )
                     val publishItems = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
                     DropDownPreference(
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier =
+                        Modifier.settingsField(Res.string.schema_mapreportsettings_publish_interval_secs)
+                            .padding(bottom = 16.dp),
                         title = stringResource(Res.string.schema_mapreportsettings_publish_interval_secs),
                         summary = stringResource(Res.string.schema_mapreportsettings_publish_interval_secs_description),
                         items = publishItems.map { it to it.toDisplayString() },

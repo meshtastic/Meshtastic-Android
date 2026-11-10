@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -33,6 +32,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -193,10 +195,11 @@ fun MetricChartScaffold(
 }
 
 /**
- * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
- * narrow screens (phones). When [isChartExpanded] is true, the card list is hidden and the chart fills the available
- * space.
+ * An adaptive layout for metric screens. Splits side-by-side when [calculatePaneScaffoldDirective] allows more than one
+ * horizontal partition, and stacks otherwise. When [isChartExpanded] is true, the card list is hidden and the chart
+ * fills the available space.
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveMetricLayout(
     chartPart: @Composable (Modifier) -> Unit,
@@ -204,27 +207,35 @@ fun AdaptiveMetricLayout(
     modifier: Modifier = Modifier,
     isChartExpanded: Boolean = false,
 ) {
-    BoxWithConstraints(modifier = modifier) {
-        val isExpanded = maxWidth >= 600.dp
-        if (isExpanded) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                chartPart(Modifier.weight(1f).fillMaxHeight())
-                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
-                    listPart(Modifier.weight(1f).fillMaxHeight())
-                }
+    val isExpanded = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions > 1
+    if (isExpanded) {
+        Row(modifier = modifier.fillMaxSize()) {
+            chartPart(Modifier.weight(1f).fillMaxHeight())
+            AnimatedVisibility(
+                visible = !isChartExpanded,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                enter = expandVertically(),
+                exit = shrinkVertically(),
+            ) {
+                listPart(Modifier.fillMaxSize())
             }
-        } else {
-            Column(modifier = Modifier.fillMaxSize()) {
-                chartPart(
-                    if (isChartExpanded) {
-                        Modifier.fillMaxWidth().weight(1f)
-                    } else {
-                        Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.45f)
-                    },
-                )
-                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
-                    listPart(Modifier.fillMaxWidth().weight(1f))
-                }
+        }
+    } else {
+        Column(modifier = modifier.fillMaxSize()) {
+            chartPart(
+                if (isChartExpanded) {
+                    Modifier.fillMaxWidth().weight(1f)
+                } else {
+                    Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.45f)
+                },
+            )
+            AnimatedVisibility(
+                visible = !isChartExpanded,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                enter = expandVertically(),
+                exit = shrinkVertically(),
+            ) {
+                listPart(Modifier.fillMaxSize())
             }
         }
     }

@@ -16,11 +16,12 @@
  */
 package org.meshtastic.feature.map.maplibre.component
 
-import org.maplibre.compose.offline.OfflineManagerState
+import org.maplibre.compose.offline.OfflineStorageState
 
 /**
- * Whether the offline sheet may start a download. [OfflineManagerState.Failed] is terminal and `create` throws its
- * cause, and while [OfflineManagerState.Loading] the sheet shows progress in place of an answer it does not have yet.
+ * Whether the offline sheet may start a download. [isReady] is whether the storage reported
+ * [OfflineStorageState.Ready]: [OfflineStorageState.Failed] is terminal and `create` throws its cause, and while
+ * [OfflineStorageState.Loading] the sheet shows progress in place of an answer it does not have yet.
  */
-internal fun canDownloadOfflinePack(state: OfflineManagerState, styleUrl: String?, estimate: Long): Boolean =
-    state is OfflineManagerState.Ready && styleUrl != null && estimate > 0L
+internal fun canDownloadOfflinePack(isReady: Boolean, styleUrl: String?, estimate: Long): Boolean =
+    isReady && styleUrl != null && estimate > 0L

@@ -58,7 +58,7 @@ fun ClusterMembersDialog(
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                 // Deduped by node number: it is the key and must be unique, and a node can reach the map from two
                 // sources, or arrive as a `num = 0` placeholder.
-                items(items = members.distinctBy { it.nodeNum }, key = { it.nodeNum }) { member ->
+                items(items = members.distinctBy { it.nodeNum }.inDialogOrder(), key = { it.nodeNum }) { member ->
                     ClusterMemberRow(member = member, onClick = { onMemberClick(member.nodeNum) })
                 }
             }

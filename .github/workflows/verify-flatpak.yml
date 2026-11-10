@@ -8,8 +8,8 @@ on:
     paths:
       - 'scripts/verify-flatpak/**'
       - '.github/workflows/verify-flatpak.yml'
-  # Post-merge only for what the check itself depends on. The offline manifest pins the
-  # Gradle distribution apart from the wrapper, so a wrapper bump is checked on merge.
+  # Post-merge only for what the check itself depends on. The offline build vendors the
+  # wrapper's Gradle distribution, so a wrapper bump is checked on merge.
   push:
     branches: [ main ]
     paths:
@@ -49,38 +49,16 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Renovate mirrors wrapper bumps into the manifest's distribution URL but cannot
-      # rewrite its sha256, so on a wrapper bump this drift is expected: fail here in
-      # seconds instead of ~15 minutes into the build ("Verification of Gradle
-      # distribution failed!", see #6777/#6782).
-      - name: Check vendored Gradle dist matches the wrapper
-        run: |
-          props=gradle/wrapper/gradle-wrapper.properties
-          manifest=scripts/verify-flatpak/desktop-offline.yaml
-          wrapper_dist=$(grep '^distributionUrl=' "$props" | sed 's|.*/||' || true)
-          wrapper_sha=$(grep '^distributionSha256Sum=' "$props" | cut -d= -f2 || true)
-          manifest_dist=$(grep -o 'gradle-[0-9][^/]*\.zip' "$manifest" || true)
-          manifest_sha=$(awk '/url:.*services\.gradle\.org\/distributions\//{getline; sub(/^[[:space:]]*sha256:[[:space:]]*/, ""); print}' "$manifest")
-          if [ -z "$wrapper_dist" ] || [ -z "$wrapper_sha" ]; then
-            echo "::error file=$props::Could not parse distributionUrl/distributionSha256Sum from $props; the guard in verify-flatpak.yml needs updating."
-            exit 1
-          fi
-          if [ "$wrapper_dist" != "$manifest_dist" ] || [ "$wrapper_sha" != "$manifest_sha" ]; then
-            echo "::error file=$manifest::Vendored Gradle dist is out of sync: $manifest pins '$manifest_dist' (sha256 '$manifest_sha') but $props pins '$wrapper_dist' (sha256 '$wrapper_sha'). Update the url and sha256 in $manifest; the correct sha256 is distributionSha256Sum in $props."
-            exit 1
-          fi
-          echo "OK: $manifest vendors $wrapper_dist, matching $props"
-
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: temurin
-          java-version: 25.0.4+101.0.LTS
+          java-version: 25.0.5+8.0.LTS
           token: ${{ github.token }}
 
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
       # Fatal: foojay lists no JBR 25, so the build cannot configure without it.
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: jetbrains
           java-version: 25
@@ -88,7 +66,7 @@ jobs:
           token: ${{ github.token }}
 
       # The build below uses its own Gradle user home, so a cache here is never read.
-      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache-disabled: true
@@ -122,6 +100,9 @@ jobs:
         run: |
           cp scripts/verify-flatpak/desktop-offline.yaml \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+          python3 scripts/verify-flatpak/bump-flathub-manifest.py --gradle-only \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml" \
+            gradle/wrapper/gradle-wrapper.properties
           cp flatpak-sources.json \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
           rsync -a --delete \

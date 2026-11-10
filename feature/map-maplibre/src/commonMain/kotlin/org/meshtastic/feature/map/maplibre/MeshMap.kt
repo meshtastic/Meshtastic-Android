@@ -73,7 +73,7 @@ import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.component.MeshMapFitPadding
-import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
+import org.meshtastic.feature.map.maplibre.component.meshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
@@ -89,6 +89,7 @@ import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
+import org.meshtastic.feature.map.maplibre.tiles.InstallRadarSmoothing
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.seconds
 import org.maplibre.compose.layers.LocationIndicatorDefaults as CoreLocationIndicatorDefaults
@@ -131,8 +132,8 @@ fun rememberMeshMapState(
      * no stale dot behind — and matches the Google flavor, which shows the dot only while tracking.
      */
     followLocation: Boolean = false,
-    /** How a location update should affect camera bearing. [BearingUpdate.IGNORE] follows position only. */
-    bearingUpdate: BearingUpdate = BearingUpdate.IGNORE,
+    /** How a location update should affect camera bearing. [BearingUpdate.Ignore] follows position only. */
+    bearingUpdate: BearingUpdate = BearingUpdate.Ignore,
     /**
      * Whether to frame the mesh once positions arrive. False when the caller has restored a remembered camera, so the
      * user's own view is not yanked away from them.
@@ -153,6 +154,7 @@ fun rememberMeshMapState(
             MapNodePolicy.visibleNodes(nodes, filterState, nowSeconds, myNodeInfo?.myNodeNum)
         }
 
+    InstallRadarSmoothing()
     val mapState =
         rememberMapState(baseStyle = basemap.toBaseStyle(), initialCameraPosition = initialCameraPosition) {
             val state = checkNotNull(LocalMapState.current)
@@ -222,6 +224,8 @@ fun MeshMap(
     mapState: MapState,
     modifier: Modifier = Modifier,
     basemap: Basemap = Basemaps.default,
+    /** HTML credits for drawn data no style source carries; see [meshMapOrnaments]. */
+    extraCredits: List<String> = emptyList(),
     /** Called with the pressed position on a long press, which is how a new waypoint gets placed. */
     onMapLongClick: (Position) -> Unit = {},
     /** Called with the tapped position. Used to collect the two corners of a waypoint's geofence bounding box. */
@@ -240,12 +244,17 @@ fun MeshMap(
     }
 
     val zoomRange = basemap.zoomRange()
+    val credits = extraCredits.distinct()
+    val ornaments = remember(credits) { meshMapOrnaments(credits) }
     MaplibreMap(
         modifier = modifier,
         state = mapState,
         // Honour what the source can actually serve, as the OSMdroid map did.
         cameraConstraints =
-        CameraConstraints(minZoom = zoomRange.start.toDouble(), maxZoom = zoomRange.endInclusive.toDouble()),
+        CameraConstraints {
+            minZoom = zoomRange.start.toDouble()
+            maxZoom = zoomRange.endInclusive.toDouble()
+        },
         interactions =
         MapInteractions {
             callbacks {
@@ -264,7 +273,7 @@ fun MeshMap(
                 }
             }
         },
-        overlay = { include(MeshMapOrnaments) },
+        overlay = { include(ornaments) },
     )
 }
 
@@ -299,8 +308,8 @@ private fun MeshMapNodeLayers(
                 // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
                 // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
                 mapState.animateCamera(
-                    CameraUpdate(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
-                    CameraAnimation.Ease(),
+                    CameraUpdate(center = centre, zoom = maxOf(expansionZoom, current.zoom)),
+                    CameraAnimation.Ease.Standard,
                 )
             }
         },
@@ -351,7 +360,7 @@ private fun FollowUserLocation(
     LocationTrackingEffect(
         locationState = locationState,
         enabled = followLocation,
-        trackBearing = bearingUpdate != BearingUpdate.IGNORE,
+        trackBearing = bearingUpdate != BearingUpdate.Ignore,
     ) {
         updateCamera(mapState = mapState, updateBearing = bearingUpdate)
     }

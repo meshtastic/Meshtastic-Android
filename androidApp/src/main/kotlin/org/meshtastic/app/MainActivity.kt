@@ -20,18 +20,13 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
-import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -42,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
@@ -57,6 +53,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.node.component.InlineMap
+import org.meshtastic.app.node.deviceModelArViewer
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
@@ -86,6 +83,7 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalDeviceModelArViewer
 import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
@@ -103,6 +101,7 @@ import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
@@ -143,18 +142,8 @@ class MainActivity : AppCompatActivity() {
         launchOptions.skipDeepLinkConfirmation =
             automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)
 
-        enableEdgeToEdge()
-
-        // Explicitly set the cutout mode to ALWAYS for Android 15+ to satisfy Play Console recommendations.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            window.attributes.layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        }
-
-        // Ensure the navigation bar remains seamless on modern Android versions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
+        // Transparent bars, cutout mode ALWAYS and no contrast scrim, which Play's edge-to-edge checks expect.
+        WindowCompat.enableEdgeToEdge(window)
 
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
@@ -168,10 +157,10 @@ class MainActivity : AppCompatActivity() {
 
             // Update system bar style when theme changes
             androidx.compose.runtime.SideEffect {
-                enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
-                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
-                )
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !dark
+                    isAppearanceLightNavigationBars = !dark
+                }
             }
 
             AppCompositionLocals {
@@ -268,6 +257,7 @@ class MainActivity : AppCompatActivity() {
                 packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION),
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
+            LocalDeviceModelArViewer provides deviceModelArViewer,
             LocalSitePlannerAvailable provides true,
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
@@ -296,7 +286,7 @@ class MainActivity : AppCompatActivity() {
                     org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
                 },
             LocalMapMainScreenProvider provides
-                { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
+                { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum, onOpenMeshHud ->
                     val viewModel = koinViewModel<SharedMapViewModel>()
                     MapScreen(
                         viewModel = viewModel,
@@ -304,6 +294,7 @@ class MainActivity : AppCompatActivity() {
                         navigateToNodeDetails = navigateToNodeDetails,
                         waypointId = waypointId,
                         sitePlannerNodeNum = sitePlannerNodeNum,
+                        onOpenMeshHud = onOpenMeshHud.takeIf { rememberMeshHudSupported() },
                     )
                 },
             content = content,
@@ -325,14 +316,10 @@ class MainActivity : AppCompatActivity() {
                         NfcAdapter.EXTRA_NDEF_MESSAGES,
                         NdefMessage::class.java,
                     )
-                if (rawMessages != null) {
-                    for (rawMsg in rawMessages) {
-                        val msg = rawMsg as NdefMessage
-                        for (record in msg.records) {
-                            record.toUri()?.let { handleMeshtasticUri(it) }
-                        }
-                    }
-                }
+                // Android matched the intent filter on the first record only, so a later record on the same tag must
+                // not be routed too.
+                val firstUri = rawMessages?.firstOrNull()?.let { it as NdefMessage }?.records?.firstOrNull()?.toUri()
+                (appLinkData ?: firstUri)?.let { handleMeshtasticUri(it) }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {

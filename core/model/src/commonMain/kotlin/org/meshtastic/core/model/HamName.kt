@@ -88,7 +88,7 @@ object HamName {
 fun String.utf8Size(): Int = encodeToByteArray().size
 
 /** Clips to at most [maxBytes] of UTF-8, stepping whole code points so a surrogate pair is never cut in half. */
-private fun String.limitToBytes(maxBytes: Int): String {
+fun String.limitToBytes(maxBytes: Int): String {
     if (utf8Size() <= maxBytes) return this
     var end = 0
     var used = 0

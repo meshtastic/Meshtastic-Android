@@ -1,7 +1,7 @@
 ---
 title: ノードメトリクス
 nav_order: 5
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
@@ -91,14 +91,14 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 ![CO₂ の深刻度が色分けされた大気質の測定値](../../assets/screenshots/node-metrics_air_quality.png)
 
-大気質のログ／メトリクスボタンは、**ノードが大気質のテレメトリを報告したときにのみ**、ノードの詳細画面に表示されます。大気質ビューでは、次のことができます：
+The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. 大気質ビューでは、次のことができます：
 
 - グラフの**期間**を選択します。
 - **メトリクスチップ**で絞り込みます。データがあるメトリクスのみが表示されます。
 - 最新の大気質テレメトリを**更新／要求**します。
 - 表計算ソフトで分析できるよう、**CSV にエクスポート**します。
 
-> 💡 **ヒント：** 大気質メトリクスには、リモートノードに対応する大気質センサーが必要です。対応ハードウェアについては、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
+See [Telemetry & Sensors](telemetry-and-sensors) for supported air-quality hardware.
 
 ## 信号品質
 
@@ -109,11 +109,10 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 | SN比    | 信号対ノイズ比（高いほど良い）                      |
 | RSSI   | 受信信号強度インジケーター（0 に近いほど良い）             |
 | ノイズフロア | ローカルの背景 RF ノイズ（dBm、値が小さい（負が大きい）ほど静か） |
-| ホップ数   | 直前のメッセージのメッシュホップ数                    |
 
 ### 信号品質の目安
 
-信号品質は、固定のしきい値ではなく、**現在の LoRa モデムプリセットの復調限界に対する SNR** で評価されます。同じ SNR でもプリセットによって意味が異なります（例：−15 dB は LongSlow では問題ありませんが、ShortFast では使い物になりません）。 When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
+Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (for example, −16 dB rates Good on Long Fast but None on Short Fast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
 
 | 品質 | 基準                                                    |
 | -- | ----------------------------------------------------- |
@@ -124,9 +123,9 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 詳しい説明は、[信号メーターを理解する](signal-meter) を参照してください。
 
-接続中の無線機のローカル統計も、利用可能な場合は信号品質に表示されます。これらのログには、ノイズフロア、トラフィックカウンター、中継カウンター、オンラインノード数、無線機の連続稼働時間が含まれます。ノイズフロアのグラフでは、混雑した RF 環境を見分けやすいよう、-85 dBm に破線の基準線が引かれます。
+Local Stats from your connected node are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and uptime. The noise floor chart uses a dashed reference line at −85 dBm to help identify a busy RF environment.
 
-- **Request** — ask the connected radio for a fresh Local Stats telemetry report
+- **Request** — ask the connected node for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
 - **Save** — export the visible Local Stats history as CSV
 
@@ -145,7 +144,7 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 ルート追跡は、メッセージがメッシュ内を通る経路を表示します：
 
-1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node. The app sends at most one traceroute every 30 seconds, to any node, and **Trace Route** in the node list's touch & hold menu shares that cooldown.
 2. アプリが対象のノードにルート追跡の要求を送信します。
 3. Results show each hop with its SNR.
 
@@ -153,20 +152,27 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
+A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`.
+
+The history also keeps traceroutes this app didn't request:
+
+- **Observed** marks a response from this node to a request made elsewhere, such as one started from your node's own screen. It has hop counts but no round-trip time, and its points on the chart are hollow rings.
+- **Traced by** _node_ marks a traceroute that node ran to yours. It shows the inbound route with the SNR of each hop, but no return route, no round-trip time, and no map, and it stays off the chart.
+
 A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## 位置ログ
 
-位置情報を共有しているノードの、過去の位置データです：
+The chart button on the **Position** row opens the node's position history: its track on a map, and a list of every position report with latitude, longitude, satellites in view, altitude, speed, heading, and timestamp. From the app bar you can:
 
-- GPS 座標
-- 標高
-- 速度（移動中の場合）
-- 各位置報告のタイムスタンプ
+- **Export GPX** to save the track as a GPX file. Reports without a GPS fix are left out.
+- Save the list as CSV.
+- **Clear** the recorded track, after a confirmation. This can't be undone.
+- Ask a remote node for a fresh position.
 
 ## 隣接ノード情報
 
-あるノードが直接受信できるノードを表示します。メッシュのトポロジーを把握するのに役立ちます。
+あるノードが直接受信できるノードを表示します。メッシュのトポロジーを把握するのに役立ちます。 The **Neighbor Info** row appears once that node's neighbor list has reached the app. See [Local Mesh Discovery](discovery#neighbor-info) for turning the module on.
 
 ## ホストのメトリクス
 

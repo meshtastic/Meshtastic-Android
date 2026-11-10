@@ -1,7 +1,7 @@
 ---
 title: Telemetria ja anturit
 nav_order: 9
-last_updated: 2026-09-18
+last_updated: 2026-10-21
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
   - sensorit
@@ -58,7 +58,7 @@ Tuetut ympäristöanturit:
 
 Molemmat näkyvät tietokorteissa radion tietonäytössä muiden ympäristömittausten rinnalla.
 
-Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. There is no chart or log screen for it yet.
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. It has no chart or log screen, and the row has no request button.
 
 ### Valo ja UV
 
@@ -75,7 +75,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card                                                                   |
 | Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
 | Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
-| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |
+| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometers |
 | Säteily                                                | µR/h                 | Card and chart                                                                                                                                                                                                                |
 | Paino                                                  | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                                                                                               |
 | Etäisyys                                               | mm or in             | Card only — water level, from a distance sensor                                                                                                                                                                               |
@@ -101,13 +101,14 @@ Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Jokaisella mittausryhmällä on oma käyttöönottokytkin ja oma mittausväli:
 
-   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its toggle, **Broadcast Device Metrics**, appears only on firmware 2.7.13 and later. Turned off, the node stops broadcasting these metrics to the mesh but still sends them to the connected app; on older firmware you can change the interval but not stop the broadcast
    - **Ympäristömittaukset** — lämpötila, kosteus, paine ja muut anturimittaukset
    - **Ilmanlaatumittaukset** — hiukkas- ja CO₂-mittaukset
    - **Virtamittaukset** — kanavakohtaiset jännite- ja virtamittaukset
 
-   Environment and Power each have an extra toggle to show their readings on the radio's own
-   screen, and Environment has one more to show its temperatures there in Fahrenheit.
+   Environment has an extra toggle, **Show on device screen**, to show its readings on the node's own
+   screen, and **Display Fahrenheit** to show its temperatures there in Fahrenheit. Power has
+   **Power Screen** for the same purpose.
 
 ### Mittausvälin valitseminen
 
@@ -133,8 +134,8 @@ Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esit
 ## Telemetrian tarkastelu
 
 1. Siirry kohtaan **Radiot** ja valitse radio.
-2. The **Telemetry** section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.
-3. Use the chart button on a row to open that metric's history, where you can pick a time frame and export the readings as CSV.
+2. The **Telemetry** section lists a row for each metric type — Device, Environment, Air Quality, Power, Host, PAX, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has sent that kind of telemetry. An empty row means nothing has arrived, not that the sensor is missing. **Soil & Water** is the exception: its row appears only after the node reports soil or water readings.
+3. Use the chart button on a row to open that metric's history, where you can pick a time frame. The Device, Environment, Air Quality, Power, Signal Quality, and Position screens also export their readings as CSV.
 
 ![Radion tietonäyttö, jossa telemetriakaavion toimintovalikko on avattuna](../../assets/screenshots/node-metrics-telemetric_actions.png)
 
@@ -142,7 +143,7 @@ Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esit
 
 - **Ympäristötiedot eivät näy?** Etäradio tarvitsee fyysisen anturin (esim. BME280 I²C-väylässä). Laitetelemetria (akun varaustaso, käyttöaika) on aina käytettävissä, mutta ympäristömittarit edellyttävät laitteistoa.
 - **Vanhentuneita lukemia?** Tarkista raportointiväli — erittäin pitkät välit (7200 s tai enemmän) tarkoittavat, että tiedot päivittyvät harvoin. Varmista myös, että etäradio on edelleen verkossa.
-- **Anturiristiriita I²C-väylässä?** Jotkin anturit käyttävät samoja I²C-osoitteita. Jos samalla väylällä on useita antureita, tarkista osoiteristiriidat radion sarjaportin virheenkorjaustulosteesta.
+- **Anturiristiriita I²C-väylässä?** Jotkin anturit käyttävät samoja I²C-osoitteita. If you have multiple sensors on the same bus, check for address collisions in the node's serial debug output.
 
 ## Aiheeseen liittyvät aiheet
 

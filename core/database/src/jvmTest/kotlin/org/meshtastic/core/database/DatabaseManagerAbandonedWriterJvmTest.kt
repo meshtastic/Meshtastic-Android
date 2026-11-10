@@ -157,7 +157,11 @@ class DatabaseManagerAbandonedWriterJvmTest {
             }
         }
         blockStarted.await()
-        assertIs<DatabaseOperationTimeoutException>(abandoned.await().exceptionOrNull())
+        val timeout = assertIs<DatabaseOperationTimeoutException>(abandoned.await().exceptionOrNull())
+        assertTrue(
+            "DatabaseManagerAbandonedWriterJvmTest" in timeout.message.orEmpty(),
+            "the timeout must name the code that passed the callback: ${timeout.message}",
+        )
         manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
 
         val replacement = manager.currentDb.value
@@ -231,6 +235,8 @@ class DatabaseManagerAbandonedWriterJvmTest {
         dispatchers: CoroutineDispatchers,
         private val dir: Path,
     ) : DatabaseManager(datastore, dispatchers) {
+        override fun applyPendingRestore(dbName: String) = Unit
+
         var withDbTimeoutMillisForTest: Long = DatabaseManager.WITH_DB_TIMEOUT_MS
 
         override val withDbTimeoutMillis: Long

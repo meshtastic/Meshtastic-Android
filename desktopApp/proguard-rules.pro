@@ -92,6 +92,24 @@
 -keep class org.maplibre.nativeffi.** { *; }
 -keep interface org.maplibre.nativeffi.** { *; }
 
+# ---- Filament's Panama FFI bindings - the 3D device model viewer ------------
+# Same jextract shape as MapLibre above: each `Fila*Callback$Function` upcall
+# resolves "apply" by name, so the shrinker would strip it.
+-keep class io.github.erkko68.filament.ffm.** { *; }
+-keep interface io.github.erkko68.filament.ffm.** { *; }
+
+# ---- LWJGL - the map bridge's Vulkan, OpenGL and Direct3D bindings -----------
+# LWJGL picks its memory backend at <clinit> by walking a list of class names
+# (`MemoryBackendUnsafe*`, `MemoryBackendFFM*`) through Class.forName, and the
+# JDK 25 FFM backend lives under META-INF/versions/25. Nothing names either
+# statically, so the shrinker drops them all and MemoryUtil dies with
+#   java.lang.Error: Failed to initialize a backend for MemoryUtil
+# on the first map. The desktop map swallows that into a blank surface
+# (#7216, #7604). The versioned FFM layer stays out either way, so LWJGL runs
+# its Unsafe backend; this keeps that backend and the bindings it serves.
+-keep class org.lwjgl.** { *; }
+-keep interface org.lwjgl.** { *; }
+
 # ---- jSerialComm Android stubs (cross-platform serial library) --------------
 # jSerialComm bundles Android shims that reference android.* classes; harmless
 # on JVM/desktop but ProGuard fails the build on unresolved program classes
@@ -123,6 +141,13 @@
 # ---- Kotlin 2.3+ stdlib intrinsics not present on JDK 17 --------------------
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator
+
+# ---- BouncyCastle (per-install TAK server certificates) -----------------------
+# :core:takserver asks its private BouncyCastleProvider for PKCS12 and SHA256withRSA by
+# name; the provider loads those algorithm classes reflectively.
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
+-dontwarn org.bouncycastle.**
 
 # ---- TAKPacket-SDK / proto ABI tolerance ------------------------------------
 # The SDK's TakPacketV2Serializer is compiled against atak.proto at a specific

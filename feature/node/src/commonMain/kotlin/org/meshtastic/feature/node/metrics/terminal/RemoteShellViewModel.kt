@@ -43,6 +43,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RemoteShellHandler
@@ -153,7 +154,7 @@ class RemoteShellViewModel(
     val bell: SharedFlow<Unit> = _bell.asSharedFlow()
 
     val nodeLongName: String
-        get() = nodeRepository.nodeDBbyNum.value[destNum]?.user?.long_name ?: destNum.toString()
+        get() = nodeRepository.nodeDBbyNum.value[destNum]?.effectiveLongName ?: destNum.toString()
 
     private val linkMutex = Mutex()
     private var link: RemoteShellLink? = null

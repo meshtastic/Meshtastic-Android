@@ -126,12 +126,18 @@ class SettingsViewModel(
     val messagesEnabled = notificationPrefs.messagesEnabled
     val nodeEventsEnabled = notificationPrefs.nodeEventsEnabled
     val lowBatteryEnabled = notificationPrefs.lowBatteryEnabled
+    val reactionsEnabled = notificationPrefs.reactionsEnabled
+    val newWaypointsEnabled = notificationPrefs.newWaypointsEnabled
 
     fun setMessagesEnabled(enabled: Boolean) = notificationPrefs.setMessagesEnabled(enabled)
 
     fun setNodeEventsEnabled(enabled: Boolean) = notificationPrefs.setNodeEventsEnabled(enabled)
 
     fun setLowBatteryEnabled(enabled: Boolean) = notificationPrefs.setLowBatteryEnabled(enabled)
+
+    fun setReactionsEnabled(enabled: Boolean) = notificationPrefs.setReactionsEnabled(enabled)
+
+    fun setNewWaypointsEnabled(enabled: Boolean) = notificationPrefs.setNewWaypointsEnabled(enabled)
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
     private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
@@ -37,7 +38,11 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.RoutingNak
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.getMessageRoutingErrorDetailResFrom
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -49,6 +54,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
 import org.meshtastic.core.resources.remote_admin_unreachable
+import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -57,10 +63,22 @@ import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.proto.Routing
 
 private const val QUEUE_REJECTION_LOG_MESSAGE = "Node-detail request rejected by outbound packet queue"
 private const val LOCAL_NODE_UNAVAILABLE_LOG_MESSAGE =
     "Node-detail request deferred until local node identity is available"
+
+// Raised by our own node when it cannot encrypt to the target, so they say more than "unreachable".
+private val LOCAL_KEY_ERRORS = setOf(Routing.Error.PKI_FAILED.value, Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value)
+
+/** A NAK from the target says why it refused; one from anywhere else means the target was never reached. */
+internal fun remoteAdminRefusalText(nak: RoutingNak, destNum: Int): StringResource = when {
+    nak.from == destNum || nak.routingError in LOCAL_KEY_ERRORS ->
+        getMessageRoutingErrorDetailResFrom(nak.routingError) ?: getStringResFrom(nak.routingError)
+
+    else -> Res.string.remote_admin_unreachable
+}
 
 /** UI state for the Node Details screen. */
 @androidx.compose.runtime.Stable
@@ -103,6 +121,7 @@ class NodeDetailViewModel(
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
     private val snackbarManager: SnackbarManager,
+    private val nakWatcher: RequestNakWatcher,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : ViewModel() {
 
@@ -181,27 +200,27 @@ class NodeDetailViewModel(
 
             is NodeMenuAction.RequestUserInfo ->
                 safeLaunch(tag = "requestUserInfo") {
-                    nodeRequestActions.requestUserInfo(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestUserInfo(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestNeighborInfo ->
                 safeLaunch(tag = "requestNeighborInfo") {
-                    nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestNeighborInfo(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestPosition ->
                 safeLaunch(tag = "requestPosition") {
-                    nodeRequestActions.requestPosition(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestPosition(action.node.num, action.node.effectiveLongName)
                 }
 
             is NodeMenuAction.RequestTelemetry ->
                 safeLaunch(tag = "requestTelemetry") {
-                    nodeRequestActions.requestTelemetry(action.node.num, action.node.user.long_name, action.type)
+                    nodeRequestActions.requestTelemetry(action.node.num, action.node.effectiveLongName, action.type)
                 }
 
             is NodeMenuAction.TraceRoute ->
                 safeLaunch(tag = "requestTraceroute") {
-                    nodeRequestActions.requestTraceroute(action.node.num, action.node.user.long_name)
+                    nodeRequestActions.requestTraceroute(action.node.num, action.node.effectiveLongName)
                 }
 
             else -> {}
@@ -211,9 +230,11 @@ class NodeDetailViewModel(
     /**
      * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
      */
-    fun refreshMetadata(destNum: Int) = safeLaunch(tag = "refreshMetadata") {
+    fun refreshMetadata(destNum: Int, longName: String) = safeLaunch(tag = "refreshMetadata") {
         try {
-            queryController.refreshMetadata(destNum)
+            nakWatcher.watch(Res.string.request_metadata, longName) { id ->
+                queryController.refreshMetadata(destNum, id)
+            }
         } catch (e: PacketQueueRejectedException) {
             showNodeRequestFailure(e, QUEUE_REJECTION_LOG_MESSAGE, snackbarManager, resolveUiText)
         } catch (e: LocalNodeUnavailableException) {
@@ -223,7 +244,8 @@ class NodeDetailViewModel(
 
     /**
      * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a
-     * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected] or [EnsureSessionResult.Timeout].
+     * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected], [EnsureSessionResult.Timeout] or
+     * [EnsureSessionResult.Rejected].
      */
     fun openRemoteAdmin(destNum: Int) =
         ensureSessionThenNavigate(destNum, "openRemoteAdmin") { SettingsRoute.Settings(destNum) }
@@ -240,7 +262,7 @@ class NodeDetailViewModel(
         if (!isEnsuringSession.compareAndSet(expect = false, update = true)) return
         safeLaunch(tag = tag) {
             try {
-                when (ensureRemoteAdminSession(destNum)) {
+                when (val result = ensureRemoteAdminSession(destNum)) {
                     EnsureSessionResult.AlreadyActive,
                     EnsureSessionResult.Refreshed,
                     -> _navigationEvents.trySend(destination())
@@ -253,6 +275,11 @@ class NodeDetailViewModel(
                     EnsureSessionResult.Timeout ->
                         snackbarManager.showSnackbar(
                             resolveUiText(UiText.Resource(Res.string.remote_admin_unreachable)),
+                        )
+
+                    is EnsureSessionResult.Rejected ->
+                        snackbarManager.showSnackbar(
+                            resolveUiText(UiText.Resource(remoteAdminRefusalText(result.nak, destNum))),
                         )
                 }
             } catch (e: PacketQueueRejectedException) {
@@ -267,6 +294,10 @@ class NodeDetailViewModel(
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
         safeLaunch(tag = "setNodeNotes") { nodeManagementActions.setNodeNotes(nodeNum, notes) }
+    }
+
+    fun setNodeDisplayName(nodeNum: Int, displayName: String) {
+        safeLaunch(tag = "setNodeDisplayName") { nodeManagementActions.setNodeDisplayName(nodeNum, displayName) }
     }
 
     /** Returns the type-safe navigation route for a direct message to this node. */

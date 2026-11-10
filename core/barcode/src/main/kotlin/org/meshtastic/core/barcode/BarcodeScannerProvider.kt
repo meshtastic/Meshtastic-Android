@@ -359,7 +359,14 @@ private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> 
         )
     }
 
-    surfaceRequest?.let { CameraXViewfinder(surfaceRequest = it, modifier = Modifier.fillMaxSize()) }
+    surfaceRequest?.let {
+        CameraXViewfinder(
+            surfaceRequest = it,
+            modifier = Modifier.fillMaxSize(),
+            isTapToFocusEnabled = true,
+            isPinchToZoomEnabled = true,
+        )
+    }
 }
 
 private fun cleanupCameraUseCases(

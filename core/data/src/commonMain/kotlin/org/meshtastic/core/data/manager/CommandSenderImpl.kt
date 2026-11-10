@@ -33,8 +33,10 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isWithinSizeLimit
+import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -77,6 +79,8 @@ class CommandSenderImpl(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val sessionManager: SessionManager,
+    private val adminRequestRegistry: AdminRequestRegistry,
+    private val connectionStateProvider: ConnectionStateProvider,
     private val scope: ServiceScope,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
@@ -212,8 +216,12 @@ class CommandSenderImpl(
         initFn().newBuilder().also { wb -> wb.session_passkey = sessionManager.getPasskey(destNum) }.build(),
     )
 
+    // Admin writes are bound to the lifecycle version current at the call, so one queued behind a radio switch is
+    // rejected rather than sent through the replacement transport with the old session's passkey.
+    private fun currentConnectionVersion(): Long = connectionStateProvider.connectionLifecycle.value.version
+
     override suspend fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
-        enqueueOrThrow(buildAdminMessagePacket(destNum, requestId, wantResponse, initFn), "Admin command")
+        sendAdminForConnection(destNum, currentConnectionVersion(), requestId, wantResponse, initFn)
     }
 
     override suspend fun sendAdminForConnection(
@@ -243,7 +251,18 @@ class CommandSenderImpl(
         wantResponse: Boolean,
         initFn: () -> AdminMessage,
     ): AwaitedSendResult =
-        packetHandler.sendToRadioAndAwaitResult(buildAdminMessagePacket(destNum, requestId, wantResponse, initFn))
+        sendAdminAwaitResultForConnection(destNum, currentConnectionVersion(), requestId, wantResponse, initFn)
+
+    override suspend fun sendAdminAwaitResultForConnection(
+        destNum: Int,
+        expectedConnectionVersion: Long,
+        requestId: Int,
+        wantResponse: Boolean,
+        initFn: () -> AdminMessage,
+    ): AwaitedSendResult = packetHandler.sendToRadioAndAwaitResultForConnection(
+        buildAdminMessagePacket(destNum, requestId, wantResponse, initFn),
+        expectedConnectionVersion,
+    )
 
     override suspend fun sendPosition(pos: ProtoPosition, destNum: Int?, wantResponse: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
@@ -271,7 +290,7 @@ class CommandSenderImpl(
         }
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {
         // Firmware coarsens a phone-originated position to the channel precision, so an explicit 0,0 goes out as a
         // real-looking coordinate. Leave the fields absent when we have none.
         val meshPosition =
@@ -288,6 +307,7 @@ class CommandSenderImpl(
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
+                id = requestId.nonZeroRequestId(),
                 channel = getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
@@ -317,12 +337,13 @@ class CommandSenderImpl(
         }
     }
 
-    override suspend fun requestUserInfo(destNum: Int) {
+    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("User-info request")
         val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: throw LocalNodeUnavailableException("User-info request")
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
+                id = requestId.nonZeroRequestId(),
                 channel = getChannelIndex(destNum),
                 decoded =
                 Data.Builder()
@@ -356,7 +377,7 @@ class CommandSenderImpl(
             ),
             "Traceroute request",
         )
-        tracerouteHandler.recordStartTime(effectiveRequestId)
+        tracerouteHandler.recordStartTime(effectiveRequestId, destNum)
     }
 
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
@@ -627,6 +648,7 @@ class CommandSenderImpl(
                 }
                 .build(),
         )
+            .also { adminRequestRegistry.register(it.id) }
 
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL

@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -42,7 +43,9 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
@@ -60,16 +63,18 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = Config.Builder().also { wb -> wb.power = it }.build()
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ConfigRoute.POWER.route)) {
             TitledCard(title = stringResource(Res.string.power_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_power_is_power_saving),
+                    modifier = Modifier.settingsField(Res.string.schema_power_is_power_saving),
                     summary = stringResource(Res.string.schema_power_is_power_saving_description),
                     checked = formState.value.is_power_saving,
                     enabled = state.connected,
@@ -82,6 +87,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_power_on_battery_shutdown_after_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_power_on_battery_shutdown_after_secs),
                     summary = stringResource(Res.string.schema_power_on_battery_shutdown_after_secs_description),
                     selectedItem = formState.value.on_battery_shutdown_after_secs.toLong(),
                     enabled = state.connected,
@@ -112,6 +118,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.schema_power_adc_multiplier_override),
+                        modifier = Modifier.settingsField(Res.string.schema_power_adc_multiplier_override),
                         value = formState.value.adc_multiplier_override,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -125,6 +132,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_power_wait_bluetooth_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_power_wait_bluetooth_secs),
                     selectedItem = formState.value.wait_bluetooth_secs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },

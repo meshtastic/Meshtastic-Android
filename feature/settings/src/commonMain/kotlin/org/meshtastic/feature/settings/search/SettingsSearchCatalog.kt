@@ -42,6 +42,8 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
  * @param route where tapping the result goes.
  * @param screenTitle the destination's name, shown beside the result so "Enabled" says which Enabled it is.
  * @param keywords the schema's `|`-separated extra search terms, where it has them. Matched, never shown.
+ * @param fieldKey the schema string key of the control, which a config screen's list item can carry as its key. Null
+ *   for a screen or an app-level setting, which has no single control to land on.
  */
 data class SettingsSearchEntry(
     val title: StringResource,
@@ -49,6 +51,7 @@ data class SettingsSearchEntry(
     val route: Route,
     val screenTitle: StringResource,
     val keywords: StringResource? = null,
+    val fieldKey: String? = null,
     /** True for settings that belong to this phone rather than to a radio, which a remote session must not offer. */
     val isAppLocal: Boolean = false,
 ) {
@@ -118,7 +121,10 @@ object SettingsSearchCatalog {
      * so a message the schema starts labelling cannot quietly go missing from search.
      */
     private val notSearchable: Map<String, String> =
-        mapOf("trafficmanagement" to "no settings screen offers these fields yet")
+        mapOf(
+            "trafficmanagement" to "no settings screen offers these fields yet",
+            "clientnotification" to "notification types the device raises, not settings",
+        )
 
     /**
      * Keys that name an enum *value* rather than a field, so search does not offer "Long Fast" as though it were a
@@ -189,11 +195,19 @@ object SettingsSearchCatalog {
                             route = route,
                             screenTitle = screenTitle,
                             keywords = all[key + KEYWORDS_SUFFIX],
+                            fieldKey = key,
                         )
                     }
                     .toList()
             }
         }
+    }
+
+    /** The schema keys of the controls [route] owns, which its list items carry so search can land on them. */
+    fun fieldKeys(route: Route): Set<String> = fieldKeysByRoute[route].orEmpty()
+
+    private val fieldKeysByRoute: Map<Route, Set<String>> by lazy {
+        schemaEntries().groupBy({ it.route }, { it.fieldKey }).mapValues { (_, keys) -> keys.filterNotNull().toSet() }
     }
 
     /** Everything searchable, screens before the controls on them. */

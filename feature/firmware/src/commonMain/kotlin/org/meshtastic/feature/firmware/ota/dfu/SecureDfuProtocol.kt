@@ -20,6 +20,8 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.ble.NordicDfu
+import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
 // ---------------------------------------------------------------------------
@@ -50,7 +52,7 @@ internal object SecureDfuUuids {
  */
 internal object LegacyDfuUuids {
     /** Legacy DFU service — exposed by app firmware to trigger reboot into the bootloader. */
-    val SERVICE: Uuid = Uuid.parse("00001530-1212-EFDE-1523-785FEABCD123")
+    val SERVICE: Uuid = NordicDfu.LEGACY_SERVICE_UUID
 
     /**
      * Control Point: NOTIFY + WRITE. Notifications must be subscribed before writing or the device returns
@@ -238,18 +240,29 @@ internal object DfuCrc32 {
 // DFU zip package contents
 // ---------------------------------------------------------------------------
 
+/** Which images a DFU package's single `.bin` carries, and so what `START_DFU` announces. */
+sealed interface DfuImage {
+    data object Application : DfuImage
+
+    /** SoftDevice followed by bootloader in one `.bin`, `sdSize + blSize` bytes long. */
+    data class SoftDeviceBootloader(val sdSize: Int, val blSize: Int) : DfuImage
+}
+
 /** Contents extracted from a Nordic DFU .zip package. */
 data class DfuZipPackage(
     val initPacket: ByteArray, // .dat  – signed init packet
-    val firmware: ByteArray, // .bin  – application binary
+    val firmware: ByteArray, // .bin  – the image(s) named by [image]
+    val image: DfuImage = DfuImage.Application,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is DfuZipPackage) return false
-        return initPacket.contentEquals(other.initPacket) && firmware.contentEquals(other.firmware)
+        return initPacket.contentEquals(other.initPacket) &&
+            firmware.contentEquals(other.firmware) &&
+            image == other.image
     }
 
-    override fun hashCode() = 31 * initPacket.contentHashCode() + firmware.contentHashCode()
+    override fun hashCode() = 31 * (31 * initPacket.contentHashCode() + firmware.contentHashCode()) + image.hashCode()
 }
 
 // ---------------------------------------------------------------------------
@@ -278,6 +291,8 @@ internal data class DfuManifestContent(
 internal data class DfuManifestEntry(
     @SerialName("bin_file") val binFile: String,
     @SerialName("dat_file") val datFile: String,
+    @SerialName("sd_size") val sdSize: Int? = null,
+    @SerialName("bl_size") val blSize: Int? = null,
 )
 
 // ---------------------------------------------------------------------------
@@ -313,4 +328,17 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
 
     /** Data transfer to the device failed for a non-protocol reason (e.g. BLE write error). */
     class TransferFailed(message: String, cause: Throwable? = null) : DfuException(message, cause)
+
+    /** START was not accepted within the [PreStartBudget]; retrying longer could outlast the bootloader's idle boot. */
+    class StartTimedOut(budget: Duration) : DfuException("START not accepted within $budget of entering DFU mode")
+
+    /** The bootloader in DFU mode is not the board or SoftDevice the package was built for. Nothing was written. */
+    class BootloaderMismatch(
+        val reported: BootloaderIdentity,
+        val expectedModel: String,
+        val expectedSoftDevice: String,
+    ) : DfuException(
+        "Bootloader reports model '${reported.model}' and '${reported.firmwareRevision}', " +
+            "package is for '$expectedModel' with S140 $expectedSoftDevice",
+    )
 }

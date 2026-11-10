@@ -62,6 +62,7 @@
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <!-- DEBUG -->
     <string name="debug_panel">Paneli i debug-ut</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Fshi</string>
     <string name="delete_for_everyone">Fshi për të gjithë</string>
@@ -98,6 +99,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtrimi</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Përditësimi i firmware kërkohet</string>
     <string name="firmware_old">Firmware radio është shumë i vjetër për të komunikuar me këtë aplikacion. Për më shumë informacion rreth kësaj, shikoni <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">udhëzuesin tonë për instalimin e firmware</a>.</string>
     <string name="firmware_too_old">Përditësimi i firmware kërkohet.</string>
     <string name="firmware_update_failed">Përditësimi dështoi</string>
@@ -105,7 +107,9 @@
     <!-- GEOFENCE -->
     <string name="good">Mirë</string>
     <string name="hops_away">Hops larg</string>
+    <!-- IAQ -->
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
+    <string name="iaq_level_good">Mirë</string>
     <string name="ignore">Injoro</string>
     <string name="ignore_add">Të shtohet ‘%1$s’ në listën e injoruar?</string>
     <string name="ignore_remove">Të hiqet ‘%1$s’ nga lista e injoruar?</string>
@@ -117,6 +121,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkt</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -125,6 +131,7 @@
     <string name="locked">I bllokuar</string>
     <!-- LOG -->
     <string name="logs">Loget</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Menaxheri i Cache</string>
     <string name="map_cache_size">Madhësia e aktuale e cache</string>
@@ -154,9 +161,12 @@
     <string name="message_input_label">Mesazh</string>
     <string name="message_status_queued">Në radhë për dërgim</string>
     <string name="messages">訊息</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Mirë</string>
     <string name="module_settings">Konfigurimi i modulit</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">I shkëputur</string>
+    <string name="mqtt_topic_finder_level_region">Rajon</string>
     <string name="must_set_region">Duhet të vendosni një rajon!</string>
     <string name="must_update">Duhet të përditësoni këtë aplikacion në dyqanin e aplikacioneve (ose Github). Është shumë i vjetër për të komunikuar me këtë firmware radioje. Ju lutemi lexoni dokumentet tona <a href="https://meshtastic.org/docs/software/android/installation">këtu</a> për këtë temë.</string>
     <!-- MUTE -->
@@ -209,7 +219,9 @@
     <string name="quick_chat_edit">Redakto bisedën e shpejtë</string>
     <string name="quick_chat_instant">Dërgo menjëherë</string>
     <string name="quick_chat_new">Bisedë e re e shpejtë</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfigurimi i radios</string>
+    <string name="radio_setup_name_headline">Emri</string>
     <string name="reboot">Rindiz</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administratë e Largët</string>
@@ -274,6 +286,8 @@
     <string name="waypoint_edit">Redakto pikën e rreshtit</string>
     <string name="waypoint_new">Pikë e re rreshti</string>
     <string name="waypoint_received">Pikë rreshti e marrë: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">I Keq</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adresa IP</string>
     <!-- WIND -->

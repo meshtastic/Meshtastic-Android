@@ -55,7 +55,7 @@ internal fun SecondaryMapControls(
         filterDropdownContent = { filterMenu?.invoke(filterMenuExpanded) { filterMenuExpanded = false } },
         bearing = mapState.cameraPosition.bearing.toFloat(),
         onCompassClick = {
-            scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease()) }
+            scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease.Standard) }
         },
         mapTypeContent = { BasemapButton(selection = basemaps) },
         onToggleLocationTracking = null,

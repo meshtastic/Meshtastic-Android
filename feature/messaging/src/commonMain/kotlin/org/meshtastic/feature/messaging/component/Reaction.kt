@@ -70,6 +70,7 @@ import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.HopCount
@@ -205,6 +206,8 @@ internal fun ReactionDialog(
     reactions: List<Reaction>,
     onDismiss: () -> Unit = {},
     myId: String? = null,
+    /** Reactor id to local display name, for reactors the user has renamed. */
+    reactorNames: Map<String, String> = emptyMap(),
     /** False for an archived conversation: a failed reaction cannot be retried there. */
     canReact: Boolean = true,
     onResend: (Reaction) -> Unit = {},
@@ -283,11 +286,12 @@ internal fun ReactionDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val isLocal = reaction.user.id == myId || reaction.user.id == NodeAddress.ID_LOCAL
+                    val name = reactorNames[reaction.user.id] ?: reaction.user.long_name
                     val displayName =
                         if (isLocal) {
-                            "${reaction.user.long_name} (${stringResource(Res.string.you)})"
+                            "$name (${stringResource(Res.string.you)})"
                         } else {
-                            reaction.user.long_name
+                            name
                         }
                     Row(
                         modifier = Modifier.weight(1f, fill = false),
@@ -329,8 +333,16 @@ internal fun ReactionDialog(
                     // Local reactions now carry a null rssi; pre-schema-51 rows stored 0, so a legacy
                     // 0 dBm reading stays indistinguishable from "no reading" and remains hidden.
                     val isLocalOrPreDbUpdateReaction = reaction.rssi == null || reaction.rssi == 0
+                    reaction.transportMechanism?.let { transport ->
+                        TransportIcon(
+                            transport = transport,
+                            viaMqtt = reaction.viaMqtt,
+                            modifier = Modifier.padding(end = 6.dp).size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     if (!isLocalOrPreDbUpdateReaction) {
-                        if (reaction.hopsAway == 0) {
+                        if (reaction.hopsAway == 0 && !reaction.viaMqtt) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Snr(reaction.snr)
                                 Rssi(reaction.rssi)

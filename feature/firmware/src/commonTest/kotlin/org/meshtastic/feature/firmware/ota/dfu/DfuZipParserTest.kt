@@ -209,4 +209,74 @@ class DfuZipParserTest {
         assertTrue(packageResult.firmware.contentEquals(byteArrayOf(0x01, 0x02)))
         assertTrue(packageResult.initPacket.contentEquals(byteArrayOf(0x03)))
     }
+
+    private fun sdBlEntries(manifest: String, bin: ByteArray = ByteArray(10)) = mapOf(
+        "manifest.json" to manifest.trimIndent().encodeToByteArray(),
+        "sd_bl.bin" to bin,
+        "sd_bl.dat" to ByteArray(14),
+    )
+
+    private val sdBlManifest =
+        """
+        {
+          "manifest": {
+            "dfu_version": 0.5,
+            "softdevice_bootloader": {
+              "bin_file": "sd_bl.bin",
+              "dat_file": "sd_bl.dat",
+              "bl_size": 4,
+              "sd_size": 6,
+              "init_packet_data": { "device_type": 82, "softdevice_req": [65534] }
+            }
+          }
+        }
+        """
+
+    @Test
+    fun bootloaderParserReadsSoftDeviceAndBootloaderSizes() {
+        val pkg = parseBootloaderDfuZipEntries(sdBlEntries(sdBlManifest))
+
+        assertEquals(DfuImage.SoftDeviceBootloader(sdSize = 6, blSize = 4), pkg.image)
+        assertEquals(10, pkg.firmware.size)
+        assertEquals(14, pkg.initPacket.size)
+    }
+
+    @Test
+    fun bootloaderParserRefusesSizesThatDoNotAddUpToTheImage() {
+        val ex =
+            assertFailsWith<DfuException.InvalidPackage> {
+                parseBootloaderDfuZipEntries(sdBlEntries(sdBlManifest, bin = ByteArray(11)))
+            }
+        assertTrue(ex.message?.contains("does not match") == true, ex.message)
+    }
+
+    @Test
+    fun bootloaderParserRefusesMissingSizes() {
+        val noSizes = sdBlManifest.replace("\"bl_size\": 4,", "")
+        assertFailsWith<DfuException.InvalidPackage> { parseBootloaderDfuZipEntries(sdBlEntries(noSizes)) }
+    }
+
+    @Test
+    fun bootloaderParserRefusesAnApplicationPackage() {
+        val app =
+            """
+            { "manifest": { "application": { "bin_file": "sd_bl.bin", "dat_file": "sd_bl.dat" } } }
+            """
+        assertFailsWith<DfuException.InvalidPackage> { parseBootloaderDfuZipEntries(sdBlEntries(app)) }
+    }
+
+    @Test
+    fun bootloaderParserRefusesACombinedPackage() {
+        val combined =
+            sdBlManifest.replace(
+                "\"dfu_version\": 0.5,",
+                "\"dfu_version\": 0.5, \"application\": { \"bin_file\": \"a.bin\", \"dat_file\": \"a.dat\" },",
+            )
+        assertFailsWith<DfuException.InvalidPackage> { parseBootloaderDfuZipEntries(sdBlEntries(combined)) }
+    }
+
+    @Test
+    fun applicationParserStillRefusesTheBootloaderPackage() {
+        assertFailsWith<DfuException.InvalidPackage> { parseDfuZipEntries(sdBlEntries(sdBlManifest)) }
+    }
 }

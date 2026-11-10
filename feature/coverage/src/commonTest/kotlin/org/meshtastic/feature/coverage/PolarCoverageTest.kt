@@ -16,7 +16,11 @@
  */
 package org.meshtastic.feature.coverage
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,6 +55,23 @@ class PolarCoverageTest {
         assertTrue(distances.zipWithNext().all { (a, b) -> b > a }, "rings should step outward: $distances")
         assertTrue(distances.first() > 0.0, "the innermost ring cannot sit on the transmitter")
         assertTrue(distances.last() <= site().radiusKm + 1e-9, "outermost ring ${distances.last()} exceeds the radius")
+    }
+
+    @Test
+    fun radialsRunOnTheGivenDispatcher() = runTest {
+        val inner = StandardTestDispatcher(testScheduler)
+        var dispatched = 0
+        val counting =
+            object : CoroutineDispatcher() {
+                override fun dispatch(context: CoroutineContext, block: Runnable) {
+                    dispatched++
+                    inner.dispatch(context, block)
+                }
+            }
+
+        LocalCoverage(flat).sweepPolar(site(), radials = 8, rings = 4, dispatcher = counting)
+
+        assertTrue(dispatched >= 8, "only $dispatched dispatches for 8 radials")
     }
 
     @Test

@@ -103,6 +103,7 @@ class MeshConfigFlowManagerImpl(
             val session: RadioSessionContext,
             val myNodeInfo: SharedMyNodeInfo,
             val nodes: List<NodeInfo> = emptyList(),
+            val refresh: Boolean = false,
         ) : HandshakeState()
 
         /** Both stages finished. The app is fully connected. */
@@ -110,6 +111,9 @@ class MeshConfigFlowManagerImpl(
     }
 
     private val handshakeState = atomic<HandshakeState>(HandshakeState.Idle)
+
+    /** A [refreshNodeInfo] that arrived mid-dump; nodes already sent in that dump answered for the old settings. */
+    private val queuedRefresh = atomic<RadioSessionContext?>(null)
 
     private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
         radioInterfaceService.runIfSessionActive(session, block)
@@ -255,6 +259,7 @@ class MeshConfigFlowManagerImpl(
         connectionManager.value.onHandshakeComplete()
 
         scope.handledLaunch { finishNodeInfoInstall(state) }
+        if (queuedRefresh.compareAndSet(state.session, null)) refreshNodeInfo()
         // Note: onHandshakeProgress() is intentionally NOT called here. By this point the
         // handshake has reached HandshakeState.Complete and the synchronous onHandshakeComplete()
         // call above has already cancelled the watchdog. Re-arming via onHandshakeProgress()
@@ -309,6 +314,8 @@ class MeshConfigFlowManagerImpl(
             Logger.i { "Config install migrated ${removedNums.size} stale node identit(y/ies)" }
             nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
+
+        if (state.refresh) return
 
         val published =
             runForSession(session) {
@@ -469,6 +476,36 @@ class MeshConfigFlowManagerImpl(
         val admitted = runForSession(session) { connectionManager.value.startConfigOnly() }
         if (!admitted) Logger.d { "Discarding reboot handshake trigger from stale transport session" }
         return admitted
+    }
+
+    override fun refreshNodeInfo(): Boolean {
+        val session = radioInterfaceService.activeSession.value ?: return false
+        var requested = false
+        runForSession(session) {
+            val state = handshakeState.value
+            if (state.belongsTo(session)) {
+                when (state) {
+                    is HandshakeState.Complete -> {
+                        handshakeState.value =
+                            HandshakeState.ReceivingNodeInfo(
+                                session = session,
+                                myNodeInfo = state.myNodeInfo,
+                                refresh = true,
+                            )
+                        connectionManager.value.startNodeInfoOnly()
+                        requested = true
+                    }
+
+                    is HandshakeState.ReceivingNodeInfo -> {
+                        queuedRefresh.value = session
+                        requested = true
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+        return requested
     }
 
     /**

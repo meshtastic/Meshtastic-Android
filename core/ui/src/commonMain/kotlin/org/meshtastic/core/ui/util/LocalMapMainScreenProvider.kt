@@ -32,7 +32,8 @@ val LocalMapMainScreenProvider =
             navigateToNodeDetails: (Int) -> Unit,
             waypointId: Int?,
             sitePlannerNodeNum: Int?,
+            onOpenMeshHud: () -> Unit,
         ) -> Unit,
         > {
-        { _, _, _, _ -> PlaceholderScreen("Map") }
+        { _, _, _, _, _ -> PlaceholderScreen("Map") }
     }

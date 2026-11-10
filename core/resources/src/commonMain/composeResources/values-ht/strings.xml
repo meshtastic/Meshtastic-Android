@@ -58,6 +58,7 @@
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
     <!-- DEBUG -->
     <string name="debug_panel">Panno Debug</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Efase</string>
     <string name="delete_for_everyone">Efase pou tout moun</string>
@@ -93,6 +94,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtre</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Nouvo mizajou mikwo lojisyèl obligatwa</string>
     <string name="firmware_old">Mikwo lojisyèl radyo a twò ansyen pou li kominike ak aplikasyon sa a. Pou plis enfòmasyon sou sa, gade <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">gid enstalasyon mikwo lojisyèl nou an</a>.</string>
     <string name="firmware_too_old">Nouvo mizajou mikwo lojisyèl obligatwa.</string>
     <string name="firmware_update_failed">Mizajou echwe</string>
@@ -100,7 +102,9 @@
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
     <string name="hops_away">Hops Lwen</string>
+    <!-- IAQ -->
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
+    <string name="iaq_level_good">Bon</string>
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
@@ -112,6 +116,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direk</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -120,6 +126,7 @@
     <string name="locked">Loken</string>
     <!-- LOG -->
     <string name="logs">Jounal</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>
@@ -148,9 +155,12 @@
     <string name="message_delivery_status">Eta livrezon mesaj</string>
     <string name="message_input_label">Mesaj</string>
     <string name="message_status_queued">Kwen pou voye</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Dakò</string>
     <string name="module_settings">Konfigirasyon modil</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Dekonekte</string>
+    <string name="mqtt_topic_finder_level_region">Rejyon</string>
     <string name="must_set_region">Ou dwe mete yon rejyon!</string>
     <string name="must_update">Ou dwe mete aplikasyon sa ajou nan magazen Google Jwèt. Li twò ansyen pou li kominike ak radyo sa a.</string>
     <!-- MUTE -->
@@ -202,7 +212,9 @@
     <string name="quick_chat_edit">Modifye chat rapid</string>
     <string name="quick_chat_instant">Voye imedyatman</string>
     <string name="quick_chat_new">Nouvo chat rapid</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfigirasyon radyo</string>
+    <string name="radio_setup_name_headline">Non</string>
     <string name="reboot">Rekòmanse</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrasyon Remote</string>
@@ -267,6 +279,8 @@
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_new">Nouvo pwen</string>
     <string name="waypoint_received">Pwen resevwa: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Move</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adrès IP</string>
     <!-- WIND -->

@@ -90,6 +90,12 @@ class FakeUiPrefs : UiPrefs {
         appIntroCompleted.value = completed
     }
 
+    override val radioSetupOfferedNodes = MutableStateFlow<Set<Int>>(emptySet())
+
+    override fun markRadioSetupOffered(nodeNum: Int) {
+        radioSetupOfferedNodes.update { it + nodeNum }
+    }
+
     override val theme = MutableStateFlow(0)
 
     override fun setTheme(value: Int) {
@@ -168,6 +174,16 @@ class FakeUiPrefs : UiPrefs {
 
     override fun recordFirmwareUpdateNotificationKey(key: String) {
         firmwareUpdateNotificationKeys.value += key
+    }
+
+    override val keptUnheardNodes = MutableStateFlow<Set<Int>>(emptySet())
+
+    override fun keepUnheardNodes(nodeNums: Set<Int>) {
+        keptUnheardNodes.value += nodeNums
+    }
+
+    override fun forgetKeptUnheardNodes(nodeNums: Set<Int>) {
+        keptUnheardNodes.value -= nodeNums
     }
 
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()
@@ -291,6 +307,12 @@ class FakeMapPrefs : MapPrefs {
     }
 
     override suspend fun awaitCameraPosition(): MapCameraPosition? = cameraPosition
+
+    override val meshHudCoachSeen = MutableStateFlow(false)
+
+    override fun setMeshHudCoachSeen(seen: Boolean) {
+        meshHudCoachSeen.value = seen
+    }
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {
@@ -323,6 +345,9 @@ class FakeMapTileProviderPrefs : MapTileProviderPrefs {
 
 class FakeRadioPrefs : RadioPrefs {
     override val devAddr = MutableStateFlow<String?>(null)
+
+    override suspend fun awaitDevAddr(): String? = devAddr.value
+
     override val devName = MutableStateFlow<String?>(null)
 
     override fun setDevAddr(address: String?) {

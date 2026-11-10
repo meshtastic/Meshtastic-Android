@@ -4,7 +4,7 @@
 
 **Targets:** Android · JVM (Desktop) · iOS
 
-The `:core:di` module defines the core Koin modules and provides standard dependencies that are shared across all other modules.
+The `:core:di` module holds `CoroutineDispatchers`, the injectable dispatcher set shared across all other modules, and the Koin module that provides it.
 
 ## Key Components
 

@@ -73,6 +73,7 @@
     <string name="debug_filter_add">Дадаць фільтр</string>
     <string name="debug_filters">Фільтры</string>
     <string name="debug_panel">Панэль адладкі</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Прыбраць</string>
     <string name="delete_for_everyone">Прыбраць для ўсіх</string>
@@ -114,13 +115,13 @@
     <string name="firmware_update_keep_device_close">.</string>
     <string name="firmware_update_retry">Паспрабаваць яшчэ раз</string>
     <!-- FORMAT -->
-    <string name="free_memory">Вольная памяць</string>
     <!-- GEOFENCE -->
     <string name="get_started">Пачаць</string>
     <string name="gpio">GPIO</string>
     <string name="hardware">Устройства</string>
     <string name="hide_password">Схаваць пароль</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
+    <!-- IAQ -->
     <string name="iaq">Якасць паветра</string>
     <string name="ignore">Ігнараваць</string>
     <!-- IMPORT -->
@@ -133,12 +134,14 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
     <!-- LOCKDOWN -->
     <!-- LOG -->
     <string name="logs">Журнал</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="lux">Люкс</string>
@@ -161,10 +164,13 @@
     <string name="message_input_label">Паведамленне</string>
     <string name="message_status_queued">У чарзе на адпраўку</string>
     <string name="messages">Паведамленні</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Добра</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_connected">Злучаны</string>
     <string name="mqtt_status_disconnected">Адлучана</string>
+    <string name="mqtt_topic_finder_level_region">Рэгіён</string>
     <string name="must_set_region">Трэба наладзіць рэгіён!</string>
     <!-- MUTE -->
     <string name="mute_1_week">1 тыдзень</string>
@@ -223,6 +229,8 @@
     <string name="qr_code">QR-код</string>
     <!-- QUICK -->
     <string name="quick_chat_instant">Імгненна даслаць</string>
+    <!-- RADIO -->
+    <string name="radio_setup_name_headline">Назва</string>
     <string name="reboot">Перазагрузіць</string>
     <!-- REMOTE -->
     <string name="remote_shell_send">Адправіць</string>
@@ -298,6 +306,7 @@
     <!-- USER -->
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>

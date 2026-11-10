@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -32,9 +33,15 @@ sealed interface NodeDetailAction {
     data class OpenRemoteShell(val nodeNum: Int) : NodeDetailAction
 
     /** Force-refresh device metadata (firmware version, edition, role) for the given node. */
-    data class RefreshMetadata(val nodeNum: Int) : NodeDetailAction
+    data class RefreshMetadata(val nodeNum: Int, val longName: String) : NodeDetailAction
 
     data object ShareContact : NodeDetailAction
+
+    /** Open the real-size 3D model of the node's hardware. */
+    data class OpenDeviceModel(val deviceHardware: DeviceHardware) : NodeDetailAction
+
+    /** Start or stop tracking this node in the Live Update. */
+    data class TrackInLiveUpdate(val nodeNum: Int, val track: Boolean) : NodeDetailAction
 
     // Opens the compass sheet scoped to a target node and the user’s preferred units.
     data class OpenCompass(val node: Node, val displayUnits: MeasurementSystem) : NodeDetailAction

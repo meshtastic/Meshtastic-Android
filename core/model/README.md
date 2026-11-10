@@ -1,7 +1,7 @@
 # `:core:model` (Meshtastic Domain Models)
 
 ## Overview
-The `:core:model` module is a **Kotlin Multiplatform (KMP)** library containing the domain models and data classes used throughout the application and its API. These models are platform-agnostic and designed to be shared across Android, JVM, and future supported platforms.
+The `:core:model` module is a **Kotlin Multiplatform (KMP)** library containing the domain models and data classes used throughout the application and its API. These models are platform-agnostic and shared across Android, JVM (Desktop) and the iOS compile target.
 
 ## Multiplatform Support
 Models are plain `commonMain` Kotlin types — `@Serializable` (kotlinx.serialization) data classes and
@@ -15,6 +15,9 @@ across Android, JVM, and iOS.
 - **`NodeAddress` / `ContactKey`**: Type-safe node addressing (`Broadcast`/`Local`/`ByNum`/`ById`) and contact-key parsing, replacing stringly-typed `"^all"`/`"!hex"` handling.
 - **`DeviceHardware`**: Represents supported Meshtastic hardware devices and their capabilities.
 - **`Channel`**: Represents a mesh channel configuration.
+- **`util/`**: Meshtastic URL handling (`ChannelSet`, `SharedContact`, `dispatchMeshtasticUri`), `UnitConversions`, and proto extension helpers.
+
+The module `api`-exports the `org.meshtastic:protobufs` artifact and the TAKPacket-SDK (with the SDK's own transitive protobufs excluded), so consumers get both without declaring them.
 
 ## Usage
 This module is a core dependency of most feature modules.
@@ -26,8 +29,10 @@ implementation(projects.core.model)
 
 ## Structure
 - **`commonMain`**: Contains the majority of domain models and logic.
-- **`androidMain`**: Contains Android-specific utilities and implementations for `expect` declarations.
-- **`androidUnitTest`**: Contains unit tests that require Android-specific features (like `Parcel` testing via Robolectric).
+- **`jvmAndroidMain`**: `actual` implementations shared by Android and Desktop (date-time, POSIX time zones, random).
+- **`androidMain`**: `UriBridge.kt`, which adapts `android.net.Uri` to the shared URL dispatch.
+- **`commonTest`** / **`jvmTest`**: Unit tests, run by `./gradlew :core:model:allTests`.
+- **`androidDeviceTest`**: Instrumented tests for channel and shared-contact URLs, which need a device or emulator.
 
 
 ## Dependency Graph

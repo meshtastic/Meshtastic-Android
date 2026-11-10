@@ -58,6 +58,7 @@
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
     <!-- DEBUG -->
     <string name="debug_panel">Painéal Laige</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Scrios</string>
     <string name="delete_for_everyone">Scrios do gach duine</string>
@@ -96,6 +97,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Scagaire</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Nuashonrú teastaíonn ar an gcórais</string>
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
@@ -103,8 +105,10 @@
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
     <string name="hops_away">Céimeanna uaidh</string>
+    <!-- IAQ -->
     <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
+    <string name="iaq_level_good">Maith</string>
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
@@ -116,6 +120,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direach</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -124,6 +130,7 @@
     <string name="locked">Ceangailte</string>
     <!-- LOG -->
     <string name="logs">Lógáil</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>
@@ -152,9 +159,12 @@
     <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
     <string name="message_input_label">Teachtaireacht</string>
     <string name="message_status_queued">Cur síos ar sheoladh</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Ceadaigh</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Na ceangailte</string>
+    <string name="mqtt_topic_finder_level_region">Réigiún</string>
     <string name="must_set_region">Caithfidh tú réigiún a shocrú!</string>
     <string name="must_update">Caithfidh tú an feidhmchlár seo a nuashonrú ón siopa feidhmchláir (nó Github). Tá sé ró-aois chun cumarsáid a dhéanamh leis an firmware raidió seo. Le do thoil, léigh ár <a href="https://meshtastic.org/docs/software/android/installation">doiciméid</a> ar an ábhar seo.</string>
     <!-- MUTE -->
@@ -206,7 +216,9 @@
     <string name="quick_chat_edit">Cuir comhrá tapa in eagar</string>
     <string name="quick_chat_instant">Seol láithreach</string>
     <string name="quick_chat_new">Comhrá tapa nua</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Cumraíocht raidió</string>
+    <string name="radio_setup_name_headline">Ainm</string>
     <string name="reboot">Athmhaoinigh</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
@@ -280,6 +292,8 @@
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_new">Pointe bealach nua</string>
     <string name="waypoint_received">Pointe bealach faighte: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Go dona</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Seoladh IP</string>
     <!-- WIND -->

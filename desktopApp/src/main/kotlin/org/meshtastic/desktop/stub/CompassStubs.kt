@@ -17,12 +17,16 @@
 package org.meshtastic.desktop.stub
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
+import org.meshtastic.feature.map.hud.CameraPoseProvider
+import org.meshtastic.feature.map.hud.CameraPoseState
+import org.meshtastic.feature.map.hud.PhonePressureProvider
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.HeadingState
-import org.meshtastic.feature.node.compass.MagneticFieldProvider
-import org.meshtastic.feature.node.compass.PhoneLocationProvider
-import org.meshtastic.feature.node.compass.PhoneLocationState
 
 /** No-op [CompassHeadingProvider] — desktop has no compass sensor. */
 class NoopCompassHeadingProvider : CompassHeadingProvider {
@@ -33,6 +37,16 @@ class NoopCompassHeadingProvider : CompassHeadingProvider {
 class NoopPhoneLocationProvider : PhoneLocationProvider {
     override fun locationUpdates(): Flow<PhoneLocationState> =
         flowOf(PhoneLocationState(permissionGranted = false, providerEnabled = false))
+}
+
+/** No-op [CameraPoseProvider] — desktop has no orientation sensor or back camera. */
+class NoopCameraPoseProvider : CameraPoseProvider {
+    override fun poseUpdates(): Flow<CameraPoseState> = flowOf(CameraPoseState(hasSensor = false))
+}
+
+/** No-op [PhonePressureProvider]: desktop has no barometer. */
+class NoopPhonePressureProvider : PhonePressureProvider {
+    override fun pressureUpdates(): Flow<Float> = emptyFlow()
 }
 
 /** No-op [MagneticFieldProvider] — always returns zero declination. */

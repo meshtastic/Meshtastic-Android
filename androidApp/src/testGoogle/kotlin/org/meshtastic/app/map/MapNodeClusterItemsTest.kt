@@ -111,6 +111,25 @@ class MapNodeClusterItemsTest {
     }
 
     @Test
+    fun `nodes at one spot become one item that carries every member`() = runComposeUiTest {
+        val spot = testNodes(count = 1).single().position
+        val nodes = testNodes(count = 4).mapIndexed { i, node -> if (i < 3) node.copy(position = spot) else node }
+        var latestItems: List<NodeClusterItem> = emptyList()
+
+        setContent {
+            val items = rememberNodeClusterItems(nodes = nodes, myNodeNum = 2, relativeTimeBucket = FIXED_TIME_BUCKET)
+            SideEffect { latestItems = items }
+        }
+        waitForIdle()
+
+        assertEquals(2, latestItems.size)
+        val stack = latestItems.first()
+        assertEquals(2, stack.node.num)
+        assertEquals(listOf(1, 2, 3), stack.stackMembers.map { it.node.num })
+        assertTrue(latestItems.last().stackMembers.isEmpty())
+    }
+
+    @Test
     fun `relative time bucket advances at the next minute boundary`() = runTest {
         val startSeconds = FIXED_TIME_BUCKET * 60 + 30
         val observedBuckets = mutableListOf<Long>()
@@ -144,8 +163,9 @@ class MapNodeClusterItemsTest {
             position =
             Position.Builder()
                 .also { wb ->
-                    wb.latitude_i = 210_000_000 + index
-                    wb.longitude_i = -1_570_000_000 + index
+                    // About 11 m apart, so no two fall within the 5 m that stacks nodes.
+                    wb.latitude_i = 210_000_000 + index * 1_000
+                    wb.longitude_i = -1_570_000_000 + index * 1_000
                     wb.time = 1_700_000_000
                 }
                 .build(),

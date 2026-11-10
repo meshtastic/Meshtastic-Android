@@ -5,7 +5,7 @@
 set -e
 
 assets_dir=androidApp/src/main/assets
-keys=(firmware hardware event_firmware device_links bootloader_quirks maintenance_uf2)
+keys=(firmware hardware event_firmware device_links bootloader_quirks maintenance_uf2 mqtt_roots)
 
 # `compare` is the jq filter both copies are diffed through and `write` the one the new copy is written through
 # (empty copies it as served). Each `guards` line is a jq count that must not be 0, so a degraded response never
@@ -66,6 +66,16 @@ asset() {
 if (.erase | type) == "object" and (.erase.nrf52Bootloader | type) == "object" then 1 else 0 end'
       guard_warning="Maintenance UF2 API response is missing the erase set (incl. erase.nrf52Bootloader) or board map. Skipping to protect the bundled seed."
       guard_detail="degraded maintenance UF2 manifest (no erase set, no erase.nrf52Bootloader, or empty board map)"
+      ;;
+    mqtt_roots)
+      file=mqtt_roots.json
+      url=https://api.meshtastic.org/resource/mqttRoots
+      fetching="MQTT root directory" api="MQTT roots API" skipping="MQTT roots update" subject="MQTT root directory"
+      compare=. write=.
+      # Counts the subdivision names under every country, so `{"US": {}}` trips it like a missing map.
+      guards='if (.subdivisionSegments | type) == "object" then ([.subdivisionSegments[] | objects | length] | add // 0) else 0 end'
+      guard_warning="MQTT roots API returned no subdivisionSegments mappings. Skipping to protect the bundled seed."
+      guard_detail="empty subdivisionSegments mappings from MQTT roots API"
       ;;
     *)
       echo "unknown asset: $1" >&2

@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -35,6 +34,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.destination
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
@@ -260,7 +260,7 @@ class MeshDataHandlerImpl(
             radioInterfaceService.launchSessionWork(scope, session) {
                 // design#140 behavior 10: still stored for the invitations list, but a mesh the radio is already on
                 // does not warrant a notification.
-                val channelSet = radioConfigRepository.channelSetFlow.first()
+                val channelSet = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launchSessionWork
                 if (beacon.isAlreadyJoined(channelSet.lora_config, channelSet.settings)) return@launchSessionWork
                 serviceNotifications.showMeshBeaconNotification(offer)
             }
@@ -325,9 +325,10 @@ class MeshDataHandlerImpl(
      * use, so the three cannot drift. Waypoint packets are infrequent, so this one-shot read per waypoint is not hot.
      */
     private suspend fun storedWaypointModifiableBy(waypointId: Int, from: Int): Boolean {
-        // firstOrNull().orEmpty(): getWaypoints() is a hot repository flow that always emits (an empty list when there
-        // are none), but tolerate a flow that completes without emitting rather than throwing on the inbound path.
-        val active = packetRepository.value.getWaypoints().firstOrNull().orEmpty().activeWaypointPackets(nowSeconds)
+        // getWaypoints() emits an empty list when none are stored and completes without a value only when its query
+        // hit a corrupt page. An unreadable store cannot prove a waypoint unlocked, so that update is rejected.
+        val waypoints = packetRepository.value.getWaypoints().firstOrNull() ?: return false
+        val active = waypoints.activeWaypointPackets(nowSeconds)
         val stored = active[waypointId]?.waypoint
         return stored == null || stored.isModifiableBy(from)
     }
@@ -389,7 +390,7 @@ class MeshDataHandlerImpl(
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
-            nodeManager.toNodeID(packet.from),
+            packet.from,
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
             session,
@@ -400,12 +401,13 @@ class MeshDataHandlerImpl(
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun handleAckNak(
         requestId: Int,
-        fromId: String,
+        fromNum: Int,
         routingError: Int,
         relayNode: Int?,
         session: RadioSessionContext,
         ackProofStatus: Int = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value,
     ) {
+        val fromId = nodeManager.toNodeID(fromNum)
         radioInterfaceService.launchSessionWork(scope, session) {
             val isAck = routingError == Routing.Error.NONE.value
             val absentAckProof = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value
@@ -476,7 +478,7 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(settled.copy(ackProofStatus = provenAckProof))
                 }
             }
-            packetHandler.completeDispatchedResponse(requestId, complete = isAck)
+            packetHandler.completeDispatchedResponse(requestId, complete = isAck, from = fromNum)
         }
     }
 
@@ -579,7 +581,7 @@ class MeshDataHandlerImpl(
      * is its modem preset ("LongFast"), never an empty title.
      */
     private suspend fun effectiveChannelName(index: Int): String? {
-        val channelSet = radioConfigRepository.channelSetFlow.first()
+        val channelSet = radioConfigRepository.channelSetFlow.firstOrNull() ?: return null
         val lora = channelSet.lora_config ?: Channel.default.loraConfig
         return channelSet.settings.getOrNull(index)?.let { Channel(it, lora).name }
     }
@@ -592,9 +594,9 @@ class MeshDataHandlerImpl(
     private suspend fun getSenderName(packet: DataPacket): String {
         if (packet.source is NodeAddress.Local) {
             val myId = nodeManager.getMyId()
-            return nodeManager.getNodeById(myId)?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+            return nodeManager.getNodeById(myId)?.effectiveLongName ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeManager.getNodeById(packet.from.orEmpty())?.user?.long_name
+        return nodeManager.getNodeById(packet.from.orEmpty())?.effectiveLongName
             ?: getStringSuspend(Res.string.unknown_username)
     }
 
@@ -662,6 +664,8 @@ class MeshDataHandlerImpl(
                     to = toId,
                     channel = dataPacket.channel,
                     xeddsaSigned = packet.xeddsa_signed,
+                    viaMqtt = dataPacket.viaMqtt,
+                    transportMechanism = dataPacket.transportMechanism,
                 )
 
             // Check for duplicates before inserting

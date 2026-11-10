@@ -49,6 +49,7 @@
     <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>
     <!-- DEBUG -->
     <string name="debug_panel">Villuleitarborð</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Eyða</string>
     <string name="delete_for_everyone">Eyða fyrir öllum</string>
@@ -73,11 +74,13 @@
     <string name="factory_reset">Grunnstilla</string>
     <!-- FILTER -->
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Uppfærsla fastbúnaðar nauðsynleg</string>
     <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit. Fyrir ítarlegri upplýsingar sjá <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Leiðbeiningar um uppfærslu fastbúnaðar</a>.</string>
     <string name="firmware_too_old">Uppfærsla fastbúnaðar nauðsynleg.</string>
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Hunsa</string>
     <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
     <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
@@ -88,6 +91,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -95,6 +99,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">Læst</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Sýsla með skyndiminni</string>
     <string name="map_cache_size">Núverandi stærð skyndiminnis</string>
@@ -119,9 +124,12 @@
     <string name="message">Skilaboð</string>
     <string name="message_delivery_status">Staða sends skilaboðs</string>
     <string name="message_input_label">Skilaboð</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Í lagi</string>
     <string name="module_settings">Stillingar aukaeininga</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Aftengd</string>
+    <string name="mqtt_topic_finder_level_region">Svæði</string>
     <string name="must_set_region">Þú verður að velja svæði!</string>
     <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/installation">leiðbeiningar </a> okkar um þetta mál.</string>
     <!-- MUTE -->
@@ -156,7 +164,9 @@
     <string name="quick_chat_edit">Breyta flýtiskilaboðum</string>
     <string name="quick_chat_instant">Sent samtímis</string>
     <string name="quick_chat_new">Ný flýtiskilaboð</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Stillingar radíós</string>
+    <string name="radio_setup_name_headline">Heiti</string>
     <string name="reboot">Endurræsa</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">Læst</string>
@@ -204,6 +214,7 @@
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_new">Nýr leiðarpunktur</string>
     <string name="waypoint_received">Móttekin leiðarpunktur: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Tala</string>
     <!-- WIND -->

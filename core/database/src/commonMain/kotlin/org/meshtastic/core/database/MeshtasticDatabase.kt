@@ -38,6 +38,7 @@ import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MaintenanceUf2Dao
 import org.meshtastic.core.database.dao.MergeMarkerDao
 import org.meshtastic.core.database.dao.MeshLogDao
+import org.meshtastic.core.database.dao.MqttRootsDao
 import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
@@ -56,6 +57,7 @@ import org.meshtastic.core.database.entity.MaintenanceUf2CacheEntity
 import org.meshtastic.core.database.entity.MergeMarkerEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MqttRootsCacheEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
@@ -88,6 +90,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         ChannelSetEntity::class,
         BootloaderOtaQuirksCacheEntity::class,
         MaintenanceUf2CacheEntity::class,
+        MqttRootsCacheEntity::class,
     ],
     autoMigrations =
     [
@@ -152,8 +155,11 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 61, to = 62),
         AutoMigration(from = 62, to = 63),
         // 63 -> 64 is the manual MIGRATION_63_64 (log index added in place), applied via configureCommon().
+        AutoMigration(from = 64, to = 65),
+        AutoMigration(from = 65, to = 66),
+        AutoMigration(from = 66, to = 67),
     ],
-    version = 64,
+    version = 67,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -188,6 +194,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun bootloaderOtaQuirksDao(): BootloaderOtaQuirksDao
 
     abstract fun maintenanceUf2Dao(): MaintenanceUf2Dao
+
+    abstract fun mqttRootsDao(): MqttRootsDao
 
     companion object {
         /**
@@ -265,9 +273,10 @@ abstract class MeshtasticDatabase : RoomDatabase() {
          * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
          * databases, and under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`) the reader-pool
          * permit semaphore can wedge: all reader connections report `Free` but `permits=0`, so every read acquisition
-         * times out indefinitely ("Error code: 5, Timed out attempting to acquire a reader connection"). Android hit
-         * this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs, so JVM/iOS were moved
-         * off the multi-reader pool too. Single-connection eliminates the separate reader permit pool entirely.
+         * waits indefinitely (Room logs "Timed out attempting to acquire a reader connection" and retries; nothing is
+         * thrown). Android hit this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs,
+         * so JVM/iOS were moved off the multi-reader pool too. Single-connection eliminates the separate reader permit
+         * pool entirely.
          *
          * For in-memory databases (tests) this is a no-op for pooling — Room already serves `name == null` databases
          * from a single connection — it just serializes the query dispatcher.
@@ -277,6 +286,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
             this.fallbackToDestructiveMigration(dropAllTables = false)
                 .addMigrations(MIGRATION_52_53, MIGRATION_63_64)
                 .setSingleConnectionPool()
+                .setConnectionPoolTimeout(ROOM_POOL_ACQUIRE_TIMEOUT)
                 .setQueryCoroutineContext(
                     // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
                     // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
@@ -287,19 +297,19 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
 @DeleteTable(tableName = "NodeInfo")
 @DeleteTable(tableName = "MyNodeInfo")
-class AutoMigration12to13 : AutoMigrationSpec
+object AutoMigration12to13 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "reply_id")
-class AutoMigration29to30 : AutoMigrationSpec
+object AutoMigration29to30 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
-class AutoMigration33to34 : AutoMigrationSpec
+object AutoMigration33to34 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
-class AutoMigration34to35 : AutoMigrationSpec
+object AutoMigration34to35 : AutoMigrationSpec
 
 /** Device links moved from the bundled `urls.json` to the resolved API; `original_url` is no longer stored. */
 @DeleteColumn(tableName = "device_link", columnName = "original_url")
-class AutoMigration42to43 : AutoMigrationSpec
+object AutoMigration42to43 : AutoMigrationSpec

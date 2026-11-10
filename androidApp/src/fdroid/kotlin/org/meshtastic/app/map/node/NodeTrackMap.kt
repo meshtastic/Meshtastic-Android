@@ -25,8 +25,7 @@ import org.meshtastic.proto.Position
 /**
  * Flavor-unified entry point for the embeddable node-track map. MapLibre implementation.
  *
- * The OSMdroid version resolved a `mapStyleId` through [org.meshtastic.feature.map.node.NodeMapViewModel]; MapLibre
- * carries its style with the map, so the track map no longer needs a view model at all.
+ * MapLibre carries its style with the map, so the track map needs no view model of its own.
  */
 @Composable
 fun NodeTrackMap(

@@ -92,6 +92,11 @@ interface UiPrefs {
 
     fun setAppIntroCompleted(completed: Boolean)
 
+    /** Node numbers of the radios the radio setup has already opened for on its own. */
+    val radioSetupOfferedNodes: StateFlow<Set<Int>>
+
+    fun markRadioSetupOffered(nodeNum: Int)
+
     val theme: StateFlow<Int>
 
     fun setTheme(value: Int)
@@ -161,6 +166,14 @@ interface UiPrefs {
 
     /** Records a notification key after the platform notification has been scheduled successfully. */
     fun recordFirmwareUpdateNotificationKey(key: String)
+
+    /** Node nums the user chose to keep from the node list's unheard banner, so it stops offering them. */
+    val keptUnheardNodes: StateFlow<Set<Int>>
+
+    fun keepUnheardNodes(nodeNums: Set<Int>)
+
+    /** Drops [nodeNums] from [keptUnheardNodes], so the banner offers them again if they go unheard later. */
+    fun forgetKeptUnheardNodes(nodeNums: Set<Int>)
 
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
@@ -247,6 +260,22 @@ interface NotificationPrefs {
 
     fun setLowBatteryEnabled(enabled: Boolean)
 
+    /** Desktop opt-in for emoji reaction notifications; Android uses the system channel setting instead. */
+    val reactionsEnabled: StateFlow<Boolean>
+
+    fun setReactionsEnabled(enabled: Boolean)
+
+    /** The persisted [reactionsEnabled] value; unlike the StateFlow it never reports the pre-load default. */
+    suspend fun loadReactionsEnabled(): Boolean
+
+    /** Desktop opt-in for new waypoint notifications; Android uses the system channel setting instead. */
+    val newWaypointsEnabled: StateFlow<Boolean>
+
+    fun setNewWaypointsEnabled(enabled: Boolean)
+
+    /** The persisted [newWaypointsEnabled] value; unlike the StateFlow it never reports the pre-load default. */
+    suspend fun loadNewWaypointsEnabled(): Boolean
+
     /**
      * Waypoint ids of foreign (not locally-created) geofences the user has opted in to receiving crossing alerts for.
      * Geofences are mesh-broadcast, so by default only the creator is alerted; this is the per-geofence opt-in.
@@ -316,6 +345,11 @@ interface MapPrefs {
 
     /** Load the complete persisted camera, or null before the map has ever been positioned. */
     suspend fun awaitCameraPosition(): MapCameraPosition?
+
+    /** True once the user has dismissed the mesh view's first-run coaching. */
+    val meshHudCoachSeen: StateFlow<Boolean>
+
+    fun setMeshHudCoachSeen(seen: Boolean)
 }
 
 data class MapCameraPosition(val latitude: Double, val longitude: Double, val zoom: Double)
@@ -344,6 +378,9 @@ interface MapTileProviderPrefs {
 /** Reactive interface for radio settings. */
 interface RadioPrefs {
     val devAddr: StateFlow<String?>
+
+    /** The saved address once the store has loaded; [devAddr] reads null until then. */
+    suspend fun awaitDevAddr(): String?
 
     /** The persisted user-visible name of the connected device (e.g. "Meshtastic_1234"). */
     val devName: StateFlow<String?>

@@ -31,6 +31,9 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.dp
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.interpolate
+import org.maplibre.compose.expressions.dsl.linear
+import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonData
@@ -97,9 +100,10 @@ internal fun TerrainLayers(viewportBounds: BoundingBox?, zoom: Double, displayUn
  * both tiers rather than only the always-present global one is harmless). The contour
  * [org.maplibre.compose.sources.GeoJsonSource] below has no attribution field of its own to carry this on —
  * [org.maplibre.compose.sources.GeoJsonOptions] doesn't have one — but contours only ever render alongside hillshade
- * (see [TerrainLayers]'s shared gate), so this covers both.
+ * (see [TerrainLayers]'s shared gate), so this covers both. A coverage estimate's [CustomLayer.attributionHtml] uses
+ * the same string, so the map shows it once when both draw.
  */
-private const val MAPTERHORN_ATTRIBUTION_HTML =
+internal const val MAPTERHORN_ATTRIBUTION_HTML =
     "&copy; <a href=\"${MapterhornEndpoints.ATTRIBUTION_URL}\">Mapterhorn</a>"
 
 /**
@@ -120,10 +124,12 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
     val globalSource =
         rememberRasterDemTileSource(
             tiles = listOf(repository.tileUrlTemplate(TerrainSource.GLOBAL)),
-            options =
-            TileSetOptions(minZoom = 0, maxZoom = globalMaxZoom, attributionHtml = MAPTERHORN_ATTRIBUTION_HTML),
             encoding = RasterDemEncoding.Terrarium,
-        )
+        ) {
+            minZoom = 0
+            maxZoom = globalMaxZoom
+            attributionHtml = MAPTERHORN_ATTRIBUTION_HTML
+        }
 
     if (region.hasRegionalDetail) {
         HillshadeLayer(
@@ -139,18 +145,18 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
         val regionalSource =
             rememberRasterDemTileSource(
                 tiles = listOf(repository.tileUrlTemplate(TerrainSource.REGIONAL)),
-                options =
-                TileSetOptions(
-                    minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM,
-                    maxZoom = regionalMaxZoom,
-                    attributionHtml = MAPTERHORN_ATTRIBUTION_HTML,
-                ),
                 encoding = RasterDemEncoding.Terrarium,
-            )
+            ) {
+                minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM
+                maxZoom = regionalMaxZoom
+                attributionHtml = MAPTERHORN_ATTRIBUTION_HTML
+            }
         HillshadeLayer(
             id = "offline-terrain-hillshade-regional",
             source = regionalSource,
             minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM.toFloat(),
+            maxZoom = hillshadeEndZoom(regionalMaxZoom),
+            exaggeration = fadingExaggeration(regionalMaxZoom),
             shadowColor = const(Color.Black),
             highlightColor = const(Color.White),
             accentColor = const(Color.Black),
@@ -159,12 +165,32 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
         HillshadeLayer(
             id = "offline-terrain-hillshade-global",
             source = globalSource,
+            maxZoom = hillshadeEndZoom(globalMaxZoom),
+            exaggeration = fadingExaggeration(globalMaxZoom),
             shadowColor = const(Color.Black),
             highlightColor = const(Color.White),
             accentColor = const(Color.Black),
         )
     }
 }
+
+/** Zoom at which a hillshade layer stops drawing: three zooms past [dataMaxZoom], where the fade reaches nothing. */
+private fun hillshadeEndZoom(dataMaxZoom: Int): Float = (dataMaxZoom + HILLSHADE_END_ZOOMS_PAST_DATA).toFloat()
+
+/**
+ * Full strength to one zoom past [dataMaxZoom], half at two past and nothing at three, matching the Google flavor's
+ * `Hillshade.strength` and the Apple app.
+ */
+private fun fadingExaggeration(dataMaxZoom: Int) = interpolate(
+    linear(),
+    zoom(),
+    (dataMaxZoom + HILLSHADE_FULL_ZOOMS_PAST_DATA).toFloat() to const(HILLSHADE_EXAGGERATION),
+    hillshadeEndZoom(dataMaxZoom) to const(0f),
+)
+
+private const val HILLSHADE_EXAGGERATION = 0.5f
+private const val HILLSHADE_FULL_ZOOMS_PAST_DATA = 1
+private const val HILLSHADE_END_ZOOMS_PAST_DATA = 3
 
 /**
  * Elevation contours for the tiles [viewportBounds] touches, decoded off the composition thread — see

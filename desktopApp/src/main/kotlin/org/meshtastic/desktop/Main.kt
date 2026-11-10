@@ -80,6 +80,7 @@ import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.log.RoomPoolTimeoutLog
 import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
@@ -175,6 +176,7 @@ fun main(args: Array<String>) {
     application(exitProcessOnExit = false) {
         val koinApp = remember {
             installDesktopLogging(isDebug = DesktopBuildConfig.IS_DEBUG)
+            RoomPoolTimeoutLog.install()
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
                 .also { app ->
@@ -472,12 +474,12 @@ private fun ApplicationScope.MeshtasticWindow(
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
                 LocalMapViewProvider provides desktopMapViewProvider(),
-                // The planner runs in the browser here rather than in the app; the button is still offered.
+                // The planner computes coverage on device and imports it as a map layer.
                 LocalSitePlannerAvailable provides true,
                 // mapGraph renders the Map tab through this seam, not through LocalMapViewProvider
                 // directly; without it the tab falls back to the "Map" placeholder.
                 LocalMapMainScreenProvider provides
-                    { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
+                    { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum, _ ->
                         MapScreen(
                             viewModel = koinViewModel<SharedMapViewModel>(),
                             onClickNodeChip = onClickNodeChip,

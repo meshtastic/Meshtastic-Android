@@ -57,6 +57,7 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
@@ -98,7 +99,7 @@ fun NodeItem(
     showTelemetry: Boolean = true,
     deviceImageUrl: String? = null,
 ) {
-    val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName = thatNode.effectiveLongName.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
     val isFavorite = thatNode.isFavorite

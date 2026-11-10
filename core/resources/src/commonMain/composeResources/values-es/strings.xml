@@ -162,6 +162,7 @@
     <string name="debug_search_clear">Borrar búsqueda</string>
     <string name="debug_search_next">Siguiente coincidencia</string>
     <string name="debug_search_prev">Coincidencia anterior</string>
+    <!-- DEEP -->
     <string name="default_">Por defecto</string>
     <!-- DELETE -->
     <string name="delete">Eliminar</string>
@@ -248,6 +249,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Software</string>
     <string name="firmware_edition">Edición de firmware</string>
+    <string name="firmware_gate_title">Es necesario actualizar el firmware</string>
     <string name="firmware_old">El firmware de radio es demasiado viejo para comunicar con esta aplicación. Para obtener más información sobre esto consulte <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nuestra guía de instalación de Firmware</a>.</string>
     <string name="firmware_too_old">El software es demasiado antiguo, por favor actualícelo.</string>
     <string name="firmware_update_checking">Buscando actualizaciones...</string>
@@ -271,7 +273,6 @@
     <string name="fixed_position">Posición Fijada</string>
     <string name="for_more_information_see_our_privacy_policy">Para más información, consulte nuestra política de privacidad.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Memoria disponible</string>
     <string name="freq">Frecuencia</string>
     <string name="gas_resistance">Resistencia del Gas</string>
     <!-- GEOFENCE -->
@@ -290,9 +291,11 @@
     <string name="i_agree">Estoy de acuerdo.</string>
     <string name="i_agree_to_share_my_location">He leído y entiendo lo anterior. Doy mi consentimiento voluntario para la transmisión no cifrada de los datos de mi nodo a través de MQTT.</string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Calidad de Aire interior) escala relativa del valor IAQ como mediciones del sensor Bosch BME680.
 Rango de Valores 0 - 500.</string>
+    <string name="iaq_level_good">Bien</string>
     <string name="icon_meanings">Significado de los iconos</string>
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">¿Añadir '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
@@ -326,6 +329,8 @@ Rango de Valores 0 - 500.</string>
     <string name="legacy_admin_channel">Canal de administración antiguo</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Directo</string>
     <!-- LOAD -->
     <string name="load">Carga</string>
     <string name="load_indexed">Carga %1$d</string>
@@ -348,6 +353,7 @@ Rango de Valores 0 - 500.</string>
     <string name="logs">Registros</string>
     <string name="long_name">Nombre largo</string>
     <string name="longitude">Longitud</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Batería baja</string>
@@ -413,6 +419,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="message_status_queued">En cola para enviar</string>
     <string name="message_status_unknown">Desconocido</string>
     <string name="messages">Mensajes</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Vale</string>
     <string name="modem_preset">Predefinidos</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="modules_already_unlocked">Módulos ya desbloqueados</string>
@@ -422,6 +430,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="mqtt_config">Configuración MQTT</string>
     <string name="mqtt_status_connected">Conectado</string>
     <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_topic_finder_level_region">Región</string>
     <string name="must_set_region">¡Debe establecer una región!</string>
     <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
     <!-- MUTE -->
@@ -553,7 +562,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="quick_chat_new">Nuevo chat rápido</string>
     <string name="quick_chat_show">Mostrar menú rápido de chat</string>
     <string name="radiation">Radiación</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Configuración de radio</string>
+    <string name="radio_setup_name_headline">Mote</string>
     <string name="range_test">Test de Alcance</string>
     <string name="range_test_config">Configuración del test de alcance</string>
     <string name="react">Reaccionar</string>
@@ -655,8 +666,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="share_to">Compartir con…</string>
     <string name="share_your_location_in_real_time">Comparte tu ubicación en tiempo real y mantén tu grupo coordinado con las características integradas del GPS.</string>
     <string name="short_name">Nombre Corto</string>
-    <string name="should_update">Para beneficiarse de los parches y de las funciones nuevas, por favor, actualiza el firmware del nodo. \n\nÚltima versión estable:%1$s</string>
-    <string name="should_update_firmware">Se recomienda encarecidamente actualizar el software.</string>
     <!-- SHOW -->
     <string name="show_layer">Mostrar capa</string>
     <string name="show_password">Mostrar contraseña</string>
@@ -683,6 +692,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="swipe_action_unmute">Desilenciar</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Regenerar</string>
     <string name="tak_server_section">Servidor</string>
     <string name="telemetry">Telemetría</string>
     <string name="telemetry_config">Configuración de la telemetría</string>
@@ -757,6 +767,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %1$s</string>
     <string name="weight">Peso</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Mal</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_done">Hecho</string>
     <string name="wifi_provision_success_ip_address">Dirección IP</string>

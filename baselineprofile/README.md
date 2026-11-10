@@ -6,17 +6,18 @@ JIT cost on first launch. Targets the **google** flavor (the variant most users 
 
 ## Generate the profile (run on a device/emulator)
 
-```bash
+```shell
 ./gradlew :androidApp:generateBaselineProfile
 ```
 
-Output is merged into `androidApp/src/main/generated/baselineProfiles/baseline-prof.txt` (`mergeIntoMain`
-in `androidApp/build.gradle.kts`). **Commit that file**: release builds of both flavors package it via
-`androidx.profileinstaller`.
+Output is merged into `androidApp/src/main/generated/baselineProfiles/` (`mergeIntoMain` in
+`androidApp/build.gradle.kts`): `baseline-prof.txt`, plus `startup-prof.txt` because the generator sets
+`includeInStartupProfile`. **Commit both files**: release builds of both flavors package them, and
+`androidx.profileinstaller` writes the bundled profile to the device when the app first starts.
 
 ## Quantify the win
 
-```bash
+```shell
 ./gradlew :baselineprofile:connectedGoogleBenchmarkReleaseAndroidTest
 ```
 
@@ -24,10 +25,11 @@ Compare `startupCompilationNone` vs `startupCompilationBaselineProfiles` in the 
 
 ## Scope / TODO
 
-- The journey (`BaselineProfileGenerator`) is cold-start only, since CI has no paired radio.
-  Extend it with post-connection screens (node list, map, message thread) once a fake transport or
-  connected device is wired into the harness — a more representative journey yields a better profile.
+- The journey (`BaselineProfileGenerator`) is cold start to first frame only, since CI has no paired
+  radio. Post-connection screens (node list, map, message thread) would make a more representative
+  journey and a better profile; that needs a mesh in the harness, and Demo Mode's showcase mesh, which
+  `:store-screenshots` connects to, is one candidate.
 - For hermetic CI generation, swap `useConnectedDevices = true` in `build.gradle.kts` for a
   [Gradle Managed Device](https://developer.android.com/topic/performance/baselineprofiles/measure-baselineprofile#gradle-managed).
-- Only `google` is produced, and f-droid ships that same profile from `src/main`. Add a second flavor
-  here if the f-droid startup path ever diverges enough to matter.
+- Only `google` is produced, and `fdroid` ships that same profile from `src/main`. Add a second flavor
+  here if the `fdroid` startup path ever diverges enough to matter.

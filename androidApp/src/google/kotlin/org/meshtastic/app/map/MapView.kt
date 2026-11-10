@@ -35,10 +35,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,6 +81,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -149,6 +153,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.model.isLocked
@@ -193,10 +198,12 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.coverage.RegionTerrain
 import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
+import org.meshtastic.feature.map.TRACK_FADE_LEVELS
 import org.meshtastic.feature.map.TRACK_STOP_RADIUS_METERS
 import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
@@ -224,9 +231,15 @@ import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.feature.map.stackCoincident
+import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
+import org.meshtastic.feature.map.trackFadeAlpha
+import org.meshtastic.feature.map.trackFadeLevel
+import org.meshtastic.feature.map.trackFadeLevelAlpha
+import org.meshtastic.feature.map.trackRecency
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -235,6 +248,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 import kotlin.coroutines.resume
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.roundToInt
 import android.graphics.Color as AndroidColor
@@ -293,6 +307,23 @@ private fun CameraPositionState.frameInsideChrome(
     move(CameraUpdateFactory.scrollBy((right - left) / 2f, (bottom - top) / 2f))
 }
 
+/**
+ * Animates to the update [build] returns and reports whether it landed. `CameraUpdateFactory` throws
+ * NullPointerException when the Maps SDK never initialized, and `animate` throws IllegalStateException when a gesture
+ * interrupts it; neither should take the app down.
+ */
+private suspend fun CameraPositionState.animateOrLog(what: String, build: () -> CameraUpdate): Boolean = try {
+    animate(build())
+    true
+} catch (e: IllegalStateException) {
+    if (e is CancellationException) currentCoroutineContext().ensureActive()
+    Logger.d { "Error $what: ${e.message}" }
+    false
+} catch (@Suppress("TooGenericExceptionCaught") e: NullPointerException) {
+    Logger.e(e) { "Error $what: the Maps SDK is not initialized" }
+    false
+}
+
 // Shared geofence overlay styling (orange, matching the fdroid flavor).
 private val GEOFENCE_OVERLAY_COLOR = Color(0xFFFF9800)
 private const val GEOFENCE_FILL_ALPHA = 0.12f
@@ -310,16 +341,27 @@ private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 /** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
 private const val OVERLAY_Z_INDEX = -0.5f
 
+// A tapped cluster opens to at least this span, about street level, matching the Apple map's floor.
+private const val CLUSTER_FIT_MIN_SPAN_METERS = 140.0
+private val CLUSTER_FIT_PADDING = 64.dp
+private const val METERS_PER_DEGREE = 111_320.0
+
+/** These bounds grown, about their center, to at least [meters] across. */
+private fun LatLngBounds.atLeastSpan(meters: Double): LatLngBounds {
+    val halfLatitude = meters / 2 / METERS_PER_DEGREE
+    val halfLongitude = halfLatitude / cos(Math.toRadians(center.latitude)).coerceAtLeast(MIN_COS_LATITUDE)
+    return including(LatLng(center.latitude + halfLatitude, center.longitude + halfLongitude))
+        .including(LatLng(center.latitude - halfLatitude, center.longitude - halfLongitude))
+}
+
+private const val MIN_COS_LATITUDE = 0.01
+
 /** Below the offline vector layer's own water/roads/boundaries (-0.75f) so those still draw on top of the shading. */
 private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
 
 /** Clears Google's own logo and the zoom controls, both of which sit along the bottom edge. */
 private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
 private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
-
-/** Faded rather than transparent, so the oldest point stays visible and tappable, as on the MapLibre track. */
-private const val OLDEST_TRACK_ALPHA = 0.25f
-private const val TRACK_FADE_LEVELS = 8
 private const val MAX_TRACK_MARKERS = 500
 private const val TRACK_POINT_SIZE_DP = 24f
 private const val SELECTED_TRACK_POINT_SIZE_DP = 32f
@@ -386,6 +428,7 @@ fun MapView(
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
     val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
     val terrainHillshadeEnabled by mapViewModel.terrainHillshadeEnabled.collectAsStateWithLifecycle()
+    val terrainShadeValleysEnabled by mapViewModel.terrainShadeValleysEnabled.collectAsStateWithLifecycle()
     val terrainContoursEnabled by mapViewModel.terrainContoursEnabled.collectAsStateWithLifecycle()
     val mapNetworkAvailable by mapViewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
@@ -417,30 +460,25 @@ fun MapView(
                 if (isLocationTrackingEnabled) {
                     locationResult.lastLocation?.let { location ->
                         val latLng = LatLng(location.latitude, location.longitude)
-                        val cameraUpdate =
-                            if (followPhoneBearing) {
-                                val bearing =
-                                    if (location.hasBearing()) {
-                                        location.bearing
-                                    } else {
-                                        cameraPositionState.position.bearing
-                                    }
-                                CameraUpdateFactory.newCameraPosition(
-                                    CameraPosition.Builder()
-                                        .target(latLng)
-                                        .zoom(cameraPositionState.position.zoom)
-                                        .bearing(bearing)
-                                        .build(),
-                                )
-                            } else {
-                                CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom)
-                            }
                         coroutineScope.launch {
-                            try {
-                                cameraPositionState.animate(cameraUpdate)
-                            } catch (e: IllegalStateException) {
-                                if (e is CancellationException) currentCoroutineContext().ensureActive()
-                                Logger.d { "Error animating camera to location: ${e.message}" }
+                            cameraPositionState.animateOrLog("animating camera to location") {
+                                if (followPhoneBearing) {
+                                    val bearing =
+                                        if (location.hasBearing()) {
+                                            location.bearing
+                                        } else {
+                                            cameraPositionState.position.bearing
+                                        }
+                                    CameraUpdateFactory.newCameraPosition(
+                                        CameraPosition.Builder()
+                                            .target(latLng)
+                                            .zoom(cameraPositionState.position.zoom)
+                                            .bearing(bearing)
+                                            .build(),
+                                    )
+                                } else {
+                                    CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom)
+                                }
                             }
                         }
                     }
@@ -603,33 +641,25 @@ fun MapView(
         LaunchedEffect(sortedTrackPositions, hasCentered) {
             if (hasCentered || sortedTrackPositions.isEmpty()) return@LaunchedEffect
             val points = sortedTrackPositions.map { it.toLatLng() }
-            val cameraUpdate =
-                if (points.size == 1) {
-                    CameraUpdateFactory.newLatLngZoom(points.first(), max(cameraPositionState.position.zoom, 12f))
-                } else {
-                    val bounds = LatLngBounds.builder()
-                    points.forEach { bounds.include(it) }
-                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 80)
+            // False for a user gesture interrupting animate() too: that cancels the animation, not this effect.
+            hasCentered =
+                cameraPositionState.animateOrLog("centering track map") {
+                    if (points.size == 1) {
+                        CameraUpdateFactory.newLatLngZoom(points.first(), max(cameraPositionState.position.zoom, 12f))
+                    } else {
+                        val bounds = LatLngBounds.builder()
+                        points.forEach { bounds.include(it) }
+                        CameraUpdateFactory.newLatLngBounds(bounds.build(), 80)
+                    }
                 }
-            try {
-                cameraPositionState.animate(cameraUpdate)
-                hasCentered = true
-            } catch (e: IllegalStateException) {
-                if (e is CancellationException) currentCoroutineContext().ensureActive()
-                // Reached for a user gesture interrupting animate() too: that cancels the animation, not this effect.
-                Logger.d { "Error centering track map: ${e.message}" }
-            }
         }
 
         // Animate to selected position marker when card is tapped in the list
         LaunchedEffect(mode.selectedPositionTime) {
             val selectedTime = mode.selectedPositionTime ?: return@LaunchedEffect
             val selectedPos = sortedTrackPositions.find { it.time == selectedTime } ?: return@LaunchedEffect
-            try {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLng(selectedPos.toLatLng()))
-            } catch (e: IllegalStateException) {
-                if (e is CancellationException) currentCoroutineContext().ensureActive()
-                Logger.d { "Error animating to selected position: ${e.message}" }
+            cameraPositionState.animateOrLog("animating to selected position") {
+                CameraUpdateFactory.newLatLng(selectedPos.toLatLng())
             }
         }
     }
@@ -639,24 +669,19 @@ fun MapView(
             if (mode.overlay == null || hasCentered) return@LaunchedEffect
             val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints).distinct()
             if (allPoints.isNotEmpty()) {
-                val cameraUpdate =
-                    if (allPoints.size == 1) {
-                        CameraUpdateFactory.newLatLngZoom(
-                            allPoints.first(),
-                            max(cameraPositionState.position.zoom, 12f),
-                        )
-                    } else {
-                        val bounds = LatLngBounds.builder()
-                        allPoints.forEach { bounds.include(it) }
-                        CameraUpdateFactory.newLatLngBounds(bounds.build(), TRACEROUTE_BOUNDS_PADDING_PX)
+                hasCentered =
+                    cameraPositionState.animateOrLog("centering traceroute overlay") {
+                        if (allPoints.size == 1) {
+                            CameraUpdateFactory.newLatLngZoom(
+                                allPoints.first(),
+                                max(cameraPositionState.position.zoom, 12f),
+                            )
+                        } else {
+                            val bounds = LatLngBounds.builder()
+                            allPoints.forEach { bounds.include(it) }
+                            CameraUpdateFactory.newLatLngBounds(bounds.build(), TRACEROUTE_BOUNDS_PADDING_PX)
+                        }
                     }
-                try {
-                    cameraPositionState.animate(cameraUpdate)
-                    hasCentered = true
-                } catch (e: IllegalStateException) {
-                    if (e is CancellationException) currentCoroutineContext().ensureActive()
-                    Logger.d { "Error centering traceroute overlay: ${e.message}" }
-                }
             }
         }
     }
@@ -767,6 +792,8 @@ fun MapView(
                         region = region,
                         archiveFile = mapViewModel.offlineRegionArchiveFile(region.id),
                         cameraPositionState = cameraPositionState,
+                        showLabels = !mapNetworkAvailable,
+                        dark = dark,
                     )
                 }
             }
@@ -778,8 +805,11 @@ fun MapView(
                 if (terrainHillshadeEnabled) {
                     key(coveringRegion.id) {
                         val hillshadeProvider =
-                            remember(coveringRegion.id) {
-                                HillshadeTileProvider(mapViewModel.terrainStoreForRegion(coveringRegion.id))
+                            remember(coveringRegion.id, terrainShadeValleysEnabled) {
+                                HillshadeTileProvider(
+                                    mapViewModel.terrainStoreForRegion(coveringRegion.id),
+                                    terrainShadeValleysEnabled,
+                                )
                             }
                         TileOverlay(
                             tileProvider = hillshadeProvider,
@@ -1026,12 +1056,14 @@ fun MapView(
         // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
         // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer. The offline
         // terrain layer's own credit (Mapterhorn) is folded in the same way, whenever hillshade or contours are
-        // actually rendering.
+        // actually rendering, or a coverage estimate built from that terrain is shown.
         val attributionCoveringRegion =
             cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
         val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
-        val terrainActive =
+        val terrainDrawn =
             attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
+        val coverageShown = mapLayers.any { it.layerType == LayerType.COVERAGE && it.isVisible }
+        val terrainActive = terrainDrawn || coverageShown
         val attributionText =
             remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
                 val baseAttribution =
@@ -1137,14 +1169,10 @@ fun MapView(
                     followPhoneBearing = !followPhoneBearing
                 } else {
                     coroutineScope.launch {
-                        try {
-                            val currentPosition = cameraPositionState.position
-                            val newCameraPosition = CameraPosition.Builder(currentPosition).bearing(0f).build()
-                            cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
-                            Logger.d { "Oriented map to north" }
-                        } catch (e: IllegalStateException) {
-                            if (e is CancellationException) currentCoroutineContext().ensureActive()
-                            Logger.d { "Error orienting map to north: ${e.message}" }
+                        cameraPositionState.animateOrLog("orienting map to north") {
+                            val newCameraPosition =
+                                CameraPosition.Builder(cameraPositionState.position).bearing(0f).build()
+                            CameraUpdateFactory.newCameraPosition(newCameraPosition)
                         }
                     }
                 }
@@ -1165,49 +1193,55 @@ fun MapView(
                 mapViewModel.clearTerrainDownloadState()
             },
         ) {
-            val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
-            val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
-            val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
-            val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
-            OfflineRegionManagerSection(
-                visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
-                currentZoom = cameraPositionState.position.zoom.toInt(),
-                regions = offlineRegions,
-                downloadState = offlineDownloadState,
-                offlineOverlayEnabled = offlineOverlayEnabled,
-                estimateTileCount = mapViewModel::estimateOfflineTileCount,
-                onDownload = mapViewModel::downloadOfflineRegion,
-                onDeleteRegion = mapViewModel::deleteOfflineRegion,
-                onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
-                terrainDownloadState = terrainDownloadState,
-                terrainDownloadRegionId = terrainDownloadRegionId,
-                terrainHillshadeEnabled = terrainHillshadeEnabled,
-                terrainContoursEnabled = terrainContoursEnabled,
-                onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
-                onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
-                onToggleContours = mapViewModel::setTerrainContoursEnabled,
-            )
-            HorizontalDivider()
+            // One scroll container for the whole sheet: the offline region list grows with every saved region, and
+            // the layer toggles below it must stay reachable.
+            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+                val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
+                val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
+                val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
+                OfflineRegionManagerSection(
+                    visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
+                    currentZoom = cameraPositionState.position.zoom.toInt(),
+                    regions = offlineRegions,
+                    downloadState = offlineDownloadState,
+                    offlineOverlayEnabled = offlineOverlayEnabled,
+                    estimateTileCount = mapViewModel::estimateOfflineTileCount,
+                    onDownload = mapViewModel::downloadOfflineRegion,
+                    onDeleteRegion = mapViewModel::deleteOfflineRegion,
+                    onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
+                    terrainDownloadState = terrainDownloadState,
+                    terrainDownloadRegionId = terrainDownloadRegionId,
+                    terrainHillshadeEnabled = terrainHillshadeEnabled,
+                    terrainContoursEnabled = terrainContoursEnabled,
+                    terrainShadeValleysEnabled = terrainShadeValleysEnabled,
+                    onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
+                    onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
+                    onToggleShadeValleys = mapViewModel::setTerrainShadeValleysEnabled,
+                    onToggleContours = mapViewModel::setTerrainContoursEnabled,
+                )
+                HorizontalDivider()
 
-            // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
-            RasterOverlayToggles(
-                available = mapViewModel.availableOverlays,
-                enabledIds = enabledOverlayIds,
-                onToggle = { mapViewModel.toggleOverlay(it) },
-                opacity = layerOpacity,
-                onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
-            )
-            HorizontalDivider()
-            CustomMapLayersSheet(
-                mapLayers = mapLayers,
-                onToggleVisibility = onToggleVisibility,
-                onRemoveLayer = onRemoveLayer,
-                onAddLayerClicked = onAddLayerClicked,
-                onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
-                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
-                opacity = layerOpacity,
-                onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
-            )
+                // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
+                RasterOverlayToggles(
+                    available = mapViewModel.availableOverlays,
+                    enabledIds = enabledOverlayIds,
+                    onToggle = { mapViewModel.toggleOverlay(it) },
+                    opacity = layerOpacity,
+                    onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
+                )
+                HorizontalDivider()
+                CustomMapLayersSheet(
+                    mapLayers = mapLayers,
+                    onToggleVisibility = onToggleVisibility,
+                    onRemoveLayer = onRemoveLayer,
+                    onAddLayerClicked = onAddLayerClicked,
+                    onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
+                    onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
+                    opacity = layerOpacity,
+                    onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
+                )
+            }
         }
     }
     // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
@@ -1217,7 +1251,9 @@ fun MapView(
             sitePlannerLaunch =
                 SitePlannerLaunch(initialParams = node.toSitePlannerParams(channelSet), selectedNode = node)
             if (node.validPosition != null) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude)))
+                cameraPositionState.animateOrLog("centering on site planner node") {
+                    CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude))
+                }
             }
             mapViewModel.consumeSitePlannerRequest(node.num)
         }
@@ -1233,15 +1269,29 @@ fun MapView(
         // Route launches retain the selected node; manual map launches continue following our connected node.
         val onUseNodeLocation: (() -> Pair<Double, Double>)? =
             launch.nodeLocation(ourNodeInfo)?.let { location -> { location } }
+        val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+        val offlineTerrain =
+            remember(offlineRegions) {
+                offlineRegions
+                    .filter { it.hasTerrain }
+                    .map { region ->
+                        RegionTerrain(
+                            store = mapViewModel.terrainStoreForRegion(region.id),
+                            bounds = GeoBounds(region.southLat, region.westLon, region.northLat, region.eastLon),
+                        )
+                    }
+            }
         SitePlannerHost(
             initialParams = launch.initialParams,
-            estimate = rememberCoverageEstimate(),
+            estimate = rememberCoverageEstimate(offlineTerrain),
             onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
                 // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
                 coroutineScope.launch {
-                    cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(latitude, longitude)))
+                    cameraPositionState.animateOrLog("centering on estimate") {
+                        CameraUpdateFactory.newLatLng(LatLng(latitude, longitude))
+                    }
                 }
             },
             onRequestCurrentLocation = onRequestCurrentLocation,
@@ -1252,14 +1302,16 @@ fun MapView(
     showClusterItemsDialog?.let { items ->
         ClusterMembersDialog(
             members =
-            items.map {
-                ClusterMemberEntry(
-                    nodeNum = it.node.num,
-                    title = it.nodeTitle,
-                    subtitle = it.nodeSnippet,
-                    node = it.node,
-                )
-            },
+            items
+                .flatMap { it.stackMembers.ifEmpty { listOf(it) } }
+                .map {
+                    ClusterMemberEntry(
+                        nodeNum = it.node.num,
+                        title = it.nodeTitle,
+                        subtitle = it.nodeSnippet,
+                        node = it.node,
+                    )
+                },
             onMemberClick = { nodeNum ->
                 navigateToNodeDetails(nodeNum)
                 showClusterItemsDialog = null
@@ -1306,15 +1358,19 @@ internal fun rememberNodeClusterItems(
     val unknownText = stringResource(Res.string.unknown)
     val nowText = stringResource(Res.string.now)
     return remember(nodes, myNodeNum, relativeTimeBucket, unknownText, nowText) {
-        nodes.map { node ->
+        fun itemFor(node: Node): NodeClusterItem {
             val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
-            NodeClusterItem(
+            return NodeClusterItem(
                 node = node,
                 nodePosition = latLng,
                 nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
-                nodeSnippet = node.user.long_name,
+                nodeSnippet = node.effectiveLongName,
                 myNodeNum = myNodeNum,
             )
+        }
+        stackCoincident(nodes, myNodeNum).map { stack ->
+            val members = if (stack.count > 1) stack.members.map(::itemFor) else emptyList()
+            itemFor(stack.top).copy(stackMembers = members)
         }
     }
 }
@@ -1341,10 +1397,12 @@ private fun MainMapContent(
     coroutineScope: CoroutineScope,
     onShowClusterItemsDialog: (List<NodeClusterItem>?) -> Unit,
 ) {
+    val clusterFitPaddingPx = with(LocalDensity.current) { CLUSTER_FIT_PADDING.roundToPx() }
     NodeClusterMarkers(
         nodeClusterItems = nodeClusterItems,
         mapFilterState = mapFilterState,
         navigateToNodeDetails = navigateToNodeDetails,
+        onStackClick = { onShowClusterItemsDialog(it) },
         onClusterClick = { cluster ->
             val items = cluster.items.toList()
             val allSameLocation = items.size > 1 && items.all { it.position == items.first().position }
@@ -1353,15 +1411,13 @@ private fun MainMapContent(
             } else {
                 val bounds = LatLngBounds.builder()
                 cluster.items.forEach { bounds.include(it.position) }
+                // Fit the members, as the Apple map does, rather than step one zoom level and leave a tight cluster
+                // needing several taps to break.
+                val fitted = bounds.build().atLeastSpan(CLUSTER_FIT_MIN_SPAN_METERS)
                 coroutineScope.launch {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newCameraPosition(
-                            CameraPosition.Builder()
-                                .target(bounds.build().center)
-                                .zoom(cameraPositionState.position.zoom + 1)
-                                .build(),
-                        ),
-                    )
+                    cameraPositionState.animateOrLog("fitting cluster") {
+                        CameraUpdateFactory.newLatLngBounds(fitted, clusterFitPaddingPx)
+                    }
                 }
                 Logger.d { "Cluster clicked! $cluster" }
             }
@@ -1457,7 +1513,7 @@ private fun NodeTrackOverlay(
     val pointIcons =
         remember(trackColor, density) {
             List(TRACK_FADE_LEVELS) { level ->
-                trackPointIcon(trackColor.copy(alpha = trackFadeAlpha(level)), TRACK_POINT_SIZE_DP, density)
+                trackPointIcon(trackColor.copy(alpha = trackFadeLevelAlpha(level)), TRACK_POINT_SIZE_DP, density)
             }
         }
     val selectedIcon =
@@ -1465,6 +1521,7 @@ private fun NodeTrackOverlay(
     val pointTitle = stringResource(Res.string.position)
     val pointDescription = stringResource(Res.string.track_point)
     val runs = remember(sortedPositions) { mergeStationaryRuns(sortedPositions) }
+    val recency = remember(runs) { trackRecency(runs.map { it.position.time.toLong() }) }
     // Every marker is added on the main thread, so only the newest points and the selected one get one.
     val firstMarkerIndex = (runs.size - MAX_TRACK_MARKERS).coerceAtLeast(0)
 
@@ -1489,14 +1546,15 @@ private fun NodeTrackOverlay(
                     NodeChip(node = focusedNode)
                 }
             } else {
-                val level = trackFadeLevel(index, runs.lastIndex)
+                // Bucketed, so a new fix changes the icon of only the markers that cross a level.
+                val level = trackFadeLevel(recency[index])
                 MarkerInfoWindow(
                     state = markerState,
                     contentDescription = pointDescription,
                     icon = if (isSelected) selectedIcon else pointIcons[level],
                     title = pointTitle,
                     snippet = formatAgo(position.time),
-                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + trackFadeAlpha(level),
+                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + trackFadeLevelAlpha(level),
                     onClick = {
                         onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
@@ -1510,23 +1568,22 @@ private fun NodeTrackOverlay(
 
     if (runs.size > 1) {
         val points = remember(runs) { runs.map { it.position.toLatLng() } }
-        // A span without a segment count covers only the first segment.
+        // One gradient span per segment, between its two ends' fade, so the line follows time rather than order.
         val spans =
-            remember(trackColor, points.size) {
-                val oldest = trackColor.copy(alpha = OLDEST_TRACK_ALPHA).toArgb()
-                val gradient = StrokeStyle.gradientBuilder(oldest, trackColor.toArgb()).build()
-                listOf(StyleSpan(gradient, (points.size - 1).toDouble()))
+            remember(trackColor, recency) {
+                recency.zipWithNext { from, to ->
+                    val gradient =
+                        StrokeStyle.gradientBuilder(
+                            trackColor.copy(alpha = trackFadeAlpha(from)).toArgb(),
+                            trackColor.copy(alpha = trackFadeAlpha(to)).toArgb(),
+                        )
+                            .build()
+                    StyleSpan(gradient, 1.0)
+                }
             }
         Polyline(points = points, spans = spans, jointType = JointType.ROUND, width = 8f, zIndex = 0.6f)
     }
 }
-
-/** Buckets a point's position along the track so that appending a point changes the icon of only a few markers. */
-private fun trackFadeLevel(index: Int, lastIndex: Int): Int =
-    if (lastIndex <= 0) TRACK_FADE_LEVELS - 1 else index * (TRACK_FADE_LEVELS - 1) / lastIndex
-
-private fun trackFadeAlpha(level: Int): Float =
-    OLDEST_TRACK_ALPHA + (1f - OLDEST_TRACK_ALPHA) * level / (TRACK_FADE_LEVELS - 1)
 
 /** A ring, drawn straight to a bitmap so building it never composes. */
 private fun trackPointIcon(color: Color, sizeDp: Float, density: Float): BitmapDescriptor {
@@ -1686,9 +1743,9 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
     MapEffect(layerItem.id, layerItem.refreshToken, opacity) { map ->
         currentLayer?.safeHide()
         currentLayer = null
-        val bytes = mapViewModel.readLayerBytes(layerItem) ?: return@MapEffect
         val layer =
             try {
+                val bytes = mapViewModel.readLayerBytes(layerItem) ?: return@MapEffect
                 val dataLayer =
                     withContext(ioDispatcher) {
                         // Buffered because the KMZ sniff marks and resets the stream before the parser reads it.
@@ -1709,6 +1766,10 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
                 throw e
             } catch (e: Exception) {
                 Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
+                null
+            } catch (e: OutOfMemoryError) {
+                // The parser builds the whole JSON tree beside the raw bytes; a layer too big for the heap fails alone.
+                Logger.withTag("MapView").e(e) { "Map layer too large to load: ${layerItem.name}" }
                 null
             }
         layer?.let {
@@ -1831,6 +1892,10 @@ private fun RenderedMapLayer.safeShow() {
         show()
     } catch (e: Exception) {
         Logger.withTag("MapView").e(e) { "Error adding map layer" }
+    } catch (e: OutOfMemoryError) {
+        // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
+        Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
+        safeHide()
     }
 }
 

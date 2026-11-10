@@ -66,6 +66,8 @@ data class Node(
     val paxcounter: Paxcount = Paxcount.Builder().build(),
     val publicKey: ByteString? = null,
     val notes: String = "",
+    /** Local-only name that replaces [User.long_name] on display surfaces. Never sent, shared or exported. */
+    val displayName: String = "",
     /** User-editable labels per power-metrics channel (e.g. "Solar", "Battery"), indexed by channel - 1. */
     val powerChannelLabels: List<String> = emptyList(),
     val manuallyVerified: Boolean = false,
@@ -249,12 +251,9 @@ data class Node(
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
-            val candidateRelayNodes =
-                nodes.filter {
-                    it.num != ourNodeNum &&
-                        it.lastHeard != 0 &&
-                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-                }
+            val candidateRelayNodes = nodes.filter {
+                it.num != ourNodeNum && it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+            }
 
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {
@@ -295,6 +294,24 @@ fun Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in
         Config.DeviceConfig.Role.TAK_TRACKER,
     )
 
+/** True when the user has set a local display name for this node. */
+val Node.hasDisplayName: Boolean
+    get() = displayName.isNotBlank()
+
+/** Local display name, never sent. Broadcast name for share and export is `user.long_name`. */
+val Node.effectiveLongName: String
+    get() = if (hasDisplayName) displayName else user.long_name
+
+/** The broadcast long name while a display name hides it, else null. */
+val Node.hiddenLongName: String?
+    get() = user.long_name.takeIf { hasDisplayName && it.isNotBlank() }
+
+/** Longest local display name in UTF-8 bytes. A cross-client limit shared with Apple, not the `User.long_name` cap. */
+const val MAX_DISPLAY_NAME_BYTES = 36
+
+/** Trims and clips [input] to [MAX_DISPLAY_NAME_BYTES]; blank input becomes the empty string, which means unset. */
+fun normalizeDisplayName(input: String): String = input.trim().limitToBytes(MAX_DISPLAY_NAME_BYTES).trim()
+
 /** Offset converting a negative [Node.num] into its unsigned 32-bit decimal representation. */
 private const val UNSIGNED_INT_OFFSET = 4294967296L
 
@@ -309,6 +326,7 @@ private val Node.unsignedNum: Long
  */
 fun Node.matchesSearch(filter: String): Boolean = filter.isBlank() ||
     user.long_name.contains(filter, ignoreCase = true) ||
+    displayName.contains(filter, ignoreCase = true) ||
     user.short_name.contains(filter, ignoreCase = true) ||
     user.id.contains(filter, ignoreCase = true) ||
     nodeStatus?.contains(filter, ignoreCase = true) == true ||

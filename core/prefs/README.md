@@ -6,12 +6,14 @@ The `:core:prefs` module provides a type-safe preferences layer backed by DataSt
 ## Key Components
 
 ### 1. DataStore Providers (`CorePrefsAndroidModule`)
-Provides named `DataStore<Preferences>` singletons for each preference domain (analytics, app, map, mesh, radio, UI, etc.). Each DataStore uses an injected `CoroutineDispatchers.io` scope and includes a `SharedPreferencesMigration` for seamless migration from the legacy preference files.
+Provides one `DataStore<Preferences>` singleton per preference domain (analytics, app, map, mesh, radio, UI, etc.), each under its own type (`AnalyticsDataStore`, `AppDataStore`, … in `PrefsDataStores.kt`) rather than a Koin string qualifier. Each DataStore uses an injected `CoroutineDispatchers.io` scope and includes a `SharedPreferencesMigration` from the legacy preference file. The Desktop host provides the same types from `desktopApp`.
 
 ### 2. Specialized Prefs
-- **`RadioPrefs`**: Manages radio-specific settings (e.g., the last connected device address).
-- **`UiPrefs`**: Manages UI preferences (e.g., theme selection, unit systems).
-- **`MapPrefs`**: Manages mapping preferences (e.g., preferred map provider).
+Each `*PrefsImpl` here implements an interface from `:core:repository`'s `AppPreferences.kt`:
+- **`RadioPrefsImpl`**: The last connected device address and name.
+- **`UiPrefsImpl`**: UI preferences (for example theme, units override, locale, node sort and filters).
+- **`MapPrefsImpl`**: Mapping preferences (for example map style and layer visibility).
+- Others for analytics, notifications, mesh, the Local TAK Server (`TakPrefsImpl`), discovery, custom emoji, and AppFunctions.
 
 
 ## Dependency Graph

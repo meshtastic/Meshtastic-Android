@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("LongMethod")
-
 package org.meshtastic.core.takserver
 
 import nl.adaptivity.xmlutil.XmlDeclMode
@@ -28,17 +26,14 @@ import kotlin.uuid.Uuid
  * The data package follows the MissionPackageManifest v2 format:
  * ```
  * Meshtastic_TAK_Server.zip
- * ├── meshtastic-server.pref   (ATAK connection preferences)
- * ├── truststore.p12           (server cert — matches iOS "truststore.p12")
- * ├── client.p12               (client identity for mTLS)
+ * ├── meshtastic-server.pref   (ATAK connection preferences, incl. the container password)
+ * ├── truststore.p12           (this install's CA certificate only, no private key)
+ * ├── client.p12               (this install's client identity for mTLS)
  * └── manifest.xml             (MissionPackageManifest v2)
  * ```
  *
- * The bundled certificates / password match Meshtastic-Apple so a single exported package works on both ATAK (Android)
- * and iTAK (iOS) without reconfiguration.
- *
- * Override [bundledCertBytesProvider] in tests to avoid touching the real classpath resources. In production the
- * default reads from [TakCertLoader].
+ * The certificates come from [TakCertificateProvider.dataPackageCredentials] and are unique to the exporting install,
+ * so the package only authenticates against the server that produced it.
  */
 object TAKDataPackageGenerator {
     private const val PREF_FILE_NAME = "meshtastic-server.pref"
@@ -51,132 +46,77 @@ object TAKDataPackageGenerator {
     // XML wire format consumed by ATAK/TAK servers. Staying on the compat policy until that migration
     // can be validated against real TAK interop; suppress the soft-deprecation on the factory itself.
     @Suppress("DEPRECATION")
-    private val xmlSerializer =
-        XML.compat {
-            xmlDeclMode = XmlDeclMode.Charset
-            indentString = "  "
-        }
+    private val xmlSerializer = XML.compat {
+        xmlDeclMode = XmlDeclMode.Charset
+        indentString = "  "
+    }
 
     /**
-     * Platform-specific hook for reading the bundled TLS certificate bytes. Default implementation lives in
-     * `jvmAndroidMain` and reads them from classpath resources via [TakCertLoader].
-     */
-    var bundledCertBytesProvider: BundledCertBytesProvider = DefaultBundledCertBytesProvider
-
-    /**
-     * Generate a complete TAK data package zip.
+     * Generate a complete TAK data package zip for [credentials].
      *
-     * @param useTls when true, package includes `truststore.p12` + `client.p12` and the pref file uses `ssl`; when
-     *   false, package is TCP-only (legacy).
+     * There is deliberately no certificate-less variant: the server only ever speaks mTLS, so a package without this
+     * install's client identity could never connect. Callers must fail the export when credentials are unavailable.
+     *
      * @return zip file contents as a [ByteArray]
      */
     fun generateDataPackage(
+        credentials: TakDataPackageCredentials,
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
-        useTls: Boolean = true,
         description: String = "Meshtastic TAK Server",
     ): ByteArray {
-        val prefContent = generateConfigPref(serverHost, port, useTls, description)
-        val manifestContent =
-            generateManifest(uid = Uuid.random().toString(), description = description, useTls = useTls)
+        val prefContent = generateConfigPref(serverHost, port, credentials.password, description)
+        val manifestContent = generateManifest(uid = Uuid.random().toString(), description = description)
 
         val entries = mutableMapOf<String, ByteArray>()
         entries[PREF_FILE_NAME] = prefContent.encodeToByteArray()
         entries["manifest.xml"] = manifestContent.encodeToByteArray()
-
-        if (useTls) {
-            bundledCertBytesProvider.serverP12Bytes()?.let { entries[TRUSTSTORE_FILE_NAME] = it }
-            bundledCertBytesProvider.clientP12Bytes()?.let { entries[CLIENT_P12_FILE_NAME] = it }
-        }
+        entries[TRUSTSTORE_FILE_NAME] = credentials.truststoreP12
+        entries[CLIENT_P12_FILE_NAME] = credentials.clientP12
 
         return ZipArchiver.createZip(entries)
     }
 
+    /** @param certPassword password of both PKCS#12 containers, written to the pref so ATAK can open them. */
     internal fun generateConfigPref(
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
-        useTls: Boolean = true,
+        certPassword: String,
         description: String = "Meshtastic TAK Server",
     ): String {
-        val protocolType = if (useTls) "ssl" else "tcp"
         val prefs =
-            if (useTls) {
-                // TLS / mTLS mode — matches the iOS data package format exactly.
-                TAKPreferencesXml(
-                    preferences =
-                    listOf(
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "cot_streams",
-                            entries =
-                            listOf(
-                                TAKEntryXml("count", "class java.lang.Integer", "1"),
-                                TAKEntryXml("description0", "class java.lang.String", description),
-                                TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "connectString0",
-                                    "class java.lang.String",
-                                    "$serverHost:$port:$protocolType",
-                                ),
-                            ),
-                        ),
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "com.atakmap.app_preferences",
-                            entries =
-                            listOf(
-                                TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "caLocation",
-                                    "class java.lang.String",
-                                    "cert/$TRUSTSTORE_FILE_NAME",
-                                ),
-                                TAKEntryXml("caPassword", "class java.lang.String", TAK_BUNDLED_CERT_PASSWORD),
-                                TAKEntryXml(
-                                    "certificateLocation",
-                                    "class java.lang.String",
-                                    "cert/$CLIENT_P12_FILE_NAME",
-                                ),
-                                TAKEntryXml(
-                                    "clientPassword",
-                                    "class java.lang.String",
-                                    TAK_BUNDLED_CERT_PASSWORD,
-                                ),
-                            ),
+            TAKPreferencesXml(
+                preferences =
+                listOf(
+                    TAKPreferenceXml(
+                        version = "1",
+                        name = "cot_streams",
+                        entries =
+                        listOf(
+                            TAKEntryXml("count", "class java.lang.Integer", "1"),
+                            TAKEntryXml("description0", "class java.lang.String", description),
+                            TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
+                            TAKEntryXml("connectString0", "class java.lang.String", "$serverHost:$port:ssl"),
                         ),
                     ),
-                )
-            } else {
-                // Legacy plain-TCP mode (not used in production, kept for tests / fallback)
-                TAKPreferencesXml(
-                    preferences =
-                    listOf(
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "cot_streams",
-                            entries =
-                            listOf(
-                                TAKEntryXml("count", "class java.lang.Integer", "1"),
-                                TAKEntryXml("description0", "class java.lang.String", description),
-                                TAKEntryXml("enabled0", "class java.lang.Boolean", "true"),
-                                TAKEntryXml(
-                                    "connectString0",
-                                    "class java.lang.String",
-                                    "$serverHost:$port:$protocolType",
-                                ),
+                    TAKPreferenceXml(
+                        version = "1",
+                        name = "com.atakmap.app_preferences",
+                        entries =
+                        listOf(
+                            TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
+                            TAKEntryXml("caLocation", "class java.lang.String", "cert/$TRUSTSTORE_FILE_NAME"),
+                            TAKEntryXml("caPassword", "class java.lang.String", certPassword),
+                            TAKEntryXml(
+                                "certificateLocation",
+                                "class java.lang.String",
+                                "cert/$CLIENT_P12_FILE_NAME",
                             ),
-                        ),
-                        TAKPreferenceXml(
-                            version = "1",
-                            name = "com.atakmap.app_preferences",
-                            entries =
-                            listOf(
-                                TAKEntryXml("displayServerConnectionWidget", "class java.lang.Boolean", "true"),
-                            ),
+                            TAKEntryXml("clientPassword", "class java.lang.String", certPassword),
                         ),
                     ),
-                )
-            }
+                ),
+            )
 
         return xmlSerializer
             .encodeToString(TAKPreferencesXml.serializer(), prefs)
@@ -186,11 +126,7 @@ object TAKDataPackageGenerator {
             )
     }
 
-    internal fun generateManifest(
-        uid: String,
-        description: String = "Meshtastic TAK Server",
-        useTls: Boolean = true,
-    ): String = buildString {
+    internal fun generateManifest(uid: String, description: String = "Meshtastic TAK Server"): String = buildString {
         appendLine("""<MissionPackageManifest version="2">""")
         appendLine("  <Configuration>")
         appendLine("""    <Parameter name="uid" value="${description.xmlEscaped()}.$uid"/>""")
@@ -199,31 +135,9 @@ object TAKDataPackageGenerator {
         appendLine("  </Configuration>")
         appendLine("  <Contents>")
         appendLine("""    <Content ignore="false" zipEntry="$PREF_FILE_NAME"/>""")
-        if (useTls) {
-            appendLine("""    <Content ignore="false" zipEntry="$TRUSTSTORE_FILE_NAME"/>""")
-            appendLine("""    <Content ignore="false" zipEntry="$CLIENT_P12_FILE_NAME"/>""")
-        }
+        appendLine("""    <Content ignore="false" zipEntry="$TRUSTSTORE_FILE_NAME"/>""")
+        appendLine("""    <Content ignore="false" zipEntry="$CLIENT_P12_FILE_NAME"/>""")
         appendLine("  </Contents>")
         append("</MissionPackageManifest>")
     }
-}
-
-/**
- * Supplies the bundled server / client PKCS#12 bytes for [TAKDataPackageGenerator]. Platform implementations live in
- * `jvmAndroidMain`.
- */
-interface BundledCertBytesProvider {
-    fun serverP12Bytes(): ByteArray?
-
-    fun clientP12Bytes(): ByteArray?
-}
-
-/**
- * Default provider that returns `null` on platforms without a real implementation. Overridden at startup on JVM /
- * Android by pointing [TAKDataPackageGenerator.bundledCertBytesProvider] at [TakCertLoader].
- */
-private object DefaultBundledCertBytesProvider : BundledCertBytesProvider {
-    override fun serverP12Bytes(): ByteArray? = null
-
-    override fun clientP12Bytes(): ByteArray? = null
 }

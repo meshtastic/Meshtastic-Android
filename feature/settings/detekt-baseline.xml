@@ -95,6 +95,8 @@
     <ID>ParameterNaming:PositionConfigScreen.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>PreviewPublic:AppInfoSection.kt:@Preview(showBackground = true) @Composable fun AppInfoSectionPreview</ID>
     <ID>PreviewPublic:AppearanceSection.kt:@Preview(showBackground = true) @Composable fun AppearanceSectionPreview</ID>
+    <ID>PreviewPublic:ChannelSharePreviews.kt:@PreviewLightDark @Composable fun ChannelShareAddPreview</ID>
+    <ID>PreviewPublic:ChannelSharePreviews.kt:@PreviewLightDark @Composable fun ChannelShareReplacePreview</ID>
     <ID>PreviewPublic:NodeLayoutSettingsPreviews.kt:@PreviewLightDark @Composable fun NodeLayoutSettingsCompactPreview</ID>
     <ID>PreviewPublic:NodeLayoutSettingsPreviews.kt:@PreviewLightDark @Composable fun NodeLayoutSettingsCompletePreview</ID>
     <ID>PreviewPublic:PersistenceSection.kt:@Preview(showBackground = true) @Composable fun PersistenceSectionPreview</ID>

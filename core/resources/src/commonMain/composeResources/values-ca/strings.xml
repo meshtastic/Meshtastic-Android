@@ -49,6 +49,7 @@
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
     <!-- DEBUG -->
     <string name="debug_panel">Panell de depuració</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Esborrar</string>
     <string name="delete_for_everyone">Esborrar per a tothom</string>
@@ -82,11 +83,13 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtre</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Actualització de firmware necessària</string>
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_update_failed">Actualització fallida</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
     <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
@@ -97,6 +100,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -104,6 +108,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">Bloquejat</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_cache_size">Mida actual de la memòria cau</string>
@@ -132,9 +137,12 @@
     <string name="message_delivery_status">Estat d'entrega del missatge</string>
     <string name="message_input_label">Missatge</string>
     <string name="message_status_queued">En cua per enviar</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Acceptar</string>
     <string name="module_settings">Configuració de mòdul</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Desconnectat</string>
+    <string name="mqtt_topic_finder_level_region">Regió</string>
     <string name="must_set_region">Has de configurar la regió!</string>
     <string name="must_update">Has d'actualitzar aquesta aplicació a la app store (o Github). És massa antiga per comunicar-se amb aquest firmware de la ràdio. Si us plau llegeix el nostre <a href="https://meshtastic.org/docs/software/android/installation">docs</a> sobre aquesta temàtica.</string>
     <!-- MUTE -->
@@ -189,7 +197,9 @@
     <string name="quick_chat_edit">Editar conversa ràpida</string>
     <string name="quick_chat_instant">Enviar instantàniament</string>
     <string name="quick_chat_new">Nova conversa ràpida</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Configuració de ràdio</string>
+    <string name="radio_setup_name_headline">Nom</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">Bloquejat</string>
@@ -248,6 +258,7 @@
     <string name="waypoint_edit">Editar punt de pas</string>
     <string name="waypoint_new">Nou punt de pas</string>
     <string name="waypoint_received">Punt de pas rebut: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adreça IP</string>
     <!-- WIND -->

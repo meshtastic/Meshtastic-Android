@@ -52,6 +52,7 @@
     <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
     <!-- DEBUG -->
     <string name="debug_panel">Otklanjanje pogrešaka</string>
+    <!-- DEEP -->
     <string name="default_">Zadano</string>
     <!-- DELETE -->
     <string name="delete">Obriši</string>
@@ -87,11 +88,13 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtriraj</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Potrebno ažuriranje firmwarea</string>
     <string name="firmware_old">Firmware radija je prestar za komunikaciju s ovom aplikacijom. Za više informacija posjetite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodič za instalaciju firmwarea</a>.</string>
     <string name="firmware_too_old">Potrebno ažuriranje firmwarea.</string>
     <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
@@ -102,6 +105,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -109,6 +113,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">Zaključano</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Upravitelj predmemorije</string>
     <string name="map_cache_size">Trenutna veličina predmemorije</string>
@@ -137,9 +142,12 @@
     <string name="message">Poruka</string>
     <string name="message_delivery_status">Status isporuke poruke</string>
     <string name="message_input_label">Poruka</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">U redu</string>
     <string name="module_settings">Konfiguracija modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Odspojeno</string>
+    <string name="mqtt_topic_finder_level_region">Regija</string>
     <string name="must_set_region">Potrebno je postaviti regiju!</string>
     <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
     <!-- MUTE -->
@@ -189,7 +197,9 @@
     <string name="quick_chat_edit">Uredi brzi chat</string>
     <string name="quick_chat_instant">Pošalji odmah</string>
     <string name="quick_chat_new">Novi brzi razgovor</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Konfiguracija uređaja</string>
+    <string name="radio_setup_name_headline">Ime</string>
     <string name="reboot">Ponovno pokreni</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">Zaključano</string>
@@ -243,6 +253,7 @@
     <string name="waypoint_edit">Uredi putnu točku</string>
     <string name="waypoint_new">Nova putna točka</string>
     <string name="waypoint_received">Primljena putna točka: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresa</string>
     <!-- WIND -->

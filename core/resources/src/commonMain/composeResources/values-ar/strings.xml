@@ -65,6 +65,7 @@
     <string name="critical_alert">تنبيه حرج!</string>
     <string name="current">الحالي</string>
     <!-- DEBUG -->
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="desc_node_filter_clear">عربي</string>
     <string name="description">الوصف</string>
@@ -97,13 +98,16 @@
     <!-- FILTER -->
     <string name="filter_icon">عربي</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">يجب عليك التحديث</string>
     <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="firmware_update_failed">التحديث فشل</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">جيد</string>
     <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
+    <!-- IAQ -->
     <string name="iaq">معدل جودة الهواء الداخلي</string>
+    <string name="iaq_level_good">جيد</string>
     <string name="ignore">تجاهل</string>
     <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
     <!-- IMPORT -->
@@ -113,6 +117,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">مباشره</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -121,6 +127,7 @@
     <string name="locked">مقفل</string>
     <!-- LOG -->
     <string name="logs">سجلات</string>
+    <!-- LORA -->
     <string name="lora">إعدادات لورا</string>
     <string name="lora_config">إعدادات لورا</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>
@@ -142,10 +149,13 @@
     <string name="message_input_label">رسالة</string>
     <string name="message_status_queued">في دور الإرسال</string>
     <string name="messages">الرسائل</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">حسنا</string>
     <string name="module_settings">إعدادات الجهاز</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_disconnected">انقطع الاتصال</string>
+    <string name="mqtt_topic_finder_level_region">الجهة</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>
     <!-- MUTE -->
     <string name="mute_1_week">أسبوع 1</string>
@@ -189,7 +199,9 @@
     <!-- PREVIEW -->
     <string name="qr_code">رمز الاستجابة السريع</string>
     <!-- QUICK -->
+    <!-- RADIO -->
     <string name="radio_configuration">إعدادات الراديو</string>
+    <string name="radio_setup_name_headline">الاسم</string>
     <string name="reboot">إعادة التشغيل</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">مقفل</string>
@@ -249,6 +261,8 @@
     <string name="user">اسم المستخدم</string>
     <string name="via_mqtt">فقط شبكة MQTT</string>
     <string name="voltage">شدة التيار</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">سيئ</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">عنوان الـ IP</string>
     <!-- WIND -->

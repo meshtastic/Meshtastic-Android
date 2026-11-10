@@ -83,9 +83,11 @@ object ChartStyling {
         lineColor: Color,
         lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
         interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+        pointProvider: LineCartesianLayer.PointProvider? = null,
     ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
         fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
         stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
+        pointProvider = pointProvider,
         interpolator = interpolator,
     )
 
@@ -147,6 +149,7 @@ object ChartStyling {
     fun createDashedLine(
         lineColor: Color,
         interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+        pointProvider: LineCartesianLayer.PointProvider? = null,
     ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
         fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
         stroke =
@@ -155,6 +158,7 @@ object ChartStyling {
             dashLength = 6.dp,
             gapLength = 3.dp,
         ),
+        pointProvider = pointProvider,
         interpolator = interpolator,
     )
 

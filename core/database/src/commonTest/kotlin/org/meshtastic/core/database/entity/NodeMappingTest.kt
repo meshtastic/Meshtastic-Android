@@ -87,6 +87,7 @@ internal fun fullyPopulatedNode(): Node {
         paxcounter = Paxcount.Builder().also { wb -> wb.ble = 3 }.build(),
         publicKey = key,
         notes = "fixture notes",
+        displayName = "Fixture Display",
         powerChannelLabels = listOf("Solar", "Battery"),
         manuallyVerified = true,
         signsPackets = true,

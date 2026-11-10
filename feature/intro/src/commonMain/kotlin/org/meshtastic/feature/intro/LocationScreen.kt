@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.phone_location
 import org.meshtastic.core.resources.phone_location_description
 import org.meshtastic.core.resources.share_location
 import org.meshtastic.core.resources.share_location_description
+import org.meshtastic.core.ui.component.OnboardingFeature
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -54,22 +55,22 @@ import org.meshtastic.core.ui.util.PermissionStatus
 internal fun LocationScreen(status: PermissionStatus, onSkip: () -> Unit, onPrimaryAction: () -> Unit) {
     val features =
         listOf(
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.share_location,
                 subtitleRes = Res.string.share_location_description,
             ),
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.HardwareModel,
                 titleRes = Res.string.distance_measurements,
                 subtitleRes = Res.string.distance_measurements_description,
             ),
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.HardwareModel,
                 titleRes = Res.string.distance_filters,
                 subtitleRes = Res.string.distance_filters_description,
             ),
-            FeatureUIData(
+            OnboardingFeature(
                 icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.mesh_map_location,
                 subtitleRes = Res.string.mesh_map_location_description,

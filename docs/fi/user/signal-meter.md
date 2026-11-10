@@ -1,7 +1,7 @@
 ---
 title: Kuinka Meshtastic-signaalimittari toimii
 nav_order: 15
-last_updated: 2026-09-09
+last_updated: 2026-10-21
 description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.
 aliases:
   - signaali
@@ -54,7 +54,7 @@ A great RSSI paired with a one- or two-bar rating (None or Bad) points to local 
 
 Sovelluksessa signaalitiedot näkyvät useassa paikassa:
 
-- **Node list** — a signal-bars icon, shown only for nodes your radio heard directly. A node reached through a relay shows its hop count instead, because the SNR your radio measured describes the last hop, not the whole path
+- **Node list** — a signal-bars icon, shown only for nodes your node heard directly over LoRa. A node reached through a relay shows its hop count instead, because the SNR your node measured describes the last hop, not the whole path
 - **Node detail** — SNR, RSSI, and the quality word in the **Details** card at the top of the screen
 - **Reitinselvitys** — signaalin laatu jokaisessa välivaiheessa jokaiselle välittävälle radiolle
 - **Signal Quality** — historical SNR and RSSI data in the metrics charts

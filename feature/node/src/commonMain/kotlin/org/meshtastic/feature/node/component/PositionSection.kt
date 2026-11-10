@@ -41,14 +41,17 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.site_planner_estimate
 import org.meshtastic.core.ui.icon.CellTower
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 private const val MAP_HEIGHT_DP = 200
@@ -82,6 +85,23 @@ internal fun PositionInlineContent(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+    if (rememberMeshHudSupported() && node.validPosition != null) {
+        Spacer(Modifier.height(8.dp))
+        FilledTonalButton(
+            onClick = { onAction(NodeDetailAction.Navigate(MapRoute.MeshHud(focusNodeNum = node.num))) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+        ) {
+            Icon(MeshtasticIcons.CenterFocusStrong, null, Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.mesh_hud_open),
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
     // Estimate RF coverage for this node in the Site Planner (Google flavor, position-gated).
     if (LocalSitePlannerAvailable.current && node.validPosition != null) {

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -43,6 +44,8 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
+import org.meshtastic.core.ble.MeshtasticBleDevice
+import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -71,8 +74,14 @@ import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
+
+internal val STRANDED_BOOTLOADER_SCAN_TIMEOUT = 15.seconds
+
+private val STRANDED_BOOTLOADER_SCAN_COOLDOWN = 60.seconds
 
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
@@ -201,6 +210,8 @@ open class ScannerViewModel(
     private val scannedBleDevices = MutableStateFlow<Map<String, BleDevice>>(emptyMap())
     private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
+    private var strandedScanJob: Job? = null
+    private var lastStrandedScan: TimeMark? = null
     private var scanStartFailureCooldownJob: Job? = null
     private val scanStartFailureCooldownActive = MutableStateFlow(false)
     private var scanStartFailureCooldownGeneration = 0
@@ -270,6 +281,11 @@ open class ScannerViewModel(
                     clearRecoveryIfConnectedDeviceReturned()
                 }
             }
+            .launchIn(viewModelScope)
+        serviceRepository.connectionState
+            .map { it is ConnectionState.Disconnected }
+            .distinctUntilChanged()
+            .onEach { disconnected -> if (disconnected) lookForStrandedBootloader() }
             .launchIn(viewModelScope)
         Logger.d { "ScannerViewModel created" }
     }
@@ -633,6 +649,8 @@ open class ScannerViewModel(
 
     /** Stops both BLE and network scans. Idempotent — safe to call when neither scan is active. */
     private fun stopAllScans() {
+        strandedScanJob?.cancel()
+        strandedScanJob = null
         stopBleScan()
         stopNetworkScan()
     }
@@ -714,6 +732,22 @@ open class ScannerViewModel(
     }
 
     /**
+     * Connects to an [address] named by a confirmed deep link. A BLE address with a [pin] pairs first and answers the
+     * pairing request with [pin] (see [blePairingPinFor]); every other address connects directly.
+     */
+    fun connectToLinkedAddress(address: String, pin: String?) {
+        val linkPin = blePairingPinFor(address, pin)
+        if (linkPin == null) {
+            changeDeviceAddress(address)
+            return
+        }
+        stopAllScans()
+        recordSelectedTransport(address)
+        val device = MeshtasticBleDevice(address.removePrefix(BLE_DEVICE_PREFIX))
+        requestBonding(DeviceListEntry.Ble(device, bonded = false), linkPin)
+    }
+
+    /**
      * Called by the UI when a device has been tapped. BLE and USB entries may still need bonding/permission — the
      * concrete return value tells the caller whether the connection was initiated immediately.
      *
@@ -774,10 +808,10 @@ open class ScannerViewModel(
      * Initiates the bonding process and connects to the device upon success.
      *
      * The default implementation connects directly without explicit bonding, which is correct for Desktop/JVM where the
-     * OS Bluetooth stack handles pairing during the GATT connection. Android overrides this to call `createBond()`
-     * first.
+     * OS Bluetooth stack handles pairing during the GATT connection (and asks for any [pin] itself). Android overrides
+     * this to call `createBond()` first, answering the pairing request with [pin] when one is given.
      */
-    protected open fun requestBonding(entry: DeviceListEntry.Ble) {
+    protected open fun requestBonding(entry: DeviceListEntry.Ble, pin: String? = null) {
         changeDeviceAddress(entry.fullAddress)
     }
 
@@ -794,10 +828,50 @@ open class ScannerViewModel(
      * Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader
      * can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point
      * — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful
-     * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
+     * reconnect or re-flash). A new record comes from the next DFU update, or from a bootloader seen at a node
+     * connected since.
      */
     fun dismissRecovery() {
-        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.clear() }
+        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.dismiss() }
+    }
+
+    /**
+     * Looks once for the last BLE node's bootloader, which advertises the legacy DFU service at the node's MAC + 1
+     * while it waits for a BLE OTA, and offers recovery when it is there. This covers a node stranded by a flash this
+     * app did not start, which leaves no pending record. The address is matched here rather than passed to the scanner:
+     * an address filter would skip the service check, and an ESP32 in OTA mode also advertises at MAC + 1.
+     */
+    private fun lookForStrandedBootloader() {
+        val scanner = bleScanner?.takeIf { bluetoothSupported && strandedScanMayStart() } ?: return
+        strandedScanJob?.cancel()
+        strandedScanJob =
+            safeLaunch(tag = "strandedBootloaderScan") {
+                if (firmwareRecoveryDataSource.pending.first() != null) return@safeLaunch
+                val node = firmwareRecoveryDataSource.lastBleNode.first() ?: return@safeLaunch
+                val bootloaderAddress = NordicDfu.bootloaderAddress(node.fullAddress.drop(1))
+                lastStrandedScan = TimeSource.Monotonic.markNow()
+                val seen = safeCatchingAll {
+                    scanner
+                        .scan(timeout = STRANDED_BOOTLOADER_SCAN_TIMEOUT, serviceUuid = NordicDfu.LEGACY_SERVICE_UUID)
+                        .flowOn(dispatchers.io)
+                        .firstOrNull { it.address.equals(bootloaderAddress, ignoreCase = true) }
+                }
+                    .onFailure { Logger.d { "Stranded-bootloader scan did not run (${it::class.simpleName})" } }
+                    .getOrNull()
+                if (seen != null) {
+                    Logger.i { "Last BLE node's bootloader is advertising; offering recovery" }
+                    firmwareRecoveryDataSource.promoteLastBleNode(node.fullAddress)
+                }
+            }
+    }
+
+    /**
+     * Scan starts share one process-wide Android quota, so the bootloader scan never competes with the user's own scan
+     * and runs at most once per cooldown however often the link flaps.
+     */
+    private fun strandedScanMayStart(): Boolean {
+        val coolingDown = lastStrandedScan?.let { it.elapsedNow() < STRANDED_BOOTLOADER_SCAN_COOLDOWN } == true
+        return !_isBleScanning.value && !scanStartFailureCooldownActive.value && !coolingDown
     }
 
     /**

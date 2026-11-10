@@ -115,6 +115,7 @@
     <string name="debug_search_clear">Aramayı sil</string>
     <string name="debug_search_next">Sonraki eşleşme</string>
     <string name="debug_search_prev">Önceki eşleşme</string>
+    <!-- DEEP -->
     <string name="default_">Varsayılan</string>
     <!-- DELETE -->
     <string name="delete">Sil</string>
@@ -180,11 +181,11 @@
     <string name="filter_icon">Filtre</string>
     <!-- FIRMWARE -->
     <string name="firmware">Yazılım</string>
+    <string name="firmware_gate_title">Yazılım güncellemesi gerekli</string>
     <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
     <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <!-- FORMAT -->
-    <string name="free_memory">Boş Hafıza</string>
     <string name="freq">Frekans</string>
     <string name="gas_resistance">Gaz Direnci</string>
     <string name="generate_qr_code">QR kod oluştur</string>
@@ -200,8 +201,10 @@
     <string name="host_metrics_log">Sunucu Ölçümleri</string>
     <string name="i_agree">Katılıyorum.</string>
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
+    <string name="iaq_level_good">İyi</string>
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine '%1$s' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>
@@ -225,6 +228,8 @@
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Doğrudan</string>
     <!-- LOAD -->
     <string name="load">Yükle</string>
     <!-- LOCAL -->
@@ -237,6 +242,7 @@
     <string name="logs">Kayıtlar</string>
     <string name="long_name">Uzun Ad</string>
     <string name="longitude">Boylam</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%)</string>
@@ -287,12 +293,15 @@
     <string name="message_status_queued">Gönderilmek üzere sırada</string>
     <string name="message_status_unknown">Bilinmeyen</string>
     <string name="messages">Mesajlar</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Tamam</string>
     <string name="module_settings">Modül ayarları</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Yapılandırması</string>
     <string name="mqtt_status_connected">Bağlandı</string>
     <string name="mqtt_status_disconnected">Bağlantı kesildi</string>
+    <string name="mqtt_topic_finder_level_region">Bölge</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
     <!-- MUTE -->
@@ -380,7 +389,9 @@
     <string name="quick_chat_instant">Hemen gönder</string>
     <string name="quick_chat_new">Yeni hızlı mesaj</string>
     <string name="radiation">Radyasyon</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Cihaz ayarları</string>
+    <string name="radio_setup_name_headline">Arkadaşça isim</string>
     <string name="range_test">Mesafe Testi</string>
     <string name="range_test_config">Menzi Test Ayarı</string>
     <string name="reboot">Yeniden başlat</string>
@@ -452,6 +463,7 @@
     <string name="swipe_action_mute">Sessiz</string>
     <string name="swipe_action_unmute">Sesi aç</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Yeniden Oluştur</string>
     <string name="tak_server_section">Sunucu</string>
     <string name="telemetry">Telemetri</string>
     <string name="telemetry_config">Telemetri Ayarı</string>
@@ -511,6 +523,8 @@
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %1$s</string>
     <string name="weight">Ağırlık</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Kötü</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresi</string>
     <string name="wifi_provision_success_username">Kullanıcı adı</string>

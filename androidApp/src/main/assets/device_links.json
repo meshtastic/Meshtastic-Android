@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-03T04:34:51.000Z",
+  "generatedAt": "2026-10-28T22:20:40.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3993,6 +3993,198 @@
         "GB",
         "US"
       ]
+    },
+    {
+      "shortCode": "x",
+      "url": "https://msh.to/x",
+      "description": "Meshtastic on X",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "facebook",
+      "url": "https://msh.to/facebook",
+      "description": "Meshtastic Facebook Page",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "bluesky",
+      "url": "https://msh.to/bluesky",
+      "description": "Meshtastic on Bluesky",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "mastodon",
+      "url": "https://msh.to/mastodon",
+      "description": "Meshtastic on Mastodon",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "linkedin",
+      "url": "https://msh.to/linkedin",
+      "description": "Meshtastic LinkedIn Page",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "telegram",
+      "url": "https://msh.to/telegram",
+      "description": "Meshtastic Telegram Group",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L2-tft",
+      "url": "https://msh.to/seeed_wio_tracker_L2-tft",
+      "description": "Seeed Wio Tracker L2 Pro",
+      "type": "vendor",
+      "targets": [
+        "seeed_wio_tracker_L2"
+      ],
+      "hwModels": [
+        137
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-pocket-v3",
+      "url": "https://msh.to/rokland-wismesh-pocket-v3",
+      "description": "RAKwireless WisMesh Pocket V3",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "heltec-rcc6",
+      "url": "https://msh.to/heltec-rcc6",
+      "description": "Radiocore C6",
+      "type": "vendor",
+      "targets": [
+        "heltec-rcc6"
+      ],
+      "hwModels": [
+        143
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-rc32",
+      "url": "https://msh.to/heltec-rc32",
+      "description": "Radiocore S3",
+      "type": "vendor",
+      "targets": [
+        "heltec-rc32"
+      ],
+      "hwModels": [
+        141
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-rc52",
+      "url": "https://msh.to/heltec-rc52",
+      "description": "Radiocore nRF52",
+      "type": "vendor",
+      "targets": [
+        "heltec-rc52"
+      ],
+      "hwModels": [
+        142
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "axiometa-genesis-mini",
+      "url": "https://msh.to/axiometa-genesis-mini",
+      "description": "Axiometa Genesis Mini",
+      "type": "vendor",
+      "targets": [
+        "axiometa-genesis-mini"
+      ],
+      "hwModels": [
+        148
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak_wismesh_pod",
+      "url": "https://msh.to/rak_wismesh_pod",
+      "description": "WisMesh Pod",
+      "type": "vendor",
+      "targets": [
+        "rak_wismesh_pod"
+      ],
+      "hwModels": [
+        105
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "station-g3",
+      "url": "https://msh.to/station-g3",
+      "description": "Station G3",
+      "type": "vendor",
+      "targets": [
+        "station-g3"
+      ],
+      "hwModels": [
+        134
+      ],
+      "marketplace": null,
+      "regions": null
     }
   ]
 }

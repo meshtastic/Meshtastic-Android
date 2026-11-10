@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.component
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.primaryChannel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
@@ -40,7 +41,7 @@ fun Node?.toSitePlannerParams(channelSet: ChannelSet?): SitePlannerParams {
     val lora = channelSet?.lora_config
     val freqMhz = channelSet?.primaryChannel?.radioFreq?.toDouble()?.takeIf { it > 0.0 }
     return SitePlannerParams(
-        name = this?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Coverage",
+        name = this?.effectiveLongName?.takeIf { it.isNotBlank() } ?: "Coverage",
         latitude = this?.latitude ?: 0.0,
         longitude = this?.longitude ?: 0.0,
         txFreqMhz = freqMhz ?: SitePlannerParams.DEFAULT_TX_FREQ_MHZ,

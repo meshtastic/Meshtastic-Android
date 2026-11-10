@@ -22,10 +22,12 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
+import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProcessRadioResponseUseCaseTest {
@@ -61,7 +63,7 @@ class ProcessRadioResponseUseCaseTest {
                 .build()
 
         // Act
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
 
         // Assert
         val error = assertIs<RadioResponseResult.Error>(result)
@@ -85,7 +87,7 @@ class ProcessRadioResponseUseCaseTest {
                 }
                 .build()
 
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
 
         assertEquals(RadioResponseResult.Success, result)
     }
@@ -112,7 +114,7 @@ class ProcessRadioResponseUseCaseTest {
                 }
                 .build()
 
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
 
         assertEquals(RadioResponseResult.UnexpectedAckSender(from = 456), result)
     }
@@ -138,7 +140,7 @@ class ProcessRadioResponseUseCaseTest {
                 .build()
 
         // Act
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
 
         // Assert
         assertTrue(result is RadioResponseResult.Metadata)
@@ -166,7 +168,7 @@ class ProcessRadioResponseUseCaseTest {
                 .build()
 
         // Act
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
 
         // Assert
         assertTrue(result is RadioResponseResult.CannedMessages)
@@ -190,7 +192,7 @@ class ProcessRadioResponseUseCaseTest {
                             .build()
                 }
                 .build()
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
         assertTrue(result is RadioResponseResult.Error)
     }
 
@@ -212,7 +214,7 @@ class ProcessRadioResponseUseCaseTest {
                             .build()
                 }
                 .build()
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
         assertTrue(result is RadioResponseResult.Owner)
         assertEquals("Owner", result.user.long_name)
     }
@@ -241,7 +243,7 @@ class ProcessRadioResponseUseCaseTest {
                             .build()
                 }
                 .build()
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
         assertTrue(result is RadioResponseResult.ConfigResponse)
     }
 
@@ -269,7 +271,7 @@ class ProcessRadioResponseUseCaseTest {
                             .build()
                 }
                 .build()
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
         assertTrue(result is RadioResponseResult.ModuleConfigResponse)
     }
 
@@ -296,10 +298,96 @@ class ProcessRadioResponseUseCaseTest {
                             .build()
                 }
                 .build()
-        val result = useCase(packet, 123, setOf(42))
+        val result = invokeLocal(packet)
         assertTrue(result is RadioResponseResult.ChannelResponse)
         assertEquals("Main", result.channel.settings?.name)
     }
 
+    // ---------- Remote admin transport ----------
+
+    private fun remoteAdminResponse(pkiEncrypted: Boolean, channel: Int = 0): MeshPacket {
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_owner_response = User.Builder().build() }.build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = REMOTE_NODE
+                wb.pki_encrypted = pkiEncrypted
+                wb.channel = channel
+                wb.decoded =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.ADMIN_APP
+                            wb.request_id = 42
+                            wb.payload = adminMsg.encode().toByteString()
+                        }
+                        .build()
+            }
+            .build()
+    }
+
+    private fun invokeRemote(packet: MeshPacket, adminChannelIndex: Int? = null) = useCase(
+        packet,
+        destNum = REMOTE_NODE,
+        requestIds = setOf(42),
+        myNodeNum = 123,
+        adminChannelIndex = adminChannelIndex,
+    )
+
+    @Test
+    fun `remote admin response without pki or admin channel is dropped`() {
+        val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false))
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `remote admin response over pki is accepted`() {
+        val result = invokeRemote(remoteAdminResponse(pkiEncrypted = true))
+
+        assertIs<RadioResponseResult.Owner>(result)
+    }
+
+    @Test
+    fun `remote admin response on the admin channel is accepted`() {
+        val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false, channel = 2), adminChannelIndex = 2)
+
+        assertIs<RadioResponseResult.Owner>(result)
+    }
+
+    @Test
+    fun `remote admin response on another channel is dropped even when an admin channel exists`() {
+        val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false, channel = 0), adminChannelIndex = 2)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `local admin response needs neither pki nor the admin channel`() {
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_owner_response = User.Builder().build() }.build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 123
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ADMIN_APP
+                                wb.request_id = 42
+                                wb.payload = adminMsg.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+
+        assertIs<RadioResponseResult.Owner>(invokeLocal(packet))
+    }
+
+    /** Runs the use case against the connected node, where no transport check applies. */
+    private fun invokeLocal(packet: MeshPacket) =
+        useCase(packet, destNum = 123, requestIds = setOf(42), myNodeNum = 123, adminChannelIndex = null)
+
     private fun ByteArray.toByteString() = okio.ByteString.of(*this)
+
+    private companion object {
+        const val REMOTE_NODE = 456
+    }
 }

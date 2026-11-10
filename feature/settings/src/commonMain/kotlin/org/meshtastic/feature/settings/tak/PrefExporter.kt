@@ -23,11 +23,16 @@ import org.meshtastic.core.ui.util.rememberFileExporter
 /**
  * Returns a launcher for exporting a TAK data package zip.
  *
- * @param dataPackageProvider suspend function producing the zip [ByteArray]
+ * @param dataPackageProvider suspend function producing the zip [ByteArray]; null means there is nothing valid to
+ *   export (for example the install's certificates could not be loaded) and [onResult] receives `false`.
+ * @param onResult called with whether the package was written
  * @return a lambda accepting the suggested file name to trigger the export
  */
 @Composable
-fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
-    val export = rememberFileExporter(content = dataPackageProvider)
+fun rememberDataPackageExporter(
+    dataPackageProvider: suspend () -> ByteArray?,
+    onResult: suspend (exported: Boolean) -> Unit = {},
+): (fileName: String) -> Unit {
+    val export = rememberFileExporter(content = dataPackageProvider, onResult = onResult)
     return remember(export) { { fileName -> export(fileName, "application/zip") } }
 }

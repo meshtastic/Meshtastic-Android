@@ -20,10 +20,12 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.capture
 import dev.mokkery.mock
 import dev.mokkery.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -35,7 +37,9 @@ import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class NeighborInfoHandlerImplTest {
 
@@ -50,6 +54,7 @@ class NeighborInfoHandlerImplTest {
     @BeforeTest
     fun setUp() {
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         handler = NeighborInfoHandlerImpl(nodeManager, serviceRepository, nodeRepository)
     }
 
@@ -182,6 +187,33 @@ class NeighborInfoHandlerImplTest {
         handler.handleNeighborInfo(packet)
 
         verify { serviceRepository.setNeighborInfoResponse(any()) }
+    }
+
+    @Test
+    fun `handleNeighborInfo names a neighbor by its local display name`() {
+        every { nodeRepository.nodeDBbyNum } returns
+            MutableStateFlow(mapOf(100 to Node(num = 100, displayName = "Nickname")))
+        val ni =
+            NeighborInfo.Builder()
+                .also { wb ->
+                    wb.node_id = myNodeNum
+                    wb.neighbors = listOf(Neighbor.Builder().also { nb -> nb.node_id = 100 }.build())
+                }
+                .build()
+        every { nodeRepository.getUser(any<Int>()) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Alice"
+                    wb.short_name = "AL"
+                }
+                .build()
+        val responses = mutableListOf<String?>()
+        every { serviceRepository.setNeighborInfoResponse(capture(responses)) } returns Unit
+
+        handler.handleNeighborInfo(createPacketWithNeighborInfo(from = myNodeNum, ni = ni))
+
+        assertTrue(responses.single().orEmpty().contains("Nickname (AL)"))
+        assertFalse(responses.single().orEmpty().contains("Alice (AL)"))
     }
 
     @Test

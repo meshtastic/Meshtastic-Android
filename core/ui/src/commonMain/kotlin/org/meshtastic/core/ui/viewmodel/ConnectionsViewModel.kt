@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
@@ -137,6 +138,37 @@ class ConnectionsViewModel(
             .map { it.lora?.region == Config.LoRaConfig.RegionCode.UNSET }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = false)
+
+    // The preference write lands later; this session's offers are consumed at once so a return to Connections before
+    // it lands cannot open the setup a second time.
+    private val radioSetupOfferedNow = MutableStateFlow<Set<Int>>(emptySet())
+
+    /** The connected radio's transport address, the key the radio setup binds to. */
+    val connectionAddress: StateFlow<String?> =
+        nodeManager.connectionIdentity.map { it?.address }.distinctUntilChanged().stateInWhileSubscribed(null)
+
+    /**
+     * The connected radio's node number while its region is UNSET and the radio setup has not opened for it yet. The
+     * screen opens the setup once per emission and marks the radio offered, so a radio the user closed is never
+     * reopened on its own. Bound to the active session the same way as [activeNodeInfoReady].
+     */
+    val radioSetupOffer: StateFlow<Int?> =
+        combine(
+            nodeManager.connectionIdentity,
+            nodeRepository.ourNodeInfo,
+            regionUnset,
+            uiPrefs.radioSetupOfferedNodes,
+            radioSetupOfferedNow,
+        ) { identity, ourNode, unset, offered, offeredNow ->
+            radioSetupOfferFor(identity?.nodeNum, ourNode?.num, unset, offered + offeredNow)
+        }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = null)
+
+    fun markRadioSetupOffered(nodeNum: Int) {
+        radioSetupOfferedNow.update { it + nodeNum }
+        uiPrefs.markRadioSetupOffered(nodeNum)
+    }
 
     /**
      * Whether the device is configured not to transmit. Null-safe against the pre-config [LocalConfig] so the notice
@@ -329,3 +361,12 @@ private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = 
     InterfaceId.REPLAY,
     -> null
 }
+
+/**
+ * The node to open the radio setup for, or null. The session's node and the repository's node must agree, so a cached
+ * node from an earlier session never triggers the setup, and an unarrived config reads as a null `lora`, not UNSET.
+ */
+internal fun radioSetupOfferFor(sessionNodeNum: Int?, ourNodeNum: Int?, regionUnset: Boolean, offered: Set<Int>): Int? =
+    sessionNodeNum?.takeIf {
+        it == ourNodeNum && regionUnset && it !in offered
+    }

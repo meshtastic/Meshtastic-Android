@@ -1023,8 +1023,8 @@ class FirmwareUpdateViewModelFileTest {
         assertEquals(UsbFileSaveStep.Firmware, awaitingFirmware.step)
         assertNotNull(awaitingFirmware.uf2Artifact, "the terminal pass must carry its artifact")
 
-        // Second, terminal pass (firmware image) — writes through the pre-existing saveDfuFile.
-        viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
+        // Second, terminal pass (firmware image) — picked as a drive like the passes before it.
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
         runUntilSettled { !radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance) }
 
         assertFalse(
@@ -1036,6 +1036,138 @@ class FirmwareUpdateViewModelFileTest {
         // grant — otherwise auto-recovery dies on SecurityException and a healthy update reads as a failure.
         advanceUntilIdle()
         verifySuspend { usbManager.ensureSerialPermission(any()) }
+    }
+
+    /** Starts a plain USB update and parks it at the drive pick, with the drive reporting [info]. */
+    private suspend fun TestScope.awaitPlainUsbDrivePick(info: String) {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        val artifact =
+            FirmwareArtifact(
+                uri = CommonUri.parse("file:///tmp/firmware.uf2"),
+                fileName = "firmware.uf2",
+                isTemporary = true,
+            )
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.AwaitingFileSave(artifact, "firmware.uf2"))
+                artifact
+            }
+        everySuspend { fileHandler.isRemovableDestination(any()) } returns true
+        everySuspend { fileHandler.readSiblingText(any(), any()) } returns info
+        everySuspend { fileHandler.createDocumentInTree(any(), any(), any()) } returns
+            CommonUri.parse("content://tree/1234-5678%3A/document/firmware.uf2")
+        everySuspend { fileHandler.copyToUri(any(), any()) } returns 1024L
+        every { usbManager.deviceDetachFlow() } returns flowOf(Unit)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+    }
+
+    @Test
+    fun `a plain usb update reads the drive and keeps the fault it reports`() = runTest {
+        awaitPlainUsbDrivePick(
+            "UF2 Bootloader 2.6.0\r\nBoard-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2b5f4 info=0x0\r\n",
+        )
+
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runUntilSettled { viewModel.state.value !is FirmwareUpdateState.AwaitingFileSave }
+
+        assertEquals(BootloaderFault(id = 0x1, pc = 0x2b5f4, info = 0x0), viewModel.bootloaderFault.value)
+        verifySuspend { fileHandler.createDocumentInTree(any(), "firmware.uf2", any()) }
+        verifySuspend { fileHandler.copyToUri(any(), any()) }
+    }
+
+    @Test
+    fun `a plain usb update re-offers the pick for a drive that is not the update drive`() = runTest {
+        awaitPlainUsbDrivePick("Model: Something\r\n")
+
+        viewModel.writeToVolume(CommonUri.parse("content://tree/primary%3ADownload"))
+        runUntilSettled { (viewModel.state.value as? FirmwareUpdateState.AwaitingFileSave)?.retryMessage != null }
+
+        val retry = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+        assertNotNull(retry.uf2Artifact, "the downloaded firmware is kept for the next pick")
+        verifySuspend(mode = VerifyMode.not) { fileHandler.copyToUri(any(), any()) }
+        verifySuspend(mode = VerifyMode.not) { fileHandler.deleteFile(any()) }
+        assertFalse(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareUpdate))
+    }
+
+    @Test
+    fun `starting a new update clears the fault an earlier one read`() = runTest {
+        awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        // No radio reconnects in this fixture, so the first update ends at VerificationFailed.
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.VerificationFailed }
+
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertNotNull(viewModel.bootloaderFault.value, "returning to Ready keeps the fault on screen data")
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertNull(viewModel.bootloaderFault.value)
+    }
+
+    @Test
+    fun `a local file update clears the fault an earlier one read`() = runTest {
+        awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.VerificationFailed }
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+        assertNotNull(viewModel.bootloaderFault.value)
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) } returns null
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        assertNull(viewModel.bootloaderFault.value)
+    }
+
+    @Test
+    fun `cancelling a plain usb write stops it before the copy and releases the hold`() = runTest {
+        val inspecting = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<String>()
+        awaitPlainUsbDrivePick("")
+        everySuspend { fileHandler.readSiblingText(any(), any()) } calls
+            {
+                inspecting.complete(Unit)
+                release.await()
+            }
+
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runCurrent()
+        assertTrue(inspecting.isCompleted, "the write is parked reading the drive")
+        assertTrue(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareUpdate))
+
+        viewModel.cancelUpdate()
+        release.complete("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { fileHandler.copyToUri(any(), any()) }
+        assertFalse(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareUpdate))
+        assertNull(viewModel.bootloaderFault.value, "a cancelled write latches nothing")
+        verifySuspend { fileHandler.deleteFile(any()) }
+    }
+
+    @Test
+    fun `cancelling clears the fault an earlier update read`() = runTest {
+        awaitPlainUsbDrivePick("Board-ID: WisBlock-RAK4631-Board\r\nLast-Fault: id=0x1 pc=0x2 info=0x3\r\n")
+        viewModel.writeToVolume(CommonUri.parse("content://tree/1234-5678%3A"))
+        runUntilSettled { viewModel.bootloaderFault.value != null }
+
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        assertNull(viewModel.bootloaderFault.value)
     }
 
     /** Starts a bootloader upgrade on a RAK4631 whose drive reports [installed], and picks that drive once. */

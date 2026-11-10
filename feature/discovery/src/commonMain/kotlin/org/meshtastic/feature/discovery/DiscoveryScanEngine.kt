@@ -71,12 +71,14 @@ import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.core.model.Channel as ChannelModel
 
 /**
  * Core scan engine for Local Mesh Discovery.
  *
  * Cycles through a queue of LoRa presets, dwells on each for a configured duration while collecting packets, then
- * persists aggregated results via [DiscoveryDao].
+ * persists aggregated results via [DiscoveryDao]. Public presets are scanned on the public mesh: the default slot with
+ * the default public channel, with the user's own primary channel and LoRa config restored afterward.
  */
 @Single
 @Suppress("LargeClass", "LongParameterList")
@@ -153,11 +155,21 @@ class DiscoveryScanEngine(
     private var dwellJob: Job? = null
     private var originalLoRaConfig: Config.LoRaConfig? = null
 
-    /** The radio's primary channel at scan start; restored after a custom-channel target overwrites it (FR-005). */
+    /** The radio's primary channel at scan start; restored after a scan target overwrites it (FR-005). */
     private var originalPrimaryChannel: ChannelSettings? = null
 
-    /** True once a custom-channel target has retuned the primary channel, so restore only writes when needed. */
+    /** True once a target has retuned the primary channel, so restore only writes when needed. */
     private var tunedPrimaryChannel: Boolean = false
+
+    /** The primary channel's identity on the radio right now, as the scan has driven it. */
+    private var primaryChannelTuning: PrimaryChannelTuning = PrimaryChannelTuning.HOME
+
+    private enum class PrimaryChannelTuning {
+        HOME,
+        PUBLIC,
+        CUSTOM,
+    }
+
     private var sessionId: Long = 0
 
     /** The radio [sessionId]'s row was written against. Identifies the session across per-device databases. */
@@ -243,7 +255,11 @@ class DiscoveryScanEngine(
                 _scanState.value = DiscoveryScanState.Failed("Home configuration restoration is incomplete")
             } else {
                 _scanState.value = DiscoveryScanState.Preparing
-                val requiresPrimaryRestore = targets.any { it.channel != null }
+                // A public-preset target on a custom primary swaps it to the default public channel, so that scan
+                // needs the same restore as a beacon-channel one.
+                val requiresPrimaryRestore =
+                    targets.any { it.channel != null } ||
+                        (initialPrimaryChannel != null && !isDefaultPublicChannel(initialPrimaryChannel))
                 when {
                     homeLora == null -> refuseUnrestorableScanLocked("Home LoRa configuration is not available")
 
@@ -311,6 +327,7 @@ class DiscoveryScanEngine(
         originalLoRaConfig = initialLoraConfig
         originalPrimaryChannel = initialPrimaryChannel
         tunedPrimaryChannel = false
+        primaryChannelTuning = PrimaryChannelTuning.HOME
         val homePresetStr =
             if (initialLoraConfig.use_preset) {
                 ChannelOption.from(initialLoraConfig.modem_preset)?.name ?: ChannelOption.DEFAULT.name
@@ -568,7 +585,11 @@ class DiscoveryScanEngine(
         // NeighborInfo request. Only the preset (and, for custom channels, region + channel_num) is overridden.
         val base = originalLoRaConfig ?: Config.LoRaConfig.Builder().build()
         if (target.channel == null) {
-            // Public-preset target — dwell on the preset using the radio's existing primary channel (unchanged).
+            // Public-preset target: listen on the public mesh for this preset. The primary channel must be the default
+            // public one so the firmware derives the public slot (channel_num 0) and decodes public traffic; a custom
+            // primary is swapped out before the first preset change and restored after the scan. Channel writes do not
+            // reboot the radio, so the swap lands before the LoRa change that does.
+            tuneToDefaultPublicChannelIfNeeded()
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->
@@ -578,12 +599,13 @@ class DiscoveryScanEngine(
                                 .also { wb ->
                                     wb.use_preset = true
                                     wb.modem_preset = target.preset.modemPreset
+                                    wb.channel_num = 0
                                 }
                                 .build()
                     }
                     .build(),
             )
-            Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
+            Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true, default slot)" }
         } else {
             // Beacon custom-channel target: apply the offered preset+region, take the slot the mesh pinned or reset
             // channel_num so firmware derives it from the new name, then tune the primary channel to the offered
@@ -609,22 +631,47 @@ class DiscoveryScanEngine(
                     .build(),
             )
             currentCoroutineContext().ensureActive()
-            mutex.withLock { tunedPrimaryChannel = true }
-            radioController.setLocalChannel(
-                Channel.Builder()
-                    .also { wb ->
-                        wb.index = 0
-                        wb.role = Channel.Role.PRIMARY
-                        wb.settings = target.channel
-                    }
-                    .build(),
-            )
+            mutex.withLock {
+                tunedPrimaryChannel = true
+                primaryChannelTuning = PrimaryChannelTuning.CUSTOM
+            }
+            radioController.setLocalChannel(primaryChannel(target.channel))
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
         }
         // The firmware often restarts the radio or reboots after a LoRa config change.
         // Wait a short moment to ensure we don't consider it 'connected' right before it drops.
         delay(3000)
     }
+
+    /**
+     * Puts the primary channel on the default public channel for a public-preset dwell, unless it already is: a home
+     * primary that is the default public channel is never written, and a public swap is written once, not per target.
+     * The tuned flag is raised before the write so a failure mid-swap still restores the home channel.
+     */
+    private suspend fun tuneToDefaultPublicChannelIfNeeded() {
+        val home = originalPrimaryChannel ?: return
+        val alreadyPublic =
+            when (primaryChannelTuning) {
+                PrimaryChannelTuning.PUBLIC -> true
+                PrimaryChannelTuning.CUSTOM -> false
+                PrimaryChannelTuning.HOME -> isDefaultPublicChannel(home)
+            }
+        if (alreadyPublic) return
+        mutex.withLock {
+            tunedPrimaryChannel = true
+            primaryChannelTuning = PrimaryChannelTuning.PUBLIC
+        }
+        radioController.setLocalChannel(primaryChannel(defaultPublicChannel(home)))
+        Logger.i { "DiscoveryScanEngine: primary channel set to the default public channel for the scan" }
+    }
+
+    private fun primaryChannel(settings: ChannelSettings): Channel = Channel.Builder()
+        .also { wb ->
+            wb.index = 0
+            wb.role = Channel.Role.PRIMARY
+            wb.settings = settings
+        }
+        .build()
 
     private suspend fun waitForConnection(): Boolean {
         val result =
@@ -985,6 +1032,25 @@ class DiscoveryScanEngine(
 
     companion object {
         private const val CONFIG_SNAPSHOT_TIMEOUT_MS = 5_000L
+
+        /**
+         * The default public channel is the empty name with the one-byte default key. Only the empty name moves with
+         * the preset: the firmware hashes it as the preset's display name, while an explicit "LongFast" hashes as that
+         * string on every preset and lands on the wrong slot for the others. An AEAD channel hashes apart too.
+         */
+        internal fun isDefaultPublicChannel(settings: ChannelSettings): Boolean =
+            settings.name.isEmpty() && !settings.use_aead && ChannelModel(settings).psk == ChannelModel.default.psk
+
+        /** The scan copy of [home]: same channel, default public name and key. */
+        internal fun defaultPublicChannel(home: ChannelSettings): ChannelSettings = home
+            .newBuilder()
+            .also { wb ->
+                wb.name = ""
+                wb.psk = ChannelModel.default.settings.psk
+                wb.use_aead = false
+            }
+            .build()
+
         private const val RECONNECT_TIMEOUT_MS = 60_000L
         private const val TICK_INTERVAL_MS = 1_000L
         private const val POSITION_DIVISOR = 1e7

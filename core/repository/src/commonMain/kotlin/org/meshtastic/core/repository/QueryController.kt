@@ -28,14 +28,14 @@ import org.meshtastic.core.model.Position
  */
 interface QueryController {
 
-    /** Requests device metadata from a remote node. */
-    suspend fun refreshMetadata(destNum: Int)
+    /** Requests device metadata from a remote node. A [requestId] of 0 lets the sender assign one. */
+    suspend fun refreshMetadata(destNum: Int, requestId: Int = 0)
 
-    /** Requests the current GPS position from a remote node. */
-    suspend fun requestPosition(destNum: Int, currentPosition: Position)
+    /** Requests the current GPS position from a remote node. A [requestId] of 0 lets the sender assign one. */
+    suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int = 0)
 
-    /** Requests detailed user info from a remote node. */
-    suspend fun requestUserInfo(destNum: Int)
+    /** Requests detailed user info from a remote node. A [requestId] of 0 lets the sender assign one. */
+    suspend fun requestUserInfo(destNum: Int, requestId: Int = 0)
 
     /** Initiates a traceroute request to a remote node. */
     suspend fun requestTraceroute(requestId: Int, destNum: Int)

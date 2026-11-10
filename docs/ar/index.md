@@ -14,7 +14,7 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 
 | Guide                                                                 | الوصف                                                          |
 | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
+| [Getting Started](user/onboarding)                                    | Connect your first node and send a message                     |
 | [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
 | [Nodes](user/nodes)                                                   | Understanding the mesh network node list                       |
 | [Signal Meter](user/signal-meter)                                     | How the LoRa signal quality meter works                        |
@@ -23,4 +23,4 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 | [Architecture](developer/architecture)                                | App architecture overview for contributors                     |
 | [Contributing](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
 
-> This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.

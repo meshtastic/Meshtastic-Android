@@ -248,6 +248,7 @@
     <string name="debug_search_prev">上一個符合的</string>
     <string name="debug_store_logs_summary">停用後將不會把網狀網路日誌寫入磁碟</string>
     <string name="debug_store_logs_title">儲存網狀網路日誌</string>
+    <!-- DEEP -->
     <string name="default_">默認</string>
     <!-- DELETE -->
     <string name="delete">刪除</string>
@@ -407,6 +408,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">韌體</string>
     <string name="firmware_edition">韌體版本</string>
+    <string name="firmware_gate_title">需要更新韌體</string>
     <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="firmware_too_old">韌體太舊，需要更新。</string>
     <string name="firmware_update_almost_there">即將完成⋯⋯</string>
@@ -461,7 +463,6 @@
     <string name="firmware_update_unknown_hardware">未知的硬體型號: %1$d</string>
     <string name="firmware_update_unknown_release">無法識別的遠端版本</string>
     <string name="firmware_update_uploading">正在上傳韌體⋯⋯</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s 裝置出廠時預載的開機載入程式通常不支援 OTA 更新功能。在執行 OTA 韌體更新前,您可能需要先透過 USB 連線刷入具備 OTA 功能的開機載入程式。</string>
     <string name="firmware_update_usb_failed">USB 更新失敗</string>
     <string name="firmware_update_usb_instruction_text">您的裝置已重新啟動進入 DFU 模式，應該會顯示為 USB 磁碟機（例如：RAK4631）。\n\n當檔案管理器開啟時，請選擇該磁碟機的根目錄以儲存韌體檔案。</string>
     <string name="firmware_update_usb_instruction_title">選擇 DFU USB 磁碟機</string>
@@ -474,7 +475,6 @@
     <string name="fixed_position">固定位置</string>
     <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <!-- FORMAT -->
-    <string name="free_memory">可用記憶體</string>
     <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="freq">頻率</string>
     <string name="gas_resistance">氣體感測器</string>
@@ -497,8 +497,10 @@
     <string name="i_agree">我同意。</string>
     <string name="i_agree_to_share_my_location">我已閱讀並理解上述內容。我同意透過 MQTT 傳輸未加密的節點資料</string>
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
+    <!-- IAQ -->
     <string name="iaq">室内空氣品質指標(IAQ)</string>
     <string name="iaq_definition">(室內空氣品質) 相對尺度 IAQ 值，由 Bosch BME680 測量。值範圍 0–500。</string>
+    <string name="iaq_level_good">良好</string>
     <string name="icon_meanings">圖示說明</string>
     <string name="ignore">忽略</string>
     <string name="ignore_add">將 '%1$s' 加入忽略清單嗎？</string>
@@ -540,6 +542,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">領有執照的業餘無線電台 (HAM)</string>
     <string name="licensed_amateur_radio_text">啟用此選項將停用訊息加密，並與預設的 Meshtastic 網路不相容。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直線</string>
+    <string name="live_update_distance">距離 %1$s</string>
     <!-- LOAD -->
     <string name="load">負載</string>
     <string name="load_15_min">15分鐘負載</string>
@@ -585,6 +590,7 @@
     <string name="logs">系統記錄</string>
     <string name="long_name">裝置長名稱</string>
     <string name="longitude">經度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">電量不足</string>
@@ -636,6 +642,73 @@
     <string name="mesh_beacon_region_label">地區</string>
     <string name="mesh_beacon_target_channel_index">頻道</string>
     <string name="mesh_beacon_target_default">默認</string>
+    <string name="mesh_hud_cardinal_north">Meshtastic is a remarkable open-source project that leverages the power of low-power, long-range radio communication. It allows you to create a decentralized, encrypted, and resilient mesh network for text messaging and data transfer, even without cellular or WiFi connectivity.
+
+**Key Features of Meshtastic:**
+
+*   **Long-Range Communication:** Utilizing LoRa radio technology, Meshtastic devices can communicate over distances of several kilometers, depending on environmental conditions and antenna configurations.
+
+*   **Mesh Networking:** Devices automatically forward messages to each other, extending the network's reach and creating redundancy.
+
+*   **Encryption:** All messages are encrypted end-to-end, ensuring privacy and security.
+
+*   **Open Source:** The entire project is open source, allowing for community contributions, customization, and auditing.
+
+*   **Hardware Flexibility:** Meshtastic supports a variety of inexpensive, readily available hardware platforms, such as ESP32, nRF52, and RP2040 based boards.
+
+**Hardware Options:**
+
+Several popular hardware options are available for running Meshtastic, including:
+
+*   **RAK Wireless WisBlock:** A modular and versatile platform with a wide range of available modules.
+
+*   **T-Beam:** A popular, integrated solution with a built-in GPS module.
+
+*   **Heltec WiFi LoRa:** A compact and widely used board with WiFi and LoRa capabilities.
+
+*   **LilyGo T-Echo:** A ruggedized device designed for outdoor use.
+
+**Software and Configuration:**
+
+Meshtastic devices are typically configured using a companion app (available for Android and iOS) or via a CLI interface. The firmware can be updated over the air (OTA) via BLE or USB.
+
+**Technical Details:**
+
+*   **Radio Technology:** LoRa
+
+*   **Microcontrollers:** ESP32, nRF52, RP2040
+
+*   **Connectivity:** LoRa, BLE, WiFi (depending on the hardware)
+
+*   **Power:** Typically powered by USB or battery
+
+*   **Interfaces:** GPIO, USB, UART, SPI, I2C
+
+**Use Cases:**
+
+Meshtastic can be used in a variety of scenarios, including:
+
+*   **Emergency Communication:** Providing communication during natural disasters or other emergencies when cellular networks are down.
+
+*   **Outdoor Adventures:** Maintaining communication while hiking, camping, or engaging in other outdoor activities in areas with limited or no cellular coverage.
+
+*   **Off-Grid Communication:** Creating a local communication network in areas without internet access.
+
+*   **IoT Applications:** Connecting sensors and devices in remote locations.
+
+**Integration with Other Systems:**
+
+Meshtastic can be integrated with other systems via MQTT or a custom API. This allows for data to be exchanged between Meshtastic devices and other applications.
+
+**Getting Started:**
+
+To get started with Meshtastic, you will need:
+
+1.  A compatible hardware device (e.g., RAK, T-Beam, Heltec, LilyGo).
+2.  The Meshtastic firmware.
+3.  The Meshtastic companion app (Android or iOS) or CLI.
+
+You can find detailed instructions and documentation on the official Meshtastic website.</string>
     <string name="mesh_map_location">Mesh Map 地圖位置</string>
     <string name="mesh_map_location_description">在 Mesh 地圖上，為您的手機啟用藍色的定位點。</string>
     <!-- MESHTASTIC -->
@@ -662,6 +735,9 @@
     <string name="messages">訊息</string>
     <string name="min">最小</string>
     <string name="minimum_wake_time_seconds">最小喚醒時間</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">返回</string>
+    <string name="mirror_key_ok">好的</string>
     <string name="modem_preset">預設值</string>
     <string name="module_settings">模組設定</string>
     <string name="modules_already_unlocked">模組已解鎖</string>
@@ -687,6 +763,9 @@
     <string name="mqtt_status_reconnecting">重新連接中…</string>
     <string name="mqtt_status_reconnecting_with_attempt">重新連接中（第 %1$d 次嘗試） — %2$s</string>
     <string name="mqtt_test_connection">測試連線</string>
+    <string name="mqtt_topic_finder_connecting">正在連接…</string>
+    <string name="mqtt_topic_finder_level_country">國家/地區</string>
+    <string name="mqtt_topic_finder_level_region">地區</string>
     <string name="must_set_region">您必須設定一個區域！</string>
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <!-- MUTE -->
@@ -888,7 +967,9 @@
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_show">顯示快速聊天選單</string>
     <string name="radiation">輻射</string>
+    <!-- RADIO -->
     <string name="radio_configuration">設備設定</string>
+    <string name="radio_setup_name_headline">顯示名稱</string>
     <string name="rainfall_1h">降雨（1h）</string>
     <string name="rainfall_24h">降雨（24h）</string>
     <string name="range_test">範圍測試</string>
@@ -1027,8 +1108,6 @@
     <string name="share_to">分享至…</string>
     <string name="share_your_location_in_real_time">透過整合的 GPS 功能，即時分享你的位置，並保持團隊協調一致。</string>
     <string name="short_name">裝置短名稱</string>
-    <string name="should_update">為享受最新功能及所修復的問題，請更新您的節點韌體。\n\n最新穩定韌體版本為：%1$s</string>
-    <string name="should_update_firmware">建議更新韌體。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">加密金鑰說明</string>
     <string name="show_iaq_legend">顯示空氣品質圖例</string>
@@ -1069,6 +1148,7 @@
     <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_regenerate_certs_confirm">重新產生</string>
     <string name="tak_server_section">伺服器</string>
     <string name="tak_server_test_card_title">TAK Mesh 測試（除錯）</string>
     <string name="tak_server_test_idle">傳送所有 %1$d 個測試固定裝置至 mesh</string>
@@ -1190,6 +1270,9 @@
     <string name="waypoint_new">新建航點</string>
     <string name="waypoint_received">收到編輯航點：%1$s</string>
     <string name="weight">重量</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">不良</string>
+    <string name="widget_packets_received">已接收</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="wifi_provision_available_networks">可用的網路</string>

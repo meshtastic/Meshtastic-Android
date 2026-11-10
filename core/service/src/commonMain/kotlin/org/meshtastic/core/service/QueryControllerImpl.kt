@@ -37,13 +37,13 @@ internal class QueryControllerImpl(
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: 0
 
-    override suspend fun refreshMetadata(destNum: Int) {
-        commandSender.sendAdmin(destNum, wantResponse = true) {
+    override suspend fun refreshMetadata(destNum: Int, requestId: Int) {
+        commandSender.sendAdmin(destNum, requestId = requestId, wantResponse = true) {
             AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
         }
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {
         if (destNum == nodeManager.myNodeNum.value) return
         val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
         // Position(0.0, 0.0, 0) means "attach no coordinates"; the sender leaves them off the wire.
@@ -55,12 +55,12 @@ internal class QueryControllerImpl(
             } else {
                 Position(0.0, 0.0, 0)
             }
-        commandSender.requestPosition(destNum, resolvedPosition)
+        commandSender.requestPosition(destNum, resolvedPosition, requestId)
     }
 
-    override suspend fun requestUserInfo(destNum: Int) {
+    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {
         if (destNum != nodeManager.myNodeNum.value) {
-            commandSender.requestUserInfo(destNum)
+            commandSender.requestUserInfo(destNum, requestId)
         }
     }
 

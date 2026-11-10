@@ -37,6 +37,35 @@ data class RegionPresetConstraint(
     fun isGated(isLicensed: Boolean): Boolean = licensedOnly && !isLicensed
 }
 
+private val PRESET_REGIONS_WITHOUT_MAP: Map<ModemPreset, Set<RegionCode>> = run {
+    val narrow =
+        setOf(
+            RegionCode.EU_N_868,
+            RegionCode.ITU2_125CM,
+            RegionCode.ITU1_70CM,
+            RegionCode.ITU2_70CM,
+            RegionCode.ITU3_70CM,
+        )
+    val tiny = setOf(RegionCode.ITU1_2M, RegionCode.ITU2_2M, RegionCode.ITU3_2M)
+    val lite = setOf(RegionCode.EU_866)
+    mapOf(
+        ModemPreset.LITE_FAST to lite,
+        ModemPreset.LITE_SLOW to lite,
+        ModemPreset.NARROW_FAST to narrow,
+        ModemPreset.NARROW_SLOW to narrow,
+        ModemPreset.TINY_FAST to tiny,
+        ModemPreset.TINY_SLOW to tiny,
+    )
+}
+
+/**
+ * Whether firmware accepts this preset in [region], for a radio that sent no [LoRaRegionPresetMap]. Lite, Narrow and
+ * Tiny are legal only in the regions firmware enforces; every other preset is unconstrained here. Not a substitute for
+ * the map: callers apply it only when the map is absent.
+ */
+fun ModemPreset.isLegalInRegionWithoutMap(region: RegionCode): Boolean =
+    PRESET_REGIONS_WITHOUT_MAP[this]?.contains(region) ?: true
+
 /**
  * Resolves the [RegionPresetConstraint] the firmware advertised for [region], or `null` when there is no constraint
  * information and the client must therefore NOT restrict the preset list. A `null` result happens when:

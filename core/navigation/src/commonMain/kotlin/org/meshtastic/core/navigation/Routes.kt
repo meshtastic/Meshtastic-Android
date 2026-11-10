@@ -35,8 +35,10 @@ sealed interface ConnectionsRoute : Route {
     /**
      * @param address Optional prefixed device address (e.g. `t192.168.1.1:4403`, `xAA:BB:CC:DD:EE:FF`) to auto-connect
      *   to when this route is deep-linked into, e.g. `/connections?address=t192.168.1.1:4403`.
+     * @param pin Optional pairing PIN for a BLE [address], e.g. `/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456`,
+     *   so a node shipped with a fixed PIN can be paired from one link or QR code.
      */
-    @Serializable data class Connections(val address: String? = null) :
+    @Serializable data class Connections(val address: String? = null, val pin: String? = null) :
         ConnectionsRoute,
         Graph
 }
@@ -55,13 +57,28 @@ sealed interface ContactsRoute : Route {
 @Serializable
 sealed interface MapRoute : Route {
     @Serializable data class Map(val waypointId: Int? = null, val sitePlannerNodeNum: Int? = null) : MapRoute
+
+    /**
+     * The camera mesh view. [focusNodeNum] points the finder at one node. A traceroute ([tracerouteDestNum] with
+     * [tracerouteRequestId], and [tracerouteLogUuid] when it was logged) draws that route in the air, and
+     * [trackNodeNum] draws that node's position track.
+     */
+    @Serializable
+    data class MeshHud(
+        val focusNodeNum: Int? = null,
+        val tracerouteDestNum: Int? = null,
+        val tracerouteRequestId: Int? = null,
+        val tracerouteLogUuid: String? = null,
+        val trackNodeNum: Int? = null,
+    ) : MapRoute
 }
 
 @Serializable
 sealed interface NodesRoute : Route {
     @Serializable data object Nodes : NodesRoute, Graph
 
-    @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
+    /** [openCompass] opens the compass sheet on arrival, for entry points that offer the compass directly. */
+    @Serializable data class NodeDetail(val destNum: Int? = null, val openCompass: Boolean = false) : NodesRoute
 }
 
 @Serializable
@@ -103,6 +120,12 @@ sealed interface SettingsRoute : Route {
     @Serializable data object ModuleConfiguration : SettingsRoute
 
     @Serializable data object Administration : SettingsRoute
+
+    /**
+     * The guided setup for the connected radio: region, preset and name. [address] is the transport address of the
+     * radio it was opened for; the setup writes to that radio only and closes when another one connects.
+     */
+    @Serializable data class RadioSetup(val address: String? = null) : SettingsRoute
 
     // region radio Config Routes
 

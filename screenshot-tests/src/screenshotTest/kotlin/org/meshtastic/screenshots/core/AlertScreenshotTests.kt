@@ -19,6 +19,7 @@ package org.meshtastic.screenshots.core
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
+import org.meshtastic.core.ui.qr.PreviewScannedQrCodeAddToFullRadio
 import org.meshtastic.core.ui.share.PreviewSharedContactImportAlert
 import org.meshtastic.core.ui.util.PreviewComposableAlert
 import org.meshtastic.core.ui.util.PreviewHtmlAlert
@@ -98,4 +99,11 @@ fun ScreenshotShareDialog() {
 @Composable
 fun ScreenshotShareDialogWithNfc() {
     PreviewShareDialogWithNfc()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotScannedQrCodeAddToFullRadio() {
+    PreviewScannedQrCodeAddToFullRadio()
 }

@@ -402,4 +402,48 @@ class LoRaRegionPresetsTest {
             map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
     }
+
+    @Test
+    fun `lite presets without a map are legal only in EU_866`() {
+        for (preset in listOf(ModemPreset.LITE_FAST, ModemPreset.LITE_SLOW)) {
+            assertTrue(preset.isLegalInRegionWithoutMap(RegionCode.EU_866))
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.EU_868))
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.US))
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.UNSET))
+        }
+    }
+
+    @Test
+    fun `narrow presets without a map are legal in EU_N_868 and the licensed 125cm and 70cm bands`() {
+        val legal =
+            listOf(
+                RegionCode.EU_N_868,
+                RegionCode.ITU2_125CM,
+                RegionCode.ITU1_70CM,
+                RegionCode.ITU2_70CM,
+                RegionCode.ITU3_70CM,
+            )
+        for (preset in listOf(ModemPreset.NARROW_FAST, ModemPreset.NARROW_SLOW)) {
+            legal.forEach { assertTrue(preset.isLegalInRegionWithoutMap(it), "$preset in $it") }
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.EU_868))
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.ITU1_2M))
+        }
+    }
+
+    @Test
+    fun `tiny presets without a map are legal only in the 2m bands`() {
+        for (preset in listOf(ModemPreset.TINY_FAST, ModemPreset.TINY_SLOW)) {
+            listOf(RegionCode.ITU1_2M, RegionCode.ITU2_2M, RegionCode.ITU3_2M).forEach {
+                assertTrue(preset.isLegalInRegionWithoutMap(it), "$preset in $it")
+            }
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.ITU1_70CM))
+            assertFalse(preset.isLegalInRegionWithoutMap(RegionCode.US))
+        }
+    }
+
+    @Test
+    fun `other presets are legal everywhere without a map`() {
+        assertTrue(ModemPreset.LONG_FAST.isLegalInRegionWithoutMap(RegionCode.US))
+        assertTrue(ModemPreset.MEDIUM_TURBO.isLegalInRegionWithoutMap(RegionCode.ITU1_2M))
+    }
 }

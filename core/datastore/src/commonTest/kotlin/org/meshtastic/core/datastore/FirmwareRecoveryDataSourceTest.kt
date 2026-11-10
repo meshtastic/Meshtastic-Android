@@ -82,11 +82,66 @@ class FirmwareRecoveryDataSourceTest {
     }
 
     @Test
+    fun `promoting the last BLE node makes it the pending recovery`() = testScope.runTest {
+        val node = recovery(name = "Base")
+        dataSource.setLastBleNode(node)
+        assertNull(dataSource.pending.first())
+
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        assertEquals(node, dataSource.pending.first())
+    }
+
+    @Test
+    fun `promoting never replaces a recovery recorded by an update`() = testScope.runTest {
+        val interrupted = recovery(name = "Interrupted")
+        dataSource.set(interrupted)
+        dataSource.setLastBleNode(recovery(name = "Other"))
+
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        assertEquals(interrupted, dataSource.pending.first())
+    }
+
+    @Test
+    fun `promoting skips a last BLE node at another address`() = testScope.runTest {
+        dataSource.setLastBleNode(recovery(name = "Newer", address = "xAA:BB:CC:00:00:05"))
+
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        assertNull(dataSource.pending.first())
+    }
+
+    @Test
+    fun `dismiss clears the last BLE node too so it is not promoted again`() = testScope.runTest {
+        dataSource.setLastBleNode(recovery(name = "Base"))
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        dataSource.dismiss()
+        dataSource.promoteLastBleNode(BASE_ADDRESS)
+
+        assertNull(dataSource.pending.first())
+        assertNull(dataSource.lastBleNode.first())
+    }
+
+    private fun recovery(name: String, address: String = BASE_ADDRESS) = PendingFirmwareRecovery(
+        fullAddress = address,
+        hwModel = 9,
+        pioEnv = "rak4631",
+        releaseType = "STABLE",
+        deviceName = name,
+    )
+
+    @Test
     fun `unreadable stored record reads as null without logging it`() = testScope.runTest {
         val truncated = """{"fullAddress":"xAA:BB:CC:11:22:33","deviceName":"CabinBase","hwModel":"""
         dataStore.edit { it[stringPreferencesKey("pending-firmware-recovery")] = truncated }
 
         assertNull(dataSource.pending.first())
         logs.assertNotLogged("AA:BB:CC:11:22:33", "CabinBase")
+    }
+
+    private companion object {
+        const val BASE_ADDRESS = "xAA:BB:CC:00:00:01"
     }
 }

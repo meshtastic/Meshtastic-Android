@@ -16,6 +16,7 @@
  */
 package org.meshtastic.buildlogic
 
+import com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension
 import com.gradle.develocity.agent.gradle.test.DevelocityTestConfiguration
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ExternalModuleDependencyBundle
@@ -26,6 +27,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
@@ -86,14 +88,18 @@ internal fun Project.configureTestOptions() {
 
     val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
 
-    tasks.withType<Test>().configureEach {
-        // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
-        // in KMP modules.  Those tasks run JUnit 4 natively; applying useJUnitPlatform()
-        // would force kotlin-test-junit5 selection which conflicts with the kotlin-test-junit
-        // that Kotlin auto-selects for Robolectric @RunWith tests when Platform is absent.
-        if (name != "testAndroidHostTest") {
-            useJUnitPlatform()
+    // KMP androidHostTest (Robolectric) runs JUnit 4 natively; Platform there forces kotlin-test-junit5,
+    // which conflicts with the kotlin-test-junit that Kotlin selects for @RunWith tests.
+    pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+        extensions.configure<KotlinMultiplatformAndroidComponentsExtension> {
+            onVariants { variant ->
+                variant.hostTests.values.forEach { hostTest -> hostTest.configureTestTask { test -> test.useJUnit() } }
+            }
         }
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
         // Parallelize unit tests at the Gradle fork level.
         // In CI, use all available processors; locally use half to keep the machine responsive.
         maxParallelForks =

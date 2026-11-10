@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,8 +43,10 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 
 private const val PIN_LENGTH = 6
@@ -62,16 +65,18 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = Config.Builder().also { wb -> wb.bluetooth = it }.build()
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ConfigRoute.BLUETOOTH.route)) {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_bluetooth_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_bluetooth_enabled),
                     summary = stringResource(Res.string.schema_bluetooth_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -81,18 +86,10 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.schema_bluetooth_mode),
-                    summary = stringResource(Res.string.schema_bluetooth_mode_description),
+                BluetoothPairingModePreference(
                     enabled = state.connected,
-                    items =
-                    Config.BluetoothConfig.PairingMode.entries
-                        .filter { it.name != "UNRECOGNIZED" }
-                        .map { it to it.name },
-                    selectedItem =
-                    formState.value.mode.takeUnless { it.name == "UNRECOGNIZED" }
-                        ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
-                    onItemSelected = {
+                    mode = formState.value.mode,
+                    onModeChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
                     },
                 )
@@ -111,6 +108,23 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 }
 
 @Composable
+internal fun BluetoothPairingModePreference(
+    enabled: Boolean,
+    mode: Config.BluetoothConfig.PairingMode,
+    onModeChange: (Config.BluetoothConfig.PairingMode) -> Unit,
+) {
+    DropDownPreference(
+        title = stringResource(Res.string.schema_bluetooth_mode),
+        modifier = Modifier.settingsField(Res.string.schema_bluetooth_mode),
+        summary = stringResource(Res.string.schema_bluetooth_mode_description),
+        enabled = enabled,
+        items = schemaLabelledItems(Config.BluetoothConfig.PairingMode.entries.filter { it.name != "UNRECOGNIZED" }),
+        selectedItem = mode.takeUnless { it.name == "UNRECOGNIZED" } ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
+        onItemSelected = onModeChange,
+    )
+}
+
+@Composable
 private fun FixedPinPreference(
     pinValue: Int,
     enabled: Boolean,
@@ -121,6 +135,7 @@ private fun FixedPinPreference(
     val pinIsError = pinState.length != PIN_LENGTH || !pinState.all { it.isDigit() }
     EditTextPreference(
         title = stringResource(Res.string.schema_bluetooth_fixed_pin),
+        modifier = Modifier.settingsField(Res.string.schema_bluetooth_fixed_pin),
         value = pinState,
         enabled = enabled,
         isError = pinIsError,

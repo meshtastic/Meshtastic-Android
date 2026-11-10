@@ -26,29 +26,9 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Verifies the restart contract that keeps process-lifetime eager StateFlows alive across a Room pool wedge (#6608): a
- * terminal acquire-timeout must restart the upstream, and an unrelated failure must still terminate it.
+ * stalled flow must restart the upstream, and an unrelated failure must still terminate it.
  */
 class DbFlowRecoveryTest {
-
-    private fun poolTimeout() =
-        IllegalStateException("Timed out attempting to acquire a reader connection from the database pool")
-
-    @Test
-    fun poolTimeoutRestartsTheUpstreamAndEmitsAfterRecovery() = runTest {
-        var attempts = 0
-        flow {
-            attempts += 1
-            if (attempts < 3) throw poolTimeout()
-            emit("nodes")
-        }
-            .retryOnDbPoolFailure("test")
-            .test(timeout = EMISSION_TIMEOUT) {
-                assertEquals("nodes", awaitItem())
-                cancelAndIgnoreRemainingEvents()
-            }
-
-        assertEquals(3, attempts, "each recoverable pool failure must restart the upstream")
-    }
 
     /**
      * A closed pool must NOT be retried. `observeCurrentDb` re-latches on the replacement by itself, so retrying adds
@@ -104,7 +84,7 @@ class DbFlowRecoveryTest {
         flow {
             attempts += 1
             emit(attempts)
-            throw poolTimeout()
+            throw DbFlowStalledException("no first emission")
         }
             .retryOnDbPoolFailure("test")
             .test(timeout = EMISSION_TIMEOUT) {

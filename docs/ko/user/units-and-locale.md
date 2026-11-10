@@ -1,7 +1,7 @@
 ---
 title: Units, Measurement & Locale
 nav_order: 16
-last_updated: 2026-08-30
+last_updated: 2026-10-21
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 aliases:
   - measurement
@@ -17,7 +17,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## How It Works
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic nodes always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
@@ -25,11 +25,11 @@ Units follow your device's **region**, not the display language. Plain languages
 
 > 💡 **Tip:** By default there is nothing to configure — change your system measurement preferences and every screen in Meshtastic updates automatically. If your device offers no working region or measurement setting (some manufacturer builds don't), set **Settings → Units** in the app instead.
 
-## The Radio's Own Screen Is Separate
+## The node's own screen is separate
 
-**Settings → Device configuration → Display → Display units** configures the screen on the radio, not the app. The **Use 12h clock format** and **Always point north** settings do too — all three apply to the radio's display only. Temperature on that screen has its own setting, **Environment metrics use Fahrenheit**, on the radio's Telemetry module — see the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
+**Settings → Device configuration → Display → Display Units** configures the screen on the node, not the app. The **12 Hour Clock** and **Always point north** settings do too, and all three apply to the node's display only. Temperature on that screen has its own setting, **Display Fahrenheit**, on the node's Telemetry module. See the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
 
-If your node list shows miles while the radio's screen shows kilometers, this is why: the two are set in different places. Changing the radio's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
+If your node list shows miles while the node's screen shows kilometers, this is why: the two are set in different places. Changing the node's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
 
 ## 온도
 
@@ -108,13 +108,14 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 Some units are international standards and are displayed the same way regardless of your locale:
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Barometric pressure              | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| 복사                               | µR/h                           | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| Measurement                      | Unit                                                                                | Why                                                                                           |
+| -------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Barometric pressure              | hPa                                                                                 | International meteorological standard                                                         |
+| Heading / bearing                | ° (degrees)                                                      | Universal navigation convention                                                               |
+| 복사                               | µR/h                                                                                | Standard dosimetry unit                                                                       |
+| GPS coordinates                  | decimal degrees                                                                     | Universal geographic standard                                                                 |
+| Humidity, battery, soil moisture | %                                                                                   | Universal                                                                                     |
+| Data sizes and transfer rates    | B, kB, MB, GB (decimal: 1 MB is 1,000,000 bytes) | Matches the storage figures Android shows; the number itself follows your locale's formatting |
 
 ## Date & Time
 
@@ -147,7 +148,7 @@ Not every device can express every preference — some manufacturer builds ship 
 offer only one English variant, and UK regions are imperial for distance even if you'd rather read altitude in
 meters. For those cases the app has its own switch:
 
-1. Open **Meshtastic Settings → Units**
+1. In Meshtastic, open **Settings → Units**
 2. Choose **System default**, **Metric**, or **Imperial**
 3. Every screen updates immediately — no restart needed
 
@@ -160,5 +161,5 @@ otherwise. The setting exists on Android and Desktop alike.
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
 - [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
-- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
-- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
+- [Settings — Radio & User](settings-radio-user) — the Display config that sets units on the node's own screen
+- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the node's own screen, on meshtastic.org

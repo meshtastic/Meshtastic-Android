@@ -90,6 +90,7 @@
     <!-- DEBUG -->
     <string name="debug">Debug</string>
     <string name="debug_panel">Debug-paneel</string>
+    <!-- DEEP -->
     <string name="default_">Standaard</string>
     <!-- DELETE -->
     <string name="delete">Verwijder</string>
@@ -143,6 +144,7 @@
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
+    <string name="firmware_gate_title">Firmware-update vereist</string>
     <string name="firmware_old">De radio firmware is te oud om met deze applicatie te praten. Voor meer informatie over deze zaak, zie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">onze Firmware Installation gids</a>.</string>
     <string name="firmware_too_old">Firmware-update vereist.</string>
     <string name="firmware_update_failed">Bijwerken mislukt</string>
@@ -156,8 +158,10 @@
     <string name="hide_password">Wachtwoord verbergen</string>
     <string name="hops_away">Aantal sprongen</string>
     <string name="i_know_what_i_m_doing">Ik weet waar ik mee bezig ben.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Binnenluchtkwaliteit) relatieve schaal IAQ waarde gemeten door Bosch BME680. Waarde tussen 0 en 500.</string>
+    <string name="iaq_level_good">Goed</string>
     <string name="ignore">Negeer</string>
     <string name="ignore_add">Voeg '%1$s' toe aan negeerlijst?</string>
     <string name="ignore_incoming">Inkomende negeren</string>
@@ -179,6 +183,8 @@
     <!-- LAYER -->
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direct</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -188,6 +194,7 @@
     <!-- LOG -->
     <string name="logs">Logs</string>
     <string name="longitude">Lengtegraad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery_title">Batterij bijna leeg: %1$s</string>
@@ -228,12 +235,15 @@
     <string name="message_input_label">Bericht</string>
     <string name="message_status_queued">In behandeling</string>
     <string name="messages">Berichten</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">OK</string>
     <string name="module_settings">Module-configuratie</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Configuratie</string>
     <string name="mqtt_status_connected">Verbonden</string>
     <string name="mqtt_status_disconnected">Niet verbonden</string>
+    <string name="mqtt_topic_finder_level_region">Regio</string>
     <string name="must_set_region">Je moet een regio instellen!</string>
     <string name="must_update">Applicatie update noodzakelijk in Google Play store (of Github). Deze versie is te oud om te praten met deze radio.</string>
     <!-- MUTE -->
@@ -307,7 +317,9 @@
     <string name="quick_chat_instant">Direct verzenden</string>
     <string name="quick_chat_new">Nieuwe snelle chat</string>
     <string name="radiation">Straling</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Radioconfiguratie</string>
+    <string name="radio_setup_name_headline">Weergavenaam</string>
     <string name="range_test">Bereik Test</string>
     <string name="reboot">Herstart</string>
     <!-- REMOTE -->
@@ -418,6 +430,8 @@
     <string name="waypoint_new">Nieuw waypoint</string>
     <string name="waypoint_received">Ontvangen waypoint: %1$s</string>
     <string name="weight">Gewicht</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Slecht</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adres</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>

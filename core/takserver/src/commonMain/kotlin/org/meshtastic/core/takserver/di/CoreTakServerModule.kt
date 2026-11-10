@@ -23,18 +23,23 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TakCertificateStore
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.core.takserver.TAKServerManagerImpl
+import org.meshtastic.core.takserver.TakCertificateProvider
 import org.meshtastic.core.takserver.createTAKServer
 
 @Module
 class CoreTakServerModule {
     @Single
-    fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = createTAKServer(dispatchers = dispatchers)
+    fun provideTAKServer(dispatchers: CoroutineDispatchers, certificateStore: TakCertificateStore): TAKServer =
+        createTAKServer(dispatchers = dispatchers, certificateStore = certificateStore)
+
+    @Single fun provideTakCertificateProvider(takServer: TAKServer): TakCertificateProvider = takServer.certificates
 
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
 

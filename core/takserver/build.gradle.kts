@@ -39,12 +39,10 @@ kotlin {
             // org.meshtastic.proto.TAKPacketV2 and friends come from the
             // protobufs SDK (api()-exported by :core:model for every target).
             // The TAKPacket-SDK conversion pipeline (org.meshtastic.tak.*) is
-            // multiplatform since 0.7.0 but consumed only on JVM/Android — it's
-            // api()-exported by :core:model's jvmAndroidMain, and common code
-            // reaches it through the TakSdkCompressor/TakV2Compressor/CotSanitizer
-            // expect/actual seams (iOS keeps stub actuals). zstd compression and
-            // CoT XML now ride on the SDK's transitive kzstd + xmlutil, so there
-            // are no native zstd-jni/xpp3 deps to re-add per target.
+            // api()-exported by :core:model's commonMain, so commonMain here
+            // calls it directly on every target. zstd compression and CoT XML
+            // ride on the SDK's transitive kzstd + xmlutil, so there are no
+            // native zstd-jni/xpp3 deps to re-add per target.
 
             implementation(libs.okio)
             implementation(libs.kotlinx.atomicfu)
@@ -56,6 +54,14 @@ kotlin {
             implementation(libs.ktor.network)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kermit)
+        }
+
+        getByName("jvmAndroidMain") {
+            dependencies {
+                // Per-install TAK PKI: X.509 builders + legacy-encoded PKCS#12 writer (see TakCertificateGenerator).
+                implementation(libs.bouncycastle.bcprov)
+                implementation(libs.bouncycastle.bcpkix)
+            }
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }

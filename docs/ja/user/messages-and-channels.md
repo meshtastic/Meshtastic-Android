@@ -1,7 +1,7 @@
 ---
 title: メッセージとチャンネル
 nav_order: 3
-last_updated: 2026-09-14
+last_updated: 2026-10-21
 description: メッセージの送受信、チャンネルの管理、暗号化の設定、会話の検索、クイックチャット・リアクション・メッセージ操作の使い方を説明します。
 aliases:
   - channels
@@ -20,7 +20,7 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 ### デフォルトチャンネル
 
-Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
+Every Meshtastic node comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### チャンネルのセキュリティ
 
@@ -39,44 +39,45 @@ Key length alone does not change the icon: a 128-bit key and a 256-bit key both 
 
 ### チャンネルを追加する
 
-1. Connect to your radio. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
+1. Connect to your node. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
 2. Go to **Settings**, then tap **Channels** under **Configuration**.
 3. Tap the **+** button to add a channel. The editor opens on the new entry.
 4. Set the channel name and the **PSK**, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside **PSK** generates another one.
 5. Tap **Save** to close the editor. The change is still only on your phone.
-6. Tap **Send** at the bottom of the channel list to write the changes to the radio. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
+6. Tap **Send** at the bottom of the channel list to write the changes to the node. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
 7. Optional: share the channel URL or QR code with the people who need access.
 
 Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
 
 ### Archived Channels
 
-A conversation belongs to the channel it was held on, not to the slot that channel occupied. When a channel leaves your radio — you scan a different channel QR, replace a channel's key, or switch the modem preset — its conversation is **archived** rather than deleted or merged into whatever takes the slot.
+A conversation belongs to the channel it was held on, not to the slot that channel occupied. When a channel leaves your node — you scan a different channel QR, replace a channel's key, or switch the modem preset — its conversation is **archived** rather than deleted or merged into whatever takes the slot.
 
 An archived conversation:
 
-- stays in the **Channels** list under the name the channel had, below the channels currently on your radio, marked with a history icon;
+- stays in the **Channels** list under the name the channel had, below the channels on your node, marked with a history icon;
 - keeps its full message history, searchable as usual;
-- is read-only — you cannot send, reply, or react, because the channel is no longer on the radio to send on, and it is not offered as a share target;
+- is read-only — you cannot send, reply, or react, because the channel is no longer on the node to send on, and it is not offered as a share target;
 - comes back automatically if you re-add that exact channel, taking its messages back to the live slot.
 
 Changing the modem preset archives the channel too: the preset is part of a default channel's identity, so **LongFast** and **MediumFast** are different channels even though neither the name nor the key changed. Changing only the region does not archive anything.
 
-To remove an archived conversation for good, long-press it in the conversation list and delete it.
+To remove an archived conversation for good, swipe it left in the conversation list, or touch & hold it and delete it from the action bar.
 
 ## ダイレクトメッセージ
 
-Direct messages (DMs) go to one specific node. When both radios hold each other's public keys, your radio encrypts the message to that node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
+Direct messages (DMs) go to one specific node. When both nodes hold each other's public keys, your node encrypts the message to the other node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
 
-Your radio must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a radio that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
+Your node must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a node that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
 
-A public-key conversation carries a key icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red key-off icon means the node's public key changed and no longer matches the one your radio stored. Tap the icon for the details.
+A public-key conversation carries an encryption icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red crossed-out key means the node's public key changed and no longer matches the one your node stored. Tap the icon for the details. This icon describes the conversation's encryption, so it keeps the locks at every firmware version rather than showing the signed or verified badges from the node list.
 
 ### ダイレクトメッセージを送信する
 
-1. 「**メッセージ**」タブを開きます。
-2. Select a conversation, or tap a node in the node list.
-3. メッセージを入力し、「**送信**」をタップします。
+1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
+2. メッセージを入力し、「**送信**」をタップします。
+
+On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 
 ### Managing the Conversation List
 
@@ -90,8 +91,9 @@ can act on it directly:
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
 - **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
-  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
-  to the top of **their own section**.
+  **Mark unread**, mute or delete them together. When every selected conversation is already
+  pinned, **Pin** becomes **Unpin**. Pinned conversations carry a pin marker and rise to the top
+  of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
   sorted independently — so a pinned direct message rises within its own section, not above the
   Channels one.
@@ -107,15 +109,19 @@ control whether they are offered at all.
 
 ステータスラベルは、**自分が**送信したメッセージの下にのみ表示されます（他のユーザーからの受信メッセージにはステータスラベルは表示されません）：
 
-| 状態                   | 意味                                                                                                                                                                                                                                       |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 送信中…                 | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
-| 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                                                                                                                                                                                       |
-| メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                        |
-| 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                   |
-| SF++ チェーン経由でルーティング中… | Store & Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                               |
-| SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                   |
-| エラー                  | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
+| 状態                              | 意味                                                                                                                                                                                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 送信中…                            | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
+| 受信者に配信済み                        | An acknowledgment came back for a direct message                                                                                                                                                                                         |
+| Delivered to recipient · proven | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
+| Delivery proof failed           | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
+| メッシュに配信済み                       | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                        |
+| 中継済み、受信者による確認なし                 | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                   |
+| SF++ チェーン経由でルーティング中…            | Store & Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                               |
+| SF++ チェーンで確認済み                  | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                   |
+| エラー                             | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
+
+Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 
 ### 配信エラー
 
@@ -124,7 +130,7 @@ control whether they are offered at all.
 | エラー                      | 意味                                                                                                                                                                            | 対処方法                                                                                                                                  |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | ルートがありません                | 宛先ノードへの経路が存在しません                                                                                                                                                              | 受信者がオフラインか、メッシュの範囲外の可能性があります。時間をおくか、距離を縮めてください。                                                                                       |
-| No radio interface       | 送信に使える無線インターフェースがありません                                                                                                                                                        | Check that your radio is connected and available.                                                                     |
+| No radio interface       | 送信に使える無線インターフェースがありません                                                                                                                                                        | Check that your node is connected and available.                                                                      |
 | メッシュへの配信に失敗しました          | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
 | Rate limited             | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
 | Not authorized           | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                              |
@@ -159,7 +165,7 @@ Each quick chat entry has a **Name** — the button label, capped at five charac
 
 ### メッセージを検索する
 
-チャット画面から、どの会話でもその全履歴を直接検索できます：
+Search covers the full history of any conversation, from the chat screen:
 
 1. 会話（チャンネルまたはダイレクトメッセージ）を開きます。
 2. 上部バーの**検索アイコン**をタップします。
@@ -168,7 +174,11 @@ Each quick chat entry has a **Name** — the button label, capped at five charac
 
 ![結果カウンターと前へ／次への矢印を備えたメッセージ検索バー](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **ヒント：** 検索は全文検索で、開いた会話の中だけを対象とします。他のチャンネルや連絡先をまたいで検索することはありません。デバイスにすでに保存されているメッセージを対象に照合するため、完全にオフラインで動作します。
+Search stays within the conversation you opened it from and doesn't reach other channels or contacts. It matches the messages stored on your phone, so it works offline.
+
+### Message filter
+
+The conversation's overflow menu also reaches the message filter, which hides messages containing words you list. **Message Filter** opens its settings, **Show N filtered** reveals what it hid in this conversation, and **Disable filter here** turns it off for this conversation alone. See [Settings — Modules & Admin](settings-module-admin) for the word list.
 
 ### メッセージの吹き出し
 
@@ -188,7 +198,7 @@ Each quick chat entry has a **Name** — the button label, capped at five charac
 
 メッセージを作成するときは、入力欄にフォーカスして 3 文字以上入力すると、入力欄の下に**書式ツールバー**が表示されます。テキストを選択してスタイルをタップすると、そのテキストが囲まれます（もう一度タップすると解除されます）。選択していない場合は、空のペアが挿入され、カーソルがマーカーの間に置かれます。リンクボタンをタップすると、URL を入力するダイアログが開きます。 As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
-> 💡 **ヒント：** 書式はメッシュ上ではそのままの文字として送られます。iOS が送信するのと同じバイト列です。 Markdown に対応していないクライアント（古いアプリや、素のファームウェアのクライアント）では、`**` や `~~` の文字がそのまま表示されます。 URL、メールアドレス、電話番号は、Markdown を使うかどうかにかかわらず、引き続き自動的にリンクになります。
+Formatting is carried as literal characters on the mesh, the same bytes the Apple client sends. Clients that don't support Markdown (older apps, plain firmware clients) show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are auto-linked whether or not you use Markdown.
 
 ### メンション
 
@@ -208,7 +218,7 @@ Each quick chat entry has a **Name** — the button label, capped at five charac
 
 ![メッセージの下に表示された絵文字リアクションのバッジ](../../assets/screenshots/messages_reaction.png)
 
-> 💡 **ヒント：** リアクションは軽量で、通常のテキストメッセージに比べてメッシュの帯域をほとんど消費しません。
+Reactions use less mesh bandwidth than full text messages.
 
 ### Replying
 
@@ -232,20 +242,22 @@ messages. That count is messages, not people — five unread from one person rea
 
 Touch & hold or double-tap a message to open the quick reaction bar, then tap **More message actions**
 (the overflow icon on that bar) to open the actions sheet. The emoji row runs across the top of the
-sheet — that is where reactions live — and beneath it, along with the message's timestamp and
-delivery status, are:
+sheet — that is where reactions live. Beneath it, **Signed · verified** appears on a message whose
+signature your node checked against the sender's key, and **Delivery proven**, **Delivery proof
+failed**, or **Delivery proof unchecked** appears when the acknowledgment for your message carried
+a delivery proof. The message's timestamp and delivery status follow, then these actions:
 
 - **返信：** そのメッセージを引用して返信します
 - **Copy** — copy the message text to the clipboard
 - **Translate** — translate a received message into your device language, and toggle between the original and translated text (Google Play build only; uses on-device translation). The first translation into a language asks to download a one-time language model and tells you its size, then translates once the download finishes. If the download fails, or the message is already in your language, the app says so instead of translating
 - **Select** — start multi-select, so you can act on several messages at once
-- **Delete** — remove the message from this phone. It works on any message in the conversation, yours or not, and does not remove it from anyone else's radio or phone
+- **Delete** — remove the message from this phone. It works on any message in the conversation, yours or not, and does not remove it from anyone else's node or phone
 
 ### メッセージの優先度
 
 The app sends every message you compose at the same, default priority — there is no
 emergency or alert tier to choose, and nothing in the app raises a direct message above a
-channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+channel broadcast. Any prioritizing between them happens in firmware, not here. (The app
 does mark some of its own internal traffic, such as admin and traceroute packets, as
 reliable or background, but that is not something you control from the message composer.)
 

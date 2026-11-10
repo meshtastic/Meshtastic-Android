@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.model.NodeMapFilter
+import org.meshtastic.core.model.decodeExcludedRoles
+
 /**
  * The stored node-list filters, as one value.
  *
@@ -67,4 +70,18 @@ data class MapFilterPrefs(
      * slot.
      */
     val excludedRoles: Set<String> = emptySet(),
+)
+
+/** The node-level part of these filters, for views that draw nodes without the map's filter sheet. */
+fun MapFilterPrefs.toNodeMapFilter() = NodeMapFilter(
+    onlyFavorites = onlyFavorites,
+    showIgnored = showIgnored,
+    excludedRoles = decodeExcludedRoles(excludedRoles),
+    includeUnknown = includeUnknown,
+    onlyOnline = onlyOnline,
+    onlyDirect = onlyDirect,
+    excludeMqtt = excludeMqtt,
+    lastHeardSeconds = lastHeardSeconds,
+    onlySigned = onlySigned,
+    onlyEncrypted = onlyEncrypted,
 )

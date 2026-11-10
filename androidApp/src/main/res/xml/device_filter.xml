@@ -99,5 +99,17 @@
     <usb-device
         vendor-id="9114"
         product-id="17413" /> <!-- 0x239A / 0x4405: Adafruit (T-Echo) -->
+    <usb-device
+        vendor-id="9114"
+        product-id="33035" /> <!-- 0x239A / 0x810B: Seeed XIAO nRF52840 Kit -->
+    <usb-device
+        vendor-id="9114"
+        product-id="179" /> <!-- 0x239A / 0x00B3: Adafruit (Pro Micro nRF52840, Meshlink) -->
+    <usb-device
+        vendor-id="9114"
+        product-id="51966" /> <!-- 0x239A / 0xCAFE: Adafruit (muzi BASE) -->
+    <usb-device
+        vendor-id="12346"
+        product-id="4097" /> <!-- 0x303A / 0x1001: Espressif ESP32-S3 USB-Serial/JTAG -->
     <usb-device vendor-id="11914" /> <!-- 0x2E8A / ……: Raspberry Pi -->
 </resources>

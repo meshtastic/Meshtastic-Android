@@ -314,6 +314,10 @@ class MeshMessageProcessorImpl(
         val viaMqtt = packet.via_mqtt == true
         val isDirect = packet.hop_start == packet.hop_limit
         val updateRadioMetrics = isDirect && packet.isLora() && !viaMqtt
+        // Every real reception carries rx_rssi; the stored packets firmware replays after a node DB dump are marked
+        // LoRa
+        // but carry none, and were heard earlier, maybe on other settings.
+        val heardOverOurRadio = packet.rx_rssi != null && !viaMqtt
         val hopsAway =
             when {
                 decoded.portnum == PortNum.RANGE_TEST_APP -> 0
@@ -328,6 +332,7 @@ class MeshMessageProcessorImpl(
             // time source. The fallback only guards a future caller that skips normalization from writing the epoch.
             lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
             viaMqtt = viaMqtt,
+            heardOnCurrentLora = node.heardOnCurrentLora || heardOverOurRadio,
             lastTransport = packet.transport_mechanism.value,
             // A packet carrying no snr must not clobber the node's last real reading either.
             snr = if (updateRadioMetrics) packet.snrOrNull() ?: node.snr else node.snr,

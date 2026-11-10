@@ -16,9 +16,7 @@
  */
 package org.meshtastic.feature.intro
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,19 +24,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -46,6 +35,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.next
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.skip
+import org.meshtastic.core.ui.component.OnboardingBottomBar
+import org.meshtastic.core.ui.component.OnboardingFeature
+import org.meshtastic.core.ui.component.OnboardingFeatureRow
+import org.meshtastic.core.ui.component.OnboardingNotice
+import org.meshtastic.core.ui.component.OnboardingPageHeader
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -68,7 +62,7 @@ import org.meshtastic.core.ui.util.PermissionStatus
  *
  * @param headlineRes String resource for the main headline of the screen.
  * @param descriptionRes String resource for the main descriptive text.
- * @param features A list of [FeatureUIData] to be displayed using [FeatureRow].
+ * @param features A list of [OnboardingFeature] to be displayed using [OnboardingFeatureRow].
  * @param status The live permission status driving the primary action and the notice.
  * @param deniedNoticeRes Notice shown after a single denial: what stays disabled if the user declines again.
  * @param blockedNoticeRes Notice shown once the system stops prompting: what stays disabled and where to turn it on.
@@ -81,7 +75,7 @@ import org.meshtastic.core.ui.util.PermissionStatus
 internal fun PermissionScreenLayout(
     headlineRes: StringResource,
     descriptionRes: StringResource,
-    features: List<FeatureUIData>,
+    features: List<OnboardingFeature>,
     status: PermissionStatus,
     deniedNoticeRes: StringResource,
     blockedNoticeRes: StringResource,
@@ -103,11 +97,11 @@ internal fun PermissionScreenLayout(
 
     Scaffold(
         bottomBar = {
-            IntroBottomBar(
-                onSkip = onSkip,
-                onConfigure = onPrimaryAction,
-                configureButtonText = stringResource(primaryLabelRes),
-                skipButtonText = stringResource(Res.string.skip),
+            OnboardingBottomBar(
+                primaryText = stringResource(primaryLabelRes),
+                onPrimary = onPrimaryAction,
+                secondaryText = stringResource(Res.string.skip),
+                onSecondary = onSkip,
             )
         },
     ) { innerPadding ->
@@ -116,28 +110,14 @@ internal fun PermissionScreenLayout(
             Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(headlineRes),
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(descriptionRes),
-                style =
-                MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                ),
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+            OnboardingPageHeader(headline = stringResource(headlineRes), body = stringResource(descriptionRes))
             Spacer(modifier = Modifier.height(16.dp))
             // Directly under the description, above the feature list. Placed last it sat below up to four feature
             // rows in a scrolling column — off-screen on a typical phone, so a user who had just declined saw the
             // button label change and no reason why. It renders only after a denial, so the happy path pays nothing.
             PermissionNotice(status = status, deniedNoticeRes = deniedNoticeRes, blockedNoticeRes = blockedNoticeRes)
             features.forEach { feature ->
-                FeatureRow(feature = feature)
+                OnboardingFeatureRow(feature = feature)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             additionalContent?.invoke()
@@ -173,25 +153,7 @@ private fun PermissionNotice(
     // Column rather than a bare Surface plus Spacer: the notice now sits mid-list, so it owns the gap below it, and a
     // composable may only emit from one source at its top level.
     Column(modifier = Modifier.fillMaxWidth()) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    text = stringResource(noticeRes),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
+        OnboardingNotice(text = stringResource(noticeRes), icon = icon)
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

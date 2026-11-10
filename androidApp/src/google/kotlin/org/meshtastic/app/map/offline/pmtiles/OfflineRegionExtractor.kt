@@ -17,7 +17,6 @@
 package org.meshtastic.app.map.offline.pmtiles
 
 import ch.poole.geo.pmtiles.Constants
-import ch.poole.geo.pmtiles.HttpUrlConnectionChannel
 import ch.poole.geo.pmtiles.Reader
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.LatLngBounds
@@ -29,8 +28,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.feature.map.terrain.ArchiveChangedException
+import org.meshtastic.feature.map.terrain.RangeCheckedHttpChannel
+import org.meshtastic.feature.map.terrain.gunzipBounded
 import java.io.IOException
-import java.util.zip.GZIPInputStream
 import kotlin.uuid.Uuid
 
 /** Public alongside [OfflineRegion] — see that class's doc comment for why these two aren't `internal`. */
@@ -109,9 +110,10 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
             // manifest entry is an orphan nothing would ever delete.
             val region =
                 try {
-                    extractInto(archiveFile, url, tiles) { completed ->
-                        emit(OfflineDownloadState.InProgress(completed, tiles.size))
-                    }
+                    val buildUrl =
+                        extractWithRetry(archiveFile, url, tiles) { completed ->
+                            emit(OfflineDownloadState.InProgress(completed, tiles.size))
+                        }
                     OfflineRegion(
                         id = id,
                         southLat = bounds.southwest.latitude,
@@ -123,6 +125,7 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
                         tileCount = tiles.size.toLong(),
                         byteSize = archiveFile.length(),
                         createdAtEpochSeconds = nowSeconds,
+                        protomapsBuildUrl = buildUrl.toString(),
                     )
                         .also { store.add(it) }
                 } catch (e: IOException) {
@@ -141,18 +144,44 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
     }
         .flowOn(ioDispatcher)
 
+    /** Starts over against the newest build, once, if the build was replaced partway through. */
+    private suspend fun extractWithRetry(
+        archiveFile: java.io.File,
+        firstUrl: java.net.URL,
+        tiles: List<TileIndex>,
+        onProgress: suspend (completed: Int) -> Unit,
+    ): java.net.URL {
+        var url = firstUrl
+        repeat(ARCHIVE_CHANGE_RETRIES) {
+            try {
+                extractInto(archiveFile, url, tiles, onProgress)
+                return url
+            } catch (_: ArchiveChangedException) {
+                archiveFile.delete()
+                url = PmTilesDailyBuild.resolveLatestUrl() ?: throw IOException("No Protomaps build to retry against")
+            }
+        }
+        extractInto(archiveFile, url, tiles, onProgress)
+        return url
+    }
+
     private suspend fun extractInto(
         archiveFile: java.io.File,
         url: java.net.URL,
         tiles: List<TileIndex>,
         onProgress: suspend (completed: Int) -> Unit,
     ) {
-        Reader(HttpUrlConnectionChannel(url)).use { reader ->
+        Reader(RangeCheckedHttpChannel(url)).use { reader ->
             OfflineVectorArchive.create(archiveFile, attribution = ATTRIBUTION).use { archive ->
                 tiles.forEachIndexed { index, tile ->
                     val raw = reader.getTile(tile.zoom, tile.x, tile.y)
                     if (raw != null) {
-                        val bytes = if (reader.tileCompression == Constants.COMPRESSION_GZIP) gunzip(raw) else raw
+                        val bytes =
+                            if (reader.tileCompression == Constants.COMPRESSION_GZIP) {
+                                gunzipBounded(raw, MAX_DECOMPRESSED_TILE_BYTES)
+                            } else {
+                                raw
+                            }
                         archive.writeTile(tile.zoom, tile.x, tile.y, bytes)
                     }
                     val completed = index + 1
@@ -162,8 +191,6 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
         }
     }
 
-    private fun gunzip(bytes: ByteArray): ByteArray = GZIPInputStream(bytes.inputStream()).use { it.readBytes() }
-
     internal companion object {
         private val LOG = Logger.withTag("OfflineRegionExtractor")
 
@@ -172,6 +199,10 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
         const val MAX_REGIONS = 10
         const val MAX_TOTAL_BYTES = 300L * 1024 * 1024
         private const val PROGRESS_STRIDE = 10
+        private const val ARCHIVE_CHANGE_RETRIES = 1
+
+        /** Protomaps vector tiles inflate to well under this. */
+        private const val MAX_DECOMPRESSED_TILE_BYTES = 16 * 1024 * 1024
 
         /** Both the Protomaps build and the MVT layers it packages (OpenStreetMap) require attribution. */
         const val ATTRIBUTION = "© OpenStreetMap contributors, © Protomaps"

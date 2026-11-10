@@ -20,6 +20,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -89,7 +90,14 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         waypointId: Int,
         isSilent: Boolean,
     ) {
-        notificationManager.dispatch(Notification(title = name, message = message, isSilent = isSilent))
+        notificationManager.dispatch(
+            Notification(
+                title = name,
+                message = message,
+                category = Notification.Category.Waypoint,
+                isSilent = isSilent,
+            ),
+        )
     }
 
     override suspend fun updateReactionNotification(
@@ -101,7 +109,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         isSilent: Boolean,
     ) {
         notificationManager.dispatch(
-            Notification(title = name, message = emoji, category = Notification.Category.Message, isSilent = isSilent),
+            Notification(title = name, message = emoji, category = Notification.Category.Reaction, isSilent = isSilent),
         )
     }
 
@@ -125,7 +133,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         notificationManager.dispatch(
             Notification(
                 title = title,
-                message = node.user.long_name,
+                message = node.effectiveLongName,
                 category = Notification.Category.NodeEvent,
                 id = node.num,
             ),
@@ -147,7 +155,11 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 Notification(
                     title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
                     message =
-                    getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                    getStringSuspend(
+                        Res.string.low_battery_message,
+                        node.effectiveLongName,
+                        node.batteryLevel ?: 0,
+                    ),
                     category = Notification.Category.Battery,
                     id = node.num,
                 )

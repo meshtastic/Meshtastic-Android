@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.ui.component.MainAppBar
@@ -35,7 +36,7 @@ internal fun RadioAdminAppBar(
     destNode: Node?,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    localSubtitle: String? = destNode?.user?.long_name,
+    localSubtitle: String? = destNode?.effectiveLongName,
     ourNode: Node? = null,
     onClickChip: (Node) -> Unit = {},
     showNodeChip: Boolean = false,
@@ -48,7 +49,7 @@ internal fun RadioAdminAppBar(
         if (isLocal) {
             localSubtitle
         } else {
-            stringResource(Res.string.remotely_administrating, destNode?.user?.long_name.orEmpty())
+            stringResource(Res.string.remotely_administrating, destNode?.effectiveLongName.orEmpty())
         },
         ourNode = ourNode,
         showNodeChip = showNodeChip,

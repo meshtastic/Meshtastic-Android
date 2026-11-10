@@ -51,6 +51,7 @@
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
     <!-- DEBUG -->
     <string name="debug_panel">פאנל דיבאג</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">מחק</string>
     <string name="delete_for_everyone">מחק לכולם</string>
@@ -80,11 +81,13 @@
     <!-- FILTER -->
     <string name="filter_icon">פילטר</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">נדרש עדכון קושחה</string>
     <string name="firmware_old">קושחת המכשיר ישנה מידי בכדי לתקשר עם האפליקציה. למידע נוסף בקר ב<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">מדריך התקנת קושחה</a>.</string>
     <string name="firmware_too_old">נדרש עדכון קושחה.</string>
     <string name="firmware_update_failed">העדכון נכשל</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף '%1$s' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד '%1$s' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
@@ -96,6 +99,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -103,6 +107,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">נעול</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">ניהול מטמון</string>
     <string name="map_cache_size">גודל מטמון נוכחי</string>
@@ -130,9 +135,12 @@
     <string name="message_delivery_status">מצב שליחת הודעה</string>
     <string name="message_input_label">הודעה</string>
     <string name="messages">הודעות</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">אישור</string>
     <string name="module_settings">הגדרות מודולות</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">מנותק</string>
+    <string name="mqtt_topic_finder_level_region">אזור</string>
     <string name="must_set_region">חובה לבחור אזור!</string>
     <string name="must_update">נדרש להתקין עדכון לאפליקציה זו דרך חנות האפליקציות (או Github). גרסת האפליקציה ישנה מדי בכדי לתקשר עם מכשיר זה. בבקשה קרא <a href="https://meshtastic.org/docs/software/android/installation">מסמכי עזרה</a> בנושא זה.</string>
     <!-- MUTE -->
@@ -174,7 +182,9 @@
     <string name="quick_chat_edit">ערוך צ'ט מהיר</string>
     <string name="quick_chat_instant">שלח מייד</string>
     <string name="quick_chat_new">צ'ט מהיר חדש</string>
+    <!-- RADIO -->
     <string name="radio_configuration">הגדרות רדיו</string>
+    <string name="radio_setup_name_headline">שם</string>
     <string name="reboot">אתחול מחדש</string>
     <!-- REMOTE -->
     <string name="remote_shell_modifier_locked">נעול</string>
@@ -223,6 +233,7 @@
     <string name="waypoint_edit">ערוך נקודת ציון</string>
     <string name="waypoint_new">נקודת ציון חדשה</string>
     <string name="waypoint_received">התקבל נקודת ציון: %1$s</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <!-- WIND -->
     <!-- WRITE -->

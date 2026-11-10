@@ -47,6 +47,7 @@ import org.koin.core.qualifier.named
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -89,6 +90,7 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
+import org.meshtastic.feature.settings.radio.rememberDatabaseBackupActions
 import org.meshtastic.feature.settings.search.SettingsSearchBar
 import org.meshtastic.feature.settings.search.SettingsSearchViewModel
 import org.meshtastic.feature.settings.util.LanguageUtils
@@ -116,6 +118,7 @@ fun SettingsScreen(
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
+    val databaseBackup = rememberDatabaseBackupActions()
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
@@ -214,7 +217,7 @@ fun SettingsScreen(
                 isLocal = state.isLocal,
                 destNode = destNode,
                 onNavigateUp = { onBack?.invoke() },
-                localSubtitle = ourNode?.user?.long_name,
+                localSubtitle = ourNode?.effectiveLongName,
                 ourNode = ourNode,
                 onClickChip = { node -> onClickNodeChip(node.num) },
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
@@ -261,6 +264,9 @@ fun SettingsScreen(
                     deviceProfile = null
                     showEditDeviceProfileDialog = true
                 },
+                databaseBackupAvailable = databaseBackup.available,
+                onBackupDatabase = databaseBackup.onBackup,
+                onRestoreDatabase = databaseBackup.onRestore,
                 onNavigate = onNavigate,
             )
 

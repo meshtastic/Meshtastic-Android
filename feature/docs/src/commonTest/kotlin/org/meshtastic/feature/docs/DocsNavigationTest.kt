@@ -17,6 +17,8 @@
 package org.meshtastic.feature.docs
 
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.feature.docs.model.TranslationSource
+import org.meshtastic.feature.docs.model.loadedTranslationSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -39,5 +41,11 @@ class DocsNavigationTest {
         val route1 = SettingsRoute.HelpDocPage("onboarding")
         val route2 = SettingsRoute.HelpDocPage("onboarding")
         assertEquals(route1, route2)
+    }
+
+    @Test
+    fun `a page with no Crowdin file is the English original - not a community translation`() {
+        assertEquals(TranslationSource.UNTRANSLATED, loadedTranslationSource(wasCrowdinLocalized = false))
+        assertEquals(TranslationSource.BUNDLED, loadedTranslationSource(wasCrowdinLocalized = true))
     }
 }

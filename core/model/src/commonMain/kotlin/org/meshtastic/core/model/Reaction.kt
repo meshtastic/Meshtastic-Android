@@ -44,4 +44,10 @@ data class Reaction(
     val xeddsaSigned: Boolean = false,
     /** The radio's verdict on the ack that delivered this outgoing reaction (see [MeshPacket.AckProofStatus]). */
     val ackProofStatus: Int = 0,
+    val viaMqtt: Boolean = false,
+    /**
+     * The transport mechanism this reaction arrived over (see [MeshPacket.TransportMechanism]), or null for local and
+     * pre-schema-67 reactions. Null, not 0: 0 is TRANSPORT_INTERNAL.
+     */
+    val transportMechanism: Int? = null,
 )

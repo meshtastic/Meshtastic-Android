@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.maplibre
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.LayoutDirection
 import org.maplibre.compose.camera.CameraAnimation
+import org.maplibre.compose.camera.CameraFit
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.map.MapState
@@ -37,7 +38,7 @@ import org.maplibre.spatialk.geojson.BoundingBox
 internal suspend fun MapState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
     val target = (cameraPosition.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
     if (target != cameraPosition.zoom) {
-        animateCamera(CameraUpdate(zoom = target), CameraAnimation.Ease())
+        animateCamera(CameraUpdate(zoom = target), CameraAnimation.Ease.Standard)
     }
 }
 
@@ -49,8 +50,8 @@ internal const val ZOOM_STEP = 1.0
  * so nodes standing metres apart open on their surroundings rather than on empty tiles. Eased, not the default flight.
  */
 internal suspend fun MapState.frameBounds(bounds: BoundingBox, padding: DpPadding = DpPadding.Zero) {
-    val fitted = cameraForBounds(bounds, fitPadding = padding)
-    animateCamera(fitted.cappedTo(FRAME_MAX_ZOOM).toCameraUpdate(), CameraAnimation.Ease())
+    val fitted = cameraForBounds(bounds, CameraFit(fitPadding = padding))
+    animateCamera(fitted.cappedTo(FRAME_MAX_ZOOM).toCameraUpdate(), CameraAnimation.Ease.Standard)
 }
 
 /**

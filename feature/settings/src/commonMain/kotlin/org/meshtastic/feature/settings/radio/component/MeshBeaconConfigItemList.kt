@@ -61,6 +61,7 @@ import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
+import org.meshtastic.core.resources.schema_meshbeacon_broadcast_interval_secs
 import org.meshtastic.core.resources.schema_meshbeacon_broadcast_message
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -68,8 +69,10 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -88,9 +91,9 @@ private val MIN_INTERVAL_SECS = FixedUpdateIntervals.ONE_HOUR.value.toInt()
 // matches a radio channel, -2 marks an explicit "no channels" placeholder row. Never a real channel_index.
 private const val NO_CHANNELS_ITEM_VALUE = -2
 
-private fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag else this and flag.inv()
+internal fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag else this and flag.inv()
 
-private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
+internal fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
 
 /**
  * Editor for `ModuleConfig.MeshBeaconConfig` (design#140, Android issue #6931). Reads via
@@ -122,6 +125,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
             configState = rememberConfigState(initialValue = meshBeaconConfig),
             enabled = false,
             responseState = state.responseState,
+            showConnectPrompt = state.connectPromptVisible,
             onDismissPacketResponse = viewModel::clearPacketResponse,
             onSave = {},
         ) {
@@ -185,13 +189,14 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         meshBeaconSaveEnabled(state.connected, radioLora.use_preset, intervalValid, state.channelList.isNotEmpty()),
         rebootBehavior = RebootBehavior.NEVER,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val stamped = stampBeaconConfigForSave(it, meshBeaconConfig, radioLora, state.channelList)
             viewModel.setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = stamped }.build())
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.MESH_BEACON.route)) {
             TitledCard(title = stringResource(Res.string.mesh_beacon)) {
                 RegularPreference(
                     title = stringResource(Res.string.mesh_beacon_region_label),
@@ -244,6 +249,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.schema_meshbeacon_broadcast_message),
+                        modifier = Modifier.settingsField(Res.string.schema_meshbeacon_broadcast_message),
                         value = formState.value.broadcast_message,
                         maxSize = MESSAGE_MAX_BYTES,
                         enabled = broadcastGate.sectionsEnabled,
@@ -280,6 +286,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                             )
                     DropDownPreference(
                         title = stringResource(Res.string.mesh_beacon_interval),
+                        modifier = Modifier.settingsField(Res.string.schema_meshbeacon_broadcast_interval_secs),
                         summary =
                         if (intervalValid) {
                             null

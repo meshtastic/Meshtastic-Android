@@ -28,6 +28,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -118,6 +120,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
+import org.meshtastic.proto.metadata
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -159,8 +162,8 @@ data class RadioConfigState(
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
     val canRebootToDfu: Boolean = false,
-    /** Whether the hardware registry tags the board DIY; null when the registry does not know the board. */
-    val isDiyHardware: Boolean? = null,
+    /** Whether the board's `HardwareModel` says the maker wired its GPS. */
+    val isOemFixedGps: Boolean = false,
 )
 
 @KoinViewModel
@@ -301,6 +304,13 @@ open class RadioConfigViewModel(
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
 
+    /** Index of the legacy `admin` channel, which carries remote admin to nodes without a PKI key. */
+    private val adminChannelIndex: StateFlow<Int?> =
+        radioConfigRepository.channelSetFlow
+            .map { cs -> cs.settings.indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) } }
+            .map { it.takeIf { index -> index >= 0 } }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     // USER reads one config on firmware without the status message module and two with it, so whether a
     // load fanned out is a property of that load, not of the route. Null falls back to the route's flag.
     private var loadFanOut: Pair<String, Boolean>? = null
@@ -336,7 +346,11 @@ open class RadioConfigViewModel(
             .onEach {
                 _destNode.value = it
                 _radioConfigState.update { state ->
-                    state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
+                    state.copy(
+                        metadata = it?.metadata,
+                        localIsLicensed = it?.user?.is_licensed == true,
+                        isOemFixedGps = it?.user?.hw_model?.metadata?.oem_fixed_gps == true,
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -353,10 +367,7 @@ open class RadioConfigViewModel(
             }
             .onEach { hardware ->
                 _radioConfigState.update {
-                    it.copy(
-                        canRebootToDfu = hardware?.isNrf52Arc == true,
-                        isDiyHardware = hardware?.isDiy,
-                    )
+                    it.copy(canRebootToDfu = hardware?.isNrf52Arc == true)
                 }
             }
             .launchIn(viewModelScope)
@@ -867,6 +878,7 @@ open class RadioConfigViewModel(
 
     /** Refreshes a config route while keeping the connect-time local snapshot visible. */
     fun loadConfigRoute(route: Enum<*>) {
+        if (destNum == null && serviceRepository.connectionState.value != ConnectionState.Connected) return
         setResponseStateLoading(route = route, showOverlay = destNum != null)
     }
 
@@ -1235,7 +1247,9 @@ open class RadioConfigViewModel(
         val requestId = packet.decoded?.request_id
         val lateRemoteReadRoute = requestId?.let { lateRemoteReads[it]?.route }
         val pendingRequestIds = requestIds.value + lateRemoteReads.keys
-        val result = processRadioResponseUseCase(packet, destNum, pendingRequestIds) ?: return
+        val result =
+            processRadioResponseUseCase(packet, destNum, pendingRequestIds, myNodeNum, adminChannelIndex.value)
+                ?: return
         val route = radioConfigState.value.route
         val isLateRemoteRead = requestId != null && lateRemoteReadRoute != null
 
@@ -1553,3 +1567,5 @@ internal fun Config.saveRebootBehavior(): RebootBehavior = when {
  */
 internal fun ModuleConfig.saveRebootBehavior(): RebootBehavior =
     if (statusmessage != null || mesh_beacon != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS
+
+private const val ADMIN_CHANNEL_NAME = "admin"

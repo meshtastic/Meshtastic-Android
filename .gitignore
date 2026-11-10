@@ -77,10 +77,8 @@ replay_pid*.log
 /coil/
 /kable/
 .opencode/
-# Synced docs in composeResources (generated from docs/ source by syncDocsToComposeResources task)
-feature/docs/src/commonMain/composeResources/files/docs/
-# Synced translated docs (generated from docs/{locale}/ by syncTranslatedDocsToComposeResources task)
-feature/docs/src/commonMain/composeResources/files/*/docs/
+# feature/docs bundles its docs under build/; anything here is a stale generated copy
+feature/docs/src/commonMain/composeResources/
 
 /desktop/bin/
 /build-logic/convention/bin/

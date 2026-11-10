@@ -1,7 +1,7 @@
 ---
 title: 単位・計測・ロケール
 nav_order: 16
-last_updated: 2026-08-30
+last_updated: 2026-10-21
 description: アプリが、デバイスのロケールに基づいて温度・距離・速度などの計測値をどう表示するかを説明します。
 aliases:
   - measurement
@@ -17,7 +17,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## 仕組み
 
-Meshtastic の無線機は、常に**メートル法の単位**（メートル、°C、m/s、hPa など）でデータを送信します。アプリはこのデータを受信すると、デバイスのロケールで指定された単位系に変換して値を表示します。
+Meshtastic nodes always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). アプリはこのデータを受信すると、デバイスのロケールで指定された単位系に変換して値を表示します。
 
 Android では、計測の設定はシステムの**言語と地域**の設定によって決まります。デスクトップ（JVM）では、アプリは JVM のデフォルトの `Locale` を使用します。
 
@@ -25,11 +25,11 @@ Units follow your device's **region**, not the display language. Plain languages
 
 > 💡 **Tip:** By default there is nothing to configure — change your system measurement preferences and every screen in Meshtastic updates automatically. If your device offers no working region or measurement setting (some manufacturer builds don't), set **Settings → Units** in the app instead.
 
-## The Radio's Own Screen Is Separate
+## The node's own screen is separate
 
-**Settings → Device configuration → Display → Display units** configures the screen on the radio, not the app. The **Use 12h clock format** and **Always point north** settings do too — all three apply to the radio's display only. Temperature on that screen has its own setting, **Environment metrics use Fahrenheit**, on the radio's Telemetry module — see the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
+**Settings → Device configuration → Display → Display Units** configures the screen on the node, not the app. The **12 Hour Clock** and **Always point north** settings do too, and all three apply to the node's display only. Temperature on that screen has its own setting, **Display Fahrenheit**, on the node's Telemetry module. See the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
 
-If your node list shows miles while the radio's screen shows kilometers, this is why: the two are set in different places. Changing the radio's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
+If your node list shows miles while the node's screen shows kilometers, this is why: the two are set in different places. Changing the node's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
 
 ## 温度
 
@@ -108,13 +108,14 @@ Readings from a connected scale are transmitted in **kg** and converted for disp
 
 一部の単位は国際標準であり、ロケールに関係なく同じように表示されます：
 
-| 計測項目          | 単位    | 理由          |
-| ------------- | ----- | ----------- |
-| 大気圧           | hPa   | 国際的な気象標準    |
-| 方位／進行方向       | °（度）  | 普遍的な航法の慣例   |
-| 放射線           | µR/h  | 標準的な線量測定の単位 |
-| GPS 座標        | 十進法の度 | 普遍的な地理標準    |
-| 湿度、バッテリー、土壌水分 | %     | 普遍的         |
+| 計測項目                          | 単位                                                                                  | 理由                                                                                            |
+| ----------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 大気圧                           | hPa                                                                                 | 国際的な気象標準                                                                                      |
+| 方位／進行方向                       | °（度）                                                                                | 普遍的な航法の慣例                                                                                     |
+| 放射線                           | µR/h                                                                                | 標準的な線量測定の単位                                                                                   |
+| GPS 座標                        | 十進法の度                                                                               | 普遍的な地理標準                                                                                      |
+| 湿度、バッテリー、土壌水分                 | %                                                                                   | 普遍的                                                                                           |
+| Data sizes and transfer rates | B, kB, MB, GB (decimal: 1 MB is 1,000,000 bytes) | Matches the storage figures Android shows; the number itself follows your locale's formatting |
 
 ## 日付と時刻
 
@@ -147,7 +148,7 @@ Not every device can express every preference — some manufacturer builds ship 
 offer only one English variant, and UK regions are imperial for distance even if you'd rather read altitude in
 meters. For those cases the app has its own switch:
 
-1. Open **Meshtastic Settings → Units**
+1. In Meshtastic, open **Settings → Units**
 2. Choose **System default**, **Metric**, or **Imperial**
 3. Every screen updates immediately — no restart needed
 
@@ -160,5 +161,5 @@ otherwise. The setting exists on Android and Desktop alike.
 - [ノードメトリクス](node-metrics)：温度・距離・センサー値が表示される場所
 - [テレメトリとセンサー](telemetry-and-sensors)：これらの計測値を生成するセンサー
 - [計測と書式](../developer/measurement)：書式ユーティリティの開発者向けリファレンス
-- [設定：無線機とユーザー](settings-radio-user)：単位の選択を決める地域設定
-- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
+- [Settings — Radio & User](settings-radio-user) — the Display config that sets units on the node's own screen
+- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the node's own screen, on meshtastic.org

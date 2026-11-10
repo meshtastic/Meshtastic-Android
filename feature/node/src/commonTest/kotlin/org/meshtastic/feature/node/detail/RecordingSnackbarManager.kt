@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarDuration
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
+import org.meshtastic.core.resources.message_routing_error_admin_public_key_unauthorized_detail
 import org.meshtastic.core.resources.node_request_send_failed
 import org.meshtastic.core.resources.remote_admin_unreachable
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -39,6 +40,8 @@ internal class RecordingSnackbarManager : SnackbarManager() {
 }
 
 internal const val NODE_REQUEST_SEND_FAILED_TEXT = "Couldn't send request. Try again."
+
+internal const val ADMIN_KEY_UNAUTHORIZED_TEXT = "The remote node does not authorize your admin key."
 
 internal val resolveNodeRequestFailureUiText: suspend (UiText) -> String = { text ->
     when (text) {
@@ -61,6 +64,7 @@ internal val resolveNodeDetailUiTextForTest: suspend (UiText) -> String = { text
             when (text.res) {
                 Res.string.connect_radio_for_remote_admin -> "Connect to a radio to administer remote nodes."
                 Res.string.remote_admin_unreachable -> "Could not reach node — try again or move closer."
+                Res.string.message_routing_error_admin_public_key_unauthorized_detail -> ADMIN_KEY_UNAUTHORIZED_TEXT
                 Res.string.node_request_send_failed -> NODE_REQUEST_SEND_FAILED_TEXT
                 else -> error("Unexpected UiText resource in test: ${text.res}")
             }

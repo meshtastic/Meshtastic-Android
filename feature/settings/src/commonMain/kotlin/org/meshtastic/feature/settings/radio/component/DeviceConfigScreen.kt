@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.input.ImeAction
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.schema_device_button_gpio
 import org.meshtastic.core.resources.schema_device_button_gpio_description
 import org.meshtastic.core.resources.schema_device_buzzer_gpio
 import org.meshtastic.core.resources.schema_device_buzzer_gpio_description
+import org.meshtastic.core.resources.schema_device_disable_triple_click
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press_description
 import org.meshtastic.core.resources.schema_device_led_heartbeat_disabled
@@ -97,7 +99,9 @@ import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.link
 import org.meshtastic.core.ui.util.annotatedStringFromHtml
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
@@ -132,17 +136,29 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = Config.Builder().also { wb -> wb.device = it }.build()
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ConfigRoute.DEVICE.route),
+                    "schema_device_",
+                    listOf("double_tap_as_button_press", "led_heartbeat_disabled", "disable_triple_click"),
+                    listOf("tzdef"),
+                    listOf("button_gpio", "buzzer_gpio"),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.options)) {
                 val currentRole = formState.value.role
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_role),
+                    modifier = Modifier.settingsField(Res.string.schema_device_role),
                     enabled = state.connected,
                     selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
@@ -155,6 +171,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val currentRebroadcastMode = formState.value.rebroadcast_mode
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_rebroadcast_mode),
+                    modifier = Modifier.settingsField(Res.string.schema_device_rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = currentRebroadcastMode,
                     onItemSelected = {
@@ -168,6 +185,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_node_info_broadcast_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_device_node_info_broadcast_secs),
                     summary = stringResource(Res.string.schema_device_node_info_broadcast_secs_description),
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
@@ -180,10 +198,11 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.hardware)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_device_double_tap_as_button_press),
+                    modifier = Modifier.settingsField(Res.string.schema_device_double_tap_as_button_press),
                     summary = stringResource(Res.string.schema_device_double_tap_as_button_press_description),
                     checked = formState.value.double_tap_as_button_press,
                     enabled = state.connected,
@@ -198,6 +217,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 SwitchPreference(
                     title = stringResource(Res.string.triple_click_adhoc_ping),
+                    modifier = Modifier.settingsField(Res.string.schema_device_disable_triple_click),
                     summary = stringResource(Res.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disable_triple_click,
                     enabled = state.connected,
@@ -210,25 +230,23 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 InsetDivider()
 
-                SwitchPreference(
-                    title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
-                    summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
-                    checked = !formState.value.led_heartbeat_disabled,
+                LedHeartbeatPreference(
                     enabled = state.connected,
+                    heartbeatDisabled = formState.value.led_heartbeat_disabled,
                     onCheckedChange = {
                         formState.value =
-                            formState.value.newBuilder().also { wb -> wb.led_heartbeat_disabled = !it }.build()
+                            formState.value.newBuilder().also { wb -> wb.led_heartbeat_disabled = it }.build()
                     },
-                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.schema_device_tzdef)) {
                 val appTzPosixString = rememberSystemTimeZonePosixString()
 
                 EditTextPreference(
                     title = "",
+                    modifier = Modifier.settingsField(Res.string.schema_device_tzdef),
                     value = formState.value.tzdef,
                     summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
@@ -277,10 +295,11 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_button_gpio),
+                    modifier = Modifier.settingsField(Res.string.schema_device_button_gpio),
                     summary = stringResource(Res.string.schema_device_button_gpio_description),
                     value = formState.value.button_gpio,
                     enabled = state.connected,
@@ -294,6 +313,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_buzzer_gpio),
+                    modifier = Modifier.settingsField(Res.string.schema_device_buzzer_gpio),
                     summary = stringResource(Res.string.schema_device_buzzer_gpio_description),
                     value = formState.value.buzzer_gpio,
                     enabled = state.connected,
@@ -341,6 +361,23 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
     }
+}
+
+internal const val LED_HEARTBEAT_SWITCH_TEST_TAG = "led_heartbeat_switch"
+
+@Composable
+internal fun LedHeartbeatPreference(enabled: Boolean, heartbeatDisabled: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    SwitchPreference(
+        title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
+        modifier =
+        Modifier.settingsField(Res.string.schema_device_led_heartbeat_disabled)
+            .testTag(LED_HEARTBEAT_SWITCH_TEST_TAG),
+        summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
+        checked = heartbeatDisabled,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange,
+        containerColor = CardDefaults.cardColors().containerColor,
+    )
 }
 
 @Composable

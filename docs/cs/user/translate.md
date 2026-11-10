@@ -1,7 +1,7 @@
 ---
 title: Překlad aplikace
 nav_order: 17
-last_updated: 2026-09-11
+last_updated: 2026-10-21
 description: Jak se aplikace a její dokumentace překládají pomocí Crowdin a jak přispívat k překladům.
 aliases:
   - translate
@@ -15,11 +15,12 @@ Aplikace a její dokumentace v aplikaci se překládají na Crowdin – tato str
 
 ## Co se překládá
 
-| Zdroj                        | Umístění zdroje                                                     | Poznámka                                                        |
-| ---------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- |
-| UI řetězce                   | `core/resources/src/commonMain/composeResources/values/strings.xml` | Tlačítka, popisky, zprávy a veškerý text zobrazený uživateli    |
-| Stránky uživatelské příručky | `docs/en/user/*.md`                                                 | Dokumentace v aplikaci zobrazená v části Nápověda a dokumentace |
-| Fastlane metadata            | `fastlane/metadata/android/en-US/`                                  | Google Play listing title, description, and changelogs          |
+| Zdroj                        | Umístění zdroje                                                            | Poznámka                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| UI řetězce                   | `core/resources/src/commonMain/composeResources/values/strings.xml`        | Tlačítka, popisky, zprávy a veškerý text zobrazený uživateli                           |
+| Setting names                | `core/resources/src/commonMain/composeResources/values/schema_strings.xml` | Names and descriptions of the node's settings, generated from the Meshtastic protobufs |
+| Stránky uživatelské příručky | `docs/en/user/*.md`                                                        | Dokumentace v aplikaci zobrazená v části Nápověda a dokumentace                        |
+| Fastlane metadata            | `fastlane/metadata/android/en-US/`                                         | Google Play listing title, description, and changelogs                                 |
 
 > ℹ️ **Poznámka:** Stránky Vývojářské příručky jsou pouze v angličtině. Dokumentace zaměřená na kód pro přispěvatele se nepřekládá.
 
@@ -28,17 +29,17 @@ Aplikace a její dokumentace v aplikaci se překládají na Crowdin – tato str
 1. **Navštivte projekt na Crowdinu.** Otevřete [Meshtastic Android Crowdin project](https://crowdin.com/project/meshtastic-android) a přihlaste se nebo si zdarma vytvořte účet.
 2. **Vyberte svůj jazyk.** Vyberte některý z dostupných jazyků nebo požádejte o přidání nového jazyka založením [GitHub problému](https://github.com/meshtastic/Meshtastic-Android/issues/new).
 3. **Přeložte řetězce.** Crowdin zobrazuje vlevo anglický zdrojový text a vpravo váš překlad. Přeložte každý řetězec a uložte ho.
-4. **Zkontrolujte kontext.** Mnoho řetězců obsahuje snímky obrazovky nebo poznámky ke kontextu – podívejte se na ně, abyste zjistili, kde se text v aplikaci zobrazuje. Naplánovaná úloha stáhne schválené překlady z Crowdin a vytvoří pull request. Překlady se dostanou do aplikace, jakmile jej správce sloučí a vyjde nová verze.
+4. **Zkontrolujte kontext.** Mnoho řetězců obsahuje snímky obrazovky nebo poznámky ke kontextu – podívejte se na ně, abyste zjistili, kde se text v aplikaci zobrazuje. A scheduled job pulls translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out.
 
 > 💡 **Tip:** Překlady udržujte krátké. UI řetězce se často zobrazují na tlačítkách, štítcích nebo v úzkých sloupcích. Pokud je překlad výrazně delší než anglický originál, zvažte jeho zkrácení, pokud zůstane význam jasný.
 
 ## Přidání nového jazyka
 
-Pokud váš jazyk ještě není na Crowdinu uveden:
+If your language is not listed on Crowdin:
 
 1. Otevřete problém na [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) s žádostí o přidání nového jazyka.
-2. Správce přidá jazyk do Crowdinu a nastaví `crowdin.yml`.
-3. Jakmile bude přidán, můžete začít překládat.
+2. A maintainer adds the language to the Crowdin project.
+3. Once added, you can begin translating. The app offers every language that has a strings folder, so the first sync that brings yours in adds it to the app.
 
 ## Jak jsou překlady uspořádány
 
@@ -62,19 +63,19 @@ docs/
 ├── en/user/             ← English source (default)
 │   ├── onboarding.md
 │   └── ...
-├── fr-rFR/user/         ← French (France)
+├── fr/user/             ← French
 │   ├── onboarding.md
 │   └── ...
-├── de-rDE/user/         ← German (Germany)
+├── de/user/             ← German
 │   └── ...
 └── ...
 ```
 
-Doc locale folders use Android locale qualifiers, either `{lang}` or `{lang}-r{REGION}` (for example `fr`, `fr-rFR`, `de-rDE`, `ja-rJP`). The `values-*` folders for app strings use bare language codes instead (`values-fr`, `values-de`, `values-ja`), because `crowdin.yml` writes strings with `%two_letters_code%` and doc pages with `%android_code%`. The two sets do not line up one-to-one.
+App strings and doc pages use the same locale names, so `values-de` and `docs/de` hold the same language. Most are a bare language code, which covers every region of that language. A few name a region or script where the language needs it: `pt-rBR` (Portuguese, Brazil), `fr-rCA` (French, Canada), `zh-rCN` and `zh-rTW` (Chinese), and `b+sr+Latn` for Serbian in Latin script, where plain `sr` is Cyrillic. Norwegian Bokmål is `nb`.
 
-The app automatically selects the correct locale based on your phone's **Language & Region** settings.
+The app follows your phone's language unless you pick one under **Language** in the app's settings.
 
-A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
+A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
 
 ## Pokyny pro překlad
 

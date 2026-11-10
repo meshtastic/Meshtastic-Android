@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,6 +37,8 @@ class RadioPrefsImpl(private val dataStore: RadioDataStore, dispatchers: Corouti
 
     override val devAddr: StateFlow<String?> =
         dataStore.data.map { it[KEY_DEV_ADDR_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+
+    override suspend fun awaitDevAddr(): String? = dataStore.data.first()[KEY_DEV_ADDR_PREF]
 
     override val devName: StateFlow<String?> =
         dataStore.data.map { it[KEY_DEV_NAME_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)

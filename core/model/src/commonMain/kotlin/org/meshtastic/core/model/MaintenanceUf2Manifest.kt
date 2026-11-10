@@ -33,6 +33,25 @@ data class MaintenanceUf2Manifest(
     @SerialName("erase") val erase: MaintenanceUf2EraseSet? = null,
     @SerialName("otafixByBoardId") val otafixByBoardId: Map<String, OtafixAssetEntry> = emptyMap(),
     @SerialName("otafixSupportedTargets") val otafixSupportedTargets: List<String> = emptyList(),
+    @SerialName("otafixBleDfuByTarget") val otafixBleDfuByTarget: Map<String, OtafixBleDfuEntry> = emptyMap(),
+)
+
+/**
+ * The legacy DFU SoftDevice+bootloader package a board takes over BLE, keyed in [MaintenanceUf2Manifest] by
+ * [DeviceHardware.platformioTarget]: BLE cannot read the drive's Board-ID, so the running node's target picks the row
+ * and the bootloader's own DIS Model Number must then equal [bleModel] before anything is written.
+ *
+ * @property softDevice The SoftDevice the package carries, as [SoftDeviceVariant.fromWire] reads it. It must equal the
+ *   installed one: an app linked for the other SoftDevice does not boot.
+ * @property bleModel The bootloader's `BLEDIS_MODEL`, read back from DIS 0x2A24 in DFU mode.
+ * @property sha256 Digest of the release's `<otafixBoardSlug>_bootloader-<tag>_s140_<softDevice>.zip`.
+ */
+@Serializable
+data class OtafixBleDfuEntry(
+    @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
+    @SerialName("softDevice") val softDevice: String,
+    @SerialName("bleModel") val bleModel: String,
+    @SerialName("sha256") val sha256: String,
 )
 
 /**
@@ -73,9 +92,20 @@ data class EraseImageEntry(
  * @property otafixBoardSlug OTAFIX's own release-asset board slug (e.g. "wiscore_rak4631_board") — deliberately NOT
  *   named the same as [DeviceHardware.platformioTarget] (e.g. "rak4631"): the two vocabularies differ per board, and a
  *   shared name here would invite exactly the confusion this class's callers already have to spell out in prose.
+ * @property targetOverrides Images for boards that ship a bootloader reporting this row's Board-ID but have their own
+ *   bootloader build, keyed by [DeviceHardware.platformioTarget]. Nested under the Board-ID so a target alone never
+ *   resolves an image: the drive must still report a Board-ID this manifest knows.
  */
 @Serializable
 data class OtafixAssetEntry(
+    @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
+    @SerialName("sha256") val sha256: String,
+    @SerialName("targetOverrides") val targetOverrides: Map<String, OtafixTargetOverride> = emptyMap(),
+)
+
+/** One [OtafixAssetEntry.targetOverrides] image, named and pinned the same way as its parent row. */
+@Serializable
+data class OtafixTargetOverride(
     @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
     @SerialName("sha256") val sha256: String,
 )

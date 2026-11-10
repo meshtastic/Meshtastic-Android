@@ -67,6 +67,7 @@
     <string name="copy">Αντιγραφή</string>
     <!-- DEBUG -->
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
+    <!-- DEEP -->
     <!-- DELETE -->
     <string name="delete">Διαγραφή</string>
     <string name="delete_for_everyone">Διαγραφή για όλους</string>
@@ -104,12 +105,14 @@
     <!-- FILTER -->
     <string name="filter_icon">Φίλτρο</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Απαιτείται ενημέρωση υλικολογισμικού</string>
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
     <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού.</string>
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
+    <!-- IAQ -->
     <string name="ignore">Παράβλεψη</string>
     <!-- IMPORT -->
     <string name="info">Πληροφορίες</string>
@@ -122,6 +125,7 @@
     <string name="latitude">Γεωγραφικό Πλάτος</string>
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -131,6 +135,7 @@
     <!-- LOG -->
     <string name="logs">Αρχεία καταγραφής</string>
     <string name="longitude">Γεωγραφικό Μήκος</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <!-- MAP -->
@@ -154,10 +159,13 @@
     <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
     <string name="message_input_label">Μήνυμα</string>
     <string name="messages">Μηνύματα</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">Εντάξει</string>
     <string name="module_settings">Ρυθμίσεις πρόσθετου</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_disconnected">Αποσυνδεδεμένο</string>
+    <string name="mqtt_topic_finder_level_region">Περιφέρεια</string>
     <string name="must_set_region">Πρέπει να ορίσετε μια περιοχή!</string>
     <string name="must_update">Πρέπει να ενημερώσετε την εφαρμογή μέσω Google Play store (ή Github). Είναι πολύ παλαιά ώστε να συνδεθεί με το radio.</string>
     <!-- MUTE -->
@@ -208,7 +216,9 @@
     <string name="quick_chat_edit">Επεξεργασία ταχείας συνομιλίας</string>
     <string name="quick_chat_instant">Άμεση αποστολή</string>
     <string name="quick_chat_new">Νέα γρήγορη συνομιλία</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
+    <string name="radio_setup_name_headline">Ονομα</string>
     <string name="reboot">Επανεκκίνηση</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
@@ -276,6 +286,7 @@
     <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
     <string name="waypoint_new">Νέο σημείο πορείας</string>
     <string name="weight">Βάρος</string>
+    <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP διεύθυνση</string>
     <string name="wifi_provision_success_username">Όνομα χρήστη</string>

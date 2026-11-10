@@ -299,6 +299,7 @@
     <string name="debug_store_logs_title">储存mesh日志</string>
     <string name="debug_tab_app_logs">应用日志</string>
     <string name="debug_tab_packets">数据包</string>
+    <!-- DEEP -->
     <string name="deep_link_connect_message">有一个链接正在请求此应用连接到位于 %1$s. 的设备请仅在您信任该链接来源的情况下继续操作。</string>
     <string name="deep_link_connect_title">是否连接到该设备？</string>
     <string name="deep_link_disconnect_message">有一个链接正在请求此应用断开与您的设备的连接请仅在您信任该链接来源的情况下继续操作。</string>
@@ -468,7 +469,6 @@
     <string name="doc_keywords_telemetry">遥测,传感器,温度,湿度,压力,功率</string>
     <string name="doc_keywords_translate">翻译,本地化管理平台,本地化,语言,国际化,贡献</string>
     <string name="doc_keywords_units">单位,区域设置,公制,英制,温度,距离</string>
-    <string name="doc_keywords_widget">桌面小部件,主屏幕,本地统计数据,速览,电池,占用率</string>
     <string name="doc_search_placeholder">搜索文档…</string>
     <string name="doc_section_developer">开发者指南</string>
     <string name="doc_section_user">使用文档</string>
@@ -557,9 +557,10 @@
     <string name="firmware_edition">固件版本</string>
     <string name="firmware_event_ended_banner">%1$s 活动已结束请刷回标准的 Meshtastic 固件以恢复正常功能。</string>
     <string name="firmware_event_ended_button">更新固件</string>
+    <string name="firmware_gate_title">需要更新固件</string>
+    <string name="firmware_gate_update">更新固件</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="firmware_recovery_banner">完成更新 %1$s</string>
-    <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
     <string name="firmware_recovery_button">继续固件升级</string>
     <string name="firmware_recovery_dismiss">取消固件恢复</string>
     <string name="firmware_recovery_explanation">此设备目前处于引导程序模式，原因是之前的固件更新未能完成请将其保持在手机附近系统将重新刷入固件以完成更新。</string>
@@ -628,7 +629,6 @@
     <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存复制到您设备的 DFU 驱动器中。</string>
     <string name="firmware_update_searching_device">正在网络上搜索 OTA 设备……</string>
     <string name="firmware_update_select_file">选择本地文件</string>
-    <string name="firmware_update_slow_bootloader_hint">此设备当前的 Bootloader引导程序更新速度较慢。刷入 OTAFIX Bootloader 可以大幅提升 蓝牙更新的速度。</string>
     <string name="firmware_update_source_local">来源: 本地文件</string>
     <string name="firmware_update_stable">稳定版本</string>
     <string name="firmware_update_starting_dfu">正在启动 DFU...</string>
@@ -643,7 +643,6 @@
     <string name="firmware_update_unsupported_transport">此设备不支持通过当前连接进行固件更新.请通过其他方式 (例如蓝牙) 连接以进行更新。</string>
     <string name="firmware_update_unsupported_update_method">此更新方法不支持本地固件文件。</string>
     <string name="firmware_update_uploading">正在上传固件……</string>
-    <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="firmware_update_usb_failed">USB 更新失败</string>
     <string name="firmware_update_usb_instruction_text">您的设备已经重启到 DFU 模式并应显示为 USB 驱动器(如RAK4631)。\n\n当文件选择器打开时，请选择该驱动器的根目录来保存固件文件。</string>
     <string name="firmware_update_usb_instruction_title">选择 DFU USB 驱动器</string>
@@ -661,7 +660,6 @@
     <string name="format_italic">斜体</string>
     <string name="format_link">链接</string>
     <string name="format_strikethrough">删除线</string>
-    <string name="free_memory">可用内存</string>
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
     <string name="gas_resistance">气体电阻性</string>
@@ -706,8 +704,10 @@
     <string name="i_agree">我同意。</string>
     <string name="i_agree_to_share_my_location">我已阅读并理解以上内容。我自愿同意通过MQTT未加密地传输我的节点数据。</string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
+    <string name="iaq_level_good">良好</string>
     <string name="icon_meanings">图标含义</string>
     <string name="ignore">忽略</string>
     <string name="ignore_add">添加 '%1$s' 到忽略列表？</string>
@@ -762,6 +762,11 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">业余无线电模式（Ham）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直频</string>
+    <string name="live_update_distance">%1$s 离开</string>
+    <string name="live_update_start">开始</string>
+    <string name="live_update_unread">%1$d 未读</string>
     <!-- LOAD -->
     <string name="load">负载</string>
     <string name="load_15_min">负载15分钟</string>
@@ -833,6 +838,7 @@
     <string name="logs">日志</string>
     <string name="long_name">长名称</string>
     <string name="longitude">经度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">电池电量低</string>
@@ -946,6 +952,13 @@
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
     <string name="minimum_wake_time_seconds">最小唤醒时间</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">后退</string>
+    <string name="mirror_key_down">下</string>
+    <string name="mirror_key_left">左</string>
+    <string name="mirror_key_ok">确定</string>
+    <string name="mirror_key_right">右</string>
+    <string name="mirror_key_up">上</string>
     <string name="modem_preset">预设</string>
     <string name="module_settings">模块设定</string>
     <string name="modules_already_unlocked">已解锁的模块</string>
@@ -975,6 +988,8 @@
     <string name="mqtt_status_reconnecting">正在重新连接…</string>
     <string name="mqtt_status_reconnecting_with_attempt">正在重新连接 (尝试 %1$d) — %2$s</string>
     <string name="mqtt_test_connection">连接测试</string>
+    <string name="mqtt_topic_finder_connecting">正在连接…</string>
+    <string name="mqtt_topic_finder_level_region">区域</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <!-- MUTE -->
@@ -1074,7 +1089,6 @@
     <string name="nodes_empty_searching_title">正在搜索节点</string>
     <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
     <string name="nodes_unheard_remove">移除</string>
-    <string name="noise_floor">底噪</string>
     <string name="noise_floor_definition">无线电接收器测量到的背景射频噪声。较低的数值通常表示接收环境较为安静; -85 dBm 是一个表示环境繁忙的参考基准，而非硬性故障阈值。</string>
     <string name="noise_floor_no_reading">底噪:未获取到数据</string>
     <string name="none">无 (停用)</string>
@@ -1202,7 +1216,9 @@
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_show">显示快速聊天菜单</string>
     <string name="radiation">辐射</string>
+    <!-- RADIO -->
     <string name="radio_configuration">设备配置</string>
+    <string name="radio_setup_name_headline">易记名称</string>
     <string name="rainfall_1h">雨量 (1小时)</string>
     <string name="rainfall_24h">雨量 (24小时)</string>
     <string name="range_test">距离测试</string>
@@ -1358,8 +1374,6 @@
     <string name="share_to">分享到…</string>
     <string name="share_your_location_in_real_time">实时分享您的位置，并通过集成的GPS功能保持团队的协调一致。</string>
     <string name="short_name">短名称</string>
-    <string name="should_update">为了获得最新的修复和功能，请更新您的节点固件。\n\n最新稳定固件版本：%1$s</string>
-    <string name="should_update_firmware">推荐固件更新。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">加密密钥</string>
     <string name="show_iaq_legend">显示空气质量图例</string>
@@ -1427,6 +1441,7 @@
     <string name="tak_server_enabled">启用本地 TAK 服务器</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh 转 CoT 转换器</string>
+    <string name="tak_server_regenerate_certs_confirm">重新生成</string>
     <string name="tak_server_section">服务器</string>
     <string name="tak_server_status">状态</string>
     <string name="tak_server_status_off">关闭</string>
@@ -1563,6 +1578,8 @@
     <string name="weight">重量</string>
     <string name="what_is_meshtastic">什么是 Meshtastic?</string>
     <string name="what_is_meshtastic_description">这是一个开源、离网、分布式 Mesh 网络，可在价格低廉的低功率无线电设备上运行。</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">差</string>
     <!-- WIFI -->
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
     <string name="wifi_provision_available_networks">可用网络</string>

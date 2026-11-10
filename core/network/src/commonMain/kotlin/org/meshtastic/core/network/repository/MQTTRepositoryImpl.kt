@@ -547,6 +547,9 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
         val tls = mqttTlsConfig()
         transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
+        // Some brokers send topic aliases even when the client allows none, a protocol error that drops the
+        // connection; accepting a few keeps them working. A 3.1.1 fallback drops the offer.
+        topicAliasMaximum = MQTT_TOPIC_ALIAS_MAXIMUM
         autoReconnect = true
         val (user, pass) = effectiveCredentials(setup.mqttConfig)
         username = user
@@ -558,6 +561,8 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
         logLevel = setup.logLevel
     },
 )
+
+private const val MQTT_TOPIC_ALIAS_MAXIMUM = 32
 
 // Public (not internal/private) so MqttManagerImpl's probe in :core:data can mirror the live client —
 // some brokers reject a keepalive-0 CONNECT (misleadingly, as CLIENT_IDENTIFIER_NOT_VALID).

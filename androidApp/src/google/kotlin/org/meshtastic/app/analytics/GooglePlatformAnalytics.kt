@@ -123,14 +123,8 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
 
     init {
         // Setup Kermit log writers immediately, they will handle delayed SDK initialization gracefully.
-        val writers = buildList {
-            add(DatadogLogWriter())
-            add(CrashlyticsLogWriter())
-            if (BuildConfig.DEBUG) {
-                add(co.touchlab.kermit.LogcatWriter())
-            }
-        }
-        KermitLogger.setLogWriters(writers)
+        // Logcat in release too: the Debug panel's log export reads this process's logcat, as on F-Droid.
+        KermitLogger.setLogWriters(DatadogLogWriter(), CrashlyticsLogWriter(), co.touchlab.kermit.LogcatWriter())
         KermitLogger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Debug else Severity.Info)
 
         // Initial consent state

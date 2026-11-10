@@ -1,8 +1,8 @@
 ---
 title: Aloittaminen
 nav_order: 1
-last_updated: 2026-09-28
-description: Ensimmäisen käynnistyksen määritys — käyttöoikeudet, käyttöönottoprosessi ja seuraavat vaiheet radion yhdistämisen jälkeen.
+last_updated: 2026-10-21
+description: First-launch setup — permissions, onboarding flow, and next steps after connecting your node.
 aliases:
   - ensimmäinen käynnistys
   - asetukset
@@ -37,16 +37,16 @@ Sovellus pyytää määrityksen aikana useita käyttöoikeuksia. Jokaisella niis
 
 ### Bluetooth-käyttöoikeus
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio. The **Bluetooth** screen shows what the permission buys you:
+Bluetooth is the primary connection method between your phone and a Meshtastic node. The **Bluetooth** screen shows what the permission buys you:
 
 - **Discovery** — find and identify Meshtastic devices near you.
 - **Configuration** — wirelessly manage your device settings and channels.
 
-On Android 12 and newer, Android asks once, for **Nearby devices**, and that one grant covers both scanning and connecting. Without it, you'll need to use USB or TCP connections instead.
+On Android 12 and newer, Android asks once, for **Nearby devices**, and that one grant covers both scanning and connecting. Without it, you'll need to use USB or TCP connections instead. On hardware with no Bluetooth LE, setup skips this screen.
 
 ### Sijaintikäyttöoikeus
 
-> ℹ️ **Note:** Location is not required for Bluetooth on Android 12 and newer. **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Käyttöoikeuden pyytäminen kahdesti voisi johtaa tilanteeseen, jossa Android lakkaa näyttämästä valintaikkunaa kokonaan (toinen hylkäys Android 11:ssä, **Älä kysy uudelleen** -valintaruutu Android 10:ssä ja sitä vanhemmissa versioissa). **Android 12:ssa ja uudemmissa versioissa** nämä ovat erillisiä: "Lähistön laitteet" on määritelty asetuksella `neverForLocation`, eikä sijaintikäyttöoikeuden hylkääminen estä radion löytämistä tai siihen yhdistämistä.
+> ℹ️ **Note:** Location is not required for Bluetooth on Android 12 and newer. **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Käyttöoikeuden pyytäminen kahdesti voisi johtaa tilanteeseen, jossa Android lakkaa näyttämästä valintaikkunaa kokonaan (toinen hylkäys Android 11:ssä, **Älä kysy uudelleen** -valintaruutu Android 10:ssä ja sitä vanhemmissa versioissa). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a node.
 
 Meshtastic käyttää sijaintiasi myös seuraaviin tarkoituksiin:
 
@@ -68,44 +68,45 @@ Ilmoitukset kertovat sinulle:
 - Uusista mesh-verkkoon liittyvistä radioista
 - Etäradion akun vähäisestä virrasta
 
-> 💡 **Vinkki:** Voit myöhemmin säätää ilmoitusasetuksia Androidin järjestelmäasetuksissa. Sovellus luo jokaiselle ilmoitusluokalle oman ilmoituskanavan (sekä muutamia sisäisiä kanavia, kuten taustapalvelulle), joten voit ottaa ne käyttöön tai mykistää ne yksitellen.
+Notification preferences can be fine-tuned later in Android system settings — the app creates a separate notification channel per category (plus a few internal ones, like the background service), so you can enable or silence them individually.
 
 ### Kriittisten hälytysten käyttöoikeus
 
 Kriittiset hälytykset ovat korkean prioriteetin ilmoituksia, jotka ohittavat Älä häiritse -tilan — niitä käytetään mesh-verkon hätähälytyksiin ja kiireellisiin viesteihin.
 
-Tämä vaihe ei ole käyttöoikeuspyyntö. Hyväksy/hylkää-valintaikkunaa ei ole: painike avaa Androidin järjestelmäasetusten sivun sovelluksen **Hälytykset**-ilmoituskanavalle, jossa voit itse ottaa käyttöön Älä häiritse -tilan ohituksen. Tap **Configure Critical Alerts** to open that page, or **Skip** to move on — you can reach the same page later from Android's notification settings for Meshtastic. This step appears only if you granted notifications on the previous screen — skip or decline them and setup ends there.
+Tämä vaihe ei ole käyttöoikeuspyyntö. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alert notifications** channel, where you turn the breakthrough behavior on yourself. Tap **Configure Critical Alerts** to open that page, or **Skip** to move on — you can reach the same page later from Android's notification settings for Meshtastic. This step appears only if you granted notifications on the previous screen — skip or decline them and setup ends there.
 
 ### Käyttöoikeuksien tarkistaminen myöhemmin
 
-The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel and contact QR codes) and **Local network permission** (finding radios over Wi-Fi by mDNS). On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
+The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel and contact QR codes) and **Local network permission** (finding and reaching nodes on your Wi-Fi network). On hardware with no Bluetooth LE the **Nearby devices permission** row is left out. On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
 
-The section reads _All allowed_ when every permission is granted, _Nothing needs your attention_ when some have simply never been asked for, and names a count when one is denied — in which case it expands itself. Tap the row to expand or collapse it at any time:
+The section reads _All allowed_ when every permission is granted, _Nothing needs your attention_ when some have never been asked for, and names a count when one is denied — in which case it expands itself. Tap the row to expand or collapse it at any time:
 
-| Tila                                                  | Mitä rivin napauttaminen tekee                                                                                       |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Sallittu**                                          | Avaa järjestelmän sivun, jossa voit tarkistaa tai peruuttaa käyttöoikeuden                                           |
-| **Ei kysytty vielä**                                  | Pyytää sitä                                                                                                          |
-| **Estetty - napauta salliaksesi**                     | Selittää, mihin käyttöoikeutta tarvitaan, ja pyytää sitä uudelleen, jos hyväksyt                                     |
-| **Estetty - napauta avataksesi järjestelmäasetukset** | Android ei enää näytä käyttöoikeusikkunaa, joten tämä avaa sivun, jossa voit ottaa käyttöoikeuden uudelleen käyttöön |
-| **Ei tarvita tässä Android-versiossa**                | Ei mitään – tätä käyttöoikeutta ei ole laitteessasi                                                                  |
+| Tila                                                  | Mitä rivin napauttaminen tekee                                                                                                                      |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sallittu**                                          | Avaa järjestelmän sivun, jossa voit tarkistaa tai peruuttaa käyttöoikeuden                                                                          |
+| **Ei kysytty vielä**                                  | Pyytää sitä                                                                                                                                         |
+| **Estetty - napauta salliaksesi**                     | Selittää, mihin käyttöoikeutta tarvitaan, ja pyytää sitä uudelleen, jos hyväksyt                                                                    |
+| **Estetty - napauta avataksesi järjestelmäasetukset** | Android ei enää näytä käyttöoikeusikkunaa, joten tämä avaa sivun, jossa voit ottaa käyttöoikeuden uudelleen käyttöön                                |
+| **Ei tarvita tässä Android-versiossa**                | Ei mitään – tätä käyttöoikeutta ei ole laitteessasi                                                                                                 |
+| **Approximate only**                                  | Shown on the location row while position sharing is on and Android grants only approximate location. Sharing needs precise location |
 
 Tämä koskee erityisesti ilmoituksia. Jos hylkäät ne käyttöönoton aikana, tämä rivi toimii paluutienä: Android lakkaa näyttämästä valintaikkunaa, kun olet hylännyt pyynnön lopullisesti (toinen hylkäys), jolloin tämän rivin tilaksi vaihtuu **Estetty** ja se avaa sen sijaan järjestelmäasetukset. Ilmoituskäyttöoikeutta pyydetään vain Android 13:ssa ja uudemmissa versioissa — vanhemmissa versioissa ilmoitukset ovat oletusarvoisesti käytössä ja niitä hallitaan Androidin omista asetuksista.
 
 ## Määrityksen jälkeen
 
-Kun olet myöntänyt käyttöoikeudet, sovellus avaa pääkäyttöliittymän. Ensimmäinen toimenpiteesi pitäisi olla yhteyden muodostaminen Meshtastic-radioon — katso [Yhteydet](connections) yksityiskohtaisia ohjeita varten.
+Kun olet myöntänyt käyttöoikeudet, sovellus avaa pääkäyttöliittymän. Your first action should be connecting to a Meshtastic node — see [Connections](connections) for detailed instructions.
 
 > 💡 **Tip:** If you skipped any permissions during setup, open the **Permissions** section of **Settings** in the app. Kaikki käyttöaikaiset käyttöoikeudet näkyvät siellä nykyisessä tilassaan sekä linkkinä niiden hallintaan, mukaan lukien ilmoitukset, joita järjestelmä ei pyydä toista kertaa automaattisesti.
 
 Sovelluksen toiminnot pyytävät käyttöoikeuksia myös tarpeen mukaan. On the **Connect** tab, a card above the device list explains what the Bluetooth permission is for and offers **Grant permission**; once Android stops prompting, that button becomes **Open settings**.
 
-Uusi Meshtasticissa? [Aloitusopas](https://meshtastic.org/docs/getting-started) meshtastic.org-sivustolla käsittelee laitteiston valintaa, radion alkuasetuksia ja ensimmäisen verkon käyttöönottoa.
+Uusi Meshtasticissa? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial node configuration, and your first mesh setup.
 
 ## Aiheeseen liittyvät aiheet
 
-- [Yhteydet](connections) — yhdistä ensimmäinen radiosi
+- [Connections](connections) — pair your first node
 - [Viestit ja kanavat](messages-and-channels) — lähetä ensimmäinen viestisi
 - [Radiot](nodes) — katso, ketkä muut ovat mesh-verkossasi
 - [Kartta ja reittipisteet](map-and-waypoints) — tarkastele radioiden sijainteja
-- [Asetukset — Radio ja käyttäjä](settings-radio-user) — määritä radio ja käyttäjäprofiili
+- [Settings — Radio & User](settings-radio-user) — configure your node and user profile

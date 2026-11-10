@@ -20,7 +20,9 @@ package org.meshtastic.feature.map.terrain
  * Placeholder Kotlin/Native implementation — same reason as [decodeTerrariumTile]'s nativeMain actual: this module has
  * no iOS surface, but the shared KMP convention plugin adds Kotlin/Native targets to every module regardless.
  */
-actual fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher = object : TerrainTileFetcher {
+actual fun openTerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher? = object : TerrainTileFetcher {
+
+    override val version: String? = null
 
     override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = throw NotImplementedError(
         "Terrain tile fetching is not implemented for Kotlin/Native (iOS). " +

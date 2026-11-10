@@ -1,7 +1,7 @@
 ---
 title: Интеграция TAK
 nav_order: 10
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -11,7 +11,7 @@ aliases:
 
 # Интеграция TAK
 
-Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic radios and TAK applications like ATAK and WinTAK.
+Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic nodes and TAK applications like ATAK and WinTAK.
 
 ## Обзор
 
@@ -28,58 +28,59 @@ Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling inte
 - ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
 - Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
   TAK module appear in Module configuration at all
-- Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+- Firmware 2.8.0 or newer on the node. Earlier firmware accepts a TAK config write and never
   stores it, so the app hides the TAK module entry below that version even when the role is set
   correctly. See [Firmware Updates](firmware)
 
 > ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 > work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
-> service is now in-process only. Do not install it. Interop today runs over the app's own local
+> service runs in-process only. Do not install it. Interop runs over the app's own local
 > TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK/iTAK/WinTAK.
 
 ### Настройки
 
-Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
+Navigate to **Settings → Module configuration → TAK (ATAK)**. The module's own settings are your TAK identity —
 there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
-| Настройка      | Описание                                                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Цвет команды   | Цвет твоей команды на карте TAK (например, Синий, Красный, Голубой, Зелёный)                          |
-| Роль участника | Your operational role within that team (Team Member, Team Lead, HQ, Medic, RTO, etc.) |
+| Настройка | Описание                                                                                                                       | По умолчанию                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Роль      | Your operational role within the team: Team Member, Team Lead, HQ, Sniper, Medic, Forward Observer, RTO, or K9 | По умолчанию (Участник команды) |
+| Командой  | Your team color on the TAK map, one of the 14 standard TAK team colors such as Blue, Red, Cyan, or Green                       | Default (Cyan)                  |
 
-Your TAK callsign isn't a separate setting — it's derived automatically from your Meshtastic node
-name.
+Your TAK callsign isn't a separate setting. The firmware uses your node's long name.
 
-> 💡 **Совет:** Цвета команд/ролей являются стандартными цветами принадлежности в TAK. Coordinate with your TAK
-> team to use consistent team assignments.
+Team colors are the standard TAK team colors, so coordinate with your TAK team to use consistent team assignments.
 
 ### Локальный TAK-сервер
 
-The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. Сервер привязывается только к локальному хосту (`127.0.0.1:8089`) и использует TLS с взаимной аутентификацией по сертификатам (mTLS), поэтому он недоступен с других устройств в сети.
+The app can also run a **local TAK server** so ATAK on the **same phone**, or WinTAK on the same computer running the desktop app, can connect directly without a remote TAK server. Сервер привязывается только к локальному хосту (`127.0.0.1:8089`) и использует TLS с взаимной аутентификацией по сертификатам (mTLS), поэтому он недоступен с других устройств в сети.
 
-Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0. On Android 17 and newer, turning the server on asks for the local network permission it needs to open its socket. If that permission is denied for good, the app turns the server back off and offers to open app settings:
 
 ![Настройки локального TAK-сервера с переключателем включения и опцией экспорта](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same phone.
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK connections from the same device.
+- **Status** — under the toggle: _Off_, _Starting TAK Server_, _Listening on 127.0.0.1:8089 — waiting for ATAK_, the count of local client connections, or _Unable to start TAK Server. Turn it off and on to retry._
 - **TAK Mesh Channel** — выбирает, в какой канал Meshtastic отправляется исходящий трафик TAK (по умолчанию: основной канал, индекс 0). Входящий трафик TAK принимается с любого канала. Соответствует аналогичной настройке на iOS и в устаревшем плагине ATAK.
 - **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
   running, this synthesizes a CoT contact for every node in your node database, so ordinary
   Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
-  node visibility** — without it, only TAK-role nodes show up.
-- **Экспорт пакета данных TAK** — создаёт пакет данных `.zip`, который ATAK/iTAK может импортировать для подключения к этому серверу.
+  node visibility** — without it, only TAK-role nodes show up. When the connected node runs
+  firmware older than 2.8.0, a notice under the switch says that only location and chat messages
+  bridge to ATAK.
+- **Export TAK Data Package** — generates a `.zip` data package that ATAK can import to connect to this server. The share icon in the top bar does the same.
 
 ## Роли TAK
 
 Ноды, настроенные с ролями, связанными с TAK, ведут себя иначе, чем стандартные клиенты:
 
-| Роль            | Описание                                                                                                                                                                                                                                                                                                                                  |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TAK**         | Полная совместимость с TAK — отправляет и принимает данные CoT, сообщения чата и обновления PLI. Выполняет функции стандартного клиента и TAK-моста.                                                                                                                                                      |
-| **TAK Tracker** | Вывод только координат в формате TAK — автоматически передаёт PLI через равные промежутки времени без участия пользователя. Оптимизирован для автономных маячков местоположения (транспортные средства, оборудование, путевые точки). Не ретранслирует сообщения чата. |
+| Роль            | Описание                                                                                                                                                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TAK**         | For a node paired with an ATAK device. Turns off many routine broadcasts to favor the CoT packet stream.                                                                                          |
+| **TAK Tracker** | Broadcasts TAK PLI automatically, at the interval set by the position configuration, and turns off many routine broadcasts. Suited to unattended position beacons such as vehicles and equipment. |
 
-> 💡 **Совет:** Используйте **TAK Tracker** для устройств, которым требуется только передавать координаты (например, радио, установленное в автомобиле). Используйте **TAK** для устройств, где пользователи активно участвуют в операциях TAK.
+> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a node mounted in a vehicle). Используйте **TAK** для устройств, где пользователи активно участвуют в операциях TAK.
 
 ### Формат CoT (Cursor on Target)
 
@@ -87,7 +88,7 @@ Open **Settings → Advanced → TAK Server**. These are app settings stored on 
 
 ## Формат передачи (V1 / V2)
 
-Meshtastic поддерживает два формата передачи данных TAK, которые выбираются автоматически в зависимости от прошивки подключённого радио — ручная настройка не требуется:
+Meshtastic supports two TAK wire formats, chosen automatically based on the connected node's firmware — no manual configuration needed:
 
 | Формат                             | Совместимость                                           | Особенности                                                                                                                                                                                                                                    |
 | ---------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -104,7 +105,7 @@ Meshtastic поддерживает два формата передачи да�
 - Сообщения чата могут передаваться между mesh-сетью и сетями TAK
 - Обновления местоположения передаются двунаправленно между Meshtastic и TAK
 - Ноды TAK Tracker автоматически передают PLI — их координаты отображаются на картах ATAK без какой-либо настройки на стороне ATAK
-- Routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. On Android 9 and older the file goes to the app's own folder under `Android/data` instead
+- On Android, routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. An update to the same route overwrites its file rather than adding a copy. After the app is reinstalled, the first update to a route saves one renamed copy, and later updates overwrite that. On Android 9 and older the file goes to the app's own folder under `Android/data` instead. The desktop app doesn't save route files
 
 > ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 

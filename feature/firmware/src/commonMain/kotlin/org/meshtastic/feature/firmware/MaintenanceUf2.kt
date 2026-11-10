@@ -110,7 +110,7 @@ internal fun bootloaderEraseUf2For(manifest: MaintenanceUf2Manifest, volumeFamil
         ?.toMaintenanceUf2OrNull()
 
 /**
- * OTAFIX bootloader self-update images stay hosted on `Adafruit_nRF52_Bootloader_OTAFIX`'s own GitHub releases — only
+ * Bootloader self-update images stay hosted on `nRF52_Bootloader`'s own GitHub releases — only
  * [MaintenanceUf2Manifest.otafixBase]/[MaintenanceUf2Manifest.otafixReleaseTag] (and the per-board digest) now come
  * from the fetched manifest instead of being hardcoded.
  *
@@ -123,8 +123,56 @@ private fun MaintenanceUf2Manifest.otafixAssetOrNull(otafixBoardSlug: String, sh
     return MaintenanceUf2(url = "$otafixBase/$name", fileName = name, sha256 = sha256)
 }
 
+/**
+ * A pinned legacy DFU SoftDevice+bootloader package for one board, and what its bootloader must report over DIS before
+ * it is written.
+ */
+data class BootloaderDfuZip(
+    val url: String,
+    val fileName: String,
+    val sha256: String,
+    val version: String,
+    val softDevice: SoftDeviceVariant,
+    val bleModel: String,
+) {
+    init {
+        require(SAFE_DFU_ZIP_FILE_NAME.matches(fileName)) { "Unsafe bootloader package filename: $fileName" }
+    }
+}
+
+private val SAFE_DFU_ZIP_FILE_NAME = Regex("""[A-Za-z0-9._-]+\.zip""")
+
+/**
+ * The SoftDevice+bootloader package [platformioTarget] takes over BLE, or `null` when [manifest] maps none, names an
+ * unsafe file or an unknown SoftDevice, or disagrees with [mappedSoftDevice] (the bootloader-quirks hint). `null`
+ * refuses the upgrade; there is no default row.
+ */
+@Suppress("ReturnCount")
+internal fun bootloaderDfuZipFor(
+    manifest: MaintenanceUf2Manifest,
+    platformioTarget: String,
+    mappedSoftDevice: SoftDeviceVariant?,
+): BootloaderDfuZip? {
+    val row =
+        manifest.otafixBleDfuByTarget.entries.firstOrNull { it.key.equals(platformioTarget, ignoreCase = true) }?.value
+            ?: return null
+    val softDevice = SoftDeviceVariant.fromWire(row.softDevice) ?: return null
+    if (mappedSoftDevice != null && mappedSoftDevice != softDevice) return null
+    if (manifest.otafixReleaseTag.isBlank() || row.bleModel.isBlank()) return null
+    val name = "${row.otafixBoardSlug}_bootloader-${manifest.otafixReleaseTag}_s140_${row.softDevice}.zip"
+    if (!SAFE_DFU_ZIP_FILE_NAME.matches(name)) return null
+    return BootloaderDfuZip(
+        url = "${manifest.otafixBase}/$name",
+        fileName = name,
+        sha256 = row.sha256,
+        version = manifest.otafixReleaseTag,
+        softDevice = softDevice,
+        bleModel = row.bleModel,
+    )
+}
+
 /** [SoftDeviceVariant.fromWire]'s own input strings — the key space [MaintenanceUf2EraseSet.nrf52] is indexed by. */
-private val SoftDeviceVariant.wireValue: String
+internal val SoftDeviceVariant.wireValue: String
     get() =
         when (this) {
             SoftDeviceVariant.S140_6_1_1 -> "6.1.1"
@@ -167,11 +215,29 @@ internal fun otafixSupportsTarget(manifest: MaintenanceUf2Manifest, platformioTa
  * `null` refuses the upgrade. That is the correct outcome even for a board OTAFIX supports: an unrecognized Board-ID
  * means the installed bootloader is not one we have a verified pairing for, and writing a bootloader built for other
  * hardware is unrecoverable without SWD.
+ *
+ * When the row carries a [OtafixAssetEntry.targetOverrides] entry for [platformioTarget], that image wins: a stock Wio
+ * Tracker L1 Pro 1W reports the plain L1's `TRACKER L1`, and the L1 image would leave it identifying as an L1.
+ * [platformioTarget] comes from the USB-connected node and [boardId] from the drive the user picked; the gate requires
+ * [FirmwareUpdateMethod.Usb], so they are normally the same board.
  */
-internal fun otafixUf2ForBoardId(manifest: MaintenanceUf2Manifest, boardId: String): MaintenanceUf2? =
-    manifest.otafixByBoardId[boardId.trim()]?.let {
-        manifest.otafixAssetOrNull(otafixBoardSlug = it.otafixBoardSlug, sha256 = it.sha256)
+internal fun otafixUf2ForBoardId(
+    manifest: MaintenanceUf2Manifest,
+    boardId: String,
+    platformioTarget: String? = null,
+): MaintenanceUf2? {
+    val row = manifest.otafixByBoardId[boardId.trim()] ?: return null
+    val override =
+        platformioTarget
+            ?.takeIf { it.isNotBlank() }
+            ?.let { target -> row.targetOverrides.entries.firstOrNull { it.key.equals(target, ignoreCase = true) } }
+            ?.value
+    return if (override != null) {
+        manifest.otafixAssetOrNull(otafixBoardSlug = override.otafixBoardSlug, sha256 = override.sha256)
+    } else {
+        manifest.otafixAssetOrNull(otafixBoardSlug = row.otafixBoardSlug, sha256 = row.sha256)
     }
+}
 
 /**
  * Extracts the `Board-ID:` value from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
@@ -253,6 +319,50 @@ internal fun parseUf2FactoryEraseFamily(infoUf2Text: String): Long? {
 }
 
 /**
+ * A SoftDevice or SDK fault the nRF52 bootloader recorded, from the `Last-Fault:` line of its `INFO_UF2.TXT`.
+ *
+ * For an SDK error [info] is the error code. Every field is a 32-bit word, and 0 is a valid value for each.
+ */
+data class BootloaderFault(val id: Long, val pc: Long, val info: Long) {
+    /** The line's own `id=0x.. pc=0x.. info=0x..` form, so a report can be matched against the bootloader source. */
+    override fun toString(): String =
+        "id=0x${id.toString(HEX_RADIX)} pc=0x${pc.toString(HEX_RADIX)} " + "info=0x${info.toString(HEX_RADIX)}"
+}
+
+/**
+ * Extracts the `Last-Fault: id=0x<hex> pc=0x<hex> info=0x<hex>` line the Meshtastic nRF52 Bootloader 2.6.0 onwards
+ * appends after recording a fault. `ghostfat.c` prints each word with `utoa(x, str, 16)`: lowercase and unpadded.
+ *
+ * The bootloader prints the record once and clears it, so the line is present only on the first drive session after the
+ * fault. Returns `null` when the line is absent or any of the three fields is missing or not hex.
+ */
+@Suppress("ReturnCount") // guard clauses; an unparseable line must yield null rather than a guess
+internal fun parseUf2LastFault(infoUf2Text: String): BootloaderFault? {
+    val value =
+        infoUf2Text
+            .lineSequence()
+            .firstOrNull { it.trimStart().startsWith(UF2_LAST_FAULT_PREFIX, ignoreCase = true) }
+            ?.substringAfter(':') ?: return null
+    val fields =
+        value
+            .split(' ')
+            .filter { it.contains('=') }
+            .associate { it.substringBefore('=').trim().lowercase() to it.substringAfter('=').trim() }
+
+    fun word(key: String): Long? = fields[key]
+        ?.takeIf { it.startsWith(HEX_PREFIX, ignoreCase = true) }
+        ?.drop(HEX_PREFIX.length)
+        ?.toLongOrNull(HEX_RADIX)
+        ?.takeIf { it in 0..UINT32_MAX }
+
+    return BootloaderFault(
+        id = word("id") ?: return null,
+        pc = word("pc") ?: return null,
+        info = word("info") ?: return null,
+    )
+}
+
+/**
  * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
  * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or partial
  * manifest), or when that row names an unsafe file — never a guess at a substitute image.
@@ -319,9 +429,13 @@ private const val UF2_SOFTDEVICE_PREFIX = "SoftDevice:"
 
 private const val UF2_FACTORY_ERASE_PREFIX = "Factory-Erase:"
 
+private const val UF2_LAST_FAULT_PREFIX = "Last-Fault:"
+
 private const val HEX_PREFIX = "0x"
 
 private const val HEX_RADIX = 16
+
+private const val UINT32_MAX = 0xFFFF_FFFFL
 
 /** All Meshtastic nRF52840 boards run the S140 SoftDevice; anything else is out of scope and refuses. */
 private const val SUPPORTED_SOFTDEVICE_ID = "S140"

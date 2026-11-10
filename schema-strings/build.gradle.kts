@@ -56,5 +56,5 @@ tasks.register<JavaExec>("sync") {
     mainClass.set("org.meshtastic.schemastrings.MainKt")
     classpath = sourceSets.main.get().runtimeClasspath
     argumentProviders.add(CommandLineArgumentProvider { listOf(root.asFile.absolutePath) })
-    outputs.upToDateWhen { false }
+    doNotTrackState("Rewrites a tracked source file from the live registry, so it always runs.")
 }

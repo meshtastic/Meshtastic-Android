@@ -17,7 +17,10 @@
 package org.meshtastic.core.ble
 
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -42,6 +45,7 @@ import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 import org.robolectric.shadows.ShadowBluetoothDevice
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -83,12 +87,135 @@ class AndroidBluetoothRepositoryBondTest {
      * resolving broadcast. The returned [Deferred] completes with the throwable `bond()` raised, or `null` on success.
      * Using launch + captured result avoids `async`/`await` exception-propagation surprises under the test scope.
      */
-    private fun TestScope.launchBond(repo: AndroidBluetoothRepository, mac: String): Deferred<Throwable?> {
+    private fun TestScope.launchBond(
+        repo: AndroidBluetoothRepository,
+        mac: String,
+        pin: String? = null,
+    ): Deferred<Throwable?> {
         val result = CompletableDeferred<Throwable?>()
         backgroundScope.launch {
-            result.complete(runCatching { repo.bond(FakeBleDevice(address = mac)) }.exceptionOrNull())
+            result.complete(runCatching { repo.bond(FakeBleDevice(address = mac), pin) }.exceptionOrNull())
         }
         return result
+    }
+
+    /**
+     * Stands in for the Settings pairing dialog: a default-priority receiver for `ACTION_PAIRING_REQUEST`, which only
+     * sees the request if nothing ahead of it aborted the ordered broadcast.
+     */
+    private class SystemPairingDialog : BroadcastReceiver() {
+        var shown = 0
+
+        override fun onReceive(context: Context, intent: Intent) {
+            shown++
+        }
+    }
+
+    private fun registerSystemPairingDialog(): SystemPairingDialog = SystemPairingDialog().also {
+        RuntimeEnvironment.getApplication()
+            .registerReceiver(it, IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST), Context.RECEIVER_EXPORTED)
+    }
+
+    private fun pairingRequestReceivers() = shadowOf(RuntimeEnvironment.getApplication()).registeredReceivers.filter {
+        it.intentFilter.hasAction(BluetoothDevice.ACTION_PAIRING_REQUEST)
+    }
+
+    private fun finishBond(mac: String) = RobolectricBleBonding.sendBondStateChanged(
+        mac,
+        newState = BluetoothDevice.BOND_BONDED,
+        previousState = BluetoothDevice.BOND_BONDING,
+    )
+
+    @Test
+    fun `a supplied PIN answers the PIN pairing request instead of the system dialog`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val mac = "AA:BB:CC:DD:EE:20"
+            RobolectricBleBonding.grantBluetoothConnectPermission()
+            RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+            val dialog = registerSystemPairingDialog()
+            val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+            val failure = launchBond(repo, mac, pin = "123456")
+            RobolectricBleBonding.sendPairingRequest(mac)
+
+            assertContentEquals("123456".encodeToByteArray(), RobolectricBleBonding.deviceShadow(mac).pin)
+            assertEquals(0, dialog.shown, "the answered request should not reach the system dialog")
+
+            finishBond(mac)
+            assertNull(failure.await())
+            // Only the stand-in remains: bond() unregisters its PIN receiver once the bond resolves.
+            assertEquals(1, pairingRequestReceivers().size)
+            RuntimeEnvironment.getApplication().unregisterReceiver(dialog)
+        }
+
+    @Test
+    fun `the PIN receiver is exported and outranks the system dialog`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:21"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac, pin = "123456")
+
+        val receiver = pairingRequestReceivers().single()
+        assertTrue((receiver.flags and Context.RECEIVER_EXPORTED) == Context.RECEIVER_EXPORTED)
+        assertTrue(receiver.intentFilter.priority > 0)
+
+        finishBond(mac)
+        assertNull(failure.await())
+    }
+
+    @Test
+    fun `a pairing variant that takes no PIN is left to the system dialog`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:22"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val dialog = registerSystemPairingDialog()
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac, pin = "123456")
+        RobolectricBleBonding.sendPairingRequest(mac, BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION)
+
+        assertNull(RobolectricBleBonding.deviceShadow(mac).pin)
+        assertEquals(1, dialog.shown)
+
+        finishBond(mac)
+        assertNull(failure.await())
+        RuntimeEnvironment.getApplication().unregisterReceiver(dialog)
+    }
+
+    @Test
+    fun `a pairing request for another device is not answered with the PIN`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:23"
+        val otherMac = "AA:BB:CC:DD:EE:24"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val dialog = registerSystemPairingDialog()
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac, pin = "123456")
+        RobolectricBleBonding.sendPairingRequest(otherMac)
+
+        assertNull(RobolectricBleBonding.deviceShadow(otherMac).pin)
+        assertEquals(1, dialog.shown)
+
+        finishBond(mac)
+        assertNull(failure.await())
+        RuntimeEnvironment.getApplication().unregisterReceiver(dialog)
+    }
+
+    @Test
+    fun `bonding without a PIN registers no pairing request receiver`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:25"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+
+        assertTrue(pairingRequestReceivers().isEmpty())
+        finishBond(mac)
+        assertNull(failure.await())
     }
 
     @Test

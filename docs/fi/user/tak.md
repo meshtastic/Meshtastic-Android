@@ -1,7 +1,7 @@
 ---
 title: TAK-integraatio
 nav_order: 10
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
@@ -11,7 +11,7 @@ aliases:
 
 # TAK-integraatio
 
-Meshtastic integroituu Team Awareness Kit (TAK) -ekosysteemiin, mikä mahdollistaa yhteentoimivuuden Meshtastic-radioiden ja TAK-sovellusten, kuten ATAKin ja WinTAKin, välillä.
+Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic nodes and TAK applications like ATAK and WinTAK.
 
 ## Yleiskatsaus
 
@@ -28,51 +28,55 @@ TAK-moduuli mahdollistaa Meshtastic-radioille:
 - Asennettuna ATAK (Android Team Awareness Kit), iTAK tai WinTAK
 - Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
   TAK module appear in Module configuration at all
-- Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+- Firmware 2.8.0 or newer on the node. Earlier firmware accepts a TAK config write and never
   stores it, so the app hides the TAK module entry below that version even when the role is set
   correctly. See [Firmware Updates](firmware)
 
-> ⚠️ **Varoitus:** Vanha **Meshtastic ATAK Plugin** ei enää kuulu tähän kokonaisuuteen eikä toimi. Yhteentoimivuus toteutetaan sovelluksen sisäisen paikallisen AIDL-rajapinnan kautta, joka poistettiin sovelluksesta 2.8.0. Mesh-palvelu toimii nyt vain sovelluksen sisäisenä. Älä asenna sitä. Interop today runs over the app's own local
+> ⚠️ **Varoitus:** Vanha **Meshtastic ATAK Plugin** ei enää kuulu tähän kokonaisuuteen eikä toimi. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+> service runs in-process only. Älä asenna sitä. Interop runs over the app's own local
 > TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK/iTAK/WinTAK.
 
 ### Asetukset
 
-Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
+Navigate to **Settings → Module configuration → TAK (ATAK)**. The module's own settings are your TAK identity —
 there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Radiosi lähettää tämän tunnuksen, joka näkyy TAK-kartoilla.
 
-| Asetus        | Kuvaus                                                                                                                      |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Tiimin väri   | TAK-kartan tiimiväri (esim. sininen, punainen, syaani, vihreä)                           |
-| Jäsenen rooli | Toiminnallinen roolisi kyseisessä ryhmässä (Team Member, Team Lead, HQ, Medic, RTO jne.) |
+| Asetus | Kuvaus                                                                                                                         | Oletus                                   |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| Rooli  | Your operational role within the team: Team Member, Team Lead, HQ, Sniper, Medic, Forward Observer, RTO, or K9 | Default (Team Member) |
+| Tiimi  | Your team color on the TAK map, one of the 14 standard TAK team colors such as Blue, Red, Cyan, or Green                       | Default (Cyan)        |
 
-TAK-kutsutunnuksesi ei ole erillinen asetus — se muodostetaan automaattisesti Meshtastic-radiosi nimestä.
+Your TAK callsign isn't a separate setting. The firmware uses your node's long name.
 
-> 💡 **Vinkki:** Tiimi- ja roolivärit ovat TAK-järjestelmän standardeja ryhmävärikoodauksia. Sovi TAK-ryhmäsi kanssa yhtenäisistä ryhmämäärityksistä.
+Team colors are the standard TAK team colors, so coordinate with your TAK team to use consistent team assignments.
 
 ### Paikallinen TAK-palvelin
 
-Sovellus voi myös käyttää **paikallista TAK-palvelinta**, jolloin samalla puhelimella oleva ATAK tai iTAK voi muodostaa siihen yhteyden suoraan ilman etä-TAK-palvelinta. Palvelin kuuntelee vain paikallisia yhteyksiä (127.0.0.1:8089) ja käyttää TLS:ää molemminpuolisella varmenteiden todentamisella.
+The app can also run a **local TAK server** so ATAK on the **same phone**, or WinTAK on the same computer running the desktop app, can connect directly without a remote TAK server. Palvelin kuuntelee vain paikallisia yhteyksiä (127.0.0.1:8089) ja käyttää TLS:ää molemminpuolisella varmenteiden todentamisella.
 
-Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0. On Android 17 and newer, turning the server on asks for the local network permission it needs to open its socket. If that permission is denied for good, the app turns the server back off and offers to open app settings:
 
 ![Paikallisen TAK-palvelimen asetukset, joissa näkyvät käyttöönotto ja vientitoiminto](../../assets/screenshots/tak_server_enabled.png)
 
-- **Ota paikallinen TAK-palvelin käyttöön** — käynnistää vain loopback-yhteyttä käyttävän mTLS-palvelimen portissa **8089** samalla puhelimella olevien ATAK- ja iTAK-yhteyksien käyttöön.
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK connections from the same device.
+- **Status** — under the toggle: _Off_, _Starting TAK Server_, _Listening on 127.0.0.1:8089 — waiting for ATAK_, the count of local client connections, or _Unable to start TAK Server. Turn it off and on to retry._
 - **TAK-mesh-kanava** – valitsee, mitä Meshtastic-kanavaa käytetään lähtevään TAK-liikenteeseen (oletuksena ensisijainen kanava, indeksi 0) Saapuva TAK-liikenne hyväksytään miltä tahansa kanavalta. Vastaa iOS:n ja vanhan ATAK-liitännäisen vastaavaa asetusta.
-- **Mesh to CoT Converter** — oletusarvoisesti pois käytöstä, ja näkyy palvelinkytkimen alla. Kun palvelin on käynnissä, se luo CoT-yhteystiedon jokaisesta radiosolmujen tietokannan radiosta, jolloin tavalliset Meshtastic-radiot näkyvät ATAK-kartalla yhteystietoina. **Tämä korvaa vanhan lisäosan näkyvyyden** — ilman tätä näkyvät vain TAK-roolin radiot.
-- **Vie TAK-tietopaketti** — luo `.zip`-tietopaketin, jonka ATAK/iTAK voi tuoda muodostaakseen yhteyden tähän palvelimeen.
+- **Mesh to CoT Converter** — oletusarvoisesti pois käytöstä, ja näkyy palvelinkytkimen alla. Kun palvelin on käynnissä, se luo CoT-yhteystiedon jokaisesta radiosolmujen tietokannan radiosta, jolloin tavalliset Meshtastic-radiot näkyvät ATAK-kartalla yhteystietoina. **Tämä korvaa vanhan lisäosan näkyvyyden** — ilman tätä näkyvät vain TAK-roolin radiot. When the connected node runs
+  firmware older than 2.8.0, a notice under the switch says that only location and chat messages
+  bridge to ATAK.
+- **Export TAK Data Package** — generates a `.zip` data package that ATAK can import to connect to this server. The share icon in the top bar does the same.
 
 ## TAK-roolit
 
 TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
 
-| Rooli           | Kuvaus                                                                                                                                                                                                                                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TAK**         | Täysi TAK-yhteentoimivuus — lähettää ja vastaanottaa CoT-dataa, chat-viestejä ja PLI-päivityksiä. Toimii tavallisen clientin lisäksi TAK-siltana.                                                                                                                                  |
-| **TAK Tracker** | Vain sijaintitietoihin perustuva TAK-lähtö — lähettää automaattisesti PLI-dataa säännöllisin väliajoin ilman käyttäjän toimintaa. Optimoitu valvomattomiin sijaintilähettimiin (ajoneuvot, laitteet ja reittipisteet). Ei välitä chat-viestejä. |
+| Rooli           | Kuvaus                                                                                                                                                                                                                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TAK**         | For a node paired with an ATAK device. Turns off many routine broadcasts to favor the CoT packet stream.                                                                                          |
+| **TAK Tracker** | Broadcasts TAK PLI automatically, at the interval set by the position configuration, and turns off many routine broadcasts. Suited to unattended position beacons such as vehicles and equipment. |
 
-> 💡 **Vinkki:** Käytä **TAK Tracker** -tilaa laitteille, joiden tarvitsee vain lähettää sijainti (esim. ajoneuvoon asennettu radio). Käytä **TAK**-tilaa laitteille, joissa käyttäjät osallistuvat aktiivisesti TAK-toimintaan.
+> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a node mounted in a vehicle). Käytä **TAK**-tilaa laitteille, joissa käyttäjät osallistuvat aktiivisesti TAK-toimintaan.
 
 ### CoT (Cursor on Target) -muoto
 
@@ -80,7 +84,7 @@ TAK-viestit käyttävät Cursor on Target XML -muotoa — sotilaskäytössä ole
 
 ## Wire Format (V1 / V2)
 
-Meshtastic tukee kahta TAK-siirtomuotoa, jotka valitaan automaattisesti yhdistetyn radion laiteohjelmiston perusteella — manuaalisia asetuksia ei tarvita:
+Meshtastic supports two TAK wire formats, chosen automatically based on the connected node's firmware — no manual configuration needed:
 
 | Muoto                                | Yhteensopivuus                                                     | Ominaisuudet                                                                                                                                                                                                                                                              |
 | ------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +101,7 @@ Kun asetukset on määritetty:
 - Viestit voivat välittyä mesh-verkon ja TAK-verkon välillä
 - Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
 - TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
-- Routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. On Android 9 and older the file goes to the app's own folder under `Android/data` instead
+- On Android, routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. An update to the same route overwrites its file rather than adding a copy. After the app is reinstalled, the first update to a route saves one renamed copy, and later updates overwrite that. On Android 9 and older the file goes to the app's own folder under `Android/data` instead. The desktop app doesn't save route files
 
 > ℹ️ **Huomautus:** TAK-integraatio edellyttää tiettyjä radiorooleja. Tavalliset Client-roolin radiot eivät osallistu automaattisesti TAK-toimintoihin — mutta kun **Mesh to CoT Converter** on käytössä, ne näkyvät silti ATAK-kartalla yhteystietoina.
 

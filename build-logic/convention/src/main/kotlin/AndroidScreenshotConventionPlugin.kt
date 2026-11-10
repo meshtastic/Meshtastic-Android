@@ -28,13 +28,13 @@ import org.meshtastic.buildlogic.libs
 /**
  * Convention for Compose Screenshot Testing modules (`:screenshot-tests`, `:docs-screenshots`).
  *
- * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the test-retry opt-out (CST's custom
- * runner is incompatible with test retry), and the Compose Multiplatform + screenshot-validation dependencies.
- * Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and `com.android.compose.screenshot`,
- * which the module declares itself. It also owns the image-difference tolerance, which used to live in the module
- * scripts as `testOptions { screenshotTests { imageDifferenceThreshold } }` — alpha16 deleted that DSL and
- * conventions the engine threshold to 0f (pixel-exact), which fails 33 of our references. The task property the
- * DSL used to feed is still public, so the same tolerance is set directly on it here.
+ * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the UTC timezone pin on the render
+ * JVM, the test-retry opt-out (CST's custom runner is incompatible with test retry), and the Compose Multiplatform +
+ * screenshot-validation dependencies. Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and
+ * `com.android.compose.screenshot`, which the module declares itself. It also owns the image-difference tolerance,
+ * which used to live in the module scripts as `testOptions { screenshotTests { imageDifferenceThreshold } }` — alpha16
+ * deleted that DSL and conventions the engine threshold to 0f (pixel-exact), which fails 33 of our references. The task
+ * property the DSL used to feed is still public, so the same tolerance is set directly on it here.
  */
 class AndroidScreenshotConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -48,9 +48,12 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                     testEngineInput.threshold.set(IMAGE_DIFFERENCE_THRESHOLD)
                 }
 
-                // CST screenshot tests use a custom runner incompatible with test retry
                 tasks.withType<Test>().configureEach {
                     if (name.contains("ScreenshotTest", ignoreCase = true)) {
+                        // CST pins the render JVM's locale but not its timezone, so a preview that formats an
+                        // absolute date renders a different day on a host east of UTC than on CI.
+                        systemProperty("user.timezone", "UTC")
+                        // CST screenshot tests use a custom runner incompatible with test retry
                         extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
                             maxRetries.set(0)
                         }

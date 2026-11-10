@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
@@ -65,8 +66,10 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.fieldTitle
@@ -170,6 +173,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         additionalDirtyCheck = { locationInput != currentPosition },
         onDiscard = { locationInput = currentPosition },
@@ -188,11 +192,22 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ConfigRoute.POSITION.route),
+                    "schema_position_",
+                    listOf("fixed_position", "gps_mode", "gps_update_interval"),
+                    listOf("position_flags"),
+                    listOf("rx_gpio", "tx_gpio", "gps_en_gpio"),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.position_packet)) {
                 val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_position_position_broadcast_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_position_position_broadcast_secs),
                     summary = stringResource(Res.string.schema_position_position_broadcast_secs_description),
                     enabled = state.connected,
                     items = items.map { it to it.toDisplayString() },
@@ -210,6 +225,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_position_position_broadcast_smart_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_position_position_broadcast_smart_enabled),
                     checked = formState.value.position_broadcast_smart_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -223,6 +239,8 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     val smartItems = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
                     DropDownPreference(
                         title = stringResource(Res.string.schema_position_broadcast_smart_minimum_interval_secs),
+                        modifier =
+                        Modifier.settingsField(Res.string.schema_position_broadcast_smart_minimum_interval_secs),
                         summary =
                         stringResource(
                             Res.string.schema_position_broadcast_smart_minimum_interval_secs_description,
@@ -248,6 +266,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                             Res.string.schema_position_broadcast_smart_minimum_distance,
                             Config.PositionConfig.broadcast_smart_minimum_distance,
                         ),
+                        modifier = Modifier.settingsField(Res.string.schema_position_broadcast_smart_minimum_distance),
                         summary =
                         stringResource(Res.string.schema_position_broadcast_smart_minimum_distance_description),
                         value = formState.value.broadcast_smart_minimum_distance,
@@ -264,10 +283,11 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_position_fixed_position),
+                    modifier = Modifier.settingsField(Res.string.schema_position_fixed_position),
                     summary = stringResource(Res.string.schema_position_fixed_position_description),
                     checked = formState.value.fixed_position,
                     enabled = state.connected,
@@ -319,6 +339,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     HorizontalDivider()
                     DropDownPreference(
                         title = stringResource(Res.string.schema_position_gps_mode),
+                        modifier = Modifier.settingsField(Res.string.schema_position_gps_mode),
                         enabled = state.connected,
                         selectedItem = formState.value.gps_mode,
                         onItemSelected = {
@@ -329,6 +350,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
                     DropDownPreference(
                         title = stringResource(Res.string.schema_position_gps_update_interval),
+                        modifier = Modifier.settingsField(Res.string.schema_position_gps_update_interval),
                         summary = stringResource(Res.string.schema_position_gps_update_interval_description),
                         enabled = state.connected,
                         items = items.map { it to it.toDisplayString() },
@@ -346,10 +368,11 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.schema_position_position_flags)) {
                 BitwisePreference(
                     title = stringResource(Res.string.schema_position_position_flags),
+                    modifier = Modifier.settingsField(Res.string.schema_position_position_flags),
                     summary = stringResource(Res.string.schema_position_position_flags_description),
                     value = formState.value.position_flags,
                     enabled = state.connected,
@@ -393,15 +416,16 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     wb.gps_en_gpio = pin
                 },
             )
-                .filter { it.metadata.offeredOn(state.isDiyHardware, holdsValue = it.value != 0) }
+                .filter { it.metadata.offeredOn(state.isOemFixedGps, holdsValue = it.value != 0) }
         if (pinRows.isNotEmpty()) {
-            item {
+            fieldItem(cards.removeFirst()) {
                 TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
                     val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
                     pinRows.forEachIndexed { index, row ->
                         if (index > 0) HorizontalDivider()
                         DropDownPreference(
                             title = stringResource(row.title),
+                            modifier = Modifier.settingsField(row.title),
                             summary = stringResource(row.description),
                             enabled = state.connected,
                             items = pins,

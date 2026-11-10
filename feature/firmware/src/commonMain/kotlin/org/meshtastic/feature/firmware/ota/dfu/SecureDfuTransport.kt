@@ -27,7 +27,6 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -42,7 +41,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
@@ -50,13 +48,15 @@ import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
 import org.meshtastic.core.ble.MeshtasticBleDevice
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.COMMAND_TIMEOUT
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.CONNECT_TIMEOUT
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.STREAM_TIMEOUT
+import org.meshtastic.feature.firmware.ota.dfu.DfuTimings.SUBSCRIPTION_SETTLE
 import org.meshtastic.feature.firmware.ota.receiveWithin
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -232,53 +232,19 @@ class SecureDfuTransport(
      * notifications on the Control Point.
      */
     override suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
-        val dfuAddress = calculateMacPlusOne(address)
-        val targetAddresses = setOf(address, dfuAddress)
-        Logger.i { "DFU: Scanning for DFU mode device at ${targetAddresses.map { it.anonymize() }}..." }
-
-        val device =
-            scanForDevice { d -> d.address in targetAddresses }
-                ?: throw DfuException.ConnectionFailed(
-                    "DFU mode device not found (tried ${targetAddresses.map {
-                        it.anonymize()
-                    }}). If the device never rebooted into DFU mode, " +
-                        "a stale BLE bond may be blocking the trigger (Meshtastic BLEDfu requires " +
-                        "SECMODE_ENC_WITH_MITM) — Forget+Re-pair the device in Android Bluetooth settings and retry.",
-                )
-
-        Logger.i { "DFU: Found DFU mode device at ${device.address.anonymize()}, connecting..." }
-
-        bleConnection.connectionState.onEach { Logger.d { "DFU: Connection state → $it" } }.launchIn(transportScope)
-
-        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
-        if (connected is BleConnectionState.Disconnected) {
-            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address.anonymize()}")
-        }
-
-        bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
-            val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
-
-            // Subscribe to Control Point notifications before issuing any commands. onSubscription fires once the CCCD
-            // write completes; launchIn(this) uses connectionScope so the subscription persists beyond this block.
-            val subscribed = CompletableDeferred<Unit>()
-            service
-                .observe(controlChar) {
-                    Logger.d { "DFU: Control Point subscribed" }
-                    subscribed.complete(Unit)
-                }
-                .onEach { bytes -> notificationChannel.trySend(bytes) }
-                .catch { e ->
-                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                    Logger.e(e) { "DFU: Control Point notification error" }
-                }
-                .launchIn(this)
-
-            subscribed.await()
-            // Conservative settle after CCCD confirmation before issuing commands.
-            delay(SUBSCRIPTION_SETTLE)
-
-            Logger.i { "DFU: Connected and ready (${device.address.anonymize()})" }
-        }
+        bleConnection.connectToDfuControlPoint(
+            address = address,
+            tag = "DFU",
+            serviceUuid = SecureDfuUuids.SERVICE,
+            controlPoint = SecureDfuUuids.CONTROL_POINT,
+            logScope = transportScope,
+            scan = ::scanForDevice,
+            onNotification = { bytes -> notificationChannel.trySend(bytes) },
+            notFoundHint =
+            " If the device never rebooted into DFU mode, a stale BLE bond may be blocking the trigger " +
+                "(Meshtastic BLEDfu requires SECMODE_ENC_WITH_MITM): forget and re-pair the device in Android " +
+                "Bluetooth settings and retry.",
+        )
     }
 
     // ---------------------------------------------------------------------------
@@ -643,9 +609,6 @@ class SecureDfuTransport(
     // ---------------------------------------------------------------------------
 
     companion object {
-        private val CONNECT_TIMEOUT = 15.seconds
-        private val COMMAND_TIMEOUT = 30.seconds
-        private val SUBSCRIPTION_SETTLE = 500.milliseconds
         private val BUTTONLESS_RESPONSE_TIMEOUT = 3.seconds
 
         /**
@@ -659,13 +622,6 @@ class SecureDfuTransport(
         private val TRIGGER_TIMEOUT = 5.seconds
         private val RETRY_DELAY = 2.seconds
         private val FIRST_CHUNK_DELAY = 400.milliseconds
-
-        /**
-         * Wall-clock budget for a single firmware-object streaming session. Must comfortably exceed the upload duration
-         * for the largest expected image at the slowest realistic Secure DFU throughput. Per-PRN/per-write watchdogs
-         * inside the loop detect real stalls; this is just a safety net so a hung profile block can't sit forever.
-         */
-        private val STREAM_TIMEOUT = 15.minutes
 
         /** Response code prefix for Buttonless DFU indications (0x20 = response). */
         private const val BUTTONLESS_RESPONSE_CODE: Byte = 0x20

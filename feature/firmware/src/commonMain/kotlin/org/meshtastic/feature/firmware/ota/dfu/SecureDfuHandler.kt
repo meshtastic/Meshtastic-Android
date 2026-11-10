@@ -34,19 +34,28 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_bootloader_downloading
+import org.meshtastic.core.resources.firmware_update_bootloader_installing
+import org.meshtastic.core.resources.firmware_update_bootloader_mismatch
+import org.meshtastic.core.resources.firmware_update_bootloader_model_unknown
+import org.meshtastic.core.resources.firmware_update_bootloader_not_back
+import org.meshtastic.core.resources.firmware_update_bootloader_not_upgraded
+import org.meshtastic.core.resources.firmware_update_bootloader_unverified
+import org.meshtastic.core.resources.firmware_update_bootloader_uploading
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
-import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
 import org.meshtastic.core.resources.firmware_update_preparing_flash
 import org.meshtastic.core.resources.firmware_update_retrying_upload
 import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
+import org.meshtastic.core.resources.firmware_update_start_timed_out
 import org.meshtastic.core.resources.firmware_update_starting_dfu
 import org.meshtastic.core.resources.firmware_update_uploading
+import org.meshtastic.core.resources.firmware_update_uploading_after_bootloader
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
-import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.feature.firmware.BootloaderDfuZip
 import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
 import org.meshtastic.feature.firmware.FirmwareRetriever
@@ -55,12 +64,14 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.ota.ThroughputTracker
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
-import org.meshtastic.feature.firmware.ota.formatTransferPercent
+import org.meshtastic.feature.firmware.ota.downloadWithProgress
 import org.meshtastic.feature.firmware.ota.formatTransferProgress
 import org.meshtastic.feature.firmware.ota.retryWithDelay
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
-import org.meshtastic.feature.firmware.stripFormatArgs
+import org.meshtastic.feature.firmware.wireValue
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
 
 private const val GATT_RELEASE_DELAY_MS = 1_500L
@@ -264,7 +275,9 @@ internal fun dfuUploadPhaseState(phase: DfuUploadPhase, uploadMsg: UiText, slowH
         DfuUploadPhase.PREPARING ->
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_preparing_flash)))
 
-        DfuUploadPhase.STREAMING -> FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint))
+        DfuUploadPhase.STARTED,
+        DfuUploadPhase.STREAMING,
+        -> FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint))
     }
 
 /**
@@ -282,6 +295,9 @@ internal fun dfuUploadPhaseState(phase: DfuUploadPhase, uploadMsg: UiText, slowH
  *   cycle never tried to upload.
  * - After the first [LegacyDfuException.MidStreamDisconnect] on Legacy, every subsequent Legacy attempt uses
  *   [LegacyDfuStreamProfile.RECOVERY]; a stale-session alone never switches the profile.
+ * - A mid-stream drop on a bootloader known to predate [BOOTLOADER_RESTARTS_AFTER_DROP] runs a reset-prime cleanup
+ *   (from the [maxStaleResets] budget) before the retry instead of the inter-attempt delay, since that START would be
+ *   refused with INVALID_STATE. A 2.6.0 or later bootloader, or an unknown version, retries directly.
  * - All exit paths are bounded: the loop stops when the upload-attempt budget is exhausted or the stale-response budget
  *   is exceeded. Up to [maxStaleResets] reset-prime cleanups run; the next stale response terminates without another
  *   cleanup.
@@ -393,7 +409,16 @@ internal suspend fun runDfuRetryLoop(
 
                     if (uploadAttempts < activeAttempts) {
                         onRetryScheduled(uploadAttempts + 1, activeAttempts)
-                        interAttemptDelay()
+                        if (error.keepsDroppedSession() && staleResets < maxStaleResets) {
+                            staleResets++
+                            Logger.i {
+                                "DFU: bootloader predates $BOOTLOADER_RESTARTS_AFTER_DROP and keeps a dropped " +
+                                    "session; reset-priming before the retry ($staleResets/$maxStaleResets) ($protocol)"
+                            }
+                            resetStaleBootloader()
+                        } else {
+                            interAttemptDelay()
+                        }
                     }
                 }
             }
@@ -409,6 +434,13 @@ internal suspend fun runDfuRetryLoop(
     }
     return DfuUploadResult.Failure(error, protocolEngaged)
 }
+
+/**
+ * True for a mid-stream drop on a bootloader known to predate [BOOTLOADER_RESTARTS_AFTER_DROP], which refuses the next
+ * START with INVALID_STATE until it is reset. An unknown version is false, so it takes the reactive stale-session path.
+ */
+internal fun Throwable.keepsDroppedSession(): Boolean = this is LegacyDfuException.MidStreamDisconnect &&
+    bootloaderVersion?.let { it < BOOTLOADER_RESTARTS_AFTER_DROP } == true
 
 /**
  * Cleanup policy for a DFU upload session's transport. Extracted from [SecureDfuHandler.runUploadSession]'s finally
@@ -446,6 +478,91 @@ internal suspend fun cleanupDfuSessionTransport(
             transport.close()
         }
     }
+}
+
+/**
+ * Per-run hooks on [SecureDfuHandler]'s upload session.
+ *
+ * @property beforeUpload Runs on the connected transport before anything is written; throwing
+ *   [DfuException.BootloaderMismatch] ends the run instead of retrying it.
+ * @property reportSuccess False when the caller has more to do after this upload and reports the outcome itself.
+ */
+internal data class UploadSessionOptions(
+    val beforeUpload: (suspend (DfuUploadTransport) -> Unit)? = null,
+    val reportSuccess: Boolean = true,
+    val uploadMessage: UiText? = null,
+)
+
+/** The bootloader did not re-advertise within the swap bound after activating a new SoftDevice and bootloader. */
+internal class BootloaderSwapTimeout : Exception("Bootloader did not re-advertise after the SoftDevice+bootloader swap")
+
+/**
+ * Refuses [asset] unless the bootloader's DIS names the board's `BLEDIS_MODEL` and the SoftDevice the package carries.
+ * A missing field refuses too: an app linked for the other SoftDevice does not boot, and a bootloader for other
+ * hardware is recoverable only over SWD.
+ */
+internal fun requireBootloaderMatches(identity: BootloaderIdentity, asset: BootloaderDfuZip) {
+    val expectedSoftDevice = asset.softDevice.wireValue
+    if (identity.model != asset.bleModel || identity.softDevice != expectedSoftDevice) {
+        throw DfuException.BootloaderMismatch(identity, asset.bleModel, expectedSoftDevice)
+    }
+}
+
+private suspend fun readIdentity(transport: DfuUploadTransport): BootloaderIdentity =
+    (transport as? LegacyDfuTransport)?.readBootloaderIdentity() ?: BootloaderIdentity(null, null)
+
+/** The Error state for a failed DFU run. A refused bootloader package wrote nothing, so it owes no recovery. */
+internal fun Exception.toErrorState(): FirmwareUpdateState.Error = when (this) {
+    is DfuException.StartTimedOut ->
+        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_start_timed_out))
+
+    is DfuException.BootloaderMismatch ->
+        FirmwareUpdateState.Error(
+            reported.model?.let {
+                UiText.Resource(Res.string.firmware_update_bootloader_mismatch, it, expectedModel)
+            } ?: UiText.Resource(Res.string.firmware_update_bootloader_model_unknown, expectedModel),
+            nothingWritten = true,
+        )
+
+    is BootloaderSwapTimeout ->
+        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_bootloader_not_back))
+
+    else -> FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, message.orEmpty()))
+}
+
+/**
+ * Unbinds the mesh link and sends the buttonless DFU trigger, then gives the device time to reboot into its bootloader.
+ * The trigger always uses [SecureDfuTransport]: it speaks both the Secure (FE59) and Legacy (1530) buttonless triggers.
+ * A failed trigger is not fatal, since the device may already be in DFU mode.
+ *
+ * @return The pre-START budget, which starts once the device has been asked to leave its application.
+ */
+private suspend fun enterDfuMode(
+    target: String,
+    radioController: RadioController,
+    bleScanner: BleScanner,
+    bleConnectionFactory: BleConnectionFactory,
+    dispatchers: CoroutineDispatchers,
+    updateState: (FirmwareUpdateState) -> Unit,
+): PreStartBudget {
+    updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu))))
+    radioController.setDeviceAddress("n")
+    delay(GATT_RELEASE_DELAY_MS)
+    val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+    try {
+        triggerTransport.triggerButtonlessDfu().onFailure { e ->
+            Logger.w(e) { "DFU: buttonless trigger failed; device may already be in DFU mode" }
+        }
+    } finally {
+        withContext(NonCancellable) { triggerTransport.close() }
+    }
+    val preStart = PreStartBudget(PRE_START_BUDGET)
+    delay(DFU_REBOOT_WAIT_MS)
+    return preStart
+}
+
+private fun DfuUploadResult.throwOnFailure() {
+    if (this is DfuUploadResult.Failure) throw error
 }
 
 /**
@@ -492,25 +609,8 @@ class SecureDfuHandler(
                 val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
-                updateState(
-                    FirmwareUpdateState.Processing(
-                        ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
-                    ),
-                )
-                radioController.setDeviceAddress("n")
-                delay(GATT_RELEASE_DELAY_MS)
-
-                // The trigger always uses SecureDfuTransport — it speaks both Secure (FE59) and Legacy (1530)
-                // buttonless triggers and falls back automatically (commit f26f610c0).
-                val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-                try {
-                    triggerTransport.triggerButtonlessDfu().onFailure { e ->
-                        Logger.w(e) { "DFU: Buttonless trigger failed ($e) — device may already be in DFU mode" }
-                    }
-                } finally {
-                    withContext(NonCancellable) { triggerTransport.close() }
-                }
-                delay(DFU_REBOOT_WAIT_MS)
+                val preStart =
+                    enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
 
                 // ── 4. Service detection: which DFU service does the bootloader advertise? ─
                 val detection = detectBootloaderProtocol(target, updateState)
@@ -533,25 +633,164 @@ class SecureDfuHandler(
                 // DfuFallbackCoordinator resolves the detection into an ordered protocol list; whether the alternate
                 // is tried depends on detection-specific engagement rules (shouldTryAlternateAfterFailure).
                 DfuFallbackCoordinator(detection).execute { protocol, budget ->
-                    runDfuUploadWithRetry(protocol, target, pkg, budget, updateState)
+                    runDfuUploadWithRetry(protocol, target, pkg, budget, preStart, updateState)
                 }
                 zipFile
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DfuException) {
-            Logger.e(e) { "DFU: Protocol error" }
-            updateState(
-                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-            )
-            cleanupArtifact
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "DFU: Unexpected error" }
-            updateState(
-                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-            )
+            Logger.e(e) { "DFU: update failed" }
+            updateState(e.toErrorState())
             cleanupArtifact
         }
+    }
+
+    /**
+     * Installs [asset]'s SoftDevice and bootloader over Legacy DFU, waits out the bootloader's own swap, then
+     * reinstalls [release]'s application, which staging the new images erased. Both packages are downloaded and checked
+     * before the device leaves its application, and nothing is written unless the bootloader's DIS reports the board
+     * and SoftDevice [asset] was built for.
+     */
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "ThrowsCount")
+    suspend fun upgradeBootloader(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        target: String,
+        asset: BootloaderDfuZip,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): FirmwareArtifact? {
+        var appZip: FirmwareArtifact? = null
+        var bootloaderZip: FirmwareArtifact? = null
+        return try {
+            withContext(ioDispatcher) {
+                appZip = obtainZipFile(release, hardware, null, updateState)
+                val appArtifact = appZip ?: return@withContext null
+                val appPkg = parseDfuZipEntries(firmwareFileHandler.extractZipEntries(appArtifact))
+
+                bootloaderZip =
+                    downloadWithProgress(
+                        updateState,
+                        UiText.Resource(Res.string.firmware_update_bootloader_downloading),
+                    ) { onProgress ->
+                        firmwareRetriever.retrieveBootloaderDfuZip(asset, onProgress)
+                    }
+                val bootloaderArtifact =
+                    bootloaderZip
+                        ?: run {
+                            updateState(
+                                FirmwareUpdateState.Error(
+                                    UiText.Resource(Res.string.firmware_update_bootloader_unverified, asset.fileName),
+                                    nothingWritten = true,
+                                ),
+                            )
+                            return@withContext appArtifact
+                        }
+                val bootloaderPkg =
+                    parseBootloaderDfuZipEntries(firmwareFileHandler.extractZipEntries(bootloaderArtifact))
+
+                val preStart =
+                    enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
+                if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
+                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode.
+                    resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)
+                    throw DfuException.TransferFailed(
+                        "Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package",
+                    )
+                }
+                val budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS)
+                runDfuUploadWithRetry(
+                    protocol = DfuProtocolKind.LEGACY,
+                    target = target,
+                    pkg = bootloaderPkg,
+                    budget = budget,
+                    preStart = preStart,
+                    updateState = updateState,
+                    session =
+                    UploadSessionOptions(
+                        beforeUpload = { transport ->
+                            requireBootloaderMatches(readIdentity(transport), asset)
+                        },
+                        reportSuccess = false,
+                        uploadMessage = UiText.Resource(Res.string.firmware_update_bootloader_uploading),
+                    ),
+                )
+                    .throwOnFailure()
+
+                updateState(
+                    FirmwareUpdateState.Processing(
+                        ProgressState(UiText.Resource(Res.string.firmware_update_bootloader_installing)),
+                    ),
+                )
+                if (!awaitBootloaderAfterSwap(target)) throw BootloaderSwapTimeout()
+
+                var after: BootloaderIdentity? = null
+                var lowSpeed = false
+                runDfuUploadWithRetry(
+                    protocol = DfuProtocolKind.LEGACY,
+                    target = target,
+                    pkg = appPkg,
+                    budget = budget,
+                    preStart = PreStartBudget(PRE_START_BUDGET),
+                    updateState = updateState,
+                    session =
+                    UploadSessionOptions(
+                        beforeUpload = { transport ->
+                            after = readIdentity(transport)
+                            lowSpeed = transport.isLowSpeedTransfer
+                        },
+                        reportSuccess = false,
+                        uploadMessage = UiText.Resource(Res.string.firmware_update_uploading_after_bootloader),
+                    ),
+                )
+                    .throwOnFailure()
+
+                val installed = after?.version
+                Logger.i { "Bootloader DFU: after upgrade the bootloader reports ${after?.firmwareRevision}" }
+                if (installed != null && installed.toString() != asset.version) {
+                    updateState(
+                        FirmwareUpdateState.Error(
+                            UiText.Resource(
+                                Res.string.firmware_update_bootloader_not_upgraded,
+                                installed.toString(),
+                                asset.version,
+                            ),
+                        ),
+                    )
+                } else {
+                    updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = lowSpeed))
+                }
+                appArtifact
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.e(e) { "Bootloader DFU: failed" }
+            updateState(e.toErrorState())
+            appZip
+        } finally {
+            bootloaderZip?.let { withContext(NonCancellable) { firmwareFileHandler.deleteFile(it) } }
+        }
+    }
+
+    /**
+     * Scans for the Legacy DFU service at [target] or MAC+1 until the bootloader re-advertises after activating a new
+     * SoftDevice and bootloader. It copies both images into place before it advertises again, which takes minutes.
+     */
+    private suspend fun awaitBootloaderAfterSwap(target: String): Boolean {
+        val targetAddresses = setOf(target, calculateMacPlusOne(target))
+        val deadline = TimeSource.Monotonic.markNow() + BOOTLOADER_SWAP_TIMEOUT
+        delay(BOOTLOADER_SWAP_FIRST_SCAN_DELAY)
+        while (deadline.hasNotPassedNow()) {
+            val hit =
+                scanForBleDeviceTolerant(
+                    tag = "Bootloader DFU swap",
+                    serviceUuid = LegacyDfuUuids.SERVICE,
+                    predicate = { it.address in targetAddresses },
+                )
+            if (hit != null) return true
+        }
+        return false
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -644,18 +883,23 @@ class SecureDfuHandler(
      * bounded retry logic to [runDfuRetryLoop] (testable without bringing up the full BLE stack); the lambdas here
      * supply the real [runUploadSession] and [resetStaleBootloader] implementations.
      */
+    @Suppress("LongParameterList")
     private suspend fun runDfuUploadWithRetry(
         protocol: DfuProtocolKind,
         target: String,
         pkg: DfuZipPackage,
         budget: DfuAttemptBudget,
+        preStart: PreStartBudget,
         updateState: (FirmwareUpdateState) -> Unit,
+        session: UploadSessionOptions = UploadSessionOptions(),
     ): DfuUploadResult = runDfuRetryLoop(
         protocol = protocol,
         budget = budget,
         maxStaleResets = MAX_LEGACY_STALE_RESETS,
-        runUploadSession = { profile -> runUploadSession(protocol, target, pkg, profile, updateState) },
-        resetStaleBootloader = { resetStaleBootloader(protocol, target) },
+        runUploadSession = { profile ->
+            runUploadSession(protocol, target, pkg, profile, preStart, updateState, session)
+        },
+        resetStaleBootloader = { resetStaleBootloader(protocol, target, preStart) },
         interAttemptDelay = { delay(SESSION_RETRY_DELAY_MS) },
         onRetryScheduled = { next, total ->
             updateState(
@@ -670,11 +914,12 @@ class SecureDfuHandler(
         protocol: DfuProtocolKind,
         target: String,
         legacyProfile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+        image: DfuImage = DfuImage.Application,
     ): DfuUploadTransport = when (protocol) {
         // Legacy transport receives the selected stream profile; default NORMAL keeps prior behavior for any caller
         // that does not pass an explicit profile (e.g. reset-prime, which is a control-point operation only).
         DfuProtocolKind.LEGACY ->
-            LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default, legacyProfile)
+            LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default, legacyProfile, image)
 
         DfuProtocolKind.SECURE -> SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
     }
@@ -686,17 +931,19 @@ class SecureDfuHandler(
      * abort are best-effort (swallowed by [DfuUploadTransport.abort]); structured-concurrency cancellation and [Error]
      * subtypes propagate per the abort contract.
      */
-    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String) {
+    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String, preStart: PreStartBudget) {
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
         val transport = createTransport(protocol, target)
         try {
-            transport
-                .connectToDfuMode()
-                .onSuccess {
-                    transport.abort()
-                    Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
-                }
-                .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
+            preStart.bounded {
+                transport
+                    .connectToDfuMode()
+                    .onSuccess {
+                        transport.abort()
+                        Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
+                    }
+                    .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
+            }
         } finally {
             withContext(NonCancellable) { transport.close() }
         }
@@ -704,20 +951,24 @@ class SecureDfuHandler(
     }
 
     /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */
+    @Suppress("LongParameterList", "CyclomaticComplexMethod", "ThrowsCount")
     private suspend fun runUploadSession(
         protocol: DfuProtocolKind,
         target: String,
         pkg: DfuZipPackage,
         legacyProfile: LegacyDfuStreamProfile,
+        preStart: PreStartBudget,
         updateState: (FirmwareUpdateState) -> Unit,
+        session: UploadSessionOptions = UploadSessionOptions(),
     ): DfuUploadResult {
-        val transport: DfuUploadTransport = createTransport(protocol, target, legacyProfile)
+        val transport: DfuUploadTransport = createTransport(protocol, target, legacyProfile, pkg.image)
         var completed = false
         var protocolEngaged = false
         var sessionFailure: Throwable? = null
         try {
-            connectWithRetry(transport, protocol, updateState)
+            preStart.bounded { connectWithRetry(transport, protocol, updateState) }
             protocolEngaged = true
+            session.beforeUpload?.let { check -> preStart.bounded { check(transport) } }
 
             updateState(
                 FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu))),
@@ -728,7 +979,7 @@ class SecureDfuHandler(
             }
             transport.transferInitPacket(pkg.initPacket).getOrThrow()
 
-            val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
+            val uploadMsg = session.uploadMessage ?: UiText.Resource(Res.string.firmware_update_uploading)
             val slowHint =
                 if (transport.isLowSpeedTransfer) {
                     UiText.Resource(Res.string.firmware_update_slow_bootloader_hint)
@@ -742,8 +993,14 @@ class SecureDfuHandler(
             transport
                 .transferFirmware(
                     pkg.firmware,
-                    onPhase = { phase -> updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint)) },
+                    onPhase = { phase ->
+                        if (phase != DfuUploadPhase.PREPARING) preStart.markStarted()
+                        updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint))
+                    },
                 ) { progress ->
+                    // Secure DFU reports no phases; its first progress callback comes after the bootloader accepted
+                    // the start.
+                    preStart.markStarted()
                     val bytesSent = (progress * firmwareSize).toLong()
                     throughputTracker.record(bytesSent)
                     val details = formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
@@ -758,9 +1015,19 @@ class SecureDfuHandler(
             )
 
             completed = true
-            updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
+            if (session.reportSuccess) {
+                updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
+            }
             return DfuUploadResult.Success
         } catch (e: CancellationException) {
+            throw e
+        } catch (e: DfuException.BootloaderMismatch) {
+            // Nothing was written; cleanup's RESET returns the board to its application. A retry would read the same.
+            sessionFailure = e
+            throw e
+        } catch (e: DfuException.StartTimedOut) {
+            // Ends the whole run, not just this session: no retry or alternate protocol can reach the board now.
+            sessionFailure = e
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sessionFailure = e
@@ -776,9 +1043,6 @@ class SecureDfuHandler(
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
         val serviceUuid = protocol.serviceUuid()
-        updateState(
-            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
-        )
         retryWithDelay(
             attempts = CONNECT_ATTEMPTS,
             retryDelayMillis = RETRY_DELAY_MS,
@@ -824,27 +1088,16 @@ class SecureDfuHandler(
             return FirmwareArtifact(uri = firmwareUri, fileName = firmwareUri.pathSegments.lastOrNull())
         }
 
-        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-
-        updateState(
-            FirmwareUpdateState.Downloading(
-                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
-            ),
-        )
-
         val path =
-            firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                updateState(
-                    FirmwareUpdateState.Downloading(
-                        ProgressState(UiText.DynamicString(downloadingMsg), progress, formatTransferPercent(progress)),
-                    ),
-                )
+            downloadWithProgress(updateState) { onProgress ->
+                firmwareRetriever.retrieveOtaFirmware(release, hardware, onProgress)
             }
 
         if (path == null) {
             updateState(
                 FirmwareUpdateState.Error(
                     UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                    nothingWritten = true,
                 ),
             )
         }
@@ -863,5 +1116,11 @@ class SecureDfuHandler(
 
         /** Wait after a reset-prime RESET for the bootloader to reboot and re-advertise a clean OTA session. */
         private const val RESET_PRIME_REBOOT_WAIT_MS = 4_000L
+
+        /** Bound on the bootloader's own SoftDevice+bootloader swap after ACTIVATE. */
+        private val BOOTLOADER_SWAP_TIMEOUT = 6.minutes
+
+        /** The swap never finishes this fast, and scanning it out only spends the scan-start quota. */
+        private val BOOTLOADER_SWAP_FIRST_SCAN_DELAY = 30.seconds
     }
 }

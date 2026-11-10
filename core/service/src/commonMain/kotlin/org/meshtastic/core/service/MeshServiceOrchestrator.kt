@@ -78,6 +78,7 @@ class MeshServiceOrchestrator(
     private val connectionManager: MeshConnectionManager,
     private val dispatchers: CoroutineDispatchers,
     private val localNetworkAccess: LocalNetworkAccess,
+    private val lastBleNodeRecorder: LastBleNodeRecorder,
 ) {
     // Per-start coroutine scope. A fresh scope is created on each start() and cancelled on stop(), so all collectors
     // launched from start() are torn down cleanly and do not accumulate across start/stop/start cycles.
@@ -179,6 +180,8 @@ class MeshServiceOrchestrator(
             .launchIn(newScope)
 
         newScope.handledLaunch { coldStartConnect() }
+
+        lastBleNodeRecorder.start(newScope)
 
         // Mid-session device-address transitions (late process-lifecycle devAddr propagation,
         // user-initiated device switch, etc.): keep the active DB in sync with the selected

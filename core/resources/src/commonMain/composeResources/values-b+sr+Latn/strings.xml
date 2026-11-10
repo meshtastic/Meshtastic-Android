@@ -106,6 +106,7 @@
     <!-- DEBUG -->
     <string name="debug">Дебагуј</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>
+    <!-- DEEP -->
     <string name="default_">Подразумевано</string>
     <!-- DELETE -->
     <string name="delete">Обриши</string>
@@ -170,6 +171,7 @@
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
     <string name="firmware">Фирмвер</string>
+    <string name="firmware_gate_title">Ажурирање фирмвера је неопходно</string>
     <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
@@ -187,8 +189,10 @@
     <string name="hops_away">Скокова удаљено</string>
     <string name="humidity">Влажност</string>
     <string name="i_know_what_i_m_doing">Знам шта радим.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalitet vazduha u zatvorenom prostoru) relativna skala vrednosti IAQ merena Bosch BME680. Raspon vrednosti 0–500.</string>
+    <string name="iaq_level_good">Dobro</string>
     <string name="ignore">Игнориши</string>
     <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
     <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>
@@ -203,6 +207,9 @@
     <string name="latitude">Ширина</string>
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direktno</string>
+    <string name="live_update_start">Почетак</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -213,6 +220,7 @@
     <string name="logs">Дневници</string>
     <string name="long_name">Дуго име</string>
     <string name="longitude">Дужина</string>
+    <!-- LORA -->
     <string name="lora">LoRA</string>
     <string name="lora_config">LoRA</string>
     <string name="low_battery_message">Чвор %1$s има низак ниво батерије (%2$d%)</string>
@@ -259,12 +267,20 @@
     <string name="message_status_queued">U redu za slanje</string>
     <string name="message_status_unknown">Непознато</string>
     <string name="messages">Поруке</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Назад</string>
+    <string name="mirror_key_down">Доле</string>
+    <string name="mirror_key_left">Лево</string>
+    <string name="mirror_key_ok">Океј</string>
+    <string name="mirror_key_right">Десно</string>
+    <string name="mirror_key_up">Горе</string>
     <string name="modem_preset">Унапред подешено</string>
     <string name="module_settings">Конфигурација модула</string>
     <!-- MQTT -->
     <string name="mqtt_config">MQTT подешавања</string>
     <string name="mqtt_status_connected">Блутут повезан</string>
     <string name="mqtt_status_disconnected">Raskačeno</string>
+    <string name="mqtt_topic_finder_level_region">Регион</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
     <string name="must_update">Morate da ažurirate ovu aplikaciju na prodavnici aplikacija (ili Github-u). Previše je stara da bi razgovarala sa ovim radio firmverom. Molimo vas da pročitate naše <a href="https://meshtastic.org/docs/software/android/installation">dokumente</a> o ovoj temi.</string>
     <!-- MUTE -->
@@ -337,7 +353,9 @@
     <string name="quick_chat_edit">Измени брзо ћаскање</string>
     <string name="quick_chat_instant">Моментално пошаљи</string>
     <string name="quick_chat_new">Ново брзо ћаскање</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Конфигурација радио уређаја</string>
+    <string name="radio_setup_name_headline">Пријатељски назив</string>
     <string name="range_test">Тест домета</string>
     <string name="range_test_config">Конфигурација теста домета</string>
     <string name="reboot">Поново покрени</string>
@@ -469,6 +487,8 @@
     <string name="website">Вебсајт</string>
     <string name="what_is_meshtastic">Шта је Мештастик?</string>
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Loš</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP адреса</string>
     <string name="wifi_provision_success_username">Корисничко име</string>

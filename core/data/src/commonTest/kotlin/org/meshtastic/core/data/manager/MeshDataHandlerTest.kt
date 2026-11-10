@@ -774,7 +774,7 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
         advanceUntilIdle()
 
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true, from = 456) }
     }
 
     private fun sentPacket(ackProofStatus: Int = 0) = DataPacket(
@@ -954,7 +954,7 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
         advanceUntilIdle()
 
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false) }
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false, from = 456) }
     }
 
     @Test
@@ -991,7 +991,7 @@ class MeshDataHandlerTest {
         verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
-        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any()) }
+        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any(), any()) }
     }
 
     // --- Telemetry handling ---
@@ -1340,6 +1340,55 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         assertEquals(true, assertNotNull(persistedReaction).xeddsaSigned)
+    }
+
+    @Test
+    fun `a reaction received via MQTT is persisted with its transport`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 98
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.via_mqtt = true
+                    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 98,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                viaMqtt = true,
+                transportMechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT.value,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(98) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        val reaction = assertNotNull(persistedReaction)
+        assertEquals(true, reaction.viaMqtt)
+        assertEquals(MeshPacket.TransportMechanism.TRANSPORT_MQTT.value, reaction.transportMechanism)
     }
 
     @Test
@@ -1915,6 +1964,30 @@ class MeshDataHandlerTest {
                     .build(),
             )
         stubWaypointPersistDependencies(500)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `a waypoint update is dropped when the stored waypoints cannot be read`() = testScope.runTest {
+        // A corrupt page completes getWaypoints() without a value; that must not read as "nothing stored".
+        every { packetRepository.getWaypoints() } returns emptyFlow()
+        val packet =
+            waypointPacket(
+                txId = 501,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(501)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()

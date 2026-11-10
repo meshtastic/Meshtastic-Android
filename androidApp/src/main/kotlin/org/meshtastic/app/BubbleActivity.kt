@@ -17,12 +17,8 @@
 package org.meshtastic.app
 
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -34,6 +30,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -69,10 +66,7 @@ class BubbleActivity : AppCompatActivity() {
         }
         messageViewModel.setContactKey(contactKey)
 
-        enableEdgeToEdge()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
+        WindowCompat.enableEdgeToEdge(window)
 
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
@@ -83,10 +77,10 @@ class BubbleActivity : AppCompatActivity() {
                     else -> isSystemInDarkTheme()
                 }
             SideEffect {
-                enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
-                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
-                )
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !dark
+                    isAppearanceLightNavigationBars = !dark
+                }
             }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
                 // Edge to edge, only this padding keeps the composer clear of the keyboard and the navigation bar.

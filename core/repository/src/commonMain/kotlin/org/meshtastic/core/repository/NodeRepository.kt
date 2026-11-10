@@ -160,6 +160,14 @@ interface NodeRepository {
      */
     suspend fun setNodeNotes(num: Int, notes: String)
 
+    /**
+     * Sets the local display name for a node. It never leaves the device. An empty string clears it.
+     *
+     * @param num The node number.
+     * @param displayName The name to show in place of the broadcast long name.
+     */
+    suspend fun setNodeDisplayName(num: Int, displayName: String)
+
     /** Clears the unheard flag on every node. See NodeInfoDao.markAllHeardOnCurrentLora. */
     suspend fun markAllHeardOnCurrentLora()
 

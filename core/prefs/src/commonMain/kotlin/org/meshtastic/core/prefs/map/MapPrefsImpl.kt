@@ -159,7 +159,16 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         }
         .first()
 
+    // Starts as seen, so a returning user does not glimpse the coaching before the stored value loads.
+    override val meshHudCoachSeen: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_MESH_HUD_COACH_SEEN_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setMeshHudCoachSeen(seen: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_MESH_HUD_COACH_SEEN_PREF] = seen } }
+    }
+
     companion object {
+        val KEY_MESH_HUD_COACH_SEEN_PREF = booleanPreferencesKey("mesh_hud_coach_seen")
         val KEY_MAP_STYLE_PREF = intPreferencesKey("map_style_id")
         val KEY_SHOW_ONLY_FAVORITES_PREF = booleanPreferencesKey("show_only_favorites")
         val KEY_SHOW_WAYPOINTS_PREF = booleanPreferencesKey("show_waypoints")

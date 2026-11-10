@@ -158,6 +158,7 @@
     <string name="debug_search_prev">Poprzednie dopasowanie</string>
     <string name="debug_store_logs_summary">Wyłącz, aby pominąć zapisywanie logów na dysku</string>
     <string name="debug_store_logs_title">Przechowuj logi sieci</string>
+    <!-- DEEP -->
     <string name="default_">Domyślny</string>
     <!-- DELETE -->
     <string name="delete">Usuń</string>
@@ -241,6 +242,7 @@
     <string name="filter_words">Filtruj słowa</string>
     <!-- FIRMWARE -->
     <string name="firmware">Oprogramowanie</string>
+    <string name="firmware_gate_title">Wymagana aktualizacja firmware'u</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="firmware_too_old">Wymagana aktualizacja firmware'u.</string>
     <string name="firmware_update_almost_there">Prawie gotowe...</string>
@@ -293,8 +295,10 @@
     <string name="i_agree">Zgadzam się.</string>
     <string name="i_agree_to_share_my_location">Przeczytałem powyższe informacje i rozumiem je. Wyrażam dobrowolną zgodę na niezaszyfrowaną transmisję danych mojego węzła za pośrednictwem protokołu MQTT</string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
+    <string name="iaq_level_good">dobry</string>
     <string name="icon_meanings">Znaczenia ikon</string>
     <string name="ignore">Zignoruj</string>
     <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>
@@ -321,6 +325,8 @@
     <!-- LAYER -->
     <string name="learn_more">Dowiedz się więcej</string>
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Bezpośrednio</string>
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
     <!-- LOCAL -->
@@ -347,6 +353,7 @@
     <string name="log_retention_never">Nigdy nie usuwaj logów</string>
     <string name="logs">Rejestry zdarzeń (logs)</string>
     <string name="long_name">Długa nazwa</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Słaba bateria</string>
@@ -408,6 +415,13 @@
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
     <string name="message_status_unknown">Nieznany</string>
     <string name="messages">Wiadomości</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Wstecz</string>
+    <string name="mirror_key_down">W Dół</string>
+    <string name="mirror_key_left">W Lewo</string>
+    <string name="mirror_key_ok">OK</string>
+    <string name="mirror_key_right">W Prawo</string>
+    <string name="mirror_key_up">W Górę</string>
     <string name="modem_preset">Presety</string>
     <string name="module_settings">Ustawienia modułu</string>
     <!-- MQTT -->
@@ -415,6 +429,7 @@
     <string name="mqtt_config">Konfiguracja MQTT</string>
     <string name="mqtt_status_connected">Połączony</string>
     <string name="mqtt_status_disconnected">Rozłączono</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub z GitHub, ponieważ aplikacja jest zbyt stara, by skomunikować się z oprogramowaniem zainstalowanym na tym urządzeniu. <a href="https://meshtastic.org/docs/software/android/installation">Więcej informacji (ang.)</a>.</string>
     <!-- MUTE -->
@@ -535,7 +550,9 @@
     <string name="quick_chat_new">Nowy szablon</string>
     <string name="quick_chat_show">Pokaż menu szybkiego wyboru</string>
     <string name="radiation">Promieniowanie</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Ustawienia urządzenia</string>
+    <string name="radio_setup_name_headline">Przyjazna nazwa</string>
     <string name="range_test">Test zasięgu</string>
     <string name="range_test_config">Konfiguracja testu zasięgu</string>
     <string name="reboot">Restart</string>
@@ -616,7 +633,6 @@
     <string name="share_to">Udostępnij…</string>
     <string name="share_your_location_in_real_time">Udostępniaj swoją lokalizację w czasie rzeczywistym i koordynuj działania swojej grupy dzięki zintegrowanym funkcjom GPS.</string>
     <string name="short_name">Krótka nazwa</string>
-    <string name="should_update_firmware">Zalecana aktualizacja.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Znaczenie klucza szyfrowania</string>
     <string name="show_layer">Pokaż warstwę</string>
@@ -637,6 +653,7 @@
     <string name="swipe_action_mute">Wycisz</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Wygeneruj ponownie</string>
     <string name="tak_server_section">Serwer</string>
     <string name="tak_server_status_off">Wyłączony</string>
     <string name="telemetry">Telemetria</string>
@@ -709,6 +726,8 @@
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %1$s</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">słaby</string>
     <!-- WIFI -->
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_done">Wykonano</string>

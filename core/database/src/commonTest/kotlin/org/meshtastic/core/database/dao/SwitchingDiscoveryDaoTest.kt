@@ -207,7 +207,7 @@ class SwitchingDiscoveryDaoTest {
         private var writesAvailable = true
         override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
 
-        override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> =
+        override fun <T> observeCurrentDb(name: String?, query: (MeshtasticDatabase) -> Flow<T>): Flow<T> =
             currentDb.flatMapLatest(query)
 
         override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(_currentDb.value)

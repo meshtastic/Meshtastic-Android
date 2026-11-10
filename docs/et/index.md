@@ -14,7 +14,7 @@ Rakenduse funktsioonide vaatamiseks kasuta külgriba navigeerimisriba, et sirvid
 
 | Juhend                                           | Kirjeldus                                                         |
 | ------------------------------------------------ | ----------------------------------------------------------------- |
-| [Alustamine](user/onboarding)                    | Ühenda oma esimene raadio ja saada sõnum                          |
+| [Alustamine](user/onboarding)                    | Connect your first node and send a message                        |
 | [Sõnumid ja kanalid](user/messages-and-channels) | Kanali levitamine, otseteated, reaktsioonid ja krüptimine         |
 | [Seadmed](user/nodes)                            | Kärgvõrgu sõlmede loendi mõistmine                                |
 | [Signaalimõõtur](user/signal-meter)              | Kuidas Lora signaali kvaliteedi mõõdik toimib                     |
@@ -23,4 +23,4 @@ Rakenduse funktsioonide vaatamiseks kasuta külgriba navigeerimisriba, et sirvid
 | [Arhitektuur](developer/architecture)            | Rakenduse arhitektuuri ülevaade kaastöölistele                    |
 | [Panustamine](developer/contributing)            | Haarade nimetamine, PR töövoog ja kinnituskäsklused               |
 
-> See dokumentatsioon pärineb samast Markdowni allikast, mis toetab rakendusesisest **Abi ja dokumentatsioon** brauserit.
+See dokumentatsioon pärineb samast Markdowni allikast, mis toetab rakendusesisest **Abi ja dokumentatsioon** brauserit.

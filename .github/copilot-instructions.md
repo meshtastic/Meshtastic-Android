@@ -15,9 +15,9 @@ Requires JDK 25 and `ANDROID_HOME`. No secrets step: the secrets plugin reads
 ```
 > Both `test` AND `allTests` are needed — `allTests` covers KMP modules, `test` covers pure-Android modules.
 
-**KMP vs Android-only task naming** (wrong name silently skips tests or fails resolution): KMP modules (`core:*`, `feature:*`) use `:module:allTests` and `:module:compileKotlinJvm`; Android-only modules (`androidApp`, `desktopApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest` (plain `:desktopApp:test` for the JVM-only desktop module). `:module:detekt` runs the rules that need no classpath and `:module:detektTypeResolved` the ones that do (both kinds of module); never call `detektMain`/`detektDebug` directly. Full matrix and pitfalls: `.skills/testing-ci/`.
+**KMP vs Android-only task naming** (wrong name silently skips tests or fails resolution): KMP modules (every `core:*` and `feature:*` except the three below) use `:module:allTests` and `:module:compileKotlinJvm`. Android-only modules with flavors (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; the flavorless `feature:widget` uses `:module:testDebugUnitTest`, and `core:nfc` has no tests. The JVM-only `desktopApp` and `schema-strings` use plain `:module:test`. `:module:detekt` runs the rules that need no classpath and `:module:detektTypeResolved` the ones that do (both kinds of module); never call `detektMain`/`detektDebug` directly. Full matrix and pitfalls: `.skills/testing-ci/`.
 
-Architecture, flavors, conventions, branch naming, protos, coding rules: **see `AGENTS.md`**. Contextual `.github/instructions/` files enforce conventions scoped to specific source sets.
+Rules, protos and coding conventions: **see `AGENTS.md`**. Module map and flavors: `.skills/project-overview/`. Branch naming: `CONTRIBUTING.md` → Pull Requests. Contextual `.github/instructions/` files enforce conventions scoped to specific source sets.
 
 ## Copilot-Only Behavior Rules
 
@@ -38,7 +38,5 @@ These are specific to the Copilot CLI environment and are not covered in AGENTS.
 - **Compact by ~turn 12.** Later turns pay for the full accumulated history; don't let exploratory sessions run 15+ turns uncompacted.
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan at
-specs/20260711-153545-message-markdown-styling/plan.md
+No Spec Kit plan is in progress.
 <!-- SPECKIT END -->

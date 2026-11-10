@@ -42,9 +42,9 @@ import org.maplibre.spatialk.geojson.Geometry
 @Composable
 internal fun <G : Geometry> rememberFeatureSource(
     vararg keys: Any?,
-    options: GeoJsonOptions = GeoJsonOptions(),
+    options: GeoJsonOptions = GeoJsonOptions.Standard,
     features: () -> FeatureCollection<G, JsonObject?>,
 ): GeoJsonSource {
     val data = remember(*keys, options) { GeoJsonData.Features(features()) }
-    return rememberGeoJsonSource(data = data, options = options)
+    return rememberGeoJsonSource(data = data, from = options)
 }

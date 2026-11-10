@@ -21,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -46,8 +47,10 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.ModuleConfig
 
 @Composable
@@ -64,16 +67,18 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = ModuleConfig.Builder().also { wb -> wb.serial = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.SERIAL.route)) {
             TitledCard(title = stringResource(Res.string.serial_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_serial_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_enabled),
                     summary = stringResource(Res.string.schema_serial_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -85,6 +90,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_serial_echo),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_echo),
                     summary = stringResource(Res.string.schema_serial_echo_description),
                     checked = formState.value.echo,
                     enabled = state.connected,
@@ -96,6 +102,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_rxd),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_rxd),
                     summary = stringResource(Res.string.schema_serial_rxd_description),
                     value = formState.value.rxd,
                     enabled = state.connected,
@@ -107,6 +114,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_txd),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_txd),
                     summary = stringResource(Res.string.schema_serial_txd_description),
                     value = formState.value.txd,
                     enabled = state.connected,
@@ -118,6 +126,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_baud),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_baud),
                     summary = stringResource(Res.string.schema_serial_baud_description),
                     enabled = state.connected,
                     selectedItem = formState.value.baud,
@@ -128,6 +137,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_timeout),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_timeout),
                     summary = stringResource(Res.string.schema_serial_timeout_description),
                     value = formState.value.timeout,
                     enabled = state.connected,
@@ -139,8 +149,10 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_mode),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_mode),
                     summary = stringResource(Res.string.schema_serial_mode_description),
                     enabled = state.connected,
+                    items = schemaLabelledItems(serialModeOptions(formState.value.mode)),
                     selectedItem = formState.value.mode,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
@@ -161,3 +173,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
     }
 }
+
+/** MODBUS is in the schema but no firmware release implements it, so it is offered only while the node holds it. */
+internal fun serialModeOptions(selected: ModuleConfig.SerialConfig.Serial_Mode) =
+    ModuleConfig.SerialConfig.Serial_Mode.entries.filter {
+        it != ModuleConfig.SerialConfig.Serial_Mode.MODBUS || it == selected
+    }

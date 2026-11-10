@@ -171,6 +171,7 @@
     <string name="debug_search_clear">Limpar busca</string>
     <string name="debug_search_next">Próxima correspondência</string>
     <string name="debug_search_prev">Correspondência anterior</string>
+    <!-- DEEP -->
     <string name="default_">Padrão</string>
     <!-- DELETE -->
     <string name="delete">Excluir</string>
@@ -245,13 +246,13 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Edição do Firmware</string>
+    <string name="firmware_gate_title">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="firmware_too_old">Atualização do firmware necessária.</string>
     <string name="firmware_update_done">Concluído</string>
     <string name="firmware_update_failed">Atualização falhou</string>
     <string name="firmware_version">Versão do firmware: %1$s</string>
     <!-- FORMAT -->
-    <string name="free_memory">Memória Livre</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Resistência ao gás</string>
     <!-- GEOFENCE -->
@@ -269,8 +270,10 @@
     <string name="i_agree">Eu concordo.</string>
     <string name="i_agree_to_share_my_location">Eu li e entendo o acima. Eu concordo voluntariamente com a transmissão não criptografada dos dados do meu nó via MQTT.</string>
     <string name="i_know_what_i_m_doing">Eu sei o que estou fazendo.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualidade do ar interior) valor relativo da escala IAQ medido pelo Bosch BME680. Intervalo de Valor de 0–500.</string>
+    <string name="iaq_level_good">Bom</string>
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Adicionar '%1$s' na lista de ignorados?</string>
     <string name="ignore_incoming">Ignorar entrada</string>
@@ -300,6 +303,9 @@
     <string name="legacy_admin_channel">Canal de administração antigo</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a criptografia e não é compatível com a rede padrão do Meshtastic.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direto</string>
+    <string name="live_update_distance">%1$s de distância</string>
     <!-- LOAD -->
     <string name="load">Carregar</string>
     <string name="load_indexed">Carga %1$d</string>
@@ -311,6 +317,7 @@
     <!-- LOG -->
     <string name="logs">Logs</string>
     <string name="longitude">Longitude</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Bateria Fraca</string>
@@ -376,6 +383,9 @@
     <string name="message_status_queued">Programado para envio</string>
     <string name="message_status_unknown">Desconhecido</string>
     <string name="messages">Mensagens</string>
+    <!-- MIRROR -->
+    <string name="mirror_back">Voltar</string>
+    <string name="mirror_key_ok">Ok</string>
     <string name="module_settings">Configuração de módulos</string>
     <string name="modules_unlocked">Módulos desbloqueados</string>
     <!-- MQTT -->
@@ -383,6 +393,7 @@
     <string name="mqtt_config">Configurações MQTT</string>
     <string name="mqtt_status_connected">Conectado</string>
     <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_topic_finder_level_region">Região</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://meshtastic.org/docs/software/android/installation">docs</a>.</string>
     <!-- MUTE -->
@@ -490,7 +501,9 @@
     <string name="quick_chat_new">Novo chat rápido</string>
     <string name="quick_chat_show">Mostrar menu de chat rápido</string>
     <string name="radiation">Radiação</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Configurações do dispositivo</string>
+    <string name="radio_setup_name_headline">Nome amigável</string>
     <string name="range_test">Teste de Alcance</string>
     <string name="range_test_config">Configuração de Teste de Distância</string>
     <string name="react">Reagir</string>
@@ -568,8 +581,6 @@
     <string name="share_location">Compartilhar Localização</string>
     <string name="share_to">Compartilhar com…</string>
     <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
-    <string name="should_update">Para se beneficiar das últimas correções e recursos, por favor, atualize o seu firmware de nó.\n\nÚltima versão de firmwares estáveis: %1$s</string>
-    <string name="should_update_firmware">Atualização de Firmware recomendada.</string>
     <!-- SHOW -->
     <string name="show_layer">Mostrar Camada</string>
     <string name="show_password">Mostrar senha</string>
@@ -656,6 +667,8 @@
     <string name="waypoint_new">Novo ponto de referência</string>
     <string name="waypoint_received">Ponto de referência recebido: %1$s</string>
     <string name="weight">Peso</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Ruim</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_done">Concluído</string>
     <string name="wifi_provision_success_ip_address">Endereço IP</string>

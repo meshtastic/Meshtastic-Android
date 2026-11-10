@@ -48,7 +48,7 @@ Seeding a fake's backing store and then asserting the value comes back passes ev
 ### D. Room schema bump without a migration test
 **Every schema-version increment ships a migration test that proves existing rows survive.**
 
-- [ ] A new `core/database/schemas/org.meshtastic.core.database.MeshtasticDatabase/<n>.json` is accompanied by an `(n-1)→n` case in `core/database/src/jvmTest/.../MeshtasticDatabaseMigrationTest.kt` — the androidHostTest `*MigrationTest.kt` files cover DAO behaviour, not schema versions.
+- [ ] A new `core/database/schemas/org.meshtastic.core.database.MeshtasticDatabase/<n>.json` is accompanied by an `(n-1)→n` case in `core/database/src/jvmTest/.../MeshtasticDatabaseMigrationTest.kt` — the androidHostTest `*MigrationTest.kt` files cover DAO behavior, not schema versions.
 - [ ] The test inserts rows at the old version, migrates, and asserts **row count and column values** are preserved — not merely that the migration runs.
 - [ ] Columns going nullable assert that pre-existing values are retained and that the new `NULL` state is reachable (this is class A at the storage layer).
 
@@ -73,7 +73,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **String Formatting:** CMP only supports `%N$s` and `%N$d`. Flag any float formats (`%N$.1f`) in Compose string resources; they must be pre-formatted using `NumberFormatter.format()` from `core:common`. Use `MetricFormatter` for metric-specific displays (temperature, voltage, current, percent, humidity, pressure, SNR, RSSI).
 - [ ] **Centralized Dialogs & Alerts:** Flag inline alert-rendering logic. Mandate the use of `AlertHost(alertManager)` or `SharedDialogs` from `core:ui/commonMain`.
 - [ ] **Placeholders:** Require `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features. No inline placeholders in feature modules.
-- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfoV2()`, which includes the desktopApp/tablet Large and XL width classes (≥ 1200dp); `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` is deprecated in its favour.
+- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfoV2()`, which includes the desktopApp/tablet Large and XL width classes (≥ 1200dp); `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` is deprecated in its favor.
 
 ### 3. Navigation & State
 - [ ] **Shared Navigation Graphs:** Feature navigation graphs must be defined as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(...)`). Flag any graphs defined in platform-specific source sets.
@@ -85,7 +85,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Root Assembly:** Confirm that the root Koin DI graph is only assembled in host shells (`androidApp` and `desktopApp`).
 
 ### 5. Networking, DB & I/O
-- [ ] **Ktor Strictly:** Check that Ktor is used for all HTTP networking. Flag and reject any usage of OkHttp.
+- [ ] **Ktor Strictly:** Check that Ktor's `HttpClient` is the only HTTP API. OkHttp appears as the Ktor engine `androidApp`'s `NetworkModule` configures (with Datadog's interceptor on google) and in the google flavor's map-tile client (`MapTileHttpClient`); flag any other direct OkHttp use.
 - [ ] **HTTP Configuration:** Verify timeouts and base URLs use `HttpClientDefaults` from `core:network`. Never hardcode timeouts in feature modules. `DefaultRequest` sets the base URL; feature API services use relative paths.
 - [ ] **Image Loading (Coil):** Coil must use `coil-network-ktor3` in host modules. Feature modules should ONLY depend on `libs.coil` (coil-compose) and never configure fetchers.
 - [ ] **Room KMP:** Ensure `factory = { MeshtasticDatabaseConstructor.initialize() }` is used in `Room.databaseBuilder`. DAOs and Entities must reside in `commonMain`.
@@ -94,7 +94,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 
 ### 6. Dependency Catalog Aliases
 - [ ] **JetBrains vs. AndroidX:**
-  - In `commonMain`: Must use `jetbrains-*` aliases (e.g., `jetbrains-lifecycle-*`, `jetbrains-navigation3-ui`).
+  - In `commonMain`: Must use `jetbrains-*` aliases (e.g., `jetbrains-lifecycle-*`, `jetbrains-navigation3-ui`). An `androidx-*` alias is allowed only where AndroidX publishes the artifact as KMP itself (`androidx-navigation3-runtime`, DataStore, Room, SQLite bundled, Paging).
   - In `androidMain`: Can use `androidx-*` or `jetbrains-*` as appropriate, but do not mix them up in `commonMain`.
 - [ ] **Compose Multiplatform:** Ensure `compose-multiplatform-*` aliases are used instead of plain `androidx.compose` in all KMP modules.
 
@@ -111,18 +111,18 @@ Kermit is the only logging API, and on the **google** flavor its writers fan eve
 
 - [ ] **Severity gates reporting:** `Severity.Error`/`Assert` become a Crashlytics non-fatal (`shouldReportAsException`, which exempts `CancellationException` and any `ExpectedCondition` in the cause chain) **and** a Datadog RUM error (`shouldDowngradeForDatadog`, which exempts only `ExpectedCondition`). `Warn` and below never report in either sink, with no exceptions. Attaching a throwable at warn level is free and keeps the stack trace in the logs, so demoting costs nothing.
 - [ ] **Don't "unify" the two cancellation rules.** Crashlytics drops `CancellationException` because it is a crash-triage tool; Datadog keeps it because a cancellation logged at *error* means a call site swallowed it instead of rethrowing — broken structured concurrency, and a real bug. That asymmetry is the detector that found #6468. Likewise, neither rule unwraps the cause chain for cancellation: coroutine machinery attaches cancellations as the cause of unrelated genuine failures, and unwrapping would silently drop those reports.
-- [ ] **`Logger.e` with no throwable still reports.** Crashlytics synthesises an `Exception(message)`; Datadog raises a RUM error from the level alone. `Logger.e { "…" }` is *not* a cheap log line.
+- [ ] **`Logger.e` with no throwable still reports.** Crashlytics synthesizes an `Exception(message)`; Datadog raises a RUM error from the level alone. `Logger.e { "…" }` is *not* a cheap log line.
 - [ ] **Expected conditions must not be reported.** Bluetooth off, a permission not granted, location services off, a deliberate disconnect, a peer/broker protocol violation, a handled retry, a guard that is doing its job — these are environment states, not bugs. Reporting them buries real regressions during release triage.
 - [ ] **Use the `ExpectedCondition` seam** (`core/common/src/commonMain/.../log/ExpectedCondition.kt`):
   - Exception type that *only ever* means "the environment said no" → implement `ExpectedCondition` and give it a stable, low-cardinality `expectedConditionLabel` (e.g. `ble-scan-bluetooth-disabled`). `BleScanStartException` is the reference example.
   - Exception type shared between expected and genuine failures → leave the type alone and log that call site at `Logger.w`.
-  - Both sinks consult `shouldReportAsException(severity, throwable)`, so an `ExpectedCondition` is suppressed even if some call site logs it at error. Treat that as a backstop, not a licence to log expected states at error.
+  - Both sinks consult `shouldReportAsException(severity, throwable)`, so an `ExpectedCondition` is suppressed even if some call site logs it at error. Treat that as a backstop, not a license to log expected states at error.
 - [ ] **Prefer a rate over an exception.** For conditions worth *watching* but not *fixing* (watchdog fired, reconnect attempt failed), emit a warn log with a stable label and track its rate in the log backend. Do not manufacture a throwable just to get a stack trace.
 - [ ] **Third-party log bridges:** adapters that forward another library's logs into Kermit must downgrade that library's "error" level — its errors are usually operational. See `core/ble/.../KermitLogEngine.kt` (Kable).
 - [ ] **New `Logger.e` in a PR:** ask what the on-call engineer would *do* about it. If the answer is "nothing, that's just the user's phone", it is a `Logger.w`.
 
 ### 9. ProGuard / R8 Rules
-- [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `androidApp/proguard-rules.pro` (R8) and `desktopApp/proguard-rules.pro` (ProGuard). The two files must stay aligned.
+- [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify its keep rules exist for **both** R8 and ProGuard. Rules both need go in `config/proguard/shared-rules.pro`, which both builds apply; platform-only rules go in `androidApp/proguard-rules.pro` or `desktopApp/proguard-rules.pro`. Desktop ProGuard does not read dependencies' bundled consumer rules, so a rule R8 picks up from a jar must be written out for desktop.
 - [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktopApp:runRelease` succeed.
 
 ## Review Output Guidelines
@@ -135,17 +135,17 @@ Kermit is the only logging API, and on the **google** flavor its writers fan eve
 4. **Don't repeat what's already flagged.** Check existing review threads before adding a finding.
 5. **Enforce Build Health — only where a gap exists:** If a change lands in a KMP module and the PR's only test evidence is a bare `./gradlew test`, say so: that task is ambiguous in KMP modules and silently skips them, so the code was never exercised and `allTests` is required. Do not append a generic build reminder to a review that has no such gap.
 
-### Analyse impact before judging test coverage
+### Analyze impact before judging test coverage
 
-"There are tests" is not coverage. For each non-trivial production change, map: **changed behaviour** (the concrete code path) → **observable surfaces** (public API, protocol handling, persisted rows, DataStore, Compose state, notifications, service lifecycle, transport, MQTT, widgets, desktop, R8-shaped release behaviour) → **regression risks** (ordering, reconnect/retry, process death, schema compatibility with rows an older build wrote, cross-module call sites, flavor and platform differences) → **the test that should exist and does not**.
+"There are tests" is not coverage. For each non-trivial production change, map: **changed behavior** (the concrete code path) → **observable surfaces** (public API, protocol handling, persisted rows, DataStore, Compose state, notifications, service lifecycle, transport, MQTT, widgets, desktop, R8-shaped release behavior) → **regression risks** (ordering, reconnect/retry, process death, schema compatibility with rows an older build wrote, cross-module call sites, flavor and platform differences) → **the test that should exist and does not**.
 
-A bug fix needs a test that fails *without* the fix. An updated screenshot golden, Room schema JSON, or regenerated baseline profile proves serialisation, not behaviour. Don't demand a test category for a surface the change cannot reach.
+A bug fix needs a test that fails *without* the fix. An updated screenshot golden, Room schema JSON, or regenerated baseline profile proves serialization, not behavior. Don't demand a test category for a surface the change cannot reach.
 
 ### Review moved code as if it were new
 
 When a type moves files or is extracted, diff the old implementation against the new one: a removed `override`, a changed exception contract, a dropped `require`/`check`, a changed default parameter value, a nullability flip on a numeric field (class A), a lost `@Serializable`/`@Parcelize`/Koin annotation, a scope change altering instance lifetime, a changed dispatcher or `SharingStarted`. Then verify every call site of the removed declaration still holds. Pre-existing defects that came along with the move are in scope — label them *"pre-existing — good opportunity to fix during this refactor"* so the author can decide on scope.
 
 ## Git & PR Hygiene Rules
-- **Commit Hygiene:** Squash fixup/polish/review-feedback commits before opening a PR. Each commit should represent a logical, self-contained unit of work — not a back-and-forth conversation.
-- **PR Descriptions:** Keep PR descriptions concise and scannable. State *what changed* and *why*, not a per-commit play-by-play. Use a short summary paragraph followed by a bullet list of changes. Avoid tables, headers-per-commit, or verbose breakdowns. Reference the `meshtastic/firmware` repo PRs for tone and style.
-- **PR Titles:** Use conventional commit format: `feat(scope):`, `fix(scope):`, `refactor(scope):`, `chore(scope):`. Keep titles under ~72 characters.
+- **Commit Hygiene:** The merge queue squash-merges every PR, so the PR title becomes the commit on `main` and branch history is not preserved. Don't rewrite pushed history to tidy it; squash only when a maintainer asks.
+- **PR Descriptions:** Follow `CONTRIBUTING.md` → Pull Requests → Writing the description: why first, changes grouped under its emoji headings, "Testing Performed" when tests changed, and a Before / After table for visual changes. No per-commit play-by-play.
+- **PR Titles:** Use conventional commit format (`feat(scope):`, `fix(scope):`, `refactor(scope):`, `build:`, `ci:`, `chore(scope):`). Keep titles under ~72 characters.

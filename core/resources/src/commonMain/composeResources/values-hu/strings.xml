@@ -165,6 +165,7 @@
     <string name="debug_search_clear">Keresés törlése</string>
     <string name="debug_search_next">Következő találat</string>
     <string name="debug_search_prev">Előző találat</string>
+    <!-- DEEP -->
     <string name="default_">Alapértelmezett</string>
     <!-- DELETE -->
     <string name="delete">Törlés</string>
@@ -251,6 +252,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware kiadás</string>
+    <string name="firmware_gate_title">Firmware frissítés szükséges</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="firmware_too_old">Firmware frissítés szükséges.</string>
     <string name="firmware_update_failed">A frissítés sikertelen</string>
@@ -258,7 +260,6 @@
     <string name="fixed_position">Rögzített pozíció</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <!-- FORMAT -->
-    <string name="free_memory">Szabad memória</string>
     <string name="freq">Frekvencia</string>
     <string name="gas_resistance">Gázellenállás</string>
     <!-- GEOFENCE -->
@@ -276,8 +277,10 @@
     <string name="i_agree">Elfogadom.</string>
     <string name="i_agree_to_share_my_location">Elolvastam és megértettem a fentieket. Önkéntesen hozzájárulok, hogy a csomópontom adatai titkosítatlanul kerüljenek továbbításra MQTT-n keresztül</string>
     <string name="i_know_what_i_m_doing">Tudom, mit csinálok.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Beltéri levegőminőség) relatív IAQ érték a Bosch BME680 szenzor alapján. Értéktartomány: 0–500.</string>
+    <string name="iaq_level_good">Jó</string>
     <string name="icon_meanings">Ikonmagyarázatok</string>
     <string name="ignore">Mellőzés</string>
     <string name="ignore_add">Hozzáadod „%1$s”-t a figyelmen kívül hagyási listához?</string>
@@ -309,6 +312,8 @@
     <string name="legacy_admin_channel">Régi admin csatorna</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Közvetlen</string>
     <!-- LOAD -->
     <string name="load">Terhelés</string>
     <string name="load_indexed">Terhelés %1$d</string>
@@ -334,6 +339,7 @@
     <string name="logs">Naplók</string>
     <string name="long_name">Hosszú név</string>
     <string name="longitude">Hosszúság</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Alacsony töltöttség</string>
@@ -401,6 +407,8 @@
     <string name="message_status_unknown">Ismeretlen</string>
     <string name="messages">Üzenetek</string>
     <string name="minimum_wake_time_seconds">Minimális ébrenléti idő</string>
+    <!-- MIRROR -->
+    <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Előbeállítások</string>
     <string name="module_settings">Modul beállítások</string>
     <string name="modules_already_unlocked">A modulok már fel vannak oldva</string>
@@ -410,6 +418,7 @@
     <string name="mqtt_config">MQTT beállítások</string>
     <string name="mqtt_status_connected">Csatlakoztatva</string>
     <string name="mqtt_status_disconnected">Szétkapcsolva</string>
+    <string name="mqtt_topic_finder_level_region">Régió</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/installation">docs</a>-ből.</string>
     <!-- MUTE -->
@@ -542,7 +551,9 @@
     <string name="quick_chat_new">Új gyors csevegés</string>
     <string name="quick_chat_show">Gyors csevegés menü megjelenítése</string>
     <string name="radiation">Sugárzás</string>
+    <!-- RADIO -->
     <string name="radio_configuration">Eszköz beállítások</string>
+    <string name="radio_setup_name_headline">Barátságos név</string>
     <string name="range_test">Hatótáv-teszt</string>
     <string name="range_test_config">Hatótáv-teszt beállításai</string>
     <string name="react">Reagálás</string>
@@ -647,8 +658,6 @@
     <string name="share_to">Megosztás…</string>
     <string name="share_your_location_in_real_time">Oszd meg a helyzeted valós időben, és tartsd összehangoltan a csoportot a beépített GPS-funkciókkal.</string>
     <string name="short_name">Rövid név</string>
-    <string name="should_update">A legújabb javítások és funkciók eléréséhez frissítsd a csomópont firmware-jét.\n\nLegújabb stabil firmware-verzió: %1$s</string>
-    <string name="should_update_firmware">Firmware-frissítés javasolt.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Titkosítási kulcsok jelentése</string>
     <string name="show_layer">Réteg megjelenítése</string>
@@ -676,6 +685,7 @@
     <string name="swipe_action_unmute">Némítás feloldása</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
+    <string name="tak_server_regenerate_certs_confirm">Újragenerálás</string>
     <string name="tak_server_section">Szerver</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Telemetria beállítások</string>
@@ -752,6 +762,8 @@
     <string name="waypoint_new">Új útpont</string>
     <string name="waypoint_received">Útvonalpont érkezett: %1$s</string>
     <string name="weight">Súly</string>
+    <!-- WIDGET -->
+    <string name="widget_packets_bad">Rossz</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP cím</string>
     <string name="wifi_provision_success_username">Felhasználónév</string>

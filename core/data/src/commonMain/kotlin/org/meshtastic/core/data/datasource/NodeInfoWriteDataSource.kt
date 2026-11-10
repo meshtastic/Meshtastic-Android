@@ -20,6 +20,7 @@ import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 
+@Suppress("TooManyFunctions") // One method per persisted node field; the count tracks the schema.
 interface NodeInfoWriteDataSource {
     suspend fun upsert(node: NodeEntity)
 
@@ -37,6 +38,8 @@ interface NodeInfoWriteDataSource {
     suspend fun upsert(metadata: MetadataEntity)
 
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    suspend fun setNodeDisplayName(num: Int, displayName: String)
 
     suspend fun markAllHeardOnCurrentLora()
 

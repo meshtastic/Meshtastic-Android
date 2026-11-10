@@ -26,14 +26,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.TakCertificateStore
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLServerSocket
+import javax.net.ssl.SSLSocket
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.withLock
 import kotlin.random.Random
@@ -43,22 +48,31 @@ import kotlinx.coroutines.isActive as coroutineIsActive
 private const val SERVER_SOCKET_BACKLOG = 4
 
 /**
- * JSSE-backed TLS TAK server. Matches the Meshtastic-Apple (iOS) implementation:
+ * Upper bound on the TLS handshake. A local process can open the port and send nothing; without this the handshake
+ * would pin an IO thread indefinitely, and a handful of such sockets would starve the app-wide IO dispatcher.
+ */
+private const val TLS_HANDSHAKE_TIMEOUT_MS = 10_000
+
+/**
+ * JSSE-backed TLS TAK server:
  * - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
- * - TLS 1.2+ with the bundled server.p12 identity
- * - Mutual TLS: clients MUST present a certificate chaining to the bundled ca.pem
+ * - TLS 1.2+ with this install's server identity from [TakCertificateManager]
+ * - Mutual TLS: clients MUST present the one client certificate this install issued
  * - `SO_REUSEADDR` on the listen socket so an app restart doesn't hit `BindException: Address already in use` while the
  *   previous socket is in `TIME_WAIT`
  * - Per-connection [TAKClientConnection] running on [CoroutineDispatchers.io]
  *
- * If the bundled certificates fail to load (e.g. packaging regression), the server refuses to start rather than
- * silently falling back to plain TCP — that failure mode would produce exactly the symptom the user was debugging
- * ("ATAK never connects").
+ * If the certificates cannot be generated or loaded, the server refuses to start rather than silently falling back to
+ * plain TCP, since that failure mode would produce exactly the symptom the user was debugging ("ATAK never connects").
  */
-internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, private val port: Int = DEFAULT_TAK_PORT) :
-    TAKServer {
+internal class TAKServerJvm(
+    private val dispatchers: CoroutineDispatchers,
+    private val certificateManager: TakCertificateManager,
+    private val port: Int = DEFAULT_TAK_PORT,
+) : TAKServer {
 
     private var serverSocket: ServerSocket? = null
+    private val restartMutex = Mutex()
 
     @Volatile private var running = false
     private var serverScope: CoroutineScope? = null
@@ -66,8 +80,21 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
     private val connectionsLock = ReentrantLock()
     private val connections = mutableMapOf<String, TAKClientConnection>()
 
+    /**
+     * Sockets accepted but not yet past [verifyIssuedClient]; closed by [stop] so a stalled handshake cannot outlive
+     * it.
+     */
+    private val pendingSockets = mutableSetOf<Socket>()
+
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+
+    private val _rejectedConnectionCount = MutableStateFlow(0)
+    override val rejectedConnectionCount: StateFlow<Int> = _rejectedConnectionCount.asStateFlow()
+
+    /** The port the listener is bound to, or null when not running. Lets tests bind port 0 and discover the result. */
+    internal val boundPort: Int?
+        get() = serverSocket?.localPort?.takeIf { it > 0 }
 
     override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
     override var onClientConnected: (() -> Unit)? = null
@@ -78,15 +105,9 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
             return Result.success(Unit)
         }
 
-        val sslContext =
-            TakCertLoader.getServerSslContext()
-                ?: return Result.failure(
-                    IllegalStateException(
-                        "TAK Server: bundled TLS certificates could not be loaded" + "; refusing to start",
-                    ),
-                )
-
         return try {
+            // Key generation on first start can take a few seconds (three RSA-2048 keys); keep it off Main.
+            val sslContext = withContext(dispatchers.io) { certificateManager.getOrCreate().sslContext }
             serverScope = scope
 
             // Bind on the IO dispatcher — bind() can briefly block.
@@ -101,14 +122,15 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
                 }
             serverSocket = boundSocket
             running = true
-            Logger.i { "TAK Server listening on 127.0.0.1:$port (TLS, mTLS enforced)" }
+            _rejectedConnectionCount.value = 0
+            Logger.i { "TAK Server listening on 127.0.0.1:${boundSocket.localPort} (TLS, mTLS enforced)" }
 
             acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
             Result.success(Unit)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
+            Logger.e(e) { "Failed to start TAK Server on 127.0.0.1:$port" }
             running = false
             try {
                 serverSocket?.close()
@@ -124,8 +146,8 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
         if (protocols.isNotEmpty()) {
             tls.enabledProtocols = protocols.toTypedArray()
         }
-        // Require client certificate (mTLS) — matches
-        // `sec_protocol_options_set_peer_authentication_required` on iOS.
+        // Require a client certificate (mTLS). The trust manager only accepts chains to this install's CA;
+        // verifyIssuedClient() then pins the leaf itself.
         tls.needClientAuth = true
         // Enable address reuse so restart doesn't hit TIME_WAIT on the port.
         tls.reuseAddress = true
@@ -165,7 +187,7 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
 
         val connectionId = Random.nextInt().toString(TAK_HEX_RADIX)
         val clientInfo = TAKClientInfo(id = connectionId, endpoint = endpoint)
-        Logger.i { "TAK client connected: id=$connectionId endpoint=$endpoint" }
+        Logger.i { "TAK client connecting: id=$connectionId endpoint=$endpoint" }
 
         val connection =
             TAKClientConnection(
@@ -176,16 +198,91 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
                 ioDispatcher = dispatchers.io,
             )
 
+        connectionsLock.withLock { pendingSockets += clientSocket }
         // Launch on IO so socket reads/writes don't queue behind CPU work on Default
         scope.launch(dispatchers.io) {
+            // Completing the handshake here (not on the accept loop) keeps a slow or hostile client from
+            // stalling accepts, and lets us reject anything but our own issued client certificate.
+            val accepted = verifyIssuedClient(clientSocket, endpoint)
+            connectionsLock.withLock { pendingSockets -= clientSocket }
+            if (!accepted) return@launch
             connectionsLock.withLock {
                 connections[connectionId] = connection
                 _connectionCount.value = connections.size
-                Logger.i { "TAK connection count now ${connections.size}" }
+                // An issued client getting in means the current package is in use, so the re-import notice is stale.
+                _rejectedConnectionCount.value = 0
+                Logger.i { "TAK client accepted: id=$connectionId, connection count now ${connections.size}" }
             }
             connection.start()
         }
     }
+
+    /**
+     * Completes the TLS handshake under [TLS_HANDSHAKE_TIMEOUT_MS] and accepts the socket only if the peer presented
+     * exactly the client certificate this install issued. Anything else (no certificate, one from an earlier build,
+     * another install's identity, our own server certificate) is counted in [rejectedConnectionCount] and closed.
+     */
+    private fun verifyIssuedClient(clientSocket: Socket, endpoint: String): Boolean {
+        val accepted =
+            try {
+                val tls = clientSocket as SSLSocket
+                tls.soTimeout = TLS_HANDSHAKE_TIMEOUT_MS
+                tls.startHandshake()
+                val issued = certificateManager.isIssuedClient(tls.session.peerCertificates.firstOrNull())
+                // TAKClientConnection reads block indefinitely between keepalives; restore the default.
+                if (issued) tls.soTimeout = 0
+                issued
+            } catch (e: Exception) {
+                Logger.w { "TAK server TLS handshake failed for $endpoint: ${e.message}" }
+                false
+            }
+        if (!accepted) {
+            Logger.w { "TAK server rejected $endpoint: client certificate is not the one issued by this install" }
+            if (running) _rejectedConnectionCount.update { it + 1 }
+            try {
+                clientSocket.close()
+            } catch (_: Exception) {}
+        }
+        return accepted
+    }
+
+    override val certificates: TakCertificateProvider =
+        object : TakCertificateProvider {
+            override suspend fun dataPackageCredentials(): TakDataPackageCredentials? = try {
+                withContext(dispatchers.io) {
+                    val material = certificateManager.getOrCreate().material
+                    TakDataPackageCredentials(
+                        clientP12 = material.clientP12,
+                        truststoreP12 = material.truststoreP12,
+                        password = material.password,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.e(e) { "TAK: could not load certificates for the data package" }
+                null
+            }
+
+            override suspend fun regenerate(): Result<Unit> = restartMutex.withLock {
+                try {
+                    withContext(dispatchers.io) { certificateManager.regenerate() }
+                    // A running listener still holds the old SSLContext (and old client sessions): rebind on the
+                    // same scope so the new identity takes effect immediately.
+                    val scope = serverScope
+                    if (running && scope != null) {
+                        stop()
+                        start(scope).getOrThrow()
+                    }
+                    Result.success(Unit)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "TAK: certificate regeneration failed" }
+                    Result.failure(e)
+                }
+            }
+        }
 
     private fun handleConnectionEvent(connectionId: String, event: TAKConnectionEvent) {
         when (event) {
@@ -232,13 +329,21 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
 
         // Guard the snapshot+clear with the same lock used by the coroutine accept/disconnect
         // paths to avoid concurrent modification or a stale connectionCount during shutdown.
-        val toClose = connectionsLock.withLock {
-            val snapshot = connections.values.toList()
-            connections.clear()
-            _connectionCount.value = 0
-            snapshot
-        }
+        val (toClose, pending) =
+            connectionsLock.withLock {
+                val snapshot = connections.values.toList()
+                connections.clear()
+                _connectionCount.value = 0
+                val stillHandshaking = pendingSockets.toList()
+                pendingSockets.clear()
+                snapshot to stillHandshaking
+            }
         toClose.forEach { it.close() }
+        pending.forEach {
+            try {
+                it.close()
+            } catch (_: Exception) {}
+        }
 
         try {
             serverSocket?.close()
@@ -284,19 +389,12 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
 
 /**
  * `actual` factory for the KMP `expect fun createTAKServer` declared in `commonMain`. Both the Desktop JVM target and
- * the Android target share this source set, so both run the same JSSE-based TLS listener.
- *
- * Also wires [TAKDataPackageGenerator]'s bundled-cert provider so that the exported `.zip` data package contains the
- * real `server.p12` / `client.p12` bytes from the classpath rather than an empty fallback.
+ * the Android target share this source set, so both run the same JSSE-based TLS listener backed by the per-install PKI
+ * kept in [certificateStore].
  */
-actual fun createTAKServer(dispatchers: CoroutineDispatchers, port: Int): TAKServer {
-    TAKDataPackageGenerator.bundledCertBytesProvider = TakCertBundledBytesProvider
-    return TAKServerJvm(dispatchers = dispatchers, port = port)
-}
-
-/** Bridges [TakCertLoader] bytes into [TAKDataPackageGenerator] via the commonMain interface. */
-private object TakCertBundledBytesProvider : BundledCertBytesProvider {
-    override fun serverP12Bytes(): ByteArray? = TakCertLoader.getServerP12Bytes()
-
-    override fun clientP12Bytes(): ByteArray? = TakCertLoader.getClientP12Bytes()
-}
+actual fun createTAKServer(
+    dispatchers: CoroutineDispatchers,
+    certificateStore: TakCertificateStore,
+    port: Int,
+): TAKServer =
+    TAKServerJvm(dispatchers = dispatchers, certificateManager = TakCertificateManager(certificateStore), port = port)

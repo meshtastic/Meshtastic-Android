@@ -6,15 +6,16 @@ The `:feature:firmware` module provides a unified interface for updating Meshtas
 
 ### Supported Platforms & Methods
 
-Meshtastic-Android supports three primary firmware update flows:
+`DefaultFirmwareUpdateManager` picks the flow from the active connection and the device architecture: BLE reaches `Esp32OtaUpdateHandler` on ESP32 and `SecureDfuHandler` otherwise, TCP reaches `Esp32OtaUpdateHandler` (ESP32 only), and USB serial reaches `UsbUpdateHandler` (not ESP32). Four flows result:
 
-#### 1. ESP32 Unified OTA (WiFi & BLE)
-Used for modern ESP32 devices (e.g., Heltec V3, T-Beam S3). This method utilizes the **Unified OTA Protocol**, which enables high-speed transfers over TCP (port 3232) or BLE. The BLE transport uses the **Kable** multiplatform library for architectural consistency and modern coroutine support.
+#### 1. ESP32 Unified OTA (Wi-Fi & BLE)
+Used for ESP32 devices (for example Heltec V3, T-Beam S3). This method uses the **Unified OTA Protocol** over TCP (port 3232) or BLE. The BLE transport uses the **Kable** multiplatform library.
 
 **Key Features:**
-- **Pre-shared Hash Verification**: The app sends the firmware SHA256 hash in an initial `AdminMessage` trigger. The device stores this in NVS and verifies the incoming stream against it.
-- **Connection Retry**: Robust logic to wait for the device to reboot and start the OTA listener.
-- **Automatic MTU Handling & Fragmentation**: The BLE transport automatically detects the negotiated MTU and fragments data chunks into packets that fit. It carefully manages acknowledgments for each fragmented packet to ensure reliability even on congested connections.
+- **Pre-shared Hash Verification**: The app sends the firmware SHA-256 hash in the `AdminMessage` `ota_request` trigger. The firmware saves it with the OTA config before rebooting into the OTA loader, and the loader verifies the incoming stream against it.
+- **Trigger Confirmation**: The firmware answers the trigger with a `ClientNotification` ("Rebooting to BLE OTA" / "Rebooting to WiFi OTA" on success, a "Cannot start OTA: ..." warning on rejection), which the handler waits for before tearing down the mesh connection.
+- **Connection Retry**: The handler retries the connection while the device reboots and starts the OTA listener.
+- **Automatic MTU Handling & Fragmentation**: The BLE transport detects the negotiated MTU, fragments data chunks into packets that fit, and waits for an acknowledgment per packet.
 
 ```mermaid
 sequenceDiagram
@@ -27,21 +28,22 @@ sequenceDiagram
 
     Note over App, Radio: Phase 2: Trigger Reboot
     App->>Radio: AdminMessage (ota_request = mode + hash)
-    Radio->>Radio: Store Hash in NVS & Reboot
+    Radio-->>App: ClientNotification ("Rebooting to <mode> OTA")
+    Radio->>Radio: Save Hash & Reboot into OTA Loader
 
     Note over App, OTA: Phase 3: Connection & Update
     App->>OTA: Connect (TCP:3232 or BLE)
-    App->>OTA: Handshake & Version Check
-    App->>OTA: Start OTA (Size + Hash)
+    App->>OTA: OTA <size> <sha256>
+    OTA-->>App: ERASING, then OK
     loop Streaming
         App->>OTA: Stream Data Chunks
-        OTA-->>App: ACK
+        OTA-->>App: ACK (BLE only)
     end
-    App->>OTA: REBOOT Command
+    OTA-->>App: OK (hash verified)
 ```
 
 #### 2. nRF52 BLE DFU
-The standard update method for nRF52-based devices (e.g., RAK4631). Uses a **pure KMP Nordic Secure DFU implementation** built on Kable — no dependency on the Nordic DFU library. The protocol stack (`SecureDfuTransport`, `SecureDfuProtocol`, `SecureDfuHandler`) handles DFU ZIP parsing, init packet validation, firmware streaming with CRC verification, and PRN-based flow control.
+The standard update method for nRF52-based devices (for example RAK4631). Uses a **pure KMP Nordic DFU implementation** built on Kable, with no dependency on the Nordic DFU library. The Secure DFU stack (`SecureDfuTransport`, `SecureDfuProtocol`, `SecureDfuHandler`) handles DFU ZIP parsing, init packet validation, firmware streaming with CRC verification, and PRN-based flow control. Bootloaders that advertise the Legacy DFU service (`1530`) get `LegacyDfuTransport` / `LegacyDfuProtocol` instead. When the scan sees neither `1530` nor Secure DFU's `FE59`, `SecureDfuHandler` tries Legacy first and falls back to Secure if Legacy fails before the bootloader engages.
 
 ```mermaid
 sequenceDiagram
@@ -70,19 +72,19 @@ sequenceDiagram
     participant USB as USB Mass Storage
 
     App->>Radio: rebootToDfu()
-    Radio->>Radio: Mounts as MESH_DRIVE
+    Radio->>Radio: Mounts as UF2 bootloader drive
     App->>App: Prompt User to Save UF2
     App->>USB: Write firmware.uf2
     USB->>USB: Auto-Flash & Reboot
 ```
 
 #### 4. USB Maintenance: Factory Erase & OTAFIX Bootloader Upgrade
-An nRF52/RP2040 device can also run a **factory erase** (wipes the internal filesystem, useful for a device stuck in a bad state or carrying stale event-firmware state) or, on boards OTAFIX ships a bootloader for, a **bootloader self-update**. The erase is reached through the update screen's "Erase device during update" opt-in (default off) rather than a standalone action, so a wipe always ends with the selected release installed; over BLE/WiFi the same opt-in instead sends an admin factory reset once the update is verified. Both USB flows are two-pass sequences: the maintenance image (erase or OTAFIX) is written first, after which the device re-enters its bootloader (bare of any application after the SoftDevice erase sketch or an OTAFIX self-update, application intact after a bootloader-driven erase); the release firmware is then written as the second, ordinary UF2 pass.
+An nRF52/RP2040 device can also run a **factory erase** (wipes the internal filesystem, useful for a device stuck in a bad state or carrying stale event-firmware state) or, on boards OTAFIX ships a bootloader for, a **bootloader self-update**. The erase is reached through the update screen's "Erase device during update" opt-in (default off) rather than a standalone action, so a wipe always ends with the selected release installed; over BLE/Wi-Fi the same opt-in instead sends an admin factory reset once the update is verified. Both USB flows are two-pass sequences: the maintenance image (erase or OTAFIX) is written first, after which the device re-enters its bootloader (bare of any application after the SoftDevice erase sketch or an OTAFIX self-update, application intact after a bootloader-driven erase); the release firmware is then written as the second, ordinary UF2 pass.
 
 There are two nRF52 erase paths, chosen from what the mounted volume reports — never by the user:
 
 - **Bootloader-driven erase** (`erase.nrf52Bootloader`, OTAFIX PR #41 onwards). A bootloader that advertises `Factory-Erase: UF2 family 0x4D455348` in `INFO_UF2.TXT` consumes a single 512-byte, board-agnostic UF2 block (`meshtastic_factory_erase.uf2`) as a command: it erases its whole App Data reservation (LittleFS config/keys/bonds plus the firmware's node-DB ring) and leaves MBR, SoftDevice, bootloader *and application* untouched, then detaches ~500 ms later and returns as a UF2 drive in 1–2 s. `bootloaderEraseUf2For()` resolves it only when the advertised family equals the manifest entry's `expectedFamilyId`; its integrity contract is the family ID in the block header (`uf2FamilyId()`, flag `0x2000` + u32 at offset 28) rather than a target address, because its `targetAddr` is 0. **No CDC unblock** follows it — the only port present afterwards is the bootloader's own.
-- **SoftDevice-specific erase sketch** (`erase.nrf52`, every earlier bootloader — those silently ignore the block above). Unchanged, and still the fallback whenever the `Factory-Erase:` line is absent or names another family.
+- **SoftDevice-specific erase sketch** (`erase.nrf52`, every earlier bootloader — those silently ignore the block above). This is the path whenever the `Factory-Erase:` line is absent or names another family.
 
 Two runtime facts make the sketch path safety-critical, not just another UF2 write:
 
@@ -109,11 +111,11 @@ sequenceDiagram
     USB->>USB: Auto-Flash & Reboot
 ```
 
-A `FirmwareMaintenanceLock` (`:core:common`) is held for the duration of the sequence so `SharedRadioInterfaceService`'s environmental-recovery listeners don't claim the erase firmware's bare CDC port out from under the flow; it is released when the sequence's terminal pass completes, fails, or the ViewModel is cleared mid-sequence.
+`FirmwareUpdateViewModel` holds a `RadioOperation.FirmwareMaintenance` lease on `RadioOperationLock` (`:core:common`) for the duration of the sequence. That operation suppresses the transport, so `SharedRadioInterfaceService` and its environmental-recovery listeners don't claim the erase firmware's bare CDC port out from under the flow. The lease is released when the sequence's terminal pass completes, fails, or the ViewModel is cleared mid-sequence. OTA and DFU flashes hold `RadioOperation.FirmwareUpdate` instead, which leaves the transport running for post-flash verification.
 
 ### Key Classes
 
-- `FirmwareUpdateManager.kt`: Top-level orchestrator for all firmware update flows.
+- `FirmwareUpdateManager.kt` / `DefaultFirmwareUpdateManager.kt`: Top-level orchestrator that routes an update to a handler by connection type and architecture.
 - `FirmwareUpdateViewModel.kt`: UI state management (MVI pattern) for the firmware update screen.
 - `FirmwareRetriever.kt`: Handles downloading and extracting firmware assets (ZIP/BIN/UF2) with manifest-based ESP32 resolution.
 - `Esp32OtaUpdateHandler.kt`: Orchestrates the Unified OTA flow for ESP32 devices.
@@ -123,12 +125,19 @@ A `FirmwareMaintenanceLock` (`:core:common`) is held for the duration of the seq
 - `SecureDfuHandler.kt`: Orchestrates the nRF52 Secure DFU flow (bootloader entry, DFU ZIP parsing, firmware transfer).
 - `SecureDfuProtocol.kt`: Low-level Nordic Secure DFU protocol operations (init packet, data transfer, CRC verification).
 - `SecureDfuTransport.kt`: BLE transport layer for Secure DFU using Kable (control/data point characteristics, PRN flow control).
+- `LegacyDfuProtocol.kt` / `LegacyDfuTransport.kt`: Nordic Legacy DFU for bootloaders that advertise the `1530` service.
 - `DfuZipParser.kt`: Parses Nordic DFU ZIP archives (manifest, init packet, firmware binary).
+- `WifiOtaDiscovery.kt`: Listens for the OTA loader's UDP discovery broadcast to learn the device's post-reboot IP, which DHCP may have changed.
 - `UsbUpdateHandler.kt`: Handles USB/UF2 firmware updates across platforms.
 - `MaintenanceUf2.kt`: Pinned erase/OTAFIX image resolution, `INFO_UF2.TXT` parsing (bootloader version, Board-ID, SoftDevice, Factory-Erase family), the drive-vs-map SoftDevice resolution used to pick a safe erase sketch, and the bootloader-driven erase resolver that pre-empts it.
 - `Uf2Header.kt`: UF2 block-header readers (first target address, family ID) that `FirmwareRetriever` checks a downloaded maintenance image against before it can be written.
 - `UsbMaintenance.kt`: Pure gating (`usbMaintenanceGate`) and volume-inspection/image-choice types for the factory-erase and bootloader-upgrade actions.
 - `UsbUpdateSupport.kt`: Sequences a maintenance pass (download → reboot to DFU → vet volume → write → confirm landed) and drives the two-pass state machine.
+- `game/`: Chirpy Hop, the mini-game offered while an update runs (`ChirpyHopScreen`, `ChirpyHopEngine`, `ChirpyHopViewModel`).
+
+## Testing
+
+`./gradlew :feature:firmware:allTests` runs `commonTest` on JVM and as Android host tests, plus the JVM-only file-handler, ZIP-extraction and USB-pass tests in `jvmTest`.
 
 ## Dependency Graph
 

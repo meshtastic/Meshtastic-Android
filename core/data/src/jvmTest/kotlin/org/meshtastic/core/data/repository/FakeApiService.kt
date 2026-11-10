@@ -20,6 +20,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.MaintenanceUf2Manifest
+import org.meshtastic.core.model.MqttRootsResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -39,6 +40,7 @@ internal class FakeApiService(
     var eventFirmware: suspend () -> EventFirmwareResponse = { unused() },
     var bootloaderOtaQuirks: suspend () -> BootloaderOtaQuirksResponse = { unused() },
     var maintenanceUf2Manifest: suspend () -> MaintenanceUf2Manifest = { unused() },
+    var mqttRoots: suspend () -> MqttRootsResponse = { unused() },
 ) : ApiService {
     var deviceHardwareCalls = 0
         private set
@@ -62,6 +64,9 @@ internal class FakeApiService(
         private set
 
     var maintenanceUf2ManifestCalls = 0
+        private set
+
+    var mqttRootsCalls = 0
         private set
 
     override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> {
@@ -102,6 +107,11 @@ internal class FakeApiService(
     override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest {
         maintenanceUf2ManifestCalls++
         return maintenanceUf2Manifest()
+    }
+
+    override suspend fun getMqttRoots(): MqttRootsResponse {
+        mqttRootsCalls++
+        return mqttRoots()
     }
 
     private companion object {

@@ -18,9 +18,11 @@ package org.meshtastic.core.model
 
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.proto.User
 
 val MeshPacket.fullRouteDiscovery: RouteDiscovery?
     get() {
@@ -57,8 +59,59 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
         return null
     }
 
+/**
+ * The inbound path of a traceroute request that reached us, from its originator to us, with `route_back` empty. The
+ * relays appended themselves on the way and our radio added only its own SNR, so the endpoints are filled in here. Null
+ * unless this packet is a traceroute request.
+ */
+val MeshPacket.inboundRouteDiscovery: RouteDiscovery?
+    get() {
+        val d = decoded ?: return null
+        if (!d.want_response || d.portnum != PortNum.TRACEROUTE_APP) return null
+        val originalRd = RouteDiscovery.ADAPTER.decodeOrNull(d.payload, Logger) ?: return null
+        val sourceId = if (d.source != 0) d.source else this.from
+        val destinationId = if (d.dest != 0) d.dest else this.to
+        return originalRd
+            .newBuilder()
+            .also { wb ->
+                wb.route = listOf(sourceId) + originalRd.route + destinationId
+                wb.route_back = emptyList()
+                wb.snr_back = emptyList()
+            }
+            .build()
+    }
+
+/**
+ * Display name for a traceroute hop. A node missing from the node DB comes back from the repository as a placeholder
+ * user with no hardware model and a generated "Meshtastic xxxx" name; that case is named by its full node id. Firmware
+ * fills a relay that did not add itself with the broadcast address, which is not a node, so it gets [unknownHopLabel].
+ * A non-blank local [displayName] replaces the broadcast long name. A node last heard over MQTT ([viaMqtt]) is marked
+ * MQTT once, since a hop across MQTT is not an RF hop and its signal reading means something else.
+ */
+fun tracerouteHopName(
+    nodeNum: Int,
+    user: User,
+    unknownHopLabel: String,
+    displayName: String = "",
+    viaMqtt: Boolean = false,
+): String {
+    if (nodeNum == NodeAddress.NODENUM_BROADCAST) return unknownHopLabel
+    val id = NodeAddress.numToDefaultId(nodeNum)
+    val placeholder =
+        displayName.isBlank() &&
+            user.hw_model == HardwareModel.UNSET &&
+            (user.long_name.isBlank() || user.long_name == "Meshtastic ${id.takeLast(PLACEHOLDER_SUFFIX_LENGTH)}")
+    val name = if (placeholder) id else "${displayName.ifBlank { user.long_name }} (${user.short_name})"
+    return if (viaMqtt && !name.contains(MQTT_MARK)) "$name $MQTT_MARK" else name
+}
+
+private const val PLACEHOLDER_SUFFIX_LENGTH = 4
+
+/** The suffix the node DB already appends to a long name that arrived over MQTT. */
+private const val MQTT_MARK = "(MQTT)"
+
 @Suppress("MagicNumber")
-private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
+internal fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
     // nodesList should include both origin and destination nodes
     // origin will not have an SNR value, but destination should
     val snrStr =

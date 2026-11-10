@@ -1,7 +1,7 @@
 ---
 title: Työpöytäsovellus
 nav_order: 14
-last_updated: 2026-09-11
+last_updated: 2026-10-21
 description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.
 aliases:
   - työpöytä
@@ -13,47 +13,50 @@ aliases:
 
 # Työpöytäsovellus
 
-Tällä sivulla kerrotaan Meshtastic Työpöytä -sovelluksen asentamisesta, radion yhdistämisestä ja siitä, miten se eroaa Android-versiosta. Työpöytä-sovellus käyttää samaa ydinkoodia kuin Android Kotlin Multiplatformin kautta, joten useimmat ominaisuudet toimivat samalla tavalla Linuxissa, macOS:ssä ja Windowsissa.
+This page covers installing the Meshtastic desktop app, connecting a node, and how it differs from Android. Työpöytä-sovellus käyttää samaa ydinkoodia kuin Android Kotlin Multiplatformin kautta, joten useimmat ominaisuudet toimivat samalla tavalla Linuxissa, macOS:ssä ja Windowsissa.
 
 ## Asennus
 
 ### Linux
 
-- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Each comes in an x86_64 and an arm64 (aarch64) build.
+- The AppImage carries its own update information, so AppImageUpdate and other zsync-based updaters can update it in place to the latest production release.
 - Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Tai rakenna lähdekoodista komennolla `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Lataa `.dmg`-paketti [julkaisusivulta](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.dmg` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). It is built for Apple silicon only.
 - Tai rakenna lähdekoodista
 
 ### Windows
 
-- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Both are x64 builds.
 - Tai rakenna lähdekoodista
 
 ## Radioon yhdistäminen
+
+All three transports live on the **Connect** tab, the same as on Android. Pick one with the transport selector. See [Connections](connections) for the full walkthrough.
 
 ### USB-sarjaportti (ensisijainen)
 
 Luotettavin yhteystapa Työpöydällä:
 
-Yhdistä radiosi USB:n kautta. Sovellus tunnistaa sarjaportin automaattisesti. Jos se ei onnistu, valitse portti Yhdistä-valikosta.
+Connect your node by USB, select **USB** in the transport selector, and click the node's serial port in the list. The list refreshes on its own as ports appear and disappear.
 
 ### TCP/IP
 
-Verkkoyhteydellä oleville radioille:
+For network-connected nodes, select **Network** in the transport selector, then either:
 
-1. Syötä radion IP-osoite ja portti (oletus: 4403).
-2. Paina **Yhdistä**.
+1. Turn on **Scan for network devices** and click a node the scan finds, or
+2. Click **Add device manually…** and enter the node's IP address or hostname and port (default: `4403`).
 
 ### Bluetooth (BLE)
 
 Bluetooth Low Energy on tuettu Työpöydällä [Kable](https://github.com/JuulLabs/kable)-kirjaston avulla:
 
-1. Varmista, että järjestelmässäsi on Bluetooth-adapteri. Sovellus etsii lähellä olevia Meshtastic-radioita automaattisesti.
-2. Valitse radiosi Yhdistä-näytöltä.
+1. Ensure your system has a Bluetooth adapter, and select **Bluetooth** in the transport selector.
+2. Click **Scan for Bluetooth devices**, then select your node from the list.
 
 ## Ominaisuuksien yhtenevyys
 
@@ -63,7 +66,7 @@ Bluetooth Low Energy on tuettu Työpöydällä [Kable](https://github.com/JuulLa
 | Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                                                                                                               |
 | Kartta                                                      | ✓       | ✓        | Vuorovaikutteinen MapLibre-kartta, jossa on taustakartan ja karttatasojen valitsimet sekä mukautetut karttalähteet. Offline terrain (hillshade and contours) can be downloaded; offline base-map packs and local `.mbtiles` archives cannot |
 | Karttatasot (`.kml` / `.kmz` / GeoJSON)  | ✓       | ✓        | Sama karttatasojen hallinta kuin Androidissa. Tuodut tiedostot piirretään Työpöytä-kartalle                                                                                                                                                                    |
-| Site Planner                                                | ✓       | ✓\*      | \*Avautuu selaimessa Työpöydällä, eikä arviota piirretä Työpöytä-kartalle                                                                                                                                                                                                      |
+| Site Planner                                                | ✓       | ✓        | Computes the coverage estimate in the app and adds it to the map as a layer, as on Android                                                                                                                                                                                     |
 | Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                                                                                                               |
 | Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                                                                                                                                                                             |
 | Laiteohjelmiston päivitys                                   | ✓       | ✓        | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only                                                                          |
@@ -97,13 +100,13 @@ Pikanäppäimissä käytetään macOS:ssä **⌘**-näppäintä (Command) ja Win
 ### Ikkuna ja järjestelmätarjotin
 
 - **Ikkunan koon muuttaminen** — responsiivinen asettelu mukautuu ikkunan kokoon
-- **System tray** — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead
-- **Valikko** — napsauta järjestelmätarjottimen kuvaketta hiiren oikealla näyttääksesi ikkunan tai sulkeaksesi sovelluksen
+- **System tray** — closing the window minimizes to the system tray for background mesh operation, provided the tray icon can be clicked to bring the window back. On Linux that needs a desktop environment with a StatusNotifierItem tray. Where there is no such tray, closing quits the app instead
+- **Tray menu** — right-click the tray icon for **Show Meshtastic** or **Quit**
 - **Hiiritoiminnot** — hover-tilat ja tavallinen työpöydän navigointi
 
 ### Ilmoitusasetukset
 
-The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, and **Low battery notifications**.
+The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, **Low battery notifications**, **Reaction notifications**, and **Waypoint notifications**.
 
 ## Sisäänrakennettu dokumentaatioselain
 
@@ -111,7 +114,7 @@ Työpöytä-sovelluksessa on sisäänrakennettu dokumentaation selain, jonka avu
 
 ![Dokumentaatioselain ja sisällysluettelo](../../assets/screenshots/docs-browser_toc.png)
 
-Selain tukee koko dokumentaation laajuista kokotekstihakua:
+The browser searches page titles and keywords across all documentation:
 
 ![Haku dokumentaatioselaimessa](../../assets/screenshots/docs-browser_search.png)
 
@@ -129,22 +132,20 @@ cd Meshtastic-Android
 
 Vaatimukset:
 
-- JDK 25 (Gradle voi asentaa työkaluketjun itse Foojayn kautta)
+- JDK 25 to run Gradle (Gradle can provision it itself via foojay)
+- JetBrains Runtime (JBR) 25 installed where Gradle's toolchain detection finds it. The desktop app compiles against it and bundles it, and foojay does not offer it, so Gradle cannot download it
 - Android SDK:ta ei tarvita pelkkien työpöytäversioiden rakentamiseen
 
 ## Tunnetut rajoitukset
 
 - Offline base-map downloads and local `.mbtiles` archives are not available on desktop. Offline terrain is — see [Map & Waypoints](map-and-waypoints).
-- `.kml`-, `.kmz`- ja GeoJSON-karttatasojen tuonti toimii — katso [Kartta ja reittipisteet](map-and-waypoints#map-layers). Site Planner opens in your browser
-  rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
-  in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
-  export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+- `.kml`-, `.kmz`- ja GeoJSON-karttatasojen tuonti toimii — katso [Kartta ja reittipisteet](map-and-waypoints#map-layers). Custom network tile sources work
   too — see [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
   desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Jotkin Android-kohtaiset ominaisuudet (widgetit, tietyt ilmoituskanavat) eivät ole käytettävissä
 - Suorituskyky voi vaihdella heikkotehoisella laitteistolla ajettaessa Compose Desktopia
-- BLE-paritus ei vielä tallenna laiteparia työpöydällä (paritus toimii ilman tallennusta)
+- BLE bonding is not supported on desktop (pairing works without bonding)
 
 ## Aiheeseen liittyvät aiheet
 

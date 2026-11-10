@@ -207,6 +207,9 @@ class FakeRadioController :
             favoritedNodes.clear()
             sentSharedContacts.clear()
             factoryResetCalls.clear()
+            displayMirrorCalls.clear()
+            displayFrameRequests = 0
+            inputEvents.clear()
             configWrites.clear()
             channelWrites.clear()
             settingsOperations.clear()
@@ -274,7 +277,23 @@ class FakeRadioController :
 
     override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
 
-    override suspend fun refreshMetadata(destNum: Int) {}
+    override suspend fun refreshMetadata(destNum: Int, requestId: Int) {}
+
+    val displayMirrorCalls = mutableListOf<Boolean>()
+    var displayFrameRequests = 0
+    val inputEvents = mutableListOf<Int>()
+
+    override fun setDisplayMirror(enabled: Boolean) {
+        displayMirrorCalls += enabled
+    }
+
+    override fun requestDisplayFrame() {
+        displayFrameRequests++
+    }
+
+    override fun sendInputEvent(eventCode: Int, kbChar: Int, touchX: Int, touchY: Int) {
+        inputEvents += eventCode
+    }
 
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
@@ -420,9 +439,9 @@ class FakeRadioController :
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {}
 
-    override suspend fun requestUserInfo(destNum: Int) {}
+    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {}
 
     override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
 

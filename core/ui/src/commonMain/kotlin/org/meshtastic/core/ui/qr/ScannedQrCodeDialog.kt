@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,6 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
@@ -59,6 +61,9 @@ import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.add_channels_description
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.channel_already_on_radio
+import org.meshtastic.core.resources.channel_slots_full
+import org.meshtastic.core.resources.channel_slots_used
 import org.meshtastic.core.resources.disabled
 import org.meshtastic.core.resources.enabled
 import org.meshtastic.core.resources.lora_config_change_value
@@ -276,6 +281,19 @@ fun ScannedQrCodeDialog(
                     )
                 }
 
+                if (!shouldReplace) {
+                    item {
+                        val incomingLeftOut =
+                            (channels.settings.size until channelSelections.size).any { !channelSelections[it] }
+                        AddCapacitySummary(
+                            selectedCount = selectedChannelSet.settings.size,
+                            maxChannels = effectiveMaxChannels,
+                            alreadyOnRadio = addPreview.alreadyOnRadio,
+                            incomingLeftOut = incomingLeftOut,
+                        )
+                    }
+                }
+
                 // Display LoRa configuration changes when in replace mode
                 if (shouldReplace && loraChanges.isNotEmpty()) {
                     item {
@@ -369,6 +387,42 @@ fun ScannedQrCodeDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Add never overwrites, so the operator sees the slot count, what was skipped, and what to do when the radio is full.
+ */
+@Composable
+private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRadio: Int, incomingLeftOut: Boolean) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Text(
+            text = stringResource(Res.string.channel_slots_used, selectedCount, maxChannels),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        if (alreadyOnRadio > 0) {
+            Text(
+                text = pluralStringResource(Res.plurals.channel_already_on_radio, alreadyOnRadio, alreadyOnRadio),
+                modifier = Modifier.padding(top = 4.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        // Over the limit, uncheck the excess; at the limit with a new channel left out, one more slot is needed.
+        val toUncheck =
+            when {
+                selectedCount > maxChannels -> selectedCount - maxChannels
+                incomingLeftOut && selectedCount == maxChannels -> 1
+                else -> 0
+            }
+        if (toUncheck > 0) {
+            Text(
+                text = pluralStringResource(Res.plurals.channel_slots_full, toUncheck, toUncheck, maxChannels),
+                modifier = Modifier.padding(top = 4.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }

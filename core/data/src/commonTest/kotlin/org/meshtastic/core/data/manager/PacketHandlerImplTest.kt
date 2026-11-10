@@ -206,6 +206,28 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `reconnect before an owned awaited packet is admitted reports the transport stopped`() =
+        runTest(testDispatcher) {
+            connectionStateFlow.value = ConnectionState.Connected
+            val lifecycleFlow = MutableStateFlow(ConnectionLifecycle(version = 11, state = ConnectionState.Connected))
+            every { serviceRepository.connectionLifecycle } returns lifecycleFlow
+            val ownedHandler = handlerWithScope(testScope)
+            val capturedVersion = lifecycleFlow.value.version
+
+            lifecycleFlow.value = ConnectionLifecycle(version = 13, state = ConnectionState.Connected)
+
+            val result =
+                ownedHandler.sendToRadioAndAwaitResultForConnection(
+                    MeshPacket.Builder().also { wb -> wb.id = 462 }.build(),
+                    capturedVersion,
+                )
+
+            assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, result.status)
+            assertFalse(result.dispatched)
+            verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
+        }
+
+    @Test
     fun `reconnect while an owned packet waits in the queue prevents stale dispatch`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         val lifecycleFlow = MutableStateFlow(ConnectionLifecycle(version = 11, state = ConnectionState.Connected))
@@ -1124,6 +1146,38 @@ class PacketHandlerImplTest {
         val rejected = result.await()
         assertEquals(AwaitedSendStatus.RADIO_REJECTED, rejected.status)
         assertTrue(rejected.dispatched)
+    }
+
+    @Test
+    fun `a relay ack leaves the wait open for the destination nak`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 830
+                    wb.to = 500
+                }
+                .build()
+        val result = async { handler.sendToRadioAndAwaitResult(packet) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 830
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
+        testScheduler.runCurrent()
+
+        handler.completeDispatchedResponse(dataRequestId = 830, complete = true, from = 123)
+        testScheduler.runCurrent()
+        assertFalse(result.isCompleted)
+
+        handler.completeDispatchedResponse(dataRequestId = 830, complete = false, from = 500)
+        testScheduler.runCurrent()
+        assertEquals(AwaitedSendStatus.RADIO_REJECTED, result.await().status)
     }
 
     @Test
