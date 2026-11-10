@@ -101,7 +101,7 @@ class TerrainContoursTest {
         assertTrue(fewer.indices.size / 3 <= budget)
         val levels = ribbons(fewer, geometry).map { it.altitude }
         assertTrue(levels.all { abs(it / 50 - (it / 50).roundToInt()) < 1e-3 }, "every line is on a 50 m level")
-        assertTrue(fewer.colors[0] > 0.8f && fewer.colors[0] == fewer.colors[2], "white or light gray over an image")
+        assertTrue(fewer.colors[0] > 0.65f, "light over an image")
     }
 
     @Test

@@ -70,7 +70,9 @@ internal object TerrainBuildings {
     private const val DISK_SHARE = 0.98f
     private const val SAME_POINT = 1e-7f
     private const val DEGREE_SCALE = 1e5
-    private val WALLS = Rgb(0.86f, 0.86f, 0.84f)
+
+    /** A quiet gray, so the pins, links and routes in color are what stands out over a city. */
+    private val WALLS = Rgb(0.6f, 0.61f, 0.63f)
 
     /** [outline] runs in order of increasing angle, x toward z, and each of [holes] the other way round. */
     private class Placed(

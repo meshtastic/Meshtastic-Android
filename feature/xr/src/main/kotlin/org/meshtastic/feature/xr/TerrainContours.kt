@@ -44,8 +44,8 @@ internal object TerrainContours {
 
     /** Minor lines between one index line and the next, counting the index line. */
     const val INDEX_EVERY = 5
-    const val MINOR_HALF_WIDTH = 0.0005f
-    const val INDEX_HALF_WIDTH = 0.0011f
+    const val MINOR_HALF_WIDTH = 0.00035f
+    const val INDEX_HALF_WIDTH = 0.00075f
 
     /** Clear of the ground, so the two do not flicker where they would share a depth. */
     const val LIFT = 0.0008f
@@ -54,9 +54,9 @@ internal object TerrainContours {
     private val METERS = listOf(10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1000.0)
     private val FEET = listOf(20.0, 40.0, 100.0, 200.0, 500.0, 1000.0, 2000.0)
 
-    // Lighter than the ground it is on: white over an image, as the 2D map draws them, and brown on elevation colors.
-    private val INDEX_ON_IMAGE = Rgb(1f, 1f, 1f)
-    private val MINOR_ON_IMAGE = Rgb(0.84f, 0.84f, 0.84f)
+    // The 2D map's contour brown, lightened over an image, where the brown itself is lost in forest and shadow.
+    private val INDEX_ON_IMAGE = Rgb(0.86f, 0.74f, 0.58f)
+    private val MINOR_ON_IMAGE = Rgb(0.7f, 0.58f, 0.43f)
     private val INDEX_ON_COLORS = Rgb(0.36f, 0.22f, 0.1f)
     private val MINOR_ON_COLORS = Rgb(0.47f, 0.33f, 0.2f)
 
