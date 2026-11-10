@@ -409,7 +409,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">수락 거부됨</string>
     <string name="routing_error_no_route">루트 없음</string>
-    <string name="routing_error_none">수락 됨</string>
     <string name="routing_error_timeout">시간 초과됨</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">수신 신호 강도 지표 Received Signal Strength Indicator, RSSI는 안테나가 수신하는 신호의 전력 수준을 측정하는 데 사용되는 지표입니다. RSSI 값이 높을수록 일반적으로 더 강력하고 안정적인 연결을 나타냅니다.</string>

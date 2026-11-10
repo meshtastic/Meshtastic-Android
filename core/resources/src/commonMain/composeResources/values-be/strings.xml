@@ -259,7 +259,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Атрымана адмоўнае пацвярджэнне</string>
     <string name="routing_error_no_route">Няма маршруту</string>
-    <string name="routing_error_none">Пацверджана</string>
     <string name="routing_error_timeout">Скончыўся час чакання</string>
     <string name="rssi">адносная магутнасць</string>
     <string name="save">Запісаць</string>

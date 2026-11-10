@@ -215,7 +215,6 @@
     <string name="reset_to_defaults">Vrati na početne postavke</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <string name="routing_error_none">Potvrđeno</string>
     <string name="save">Spremi</string>
     <string name="save_changes">Spremi</string>
     <!-- SCAN -->

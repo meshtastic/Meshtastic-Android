@@ -218,7 +218,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">لم يستلم</string>
     <string name="routing_error_no_route">لاطريق</string>
-    <string name="routing_error_none">استلم</string>
     <string name="routing_error_timeout">استغرق وقت طويل</string>
     <string name="rssi">مؤشر القوة النسبية</string>
     <string name="save">حفظ</string>

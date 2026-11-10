@@ -217,7 +217,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
     <string name="routing_error_no_route">Sense ruta</string>
-    <string name="routing_error_none">Confirmat</string>
     <string name="routing_error_timeout">Temps esgotat</string>
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>

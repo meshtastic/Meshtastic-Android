@@ -243,7 +243,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
     <string name="routing_error_no_route">Nėra maršruto</string>
-    <string name="routing_error_none">Pristatymas patvirtintas</string>
     <string name="routing_error_timeout">Baigėsi laikas</string>
     <string name="rssi">RSSI</string>
     <string name="save">Išsaugoti</string>

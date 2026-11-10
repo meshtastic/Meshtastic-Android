@@ -798,6 +798,7 @@
     <string name="firmware_update_start_timed_out">Не удалось запустить обновление. Попробуй обновить снова.</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
     <string name="firmware_update_starting_ota">Запуск OTA обновления...</string>
+    <string name="firmware_update_stop">Остановка</string>
     <string name="firmware_update_success">Обновлено успешно!</string>
     <string name="firmware_update_success_wiped">Устройство было сброшено к заводским настройкам, и его необходимо настроить (и выполнить сопряжение) заново.</string>
     <string name="firmware_update_taking_a_while">Это может занять минутку...</string>
@@ -1885,7 +1886,7 @@
     <string name="routing_error_no_interface">Нет радиоинтерфейса</string>
     <string name="routing_error_no_response">Нет ответа приложения</string>
     <string name="routing_error_no_route">Нет маршрута</string>
-    <string name="routing_error_none">Принято</string>
+    <string name="routing_error_none">Доставлено получателю</string>
     <string name="routing_error_not_authorized">Не авторизовано</string>
     <string name="routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
