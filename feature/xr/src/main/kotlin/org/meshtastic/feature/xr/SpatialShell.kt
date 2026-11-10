@@ -47,7 +47,7 @@ import org.meshtastic.core.ui.icon.CloseFullscreen
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.OpenInFull
-import org.meshtastic.feature.map.terrain.spatial.LatLon
+import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 
 /**
  * Hosts the app on Android XR. In Full Space the activity's window is the main panel, with an orbiter below it to go
@@ -55,7 +55,7 @@ import org.meshtastic.feature.map.terrain.spatial.LatLon
  */
 @Composable
 fun SpatialShell(
-    nodePositions: List<LatLon>,
+    nodes: List<SpatialNodeSnapshot>,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -74,7 +74,7 @@ fun SpatialShell(
                     }
                 }
             }
-            if (mapShown) SpatialTerrainMap(nodePositions, buildDispatcher)
+            if (mapShown) SpatialTerrainMap(nodes, buildDispatcher)
         } else {
             SpaceToggle(
                 inFullSpace = false,

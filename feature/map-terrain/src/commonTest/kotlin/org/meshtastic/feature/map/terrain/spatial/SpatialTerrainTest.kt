@@ -122,6 +122,27 @@ class SpatialTerrainTest {
     }
 
     @Test
+    fun `cleaned clamps below-sea and near-zero covered heights to zero`() {
+        val columns = 10
+        val rows = 10
+        // Columns 0..2 below sea level, 3..5 within the 0.5 m water band, 6..9 land.
+        val heights =
+            FloatArray(columns * rows) {
+                when (it % columns) {
+                    in 0..2 -> -20f
+                    in 3..5 -> 0.3f
+                    else -> 100f
+                }
+            }
+        val grid = SpatialHeightGrid(columns, rows, heights, BooleanArray(columns * rows) { true }, 0f, 0f).cleaned()
+        val row = 5 * columns
+        assertEquals(0f, grid.heights[row + 1])
+        assertEquals(0f, grid.heights[row + 4])
+        assertEquals(100f, grid.heights[row + 8])
+        assertEquals(0f, grid.baseElevation)
+    }
+
+    @Test
     fun `median of nine ignores a spike`() {
         val window = floatArrayOf(5f, 5f, 5f, 5f, 900f, 5f, 5f, 5f, 5f)
         assertEquals(5f, SpatialHeightGrid.medianOfNine(window))
@@ -203,11 +224,12 @@ class SpatialTerrainTest {
         val radio = SpatialNodeSnapshot(1, LatLon(47.6, -122.3), isConnectedRadio = true)
         val far = SpatialNodeSnapshot(2, LatLon(35.0, 139.0))
         val near = SpatialNodeSnapshot(3, LatLon(47.61, -122.31))
-        val fitted = SpatialMapArea.fit(listOf(radio, far, near))
-        assertEquals(1, fitted.outsideCount)
+        val farUnpinned = SpatialNodeSnapshot(4, LatLon(-33.9, 151.2))
+        val fitted = SpatialMapArea.fit(listOf(radio, far, near, farUnpinned))
+        assertEquals(2, fitted.outsideCount)
         assertEquals(listOf(1L, 3L), fitted.nodes.map { it.id })
-        val pinned = SpatialMapArea.fit(listOf(radio, far, near), pinned = setOf(2L))
-        assertEquals(0, pinned.outsideCount)
-        assertEquals(3, pinned.nodes.size)
+        val pinned = SpatialMapArea.fit(listOf(radio, far, near, farUnpinned), pinned = setOf(2L))
+        assertEquals(1, pinned.outsideCount)
+        assertEquals(listOf(1L, 2L, 3L), pinned.nodes.map { it.id })
     }
 }

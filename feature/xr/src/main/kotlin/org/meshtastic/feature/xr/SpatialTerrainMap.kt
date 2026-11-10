@@ -18,6 +18,8 @@
 
 package org.meshtastic.feature.xr
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -76,7 +80,6 @@ import org.meshtastic.core.resources.xr_terrain_loading
 import org.meshtastic.core.resources.xr_terrain_unavailable
 import org.meshtastic.core.resources.xr_terrain_zoom
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
-import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.map.terrain.spatial.SpatialCircle
 import org.meshtastic.feature.map.terrain.spatial.SpatialFrame
 import org.meshtastic.feature.map.terrain.spatial.SpatialHeightGrid
@@ -113,11 +116,16 @@ private class BuiltTerrain(
  * letters, and a zoom slider in an orbiter. Draws nothing without 3D content, so it only shows in Full Space.
  */
 @Composable
-fun SpatialTerrainMap(positions: List<LatLon>, buildDispatcher: CoroutineDispatcher, modifier: Modifier = Modifier) {
+fun SpatialTerrainMap(
+    nodes: List<SpatialNodeSnapshot>,
+    buildDispatcher: CoroutineDispatcher,
+    modifier: Modifier = Modifier,
+) {
     val session = LocalSession.current
     if (session == null || !LocalSpatialCapabilities.current.isContent3dEnabled) return
-    val nodes = remember(positions) { positions.mapIndexed { i, p -> SpatialNodeSnapshot(i.toLong(), p) } }
-    val full = remember(nodes) { SpatialMapArea.meshCircle(nodes) }
+    // Taken once the first position arrives: node updates after that must not move the circle, reset the zoom or
+    // restart the build.
+    val full = remember(nodes.isNotEmpty()) { SpatialMapArea.meshCircle(withLocalAnchor(nodes)) }
     if (full == null) {
         Notice(stringResource(Res.string.xr_terrain_empty), modifier)
         return
@@ -130,6 +138,7 @@ fun SpatialTerrainMap(positions: List<LatLon>, buildDispatcher: CoroutineDispatc
     val motion = remember { SpatialWheelMotion() }
     var wheel by remember { mutableStateOf<Entity?>(null) }
     val http = remember { HttpClient() }
+    DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(
         session,
@@ -164,6 +173,22 @@ fun SpatialTerrainMap(positions: List<LatLon>, buildDispatcher: CoroutineDispatc
     }
 }
 
+/**
+ * [nodes] with an anchor for [SpatialMapArea.fit], which leaves out nodes too far from it: the connected radio, else
+ * the node nearest the median position, which a few far nodes cannot drag away the way a centroid is.
+ */
+internal fun withLocalAnchor(nodes: List<SpatialNodeSnapshot>): List<SpatialNodeSnapshot> {
+    if (nodes.isEmpty() || nodes.any { it.isConnectedRadio }) return nodes
+    val latitude = nodes.map { it.coordinate.latitude }.sorted()[nodes.size / 2]
+    val longitude = nodes.map { it.coordinate.longitude }.sorted()[nodes.size / 2]
+    val anchor = nodes.minBy {
+        val dLat = it.coordinate.latitude - latitude
+        val dLon = it.coordinate.longitude - longitude
+        dLat * dLat + dLon * dLon
+    }
+    return nodes.map { if (it.id == anchor.id) it.copy(isConnectedRadio = true) else it }
+}
+
 @Composable
 private fun Notice(text: String, modifier: Modifier = Modifier, alignment: Alignment = Alignment.Center) {
     Box(modifier.fillMaxSize().padding(24.dp), contentAlignment = alignment) {
@@ -185,7 +210,7 @@ private fun WheelFrames(wheel: Entity?, motion: SpatialWheelMotion) {
         val entity = wheel ?: return@LaunchedEffect
         var last = 0L
         while (true) {
-            androidx.compose.runtime.withFrameNanos { now ->
+            withFrameNanos { now ->
                 val dt = if (last == 0L) 0.0 else (now - last) / NANOS_PER_SECOND
                 last = now
                 if (motion.step(dt)) entity.setPose(Pose(Vector3.Zero, yawRotation(motion.shown)))
@@ -206,6 +231,11 @@ private fun TerrainEntities(
 ) {
     val wheelChanged by rememberUpdatedState(onWheel)
     val statusChanged by rememberUpdatedState(onStatus)
+    // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
+    val mainExecutor = remember {
+        val handler = Handler(Looper.getMainLooper())
+        Executor { handler.post(it) }
+    }
     LaunchedEffect(session, circle) {
         statusChanged(TerrainStatus.Loading)
         val built =
@@ -214,7 +244,8 @@ private fun TerrainEntities(
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.w(e) { "Terrain map failed to build" }
+                // The message names tile coordinates, which place the mesh to a few kilometers.
+                Logger.w { "Terrain map failed to build: ${e::class.simpleName}" }
                 statusChanged(TerrainStatus.Failed)
                 return@LaunchedEffect
             }
@@ -224,14 +255,14 @@ private fun TerrainEntities(
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
         val meshes = listOf(built.terrain, built.bezel).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
-        val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion)
+        val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
         wheelChanged(wheel)
         statusChanged(if (built.flat) TerrainStatus.Flat else TerrainStatus.Ready)
         try {
             awaitCancellation()
         } finally {
             wheelChanged(null)
-            destroy(entities + plate + wheel + root, meshes, material)
+            destroy(entities + plate.entity + wheel + root, meshes + plate.mesh, material)
         }
     }
 }
@@ -268,7 +299,8 @@ private fun createPlate(
     diskRadius: Float,
     material: KhronosUnlitMaterial,
     motion: SpatialWheelMotion,
-): Entity {
+    mainExecutor: Executor,
+): Plate {
     val acc = MeshAccumulator()
     val radius = diskRadius + SpatialWheelLayout.GAP + SpatialWheelLayout.BEZEL_WIDTH
     acc.box(0f, -PLATE_HALF, 0f, radius * PLATE_FILL, PLATE_HALF, radius * PLATE_FILL, Rgb(0.1f, 0.1f, 0.12f))
@@ -276,7 +308,7 @@ private fun createPlate(
     val entity = MeshEntity.create(session, mesh, listOf(material), 0, Pose.Identity, root)
     var drag: SpatialWheelDrag? = null
     entity.addComponent(
-        InteractableComponent.create(session, Executor { it.run() }) { event ->
+        InteractableComponent.create(session, mainExecutor) { event ->
             val hit = event.hitInfoList.firstOrNull()?.hitPosition ?: return@create
             val seconds = event.timestamp / MILLIS_PER_SECOND
             when (event.action) {
@@ -295,8 +327,11 @@ private fun createPlate(
             }
         },
     )
-    return entity
+    return Plate(entity, mesh)
 }
+
+/** The plate's entity and the mesh it borrows, which is released after it. */
+private class Plate(val entity: Entity, val mesh: CustomMesh)
 
 private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
     val layout =

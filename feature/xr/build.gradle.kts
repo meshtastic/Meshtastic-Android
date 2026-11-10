@@ -48,4 +48,8 @@ dependencies {
     implementation(libs.androidx.xr.compose)
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.scenecore)
+
+    testImplementation(kotlin("test-junit"))
+    // configureTestOptions() turns on useJUnitPlatform(), so the vintage engine is what runs JUnit 4 tests.
+    testRuntimeOnly(libs.junit.vintage.engine)
 }

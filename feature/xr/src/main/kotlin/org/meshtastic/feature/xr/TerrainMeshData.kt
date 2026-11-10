@@ -258,9 +258,12 @@ internal fun bezelMeshData(diskRadius: Float, rimTop: Float): TerrainMeshData {
     val spokeStart = diskRadius + SpatialWheelLayout.GAP + SpatialWheelLayout.BEZEL_WIDTH
     for (angle in SpatialWheelLayout.handleAngles) {
         val knob = SpatialWheelLayout.point(knobDistance, angle)
-        val mid = SpatialWheelLayout.point((spokeStart + knobDistance) / 2, angle)
-        // Spokes are boxes along x or z only at the four diagonals' resolution; thin enough to read as a rod.
-        acc.sphere(mid.x, top / 2, mid.y, SpatialWheelLayout.SPOKE_RADIUS, BEZEL, rings = 4, segments = 6)
+        // A row of small spheres from the bezel to the knob reads as a rod.
+        for (step in 0..SPOKE_STEPS) {
+            val along = spokeStart + (knobDistance - spokeStart) * step / SPOKE_STEPS
+            val at = SpatialWheelLayout.point(along, angle)
+            acc.sphere(at.x, top / 2, at.y, SpatialWheelLayout.SPOKE_RADIUS, BEZEL, rings = 4, segments = 6)
+        }
         acc.sphere(knob.x, top / 2, knob.y, SpatialWheelLayout.KNOB_RADIUS, KNOB)
     }
     return acc.build()
@@ -276,6 +279,7 @@ private const val WATER_LEVEL_METERS = 0.5
 private const val AMBIENT = 0.45f
 private const val MIN_BEZEL_TOP = 0.012f
 private const val TERRAIN_SKIRT = 0.02f
+private const val SPOKE_STEPS = 6
 private const val LETTER_LIFT = 0.0006f
 private const val LETTER_SCALE = 0.7f
 

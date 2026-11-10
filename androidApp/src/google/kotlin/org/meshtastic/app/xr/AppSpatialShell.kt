@@ -24,18 +24,25 @@ import org.koin.compose.koinInject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.map.terrain.spatial.LatLon
+import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.xr.SpatialShell
 
 @Composable
 fun AppSpatialShell(content: @Composable () -> Unit) {
-    val nodes by koinInject<NodeRepository>().nodeDBbyNum.collectAsState()
-    val positions =
-        remember(nodes) {
-            nodes.values.filter { it.validPosition != null }.map { LatLon(it.latitude, it.longitude) }
+    val repository = koinInject<NodeRepository>()
+    val nodes by repository.nodeDBbyNum.collectAsState()
+    val ours by repository.ourNodeInfo.collectAsState()
+    val snapshots =
+        remember(nodes, ours) {
+            nodes.values
+                .filter { it.validPosition != null }
+                .map {
+                    SpatialNodeSnapshot(
+                        id = it.num.toLong(),
+                        coordinate = LatLon(it.latitude, it.longitude),
+                        isConnectedRadio = it.num == ours?.num,
+                    )
+                }
         }
-    SpatialShell(
-        nodePositions = positions,
-        buildDispatcher = koinInject<CoroutineDispatchers>().default,
-        content = content,
-    )
+    SpatialShell(nodes = snapshots, buildDispatcher = koinInject<CoroutineDispatchers>().default, content = content)
 }
