@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
@@ -140,6 +141,8 @@ fun SpatialTerrainMap(
     val motion = remember { SpatialWheelMotion() }
     var wheel by remember { mutableStateOf<Entity?>(null) }
     val http = remember { HttpClient() }
+    val context = LocalContext.current
+    val tipped = remember(context) { opensMapAtLaunch(context) }
     DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(
@@ -149,6 +152,7 @@ fun SpatialTerrainMap(
         http,
         motion,
         buildDispatcher,
+        tipped = tipped,
         description = stringResource(Res.string.xr_terrain_map),
         onWheel = { wheel = it },
         onStatus = { status = it },
@@ -231,6 +235,7 @@ private fun TerrainEntities(
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
+    tipped: Boolean,
     description: String,
     onWheel: (Entity?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
@@ -260,7 +265,7 @@ private fun TerrainEntities(
         // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
-        val root = createRoot(session, built.geometry).also { it.contentDescription = description }
+        val root = createRoot(session, built.geometry, tipped).also { it.contentDescription = description }
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
         val meshes = listOfNotNull(built.terrain, built.bezel, built.pins).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
@@ -288,14 +293,22 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: 
 }
 
 /** A root beside the main panel's right edge, scaled so the table is its real size whatever the panel's scale. */
-private fun createRoot(session: Session, geometry: SpatialTerrainGeometry): Entity {
+private fun createRoot(session: Session, geometry: SpatialTerrainGeometry, tipped: Boolean): Entity {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
     val scale = panel.getScale(Space.ACTIVITY)
     val fit = SpatialVolumeFit(TABLE_VOLUME_METERS, TABLE_VOLUME_METERS, geometry.transform.diskRadius)
     val reach = fit.diskRadius + SpatialWheelLayout.REACH + TABLE_GAP_METERS
     val at = Vector3((size.width / 2f + reach / scale), -size.height * DROP_FRACTION, 0f)
-    return Entity.create(session, "terrain-map", Pose(at), panel).also { it.setScale(fit.scale / scale) }
+    val pose =
+        if (tipped) {
+            // Below the panel and in front of it, its far side tipped up toward the camera.
+            val below = Vector3(0f, -size.height / 2f - TIPPED_DROP_METERS / scale, TIPPED_FORWARD_METERS / scale)
+            Pose(below, Quaternion.fromAxisAngle(Vector3.Right, TIPPED_DEGREES))
+        } else {
+            Pose(at)
+        }
+    return Entity.create(session, "terrain-map", pose, panel).also { it.setScale(fit.scale / scale) }
 }
 
 /**
@@ -414,6 +427,9 @@ private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
 private const val PLATE_MARGIN = 0.012f
+private const val TIPPED_DROP_METERS = 0.3f
+private const val TIPPED_FORWARD_METERS = 0.35f
+private const val TIPPED_DEGREES = 50f
 
 /** Under the terrain's skirt and the bezel, which reach this far below the ground. */
 private const val PLATE_TOP = -0.02f

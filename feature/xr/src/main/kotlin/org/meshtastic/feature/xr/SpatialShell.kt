@@ -16,6 +16,9 @@
  */
 package org.meshtastic.feature.xr
 
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,12 +29,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
@@ -62,7 +67,13 @@ fun SpatialShell(
     content: @Composable () -> Unit,
 ) {
     val spatial = LocalSpatialCapabilities.current.isSpatialUiEnabled
-    var mapShown by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val session = LocalSession.current
+    val openAtLaunch = remember(context) { opensMapAtLaunch(context) }
+    var mapShown by remember { mutableStateOf(openAtLaunch) }
+    if (openAtLaunch && session != null) {
+        LaunchedEffect(session) { session.scene.requestFullSpace() }
+    }
     Box(modifier.fillMaxSize()) {
         content()
         if (spatial) {
@@ -100,6 +111,14 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/**
+ * For emulator checks, where nothing can press an orbiter: on a debuggable build, `adb shell setprop log.tag.MeshXrMap
+ * DEBUG` opens the terrain map in Full Space at launch, tipped toward the emulator's camera, which otherwise sees the
+ * table edge on.
+ */
+internal fun opensMapAtLaunch(context: Context): Boolean =
+    context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 && Log.isLoggable("MeshXrMap", Log.DEBUG)
 
 /** The pointer target Android XR recommends, above Material's 48 dp minimum. */
 internal val XrTargetSize = 56.dp
