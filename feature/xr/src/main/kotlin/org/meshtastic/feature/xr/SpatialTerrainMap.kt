@@ -77,6 +77,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.xr_terrain_empty
 import org.meshtastic.core.resources.xr_terrain_flat
 import org.meshtastic.core.resources.xr_terrain_loading
+import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.resources.xr_terrain_unavailable
 import org.meshtastic.core.resources.xr_terrain_zoom
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
@@ -146,6 +147,7 @@ fun SpatialTerrainMap(
         http,
         motion,
         buildDispatcher,
+        description = stringResource(Res.string.xr_terrain_map),
         onWheel = { wheel = it },
         onStatus = { status = it },
     )
@@ -155,7 +157,7 @@ fun SpatialTerrainMap(
         Orbiter(position = OrbiterPosition.TopCenter()) {
             Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp)) {
-                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
                     Slider(
                         value = slider,
                         onValueChange = { slider = it },
@@ -226,6 +228,7 @@ private fun TerrainEntities(
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
+    description: String,
     onWheel: (Entity?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
@@ -249,10 +252,11 @@ private fun TerrainEntities(
                 statusChanged(TerrainStatus.Failed)
                 return@LaunchedEffect
             }
-        val root = createRoot(session, built.geometry)
-        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
+        // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
+        val root = createRoot(session, built.geometry).also { it.contentDescription = description }
+        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
         val meshes = listOf(built.terrain, built.bezel).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)

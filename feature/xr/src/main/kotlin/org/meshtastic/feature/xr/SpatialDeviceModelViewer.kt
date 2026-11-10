@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -166,6 +167,7 @@ private fun DeviceModelInSpace(
             val beside = Vector3(size.width / 2f + CLEARANCE_METERS / scale, -size.height * DROP_FRACTION, 0f)
             val entity = GltfModelEntity.create(session, model, Pose(beside), panel)
             entity.setScale(1f / scale)
+            entity.contentDescription = title
             entity.addComponent(MovableComponent.createSystemMovable(session))
             device = entity
             try {
@@ -266,14 +268,14 @@ private fun InSpaceChrome(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     BananaToggle(checked = bananaShown, onCheckedChange = onBananaShownChange)
-                    FilledTonalIconButton(onClick = onDismiss) {
+                    FilledTonalIconButton(onClick = onDismiss, modifier = Modifier.size(XrTargetSize)) {
                         Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.close))
                     }
                 }
                 notice?.let {
                     Text(
                         it,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )

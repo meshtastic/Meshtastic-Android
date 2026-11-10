@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -69,7 +70,7 @@ fun SpatialShell(
             Orbiter(position = OrbiterPosition.BottomCenter()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SpaceToggle(inFullSpace = true)
-                    FilledTonalIconButton(onClick = { mapShown = !mapShown }) {
+                    FilledTonalIconButton(onClick = { mapShown = !mapShown }, modifier = Modifier.size(XrTargetSize)) {
                         Icon(MeshtasticIcons.Map, contentDescription = stringResource(Res.string.xr_terrain_map))
                     }
                 }
@@ -91,7 +92,7 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
     val label = stringResource(if (inFullSpace) Res.string.xr_home_space else Res.string.xr_full_space)
     FilledTonalIconButton(
         onClick = { if (inFullSpace) session.scene.requestHomeSpace() else session.scene.requestFullSpace() },
-        modifier = modifier,
+        modifier = modifier.size(XrTargetSize),
     ) {
         Icon(
             imageVector = if (inFullSpace) MeshtasticIcons.CloseFullscreen else MeshtasticIcons.OpenInFull,
@@ -99,3 +100,6 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/** The pointer target Android XR recommends, above Material's 48 dp minimum. */
+internal val XrTargetSize = 56.dp
