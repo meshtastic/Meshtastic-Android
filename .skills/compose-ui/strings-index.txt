@@ -2280,6 +2280,8 @@ write_nfc_failed
 write_nfc_subtext
 write_nfc_success
 write_nfc_text
+xr_full_space
+xr_home_space
 you
 zh_CN
 zh_TW
