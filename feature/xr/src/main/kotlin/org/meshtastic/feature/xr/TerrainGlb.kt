@@ -28,7 +28,9 @@ import kotlin.math.roundToInt
  * model from bytes, so an image made at run time reaches the scene inside a model. The material is unlit: the light is
  * already in the vertex colors, which glTF multiplies into the image.
  */
-internal fun terrainGlb(mesh: TerrainMeshData, image: ByteArray, mimeType: String): ByteArray {
+internal fun terrainGlb(mesh: TerrainMeshData, image: ByteArray, mimeType: String, cutout: Boolean = false): ByteArray {
+    // An image with clear parts is cut out along them, and seen from both sides.
+    val alpha = if (cutout) """"alphaMode":"MASK","alphaCutoff":0.5,"doubleSided":true,""" else ""
     val count = mesh.vertexCount
     val bin = ByteArrayOutputStream()
     val views = ArrayList<String>()
@@ -66,7 +68,7 @@ internal fun terrainGlb(mesh: TerrainMeshData, image: ByteArray, mimeType: Strin
             """"meshes":[{"primitives":[{"attributes":{"POSITION":0,"NORMAL":1,"COLOR_0":2,"TEXCOORD_0":3},""" +
             """"indices":4,"material":0}]}],""" +
             """"materials":[{"pbrMetallicRoughness":{"baseColorTexture":{"index":0},"metallicFactor":0,""" +
-            """"roughnessFactor":1},"extensions":{"KHR_materials_unlit":{}}}],""" +
+            """"roughnessFactor":1},$alpha"extensions":{"KHR_materials_unlit":{}}}],""" +
             """"extensionsUsed":["KHR_materials_unlit"],"textures":[{"sampler":0,"source":0}],""" +
             """"samplers":[{"magFilter":9729,"minFilter":9987,"wrapS":33071,"wrapT":33071}],""" +
             """"images":[{"bufferView":5,"mimeType":"$mimeType"}],"accessors":[""" +

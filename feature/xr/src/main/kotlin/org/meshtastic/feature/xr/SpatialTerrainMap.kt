@@ -413,7 +413,7 @@ private fun TerrainEntities(
         val labels =
             built.labels?.let { labels ->
                 val atlas = withContext(buildDispatcher) { LabelAtlas.draw(labels.names) }
-                val glb = terrainGlb(labels.mesh, atlas, "image/png")
+                val glb = terrainGlb(labels.mesh, atlas, "image/png", cutout = true)
                 GltfModel.create(session, glb, "labels")
             }
         val models = listOfNotNull(model, labels)

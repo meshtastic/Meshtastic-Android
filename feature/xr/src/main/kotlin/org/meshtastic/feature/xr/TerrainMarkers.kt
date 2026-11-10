@@ -202,11 +202,11 @@ private fun rgb(hex: Int) = Rgb((hex shr 16 and 0xFF) / 255f, (hex shr 8 and 0xF
 
 private fun Int.toRgb() = Rgb(Color.red(this) / 255f, Color.green(this) / 255f, Color.blue(this) / 255f)
 
-/** Name plates: a mesh of flat quads, one per label, and where each one's text is in the atlas. */
+/** Node chips: a mesh of flat quads, one per chip, and where each one is drawn in the atlas. */
 internal class TerrainLabels(val mesh: TerrainMeshData, val names: List<Pair<String, Rgb>>)
 
 /**
- * A name plate lying flat beside the top of each marker that has a short name, the connected radio, favorites and
+ * The 2D map's node chip lying flat on top of each marker that has a short name, the connected radio, favorites and
  * towers first, at most [LabelAtlas.CAPACITY]. They are textured quads in one model rather than a panel each: a scene
  * of dozens of panels is costly, and one image is not.
  */
@@ -231,8 +231,8 @@ internal fun terrainLabels(markers: List<NodeMarker>): TerrainLabels? {
     for ((index, marker) in chosen.withIndex()) {
         val cell = LabelAtlas.cell(index)
         val x = marker.top.x
-        val y = marker.top.y
-        val z = marker.top.z + LABEL_OFFSET
+        val y = marker.top.y + CHIP_LIFT
+        val z = marker.top.z
         // South-west, south-east, north-east, north-west: counter-clockwise seen from above.
         val corners =
             listOf(
@@ -283,28 +283,30 @@ internal object LabelAtlas {
         )
     }
 
-    /** Each name in its cell as PNG: light text on a dark plate, with a stripe in the node's color. */
+    /**
+     * Each name in the middle of its cell as PNG, drawn as the 2D map draws a node chip: a rounded plate in the node's
+     * color, as wide as its name, with the name in black or white, whichever reads on that color. Clear around it.
+     */
     fun draw(names: List<Pair<String, Rgb>>): ByteArray {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val plate = Paint().apply { color = Color.rgb(20, 22, 28) }
-        val stripe = Paint()
+        val plate = Paint(Paint.ANTI_ALIAS_FLAG)
         val text =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
                 textSize = CELL_HEIGHT * TEXT_SHARE
                 typeface = Typeface.DEFAULT_BOLD
                 textAlign = Paint.Align.CENTER
             }
         for ((index, name) in names.withIndex()) {
-            val x = (index % COLUMNS * CELL_WIDTH).toFloat()
+            val middle = index % COLUMNS * CELL_WIDTH + CELL_WIDTH / 2f
             val y = (index / COLUMNS * CELL_HEIGHT).toFloat()
-            canvas.drawRect(x, y, x + CELL_WIDTH, y + CELL_HEIGHT, plate)
+            val half = (text.measureText(name.first) / 2 + PADDING).coerceIn(MIN_HALF_WIDTH, CELL_WIDTH / 2f)
             val (r, g, b) = name.second
-            stripe.color = Color.rgb((r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt())
-            canvas.drawRect(x, y, x + STRIPE, y + CELL_HEIGHT, stripe)
+            plate.color = Color.rgb((r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt())
+            canvas.drawRoundRect(middle - half, y, middle + half, y + CELL_HEIGHT, CORNER, CORNER, plate)
+            text.color = if (isLight(name.second)) Color.BLACK else Color.WHITE
             val baseline = y + CELL_HEIGHT / 2f - (text.descent() + text.ascent()) / 2f
-            canvas.drawText(name.first, x + STRIPE + (CELL_WIDTH - STRIPE) / 2f, baseline, text)
+            canvas.drawText(name.first, middle, baseline, text)
         }
         val out = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -312,8 +314,14 @@ internal object LabelAtlas {
         return out.toByteArray()
     }
 
-    private const val STRIPE = 12f
-    private const val TEXT_SHARE = 0.62f
+    /** The rule the app's node colors use to pick black text over white. */
+    fun isLight(color: Rgb): Boolean = 0.299f * color.r + 0.587f * color.g + 0.114f * color.b > 0.5f
+
+    // The 2D chip is 28 dp high with 8 dp corners and padding and is at least 64 dp wide; a cell is twice that scale.
+    private const val CORNER = 16f
+    private const val PADDING = 16f
+    private const val MIN_HALF_WIDTH = 64f
+    private const val TEXT_SHARE = 0.55f
 }
 
 private const val PIN_HEIGHT = 0.03f
@@ -335,7 +343,9 @@ private const val ROUTE_BACK_HALF_WIDTH = 0.0013f
 private const val ROUTE_SHIFT = 0.003f
 private const val LABEL_HALF_WIDTH = 0.017f
 private const val LABEL_HALF_HEIGHT = LABEL_HALF_WIDTH * LabelAtlas.CELL_HEIGHT / LabelAtlas.CELL_WIDTH
-private const val LABEL_OFFSET = 0.016f
+
+/** Above the ball at the top of the pin, the connected radio's larger one included. */
+private const val CHIP_LIFT = 0.011f
 
 /** The 2D map's trace route colors: orange out, blue back. */
 private val ROUTE_OUT = rgb(0xE86A00)
