@@ -20,6 +20,7 @@ package org.meshtastic.feature.xr
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -160,7 +161,8 @@ fun SpatialTerrainMap(
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
     val context = LocalContext.current
-    val tipped = remember(context) { opensMapAtLaunch(context) }
+    // `log.tag.MeshXrTip DEBUG` on top of the map hook: for a console screenshot, which sees the table edge on.
+    val tipped = remember(context) { opensMapAtLaunch(context) && Log.isLoggable("MeshXrTip", Log.DEBUG) }
     DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(

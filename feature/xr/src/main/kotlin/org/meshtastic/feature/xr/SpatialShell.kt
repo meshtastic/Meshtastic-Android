@@ -123,8 +123,7 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
 
 /**
  * For emulator checks, where nothing can press an orbiter: on a debuggable build, `adb shell setprop log.tag.MeshXrMap
- * DEBUG` opens the terrain map in Full Space at launch, tipped toward the emulator's camera, which otherwise sees the
- * table edge on.
+ * DEBUG` opens the terrain map in Full Space at launch.
  */
 internal fun opensMapAtLaunch(context: Context): Boolean =
     context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 && Log.isLoggable("MeshXrMap", Log.DEBUG)
