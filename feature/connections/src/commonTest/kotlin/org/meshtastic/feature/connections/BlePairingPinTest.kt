@@ -28,9 +28,11 @@ class BlePairingPinTest {
     }
 
     @Test
-    fun `a PIN with leading zeros is kept as typed`() {
-        // fixed_pin is shown zero-padded to six digits, so the link must not lose the padding.
-        assertEquals("012345", blePairingPinFor("xAA:BB:CC:DD:EE:FF", "012345"))
+    fun `a PIN with a leading zero is dropped`() {
+        // fixed_pin is a uint32 and firmware PINs run 100000..999999, so a leading zero can never match.
+        listOf("012345", "000000").forEach { pin ->
+            assertNull(blePairingPinFor("xAA:BB:CC:DD:EE:FF", pin), "PIN '$pin' should be rejected")
+        }
     }
 
     @Test

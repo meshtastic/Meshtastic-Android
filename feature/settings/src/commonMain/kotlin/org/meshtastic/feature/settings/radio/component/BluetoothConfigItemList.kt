@@ -34,6 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.bluetooth_config
+import org.meshtastic.core.resources.bluetooth_fixed_pin_range
 import org.meshtastic.core.resources.schema_bluetooth_enabled
 import org.meshtastic.core.resources.schema_bluetooth_enabled_description
 import org.meshtastic.core.resources.schema_bluetooth_fixed_pin
@@ -50,6 +51,8 @@ import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 
 private const val PIN_LENGTH = 6
+private const val MIN_PIN = 100000
+private const val MAX_PIN = 999999
 
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -57,6 +60,12 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build()
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
+    var pinText by
+        remember(bluetoothConfig.fixed_pin) {
+            mutableStateOf(bluetoothConfig.fixed_pin.toString().padStart(PIN_LENGTH, '0'))
+        }
+    val pinIsValid = pinText.toIntOrNull() in MIN_PIN..MAX_PIN
+    val pinRequired = formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN
 
     RadioConfigScreenList(
         rebootBehavior = RebootBehavior.ALWAYS,
@@ -64,6 +73,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
+        saveEnabled = state.connected && (pinIsValid || !pinRequired),
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
@@ -95,8 +105,10 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 FixedPinPreference(
-                    pinValue = formState.value.fixed_pin,
+                    pinText = pinText,
+                    showError = pinRequired && !pinIsValid,
                     enabled = state.connected,
+                    onPinTextChange = { pinText = it },
                     focusManager = focusManager,
                     onPinChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build()
@@ -126,28 +138,32 @@ internal fun BluetoothPairingModePreference(
 
 @Composable
 private fun FixedPinPreference(
-    pinValue: Int,
+    pinText: String,
+    showError: Boolean,
     enabled: Boolean,
+    onPinTextChange: (String) -> Unit,
     focusManager: androidx.compose.ui.focus.FocusManager,
     onPinChange: (Int) -> Unit,
 ) {
-    var pinState by remember(pinValue) { mutableStateOf(pinValue.toString().padStart(PIN_LENGTH, '0')) }
-    val pinIsError = pinState.length != PIN_LENGTH || !pinState.all { it.isDigit() }
     EditTextPreference(
         title = stringResource(Res.string.schema_bluetooth_fixed_pin),
         modifier = Modifier.settingsField(Res.string.schema_bluetooth_fixed_pin),
-        value = pinState,
+        value = pinText,
+        summary = stringResource(Res.string.bluetooth_fixed_pin_range),
         enabled = enabled,
-        isError = pinIsError,
+        isError = showError,
         keyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         onValueChanged = { input ->
-            if (input.length <= PIN_LENGTH && input.all { it.isDigit() }) {
-                pinState = input
-                if (input.length == PIN_LENGTH) {
-                    onPinChange(input.toInt())
-                }
+            if (input.length <= PIN_LENGTH && input.all { it in '0'..'9' }) {
+                onPinTextChange(input)
+                input
+                    .toIntOrNull()
+                    ?.takeIf { it in MIN_PIN..MAX_PIN }
+                    ?.let { pin ->
+                        onPinChange(pin)
+                    }
             }
         },
     )

@@ -24,9 +24,9 @@ class ConnectLinkFromTest {
 
     @Test
     fun `a scanned meshtastic link yields its address and PIN`() {
-        val link = connectLinkFrom("meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=012345")
+        val link = connectLinkFrom("meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456")
         assertEquals("xAA:BB:CC:DD:EE:FF", link?.address)
-        assertEquals("012345", link?.pin)
+        assertEquals("123456", link?.pin)
     }
 
     @Test
