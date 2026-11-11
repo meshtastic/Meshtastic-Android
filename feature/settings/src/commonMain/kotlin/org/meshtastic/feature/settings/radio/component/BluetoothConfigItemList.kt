@@ -116,7 +116,16 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     pinText = pinText,
                     showError = !pinIsValid && (pinRequired || pinEdited),
                     enabled = state.connected,
-                    onPinTextChange = { pinText = it },
+                    onPinTextChange = { text ->
+                        pinText = text
+                        if (text == savedPinText) {
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.fixed_pin = bluetoothConfig.fixed_pin }
+                                    .build()
+                        }
+                    },
                     focusManager = focusManager,
                     onPinChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build()
