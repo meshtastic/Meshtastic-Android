@@ -67,6 +67,7 @@ fun SpatialShell(
     imagery: List<TerrainImagery>,
     buildings: TerrainBuildingSource?,
     route: TerrainRoute?,
+    contourUnits: ContourUnits,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -101,6 +102,7 @@ fun SpatialShell(
                     imagery,
                     buildings,
                     if (made === CITY) CITY_ROUTE else route,
+                    contourUnits,
                     buildDispatcher,
                 )
             }

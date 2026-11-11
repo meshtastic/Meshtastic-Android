@@ -122,7 +122,6 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialWheelLayout
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelMotion
 import org.meshtastic.feature.map.terrain.spatial.SpatialZoom
 import org.meshtastic.feature.map.terrain.spatial.Vec3
-import java.util.Locale
 import java.util.concurrent.Executor
 import kotlin.math.PI
 import kotlin.math.cos
@@ -166,6 +165,7 @@ fun SpatialTerrainMap(
     imagery: List<TerrainImagery>,
     buildingSource: TerrainBuildingSource?,
     route: TerrainRoute?,
+    contourUnits: ContourUnits,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
 ) {
@@ -191,6 +191,7 @@ fun SpatialTerrainMap(
     val motion = remember { SpatialWheelMotion() }
     var ground by remember { mutableStateOf<Ground?>(null) }
     val http = remember { HttpClient() }
+    val cache = remember(full) { TerrainCache() }
     var layerId by rememberSaveable { mutableStateOf(imagery.firstOrNull()?.id) }
     val layer = imagery.firstOrNull { it.id == layerId }
     var buildingsShown by rememberSaveable { mutableStateOf(true) }
@@ -200,7 +201,6 @@ fun SpatialTerrainMap(
     val tipped = remember(context) { debugSwitch(context, "MeshXrTip") }
     // `log.tag.MeshXrContours DEBUG` on top of the map hook starts with the lines on, as nothing can press the chip.
     var contoursShown by rememberSaveable { mutableStateOf(debugSwitch(context, "MeshXrContours")) }
-    val units = remember(context) { contourUnits(context.resources.configuration.locales[0]) }
     // Made-up nodes are never heard, so their comets are sent in turn.
     val demo = remember(context) { debugSwitch(context, "MeshXrCity") || debugSwitch(context, "MeshXrPeaks") }
     DisposableEffect(http) { onDispose { http.close() } }
@@ -211,8 +211,9 @@ fun SpatialTerrainMap(
         session,
         circle,
         nodes,
-        TerrainLayers(layer, raised, units.takeIf { contoursShown }, route),
+        TerrainLayers(layer, raised, contourUnits.takeIf { contoursShown }, route),
         http,
+        cache,
         motion,
         buildDispatcher,
         onGround = { ground = it },
@@ -553,6 +554,7 @@ private fun TerrainEntities(
     nodes: List<SpatialNodeSnapshot>,
     layers: TerrainLayers,
     http: HttpClient,
+    cache: TerrainCache,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
     onGround: (Ground?) -> Unit,
@@ -570,7 +572,7 @@ private fun TerrainEntities(
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, pinned, current, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, current, http, cache) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -882,22 +884,22 @@ private suspend fun buildTerrain(
     nodes: List<SpatialNodeSnapshot>,
     layers: TerrainLayers,
     http: HttpClient,
+    cache: TerrainCache,
 ): BuiltTerrain = coroutineScope {
     val imagery = layers.imagery
     val buildings = layers.buildings
     val contours = layers.contours
     val frame = SpatialFrame(circle.bounds)
-    // Fetched while the elevation is sampled.
-    val draped = imagery?.let { async { terrainImage(frame.bounds, it, http) } }
+    // Fetched while the elevation is sampled, and not again when only an overlay or the route changed.
+    val kept = imagery?.let { cache.image(circle, it.id) }
+    val draped =
+        imagery
+            ?.takeIf { kept == null }
+            ?.let { layer ->
+                async { terrainImage(frame.bounds, layer, http)?.also { cache.keep(circle, layer.id, it) } }
+            }
     val footprints = buildings?.let { async { footprintsOrNone(it, frame.bounds) } }
-    val source = MapterhornElevationSource(http)
-    val plan =
-        SpatialHeightGrid.plan(
-            frame,
-            maxTriangles = MAX_TRIANGLES,
-            dataMaxZoom = minOf(source.finestDataZoom(), MapterhornEndpoints.TILES_MAX_ZOOM),
-        )
-    val grid = SpatialHeightGrid.sample(frame, plan, source).cleaned()
+    val grid = cache.grid(circle) ?: sampleGround(frame, http).also { cache.keep(circle, it) }
     val relief = (grid.maxElevation - grid.baseElevation).toDouble()
     val transform =
         SpatialModelTransform(
@@ -907,7 +909,7 @@ private suspend fun buildTerrain(
             verticalExaggeration = reliefExaggeration(relief, maxOf(frame.widthMeters, frame.depthMeters)),
         )
     val geometry = SpatialTerrainGeometry(grid, transform)
-    val image = draped?.await()
+    val image = kept ?: draped?.await()
     val markers = nodeMarkers(geometry, nodes, circle)
     val lines = contours?.let { TerrainContours.meshData(geometry, it, onImage = image != null) }
     val raised = footprints?.await()?.let { TerrainBuildings.meshData(it, geometry) }
@@ -934,11 +936,16 @@ private val TerrainMeshData?.triangleCount: Int
 /** A `log.tag.<tag> DEBUG` switch, read only where the map hook is on. */
 private fun debugSwitch(context: Context, tag: String) = opensMapAtLaunch(context) && Log.isLoggable(tag, Log.DEBUG)
 
-/** Round feet where the locale measures in them, round meters everywhere else. */
-internal fun contourUnits(locale: Locale): ContourUnits =
-    if (locale.country.uppercase(Locale.ROOT) in IMPERIAL_COUNTRIES) ContourUnits.Imperial else ContourUnits.Metric
-
-private val IMPERIAL_COUNTRIES = setOf("US", "LR", "MM")
+private suspend fun sampleGround(frame: SpatialFrame, http: HttpClient): SpatialHeightGrid {
+    val source = MapterhornElevationSource(http)
+    val plan =
+        SpatialHeightGrid.plan(
+            frame,
+            maxTriangles = MAX_TRIANGLES,
+            dataMaxZoom = minOf(source.finestDataZoom(), MapterhornEndpoints.TILES_MAX_ZOOM),
+        )
+    return SpatialHeightGrid.sample(frame, plan, source).cleaned()
+}
 
 private suspend fun hasBuildings(source: TerrainBuildingSource): Boolean = try {
     source.available()

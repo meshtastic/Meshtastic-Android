@@ -22,13 +22,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.meshtastic.app.map.offline.pmtiles.OfflineBuildings
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionStore
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.component.determineSignalQuality
@@ -36,6 +42,7 @@ import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.map.terrain.spatial.SpatialSignal
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
+import org.meshtastic.feature.xr.ContourUnits
 import org.meshtastic.feature.xr.SpatialShell
 import org.meshtastic.feature.xr.TerrainBuildingSource
 import org.meshtastic.feature.xr.TerrainImagery
@@ -65,20 +72,31 @@ private val INFRASTRUCTURE_ROLES =
         Config.DeviceConfig.Role.CLIENT_BASE,
     )
 
-private fun signalOf(snr: Float): SpatialSignal = when (determineSignalQuality(snr, modemPreset = null)) {
-    Quality.GOOD -> SpatialSignal.GOOD
-    Quality.FAIR -> SpatialSignal.FAIR
-    Quality.BAD -> SpatialSignal.BAD
-    Quality.NONE -> SpatialSignal.NONE
-}
+private fun presetOf(radioConfig: RadioConfigRepository): Flow<Config.LoRaConfig.ModemPreset?> =
+    radioConfig.localConfigFlow.map { it.lora?.modem_preset }.distinctUntilChanged()
+
+private fun signalOf(snr: Float, preset: Config.LoRaConfig.ModemPreset?): SpatialSignal =
+    when (determineSignalQuality(snr, preset)) {
+        Quality.GOOD -> SpatialSignal.GOOD
+        Quality.FAIR -> SpatialSignal.FAIR
+        Quality.BAD -> SpatialSignal.BAD
+        Quality.NONE -> SpatialSignal.NONE
+    }
 
 @Composable
 fun AppSpatialShell(content: @Composable () -> Unit) {
     val repository = koinInject<NodeRepository>()
     val nodes by repository.nodeDBbyNum.collectAsState()
     val ours by repository.ourNodeInfo.collectAsState()
+    // The node list rates signal against the connected radio's preset, so the table does too.
+    val radioConfig = koinInject<RadioConfigRepository>()
+    val presetFlow = remember(radioConfig) { presetOf(radioConfig) }
+    val preset by presetFlow.collectAsState(initial = null)
+    // The app's own Units setting, as the 2D map's contours follow, not the device locale alone.
+    val unitsFlow = koinInject<LocaleUnitsProvider>().measurementSystem
+    val units by unitsFlow.collectAsState()
     val snapshots =
-        remember(nodes, ours) {
+        remember(nodes, ours, preset) {
             nodes.values
                 .filter { it.validPosition != null }
                 .map {
@@ -92,7 +110,7 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
                         isFavorite = it.isFavorite,
                         viaMqtt = it.viaMqtt,
                         hopsAway = it.hopsAway,
-                        signal = it.snr.takeIf { snr -> snr != Float.MAX_VALUE }?.let(::signalOf),
+                        signal = it.snr.takeIf { snr -> snr != Float.MAX_VALUE }?.let { snr -> signalOf(snr, preset) },
                         isInfrastructure = it.user.role in INFRASTRUCTURE_ROLES,
                         lastHeard = it.lastHeard,
                     )
@@ -123,6 +141,7 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
         imagery = terrainImagery,
         buildings = buildings,
         route = route,
+        contourUnits = if (units == MeasurementSystem.METRIC) ContourUnits.Metric else ContourUnits.Imperial,
         buildDispatcher = dispatchers.default,
         content = content,
     )

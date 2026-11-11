@@ -67,6 +67,8 @@ class SpatialHeightGridSamplingTest {
 
     private companion object {
         const val SLOPE = 100f
-        const val TOLERANCE_METERS = 1.5f
+
+        // Under a half texel of a 512 pixel tile, 0.1 m here, so a half texel of drift fails.
+        const val TOLERANCE_METERS = 0.05f
     }
 }
