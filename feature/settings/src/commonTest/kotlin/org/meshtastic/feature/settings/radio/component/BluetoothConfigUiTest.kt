@@ -21,6 +21,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -28,6 +29,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.save_and_restart
 import org.meshtastic.core.ui.theme.AppTheme
@@ -44,17 +46,23 @@ class BluetoothConfigUiTest {
 
     private class Harness(val saved: MutableList<BluetoothConfig> = mutableListOf())
 
-    private fun ComposeUiTest.show(stored: BluetoothConfig, harness: Harness) = setContent {
-        AppTheme {
-            BluetoothConfigContent(
-                bluetoothConfig = stored,
-                connected = true,
-                responseState = ResponseState.Empty,
-                connectPromptVisible = false,
-                onDismissPacketResponse = {},
-                onBack = {},
-                onSave = { harness.saved += it },
-            )
+    private fun ComposeUiTest.show(
+        stored: BluetoothConfig,
+        harness: Harness,
+        saveRestore: SaveRestoreHarness = SaveRestoreHarness(),
+    ) = setContent {
+        saveRestore.Content {
+            AppTheme {
+                BluetoothConfigContent(
+                    bluetoothConfig = stored,
+                    connected = true,
+                    responseState = ResponseState.Empty,
+                    connectPromptVisible = false,
+                    onDismissPacketResponse = {},
+                    onBack = {},
+                    onSave = { harness.saved += it },
+                )
+            }
         }
     }
 
@@ -114,6 +122,47 @@ class BluetoothConfigUiTest {
         enterPin("123456")
         onNodeWithText(getString(Res.string.save_and_restart)).assertIsEnabled()
         enterPin("000000")
+        onAllNodesWithText(getString(Res.string.save_and_restart)).assertCountEquals(0)
+        assertNull(harness.saved.firstOrNull())
+    }
+
+    @Test
+    fun `a valid draft survives save and restore and still saves`() = runComposeUiTest {
+        val harness = Harness()
+        val saveRestore = SaveRestoreHarness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness, saveRestore)
+        enterPin("654321")
+
+        saveRestore.saveAndRestore(this)
+
+        onNode(hasSetTextAction()).assertTextContains("654321")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsEnabled().performClick()
+        waitForIdle()
+        assertEquals(654321, harness.saved.single().fixed_pin)
+    }
+
+    @Test
+    fun `an invalid draft survives save and restore and keeps Save disabled`() = runComposeUiTest {
+        val saveRestore = SaveRestoreHarness()
+        show(stored(PairingMode.FIXED_PIN, 123456), Harness(), saveRestore)
+        enterPin("012345")
+
+        saveRestore.saveAndRestore(this)
+
+        onNode(hasSetTextAction()).assertTextContains("012345")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `discard resets the field to the stored PIN`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness)
+        enterPin("654321")
+
+        onNodeWithText(getString(Res.string.discard_changes)).performClick()
+        waitForIdle()
+
+        onNode(hasSetTextAction()).assertTextContains("123456")
         onAllNodesWithText(getString(Res.string.save_and_restart)).assertCountEquals(0)
         assertNull(harness.saved.firstOrNull())
     }
