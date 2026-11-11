@@ -63,11 +63,13 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
 }
 
 /**
- * The pairing PIN a link supplies for [address], or `null` when it is missing, is not exactly six digits (the
- * firmware's passkey format), or [address] is not a BLE device, so the link falls back to pairing by hand.
+ * The pairing PIN a link supplies for [address], or `null` when it is missing, is not six digits from 100000 to 999999
+ * (the range firmware draws passkeys from; a leading zero can never match its numeric PIN), or [address] is not a BLE
+ * device, so the link falls back to pairing by hand.
  */
 fun blePairingPinFor(address: String?, pin: String?): String? = pin?.takeIf {
     address?.startsWith(BLE_DEVICE_PREFIX) == true &&
         it.length == BLE_PAIRING_PIN_LENGTH &&
-        it.all { c -> c in '0'..'9' }
+        it.all { c -> c in '0'..'9' } &&
+        it[0] != '0'
 }

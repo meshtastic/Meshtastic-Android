@@ -162,6 +162,7 @@
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="bluetooth_feature_discovery">Discovery</string>
     <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
+    <string name="bluetooth_fixed_pin_range">Six digits, 100000 to 999999</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_permission_blocked_notice">Nearby devices access is turned off and Android will not ask again. Turn it on in app settings to connect over Bluetooth, or connect over Wi-Fi or USB instead.</string>
     <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>

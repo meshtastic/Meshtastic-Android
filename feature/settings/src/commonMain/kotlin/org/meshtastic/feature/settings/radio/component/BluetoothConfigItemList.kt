@@ -23,7 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -34,6 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.bluetooth_config
+import org.meshtastic.core.resources.bluetooth_fixed_pin_range
 import org.meshtastic.core.resources.schema_bluetooth_enabled
 import org.meshtastic.core.resources.schema_bluetooth_enabled_description
 import org.meshtastic.core.resources.schema_bluetooth_fixed_pin
@@ -46,31 +47,77 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 
 private const val PIN_LENGTH = 6
+private const val MIN_PIN = 100000
+private const val MAX_PIN = 999999
+
+private fun ConfigState<Config.BluetoothConfig>.restoreFixedPin(pin: Int) {
+    value = value.newBuilder().also { it.fixed_pin = pin }.build()
+}
+
+/**
+ * Whether the PIN field blocks Save: an invalid PIN blocks when it was edited, or when fixed-PIN mode needs a usable
+ * one. An unedited invalid stored PIN (such as 0) is left alone in the other modes, where it is unused.
+ */
+internal fun isFixedPinBlocked(text: String, savedText: String, fixedPinMode: Boolean): Boolean =
+    !isValidFixedPin(text) && (text != savedText || fixedPinMode)
+
+/** The stored PIN as the field shows it, padded to six digits. */
+internal fun fixedPinText(pin: Int): String = pin.toString().padStart(PIN_LENGTH, '0')
+
+/** Firmware draws PINs from 100000 to 999999, so a leading zero can never match its numeric PIN. */
+internal fun isValidFixedPin(text: String): Boolean =
+    text.length == PIN_LENGTH && text.all { it in '0'..'9' } && text.toInt() in MIN_PIN..MAX_PIN
 
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build()
+    BluetoothConfigContent(
+        bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build(),
+        connected = state.connected,
+        responseState = state.responseState,
+        connectPromptVisible = state.connectPromptVisible,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onBack = onBack,
+        onSave = { viewModel.setConfig(Config.Builder().also { wb -> wb.bluetooth = it }.build()) },
+    )
+}
+
+@Composable
+internal fun BluetoothConfigContent(
+    bluetoothConfig: Config.BluetoothConfig,
+    connected: Boolean,
+    responseState: ResponseState<Any>,
+    connectPromptVisible: Boolean,
+    onDismissPacketResponse: () -> Unit,
+    onBack: () -> Unit,
+    onSave: (Config.BluetoothConfig) -> Unit,
+) {
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
+    val savedPinText = fixedPinText(bluetoothConfig.fixed_pin)
+    var pinText by rememberSaveable(bluetoothConfig) { mutableStateOf(savedPinText) }
+    val pinEdited = pinText != savedPinText
+    val pinBlocked =
+        isFixedPinBlocked(pinText, savedPinText, formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN)
 
     RadioConfigScreenList(
         rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.bluetooth),
         onBack = onBack,
         configState = formState,
-        enabled = state.connected,
-        responseState = state.responseState,
-        showConnectPrompt = state.connectPromptVisible,
-        onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = {
-            val config = Config.Builder().also { wb -> wb.bluetooth = it }.build()
-            viewModel.setConfig(config)
-        },
+        enabled = connected,
+        saveEnabled = connected && !pinBlocked,
+        additionalDirtyCheck = { pinEdited },
+        onDiscard = { pinText = savedPinText },
+        responseState = responseState,
+        showConnectPrompt = connectPromptVisible,
+        onDismissPacketResponse = onDismissPacketResponse,
+        onSave = onSave,
     ) {
         fieldItem(SettingsSearchCatalog.fieldKeys(ConfigRoute.BLUETOOTH.route)) {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
@@ -79,7 +126,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     modifier = Modifier.settingsField(Res.string.schema_bluetooth_enabled),
                     summary = stringResource(Res.string.schema_bluetooth_enabled_description),
                     checked = formState.value.enabled,
-                    enabled = state.connected,
+                    enabled = connected,
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
                     },
@@ -87,7 +134,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 BluetoothPairingModePreference(
-                    enabled = state.connected,
+                    enabled = connected,
                     mode = formState.value.mode,
                     onModeChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
@@ -95,8 +142,13 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 FixedPinPreference(
-                    pinValue = formState.value.fixed_pin,
-                    enabled = state.connected,
+                    pinText = pinText,
+                    showError = pinBlocked,
+                    enabled = connected,
+                    onPinTextChange = { text ->
+                        pinText = text
+                        if (text == savedPinText) formState.restoreFixedPin(bluetoothConfig.fixed_pin)
+                    },
                     focusManager = focusManager,
                     onPinChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build()
@@ -126,28 +178,27 @@ internal fun BluetoothPairingModePreference(
 
 @Composable
 private fun FixedPinPreference(
-    pinValue: Int,
+    pinText: String,
+    showError: Boolean,
     enabled: Boolean,
+    onPinTextChange: (String) -> Unit,
     focusManager: androidx.compose.ui.focus.FocusManager,
     onPinChange: (Int) -> Unit,
 ) {
-    var pinState by remember(pinValue) { mutableStateOf(pinValue.toString().padStart(PIN_LENGTH, '0')) }
-    val pinIsError = pinState.length != PIN_LENGTH || !pinState.all { it.isDigit() }
     EditTextPreference(
         title = stringResource(Res.string.schema_bluetooth_fixed_pin),
         modifier = Modifier.settingsField(Res.string.schema_bluetooth_fixed_pin),
-        value = pinState,
+        value = pinText,
+        summary = stringResource(Res.string.bluetooth_fixed_pin_range),
         enabled = enabled,
-        isError = pinIsError,
+        isError = showError,
         keyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         onValueChanged = { input ->
-            if (input.length <= PIN_LENGTH && input.all { it.isDigit() }) {
-                pinState = input
-                if (input.length == PIN_LENGTH) {
-                    onPinChange(input.toInt())
-                }
+            if (input.length <= PIN_LENGTH && input.all { it in '0'..'9' }) {
+                onPinTextChange(input)
+                if (isValidFixedPin(input)) onPinChange(input.toInt())
             }
         },
     )
