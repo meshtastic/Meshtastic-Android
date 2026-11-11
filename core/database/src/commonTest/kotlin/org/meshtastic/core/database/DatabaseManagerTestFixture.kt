@@ -27,11 +27,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
 import okio.FileSystem
@@ -83,8 +83,8 @@ abstract class DatabaseManagerTestFixture {
 
     protected fun tearDownFixture() = runTest(testDispatcher) {
         managers.asReversed().forEach { it.close() }
-        dataStoreScope.cancel()
-        runCurrent()
+        // A DataStore write can still be finishing on a Room thread; joining keeps it from recreating the file.
+        dataStoreScope.coroutineContext.job.cancelAndJoin()
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
