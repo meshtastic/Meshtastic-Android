@@ -54,6 +54,10 @@ private const val PIN_LENGTH = 6
 private const val MIN_PIN = 100000
 private const val MAX_PIN = 999999
 
+private fun ConfigState<Config.BluetoothConfig>.restoreFixedPin(pin: Int) {
+    value = value.newBuilder().also { it.fixed_pin = pin }.build()
+}
+
 /** The stored PIN as the field shows it, padded to six digits. */
 internal fun fixedPinText(pin: Int): String = pin.toString().padStart(PIN_LENGTH, '0')
 
@@ -118,13 +122,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     onPinTextChange = { text ->
                         pinText = text
-                        if (text == savedPinText) {
-                            formState.value =
-                                formState.value
-                                    .newBuilder()
-                                    .also { wb -> wb.fixed_pin = bluetoothConfig.fixed_pin }
-                                    .build()
-                        }
+                        if (text == savedPinText) formState.restoreFixedPin(bluetoothConfig.fixed_pin)
                     },
                     focusManager = focusManager,
                     onPinChange = {
