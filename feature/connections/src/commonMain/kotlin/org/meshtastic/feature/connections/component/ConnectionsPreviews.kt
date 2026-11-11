@@ -50,8 +50,8 @@ import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.LiveUpdateCard
 import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
-import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
+import org.meshtastic.node.transport.Bearer
 import org.meshtastic.proto.User
 
 private const val PREVIEW_BLE_RSSI = -60

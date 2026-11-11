@@ -320,6 +320,8 @@ meshtastic-mqtt-client-bom = { module = "org.meshtastic:mqtt-client-bom", versio
 meshtastic-node-bom = { module = "org.meshtastic:node-bom", version.ref = "meshtastic-node-kmp" }
 meshtastic-node-host = { module = "org.meshtastic:node-host" }
 meshtastic-node-android = { module = "org.meshtastic:node-android" }
+meshtastic-node-desktop = { module = "org.meshtastic:node-desktop" }
+meshtastic-node-store-file = { module = "org.meshtastic:node-store-file" }
 meshtastic-node-testing = { module = "org.meshtastic:node-testing" }
 meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }
 meshtastic-mqtt-client-transport-tcp = { module = "org.meshtastic:mqtt-client-transport-tcp" }

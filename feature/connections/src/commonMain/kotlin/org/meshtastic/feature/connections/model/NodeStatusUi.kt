@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.connections.model
 
-import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
+import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.TransportAvailability
 
 /** The in-process node as the status card shows it. */
@@ -66,9 +66,9 @@ sealed interface BearerRowState {
     data class Unsupported(val reason: String) : BearerRowState
 }
 
-fun NodeStatus.toUi(): NodeStatusUi = NodeStatusUi(
+fun NodeStatus.toUi(): NodeStatusUi = nodeStatusUi(
     phase = phase,
-    nodeId = nodeNum?.let { nodeId(it) },
+    nodeNum = nodeNum,
     longName = longName,
     shortName = shortName,
     peerCount = peerCount,
@@ -89,6 +89,28 @@ fun NodeStatus.toUi(): NodeStatusUi = NodeStatusUi(
                 relayed = status.counters.relayed,
             )
         },
+)
+
+/** The card's header from the node's fields; [NodeStatus] has no public constructor, so tests build the card here. */
+@Suppress("LongParameterList")
+internal fun nodeStatusUi(
+    phase: NodePhase,
+    nodeNum: Long?,
+    longName: String?,
+    shortName: String?,
+    peerCount: Int,
+    failure: String?,
+    settingsReset: Boolean,
+    bearers: List<BearerRowUi>,
+): NodeStatusUi = NodeStatusUi(
+    phase = phase,
+    nodeId = nodeNum?.let { nodeId(it) },
+    longName = longName,
+    shortName = shortName,
+    peerCount = peerCount,
+    failure = failure,
+    settingsReset = settingsReset,
+    bearers = bearers,
 )
 
 /** A requirement outranks the availability: the user can act on it, while availability only reports. */

@@ -21,9 +21,9 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.network.radio.NodeBearers
 import org.meshtastic.node.BytesStore
+import org.meshtastic.node.desktop.JvmBearerFactory
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
-import org.meshtastic.node.host.JvmBearerFactory
 import org.meshtastic.node.store.file.AtomicFileStore
 import java.io.File
 

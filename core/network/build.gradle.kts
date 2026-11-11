@@ -48,6 +48,7 @@ kotlin {
             // its platform factory comes from androidMain (node-android) or the desktop app (JvmBearerFactory).
             api(project.dependencies.platform(libs.meshtastic.node.bom))
             api(libs.meshtastic.node.host)
+            implementation(libs.meshtastic.node.store.file) // nodeFileStores and AtomicFileStore
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)
@@ -74,7 +75,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            // FakeBearerFactory for NodeRadioTransport tests. node-testing carries kotlin-test's JUnit 4 flavor
+            // FakeTransport for NodeRadioTransport tests. node-testing carries kotlin-test's JUnit 4 flavor
             // transitively; this module tests on JUnit 5, and both claim the same capability.
             implementation(libs.meshtastic.node.testing.get().toString()) {
                 exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit")

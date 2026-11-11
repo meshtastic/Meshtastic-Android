@@ -16,10 +16,9 @@
  */
 package org.meshtastic.feature.connections.model
 
-import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
-import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
+import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.TransportAvailability
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -113,17 +112,16 @@ class NodeStatusUiTest {
     @Test
     fun `the node id is the firmware form and the header fields carry over`() {
         val status =
-            NodeStatus(
+            nodeStatusUi(
                 phase = NodePhase.Failed,
                 nodeNum = 0x3a5806beL,
                 longName = "Phone",
                 shortName = "PHON",
-                bearers = emptyMap(),
                 peerCount = 4,
                 failure = "boom",
                 settingsReset = true,
+                bearers = emptyList(),
             )
-                .toUi()
         assertEquals("!3a5806be", status.nodeId)
         assertEquals(NodePhase.Failed, status.phase)
         assertEquals("Phone", status.longName)
@@ -136,7 +134,7 @@ class NodeStatusUiTest {
 
     @Test
     fun `a small node number is zero padded`() {
-        val status = NodeStatus(NodePhase.Running, 0x1fL, null, null, emptyMap(), 0).toUi()
+        val status = nodeStatusUi(NodePhase.Running, 0x1fL, null, null, 0, null, false, emptyList())
         assertEquals("!0000001f", status.nodeId)
     }
 }
