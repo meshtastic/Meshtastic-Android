@@ -100,6 +100,10 @@ class MainActivityLaunchIntentTest {
     }
 }
 
+private val inlineIoDispatchersModule = module {
+    single { CoroutineDispatchers(io = Dispatchers.Unconfined, main = Dispatchers.Main, default = Dispatchers.Default) }
+}
+
 /**
  * The production Application with Koin, no background init, and IO work run inline, so a shared file's metadata query
  * has happened by the time the main looper is idle. Must not be private: Robolectric instantiates it reflectively.
@@ -110,17 +114,7 @@ internal class InlineIoApplication : MeshUtilApplication() {
             Configuration.Builder().setExecutor(SynchronousExecutor()).setTaskExecutor(SynchronousExecutor()).build()
         WorkManagerTestInitHelper.initializeTestWorkManager(this, configuration)
         super.onCreate()
-        loadKoinModules(
-            module {
-                single {
-                    CoroutineDispatchers(
-                        io = Dispatchers.Unconfined,
-                        main = Dispatchers.Main,
-                        default = Dispatchers.Default,
-                    )
-                }
-            },
-        )
+        loadKoinModules(inlineIoDispatchersModule)
     }
 
     override fun startBackgroundInit() = Unit
