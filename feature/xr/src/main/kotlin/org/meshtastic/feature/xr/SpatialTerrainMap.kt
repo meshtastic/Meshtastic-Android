@@ -66,7 +66,6 @@ import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.runtime.Session
 import androidx.xr.runtime.math.BoundingBox
-import androidx.xr.runtime.math.FloatSize3d
 import androidx.xr.runtime.math.IntSize2d
 import androidx.xr.runtime.math.Pose
 import androidx.xr.runtime.math.Quaternion
@@ -82,7 +81,6 @@ import androidx.xr.scenecore.InteractableComponent
 import androidx.xr.scenecore.KhronosUnlitMaterial
 import androidx.xr.scenecore.MeshEntity
 import androidx.xr.scenecore.MeshSubsetTopology
-import androidx.xr.scenecore.MovableComponent
 import androidx.xr.scenecore.PanelEntity
 import androidx.xr.scenecore.Space
 import androidx.xr.scenecore.VertexAttribute
@@ -122,6 +120,7 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialWheelDrag
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelLayout
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelMotion
 import org.meshtastic.feature.map.terrain.spatial.SpatialZoom
+import org.meshtastic.feature.map.terrain.spatial.Vec3
 import java.util.Locale
 import java.util.concurrent.Executor
 import kotlin.math.PI
@@ -415,11 +414,12 @@ private fun rememberTableStage(
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
         val handle = createMesh(session, handleMeshData(TABLE_DISK_RADIUS))
-        val root = createRoot(session, tipped, handle, material)
+        val root = createRoot(session, tipped, handle, material, mainExecutor)
         root.entity.contentDescription = description
         val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root.entity)
         val plate = createPlate(session, root.entity, TABLE_DISK_RADIUS, material, motion, mainExecutor)
         val made = TableStage(root.entity, wheel, material, root.scale, plate, handle)
+        made.hang(root.bar)
         stage = made
         try {
             awaitCancellation()
@@ -676,7 +676,13 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>) {
  * draws the grab bar at the table's front: the system moves an entity by its own shape, so pinching the bar carries the
  * whole table, and the ring around the wheel is left for turning it.
  */
-private fun createRoot(session: Session, tipped: Boolean, handle: CustomMesh, material: KhronosUnlitMaterial): Root {
+private fun createRoot(
+    session: Session,
+    tipped: Boolean,
+    handle: CustomMesh,
+    material: KhronosUnlitMaterial,
+    executor: Executor,
+): Root {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
     val scale = panel.getScale(Space.ACTIVITY)
@@ -692,20 +698,48 @@ private fun createRoot(session: Session, tipped: Boolean, handle: CustomMesh, ma
         } else {
             Pose(at)
         }
-    val root = MeshEntity.create(session, handle, listOf(material), 0, pose, panel)
+    val root = Entity.create(session, "table", pose, panel)
     root.setScale(fit.scale / scale)
-    // Not scaled with distance: the table keeps its size wherever it is put.
-    val movable = MovableComponent.createSystemMovable(session, false)
-    // The system draws its move bar around this box, in the root's own units.
-    val across = 2 * (TABLE_DISK_RADIUS + SpatialWheelLayout.REACH)
-    movable.size = FloatSize3d(across, MOVE_BOX_HEIGHT, across)
-    val attached = root.addComponent(movable)
-    Logger.d { "Terrain table movable attached: $attached" }
-    return Root(root, fit.scale / scale)
+    // The bar is the grip. The system's own movable only moves its entity from its own decorations, which a bar drawn
+    // here is not, so the bar takes the drag itself and swings the table round the user.
+    val bar = MeshEntity.create(session, handle, listOf(material), 0, Pose.Identity, root)
+    var drag: RayDrag? = null
+    bar.addComponent(
+        InteractableComponent.create(session, executor) { event ->
+            val origin = Vec3(event.origin.x, event.origin.y, event.origin.z)
+            val direction = Vec3(event.direction.x, event.direction.y, event.direction.z)
+            when (event.action) {
+                InputEvent.Action.DOWN -> {
+                    val grip = bar.getPose(Space.ACTIVITY).translation
+                    val away = Vector3(grip.x - origin.x, grip.y - origin.y, grip.z - origin.z)
+                    drag = RayDrag(origin, direction, away.length)
+                }
+
+                InputEvent.Action.MOVE ->
+                    drag?.let {
+                        val moved = it.move(origin, direction)
+                        // From the activity's space into the main panel's, where the table's pose is kept.
+                        val inPanel =
+                            panel.getPose(Space.ACTIVITY).rotation.inverse *
+                                Vector3(moved.x, moved.y, moved.z) *
+                                (1f / panel.getScale(Space.ACTIVITY))
+                        val now = root.getPose()
+                        root.setPose(Pose(now.translation + inPanel, now.rotation))
+                    }
+
+                InputEvent.Action.UP,
+                InputEvent.Action.CANCEL,
+                -> drag = null
+
+                else -> Unit
+            }
+        },
+    )
+    return Root(root, bar, fit.scale / scale)
 }
 
 /** The table's root, and its scale in the main panel's units. */
-private class Root(val entity: Entity, val scale: Float)
+private class Root(val entity: Entity, val bar: Entity, val scale: Float)
 
 /** The comets, their entities and the one mesh each color of comet shares. */
 private class CometEntities(val comets: TerrainComets, val entities: List<Entity>, val meshes: List<CustomMesh>)
@@ -920,11 +954,10 @@ private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
 private const val PLATE_MARGIN = 0.012f
-private const val MOVE_BOX_HEIGHT = 0.3f
 private const val HANDLE_GAP = 0.04f
 private const val HANDLE_DROP = 0.03f
-private const val HANDLE_HALF_LENGTH = 0.1f
-private const val HANDLE_HALF = 0.008f
+private const val HANDLE_HALF_LENGTH = 0.12f
+private const val HANDLE_HALF = 0.012f
 private const val TIPPED_DROP_METERS = -0.3f
 private const val TIPPED_FORWARD_METERS = 0.35f
 private const val TIPPED_DEGREES = 50f
