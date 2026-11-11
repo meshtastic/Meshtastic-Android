@@ -25,7 +25,7 @@ navigationevent = "1.1.0"
 paging = "3.5.3"
 room = "3.1.0-alpha03"
 koin = "4.2.2"
-koin-plugin = "1.2.2"
+koin-plugin = "1.2.3"
 
 # Kotlin
 kotlin = "2.4.21"
