@@ -145,13 +145,14 @@ internal fun embeddedNode(
     stores = nodeFileStores(bearers.storesDir()),
     bearers = factory,
     signals = bearers.hostSignals,
-    hostBearerStore = bearers.hostBearerStore(),
-    defaults = firstRunDefaults(),
-    logger = logger,
-    positionSource = bearers.positionSource,
+) {
+    hostBearerStore = bearers.hostBearerStore()
+    defaults = firstRunDefaults()
+    this.logger = logger
+    positionSource = bearers.positionSource
     // VIRTUAL_NODE, by number until the protobufs pin names it (protobufs#1126).
-    hardwareModel = HardwareModel.fromValue(VIRTUAL_NODE) ?: HardwareModel.PRIVATE_HW,
-)
+    hardwareModel = HardwareModel.fromValue(VIRTUAL_NODE) ?: HardwareModel.PRIVATE_HW
+}
 
 private const val VIRTUAL_NODE = 254
 
@@ -162,14 +163,16 @@ private const val VIRTUAL_NODE = 254
  */
 internal fun firstRunDefaults(): BackupPreferences = nodeDefaults {
     transport {
-        TransportKeys.section(
-            listOf(
-                Transport.TRANSPORT_LORA,
-                Transport.TRANSPORT_MULTICAST_UDP,
-                Transport.TRANSPORT_BLE_ADV,
-                Transport.TRANSPORT_BLE_GATT,
-            ),
-        )
+        enabled =
+            TransportKeys.section(
+                listOf(
+                    Transport.TRANSPORT_LORA,
+                    Transport.TRANSPORT_MULTICAST_UDP,
+                    Transport.TRANSPORT_BLE_ADV,
+                    Transport.TRANSPORT_BLE_GATT,
+                ),
+            )
+                .enabled
     }
 }
 

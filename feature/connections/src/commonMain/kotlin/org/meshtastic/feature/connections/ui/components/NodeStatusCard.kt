@@ -79,8 +79,8 @@ import org.meshtastic.core.ui.util.rememberPermissionState
 import org.meshtastic.feature.connections.model.BearerRowState
 import org.meshtastic.feature.connections.model.BearerRowUi
 import org.meshtastic.feature.connections.model.NodeStatusUi
-import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
+import org.meshtastic.node.transport.Bearer
 
 /**
  * This device as the node: its phase, identity and one row per bearer. Every bearer but LoRa carries a switch; one

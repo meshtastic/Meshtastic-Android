@@ -23,10 +23,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
-import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.EmbeddedNode
 import org.meshtastic.node.host.NodeStatus
+import org.meshtastic.node.transport.Bearer
 import kotlin.concurrent.Volatile
 
 /**

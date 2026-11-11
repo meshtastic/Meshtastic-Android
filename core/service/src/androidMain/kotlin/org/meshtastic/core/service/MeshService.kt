@@ -49,7 +49,7 @@ import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.node.host.Bearer
+import org.meshtastic.node.transport.Bearer
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.

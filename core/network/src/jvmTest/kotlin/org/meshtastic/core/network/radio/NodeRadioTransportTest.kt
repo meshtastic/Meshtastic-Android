@@ -32,7 +32,6 @@ import org.meshtastic.node.BytesStore
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.host.NodePhase
-import org.meshtastic.node.testing.FakeBearerFactory
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.ToRadio
 import java.nio.file.Files
