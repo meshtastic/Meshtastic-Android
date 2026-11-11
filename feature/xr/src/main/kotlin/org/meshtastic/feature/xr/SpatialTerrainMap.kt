@@ -232,7 +232,12 @@ fun SpatialTerrainMap(
             }
             if (maxZoom > 1) {
                 Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
-                Slider(slider, onValueChange = { slider = it }, onValueChangeFinished = { committed = slider })
+                Slider(
+                    slider,
+                    onValueChange = { slider = it },
+                    onValueChangeFinished = { committed = slider },
+                    modifier = Modifier.heightIn(min = XrTargetSize),
+                )
             }
         }
     }
@@ -269,7 +274,10 @@ internal fun withLocalAnchor(nodes: List<SpatialNodeSnapshot>): List<SpatialNode
 @Composable
 private fun MapControls(credits: List<String>, content: @Composable () -> Unit) {
     Surface(tonalElevation = 3.dp) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(TARGET_GAP),
+        ) {
             content()
             if (credits.isNotEmpty()) {
                 Text(credits.joinToString(" · "), style = MaterialTheme.typography.labelLarge)
@@ -291,8 +299,12 @@ private fun LayerChips(
     onSelect: (TerrainImagery?) -> Unit,
     overlays: @Composable () -> Unit,
 ) {
-    // Wrapped onto as many rows as they need: a row that scrolls is hard to work with a pointed ray.
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    // Wrapped onto as many rows as they need: a row that scrolls is hard to work with a pointed ray. Targets keep
+    // Material's 8 dp apart both ways, so one is not hit for its neighbor.
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(TARGET_GAP),
+        verticalArrangement = Arrangement.spacedBy(TARGET_GAP),
+    ) {
         overlays()
         for (layer in imagery) {
             FilterChip(
@@ -446,7 +458,8 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
     val shown by rememberUpdatedState(content)
     DisposableEffect(stage) {
         val table = stage ?: return@DisposableEffect onDispose {}
-        val width = (CONTROLS_WIDTH_DP * context.resources.displayMetrics.density).toInt()
+        val density = context.resources.displayMetrics.density
+        val width = (CONTROLS_WIDTH_DP * density).toInt()
         val view = ComposeView(context)
         view.setViewTreeLifecycleOwner(lifecycle)
         view.setViewTreeSavedStateRegistryOwner(savedState)
@@ -461,6 +474,9 @@ private fun TableControls(stage: TableStage?, session: Session, content: @Compos
             val lean = CONTROLS_LEAN_DEGREES * PI.toFloat() / 180f
             val top = Vector3(0f, CONTROLS_TOP, TABLE_DISK_RADIUS + SpatialWheelLayout.REACH + CONTROLS_GAP)
             val middle = top * table.rootScale + Vector3(0f, -half * cos(lean), half * sin(lean))
+            // The system's 32 dp panel corner, which a panel made here does not get: dp to meters by the panel's own
+            // size in pixels and in its units.
+            panel.cornerRadius = PANEL_CORNER_DP * density * panel.size.width / panel.sizeInPixels.width
             val leaning = Quaternion.fromAxisAngle(Vector3.Right, -CONTROLS_LEAN_DEGREES)
             panel.setPose(Pose(root.transformPoint(middle), root.rotation * leaning))
         }
@@ -945,6 +961,8 @@ private const val MAX_TRIANGLES = 90_000
 /** The map is a circle in a square one model unit on a side, whatever ground it shows. */
 private const val TABLE_DISK_RADIUS = 0.5f
 private const val CONTROLS_WIDTH_DP = 480
+private const val PANEL_CORNER_DP = 32f
+private val TARGET_GAP = 8.dp
 private const val CONTROLS_LEAN_DEGREES = 35f
 private const val CONTROLS_TOP = -0.08f
 private const val CONTROLS_GAP = 0.05f
@@ -956,8 +974,8 @@ private const val PLATE_HALF = 0.004f
 private const val PLATE_MARGIN = 0.012f
 private const val HANDLE_GAP = 0.04f
 private const val HANDLE_DROP = 0.03f
-private const val HANDLE_HALF_LENGTH = 0.12f
-private const val HANDLE_HALF = 0.012f
+private const val HANDLE_HALF_LENGTH = 0.14f
+private const val HANDLE_HALF = 0.02f
 private const val TIPPED_DROP_METERS = -0.3f
 private const val TIPPED_FORWARD_METERS = 0.35f
 private const val TIPPED_DEGREES = 50f
