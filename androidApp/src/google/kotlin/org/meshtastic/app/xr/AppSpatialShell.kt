@@ -17,12 +17,10 @@
 package org.meshtastic.app.xr
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
@@ -114,12 +112,12 @@ fun AppSpatialShell(content: @Composable () -> Unit) {
         }
     // The screen that shows a trace route clears it, so the table keeps the last one that had a route.
     val traced by koinInject<ServiceRepository>().tracerouteResponse.collectAsState()
-    var route by remember { mutableStateOf<TerrainRoute?>(null) }
-    LaunchedEffect(traced) {
-        traced
-            ?.takeIf { it.hasOverlay }
-            ?.let { route = TerrainRoute(it.forwardRoute.map(Int::toLong), it.returnRoute.map(Int::toLong)) }
-    }
+    val route by
+        produceState<TerrainRoute?>(null, traced) {
+            traced
+                ?.takeIf { it.hasOverlay }
+                ?.let { value = TerrainRoute(it.forwardRoute.map(Int::toLong), it.returnRoute.map(Int::toLong)) }
+        }
     SpatialShell(
         nodes = snapshots,
         imagery = terrainImagery,

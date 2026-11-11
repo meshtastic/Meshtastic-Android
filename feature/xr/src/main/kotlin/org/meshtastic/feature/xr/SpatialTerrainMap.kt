@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -136,6 +137,7 @@ private enum class TerrainStatus {
 }
 
 /** What the map stands on once built, and what to say about it. */
+@Suppress("LongParameterList")
 private class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
@@ -533,7 +535,8 @@ private fun TableFrames(
         }
     }
     val heard = remember(ground) { HashMap<Long, Int>() }
-    LaunchedEffect(ground, nodes) {
+    // After each composition rather than in a coroutine: it only compares times, and a change sends a comet.
+    SideEffect {
         for (node in nodes) {
             val before = heard.put(node.id, node.lastHeard)
             if (before != null && before != node.lastHeard) ground?.comets?.heard(node.id)
@@ -579,6 +582,7 @@ private fun TerrainEntities(
         // The draped terrain is a model: SceneCore takes a run-time image only inside one. So is each chip.
         val models = ArrayList<GltfModel>()
         val chipModels = ArrayList<Pair<TerrainChip, GltfModel>>()
+        var made = false
         try {
             built.image?.let { image ->
                 val glb = withContext(buildDispatcher) { terrainGlb(built.terrain, image, "image/jpeg") }
@@ -590,10 +594,13 @@ private fun TerrainEntities(
                 val glb = terrainGlb(quad, png, "image/png", cutout = true)
                 chipModels += chip to GltfModel.create(session, glb, "chip")
             }
-        } catch (e: CancellationException) {
-            models.forEach { it.close() }
-            chipModels.forEach { it.second.close() }
-            throw e
+            made = true
+        } finally {
+            // A cancel part way leaves models with nothing to close them.
+            if (!made) {
+                models.forEach { it.close() }
+                chipModels.forEach { it.second.close() }
+            }
         }
         // Nothing suspends from here to the hand-over: a cancel in between would leave entities with nothing to
         // dispose them.

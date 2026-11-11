@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,7 +77,10 @@ fun SpatialShell(
     val openAtLaunch = remember(context) { opensMapAtLaunch(context) }
     var mapShown by remember { mutableStateOf(openAtLaunch) }
     if (openAtLaunch && session != null) {
-        LaunchedEffect(session) { session.scene.requestFullSpace() }
+        DisposableEffect(session) {
+            session.scene.requestFullSpace()
+            onDispose {}
+        }
     }
     Box(modifier.fillMaxSize()) {
         content()
