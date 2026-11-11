@@ -28,3 +28,6 @@ The orbiter's map button shows the mesh's ground as a turning table beside the a
 
 - Never size the main panel. `SpatialMainPanel` with an explicit size resizes the window, which recreates `MainActivity` and leaks the old one through the platform's XR panel listener.
 - Spatial UI and 3D content show only in Full Space; gate on `LocalSpatialCapabilities`, never on device.
+- Buttons are `XrTargetSize` (56 dp) and text is 14 sp or larger, per the Android XR [visual design guide](https://developer.android.com/design/ui/xr/guides/visual-design).
+- Create a material or model before the entities that use it, so a cancel while it loads leaves nothing in the scene.
+- Entities a user can point at carry a `contentDescription`.

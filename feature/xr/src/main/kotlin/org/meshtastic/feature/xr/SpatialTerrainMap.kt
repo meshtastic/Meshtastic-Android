@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.xr_terrain_empty
 import org.meshtastic.core.resources.xr_terrain_flat
 import org.meshtastic.core.resources.xr_terrain_loading
+import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.resources.xr_terrain_unavailable
 import org.meshtastic.core.resources.xr_terrain_zoom
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
@@ -108,6 +110,7 @@ private class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
     val bezel: TerrainMeshData,
+    val pins: TerrainMeshData?,
     val flat: Boolean,
 )
 
@@ -138,14 +141,19 @@ fun SpatialTerrainMap(
     val motion = remember { SpatialWheelMotion() }
     var wheel by remember { mutableStateOf<Entity?>(null) }
     val http = remember { HttpClient() }
+    val context = LocalContext.current
+    val tipped = remember(context) { opensMapAtLaunch(context) }
     DisposableEffect(http) { onDispose { http.close() } }
 
     TerrainEntities(
         session,
         circle,
+        nodes,
         http,
         motion,
         buildDispatcher,
+        tipped = tipped,
+        description = stringResource(Res.string.xr_terrain_map),
         onWheel = { wheel = it },
         onStatus = { status = it },
     )
@@ -155,7 +163,7 @@ fun SpatialTerrainMap(
         Orbiter(position = OrbiterPosition.TopCenter()) {
             Surface(shape = MaterialTheme.shapes.large, tonalElevation = 3.dp) {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp)) {
-                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
                     Slider(
                         value = slider,
                         onValueChange = { slider = it },
@@ -223,14 +231,19 @@ private fun WheelFrames(wheel: Entity?, motion: SpatialWheelMotion) {
 private fun TerrainEntities(
     session: Session,
     circle: SpatialCircle,
+    nodes: List<SpatialNodeSnapshot>,
     http: HttpClient,
     motion: SpatialWheelMotion,
     buildDispatcher: CoroutineDispatcher,
+    tipped: Boolean,
+    description: String,
     onWheel: (Entity?) -> Unit,
     onStatus: (TerrainStatus) -> Unit,
 ) {
     val wheelChanged by rememberUpdatedState(onWheel)
     val statusChanged by rememberUpdatedState(onStatus)
+    // Read when a build starts: a node update alone must not rebuild the map.
+    val pinned by rememberUpdatedState(nodes)
     // The wheel's input callbacks and its per-frame steps share one state, so both run on the main thread.
     val mainExecutor = remember {
         val handler = Handler(Looper.getMainLooper())
@@ -240,7 +253,7 @@ private fun TerrainEntities(
         statusChanged(TerrainStatus.Loading)
         val built =
             try {
-                withContext(buildDispatcher) { buildTerrain(circle, http) }
+                withContext(buildDispatcher) { buildTerrain(circle, pinned, http) }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -249,11 +262,12 @@ private fun TerrainEntities(
                 statusChanged(TerrainStatus.Failed)
                 return@LaunchedEffect
             }
-        val root = createRoot(session, built.geometry)
-        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
+        // Before any entity: a cancel while this suspends would leave them in the scene with nothing to dispose them.
         val material = KhronosUnlitMaterial.create(session, AlphaMode.OPAQUE)
         material.setBaseColorFactor(Vector4(1f, 1f, 1f, 1f))
-        val meshes = listOf(built.terrain, built.bezel).map { createMesh(session, it) }
+        val root = createRoot(session, built.geometry, tipped).also { it.contentDescription = description }
+        val wheel = Entity.create(session, "wheel", Pose(Vector3.Zero, yawRotation(motion.shown)), root)
+        val meshes = listOfNotNull(built.terrain, built.bezel, built.pins).map { createMesh(session, it) }
         val entities = meshes.map { MeshEntity.create(session, it, listOf(material), 0, Pose.Identity, wheel) }
         val plate = createPlate(session, root, built.geometry.transform.diskRadius, material, motion, mainExecutor)
         wheelChanged(wheel)
@@ -279,14 +293,22 @@ private fun destroy(entities: List<Entity>, meshes: List<CustomMesh>, material: 
 }
 
 /** A root beside the main panel's right edge, scaled so the table is its real size whatever the panel's scale. */
-private fun createRoot(session: Session, geometry: SpatialTerrainGeometry): Entity {
+private fun createRoot(session: Session, geometry: SpatialTerrainGeometry, tipped: Boolean): Entity {
     val panel = session.scene.mainPanelEntity
     val size = panel.size
     val scale = panel.getScale(Space.ACTIVITY)
     val fit = SpatialVolumeFit(TABLE_VOLUME_METERS, TABLE_VOLUME_METERS, geometry.transform.diskRadius)
     val reach = fit.diskRadius + SpatialWheelLayout.REACH + TABLE_GAP_METERS
     val at = Vector3((size.width / 2f + reach / scale), -size.height * DROP_FRACTION, 0f)
-    return Entity.create(session, "terrain-map", Pose(at), panel).also { it.setScale(fit.scale / scale) }
+    val pose =
+        if (tipped) {
+            // Below the panel and in front of it, its far side tipped up toward the camera.
+            val below = Vector3(0f, -size.height / 2f - TIPPED_DROP_METERS / scale, TIPPED_FORWARD_METERS / scale)
+            Pose(below, Quaternion.fromAxisAngle(Vector3.Right, TIPPED_DEGREES))
+        } else {
+            Pose(at)
+        }
+    return Entity.create(session, "terrain-map", pose, panel).also { it.setScale(fit.scale / scale) }
 }
 
 /**
@@ -302,8 +324,9 @@ private fun createPlate(
     mainExecutor: Executor,
 ): Plate {
     val acc = MeshAccumulator()
-    val radius = diskRadius + SpatialWheelLayout.GAP + SpatialWheelLayout.BEZEL_WIDTH
-    acc.box(0f, -PLATE_HALF, 0f, radius * PLATE_FILL, PLATE_HALF, radius * PLATE_FILL, Rgb(0.1f, 0.1f, 0.12f))
+    // Out past the knobs, so the ring around the wheel is there to point at and drag.
+    val radius = diskRadius + SpatialWheelLayout.REACH + PLATE_MARGIN
+    acc.disk(radius, PLATE_TOP - 2 * PLATE_HALF, PLATE_TOP, Rgb(0.1f, 0.1f, 0.12f))
     val mesh = createMesh(session, acc.build())
     val entity = MeshEntity.create(session, mesh, listOf(material), 0, Pose.Identity, root)
     var drag: SpatialWheelDrag? = null
@@ -362,7 +385,11 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
         .build()
 }
 
-private suspend fun buildTerrain(circle: SpatialCircle, http: HttpClient): BuiltTerrain {
+private suspend fun buildTerrain(
+    circle: SpatialCircle,
+    nodes: List<SpatialNodeSnapshot>,
+    http: HttpClient,
+): BuiltTerrain {
     val frame = SpatialFrame(circle.bounds)
     val source = MapterhornElevationSource(http)
     val plan =
@@ -372,12 +399,20 @@ private suspend fun buildTerrain(circle: SpatialCircle, http: HttpClient): Built
             dataMaxZoom = minOf(source.finestDataZoom(), MapterhornEndpoints.TILES_MAX_ZOOM),
         )
     val grid = SpatialHeightGrid.sample(frame, plan, source).cleaned()
-    val transform = SpatialModelTransform(frame, grid.baseElevation.toDouble(), grid.maxElevation.toDouble())
+    val relief = (grid.maxElevation - grid.baseElevation).toDouble()
+    val transform =
+        SpatialModelTransform(
+            frame,
+            grid.baseElevation.toDouble(),
+            grid.maxElevation.toDouble(),
+            verticalExaggeration = reliefExaggeration(relief, maxOf(frame.widthMeters, frame.depthMeters)),
+        )
     val geometry = SpatialTerrainGeometry(grid, transform)
     return BuiltTerrain(
         geometry = geometry,
         terrain = terrainMeshData(geometry, grid.baseElevation.toDouble(), grid.maxElevation.toDouble()),
         bezel = bezelMeshData(transform.diskRadius, geometry.rimTop),
+        pins = pinMeshData(geometry, nodes, circle),
         flat = !grid.hasAnyTerrain,
     )
 }
@@ -391,6 +426,12 @@ private const val TABLE_VOLUME_METERS = 0.8f
 private const val TABLE_GAP_METERS = 0.12f
 private const val DROP_FRACTION = 0.25f
 private const val PLATE_HALF = 0.004f
-private const val PLATE_FILL = 1.02f
+private const val PLATE_MARGIN = 0.012f
+private const val TIPPED_DROP_METERS = 0.3f
+private const val TIPPED_FORWARD_METERS = 0.35f
+private const val TIPPED_DEGREES = 50f
+
+/** Under the terrain's skirt and the bezel, which reach this far below the ground. */
+private const val PLATE_TOP = -0.02f
 private const val NANOS_PER_SECOND = 1_000_000_000.0
 private const val MILLIS_PER_SECOND = 1_000.0

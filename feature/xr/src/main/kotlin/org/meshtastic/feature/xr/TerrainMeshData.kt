@@ -19,6 +19,8 @@
 package org.meshtastic.feature.xr
 
 import org.meshtastic.feature.map.terrain.spatial.SpatialBezelMesh
+import org.meshtastic.feature.map.terrain.spatial.SpatialCircle
+import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 import org.meshtastic.feature.map.terrain.spatial.SpatialTerrainGeometry
 import org.meshtastic.feature.map.terrain.spatial.SpatialWheelLayout
 import java.nio.ByteBuffer
@@ -95,6 +97,28 @@ internal class MeshAccumulator {
         quad(listOf(p(1, -1, -1), p(-1, -1, -1), p(-1, 1, -1), p(1, 1, -1)), 0f, 0f, -1f, color)
         quad(listOf(p(1, -1, 1), p(1, -1, -1), p(1, 1, -1), p(1, 1, 1)), 1f, 0f, 0f, color)
         quad(listOf(p(-1, -1, -1), p(-1, -1, 1), p(-1, 1, 1), p(-1, 1, -1)), -1f, 0f, 0f, color)
+    }
+
+    /** A flat round slab about the y axis, from [bottom] to [top]. */
+    fun disk(radius: Float, bottom: Float, top: Float, color: Rgb, segments: Int = 64) {
+        fun at(i: Int, y: Float): FloatArray {
+            val theta = 2 * PI.toFloat() * i / segments
+            return floatArrayOf(radius * cos(theta), y, radius * sin(theta))
+        }
+        for (i in 0 until segments) {
+            val a = at(i, top)
+            val b = at(i + 1, top)
+            val base = count
+            vertex(0f, top, 0f, 0f, 1f, 0f, color)
+            vertex(b[0], b[1], b[2], 0f, 1f, 0f, color)
+            vertex(a[0], a[1], a[2], 0f, 1f, 0f, color)
+            vertex(0f, bottom, 0f, 0f, -1f, 0f, color)
+            vertex(a[0], bottom, a[2], 0f, -1f, 0f, color)
+            vertex(b[0], bottom, b[2], 0f, -1f, 0f, color)
+            indices.addAll(listOf(base, base + 1, base + 2, base + 3, base + 4, base + 5))
+            val mid = 2 * PI.toFloat() * (i + 0.5f) / segments
+            quad(listOf(at(i + 1, bottom), at(i, bottom), a, b), cos(mid), 0f, sin(mid), color)
+        }
     }
 
     fun sphere(cx: Float, cy: Float, cz: Float, radius: Float, color: Rgb, rings: Int = 6, segments: Int = 10) {
@@ -269,6 +293,31 @@ internal fun bezelMeshData(diskRadius: Float, rimTop: Float): TerrainMeshData {
     return acc.build()
 }
 
+/** A pin standing on the ground at each node inside [circle], or null when there are none. */
+internal fun pinMeshData(
+    geometry: SpatialTerrainGeometry,
+    nodes: List<SpatialNodeSnapshot>,
+    circle: SpatialCircle,
+): TerrainMeshData? {
+    val acc = MeshAccumulator()
+    for (node in nodes) {
+        if (!circle.contains(node.coordinate)) continue
+        val foot = geometry.surfacePosition(node.coordinate)
+        acc.box(foot.x, foot.y + PIN_HEIGHT / 2, foot.z, PIN_STALK, PIN_HEIGHT / 2, PIN_STALK, LETTER)
+        acc.sphere(foot.x, foot.y + PIN_HEIGHT, foot.z, PIN_RADIUS, if (node.isConnectedRadio) NORTH else PIN)
+    }
+    return acc.build().takeIf { it.vertexCount > 0 }
+}
+
+/**
+ * How far to stretch heights so the relief stands [TARGET_RELIEF] of the map's width tall. A mesh tens of kilometers
+ * wide is otherwise a sheet of paper; the cap keeps plains from turning into spikes.
+ */
+internal fun reliefExaggeration(reliefMeters: Double, spanMeters: Double): Double {
+    if (reliefMeters <= 0 || spanMeters <= 0) return MIN_EXAGGERATION
+    return (TARGET_RELIEF * spanMeters / reliefMeters).coerceIn(MIN_EXAGGERATION, MAX_EXAGGERATION)
+}
+
 private fun ramp(t: Float): Rgb = when {
     t < 0.35f -> LOWLAND.mix(MIDLAND, t / 0.35f)
     t < 0.75f -> MIDLAND.mix(HIGHLAND, (t - 0.35f) / 0.4f)
@@ -282,6 +331,12 @@ private const val TERRAIN_SKIRT = 0.02f
 private const val SPOKE_STEPS = 6
 private const val LETTER_LIFT = 0.0006f
 private const val LETTER_SCALE = 0.7f
+private const val PIN_HEIGHT = 0.03f
+private const val PIN_STALK = 0.0012f
+private const val PIN_RADIUS = 0.007f
+private const val TARGET_RELIEF = 0.12
+private const val MIN_EXAGGERATION = 1.5
+private const val MAX_EXAGGERATION = 6.0
 
 /** From the north-west and above, the way a printed relief map is lit, normalized. */
 private val LIGHT = floatArrayOf(-0.5f, 0.75f, -0.43f)
@@ -294,4 +349,5 @@ private val SKIRT = Rgb(0.28f, 0.22f, 0.17f)
 private val BEZEL = Rgb(0.16f, 0.17f, 0.2f)
 private val KNOB = Rgb(0.7f, 0.72f, 0.76f)
 private val LETTER = Rgb(0.92f, 0.92f, 0.94f)
+private val PIN = Rgb(0.4f, 0.92f, 0.56f)
 private val NORTH = Rgb(0.95f, 0.45f, 0.2f)
