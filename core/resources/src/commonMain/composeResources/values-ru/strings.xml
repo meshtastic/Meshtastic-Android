@@ -1830,8 +1830,6 @@
     <string name="remote_shell_modifier_locked">Заблокировано</string>
     <string name="remote_shell_modifier_once">Применить к следующей клавише</string>
     <string name="remote_shell_more_options">Больше параметров</string>
-    <string name="remote_shell_no_reply">Нет ответа от ноды. Она должна указывать открытый ключ вашего радио в качестве ключа администратора и находиться в зоне доступа.</string>
-    <string name="remote_shell_no_reply_reason">Не удалось открыть сессию (%1$s). Нода должна указать публичный ключ вашего радиоканала в качестве ключа администратора и находиться в зоне доступа.</string>
     <string name="remote_shell_open">Открыть терминал</string>
     <string name="remote_shell_open_description">Открыть терминал на этой ноде, при необходимости запустить удаленный сеанс администратора</string>
     <string name="remote_shell_reconnect">Переподключение</string>
@@ -2350,6 +2348,7 @@
     <!-- XR -->
     <string name="xr_full_space">Полное пространство</string>
     <string name="xr_home_space">Домашнее пространство</string>
+    <string name="xr_terrain_layer_elevation">Высота</string>
     <string name="you">Вы</string>
     <string name="zoom_in">Увеличить</string>
     <string name="zoom_out">Уменьшить</string>

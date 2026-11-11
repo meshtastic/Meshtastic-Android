@@ -1602,6 +1602,7 @@
     <string name="write_nfc_success">Scritto sul tag</string>
     <string name="write_nfc_text">Tieni un tag NFC scrivibile contro il retro del telefono.</string>
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Altezza</string>
     <string name="you">Tu</string>
     <string name="zoom_in">Aumenta zoom</string>
     <string name="zoom_out">Riduci zoom</string>

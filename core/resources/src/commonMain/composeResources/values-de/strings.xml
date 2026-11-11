@@ -1498,6 +1498,7 @@
     <string name="write_nfc_success">Auf Tag geschrieben</string>
     <string name="write_nfc_text">Halte einen schreibbaren NFC-Tag gegen die Hinterseite deines Handys.</string>
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Höhe</string>
     <string name="you">Du</string>
     <string name="zoom_in">Vergrößern</string>
     <string name="zoom_out">Verkleinern</string>

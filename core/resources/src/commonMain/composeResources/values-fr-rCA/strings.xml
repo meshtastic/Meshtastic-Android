@@ -1406,6 +1406,7 @@
     <string name="wind_speed">Vitesse du vent</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Altitude</string>
     <string name="you">Vous</string>
     <string name="zoom_in">Zoom +</string>
     <string name="zoom_out">Zoom -</string>

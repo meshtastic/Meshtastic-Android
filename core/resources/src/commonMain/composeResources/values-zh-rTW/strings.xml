@@ -1309,6 +1309,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="wind_speed">風速</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">高度</string>
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">縮小</string>
