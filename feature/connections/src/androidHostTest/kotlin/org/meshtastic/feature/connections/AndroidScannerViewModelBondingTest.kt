@@ -147,6 +147,19 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
+    fun `a linked BLE address with a leading-zero PIN connects directly with no PIN bond`() =
+        runTest(harness.testDispatcher) {
+            listOf("012345", "000000").forEach { pin ->
+                viewModel.connectToLinkedAddress(expectedFullAddress, pin = pin)
+                testScheduler.advanceUntilIdle()
+            }
+
+            assertTrue(harness.bluetoothRepository.bondCalls.isEmpty())
+            assertTrue(harness.bluetoothRepository.bondPins.isEmpty())
+            assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
+        }
+
+    @Test
     fun `a linked PIN that fails to bond does not arm the transport`() = runTest(harness.testDispatcher) {
         // A wrong PIN ends the bond as BOND_NONE; like a tapped device, wait for the user to retry.
         harness.bluetoothRepository.failBondWith(Exception("Bonding failed or rejected"))

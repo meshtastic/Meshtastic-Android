@@ -23,7 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -54,17 +54,22 @@ private const val PIN_LENGTH = 6
 private const val MIN_PIN = 100000
 private const val MAX_PIN = 999999
 
+/** The stored PIN as the field shows it, padded to six digits. */
+internal fun fixedPinText(pin: Int): String = pin.toString().padStart(PIN_LENGTH, '0')
+
+/** Firmware draws PINs from 100000 to 999999, so a leading zero can never match its numeric PIN. */
+internal fun isValidFixedPin(text: String): Boolean =
+    text.length == PIN_LENGTH && text.all { it in '0'..'9' } && text.toInt() in MIN_PIN..MAX_PIN
+
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build()
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
-    var pinText by
-        remember(bluetoothConfig.fixed_pin) {
-            mutableStateOf(bluetoothConfig.fixed_pin.toString().padStart(PIN_LENGTH, '0'))
-        }
-    val pinIsValid = pinText.toIntOrNull() in MIN_PIN..MAX_PIN
+    val savedPinText = fixedPinText(bluetoothConfig.fixed_pin)
+    var pinText by rememberSaveable(bluetoothConfig.fixed_pin) { mutableStateOf(savedPinText) }
+    val pinIsValid = isValidFixedPin(pinText)
     val pinRequired = formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN
 
     RadioConfigScreenList(
@@ -74,6 +79,8 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         configState = formState,
         enabled = state.connected,
         saveEnabled = state.connected && (pinIsValid || !pinRequired),
+        additionalDirtyCheck = { pinText != savedPinText },
+        onDiscard = { pinText = savedPinText },
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
@@ -158,12 +165,7 @@ private fun FixedPinPreference(
         onValueChanged = { input ->
             if (input.length <= PIN_LENGTH && input.all { it in '0'..'9' }) {
                 onPinTextChange(input)
-                input
-                    .toIntOrNull()
-                    ?.takeIf { it in MIN_PIN..MAX_PIN }
-                    ?.let { pin ->
-                        onPinChange(pin)
-                    }
+                if (isValidFixedPin(input)) onPinChange(input.toInt())
             }
         },
     )
