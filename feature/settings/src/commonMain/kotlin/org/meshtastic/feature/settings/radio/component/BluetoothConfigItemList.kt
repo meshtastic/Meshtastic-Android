@@ -68,8 +68,9 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
     val savedPinText = fixedPinText(bluetoothConfig.fixed_pin)
-    var pinText by rememberSaveable(bluetoothConfig.fixed_pin) { mutableStateOf(savedPinText) }
+    var pinText by rememberSaveable(bluetoothConfig) { mutableStateOf(savedPinText) }
     val pinIsValid = isValidFixedPin(pinText)
+    val pinEdited = pinText != savedPinText
     val pinRequired = formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN
 
     RadioConfigScreenList(
@@ -78,8 +79,8 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
-        saveEnabled = state.connected && (pinIsValid || !pinRequired),
-        additionalDirtyCheck = { pinText != savedPinText },
+        saveEnabled = state.connected && (pinIsValid || !(pinEdited || pinRequired)),
+        additionalDirtyCheck = { pinEdited },
         onDiscard = { pinText = savedPinText },
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
@@ -113,7 +114,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 FixedPinPreference(
                     pinText = pinText,
-                    showError = pinRequired && !pinIsValid,
+                    showError = !pinIsValid && (pinRequired || pinEdited),
                     enabled = state.connected,
                     onPinTextChange = { pinText = it },
                     focusManager = focusManager,
