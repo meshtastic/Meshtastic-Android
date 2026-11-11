@@ -47,6 +47,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 
@@ -75,7 +76,27 @@ internal fun isValidFixedPin(text: String): Boolean =
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build()
+    BluetoothConfigContent(
+        bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build(),
+        connected = state.connected,
+        responseState = state.responseState,
+        connectPromptVisible = state.connectPromptVisible,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onBack = onBack,
+        onSave = { viewModel.setConfig(Config.Builder().also { wb -> wb.bluetooth = it }.build()) },
+    )
+}
+
+@Composable
+internal fun BluetoothConfigContent(
+    bluetoothConfig: Config.BluetoothConfig,
+    connected: Boolean,
+    responseState: ResponseState<Any>,
+    connectPromptVisible: Boolean,
+    onDismissPacketResponse: () -> Unit,
+    onBack: () -> Unit,
+    onSave: (Config.BluetoothConfig) -> Unit,
+) {
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
     val savedPinText = fixedPinText(bluetoothConfig.fixed_pin)
@@ -89,17 +110,14 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         title = stringResource(Res.string.bluetooth),
         onBack = onBack,
         configState = formState,
-        enabled = state.connected,
-        saveEnabled = state.connected && !pinBlocked,
+        enabled = connected,
+        saveEnabled = connected && !pinBlocked,
         additionalDirtyCheck = { pinEdited },
         onDiscard = { pinText = savedPinText },
-        responseState = state.responseState,
-        showConnectPrompt = state.connectPromptVisible,
-        onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = {
-            val config = Config.Builder().also { wb -> wb.bluetooth = it }.build()
-            viewModel.setConfig(config)
-        },
+        responseState = responseState,
+        showConnectPrompt = connectPromptVisible,
+        onDismissPacketResponse = onDismissPacketResponse,
+        onSave = onSave,
     ) {
         fieldItem(SettingsSearchCatalog.fieldKeys(ConfigRoute.BLUETOOTH.route)) {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
@@ -108,7 +126,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     modifier = Modifier.settingsField(Res.string.schema_bluetooth_enabled),
                     summary = stringResource(Res.string.schema_bluetooth_enabled_description),
                     checked = formState.value.enabled,
-                    enabled = state.connected,
+                    enabled = connected,
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
                     },
@@ -116,7 +134,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 BluetoothPairingModePreference(
-                    enabled = state.connected,
+                    enabled = connected,
                     mode = formState.value.mode,
                     onModeChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
@@ -126,7 +144,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 FixedPinPreference(
                     pinText = pinText,
                     showError = pinBlocked,
-                    enabled = state.connected,
+                    enabled = connected,
                     onPinTextChange = { text ->
                         pinText = text
                         if (text == savedPinText) formState.restoreFixedPin(bluetoothConfig.fixed_pin)

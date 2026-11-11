@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.settings.radio.component
+
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.save_and_restart
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.proto.Config.BluetoothConfig
+import org.meshtastic.proto.Config.BluetoothConfig.PairingMode
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+
+/** Drives [BluetoothConfigContent] directly, so no [org.meshtastic.feature.settings.radio.RadioConfigViewModel]. */
+@OptIn(ExperimentalTestApi::class)
+class BluetoothConfigUiTest {
+
+    private class Harness(val saved: MutableList<BluetoothConfig> = mutableListOf())
+
+    private fun ComposeUiTest.show(stored: BluetoothConfig, harness: Harness) = setContent {
+        AppTheme {
+            BluetoothConfigContent(
+                bluetoothConfig = stored,
+                connected = true,
+                responseState = ResponseState.Empty,
+                connectPromptVisible = false,
+                onDismissPacketResponse = {},
+                onBack = {},
+                onSave = { harness.saved += it },
+            )
+        }
+    }
+
+    private fun stored(mode: PairingMode, pin: Int) = BluetoothConfig.Builder()
+        .also { wb ->
+            wb.enabled = true
+            wb.mode = mode
+            wb.fixed_pin = pin
+        }
+        .build()
+
+    private fun ComposeUiTest.enterPin(text: String) {
+        onNode(hasSetTextAction()).performTextReplacement(text)
+        waitForIdle()
+    }
+
+    @Test
+    fun `leading zero PINs disable Save in fixed PIN mode`() = runComposeUiTest {
+        show(stored(PairingMode.FIXED_PIN, 123456), Harness())
+        listOf("012345", "000000").forEach { pin ->
+            enterPin(pin)
+            onNodeWithText(getString(Res.string.save_and_restart)).assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun `boundary PINs save the typed fixed_pin`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness)
+        enterPin("100000")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsEnabled().performClick()
+        waitForIdle()
+        assertEquals(100000, harness.saved.single().fixed_pin)
+    }
+
+    @Test
+    fun `999999 saves as typed`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness)
+        enterPin("999999")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsEnabled().performClick()
+        waitForIdle()
+        assertEquals(999999, harness.saved.single().fixed_pin)
+    }
+
+    @Test
+    fun `an edited invalid PIN disables Save outside fixed PIN mode too`() = runComposeUiTest {
+        show(stored(PairingMode.RANDOM_PIN, 123456), Harness())
+        enterPin("012345")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `returning to an invalid stored PIN restores the form and clears the dirty state`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.RANDOM_PIN, 0), harness)
+        enterPin("123456")
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsEnabled()
+        enterPin("000000")
+        onAllNodesWithText(getString(Res.string.save_and_restart)).assertCountEquals(0)
+        assertNull(harness.saved.firstOrNull())
+    }
+}
