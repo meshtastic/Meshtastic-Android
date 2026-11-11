@@ -32,6 +32,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.save_and_restart
+import org.meshtastic.core.resources.schema_bluetooth_enabled
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.proto.Config.BluetoothConfig
@@ -165,5 +166,67 @@ class BluetoothConfigUiTest {
         onNode(hasSetTextAction()).assertTextContains("123456")
         onAllNodesWithText(getString(Res.string.save_and_restart)).assertCountEquals(0)
         assertNull(harness.saved.firstOrNull())
+    }
+
+    private fun ComposeUiTest.toggleBluetoothEnabled() {
+        onNodeWithText(getString(Res.string.schema_bluetooth_enabled)).performClick()
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.save() {
+        onNodeWithText(getString(Res.string.save_and_restart)).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `clicking a disabled Save with an invalid PIN saves nothing`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness)
+        enterPin("012345")
+        save()
+        assertNull(harness.saved.firstOrNull())
+    }
+
+    @Test
+    fun `an unchanged invalid stored PIN blocks an unrelated save in fixed PIN mode`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 0), harness)
+        toggleBluetoothEnabled()
+        onNodeWithText(getString(Res.string.save_and_restart)).assertIsNotEnabled()
+        save()
+        assertNull(harness.saved.firstOrNull())
+    }
+
+    @Test
+    fun `an unchanged invalid stored PIN is saved untouched outside fixed PIN mode`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.RANDOM_PIN, 0), harness)
+        toggleBluetoothEnabled()
+        save()
+        assertEquals(0, harness.saved.single().fixed_pin)
+        assertEquals(false, harness.saved.single().enabled)
+    }
+
+    @Test
+    fun `an unrelated save after discard submits the stored PIN`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.FIXED_PIN, 123456), harness)
+        enterPin("654321")
+        onNodeWithText(getString(Res.string.discard_changes)).performClick()
+        waitForIdle()
+        toggleBluetoothEnabled()
+        save()
+        assertEquals(123456, harness.saved.single().fixed_pin)
+    }
+
+    @Test
+    fun `an unrelated save after retyping the stored PIN submits the stored PIN`() = runComposeUiTest {
+        val harness = Harness()
+        show(stored(PairingMode.RANDOM_PIN, 0), harness)
+        enterPin("123456")
+        enterPin("000000")
+        toggleBluetoothEnabled()
+        save()
+        assertEquals(0, harness.saved.single().fixed_pin)
     }
 }
