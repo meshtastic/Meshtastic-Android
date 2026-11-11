@@ -17,48 +17,40 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.channel_1
-import org.meshtastic.core.resources.channel_2
-import org.meshtastic.core.resources.channel_3
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.core.ui.icon.Voltage
+import org.meshtastic.feature.node.metrics.powerChannelTexts
+import org.meshtastic.feature.node.metrics.reportingPowerChannels
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays power metrics for a node: for every channel reporting a voltage, its voltage and — when the channel reports
- * one — its current are stacked in a single vertical column so the pair stays visually grouped and the columns flow
- * side by side.
+ * Displays power metrics for a node: every channel that reports a voltage, a current or both, under the user's label or
+ * "Channel N". Each reported half stacks in one column so a channel stays grouped, and a half the channel did not
+ * report is not shown.
  */
 @Composable
 internal fun PowerMetrics(node: Node) {
-    val channels =
-        with(node.powerMetrics) {
-            listOf(
-                Triple(Res.string.channel_1, ch1_voltage, ch1_current),
-                Triple(Res.string.channel_2, ch2_voltage, ch2_current),
-                Triple(Res.string.channel_3, ch3_voltage, ch3_current),
+    val pm = node.powerMetrics
+    val groups =
+        reportingPowerChannels(pm).map { channel ->
+            val texts = powerChannelTexts(channel.voltage(pm), channel.current(pm))
+            val label = node.powerChannelLabels.getOrNull(channel.ordinal)?.takeIf { it.isNotBlank() }
+            listOfNotNull(
+                texts.voltage?.let {
+                    VectorMetricInfo(channel.strRes, it, MeshtasticIcons.Voltage, customLabel = label)
+                },
+                texts.current?.let {
+                    VectorMetricInfo(
+                        channel.strRes,
+                        it,
+                        MeshtasticIcons.PowerSupply,
+                        customLabel = label,
+                    )
+                },
             )
         }
-            .mapNotNull { (label, voltage, current) ->
-                // Voltage and current both carry presence: an absent reading is hidden, but a reported 0V / 0mA is a
-                // real measurement and is shown.
-                voltage?.let { volts ->
-                    listOfNotNull(
-                        VectorMetricInfo(label, "${NumberFormatter.format(volts, 2)}V", MeshtasticIcons.Voltage),
-                        current?.let { milliAmps ->
-                            VectorMetricInfo(
-                                label,
-                                "${NumberFormatter.format(milliAmps, 1)}mA",
-                                MeshtasticIcons.PowerSupply,
-                            )
-                        },
-                    )
-                }
-            }
 
-    MetricCardFlow(groups = channels)
+    MetricCardFlow(groups = groups)
 }

@@ -22,7 +22,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.iaq_level_dangerously_polluted
 import org.meshtastic.core.resources.iaq_level_excellent
 import org.meshtastic.core.resources.iaq_level_extremely_polluted
 import org.meshtastic.core.resources.iaq_level_good
@@ -50,7 +49,6 @@ class IndoorAirQualityLabelTest {
                 Res.string.iaq_level_heavily_polluted,
                 Res.string.iaq_level_severely_polluted,
                 Res.string.iaq_level_extremely_polluted,
-                Res.string.iaq_level_dangerously_polluted,
             ),
             Iaq.entries.map { it.label },
         )
@@ -69,8 +67,41 @@ class IndoorAirQualityLabelTest {
         setContent { AppTheme { IndoorAirQuality(iaq = 600, displayMode = IaqDisplayMode.Text) } }
 
         onNodeWithText(
-            getString(Res.string.iaq_level_range_open, getString(Res.string.iaq_level_dangerously_polluted), 501),
+            getString(Res.string.iaq_level_range_open, getString(Res.string.iaq_level_extremely_polluted), 351),
         )
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun `IAQ bands follow the Bosch scale at every boundary`() {
+        val expected =
+            listOf(
+                0 to Iaq.Excellent,
+                50 to Iaq.Excellent,
+                51 to Iaq.Good,
+                100 to Iaq.Good,
+                101 to Iaq.LightlyPolluted,
+                150 to Iaq.LightlyPolluted,
+                151 to Iaq.ModeratelyPolluted,
+                200 to Iaq.ModeratelyPolluted,
+                201 to Iaq.HeavilyPolluted,
+                250 to Iaq.HeavilyPolluted,
+                251 to Iaq.SeverelyPolluted,
+                350 to Iaq.SeverelyPolluted,
+                351 to Iaq.ExtremelyPolluted,
+                500 to Iaq.ExtremelyPolluted,
+                600 to Iaq.ExtremelyPolluted,
+            )
+        expected.forEach { (value, band) -> assertEquals(band, getIaq(value), "iaq $value") }
+    }
+
+    @Test
+    fun `a uint32 reading that wraps negative is above the scale`() {
+        assertEquals(Iaq.ExtremelyPolluted, getIaq(-1))
+    }
+
+    @Test
+    fun `an unset IAQ has no band`() {
+        assertEquals(null, getIaq(Int.MIN_VALUE))
     }
 }

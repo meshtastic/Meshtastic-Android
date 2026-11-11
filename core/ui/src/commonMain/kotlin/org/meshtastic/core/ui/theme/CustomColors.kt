@@ -141,7 +141,6 @@ object IAQColors {
     val IAQHeavilyPolluted = Color(0xFFFF0000)
     val IAQSeverelyPolluted = Color(0xFF99004C)
     val IAQExtremelyPolluted = Color(0xFF663300)
-    val IAQDangerouslyPolluted = Color(0xFF663300)
 }
 
 object GraphColors {
