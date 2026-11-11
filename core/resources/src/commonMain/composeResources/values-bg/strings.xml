@@ -1364,6 +1364,7 @@
     <string name="wind_speed">Скорост на вятъра</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Височина</string>
     <string name="you">Вие</string>
     <string name="zoom_in">Увеличаване</string>
     <string name="zoom_out">Намаляване</string>

@@ -736,6 +736,7 @@
     <string name="wind">Wiatr</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Elewacja</string>
     <string name="you">Ty</string>
     <string name="zoom_in">Powiększ</string>
     <string name="zoom_out">Oddal</string>

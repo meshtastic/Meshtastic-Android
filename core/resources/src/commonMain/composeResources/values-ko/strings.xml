@@ -517,6 +517,7 @@
     <string name="wind">바람</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">고도</string>
     <string name="you">나</string>
     <string name="zoom_in">확대</string>
     <string name="zoom_out">축소</string>

@@ -1219,6 +1219,7 @@
     <string name="wind_speed">Vindhastighet</string>
     <!-- WRITE -->
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Höjd</string>
     <string name="you">Du</string>
     <string name="zoom_in">Zooma in</string>
     <string name="zoom_out">Zooma ut</string>

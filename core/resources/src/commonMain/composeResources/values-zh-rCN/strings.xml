@@ -1622,6 +1622,7 @@
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">高度</string>
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>

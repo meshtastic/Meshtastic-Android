@@ -1838,6 +1838,7 @@
     <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>
     <string name="write_nfc_text">Pidä kirjoitettavaa NFC-tunnistetta puhelimesi takapuolta vasten.</string>
     <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Korkeus</string>
     <string name="you">Sinä</string>
     <string name="zoom_in">Suurenna</string>
     <string name="zoom_out">Pienennä</string>
