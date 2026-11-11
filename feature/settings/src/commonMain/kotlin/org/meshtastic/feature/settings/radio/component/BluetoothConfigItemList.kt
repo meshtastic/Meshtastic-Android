@@ -58,6 +58,13 @@ private fun ConfigState<Config.BluetoothConfig>.restoreFixedPin(pin: Int) {
     value = value.newBuilder().also { it.fixed_pin = pin }.build()
 }
 
+/**
+ * Whether the PIN field blocks Save: an invalid PIN blocks when it was edited, or when fixed-PIN mode needs a usable
+ * one. An unedited invalid stored PIN (such as 0) is left alone in the other modes, where it is unused.
+ */
+internal fun isFixedPinBlocked(text: String, savedText: String, fixedPinMode: Boolean): Boolean =
+    !isValidFixedPin(text) && (text != savedText || fixedPinMode)
+
 /** The stored PIN as the field shows it, padded to six digits. */
 internal fun fixedPinText(pin: Int): String = pin.toString().padStart(PIN_LENGTH, '0')
 
@@ -73,9 +80,9 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val focusManager = LocalFocusManager.current
     val savedPinText = fixedPinText(bluetoothConfig.fixed_pin)
     var pinText by rememberSaveable(bluetoothConfig) { mutableStateOf(savedPinText) }
-    val pinIsValid = isValidFixedPin(pinText)
     val pinEdited = pinText != savedPinText
-    val pinRequired = formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN
+    val pinBlocked =
+        isFixedPinBlocked(pinText, savedPinText, formState.value.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN)
 
     RadioConfigScreenList(
         rebootBehavior = RebootBehavior.ALWAYS,
@@ -83,7 +90,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
-        saveEnabled = state.connected && (pinIsValid || !(pinEdited || pinRequired)),
+        saveEnabled = state.connected && !pinBlocked,
         additionalDirtyCheck = { pinEdited },
         onDiscard = { pinText = savedPinText },
         responseState = state.responseState,
@@ -118,7 +125,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 FixedPinPreference(
                     pinText = pinText,
-                    showError = !pinIsValid && (pinRequired || pinEdited),
+                    showError = pinBlocked,
                     enabled = state.connected,
                     onPinTextChange = { text ->
                         pinText = text

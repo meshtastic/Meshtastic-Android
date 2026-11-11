@@ -42,4 +42,26 @@ class FixedPinTest {
         assertEquals("000000", fixedPinText(0))
         assertEquals("012345", fixedPinText(12345))
     }
+
+    @Test
+    fun `an edited invalid PIN blocks Save in every mode`() {
+        listOf("012345", "000000", "12345").forEach { pin ->
+            assertTrue(isFixedPinBlocked(pin, "123456", fixedPinMode = true), pin)
+            assertTrue(isFixedPinBlocked(pin, "123456", fixedPinMode = false), pin)
+        }
+    }
+
+    @Test
+    fun `a valid PIN never blocks Save`() {
+        listOf("100000", "999999").forEach { pin ->
+            assertFalse(isFixedPinBlocked(pin, "123456", fixedPinMode = true), pin)
+            assertFalse(isFixedPinBlocked(pin, "123456", fixedPinMode = false), pin)
+        }
+    }
+
+    @Test
+    fun `an unedited invalid stored PIN blocks only in fixed PIN mode`() {
+        assertTrue(isFixedPinBlocked("000000", "000000", fixedPinMode = true))
+        assertFalse(isFixedPinBlocked("000000", "000000", fixedPinMode = false))
+    }
 }
