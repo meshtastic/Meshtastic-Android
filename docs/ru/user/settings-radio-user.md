@@ -232,11 +232,11 @@ on a network, a **Current connections:** card at the top shows its **Wi-Fi IP:**
 
 On **Settings → Device configuration → Bluetooth**, on nodes with Bluetooth.
 
-| Настройка             | Описание                                                                                                                      | По умолчанию                                                          |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Bluetooth включен     | Turn the node's Bluetooth on or off                                                                                           | On, except on some nodes with a color screen                          |
-| Фиксированный PIN-код | PIN code for pairing, used with `FIXED_PIN`. Must be **exactly six digits** — the field rejects anything else | 123456                                                                |
-| Режим сопряжения      | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                               | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
+| Настройка             | Описание                                                                                                                                | По умолчанию                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Bluetooth включен     | Turn the node's Bluetooth on or off                                                                                                     | On, except on some nodes with a color screen                          |
+| Фиксированный PIN-код | PIN code for pairing, used with `FIXED_PIN`. Must be six digits from 100000 to 999999 — the field rejects anything else | 123456                                                                |
+| Режим сопряжения      | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                                         | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
 
 ## Настройки безопасности
 

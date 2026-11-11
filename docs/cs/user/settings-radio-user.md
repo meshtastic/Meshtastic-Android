@@ -232,11 +232,11 @@ on a network, a **Current connections:** card at the top shows its **Wi-Fi IP:**
 
 On **Settings → Device configuration → Bluetooth**, on nodes with Bluetooth.
 
-| Nastavení          | Popis                                                                                                                         | Výchozí                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Bluetooth povoleno | Turn the node's Bluetooth on or off                                                                                           | On, except on some nodes with a color screen                          |
-| Fixed Pin          | PIN code for pairing, used with `FIXED_PIN`. Must be **exactly six digits** — the field rejects anything else | 123456                                                                |
-| Režim párování     | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                               | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
+| Nastavení          | Popis                                                                                                                                   | Výchozí                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Bluetooth povoleno | Turn the node's Bluetooth on or off                                                                                                     | On, except on some nodes with a color screen                          |
+| Fixed Pin          | PIN code for pairing, used with `FIXED_PIN`. Must be six digits from 100000 to 999999 — the field rejects anything else | 123456                                                                |
+| Režim párování     | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                                         | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
 
 ## Nastavení zabezpečení
 
