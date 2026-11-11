@@ -177,9 +177,10 @@ compose.desktop {
                 .asFile
                 .absolutePath
 
+        // No -Xmx: the JVM's default max heap is a quarter of the machine's RAM. A fixed cap above
+        // physical RAM lets the heap outgrow a small board and the kernel kills the app.
         val desktopJvmArgs =
             listOf(
-                "-Xmx2G",
                 // maplibre-compose's desktop renderer reaches native code through the FFM API,
                 // which refuses to load without this. Omitting it fails at first map composition,
                 // not at startup, so the map tab would simply be blank.
@@ -226,7 +227,6 @@ compose.desktop {
             )
 
             // Default JVM arguments for the packaged application
-            // Increase max heap size to prevent OOM issues on complex maps/data
             jvmArgs(*desktopJvmArgs.toTypedArray())
 
             // App Icon & OS Specific Configurations
