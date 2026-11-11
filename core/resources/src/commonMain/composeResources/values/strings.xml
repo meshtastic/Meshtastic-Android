@@ -2361,8 +2361,10 @@
     <!-- XR -->
     <string name="xr_full_space">Full Space</string>
     <string name="xr_home_space">Home Space</string>
+    <string name="xr_terrain_buildings">Buildings</string>
     <string name="xr_terrain_empty">No nodes with a position yet, so there is no area to show.</string>
     <string name="xr_terrain_flat">No terrain data for this area, so the ground is flat.</string>
+    <string name="xr_terrain_layer_elevation">Elevation</string>
     <string name="xr_terrain_loading">Building the terrain…</string>
     <string name="xr_terrain_map">3D map</string>
     <string name="xr_terrain_unavailable">The terrain could not be loaded. Check the connection and try again.</string>

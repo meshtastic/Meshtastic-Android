@@ -21,8 +21,41 @@ package org.meshtastic.feature.map.terrain.spatial
 import org.meshtastic.feature.map.terrain.GeoBounds
 import kotlin.math.sqrt
 
-/** The part of a mesh node the spatial map places. */
-data class SpatialNodeSnapshot(val id: Long, val coordinate: LatLon, val isConnectedRadio: Boolean = false)
+/** How well the connected radio hears a node, weakest first. */
+enum class SpatialSignal {
+    NONE,
+    BAD,
+    FAIR,
+    GOOD,
+}
+
+/**
+ * What the spatial map needs to know about one mesh node.
+ *
+ * @param color the node's own color as ARGB, 0 for the map's default
+ * @param hopsAway hops from the connected radio, negative when unknown
+ * @param signal how the connected radio hears it, null when it has not heard it
+ * @param isInfrastructure a router, repeater or client base, which stands as a tower
+ * @param lastHeard when the connected radio last heard it, in seconds since 1970
+ */
+data class SpatialNodeSnapshot(
+    val id: Long,
+    val coordinate: LatLon,
+    val isConnectedRadio: Boolean = false,
+    val shortName: String = "",
+    val color: Int = 0,
+    val isOnline: Boolean = true,
+    val isFavorite: Boolean = false,
+    val viaMqtt: Boolean = false,
+    val hopsAway: Int = -1,
+    val signal: SpatialSignal? = null,
+    val isInfrastructure: Boolean = false,
+    val lastHeard: Int = 0,
+) {
+    /** Heard by the connected radio itself, over the air: the two are joined by a link. */
+    val isDirect: Boolean
+        get() = !isConnectedRadio && hopsAway == 0 && !viaMqtt && isOnline
+}
 
 /** A downloaded offline map region, as the spatial map's coverage checks see it. */
 data class SpatialOfflineRegion(

@@ -63,6 +63,28 @@ class TerrainMeshDataTest {
     }
 
     @Test
+    fun `a chip's name is black on a light node color and white on a dark one`() {
+        assertTrue(ChipImage.isLight(Rgb(0.9f, 0.9f, 0.2f)))
+        assertTrue(!ChipImage.isLight(Rgb(0.2f, 0.1f, 0.6f)))
+    }
+
+    @Test
+    fun `a cut-out model masks the clear parts of its image`() {
+        val mesh =
+            TerrainMeshData(
+                floatArrayOf(0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f),
+                FloatArray(9),
+                FloatArray(12),
+                intArrayOf(0, 1, 2),
+            )
+
+        val cut = String(terrainGlb(mesh, ByteArray(4), "image/png", cutout = true), Charsets.ISO_8859_1)
+
+        assertTrue("\"alphaMode\":\"MASK\"" in cut)
+        assertTrue("alphaMode" !in String(terrainGlb(mesh, ByteArray(4), "image/png"), Charsets.ISO_8859_1))
+    }
+
+    @Test
     fun `a connected radio stays the anchor`() {
         val radio = SpatialNodeSnapshot(1, LatLon(47.6, -122.3), isConnectedRadio = true)
         val other = SpatialNodeSnapshot(2, LatLon(47.7, -122.4))

@@ -289,9 +289,14 @@ class SpatialHeightGrid(
                     if (entry == null || !entry.second.contains(LatLon(latitudes[j], longitudes[i]))) continue
                     val index = j * plan.columns + i
                     // Pixels are in a [size]-pixel tile; a source may hand back a finer one (Mapterhorn's are 512).
+                    // Scaled about the texel's own edge, so the half-texel centering is not scaled with it.
                     val tile = entry.first
                     heights[index] =
-                        TerrainSampling.sample(tile, column.px * tile.width / size, row.py * tile.height / size)
+                        TerrainSampling.sample(
+                            tile,
+                            (column.px + 0.5) * tile.width / size - 0.5,
+                            (row.py + 0.5) * tile.height / size - 0.5,
+                        )
                     covered[index] = true
                 }
             }

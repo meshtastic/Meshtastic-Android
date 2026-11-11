@@ -53,7 +53,9 @@ import org.meshtastic.core.ui.icon.CloseFullscreen
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.OpenInFull
+import org.meshtastic.feature.map.terrain.spatial.LatLon
 import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
+import org.meshtastic.feature.map.terrain.spatial.SpatialSignal
 
 /**
  * Hosts the app on Android XR. In Full Space the activity's window is the main panel, with an orbiter below it to go
@@ -62,6 +64,10 @@ import org.meshtastic.feature.map.terrain.spatial.SpatialNodeSnapshot
 @Composable
 fun SpatialShell(
     nodes: List<SpatialNodeSnapshot>,
+    imagery: List<TerrainImagery>,
+    buildings: TerrainBuildingSource?,
+    route: TerrainRoute?,
+    contourUnits: ContourUnits,
     buildDispatcher: CoroutineDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -89,7 +95,17 @@ fun SpatialShell(
                     }
                 }
             }
-            if (mapShown) SpatialTerrainMap(nodes, buildDispatcher)
+            if (mapShown) {
+                val made = if (openAtLaunch) debugNodes() else null
+                SpatialTerrainMap(
+                    made ?: nodes,
+                    imagery,
+                    buildings,
+                    if (made === CITY) CITY_ROUTE else route,
+                    contourUnits,
+                    buildDispatcher,
+                )
+            }
         } else {
             SpaceToggle(
                 inFullSpace = false,
@@ -117,11 +133,56 @@ private fun SpaceToggle(inFullSpace: Boolean, modifier: Modifier = Modifier) {
 
 /**
  * For emulator checks, where nothing can press an orbiter: on a debuggable build, `adb shell setprop log.tag.MeshXrMap
- * DEBUG` opens the terrain map in Full Space at launch, tipped toward the emulator's camera, which otherwise sees the
- * table edge on.
+ * DEBUG` opens the terrain map in Full Space at launch.
  */
 internal fun opensMapAtLaunch(context: Context): Boolean =
     context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 && Log.isLoggable("MeshXrMap", Log.DEBUG)
+
+/** Made-up nodes in place of the mesh, when one of the switches below is set on top of the map hook. */
+private fun debugNodes(): List<SpatialNodeSnapshot>? = when {
+    Log.isLoggable("MeshXrPeaks", Log.DEBUG) -> PEAKS
+    Log.isLoggable("MeshXrCity", Log.DEBUG) -> CITY
+    else -> null
+}
+
+private val GOOD = SpatialSignal.GOOD
+private val BAD = SpatialSignal.BAD
+
+/** `log.tag.MeshXrCity DEBUG`: downtown Seattle, a circle small enough for a downloaded basemap's buildings. */
+private val CITY =
+    listOf(
+        city(1, 47.6062, -122.3321, "DOWN", 0xFF7886EE).copy(isConnectedRadio = true),
+        city(2, 47.6205, -122.3493, "NDL", 0xFFF2C14E).copy(hopsAway = 0, signal = GOOD),
+        city(3, 47.5952, -122.3316, "STA", 0xFF2A9D8F).copy(hopsAway = 0, signal = BAD),
+        city(4, 47.6131, -122.3166, "CAPH", 0xFF8E3B8C).copy(hopsAway = 1, isInfrastructure = true),
+    )
+
+/** A made-up node in a color of its own, as a real node's number gives it one. */
+private fun city(id: Long, latitude: Double, longitude: Double, name: String, color: Long) =
+    SpatialNodeSnapshot(id, LatLon(latitude, longitude), shortName = name, color = color.toInt())
+
+/** A trace route over [CITY]: out by way of NDL to CAPH, and straight back. */
+private val CITY_ROUTE = TerrainRoute(forward = listOf(1, 2, 4), back = listOf(4, 1))
+
+/** `log.tag.MeshXrPeaks DEBUG`: around Mount Rainier, to check relief, towers and links on ground that has some. */
+private val PEAKS =
+    listOf(
+        SpatialNodeSnapshot(1, LatLon(46.786, -121.735), isConnectedRadio = true, shortName = "PARA"),
+        SpatialNodeSnapshot(2, LatLon(46.835, -121.731), shortName = "MUIR", hopsAway = 0, signal = SpatialSignal.GOOD),
+        SpatialNodeSnapshot(3, LatLon(46.914, -121.642), shortName = "SUNR", hopsAway = 0, signal = SpatialSignal.FAIR),
+        SpatialNodeSnapshot(
+            4,
+            LatLon(46.935, -121.474),
+            shortName = "CRYS",
+            hopsAway = 0,
+            signal = SpatialSignal.BAD,
+            isInfrastructure = true,
+        ),
+        SpatialNodeSnapshot(5, LatLon(46.759, -122.031), shortName = "ASHF", hopsAway = 1, color = 0xFF3D7BE0.toInt()),
+        SpatialNodeSnapshot(6, LatLon(46.606, -121.671), shortName = "PACK", hopsAway = 2, isOnline = false),
+        SpatialNodeSnapshot(7, LatLon(47.204, -121.991), shortName = "ENUM", hopsAway = 1, isInfrastructure = true),
+        SpatialNodeSnapshot(8, LatLon(46.867, -122.266), shortName = "EATN", hopsAway = 2, color = 0xFFB04CD9.toInt()),
+    )
 
 /** The pointer target Android XR recommends, above Material's 48 dp minimum. */
 internal val XrTargetSize = 56.dp
