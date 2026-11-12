@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -64,11 +64,13 @@ Uses Android Gradle Plugin's native (layoutlib) screenshot testing framework, sp
 - **`:docs-screenshots`** — **generate-only**, *not* validated in CI. Holds doc-framed compositions whose framing is tuned for the docs site, so reframing a doc image never churns the regression gate.
 
 ```shell
-./gradlew :screenshot-tests:updateDebugScreenshotTest    # record regression goldens
-./gradlew :screenshot-tests:validateDebugScreenshotTest  # compare against goldens (CI gate)
-./gradlew :docs-screenshots:updateDebugScreenshotTest    # record doc-framed composition images
+./gradlew :screenshot-tests:updateDebugScreenshotTest -Dorg.gradle.isolated-projects=false    # record regression goldens
+./gradlew :screenshot-tests:validateDebugScreenshotTest -Dorg.gradle.isolated-projects=false  # compare against goldens (CI gate)
+./gradlew :docs-screenshots:updateDebugScreenshotTest -Dorg.gradle.isolated-projects=false    # record doc-framed composition images
 ./gradlew :screenshot-tests:copyDocsScreenshots          # copy doc images from BOTH modules into docs/assets
 ```
+
+The update and validate tasks need `-Dorg.gradle.isolated-projects=false`: the screenshot plugin fails under Isolated Projects after it has rendered. Run `copyDocsScreenshots` as its own command after the updates, because Gradle doesn't order it behind them.
 
 Rendering runs on the host through layoutlib, so goldens recorded locally are the ones CI validates against. `validate` allows an image-difference threshold of 0.0005, set in `AndroidScreenshotConventionPlugin`, because pixel-exact comparison fails some references. See `docs/assets/screenshots/README.md` for which module a new screenshot belongs in.
 
