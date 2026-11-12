@@ -1,7 +1,7 @@
 ---
 title: Local Mesh Discovery
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - discovery
@@ -157,6 +157,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### 使用路由追蹤進行疑難排解
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. 請確認兩個節點至少共用一個使用相同加密金鑰的頻道。
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - 「路由追蹤逾時」— 路徑可能過長（超過跳躍限制），或某中繼節點發生壅塞。 Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - 非對稱路徑 — 從 A → B 的路由追蹤路徑，可能與 B → A 不同。 This is normal — radio propagation isn't always symmetric.

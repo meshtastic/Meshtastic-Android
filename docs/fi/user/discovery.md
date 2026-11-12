@@ -1,7 +1,7 @@
 ---
 title: Paikallisen mesh-verkon skannaus
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
   - haku
@@ -157,6 +157,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### Reitinselvityksen vianmääritys
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Varmista, että molemmat radiot jakavat vähintään yhden kanavan samalla salausavaimella.
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - **Reitinselvitys aikakatkaistu** — reitti voi olla liian pitkä (ylittää hyppymäärärajan) tai välittäjä-radio on ruuhkautunut. Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Epäsymmetriset reitit** — reitinselvitys A→B voi kulkea eri reittiä kuin B→A. This is normal — radio propagation isn't always symmetric.

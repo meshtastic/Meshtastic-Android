@@ -1,7 +1,7 @@
 ---
 title: Актуализации на фърмуера
 nav_order: 13
-last_updated: 2026-10-28
+last_updated: 2026-11-12
 description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -91,7 +91,7 @@ Both a USB erase and a bootloader upgrade write two files in turn, so you are as
 
 The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything.
 
-For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. The running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode, never on the firmware screen while connected. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
+For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. On firmware 2.8.2 and older the running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
 
 On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the node recoverable only with a hardware programmer.
 
@@ -101,6 +101,24 @@ Once the drive is readable, how an nRF52 device is erased depends on its bootloa
 - **Older bootloaders need a Bluetooth-stack-specific erase.** On these the app writes a small erase program matched to your device's Bluetooth stack, then starts it over the serial port. If the drive reports a different stack than expected, the app refuses rather than guessing.
 
 The app picks the path from what the drive reports; you don't choose it.
+
+### Bootloader version and upgrade over Bluetooth
+
+An nRF52 node on firmware newer than 2.8.2 reports its bootloader version while it runs. The device card on the firmware screen then shows a **Bootloader** row with the latest release beside it, on any connection. Every bootloader before 2.6.0 reports the same value, so those read **Bootloader: older than 2.6.0**. A node that reports no version shows no row. A node that reports the latest release isn't offered an upgrade.
+
+The screen offers **Upgrade bootloader** over Bluetooth when all of these hold:
+
+- the node is connected over Bluetooth
+- it reports a bootloader older than the latest release
+- a firmware version is selected
+
+Unplug the USB cable before starting. With a cable attached, the new bootloader comes up as an update drive, not over Bluetooth, and the app cannot send the firmware.
+
+The app sends the new bootloader over Bluetooth, then reinstalls the selected firmware, because writing the bootloader erases it. The whole upgrade takes about 10 minutes. Afterward the **Bootloader** row shows the latest release.
+
+Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
+
+A node that doesn't come back over Bluetooth after the bootloader is written can be finished either way: install the firmware from its update drive over USB, or unplug it, reset it, and use **Resume firmware update** on the **Connect** tab.
 
 ### What the nRF52 bootloader does
 

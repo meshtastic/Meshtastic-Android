@@ -1,7 +1,7 @@
 ---
 title: Desktop App
 nav_order: 14
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -145,7 +145,7 @@ Requisiti:
 - The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
   desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Some Android-specific features (widgets, specific notification channels) are unavailable
-- Performance may vary on low-spec hardware running Compose Desktop
+- Performance may vary on low-spec hardware running Compose Desktop. The app takes at most a quarter of the machine's RAM for its heap. It runs on a 512 MB board, but slows down there on a mesh of several hundred nodes
 - BLE bonding is not supported on desktop (pairing works without bonding)
 
 ## Related Topics

@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -62,6 +62,19 @@ Tap the mesh view button (**Open mesh view**) in the map's top bar to see the wh
 - Waypoint geofences are outlined, and the view says when you are inside one.
 
 When your phone's position has no altitude, targets sit level with you and the view says elevation is approximate. Without camera access, or while the phone is too hot, the view carries on as a compass.
+
+## 3D map on Android XR
+
+On an Android XR headset, the Google Play build adds a **Full Space** button. Full Space is the headset mode in which the app shares the room with 3D content. There the app stays as its own panel and gains **Home Space** and **3D map** buttons. F-Droid builds run on a headset as the flat app only.
+
+**3D map** stands a terrain table beside the app, built from the positions your nodes have shared and anchored on your connected node. The table shows:
+
+- the terrain in relief, with any of the 2D map's base maps draped over it
+- elevation contours, in meters or feet by your [units setting](units-and-locale)
+- buildings, where a downloaded offline region reaches zoom 13 or closer
+- nodes as the same chips as the 2D map, the links between them in signal colors, and the last traceroute
+
+The table's control panel holds the layer, **Buildings**, contour, and **Zoom** controls. With no positioned nodes there is no area to show. Where no terrain data exists, the ground is drawn flat.
 
 ## Waypoints
 

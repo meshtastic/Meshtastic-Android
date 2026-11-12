@@ -1,3 +1,3 @@
-Stability and reliability fixes.
+Guided setup for a new node. Upgrade an nRF52 bootloader over Bluetooth. Scan or tap a connect code. Share channels as Replace or Add. Traceroute states and MQTT hops. Banana for scale. Android XR: device models and a 3D terrain map in your space.
 
 Notas de lançamento completas: https://github.com/meshtastic/Meshtastic-Android/releases

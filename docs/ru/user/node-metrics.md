@@ -1,7 +1,7 @@
 ---
 title: Метрики ноды
 nav_order: 5
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Панели телеметрии для каждой ноды mesh-сети — состояние устройства, датчики окружающей среды, качество воздуха, качество сигнала, питание, трассировка и история местоположения.
 aliases:
   - metrics
@@ -57,11 +57,21 @@ Device Metrics has no cards on the node detail screen. Use the chart button on i
 | Сопротивление газа                        | BME680                |
 | IAQ (Качества воздуха) | BME680                |
 
-Environment metrics are charted over time — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Environment metrics are charted over time, one chart per unit, stacked: temperature, humidity, pressure, and each other reading the node reports get their own chart with the unit on the Y axis. Humidity and soil moisture run from 0 to 100%. A unit with no data gets no chart.
 
-Индекс **IAQ (качество воздуха в помещении)** датчика BME680 представляет собой единое значение от 0 до 500+, полученное на основе сопротивления газа, и отображается на цветовой шкале от **"Отлично"** до **"Опасно загрязнён"**:
+The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a seven-band scale. Each band has a color and a label:
 
-![Шкала индекса IAQ от Отлично до Опасно загрязнён](../../assets/screenshots/node-metrics_iaq_scale.png)
+| Относительное качество воздуха в помещении | Label                    |
+| ------------------------------------------ | ------------------------ |
+| 0–50                                       | Отлично                  |
+| 51–100                                     | Хороший                  |
+| 101–150                                    | Слегка загрязненный      |
+| 151–200                                    | Умеренно загрязненный    |
+| 201–250                                    | Сильно загрязнённый      |
+| 251–350                                    | Сильно загрязнённый      |
+| 351 and up                                 | Чрезвычайно загрязненный |
+
+![IAQ legend listing the seven bands with their colors](../../assets/screenshots/node-metrics_iaq_scale.png)
 
 > 💡 **Совет:** Для получения метрик окружающей среды к удалённой ноде должен быть подключён датчик. Не все ноды передают данные об окружающей среде. См. [Телеметрия и датчики](telemetry-and-sensors) для получения полного списка поддерживаемых датчиков.
 
@@ -138,28 +148,32 @@ Local Stats from your connected node are also shown in Signal Quality when avail
 | Напряжение  | Per-channel voltage reading    |
 | Ток         | Per-channel draw, in milliamps |
 
-The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
+The node detail screen shows a card for every channel that reported data, up to eight, under the name you gave the channel or **Channel** _N_. A channel that reported only voltage or only current shows only that reading. The chart button on the **Power Metrics** row opens the chart screen. It lists a chip for every channel that reported data, up to eight, and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Трассировка маршрута
 
 Трассировка показывает путь сообщения через mesh-сеть:
 
 1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node. The app sends at most one traceroute every 30 seconds, to any node, and **Trace Route** in the node list's touch & hold menu shares that cooldown.
-2. Приложение отправляет запрос трассировки целевой ноде.
+2. Приложение отправляет запрос трассировки целевой ноде. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
+
+The ring on the traceroute button counts down the seconds until the next request is allowed.
 
 ### Чтение результатов трассировки
 
 A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`.
+A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`. A hop whose node was last heard over MQTT is marked `(MQTT)`.
 
 The history also keeps traceroutes this app didn't request:
 
 - **Observed** marks a response from this node to a request made elsewhere, such as one started from your node's own screen. It has hop counts but no round-trip time, and its points on the chart are hollow rings.
 - **Traced by** _node_ marks a traceroute that node ran to yours. It shows the inbound route with the SNR of each hop, but no return route, no round-trip time, and no map, and it stays off the chart.
 
-A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
+A result marked **No Response** means the target didn't answer within two minutes, or the mesh reported that the request couldn't be delivered. The target may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
+
+A result marked **Rate limited** means your node refused the request because it sends one traceroute every 30 seconds. Wait for the cooldown and try again.
 
 ## Журнал местоположения
 

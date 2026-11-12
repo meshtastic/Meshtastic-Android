@@ -1,7 +1,7 @@
 ---
 title: Conexiones
 nav_order: 2
-last_updated: 2026-11-08
+last_updated: 2026-11-12
 description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -143,9 +143,16 @@ If the scan reports **No networks found** or fails outright, move the phone clos
 
 Being connected is not the same as being able to transmit.
 
-A node leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a node, the **Connect** tab shows a **Set your region** card; tap it to open the LoRa screen and choose the region you are in.
+A node leaves the factory with no LoRa region set, and it does not transmit until you set one. The first time you connect such a node, the app opens a guided setup, and the **Connect** tab shows a **Set your region** card that reopens it. The setup takes you through four choices and ends on a summary:
 
-Once the region is set, the tab warns you if the node is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the same screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time. An unset region already stops the node transmitting, so the app names that first and holds the transmit card back until you have set a region.
+1. **Region.** Search the list for the region you are in. The app suggests the one that matches your phone's region setting; confirm it or pick another.
+2. **Preset.** The modem preset sets the range and speed of the mesh, and everyone on a mesh uses the same one. On firmware older than 2.8 the node restarts after saving, and the setup continues once it reconnects.
+3. **Name.** Enter the names other people see in their node lists and on their maps. Licensed operators skip this page.
+4. **Nearby meshes.** On a node with the [Mesh Beacon](discovery#mesh-beacon) module, turn on listening for invitations from nearby meshes and join one you have heard.
+
+If you close the setup, the app doesn't open it for that node again on its own. Once the region is set, the card reads **Set up radio**, and the **Settings** screen has a **Set up radio** row for your own node.
+
+Once the region is set, the tab also warns you if the node is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the LoRa screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time. An unset region already stops the node transmitting, so the app names that first and holds the transmit card back until you have set a region.
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
 

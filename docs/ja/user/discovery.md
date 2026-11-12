@@ -1,7 +1,7 @@
 ---
 title: ローカルメッシュ探索
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - discovery
@@ -157,6 +157,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### ルート追跡によるトラブルシューティング
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. 両方のノードが、同じ暗号化鍵を持つチャンネルを少なくとも 1 つ共有しているか確認してください。
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - **ルート追跡がタイムアウトする**：経路が長すぎる（ホップ数上限を超える）か、中継ノードが混雑している可能性があります。 Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **非対称な経路**：A→B のルート追跡は、B→A とは異なる経路を通ることがあります。 This is normal — radio propagation isn't always symmetric.

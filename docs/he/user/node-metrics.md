@@ -1,7 +1,7 @@
 ---
 title: Node Metrics
 nav_order: 5
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -57,11 +57,21 @@ Environmental sensor data (requires compatible hardware):
 | Gas Resistance                       | BME680                |
 | IAQ (Air Quality) | BME680                |
 
-Environment metrics are charted over time — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Environment metrics are charted over time, one chart per unit, stacked: temperature, humidity, pressure, and each other reading the node reports get their own chart with the unit on the Y axis. Humidity and soil moisture run from 0 to 100%. A unit with no data gets no chart.
 
-The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
+The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a seven-band scale. Each band has a color and a label:
 
-![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
+| IAQ        | Label               |
+| ---------- | ------------------- |
+| 0–50       | Excellent           |
+| 51–100     | Good                |
+| 101–150    | Lightly Polluted    |
+| 151–200    | Moderately Polluted |
+| 201–250    | Heavily Polluted    |
+| 251–350    | Severely Polluted   |
+| 351 and up | Extremely Polluted  |
+
+![IAQ legend listing the seven bands with their colors](../../assets/screenshots/node-metrics_iaq_scale.png)
 
 > 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
 
@@ -138,28 +148,32 @@ Power management telemetry (requires INA sensor or compatible hardware):
 | Voltage | Per-channel voltage reading    |
 | Current | Per-channel draw, in milliamps |
 
-The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
+The node detail screen shows a card for every channel that reported data, up to eight, under the name you gave the channel or **Channel** _N_. A channel that reported only voltage or only current shows only that reading. The chart button on the **Power Metrics** row opens the chart screen. It lists a chip for every channel that reported data, up to eight, and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## בדיקת מסלול
 
 Traceroute shows the path a message takes through the mesh:
 
 1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node. The app sends at most one traceroute every 30 seconds, to any node, and **Trace Route** in the node list's touch & hold menu shares that cooldown.
-2. The app sends a traceroute request to the target node.
+2. The app sends a traceroute request to the target node. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
+
+The ring on the traceroute button counts down the seconds until the next request is allowed.
 
 ### Reading Traceroute Results
 
 A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`.
+A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`. A hop whose node was last heard over MQTT is marked `(MQTT)`.
 
 The history also keeps traceroutes this app didn't request:
 
 - **Observed** marks a response from this node to a request made elsewhere, such as one started from your node's own screen. It has hop counts but no round-trip time, and its points on the chart are hollow rings.
 - **Traced by** _node_ marks a traceroute that node ran to yours. It shows the inbound route with the SNR of each hop, but no return route, no round-trip time, and no map, and it stays off the chart.
 
-A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
+A result marked **No Response** means the target didn't answer within two minutes, or the mesh reported that the request couldn't be delivered. The target may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
+
+A result marked **Rate limited** means your node refused the request because it sends one traceroute every 30 seconds. Wait for the cooldown and try again.
 
 ## Position Log
 

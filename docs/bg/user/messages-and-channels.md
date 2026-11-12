@@ -1,7 +1,7 @@
 ---
 title: Съобщения & Канали
 nav_order: 3
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - канали
@@ -45,9 +45,18 @@ Key length alone does not change the icon: a 128-bit key and a 256-bit key both 
 4. Set the channel name and the **PSK**, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside **PSK** generates another one.
 5. Tap **Save** to close the editor. The change is still only on your phone.
 6. Tap **Send** at the bottom of the channel list to write the changes to the node. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
-7. Optional: share the channel URL or QR code with the people who need access.
+7. Optional: share the channels with the people who need access — see [Sharing and importing channels](#sharing-and-importing-channels).
 
 Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
+
+### Sharing and importing channels
+
+On the **Channels** screen, tap **Share Channels** to show a QR code and a link for the channels on your node. Choose what the code does on the other person's node before you hand it out:
+
+- **Replace** overwrites every channel on their node with yours and applies your LoRa settings.
+- **Add** keeps their channels and LoRa settings and appends yours.
+
+To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. For an Add code, the app lists the incoming channels so you can select the ones you want and shows how many of your node's channel slots are in use. If the selection doesn't fit, a line says how many channels to uncheck. Unchecking a channel that is already on your node removes it.
 
 ### Archived Channels
 

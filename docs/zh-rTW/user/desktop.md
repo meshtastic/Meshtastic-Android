@@ -1,7 +1,7 @@
 ---
 title: 桌面版應用程式
 nav_order: 14
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: 在 Linux、macOS 及 Windows 上安裝並使用 Meshtastic 桌面版應用程式——涵蓋連線方式、功能對等性與鍵盤快速鍵。
 aliases:
   - 桌面
@@ -145,7 +145,7 @@ cd Meshtastic-Android
 - The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
   desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - 部分 Android 專屬功能（小工具、特定通知頻道）無法使用
-- 在低規格硬體上執行 Compose Desktop 時，效能可能有所不同
+- Performance may vary on low-spec hardware running Compose Desktop. The app takes at most a quarter of the machine's RAM for its heap. It runs on a 512 MB board, but slows down there on a mesh of several hundred nodes
 - BLE bonding is not supported on desktop (pairing works without bonding)
 
 ## 相關主題
