@@ -35,9 +35,10 @@ The gradle-runner subagent has Bash and has been observed reverting/editing file
 git status --short
 ```
 - If gradle-runner touched files you didn't, treat its PASS as suspect and re-run the failing task inline.
-- If `docs/assets/screenshots/` shows changes and the work is not a UI change (you did not run `copyDocsScreenshots` on purpose), restore that directory so host-render noise does not ride into the PR:
+- `docs/assets/screenshots/` holds copies of the recorded references, and `bash scripts/check-docs-screenshots.sh` (a `docs-quality.yml` gate) fails when a copy and its reference differ. If the work re-recorded a reference, run `./gradlew :screenshot-tests:copyDocsScreenshots` and commit the copies with it. Restore the directory only when no reference changed and the check passes on `HEAD`:
 ```bash
 git restore --source=HEAD --staged --worktree -- docs/assets/screenshots/
+bash scripts/check-docs-screenshots.sh
 ```
 
 ## 5. Report

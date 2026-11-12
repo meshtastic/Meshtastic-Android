@@ -72,6 +72,8 @@ Uses Android Gradle Plugin's native (layoutlib) screenshot testing framework, sp
 
 The update and validate tasks need `-Dorg.gradle.isolated-projects=false`: the screenshot plugin fails under Isolated Projects after it has rendered. Run `copyDocsScreenshots` as its own command after the updates, because Gradle doesn't order it behind them.
 
+The images under `docs/assets/screenshots/` are copies of these references. `scripts/check-docs-screenshots.sh`, a `docs-quality.yml` gate, fails a pull request whose reference and copy differ, so a change that re-records a reference also commits what `copyDocsScreenshots` writes.
+
 Rendering runs on the host through layoutlib, so goldens recorded locally are the ones CI validates against. `validate` allows an image-difference threshold of 0.0005, set in `AndroidScreenshotConventionPlugin`, because pixel-exact comparison fails some references. See `docs/assets/screenshots/README.md` for which module a new screenshot belongs in.
 
 #### Store screenshots
