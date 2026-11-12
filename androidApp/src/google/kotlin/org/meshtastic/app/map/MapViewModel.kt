@@ -86,8 +86,8 @@ import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.MapLayerProblem
 import org.meshtastic.feature.map.layers.MapLayerRefusal
 import org.meshtastic.feature.map.layers.MapLayersManager
-import org.meshtastic.feature.map.layers.maxSourceMegabytes
 import org.meshtastic.feature.map.layers.PickedMapFile
+import org.meshtastic.feature.map.layers.maxSourceMegabytes
 import org.meshtastic.feature.map.shouldAutoUseOfflineBasemap
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.TerrainDownloadState
@@ -857,13 +857,9 @@ class MapViewModel(
 
     private suspend fun MapLayerProblem.message(): String = when {
         refusal == MapLayerRefusal.TOO_DETAILED -> getStringSuspend(Res.string.map_layer_too_detailed, layerName)
-
         refusal == MapLayerRefusal.NOT_MAP_DATA && atImport -> getStringSuspend(Res.string.map_layer_formats)
-
         refusal == MapLayerRefusal.NOT_MAP_DATA -> getStringSuspend(Res.string.map_layer_not_map_data, layerName)
-
         atImport -> getStringSuspend(Res.string.map_layer_too_large, layerType.maxSourceMegabytes())
-
         else -> getStringSuspend(Res.string.map_layer_too_detailed, layerName)
     }
 

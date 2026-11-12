@@ -272,8 +272,7 @@ class MapLayersManager(
                         val stored = fileSystem.metadataOrNull(path)?.size
                         if (stored != null && stored > maxBytes) null else fileSystem.read(path) { readByteArray() }
                     }
-                val refusal =
-                    if (bytes == null) MapLayerRefusal.TOO_LARGE else bytes.refusalFor(layerItem.layerType)
+                val refusal = if (bytes == null) MapLayerRefusal.TOO_LARGE else bytes.refusalFor(layerItem.layerType)
                 if (refusal == null) {
                     bytes
                 } else {

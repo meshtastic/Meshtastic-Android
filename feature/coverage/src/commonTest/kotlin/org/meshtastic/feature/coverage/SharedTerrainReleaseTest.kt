@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.coverage
 
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.feature.map.terrain.ElevationTile
 import kotlin.test.Test
@@ -40,34 +38,13 @@ class SharedTerrainReleaseTest {
     }
 
     @Test
-    fun terrainIsDroppedOnceNoEstimateHasRunForTheIdlePeriod() = runTest {
+    fun terrainIsDroppedWhenTheEstimateEnds() = runTest {
         SharedTerrain.estimateStarted()
         warm(zoom = 11)
-        SharedTerrain.estimateFinished(scope = backgroundScope, idleMs = IDLE_MS)
-
-        advanceTimeBy(IDLE_MS - 1)
         assertEquals(2, SharedTerrain.residentTiles())
 
-        advanceTimeBy(2)
-        runCurrent()
-        assertEquals(0, SharedTerrain.residentTiles())
-    }
+        SharedTerrain.estimateFinished()
 
-    @Test
-    fun aSecondEstimateInsideTheIdlePeriodKeepsTheTerrain() = runTest {
-        SharedTerrain.estimateStarted()
-        warm(zoom = 12)
-        SharedTerrain.estimateFinished(scope = backgroundScope, idleMs = IDLE_MS)
-
-        advanceTimeBy(IDLE_MS / 2)
-        SharedTerrain.estimateStarted()
-        advanceTimeBy(IDLE_MS * 2)
-        runCurrent()
-        assertEquals(2, SharedTerrain.residentTiles())
-
-        SharedTerrain.estimateFinished(scope = backgroundScope, idleMs = IDLE_MS)
-        advanceTimeBy(IDLE_MS + 1)
-        runCurrent()
         assertEquals(0, SharedTerrain.residentTiles())
     }
 
@@ -76,15 +53,11 @@ class SharedTerrainReleaseTest {
         SharedTerrain.estimateStarted()
         SharedTerrain.estimateStarted()
         warm(zoom = 13)
-        SharedTerrain.estimateFinished(scope = backgroundScope, idleMs = IDLE_MS)
 
-        advanceTimeBy(IDLE_MS * 2)
-        runCurrent()
+        SharedTerrain.estimateFinished()
         assertEquals(2, SharedTerrain.residentTiles())
 
-        SharedTerrain.estimateFinished(scope = backgroundScope, idleMs = IDLE_MS)
-        advanceTimeBy(IDLE_MS + 1)
-        runCurrent()
+        SharedTerrain.estimateFinished()
         assertEquals(0, SharedTerrain.residentTiles())
     }
 
@@ -100,6 +73,5 @@ class SharedTerrainReleaseTest {
 
     private companion object {
         const val ARCHIVE = "test://shared-terrain-release"
-        const val IDLE_MS = 1_000L
     }
 }

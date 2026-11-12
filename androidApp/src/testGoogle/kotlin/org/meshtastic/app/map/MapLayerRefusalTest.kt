@@ -101,7 +101,9 @@ class MapLayerRefusalTest {
 
     @Test
     fun `a stored json that is not GeoJSON is skipped and reported once`() = runTest {
-        layersDir.resolve("firmware-2.7.26_00000000-0000-0000-0000-000000000000.geojson").writeText("""{"version":"2.7.26"}""")
+        layersDir
+            .resolve("firmware-2.7.26_00000000-0000-0000-0000-000000000000.geojson")
+            .writeText("""{"version":"2.7.26"}""")
         val (manager, problems) = manager()
         val layer = manager.mapLayers.value.single()
 
@@ -116,7 +118,9 @@ class MapLayerRefusalTest {
 
     @Test
     fun `a layer the renderer has no room for is reported once and then skipped`() = runTest {
-        layersDir.resolve("dense_00000000-0000-0000-0000-000000000000.geojson").writeText("""{"type":"FeatureCollection","features":[]}""")
+        layersDir
+            .resolve("dense_00000000-0000-0000-0000-000000000000.geojson")
+            .writeText("""{"type":"FeatureCollection","features":[]}""")
         val (manager, problems) = manager()
         val layer = manager.mapLayers.value.single()
         assertNotNull(manager.readLayerBytes(layer))
@@ -130,7 +134,9 @@ class MapLayerRefusalTest {
 
     @Test
     fun `refreshing a layer lets it be read and reported again`() = runTest {
-        layersDir.resolve("dense_00000000-0000-0000-0000-000000000000.geojson").writeText("""{"type":"FeatureCollection","features":[]}""")
+        layersDir
+            .resolve("dense_00000000-0000-0000-0000-000000000000.geojson")
+            .writeText("""{"type":"FeatureCollection","features":[]}""")
         val (manager, problems) = manager()
         val layer = manager.mapLayers.value.single()
         manager.reportUndrawable(layer, MapLayerRefusal.TOO_DETAILED)

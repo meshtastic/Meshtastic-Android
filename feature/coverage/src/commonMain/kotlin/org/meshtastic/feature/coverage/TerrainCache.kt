@@ -18,14 +18,9 @@ package org.meshtastic.feature.coverage
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.feature.map.terrain.ElevationTile
@@ -143,17 +138,15 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
  * The shared caches, one per archive and zoom.
  *
  * Process-wide on purpose: terrain does not belong to a screen. A decoded tile is one float per sample, about 1 MB for
- * a 512-pixel tile, so a disc's worth is a large share of a phone's heap. It is kept while estimates are being run, so
- * a second one reuses the first one's terrain, and dropped once none has run for [IDLE_RELEASE_MS]; the tile store on
- * disk makes the next estimate a decode rather than a download.
+ * a 512-pixel tile, so a disc's worth is a large share of a phone's heap. It is shared by estimates running together
+ * and dropped when the last of them ends; the tile store on disk makes the next estimate a decode rather than a
+ * download.
  */
 internal object SharedTerrain {
 
     private val caches = HashMap<String, TerrainCache>()
     private val lock = Mutex()
-    private val idleScope = CoroutineScope(SupervisorJob() + coverageComputeDispatcher)
     private var running = 0
-    private var pendingRelease: Job? = null
 
     suspend fun forArchive(url: String, zoom: Int): TerrainCache = lock.withLock {
         caches.getOrPut("$url@$zoom") { TerrainCache() }
@@ -162,30 +155,15 @@ internal object SharedTerrain {
     /** Decoded tiles resident across every archive and zoom. */
     suspend fun residentTiles(): Int = lock.withLock { caches.values.sumOf { it.size } }
 
-    suspend fun estimateStarted() = lock.withLock {
-        running++
-        pendingRelease?.cancel()
-        pendingRelease = null
-    }
+    suspend fun estimateStarted() = lock.withLock { running++ }
 
-    /** Schedule the decoded terrain to be dropped unless another estimate starts within [idleMs]. */
-    suspend fun estimateFinished(scope: CoroutineScope = idleScope, idleMs: Long = IDLE_RELEASE_MS) = lock.withLock {
+    /** Drop the decoded terrain once no estimate is running. */
+    suspend fun estimateFinished() = lock.withLock {
         running = (running - 1).coerceAtLeast(0)
-        if (running > 0) return@withLock
-        pendingRelease?.cancel()
-        pendingRelease = scope.launch {
-            delay(idleMs)
-            release()
-        }
-    }
-
-    private suspend fun release() = lock.withLock {
         if (running > 0) return@withLock
         caches.values.forEach { it.clear() }
         caches.clear()
     }
-
-    const val IDLE_RELEASE_MS = 60_000L
 
     /**
      * One HTTP client for the process.
