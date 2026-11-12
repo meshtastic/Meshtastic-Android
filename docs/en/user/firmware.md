@@ -119,7 +119,7 @@ The app sends the new bootloader over Bluetooth, then reinstalls the selected fi
 
 Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
 
-If the node doesn't come back over Bluetooth after the bootloader is written, install the firmware from its update drive over USB. Otherwise unplug it, reset it, and use **Resume firmware update** on the **Connect** tab.
+A node that doesn't come back over Bluetooth after the bootloader is written can be finished either way: install the firmware from its update drive over USB, or unplug it, reset it, and use **Resume firmware update** on the **Connect** tab.
 
 ### What the nRF52 bootloader does
 
