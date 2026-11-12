@@ -80,6 +80,12 @@
 -keep class org.bouncycastle.jce.provider.BouncyCastleProvider { *; }
 -dontwarn org.openjsse.**
 
+# ---- Android XR system extensions --------------------------------------------
+# The Jetpack XR renderer links against the platform's XR extensions library, which only an
+# Android XR device provides at runtime.
+-dontwarn com.android.extensions.xr.**
+-dontwarn android.extensions.xr.**
+
 # ---- AppSearch / AppFunctions generated document factories ------------------
 # AppSearch's DocumentClassFactoryRegistry loads the generated
 # `$$__AppSearch__*` factory classes by name and instantiates them via their
