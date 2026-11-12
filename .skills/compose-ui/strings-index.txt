@@ -1099,6 +1099,7 @@ map_layer_formats
 map_layer_not_map_data
 map_layer_opacity
 map_layer_open_failed
+map_layer_stored_too_large
 map_layer_too_detailed
 map_layer_too_large
 map_node_popup_details

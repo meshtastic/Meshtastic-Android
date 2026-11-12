@@ -31,6 +31,7 @@ import org.meshtastic.feature.map.layers.MapLayerProblem
 import org.meshtastic.feature.map.layers.MapLayerRefusal
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.PickedMapFile
+import org.meshtastic.feature.map.layers.maxSourceBytes
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
@@ -146,5 +147,44 @@ class MapLayerRefusalTest {
         assertNotNull(manager.readLayerBytes(manager.mapLayers.value.single()))
         manager.reportUndrawable(layer, MapLayerRefusal.TOO_DETAILED)
         assertEquals(2, problems.size)
+    }
+
+    @Test
+    fun `a layer that only lost out to the others drawn is reported once and still read`() = runTest {
+        layersDir
+            .resolve("dense_00000000-0000-0000-0000-000000000000.geojson")
+            .writeText("""{"type":"FeatureCollection","features":[]}""")
+        val (manager, problems) = manager()
+        val layer = manager.mapLayers.value.single()
+
+        manager.reportUndrawable(layer, MapLayerRefusal.TOO_DETAILED, permanent = false)
+        manager.reportUndrawable(layer, MapLayerRefusal.TOO_DETAILED, permanent = false)
+
+        assertEquals(1, problems.size)
+        assertNotNull(manager.readLayerBytes(layer))
+    }
+
+    @Test
+    fun `a picked file is asked for one byte past its limit and refused when it has it`() = runTest {
+        val (manager, problems) = manager()
+        val limit = LayerType.GEOJSON.maxSourceBytes()
+        var asked = 0L
+        val oversized =
+            PickedMapFile(
+                displayName = "huge.geojson",
+                extensionOrMime = "geojson",
+                read = { maxBytes ->
+                    asked = maxBytes
+                    ByteArray(maxBytes.toInt())
+                },
+            )
+
+        manager.addMapLayer(oversized)
+
+        assertEquals(limit + 1, asked)
+        assertTrue(manager.mapLayers.value.isEmpty())
+        val problem = problems.single()
+        assertEquals(MapLayerRefusal.TOO_LARGE, problem.refusal)
+        assertTrue(problem.atImport)
     }
 }

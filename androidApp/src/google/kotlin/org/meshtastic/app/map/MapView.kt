@@ -231,6 +231,7 @@ import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.MapLayerRefusal
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
@@ -1781,9 +1782,11 @@ private class MapLayerSlot {
                 val count = dataLayer?.vertexCount() ?: 0
                 when {
                     dataLayer == null -> {
+                        // The type, not the name: a layer's name is whatever the user called the file.
                         Logger.withTag("MapView").e {
-                            "Error loading map layer: ${layerItem.name} (unrecognized format)"
+                            "Map layer not drawn, unrecognized format: type=${layerItem.layerType}"
                         }
+                        mapViewModel.reportLayerUndrawable(layerItem, MapLayerRefusal.NOT_MAP_DATA)
                         null
                     }
 
@@ -1793,7 +1796,12 @@ private class MapLayerSlot {
                                 "vertices=$count drawn=${mapLayerBudget.inUse} " +
                                 "perLayer=${mapLayerBudget.perLayer} total=${mapLayerBudget.total}"
                         }
-                        mapViewModel.reportLayerTooDetailed(layerItem)
+                        // Too big on its own never changes; too big beside the others does when one is hidden.
+                        mapViewModel.reportLayerUndrawable(
+                            layerItem,
+                            MapLayerRefusal.TOO_DETAILED,
+                            permanent = count > mapLayerBudget.perLayer,
+                        )
                         null
                     }
 
@@ -1812,15 +1820,16 @@ private class MapLayerSlot {
                 // Swallowing it broke structured concurrency and reported routine refreshes to error tracking.
                 throw e
             } catch (e: Exception) {
-                Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
+                Logger.withTag("MapView").e(e) { "Error loading map layer: type=${layerItem.layerType}" }
                 null
             } catch (e: OutOfMemoryError) {
                 // The parser builds the whole JSON tree beside the raw bytes; a layer too big for the heap fails alone.
-                Logger.withTag("MapView").e(e) { "Map layer too large to load: ${layerItem.name}" }
+                Logger.withTag("MapView").e(e) { "Map layer too large to load: type=${layerItem.layerType}" }
                 null
             }
         layer = rendered
-        rendered?.safeShow()
+        // Nothing drawn means nothing held: the reservation goes back whether the load or the draw failed.
+        if (rendered == null || !rendered.safeShow()) clear()
     }
 }
 
@@ -1926,17 +1935,19 @@ private class RenderedMapLayer(
     }
 }
 
-private fun RenderedMapLayer.safeShow() {
-    try {
-        show()
-    } catch (e: Exception) {
-        Logger.withTag("MapView").e(e) { "Error adding map layer" }
-        safeHide()
-    } catch (e: OutOfMemoryError) {
-        // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
-        Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
-        safeHide()
-    }
+/** Draw the layer; false when it could not be drawn, in which case whatever it added has been removed. */
+private fun RenderedMapLayer.safeShow(): Boolean = try {
+    show()
+    true
+} catch (e: Exception) {
+    Logger.withTag("MapView").e(e) { "Error adding map layer" }
+    safeHide()
+    false
+} catch (e: OutOfMemoryError) {
+    // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
+    Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
+    safeHide()
+    false
 }
 
 private fun RenderedMapLayer.safeHide() {

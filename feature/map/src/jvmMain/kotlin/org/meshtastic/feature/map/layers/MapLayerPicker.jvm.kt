@@ -54,11 +54,11 @@ actual fun rememberMapLayerPicker(onPick: (PickedMapFile) -> Unit): MapLayerPick
                 PickedMapFile(
                     displayName = chosen.name,
                     extensionOrMime = chosen.extension.ifBlank { null },
-                    read = {
+                    read = { maxBytes ->
                         withContext(ioDispatcher) {
                             @Suppress("TooGenericExceptionCaught")
                             try {
-                                chosen.readBytes()
+                                chosen.inputStream().use { it.readAtMost(maxBytes) }
                             } catch (e: Exception) {
                                 Logger.e(throwable = e) { "Failed to read the picked map layer" }
                                 null

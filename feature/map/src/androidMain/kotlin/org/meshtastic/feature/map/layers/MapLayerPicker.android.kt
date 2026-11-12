@@ -65,7 +65,7 @@ fun Uri.toPickedMapFile(context: Context): PickedMapFile {
         displayName.substringAfterLast('.', "").ifBlank {
             context.contentResolver.getType(this)?.substringAfterLast('/')
         },
-        read = { context.contentResolver.openInputStream(this)?.use { it.readBytes() } },
+        read = { maxBytes -> context.contentResolver.openInputStream(this)?.use { it.readAtMost(maxBytes) } },
     )
 }
 

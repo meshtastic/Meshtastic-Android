@@ -54,6 +54,10 @@ class PickedMapFile(
     val displayName: String,
     /** File extension or MIME subtype, resolved to a [LayerType] by [resolveLayerType]. */
     val extensionOrMime: String?,
-    /** Reads the picked file. Null if it could not be opened, which is reported and skipped rather than thrown. */
-    val read: suspend () -> ByteArray?,
+    /**
+     * Reads at most `maxBytes` of the picked file. Null if it could not be opened, which is reported and skipped rather
+     * than thrown. The store asks for one byte more than it accepts, so a file over the limit is seen without being
+     * held whole.
+     */
+    val read: suspend (maxBytes: Long) -> ByteArray?,
 )

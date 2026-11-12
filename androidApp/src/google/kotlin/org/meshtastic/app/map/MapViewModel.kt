@@ -76,6 +76,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.map_layer_formats
 import org.meshtastic.core.resources.map_layer_not_map_data
+import org.meshtastic.core.resources.map_layer_stored_too_large
 import org.meshtastic.core.resources.map_layer_too_detailed
 import org.meshtastic.core.resources.map_layer_too_large
 import org.meshtastic.core.resources.url_http_localhost_only
@@ -851,16 +852,16 @@ class MapViewModel(
 
     suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? = mapLayersManager.readLayerBytes(layerItem)
 
-    /** The map parsed [layerItem] but has no room in its vertex budget to draw it. */
-    fun reportLayerTooDetailed(layerItem: MapLayerItem) =
-        mapLayersManager.reportUndrawable(layerItem, MapLayerRefusal.TOO_DETAILED)
+    /** The map read [layerItem] but cannot draw it. [permanent] is false when hiding another layer would make room. */
+    fun reportLayerUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal, permanent: Boolean = true) =
+        mapLayersManager.reportUndrawable(layerItem, refusal, permanent)
 
     private suspend fun MapLayerProblem.message(): String = when {
         refusal == MapLayerRefusal.TOO_DETAILED -> getStringSuspend(Res.string.map_layer_too_detailed, layerName)
         refusal == MapLayerRefusal.NOT_MAP_DATA && atImport -> getStringSuspend(Res.string.map_layer_formats)
         refusal == MapLayerRefusal.NOT_MAP_DATA -> getStringSuspend(Res.string.map_layer_not_map_data, layerName)
         atImport -> getStringSuspend(Res.string.map_layer_too_large, layerType.maxSourceMegabytes())
-        else -> getStringSuspend(Res.string.map_layer_too_detailed, layerName)
+        else -> getStringSuspend(Res.string.map_layer_stored_too_large, layerName, layerType.maxSourceMegabytes())
     }
 
     override fun onCleared() {

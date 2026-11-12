@@ -19,10 +19,11 @@ package org.meshtastic.feature.map.layers
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.readRawBytes
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.Url
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -71,6 +73,9 @@ class MapLayersManager(
 
     // Layers already found undrawable this run. A refresh re-reads a network layer, so it clears its own entry.
     private val unreadableLayerIds = MutableStateFlow<Set<String>>(emptySet())
+
+    // Layers the user has already been told about this run.
+    private val reportedLayerIds = MutableStateFlow<Set<String>>(emptySet())
 
     private val _layerProblems = MutableSharedFlow<MapLayerProblem>(extraBufferCapacity = PROBLEM_BUFFER)
 
@@ -151,7 +156,7 @@ class MapLayersManager(
                 return@launch
             }
 
-            val bytes = picked.read()
+            val bytes = picked.read(layerType.maxSourceBytes() + 1)
             if (bytes == null) {
                 Logger.withTag(TAG).w("Could not read the picked map layer.")
                 return@launch
@@ -235,6 +240,7 @@ class MapLayersManager(
     /** Bump a layer's [MapLayerItem.refreshToken] so renderers re-read it (used for network-layer refresh). */
     fun refreshMapLayer(layerId: String) {
         unreadableLayerIds.update { it - layerId }
+        reportedLayerIds.update { it - layerId }
         _mapLayers.update { layers ->
             layers.map { if (it.id == layerId) it.copy(refreshToken = it.refreshToken + 1) else it }
         }
@@ -266,7 +272,13 @@ class MapLayersManager(
                             return@withContext null
                         }
                         val declared = response.contentLength()
-                        if (declared != null && declared > maxBytes) null else response.readRawBytes()
+                        if (declared != null && declared > maxBytes) {
+                            null
+                        } else {
+                            // Content-Length is optional and unchecked, so the read itself stops one byte past the
+                            // limit.
+                            response.bodyAsChannel().readBuffer(maxBytes + 1).readByteArray()
+                        }
                     } else {
                         val path = uri.toLocalPath()
                         val stored = fileSystem.metadataOrNull(path)?.size
@@ -303,11 +315,13 @@ class MapLayersManager(
      * Record that [layerItem] cannot be drawn and tell the user, once per run.
      *
      * A stored layer is asked for again on every map open, so without the memory a layer that can never draw would be
-     * re-read, and re-announced, each time. A renderer calls this too, for a layer it parsed but has no room to draw.
+     * re-read, and re-announced, each time. A renderer calls this too, for a layer it parsed but cannot draw; it passes
+     * [permanent] false when the layer only lost out to the others drawn now, so hiding one lets it load.
      */
-    fun reportUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal) {
-        if (layerItem.id in unreadableLayerIds.value) return
-        unreadableLayerIds.update { it + layerItem.id }
+    fun reportUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal, permanent: Boolean = true) {
+        if (permanent) unreadableLayerIds.update { it + layerItem.id }
+        if (layerItem.id in reportedLayerIds.value) return
+        reportedLayerIds.update { it + layerItem.id }
         _layerProblems.tryEmit(MapLayerProblem(layerItem.name, layerItem.layerType, refusal, atImport = false))
     }
 
