@@ -1,7 +1,7 @@
 ---
 title: Kohalik kärgvõrgu avastaja
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
   - discovery
@@ -157,6 +157,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### Veaotsing koos Traceroute
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Asümmeetrilised teed** – Jälgimismarsruut teelt A→B võib minna teist teed kui teelt B→A. This is normal — radio propagation isn't always symmetric.

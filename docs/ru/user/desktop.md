@@ -1,7 +1,7 @@
 ---
 title: Настольное приложение
 nav_order: 14
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Установка и использование приложения Meshtastic Desktop на Linux, macOS и Windows — подключения, функционал и сочетания клавиш.
 aliases:
   - desktop
@@ -145,7 +145,7 @@ cd Meshtastic-Android
 - The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
   desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Некоторые специфичные для Android функции (виджеты, отдельные каналы уведомлений) недоступны
-- Производительность может варьироваться на маломощном оборудовании при запуске Compose Desktop
+- Performance may vary on low-spec hardware running Compose Desktop. The app takes at most a quarter of the machine's RAM for its heap. It runs on a 512 MB board, but slows down there on a mesh of several hundred nodes
 - BLE bonding is not supported on desktop (pairing works without bonding)
 
 ## Связанные темы

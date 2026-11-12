@@ -1,7 +1,7 @@
 ---
 title: Локальное обнаружение сети
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Исследуйте свою mesh-сеть — сканер локального обнаружения mesh-сети, трассировка путей, карты соседей и инструменты обнаружения нодов.
 aliases:
   - discovery
@@ -157,6 +157,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### Устранение неполадок с трассировкой
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Проверь, что обе ноды имеют хотя бы один канал с одинаковым ключом шифрования.
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - **Время ожидания трассировки истекло** — путь может быть слишком длинным (превышен лимит хопов) или нода ретрансляции перегружена. Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Асимметричные маршруты** — трассировка от A→B может проходить по другому пути, чем B→A. This is normal — radio propagation isn't always symmetric.
