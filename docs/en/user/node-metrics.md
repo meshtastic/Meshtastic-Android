@@ -149,7 +149,7 @@ Power management telemetry (requires INA sensor or compatible hardware):
 | Voltage | Per-channel voltage reading |
 | Current | Per-channel draw, in milliamps |
 
-The node detail screen shows a card for every channel that reported data, up to eight, under the name you gave the channel or **Channel** *N*. A channel that reported only voltage or only current shows only that reading. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
+The node detail screen shows a card for every channel that reported data, up to eight, under the name you gave the channel or **Channel** *N*. A channel that reported only voltage or only current shows only that reading. The chart button on the **Power Metrics** row opens the chart screen. It lists a chip for every channel that reported data, up to eight, and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Traceroute
 
