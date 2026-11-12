@@ -18,7 +18,7 @@ package org.meshtastic.feature.map.layers
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.Url
 import io.ktor.http.contentLength
@@ -261,30 +261,19 @@ class MapLayersManager(
         val maxBytes = layerItem.layerType.maxSourceBytes()
         return withContext(dispatchers.io) {
             try {
-                val bytes =
+                val read =
                     if (layerItem.isNetwork && (uri.startsWith("http://") || uri.startsWith("https://"))) {
-                        val response = httpClient.get(uri)
-                        if (!response.status.isSuccess()) {
-                            // Log only the host, not the full URL (paths can carry user-identifying info).
-                            Logger.withTag(TAG).e {
-                                "HTTP ${response.status} fetching network layer from ${Url(uri).host}"
-                            }
-                            return@withContext null
-                        }
-                        val declared = response.contentLength()
-                        if (declared != null && declared > maxBytes) {
-                            null
-                        } else {
-                            // Content-Length is optional and unchecked, so the read itself stops one byte past the
-                            // limit.
-                            response.bodyAsChannel().readBuffer(maxBytes + 1).readByteArray()
-                        }
+                        fetchNetworkLayer(uri, maxBytes)
                     } else {
-                        val path = uri.toLocalPath()
-                        val stored = fileSystem.metadataOrNull(path)?.size
-                        if (stored != null && stored > maxBytes) null else fileSystem.read(path) { readByteArray() }
+                        readStoredLayer(uri, maxBytes)
                     }
-                val refusal = if (bytes == null) MapLayerRefusal.TOO_LARGE else bytes.refusalFor(layerItem.layerType)
+                val bytes = (read as? LayerRead.Bytes)?.bytes
+                val refusal =
+                    when (read) {
+                        LayerRead.Failed -> return@withContext null
+                        LayerRead.OverLimit -> MapLayerRefusal.TOO_LARGE
+                        is LayerRead.Bytes -> read.bytes.refusalFor(layerItem.layerType)
+                    }
                 if (refusal == null) {
                     bytes
                 } else {
@@ -301,6 +290,47 @@ class MapLayersManager(
                 Logger.withTag(TAG).e(e) { "Error reading map layer (network=${layerItem.isNetwork})" }
                 null
             }
+        }
+    }
+
+    private sealed interface LayerRead {
+        class Bytes(val bytes: ByteArray) : LayerRead
+
+        data object OverLimit : LayerRead
+
+        data object Failed : LayerRead
+    }
+
+    /**
+     * Fetch a network layer, reading no more than one byte past [maxBytes].
+     *
+     * Streamed through `prepareGet`: a plain `get` buffers the whole body before the caller sees the response, so a
+     * limit applied afterwards bounds nothing. Content-Length is optional and unchecked, which is why the read itself
+     * stops as well.
+     */
+    private suspend fun fetchNetworkLayer(uri: String, maxBytes: Long): LayerRead =
+        httpClient.prepareGet(uri).execute { response ->
+            val declared = response.contentLength()
+            when {
+                !response.status.isSuccess() -> {
+                    // Log only the host, not the full URL (paths can carry user-identifying info).
+                    Logger.withTag(TAG).e { "HTTP ${response.status} fetching network layer from ${Url(uri).host}" }
+                    LayerRead.Failed
+                }
+
+                declared != null && declared > maxBytes -> LayerRead.OverLimit
+
+                else -> LayerRead.Bytes(response.bodyAsChannel().readBuffer(maxBytes + 1).readByteArray())
+            }
+        }
+
+    private fun readStoredLayer(uri: String, maxBytes: Long): LayerRead {
+        val path = uri.toLocalPath()
+        val stored = fileSystem.metadataOrNull(path)?.size
+        return if (stored != null && stored > maxBytes) {
+            LayerRead.OverLimit
+        } else {
+            LayerRead.Bytes(fileSystem.read(path) { readByteArray() })
         }
     }
 
