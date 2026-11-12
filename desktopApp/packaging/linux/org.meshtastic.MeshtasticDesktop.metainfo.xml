@@ -98,7 +98,7 @@
   <releases>
     <release version="2.8.5" date="2026-11-05">
       <description>
-        <p>Stability and reliability fixes.</p>
+        <p>Guided setup for a new node. Upgrade an nRF52 bootloader over Bluetooth. Scan or tap a connect code. Share channels as Replace or Add. Traceroute states and MQTT hops. Banana for scale. Android XR: device models and a 3D terrain map in your space.</p>
       </description>
     </release>
     <release version="2.8.4" date="2026-10-20">

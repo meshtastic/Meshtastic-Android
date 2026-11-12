@@ -17,21 +17,21 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**November 2026** — [Connections](user/connections) — A node with no region opens a guided setup for its region, preset, name, and nearby meshes.
+
+**November 2026** — [Firmware Updates](user/firmware) — The firmware screen shows the nRF52 bootloader version a node reports, and an outdated bootloader can be upgraded over Bluetooth.
+
+**November 2026** — [Messages & Channels](user/messages-and-channels) — **Share Channels** offers Replace or Add on the code itself, and an Add import shows how many channel slots are in use.
+
+**November 2026** — [Node Metrics](user/node-metrics) — A traceroute request reads **Waiting for response**, **No Response**, or **Rate limited**, MQTT hops are marked, and environment readings chart one unit per chart.
+
+**November 2026** — [Map & Waypoints](user/map-and-waypoints) — On an Android XR headset, a 3D terrain table shows the mesh with base map, contours, buildings, and links.
+
 **October 2026** — [Firmware Updates](user/firmware) — What the Meshtastic nRF52 Bootloader does while the update drive is up, and where a node waits after a dropped Bluetooth update.
 
 **October 2026** — [Settings — Radio & User](user/settings-radio-user) — Each configuration screen has its own section, settings use the app's exact labels, and every table lists the default value.
 
-**October 2026** — [Firmware Updates](user/firmware) — A node on firmware from 2.3.15 up to 2.5.14 stays connected behind a required-update screen, and the Connect tab flags a newer stable release.
-
-**October 2026** — [Messages & Channels](user/messages-and-channels) — A failed message can be resent in place, and on firmware 2.8.1 or newer a direct message can show **Delivered to recipient · proven**.
-
-**October 2026** — [Desktop App](user/desktop) — Site Planner computes coverage inside the app and adds it to the map as a layer.
-
 **October 2026** — [Map & Waypoints](user/map-and-waypoints) — The AR mesh view draws nodes and waypoints over the phone's camera and turns you toward the one you are finding.
-
-**September 2026** — [Notifications](user/notifications) — A page that lists every notification category, what each opens when tapped, when a message stays quiet, and what a message notification lets you do from the shade or a watch.
-
-**September 2026** — [Nodes](user/nodes) — On firmware 2.8.1 or newer, nodes your node has not heard since its LoRa settings changed carry an orange marker, a **Hide unheard nodes** filter, and a banner whose **Remove** action deletes them after you confirm.
 
 <!-- WHATS_NEW_END -->
 

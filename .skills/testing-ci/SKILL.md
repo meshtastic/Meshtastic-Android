@@ -81,10 +81,12 @@ Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules —
 - **`:docs-screenshots`** — **generate-only**, NOT validated in CI. Holds doc-framed compositions (crops/full screens tuned for the docs site). Reframe these freely; it never churns the regression gate.
 
 ```bash
-./gradlew :screenshot-tests:updateDebugScreenshotTest   # regression goldens
-./gradlew :docs-screenshots:updateDebugScreenshotTest   # doc-framed composition images
+./gradlew :screenshot-tests:updateDebugScreenshotTest -Dorg.gradle.isolated-projects=false   # regression goldens
+./gradlew :docs-screenshots:updateDebugScreenshotTest -Dorg.gradle.isolated-projects=false   # doc-framed composition images
 ./gradlew :screenshot-tests:copyDocsScreenshots         # copy doc images from BOTH modules → docs/assets
 ```
+
+The update and validate tasks fail under Isolated Projects after rendering, so pass `-Dorg.gradle.isolated-projects=false`. Run `copyDocsScreenshots` as a separate command after the updates; in one invocation Gradle runs it first.
 
 Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. The convention plugin pins the render JVM to `user.timezone=UTC` (CST itself pins only the locale), so a preview that formats an absolute date records the same day on every host. **Exception — color emoji: do NOT gate CI on them.** Layoutlib bundles the text fonts but resolves color emoji through the host's emoji font, so glyph edges rasterize differently on macOS than on the Linux runner. Layout, text and vectors still match exactly; only the emoji anti-aliasing moves, which is enough to blow the 0.0005 `imageDifferenceThreshold` on an emoji-dense composition and cannot be fixed by re-running `update` locally. Assert the layout rule in a unit test instead — see `core/ui/src/commonTest/.../emoji/EmojiCellSizeTest.kt` — or put the composition in generate-only `:docs-screenshots`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run; restore it with `git restore --source=HEAD --staged --worktree -- docs/assets/screenshots/nodes_detail_local.png`. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
 

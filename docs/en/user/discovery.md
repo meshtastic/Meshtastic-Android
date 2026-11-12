@@ -2,7 +2,7 @@
 title: Local Mesh Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - discovery
@@ -158,6 +158,7 @@ Run traceroute several times over a few minutes, waiting out the 30-second coold
 #### Troubleshooting with Traceroute
 
 - **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
+- **Rate limited** — Your node refused the request because it sends one traceroute every 30 seconds. The ring on the traceroute button counts down until the next one is allowed.
 - **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa**.
 - **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation isn't always symmetric.
