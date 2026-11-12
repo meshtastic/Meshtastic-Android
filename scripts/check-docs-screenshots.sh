@@ -25,7 +25,7 @@ status=0
 checked=0
 declare -A seen
 
-while IFS='=' read -r doc ref; do
+while IFS='=' read -r doc ref || [ -n "$doc$ref" ]; do
   doc="${doc//[[:space:]]/}"
   ref="${ref//[[:space:]]/}"
   case "$doc" in ''|\#*) continue ;; esac
