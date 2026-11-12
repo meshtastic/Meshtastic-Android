@@ -182,6 +182,30 @@ jobs:
           } >> "$GITHUB_OUTPUT"
         shell: bash
 
+      # Both are cheaper to refuse here than after forty minutes of builds, or after the tag is promoted.
+      - name: Check HEAD is ready for an internal cut
+        id: ready
+        if: ${{ inputs.channel == 'internal' }}
+        env:
+          BASE_VERSION: ${{ steps.calculate_tags.outputs.base_version }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          # Promotion reads the release highlights and Play's what's-new from the tag, so they
+          # have to be written before it. The text is PLACEHOLDER in scripts/bump-version-name.py.
+          NOTES=fastlane/metadata/android/en-US/changelogs/default.txt
+          if [[ "$(head -n 1 "$NOTES")" == "Stability and reliability fixes." ]]; then
+            echo "::error::$NOTES still has the version bump's placeholder. Rewrite the $BASE_VERSION <description> in the metainfo, run scripts/sync-play-changelog.py, and merge that first."
+            exit 1
+          fi
+
+          # The version code comes from the commit count, and Play takes each code once.
+          EXISTING=$(git tag --points-at HEAD --list "v${BASE_VERSION}-internal.*" | head -n 1)
+          if [ -n "$EXISTING" ]; then
+            echo "::error::HEAD is already $EXISTING, so this cut would rebuild version code $VERSION_CODE. Promote that tag, or re-run its failed jobs."
+            exit 1
+          fi
+        shell: bash
+
       - name: Summarize the plan
         env:
           CHANNEL: ${{ inputs.channel }}
