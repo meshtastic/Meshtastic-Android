@@ -67,14 +67,15 @@ fun Uri.toPickedMapFile(context: Context): PickedMapFile {
             context.contentResolver.getType(this)?.substringAfterLast('/')
         },
         read = { maxBytes ->
-            // A document that has gone away throws rather than returning null, and so does a revoked grant.
+            // A document that has gone away throws rather than returning null, and so does a revoked grant. Only the
+            // exception's type is logged: its message can carry the content URI, and with it the file's name.
             try {
                 context.contentResolver.openInputStream(this)?.use { it.readAtMost(maxBytes) }
             } catch (e: IOException) {
-                Logger.e(e) { "Failed to read the picked map layer" }
+                Logger.e { "Failed to read the picked map layer: ${e::class.simpleName}" }
                 null
             } catch (e: SecurityException) {
-                Logger.e(e) { "Not allowed to read the picked map layer" }
+                Logger.e { "Not allowed to read the picked map layer: ${e::class.simpleName}" }
                 null
             }
         },
