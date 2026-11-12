@@ -133,6 +133,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -150,6 +152,7 @@ import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
@@ -228,6 +231,7 @@ import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.MapLayerRefusal
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
@@ -1736,16 +1740,38 @@ private fun offsetPolyline(
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewModel: MapViewModel) {
-    var currentLayer by remember { mutableStateOf<RenderedMapLayer?>(null) }
+    val slot = remember { MapLayerSlot() }
 
     // Opacity is part of the key: maps-utils has no way to restyle a layer already on the map, so a fade is a
-    // teardown and a redraw.
-    MapEffect(layerItem.id, layerItem.refreshToken, opacity) { map ->
-        currentLayer?.safeHide()
-        currentLayer = null
-        val layer =
+    // teardown and a redraw. Visibility is too: a hidden layer is not read or parsed, and holds nothing.
+    MapEffect(layerItem.id, layerItem.refreshToken, opacity, layerItem.isVisible) { map ->
+        slot.clear()
+        if (!layerItem.isVisible) return@MapEffect
+        // One layer at a time: each holds its bytes, its JSON tree and its model at once while it loads.
+        mapLayerLoadMutex.withLock { slot.load(map, layerItem, opacity, mapViewModel) }
+    }
+
+    DisposableEffect(layerItem.id) { onDispose { slot.clear() } }
+}
+
+/** The layer one [MapLayerOverlay] has on the map, and the share of [mapLayerBudget] it holds. */
+private class MapLayerSlot {
+    private var layer: RenderedMapLayer? = null
+    private var vertices = 0
+
+    fun clear() {
+        layer?.safeHide()
+        layer = null
+        mapLayerBudget.release(vertices)
+        vertices = 0
+    }
+
+    @Suppress("TooGenericExceptionCaught", "LongMethod")
+    suspend fun load(map: GmsGoogleMap, layerItem: MapLayerItem, opacity: Float, mapViewModel: MapViewModel) {
+        val started = nowMillis
+        val rendered =
             try {
-                val bytes = mapViewModel.readLayerBytes(layerItem) ?: return@MapEffect
+                val bytes = mapViewModel.readLayerBytes(layerItem) ?: return
                 val dataLayer =
                     withContext(ioDispatcher) {
                         // Buffered because the KMZ sniff marks and resets the stream before the parser reads it.
@@ -1753,11 +1779,40 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
                             parseMapLayer(layerItem.layerType, stream)
                         }
                     }
-                if (dataLayer == null) {
-                    Logger.withTag("MapView").e { "Error loading map layer: ${layerItem.name} (unrecognized format)" }
-                    null
-                } else {
-                    RenderedMapLayer(map, dataLayer.scaledByOpacity(opacity), opacity)
+                val count = dataLayer?.vertexCount() ?: 0
+                when {
+                    dataLayer == null -> {
+                        // The type, not the name: a layer's name is whatever the user called the file.
+                        Logger.withTag("MapView").e {
+                            "Map layer not drawn, unrecognized format: type=${layerItem.layerType}"
+                        }
+                        mapViewModel.reportLayerUndrawable(layerItem, MapLayerRefusal.NOT_MAP_DATA)
+                        null
+                    }
+
+                    !mapLayerBudget.tryAcquire(count) -> {
+                        Logger.withTag("MapView").e {
+                            "Map layer not drawn, over the vertex budget: type=${layerItem.layerType} " +
+                                "vertices=$count drawn=${mapLayerBudget.inUse} " +
+                                "perLayer=${mapLayerBudget.perLayer} total=${mapLayerBudget.total}"
+                        }
+                        // Too big on its own never changes; too big beside the others does when one is hidden.
+                        mapViewModel.reportLayerUndrawable(
+                            layerItem,
+                            MapLayerRefusal.TOO_DETAILED,
+                            permanent = count > mapLayerBudget.perLayer,
+                        )
+                        null
+                    }
+
+                    else -> {
+                        vertices = count
+                        Logger.withTag("MapView").i {
+                            "Map layer loaded: type=${layerItem.layerType} bytes=${bytes.size} " +
+                                "features=${dataLayer.features.size} vertices=$count ms=${nowMillis - started}"
+                        }
+                        RenderedMapLayer(map, dataLayer.scaledByOpacity(opacity), opacity)
+                    }
                 }
             } catch (e: CancellationException) {
                 // Not a load failure: this MapEffect is relaunched on every refresh (refreshToken) and cancelled when
@@ -1765,30 +1820,23 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
                 // Swallowing it broke structured concurrency and reported routine refreshes to error tracking.
                 throw e
             } catch (e: Exception) {
-                Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
+                Logger.withTag("MapView").e(e) { "Error loading map layer: type=${layerItem.layerType}" }
                 null
             } catch (e: OutOfMemoryError) {
                 // The parser builds the whole JSON tree beside the raw bytes; a layer too big for the heap fails alone.
-                Logger.withTag("MapView").e(e) { "Map layer too large to load: ${layerItem.name}" }
+                Logger.withTag("MapView").e(e) { "Map layer too large to load: type=${layerItem.layerType}" }
                 null
             }
-        layer?.let {
-            if (layerItem.isVisible) it.safeShow()
-            currentLayer = it
-        }
+        layer = rendered
+        // Nothing drawn means nothing held: the reservation goes back whether the load or the draw failed.
+        if (rendered == null || !rendered.safeShow()) clear()
     }
+}
 
-    DisposableEffect(layerItem.id) {
-        onDispose {
-            currentLayer?.safeHide()
-            currentLayer = null
-        }
-    }
+private val mapLayerLoadMutex = Mutex()
 
-    LaunchedEffect(layerItem.isVisible) {
-        val layer = currentLayer ?: return@LaunchedEffect
-        if (layerItem.isVisible) layer.safeShow() else layer.safeHide()
-    }
+private val mapLayerBudget: MapLayerVertexBudget by lazy {
+    MapLayerVertexBudget.forHeap(Runtime.getRuntime().maxMemory())
 }
 
 /**
@@ -1851,11 +1899,11 @@ private class RenderedMapLayer(
 
     fun show() {
         if (renderer != null) return
-        renderer =
-            MapViewRenderer(map, UrlIconProvider()).also { r ->
-                localImages.forEach { (path, bitmap) -> r.cacheImageData(path, bitmap) }
-                r.addLayer(dataLayer)
-            }
+        // Held before anything is added: a draw that fails part-way still has its shapes on the map, and hide()
+        // can only clear a renderer it knows about.
+        val r = MapViewRenderer(map, UrlIconProvider()).also { renderer = it }
+        localImages.forEach { (path, bitmap) -> r.cacheImageData(path, bitmap) }
+        r.addLayer(dataLayer)
         groundOverlays.forEach { overlay ->
             val image = localImages[overlay.href]
             if (image == null) {
@@ -1887,16 +1935,19 @@ private class RenderedMapLayer(
     }
 }
 
-private fun RenderedMapLayer.safeShow() {
-    try {
-        show()
-    } catch (e: Exception) {
-        Logger.withTag("MapView").e(e) { "Error adding map layer" }
-    } catch (e: OutOfMemoryError) {
-        // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
-        Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
-        safeHide()
-    }
+/** Draw the layer; false when it could not be drawn, in which case whatever it added has been removed. */
+private fun RenderedMapLayer.safeShow(): Boolean = try {
+    show()
+    true
+} catch (e: Exception) {
+    Logger.withTag("MapView").e(e) { "Error adding map layer" }
+    safeHide()
+    false
+} catch (e: OutOfMemoryError) {
+    // A layer that parsed can still exhaust the heap drawing; drop what it added rather than the app.
+    Logger.withTag("MapView").e(e) { "Map layer too large to draw" }
+    safeHide()
+    false
 }
 
 private fun RenderedMapLayer.safeHide() {

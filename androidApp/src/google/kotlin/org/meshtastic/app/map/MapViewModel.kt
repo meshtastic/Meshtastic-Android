@@ -74,13 +74,21 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.map_layer_formats
+import org.meshtastic.core.resources.map_layer_not_map_data
+import org.meshtastic.core.resources.map_layer_stored_too_large
+import org.meshtastic.core.resources.map_layer_too_detailed
+import org.meshtastic.core.resources.map_layer_too_large
 import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.MapLayerProblem
+import org.meshtastic.feature.map.layers.MapLayerRefusal
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.PickedMapFile
+import org.meshtastic.feature.map.layers.maxSourceMegabytes
 import org.meshtastic.feature.map.shouldAutoUseOfflineBasemap
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.TerrainDownloadState
@@ -681,6 +689,7 @@ class MapViewModel(
     }
 
     init {
+        viewModelScope.launch { mapLayersManager.layerProblems.collect { _errorFlow.emit(it.message()) } }
         viewModelScope.launch {
             val savedCamera = googleMapsPrefs.cameraPosition.first()
             if (savedCamera == null) {
@@ -842,6 +851,18 @@ class MapViewModel(
     }
 
     suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? = mapLayersManager.readLayerBytes(layerItem)
+
+    /** The map read [layerItem] but cannot draw it. [permanent] is false when hiding another layer would make room. */
+    fun reportLayerUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal, permanent: Boolean = true) =
+        mapLayersManager.reportUndrawable(layerItem, refusal, permanent)
+
+    private suspend fun MapLayerProblem.message(): String = when {
+        refusal == MapLayerRefusal.TOO_DETAILED -> getStringSuspend(Res.string.map_layer_too_detailed, layerName)
+        refusal == MapLayerRefusal.NOT_MAP_DATA && atImport -> getStringSuspend(Res.string.map_layer_formats)
+        refusal == MapLayerRefusal.NOT_MAP_DATA -> getStringSuspend(Res.string.map_layer_not_map_data, layerName)
+        atImport -> getStringSuspend(Res.string.map_layer_too_large, layerType.maxSourceMegabytes())
+        else -> getStringSuspend(Res.string.map_layer_stored_too_large, layerName, layerType.maxSourceMegabytes())
+    }
 
     override fun onCleared() {
         super.onCleared()

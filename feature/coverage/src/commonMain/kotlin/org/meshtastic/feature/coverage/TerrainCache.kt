@@ -34,9 +34,10 @@ import kotlin.concurrent.Volatile
  * second estimate paid the full terrain download again for tiles it had already decoded seconds earlier: 8.8 s where
  * the sweep itself is 0.2 s.
  *
- * Bounded, because a decoded tile is ~256 KB and a 25 km disc is ~70 of them. Eviction is insertion order rather than
- * least-recently-used: a sweep's working set is one contiguous disc, so the oldest entries are from a disc the user has
- * already moved away from, and tracking access order would cost a write on the hot read path for no better answer.
+ * Bounded, because a decoded 512-pixel tile is ~1 MB and a 25 km disc is ~70 of them. Eviction is insertion order
+ * rather than least-recently-used: a sweep's working set is one contiguous disc, so the oldest entries are from a disc
+ * the user has already moved away from, and tracking access order would cost a write on the hot read path for no better
+ * answer.
  */
 internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
 
@@ -105,6 +106,9 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
         keys.forEach { inFlight.remove(it) }
     }
 
+    /** Drop every decoded tile. A fetch still in flight is left to its owner. */
+    suspend fun clear() = lock.withLock { resolved = emptyMap() }
+
     /** Record tiles fetched in bulk, as a prefetch does. */
     suspend fun publish(entries: List<Pair<Long, ElevationTile?>>) = lock.withLock {
         val merged = LinkedHashMap(resolved)
@@ -122,9 +126,9 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
 
     companion object {
         /**
-         * A 25 km disc is ~70 tiles at z12 and a decoded tile is ~256 KB, so this holds a working set with room to pan.
-         * Asking for a deeper zoom will evict (256 tiles at z13), which the disk cache makes a decode rather than a
-         * download, but it is why z12 is the default.
+         * A 25 km disc is ~70 tiles at z12 and a decoded 512-pixel tile is ~1 MB, so this holds a working set with room
+         * to pan. Asking for a deeper zoom will evict (256 tiles at z13), which the disk cache makes a decode rather
+         * than a download, but it is why z12 is the default.
          */
         const val DEFAULT_CAPACITY = 192
     }
@@ -133,16 +137,32 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
 /**
  * The shared caches, one per archive and zoom.
  *
- * Process-wide on purpose: terrain does not belong to a screen. The map keeps at most a couple of archives open, so
- * this never needs eviction of its own.
+ * Process-wide on purpose: terrain does not belong to a screen. A decoded tile is one float per sample, about 1 MB for
+ * a 512-pixel tile, so a disc's worth is a large share of a phone's heap. It is shared by estimates running together
+ * and dropped when the last of them ends; the tile store on disk makes the next estimate a decode rather than a
+ * download.
  */
 internal object SharedTerrain {
 
     private val caches = HashMap<String, TerrainCache>()
     private val lock = Mutex()
+    private var running = 0
 
     suspend fun forArchive(url: String, zoom: Int): TerrainCache = lock.withLock {
         caches.getOrPut("$url@$zoom") { TerrainCache() }
+    }
+
+    /** Decoded tiles resident across every archive and zoom. */
+    suspend fun residentTiles(): Int = lock.withLock { caches.values.sumOf { it.size } }
+
+    suspend fun estimateStarted() = lock.withLock { running++ }
+
+    /** Drop the decoded terrain once no estimate is running. */
+    suspend fun estimateFinished() = lock.withLock {
+        running = (running - 1).coerceAtLeast(0)
+        if (running > 0) return@withLock
+        caches.values.forEach { it.clear() }
+        caches.clear()
     }
 
     /**

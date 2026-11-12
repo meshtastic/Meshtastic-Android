@@ -65,7 +65,11 @@ fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: In
                     band.polygons.joinToString(",") { polygon ->
                         "[" +
                             polygon.joinToString(",") { ring ->
-                                "[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]"
+                                "[" +
+                                    ring.joinToString(",") { (lon, lat) ->
+                                        "[${lon.toCoordinate()},${lat.toCoordinate()}]"
+                                    } +
+                                    "]"
                             } +
                             "]"
                     }
@@ -103,3 +107,20 @@ internal fun Double.toFixed1(): String {
 }
 
 private const val TENTHS = 10
+
+/**
+ * A coordinate at six decimal places, about 10 cm, with trailing zeros dropped.
+ *
+ * RFC 7946 section 11.2: more precision than the data has nearly doubles a polygon-heavy document, and every reader of
+ * this layer holds the whole text in memory.
+ */
+internal fun Double.toCoordinate(): String {
+    val scaled = (this * MICRODEGREES).roundToLong()
+    val sign = if (scaled < 0) "-" else ""
+    val magnitude = abs(scaled)
+    val fraction = (magnitude % MICRODEGREES).toString().padStart(COORDINATE_DECIMALS, '0').trimEnd('0')
+    return if (fraction.isEmpty()) "$sign${magnitude / MICRODEGREES}" else "$sign${magnitude / MICRODEGREES}.$fraction"
+}
+
+private const val COORDINATE_DECIMALS = 6
+private const val MICRODEGREES = 1_000_000

@@ -18,19 +18,25 @@ package org.meshtastic.feature.map.layers
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.readRawBytes
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.Url
+import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -64,6 +70,17 @@ class MapLayersManager(
 
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
+
+    // Layers already found undrawable this run. A refresh re-reads a network layer, so it clears its own entry.
+    private val unreadableLayerIds = MutableStateFlow<Set<String>>(emptySet())
+
+    // Layers the user has already been told about this run.
+    private val reportedLayerIds = MutableStateFlow<Set<String>>(emptySet())
+
+    private val _layerProblems = MutableSharedFlow<MapLayerProblem>(extraBufferCapacity = PROBLEM_BUFFER)
+
+    /** Layers refused at import or left undrawn, for a host to tell the user about. */
+    val layerProblems: SharedFlow<MapLayerProblem> = _layerProblems.asSharedFlow()
 
     init {
         loadPersistedLayers()
@@ -139,9 +156,15 @@ class MapLayersManager(
                 return@launch
             }
 
-            val bytes = picked.read()
+            val bytes = picked.read(layerType.maxSourceBytes() + 1)
             if (bytes == null) {
                 Logger.withTag(TAG).w("Could not read the picked map layer.")
+                return@launch
+            }
+            val refusal = bytes.refusalFor(layerType)
+            if (refusal != null) {
+                Logger.withTag(TAG).w("Refusing a picked map layer: $refusal")
+                _layerProblems.tryEmit(MapLayerProblem(layerName, layerType, refusal, atImport = true))
                 return@launch
             }
             val storedUri = write(bytes, layerFileName(layerName, layerType.storageExtension()))
@@ -216,6 +239,8 @@ class MapLayersManager(
 
     /** Bump a layer's [MapLayerItem.refreshToken] so renderers re-read it (used for network-layer refresh). */
     fun refreshMapLayer(layerId: String) {
+        unreadableLayerIds.update { it - layerId }
+        reportedLayerIds.update { it - layerId }
         _mapLayers.update { layers ->
             layers.map { if (it.id == layerId) it.copy(refreshToken = it.refreshToken + 1) else it }
         }
@@ -232,19 +257,29 @@ class MapLayersManager(
      * KML converter and the zip reader — want the whole document anyway.
      */
     suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? {
-        val uri = layerItem.uri ?: return null
+        val uri = layerItem.uri?.takeUnless { layerItem.id in unreadableLayerIds.value } ?: return null
+        val maxBytes = layerItem.layerType.maxSourceBytes()
         return withContext(dispatchers.io) {
             try {
-                if (layerItem.isNetwork && (uri.startsWith("http://") || uri.startsWith("https://"))) {
-                    val response = httpClient.get(uri)
-                    if (!response.status.isSuccess()) {
-                        // Log only the host, not the full URL (paths can carry user-identifying info).
-                        Logger.withTag(TAG).e { "HTTP ${response.status} fetching network layer from ${Url(uri).host}" }
-                        return@withContext null
+                val read =
+                    if (layerItem.isNetwork && (uri.startsWith("http://") || uri.startsWith("https://"))) {
+                        fetchNetworkLayer(uri, maxBytes)
+                    } else {
+                        readStoredLayer(uri, maxBytes)
                     }
-                    response.readRawBytes()
+                val bytes = (read as? LayerRead.Bytes)?.bytes
+                val refusal =
+                    when (read) {
+                        LayerRead.Failed -> return@withContext null
+                        LayerRead.OverLimit -> MapLayerRefusal.TOO_LARGE
+                        is LayerRead.Bytes -> read.bytes.refusalFor(layerItem.layerType)
+                    }
+                if (refusal == null) {
+                    bytes
                 } else {
-                    fileSystem.read(uri.toLocalPath()) { readByteArray() }
+                    Logger.withTag(TAG).e { "Skipping a map layer that cannot be drawn: $refusal" }
+                    reportUndrawable(layerItem, refusal)
+                    null
                 }
             } catch (e: CancellationException) {
                 // The caller is a composition-scoped effect, so a layer refresh or leaving the map cancels this fetch
@@ -256,6 +291,68 @@ class MapLayersManager(
                 null
             }
         }
+    }
+
+    private sealed interface LayerRead {
+        class Bytes(val bytes: ByteArray) : LayerRead
+
+        data object OverLimit : LayerRead
+
+        data object Failed : LayerRead
+    }
+
+    /**
+     * Fetch a network layer, reading no more than one byte past [maxBytes].
+     *
+     * Streamed through `prepareGet`: a plain `get` buffers the whole body before the caller sees the response, so a
+     * limit applied afterwards bounds nothing. Content-Length is optional and unchecked, which is why the read itself
+     * stops as well.
+     */
+    private suspend fun fetchNetworkLayer(uri: String, maxBytes: Long): LayerRead =
+        httpClient.prepareGet(uri).execute { response ->
+            val declared = response.contentLength()
+            when {
+                !response.status.isSuccess() -> {
+                    // Log only the host, not the full URL (paths can carry user-identifying info).
+                    Logger.withTag(TAG).e { "HTTP ${response.status} fetching network layer from ${Url(uri).host}" }
+                    LayerRead.Failed
+                }
+
+                declared != null && declared > maxBytes -> LayerRead.OverLimit
+
+                else -> LayerRead.Bytes(response.bodyAsChannel().readBuffer(maxBytes + 1).readByteArray())
+            }
+        }
+
+    private fun readStoredLayer(uri: String, maxBytes: Long): LayerRead {
+        val path = uri.toLocalPath()
+        val stored = fileSystem.metadataOrNull(path)?.size
+        return if (stored != null && stored > maxBytes) {
+            LayerRead.OverLimit
+        } else {
+            LayerRead.Bytes(fileSystem.read(path) { readByteArray() })
+        }
+    }
+
+    /** Why a layer of [type] with these bytes can never draw, or null when it can be handed to a parser. */
+    private fun ByteArray.refusalFor(type: LayerType): MapLayerRefusal? = when {
+        size > type.maxSourceBytes() -> MapLayerRefusal.TOO_LARGE
+        type == LayerType.GEOJSON && !looksLikeGeoJson() -> MapLayerRefusal.NOT_MAP_DATA
+        else -> null
+    }
+
+    /**
+     * Record that [layerItem] cannot be drawn and tell the user, once per run.
+     *
+     * A stored layer is asked for again on every map open, so without the memory a layer that can never draw would be
+     * re-read, and re-announced, each time. A renderer calls this too, for a layer it parsed but cannot draw; it passes
+     * [permanent] false when the layer only lost out to the others drawn now, so hiding one lets it load.
+     */
+    fun reportUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal, permanent: Boolean = true) {
+        if (permanent) unreadableLayerIds.update { it + layerItem.id }
+        if (layerItem.id in reportedLayerIds.value) return
+        reportedLayerIds.update { it + layerItem.id }
+        _layerProblems.tryEmit(MapLayerProblem(layerItem.name, layerItem.layerType, refusal, atImport = false))
     }
 
     private suspend fun write(bytes: ByteArray, fileName: String): String? = withContext(dispatchers.io) {
@@ -282,6 +379,7 @@ class MapLayersManager(
 
     private companion object {
         const val TAG = "MapLayersManager"
+        const val PROBLEM_BUFFER = 8
         const val NETWORK_LAYER_DELIMITER = "|:|"
         const val NETWORK_LAYER_FIELDS = 3 // id|:|name|:|uri
     }

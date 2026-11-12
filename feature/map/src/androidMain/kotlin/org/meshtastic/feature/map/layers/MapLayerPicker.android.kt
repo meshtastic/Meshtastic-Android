@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.nowMillis
+import java.io.IOException
 
 @Composable
 actual fun rememberMapLayerPicker(onPick: (PickedMapFile) -> Unit): MapLayerPickerLauncher {
@@ -65,7 +66,19 @@ fun Uri.toPickedMapFile(context: Context): PickedMapFile {
         displayName.substringAfterLast('.', "").ifBlank {
             context.contentResolver.getType(this)?.substringAfterLast('/')
         },
-        read = { context.contentResolver.openInputStream(this)?.use { it.readBytes() } },
+        read = { maxBytes ->
+            // A document that has gone away throws rather than returning null, and so does a revoked grant. Only the
+            // exception's type is logged: its message can carry the content URI, and with it the file's name.
+            try {
+                context.contentResolver.openInputStream(this)?.use { it.readAtMost(maxBytes) }
+            } catch (e: IOException) {
+                Logger.e { "Failed to read the picked map layer: ${e::class.simpleName}" }
+                null
+            } catch (e: SecurityException) {
+                Logger.e { "Not allowed to read the picked map layer: ${e::class.simpleName}" }
+                null
+            }
+        },
     )
 }
 
