@@ -164,6 +164,7 @@
     <string name="bluetooth_feature_config_description">Беспроводное управление настройками устройства и каналами.</string>
     <string name="bluetooth_feature_discovery">Обнаружение</string>
     <string name="bluetooth_feature_discovery_description">Найдите и определите устройства Meshtastic рядом с вами.</string>
+    <string name="bluetooth_fixed_pin_range">Шесть цифр, от 100000 до 999999</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_permission_blocked_notice">Доступ к ближайшим устройствам отключен, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы подключаться через Bluetooth, или используй Wi-Fi или USB.</string>
     <string name="bluetooth_permission_blocked_notice_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать устройства Bluetooth, или подключись через Wi-Fi или USB.</string>
@@ -1773,6 +1774,7 @@
     <string name="radio_setup_beacons_settings">Настройки маяка</string>
     <string name="radio_setup_beacons_waiting">Ожидание настройки радиомаяка…</string>
     <string name="radio_setup_intro_headline">Настройте ваше радио</string>
+    <string name="radio_setup_name_body">Другие люди видят эти имена в списках нод и на их картах.</string>
     <string name="radio_setup_name_headline">Понятное имя</string>
     <string name="radio_setup_reconnecting">Ожидание переподключения устройства…</string>
     <string name="radio_setup_region_none">Регион не совпадает.</string>
