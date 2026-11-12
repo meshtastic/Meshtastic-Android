@@ -21,6 +21,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.readRawBytes
 import io.ktor.http.Url
+import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +65,9 @@ class MapLayersManager(
 
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
+
+    // Layers already found undrawable this run. A refresh re-reads a network layer, so it clears its own entry.
+    private val unreadableLayerIds = MutableStateFlow<Set<String>>(emptySet())
 
     init {
         loadPersistedLayers()
@@ -144,6 +148,11 @@ class MapLayersManager(
                 Logger.withTag(TAG).w("Could not read the picked map layer.")
                 return@launch
             }
+            val refusal = bytes.refusalFor(layerType)
+            if (refusal != null) {
+                Logger.withTag(TAG).w("Refusing a picked map layer: $refusal")
+                return@launch
+            }
             val storedUri = write(bytes, layerFileName(layerName, layerType.storageExtension()))
             if (storedUri != null) {
                 _mapLayers.update {
@@ -216,6 +225,7 @@ class MapLayersManager(
 
     /** Bump a layer's [MapLayerItem.refreshToken] so renderers re-read it (used for network-layer refresh). */
     fun refreshMapLayer(layerId: String) {
+        unreadableLayerIds.update { it - layerId }
         _mapLayers.update { layers ->
             layers.map { if (it.id == layerId) it.copy(refreshToken = it.refreshToken + 1) else it }
         }
@@ -232,19 +242,40 @@ class MapLayersManager(
      * KML converter and the zip reader — want the whole document anyway.
      */
     suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? {
-        val uri = layerItem.uri ?: return null
+        val uri = layerItem.uri?.takeUnless { layerItem.id in unreadableLayerIds.value } ?: return null
+        val maxBytes = layerItem.layerType.maxSourceBytes()
         return withContext(dispatchers.io) {
             try {
-                if (layerItem.isNetwork && (uri.startsWith("http://") || uri.startsWith("https://"))) {
-                    val response = httpClient.get(uri)
-                    if (!response.status.isSuccess()) {
-                        // Log only the host, not the full URL (paths can carry user-identifying info).
-                        Logger.withTag(TAG).e { "HTTP ${response.status} fetching network layer from ${Url(uri).host}" }
-                        return@withContext null
+                val bytes =
+                    if (layerItem.isNetwork && (uri.startsWith("http://") || uri.startsWith("https://"))) {
+                        val response = httpClient.get(uri)
+                        if (!response.status.isSuccess()) {
+                            // Log only the host, not the full URL (paths can carry user-identifying info).
+                            Logger.withTag(TAG).e {
+                                "HTTP ${response.status} fetching network layer from ${Url(uri).host}"
+                            }
+                            return@withContext null
+                        }
+                        val declared = response.contentLength()
+                        if (declared != null && declared > maxBytes) null else response.readRawBytes()
+                    } else {
+                        val path = uri.toLocalPath()
+                        val stored = fileSystem.metadataOrNull(path)?.size
+                        if (stored != null && stored > maxBytes) null else fileSystem.read(path) { readByteArray() }
                     }
-                    response.readRawBytes()
+                val refusal =
+                    if (bytes == null) {
+                        "over the ${layerItem.layerType} size limit"
+                    } else {
+                        bytes.refusalFor(layerItem.layerType)
+                    }
+                if (refusal == null) {
+                    bytes
                 } else {
-                    fileSystem.read(uri.toLocalPath()) { readByteArray() }
+                    // Once per process: a layer that can never draw is asked for again on every map open.
+                    unreadableLayerIds.update { it + layerItem.id }
+                    Logger.withTag(TAG).e { "Skipping a map layer that cannot be drawn: $refusal" }
+                    null
                 }
             } catch (e: CancellationException) {
                 // The caller is a composition-scoped effect, so a layer refresh or leaving the map cancels this fetch
@@ -256,6 +287,13 @@ class MapLayersManager(
                 null
             }
         }
+    }
+
+    /** Why a layer of [type] with these bytes can never draw, or null when it can be handed to a parser. */
+    private fun ByteArray.refusalFor(type: LayerType): String? = when {
+        size > type.maxSourceBytes() -> "over the $type size limit"
+        type == LayerType.GEOJSON && !looksLikeGeoJson() -> "not a GeoJSON document"
+        else -> null
     }
 
     private suspend fun write(bytes: ByteArray, fileName: String): String? = withContext(dispatchers.io) {
