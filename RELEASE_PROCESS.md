@@ -7,16 +7,12 @@ This guide summarizes the steps for releasing new versions of Meshtastic Android
 The entire release process is managed by a single GitHub Action: **`Create or Promote Release`**.
 
 -   **Trigger:** To start a new release or promote an existing one, a developer runs the workflow from the GitHub Actions tab.
--   **Inputs:** The workflow requires the following inputs:
-    1.  `base_version`: The base version number you are releasing (e.g., `2.8.0`). It must be `X.Y.Z` and equal `VERSION_NAME_BASE` in `config.properties` at the commit being released (`HEAD` for an internal cut, the promoted tag's commit for a promotion), or the run stops before any tag is pushed.
-    2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
-    3.  `dry_run`: If `true`, calculates the tag but does not push it or start the release (default: `false`).
-    4.  `no_review_in_flight`: **Promotions only, and a hard gate.** Before promoting, check
-        Play Console → Publishing overview → Submission activity; if anything reads "In
-        review", wait. Tick this box to confirm — the workflow fails without it, because
-        each promotion creates a new Play submission that *cancels and restarts* any review
-        already in flight. Internal releases and dry runs are exempt (Play internal testing
-        skips full review).
+-   **Inputs:** The workflow takes two inputs:
+    1.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
+    2.  `base_version`: Optional. Left empty, an internal cut takes `VERSION_NAME_BASE` from `config.properties` at `HEAD`, and a promotion takes the newest version on the previous channel that has no production tag. A value you enter must be `X.Y.Z` and equal `VERSION_NAME_BASE` at the commit being released (`HEAD` for an internal cut, the promoted tag's commit for a promotion), or the run stops before any tag is pushed.
+-   **Before a promotion:** check Play Console → Publishing overview → Submission activity. Each promotion creates a new Play submission that *cancels and restarts* any review already in flight, so wait if anything reads "In review". Internal releases are exempt (Play internal testing skips full review).
+-   **What an internal cut refuses:** a `HEAD` whose Play "What's new" is still the version bump's placeholder, and a `HEAD` that already carries an internal tag for the version, since Play takes each version code once. Both stop the run before any tag is pushed.
+-   **What a promotion ships:** the newest tag on the previous channel (`internal` for `closed`, `closed` for `open`, `open` for `production`). The run summary names the tag it promotes and the tag it creates, and warns when a later internal cut exists that the promoted tag was not built from.
 -   **Automation:** The workflow handles everything automatically:
     -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes. The internal draft's notes cover the PRs since the newest published release, pre-release or production; a production promotion rewrites them over the whole range since the previous production tag, with the metainfo `<description>` for the version as a Highlights section on top, and opens a PR folding the same notes into `CHANGELOG.md`. Every internal, closed and open run ends by dispatching the `Update Changelog` workflow, which refreshes that file's `[Unreleased]` section through its own PR. Every PR the release automation opens (these two, the screenshot refresh and the version bump) goes through `.github/actions/bot-pr` with `CROWDIN_GITHUB_TOKEN`, so it runs the normal PR checks and merges itself through the queue once they pass.
     -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Once `publish-play` has uploaded the bundle the tag stays, since Play keeps that versionCode; re-run the failed jobs instead. Promotions skip this entirely and retag the already-built artifact (see below).
@@ -38,9 +34,8 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
 1.  Navigate to the **Actions** tab in the GitHub repository.
 2.  Select the **`Create or Promote Release`** workflow.
 3.  Click the **"Run workflow"** dropdown.
-4.  Enter the `base_version` (e.g., `2.8.0`).
-5.  Select the `internal` channel.
-6.  Click **"Run workflow"**. (Tip: enable `dry_run` first to preview the tag that would be created without pushing anything.)
+4.  Select the `internal` channel. Leave `base_version` empty to release the version in `config.properties`.
+5.  Click **"Run workflow"**.
 
 The workflow will:
 1.  **Tag** the current commit on the branch with an incremental internal tag (e.g., `v2.8.0-internal.1`) — no new commit is created; it tags whatever is already at `HEAD`.
@@ -54,7 +49,7 @@ The workflow will:
 
 Once an internal build has been verified, you can promote it to a wider audience.
 
-1.  Run the **`Create or Promote Release`** workflow again with the same `base_version`.
+1.  Run the **`Create or Promote Release`** workflow again.
 2.  Select the next channel in the sequence (e.g., `closed`, then `open`).
 3.  The workflow will create a new incremental tag for that channel (e.g., `v2.8.0-closed.1`) and create a **published** pre-release on GitHub.
 
@@ -63,9 +58,8 @@ Once an internal build has been verified, you can promote it to a wider audience
 After testing is complete on all pre-release channels, you can create the final public release.
 
 1.  Run the **`Create or Promote Release`** workflow one last time.
-2.  Use the same `base_version`.
-3.  Select the `production` channel.
-4.  The workflow will create a clean version tag (e.g., `v2.8.0`) and create a **published, stable** (non-prerelease) release on GitHub.
+2.  Select the `production` channel.
+3.  The workflow will create a clean version tag (e.g., `v2.8.0`) and create a **published, stable** (non-prerelease) release on GitHub.
 
 ### 4. Post-Release
 
@@ -96,7 +90,7 @@ or `beta` track. Its inputs are the `track`, an `action` and, for `rollout`, a `
 | `complete` | Ships the release to every user |
 | `halt` | Stops the rollout at its current fraction |
 
-It carries the same `no_review_in_flight` gate as a promotion, because a committed change
+It carries a `no_review_in_flight` confirmation, because a committed change
 cancels and restarts any review in flight. It runs in its own concurrency group, not
 `Create or Promote Release`'s, since a group keeps one pending run and a rollout queued there
 would cancel a pending promotion. The run stops without

@@ -3,11 +3,8 @@ name: Create or Promote Release
 on:
   workflow_dispatch:
     inputs:
-      base_version:
-        description: 'Base version for the release (e.g., 2.3.0)'
-        required: true
       channel:
-        description: 'The channel to create a release for or promote to'
+        description: 'The channel to create a release for or promote to. Before a promotion, check Play Console > Publishing overview: a new submission cancels a review in flight.'
         required: true
         type: choice
         options:
@@ -15,16 +12,10 @@ on:
           - closed
           - open
           - production
-      dry_run:
-        description: 'If true, calculates the tag but does not push it or start the release'
-        required: true
-        type: boolean
-        default: false
-      no_review_in_flight:
-        description: 'Promotions only: I checked Publishing overview > Submission activity and no submission is In review. Every promotion creates a new Play submission, which CANCELS and RESTARTS any review in flight.'
+      base_version:
+        description: 'Version X.Y.Z. Leave empty to use VERSION_NAME_BASE from config.properties (internal) or the newest unreleased version on the previous channel (promotion).'
         required: false
-        type: boolean
-        default: false
+        default: ''
 
 permissions:
   contents: write
@@ -45,18 +36,10 @@ jobs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
+      base_version: ${{ steps.calculate_tags.outputs.base_version }}
       version_name: ${{ steps.version.outputs.version_name }}
       version_code: ${{ steps.version.outputs.version_code }}
     steps:
-      # Internal releases are exempt: Play internal testing skips full review,
-      # so only promotions (closed/open/production) can clobber an in-flight
-      # review. Dry runs never reach Play.
-      - name: Require review-in-flight confirmation for promotions
-        if: ${{ !inputs.dry_run && inputs.channel != 'internal' && !inputs.no_review_in_flight }}
-        run: |
-          echo "::error::Promotion blocked: confirm no Play review is in flight. Check Play Console > Publishing overview > Submission activity — if a submission shows 'In review', WAIT (a new promotion cancels it and restarts the clock). If clear, re-dispatch with 'no_review_in_flight' checked."
-          exit 1
-
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -69,10 +52,42 @@ jobs:
           BASE_VERSION: ${{ inputs.base_version }}
           CHANNEL: ${{ inputs.channel }}
         run: |
+          FROM_CHANNEL="internal"
+          if [[ "$CHANNEL" == "open" ]]; then
+            FROM_CHANNEL="closed"
+          elif [[ "$CHANNEL" == "production" ]]; then
+            FROM_CHANNEL="open"
+          fi
+
+          # No base_version given: an internal cut builds HEAD, so it takes HEAD's version; a
+          # promotion takes the newest version on the previous channel that has no production tag.
+          if [[ -z "$BASE_VERSION" ]]; then
+            if [[ "$CHANNEL" == "internal" ]]; then
+              BASE_VERSION=$(sed -n 's/^VERSION_NAME_BASE=//p' config.properties)
+              SOURCE="VERSION_NAME_BASE in config.properties"
+            else
+              while read -r TAG; do
+                CANDIDATE=${TAG#v}
+                CANDIDATE=${CANDIDATE%%-*}
+                if ! git rev-parse -q --verify "refs/tags/v${CANDIDATE}" >/dev/null; then
+                  BASE_VERSION=$CANDIDATE
+                  break
+                fi
+              done < <(git tag --list "v*-${FROM_CHANNEL}.*" --sort=-v:refname)
+              SOURCE="the newest unreleased ${FROM_CHANNEL} tag"
+              if [[ -z "$BASE_VERSION" ]]; then
+                echo "::error::No unreleased ${FROM_CHANNEL} release found to promote to ${CHANNEL}."
+                exit 1
+              fi
+            fi
+            echo "base_version not given, using ${BASE_VERSION:-<unset>} from $SOURCE"
+          fi
+
           if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::base_version '$BASE_VERSION' is not X.Y.Z (e.g., 2.8.3)."
             exit 1
           fi
+          echo "base_version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
 
           if [[ "$CHANNEL" == "internal" ]]; then
             # This is a new build, create a new internal tag
@@ -92,13 +107,6 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           else
             # This is a promotion, find the latest tag from the previous channel to promote
-            FROM_CHANNEL="internal"
-            if [[ "$CHANNEL" == "open" ]]; then
-              FROM_CHANNEL="closed"
-            elif [[ "$CHANNEL" == "production" ]]; then
-              FROM_CHANNEL="open"
-            fi
-            
             LATEST_TAG_TO_PROMOTE=$(git tag --list "v${BASE_VERSION}-${FROM_CHANNEL}.*" --sort=-v:refname | head -n 1)
 
             if [ -z "$LATEST_TAG_TO_PROMOTE" ]; then
@@ -107,6 +115,13 @@ jobs:
             fi
 
             echo "Found latest ${FROM_CHANNEL} tag to promote: $LATEST_TAG_TO_PROMOTE"
+
+            # A promotion ships the build its tag points at, so a later internal cut is left behind.
+            NEWEST_INTERNAL=$(git tag --list "v${BASE_VERSION}-internal.*" --sort=-v:refname | head -n 1)
+            if [ -n "$NEWEST_INTERNAL" ] &&
+              [ "$(git rev-list -n 1 "$NEWEST_INTERNAL")" != "$(git rev-list -n 1 "$LATEST_TAG_TO_PROMOTE")" ]; then
+              echo "::warning::$LATEST_TAG_TO_PROMOTE is not the build of $NEWEST_INTERNAL, the newest internal cut. Promote that one through the earlier channels first if it should ship."
+            fi
 
             # Calculate the increment for the TARGET channel
             if [[ "$CHANNEL" != "production" ]]; then
@@ -138,7 +153,7 @@ jobs:
       - name: Calculate version
         id: version
         env:
-          BASE_VERSION: ${{ inputs.base_version }}
+          BASE_VERSION: ${{ steps.calculate_tags.outputs.base_version }}
           CHANNEL: ${{ inputs.channel }}
           TAG: ${{ steps.calculate_tags.outputs.tag_to_process }}
         run: |
@@ -167,8 +182,50 @@ jobs:
           } >> "$GITHUB_OUTPUT"
         shell: bash
 
+      # Both are cheaper to refuse here than after forty minutes of builds, or after the tag is promoted.
+      - name: Check HEAD is ready for an internal cut
+        id: ready
+        if: ${{ inputs.channel == 'internal' }}
+        env:
+          BASE_VERSION: ${{ steps.calculate_tags.outputs.base_version }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          # Promotion reads the release highlights and Play's what's-new from the tag, so they
+          # have to be written before it. The text is PLACEHOLDER in scripts/bump-version-name.py.
+          NOTES=fastlane/metadata/android/en-US/changelogs/default.txt
+          if [[ "$(head -n 1 "$NOTES")" == "Stability and reliability fixes." ]]; then
+            echo "::error::$NOTES still has the version bump's placeholder. Rewrite the $BASE_VERSION <description> in the metainfo, run scripts/sync-play-changelog.py, and merge that first."
+            exit 1
+          fi
+
+          # The version code comes from the commit count, and Play takes each code once.
+          EXISTING=$(git tag --points-at HEAD --list "v${BASE_VERSION}-internal.*" | head -n 1)
+          if [ -n "$EXISTING" ]; then
+            echo "::error::HEAD is already $EXISTING, so this cut would rebuild version code $VERSION_CODE. Promote that tag, or re-run its failed jobs."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Summarize the plan
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          BASE_VERSION: ${{ steps.calculate_tags.outputs.base_version }}
+          FROM_TAG: ${{ steps.calculate_tags.outputs.tag_to_process }}
+          FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          {
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Channel | $CHANNEL |"
+            echo "| Version | $BASE_VERSION ($VERSION_CODE) |"
+            if [[ "$CHANNEL" != "internal" ]]; then echo "| Promotes | \`$FROM_TAG\` |"; fi
+            echo "| Tag | \`$FINAL_TAG\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+
       - name: Create and Push Release Tag
-        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        if: ${{ inputs.channel == 'internal' }}
         env:
           FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
         run: |
@@ -178,7 +235,7 @@ jobs:
         shell: bash
 
   call-release-workflow:
-    if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+    if: ${{ inputs.channel == 'internal' }}
     needs: determine-tags
     uses: ./.github/workflows/release.yml
     with:
@@ -188,7 +245,7 @@ jobs:
     secrets: inherit
 
   call-promote-workflow:
-    if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
+    if: ${{ inputs.channel != 'internal' }}
     needs: determine-tags
     # promote.yml's token is capped by this job's grants, and a called
     # workflow requesting more than its caller grants fails at startup —
@@ -203,7 +260,7 @@ jobs:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
-      base_version: ${{ inputs.base_version }}
+      base_version: ${{ needs.determine-tags.outputs.base_version }}
       from_channel: ${{ needs.determine-tags.outputs.from_channel }}
       version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
@@ -212,7 +269,7 @@ jobs:
   update-changelog:
     needs: [call-release-workflow, call-promote-workflow]
     if: >-
-      ${{ !cancelled() && !inputs.dry_run && inputs.channel != 'production'
+      ${{ !cancelled() && inputs.channel != 'production'
         && (needs.call-release-workflow.result == 'success' || needs.call-promote-workflow.result == 'success') }}
     runs-on: ubuntu-slim
     timeout-minutes: 5
@@ -227,7 +284,7 @@ jobs:
 
   cleanup-on-failure:
     needs: [determine-tags, call-release-workflow]
-    if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
+    if: ${{ (failure() || cancelled()) && inputs.channel == 'internal' }}
     runs-on: ubuntu-slim
     timeout-minutes: 10
     permissions:
