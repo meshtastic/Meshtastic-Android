@@ -26,8 +26,11 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -68,6 +71,11 @@ class MapLayersManager(
 
     // Layers already found undrawable this run. A refresh re-reads a network layer, so it clears its own entry.
     private val unreadableLayerIds = MutableStateFlow<Set<String>>(emptySet())
+
+    private val _layerProblems = MutableSharedFlow<MapLayerProblem>(extraBufferCapacity = PROBLEM_BUFFER)
+
+    /** Layers refused at import or left undrawn, for a host to tell the user about. */
+    val layerProblems: SharedFlow<MapLayerProblem> = _layerProblems.asSharedFlow()
 
     init {
         loadPersistedLayers()
@@ -151,6 +159,7 @@ class MapLayersManager(
             val refusal = bytes.refusalFor(layerType)
             if (refusal != null) {
                 Logger.withTag(TAG).w("Refusing a picked map layer: $refusal")
+                _layerProblems.tryEmit(MapLayerProblem(layerName, layerType, refusal, atImport = true))
                 return@launch
             }
             val storedUri = write(bytes, layerFileName(layerName, layerType.storageExtension()))
@@ -264,17 +273,12 @@ class MapLayersManager(
                         if (stored != null && stored > maxBytes) null else fileSystem.read(path) { readByteArray() }
                     }
                 val refusal =
-                    if (bytes == null) {
-                        "over the ${layerItem.layerType} size limit"
-                    } else {
-                        bytes.refusalFor(layerItem.layerType)
-                    }
+                    if (bytes == null) MapLayerRefusal.TOO_LARGE else bytes.refusalFor(layerItem.layerType)
                 if (refusal == null) {
                     bytes
                 } else {
-                    // Once per process: a layer that can never draw is asked for again on every map open.
-                    unreadableLayerIds.update { it + layerItem.id }
                     Logger.withTag(TAG).e { "Skipping a map layer that cannot be drawn: $refusal" }
+                    reportUndrawable(layerItem, refusal)
                     null
                 }
             } catch (e: CancellationException) {
@@ -290,10 +294,22 @@ class MapLayersManager(
     }
 
     /** Why a layer of [type] with these bytes can never draw, or null when it can be handed to a parser. */
-    private fun ByteArray.refusalFor(type: LayerType): String? = when {
-        size > type.maxSourceBytes() -> "over the $type size limit"
-        type == LayerType.GEOJSON && !looksLikeGeoJson() -> "not a GeoJSON document"
+    private fun ByteArray.refusalFor(type: LayerType): MapLayerRefusal? = when {
+        size > type.maxSourceBytes() -> MapLayerRefusal.TOO_LARGE
+        type == LayerType.GEOJSON && !looksLikeGeoJson() -> MapLayerRefusal.NOT_MAP_DATA
         else -> null
+    }
+
+    /**
+     * Record that [layerItem] cannot be drawn and tell the user, once per run.
+     *
+     * A stored layer is asked for again on every map open, so without the memory a layer that can never draw would be
+     * re-read, and re-announced, each time. A renderer calls this too, for a layer it parsed but has no room to draw.
+     */
+    fun reportUndrawable(layerItem: MapLayerItem, refusal: MapLayerRefusal) {
+        if (layerItem.id in unreadableLayerIds.value) return
+        unreadableLayerIds.update { it + layerItem.id }
+        _layerProblems.tryEmit(MapLayerProblem(layerItem.name, layerItem.layerType, refusal, atImport = false))
     }
 
     private suspend fun write(bytes: ByteArray, fileName: String): String? = withContext(dispatchers.io) {
@@ -320,6 +336,7 @@ class MapLayersManager(
 
     private companion object {
         const val TAG = "MapLayersManager"
+        const val PROBLEM_BUFFER = 8
         const val NETWORK_LAYER_DELIMITER = "|:|"
         const val NETWORK_LAYER_FIELDS = 3 // id|:|name|:|uri
     }

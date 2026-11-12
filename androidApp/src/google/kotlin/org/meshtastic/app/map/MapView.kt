@@ -1793,6 +1793,7 @@ private class MapLayerSlot {
                                 "vertices=$count drawn=${mapLayerBudget.inUse} " +
                                 "perLayer=${mapLayerBudget.perLayer} total=${mapLayerBudget.total}"
                         }
+                        mapViewModel.reportLayerTooDetailed(layerItem)
                         null
                     }
 

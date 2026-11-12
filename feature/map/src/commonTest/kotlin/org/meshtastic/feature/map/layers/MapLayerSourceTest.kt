@@ -89,9 +89,10 @@ class MapLayerSourceTest {
     }
 
     @Test
-    fun geoJsonAndCoverageShareTheParserCeilingAndKmlTheArchiveCeiling() {
-        assertEquals(MAX_GEOJSON_LAYER_BYTES, LayerType.GEOJSON.maxSourceBytes())
-        assertEquals(MAX_GEOJSON_LAYER_BYTES, LayerType.COVERAGE.maxSourceBytes())
-        assertEquals(MAX_KMZ_INFLATED_BYTES, LayerType.KML.maxSourceBytes())
+    fun geoJsonAndCoverageStayUnderTheParserCeilingAndKmlUnderTheArchiveCeiling() {
+        assertEquals(10_000_000L, LayerType.GEOJSON.maxSourceBytes())
+        assertEquals(10_000_000L, LayerType.COVERAGE.maxSourceBytes())
+        assertEquals(50_000_000L, LayerType.KML.maxSourceBytes())
+        assertTrue(LayerType.KML.maxSourceBytes() <= MAX_KMZ_INFLATED_BYTES)
     }
 }

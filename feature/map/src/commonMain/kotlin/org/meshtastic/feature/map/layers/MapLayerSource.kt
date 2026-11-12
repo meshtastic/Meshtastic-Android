@@ -16,21 +16,48 @@
  */
 package org.meshtastic.feature.map.layers
 
+import org.meshtastic.core.common.util.BYTES_PER_MEGABYTE
+
 /**
  * Largest stored GeoJSON or coverage layer that is read back.
  *
  * The GeoJSON parser refuses anything larger, so reading more only fills the heap with bytes it will reject.
  */
-const val MAX_GEOJSON_LAYER_BYTES: Long = 10L * 1024 * 1024
+const val MAX_GEOJSON_LAYER_MB = 10
 
-/** Largest source read for a layer of this type. A KMZ carries its images, so KML shares the archive ceiling. */
-fun LayerType.maxSourceBytes(): Long = when (this) {
-    LayerType.KML -> MAX_KMZ_INFLATED_BYTES
+/** Largest KML or KMZ source read back. A KMZ carries its images, so it gets the room a shared map file is allowed. */
+const val MAX_KML_LAYER_MB = 50
+
+/** Largest source read for a layer of this type, in the megabytes a user is told about. */
+fun LayerType.maxSourceMegabytes(): Int = when (this) {
+    LayerType.KML -> MAX_KML_LAYER_MB
 
     LayerType.GEOJSON,
     LayerType.COVERAGE,
-    -> MAX_GEOJSON_LAYER_BYTES
+    -> MAX_GEOJSON_LAYER_MB
 }
+
+fun LayerType.maxSourceBytes(): Long = (maxSourceMegabytes() * BYTES_PER_MEGABYTE).toLong()
+
+/** Why a layer was refused at import or left undrawn. */
+enum class MapLayerRefusal {
+    /** Over [maxSourceBytes] for its type. */
+    TOO_LARGE,
+
+    /** A `.json` that is not GeoJSON. */
+    NOT_MAP_DATA,
+
+    /** Parsed, but more vertices than the renderer has room to draw. */
+    TOO_DETAILED,
+}
+
+/** One refused or undrawn layer. [atImport] separates a file the user just picked from a stored layer. */
+class MapLayerProblem(
+    val layerName: String,
+    val layerType: LayerType,
+    val refusal: MapLayerRefusal,
+    val atImport: Boolean,
+)
 
 /** The `type` values RFC 7946 allows at the root of a GeoJSON document. */
 private val GEOJSON_ROOT_TYPES =
