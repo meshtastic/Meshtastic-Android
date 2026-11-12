@@ -8,7 +8,51 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-*No changes yet.*
+### Internal (v2.8.5-internal.1)
+Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
+
+#### 🏗️ Features
+* feat(map): record where an offline region's tiles came from by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7945
+* feat(settings): guided setup for a radio with no region by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7953
+* feat(settings): nearby meshes page and a searchable region list in the radio setup by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7955
+* feat(node): show traceroute request states and mark MQTT hops by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7969
+* feat(settings): Replace or Add on the channel share surface, capacity on Add import by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7968
+* feat(node): banana for scale beside the device model and in AR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7973
+* feat(connections): scan connect codes, read them from NFC, check addresses by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7974
+* feat(firmware): show the bootloader version the device reports by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7981
+* feat(firmware): upgrade an nRF52 bootloader over BLE by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7982
+* refactor(firmware): fix dead update states and share the update runner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7984
+* feat(xr): spatial shell for Android XR headsets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7980
+* feat(xr): stand the device model in the room on Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7987
+* feat(xr): 3D terrain map on Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7989
+* feat(xr): map the terrain table with imagery, buildings, contours, routes and comets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8001
+#### 🖥️ Desktop
+* fix(desktop): let the JVM size the heap from available RAM by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8015
+#### 🛠️ Fixes
+* fix(widget): compose the picker preview without a glance id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7934
+* fix(map): download regional terrain from every z6 archive a region touches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7943
+* fix(map): fade offline hillshade past the terrain data and add Shade Valleys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7946
+* fix(map): reject mismatched range responses and retry a replaced archive by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7944
+* fix(map): draw offline polygons with holes, style roads by zoom, name places offline by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7947
+* fix(map): keep the layer toggles reachable with many offline regions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7951
+* fix(hardware): skip 3D model files when choosing a device image by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7963
+* fix(data): bind admin writes to the transport session they were issued under by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7964
+* fix(settings): clear managed mode with the last admin key and say how to recover by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7961
+* fix(settings): write from the radio setup only while its bound radio is the connected one by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7956
+* fix(node): put Message first in the node long-press menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7965
+* fix(mqtt): accept root topics in any script by @garthvh in https://github.com/meshtastic/Meshtastic-Android/pull/7960
+* fix(connections): keep the Connections tab usable at large font and display sizes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7966
+* fix(node): put Set display name right after Message in the node menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7970
+* fix(connections): require a host for TCP links and a port name for serial links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7979
+* fix(messaging): say Delivered to recipient for a NONE routing result by @garthvh in https://github.com/meshtastic/Meshtastic-Android/pull/7959
+* fix(node): use packet time for telemetry logs by @vpolevikoff in https://github.com/meshtastic/Meshtastic-Android/pull/7889
+* fix(node): follow the design#53 telemetry display rules by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7995
+* fix(xr): follow the Android XR design guide and stand the terrain up by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7994
+* fix(node): name the DMShell opt-in when a node never answers the terminal by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7996
+* fix(connections): reject connect link and settings PINs with a leading zero by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8006
+* fix(build): let R8 pass over the Android XR system extensions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8023
+#### 📝 Other Changes
+* fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
