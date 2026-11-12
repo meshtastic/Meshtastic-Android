@@ -1300,7 +1300,7 @@
     <string name="routing_error_got_nak">接收到否定确认</string>
     <string name="routing_error_max_retransmit">发送至MESH失败</string>
     <string name="routing_error_no_route">无路径</string>
-    <string name="routing_error_none">已确认</string>
+    <string name="routing_error_none">正在发送</string>
     <string name="routing_error_pki_failed">无法发送加密消息</string>
     <string name="routing_error_pki_send_fail_public_key">接收方密钥不可用</string>
     <string name="routing_error_pki_unknown_pubkey">接收方需要你的密钥</string>
@@ -1621,6 +1621,8 @@
     <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
+    <!-- XR -->
+    <string name="xr_terrain_layer_elevation">高度</string>
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>

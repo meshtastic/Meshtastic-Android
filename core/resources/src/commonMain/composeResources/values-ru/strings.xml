@@ -221,6 +221,7 @@
     <string name="channel_features">Особенности канала</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="channel_name">Имя канала</string>
+    <string name="channel_slots_used">Используется %1$d слотов канала %2$d</string>
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Каналы</string>
@@ -318,6 +319,7 @@
     <string name="configure_location_permissions">Настроить права доступа к местоположению</string>
     <string name="configure_notification_permissions">Настроить права доступа для уведомлений</string>
     <string name="connect">Подключить</string>
+    <string name="connect_code_invalid">Этот код не Meshtastic connect код.</string>
     <string name="connect_radio_for_remote_admin">Подключись к ноде для управления удалёнными нодами.</string>
     <string name="connect_radio_to_change_settings">Подключись к радио, чтобы изменить эти настройки.</string>
     <string name="connected">Подключено</string>
@@ -436,6 +438,7 @@
     <string name="device_model_ar_camera_unavailable">Другое приложение использует камеру. Закрой и вернись.</string>
     <string name="device_model_ar_failed">AR не удалось начать</string>
     <string name="device_model_ar_restart_phone">Перезагрузи телефон. Датчик движения не отвечает, а без него дополненная реальность не запустится.</string>
+    <string name="device_model_banana_for_scale">Банан для шкалы</string>
     <string name="device_model_capture">Сделать снимок</string>
     <string name="device_model_capture_failed">Невозможно сохранить изображение</string>
     <string name="device_model_capture_saved">Сохранено в изображениях</string>
@@ -707,9 +710,11 @@
     <string name="firmware_gate_message">Прошивка радио (%1$s) старше минимальной поддерживаемой версии (%2$s). Обнови прошивку, чтобы продолжать использовать приложение. Последняя стабильная версия прошивки: %3$s</string>
     <string name="firmware_gate_title">Требуется обновление прошивки</string>
     <string name="firmware_gate_update">Обновление прошивки</string>
+    <string name="firmware_maintenance_ble_upgrade_text">Обновление загрузчика на %1$s через Bluetooth, а затем переустановка прошивки. Занимает около десяти минут. Сначала отсоедини USB: с подключенным кабелем, новый загрузчик ожидает в USB.</string>
     <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
     <string name="firmware_maintenance_bootloader_last_fault">Загрузчик сообщил об ошибке: %1$s</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Последняя: %1$s. Установленная версия отображается после перезагрузки устройства в режим обновления.</string>
     <string name="firmware_maintenance_bootloader_up_to_date">Загрузчик обновлён</string>
     <string name="firmware_maintenance_bootloader_up_to_date_hint">Обновлять нечего. Далее переустанавливается прошивка, что приведёт к перезагрузке устройства.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
@@ -723,6 +728,7 @@
     <string name="firmware_maintenance_unknown_softdevice">Это приложение не может подтвердить, какой стек Bluetooth использует это устройство, поэтому его стирание небезопасно. Вместо этого используй веб-флешер на flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_unsupported_device">Это устройство не поддерживает стирание из приложения.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Обновить загрузчик</string>
+    <string name="firmware_maintenance_upgrade_confirm_text">Устанавливается быстрый загрузчик на %1$s, затем переустанавливается прошивка. Подключи устройство до тех пор, пока оно не закончится.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Обновить загрузчик?</string>
     <string name="firmware_maintenance_wrong_destination">Это расположение не является диском обновления устройства, поэтому на устройство ничего не записано. Выбери съёмный диск, который появляется, когда устройство находится в режиме обновления.</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
@@ -736,6 +742,16 @@
     <string name="firmware_update_archive_missing_target">Прошивка для %2$s (%3$s) не найдена в разделе "%1$s".</string>
     <string name="firmware_update_available">Доступно обновление прошивки</string>
     <string name="firmware_update_battery_low">Слишком низкий заряд (%1$d%). Пожалуйста, зарядите устройство перед обновлением.</string>
+    <string name="firmware_update_bootloader_downloading">Загрузка загрузчика...</string>
+    <string name="firmware_update_bootloader_installed">Загрузчик: %1$s</string>
+    <string name="firmware_update_bootloader_installing">Установка загрузчика. Это займет несколько минут.</string>
+    <string name="firmware_update_bootloader_latest">Последний загрузчик: %1$s</string>
+    <string name="firmware_update_bootloader_mismatch">Загрузчик сообщает об %1$s, но этот пакет предназначен для %2$s. Ничего не было записано.</string>
+    <string name="firmware_update_bootloader_model_unknown">Загрузчик не сообщил о модели, поэтому этот пакет для %1$s не был записан.</string>
+    <string name="firmware_update_bootloader_not_upgraded">Прошивка переустановлена, но загрузчик сообщает о %1$s вместо %2$s.</string>
+    <string name="firmware_update_bootloader_older_than">Загрузчик: старше чем %1$s</string>
+    <string name="firmware_update_bootloader_unverified">Пакет загрузчика %1$s не удалось проверить. Ничего не было записано.</string>
+    <string name="firmware_update_bootloader_uploading">Загрузка загрузчика, шаг 1 из 2...</string>
     <string name="firmware_update_checking">Проверка обновлений...</string>
     <string name="firmware_update_confirm_file_button">Начать прошивку</string>
     <string name="firmware_update_confirm_file_message">Проверь полное имя файла перед установкой. Прошивка начинается только после подтверждения.</string>
@@ -751,6 +767,7 @@
     <string name="firmware_update_disconnect_warning">Примечание: Во время обновления устройство временно отключится.</string>
     <string name="firmware_update_do_not_close">Не закрывайте приложение.</string>
     <string name="firmware_update_done">Готово</string>
+    <string name="firmware_update_downloading">Загрузка прошивки...</string>
     <string name="firmware_update_downloading_percent">Загрузка прошивки... %1$d%</string>
     <string name="firmware_update_enabling_dfu">Включение DFU режима...</string>
     <string name="firmware_update_erasing">Очистка...</string>
@@ -764,6 +781,7 @@
     <string name="firmware_update_in_progress">Обновление прошивки…</string>
     <string name="firmware_update_invalid_local_file_detail">Выбранный файл "%1$s" не соответствует %2$s (%3$s). Выберите файл прошивки для этой цели.</string>
     <string name="firmware_update_keep_device_close">Держите устройство поближе к телефону.</string>
+    <string name="firmware_update_keep_going">Продолжай</string>
     <string name="firmware_update_latest">Обновить до: %1$s</string>
     <string name="firmware_update_local_file">Локальный файл</string>
     <string name="firmware_update_method_ble">BLE OTA (по воздуху)</string>
@@ -798,6 +816,9 @@
     <string name="firmware_update_start_timed_out">Не удалось запустить обновление. Попробуй обновить снова.</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
     <string name="firmware_update_starting_ota">Запуск OTA обновления...</string>
+    <string name="firmware_update_stop">Остановка</string>
+    <string name="firmware_update_stop_text">Если устройство находится в процессе промежуточного обновления, оно остается в режиме обновления до тех пор, пока ты не завершишь или не восстановишь его.</string>
+    <string name="firmware_update_stop_title">Остановить обновление?</string>
     <string name="firmware_update_success">Обновлено успешно!</string>
     <string name="firmware_update_success_wiped">Устройство было сброшено к заводским настройкам, и его необходимо настроить (и выполнить сопряжение) заново.</string>
     <string name="firmware_update_taking_a_while">Это может занять минутку...</string>
@@ -811,6 +832,8 @@
     <string name="firmware_update_unsupported_transport">Обновления прошивки не поддерживаются через это соединение для данного устройства. Подключитесь другим способом (например, через Bluetooth), чтобы обновить.</string>
     <string name="firmware_update_unsupported_update_method">Локальные файлы прошивки для этого метода обновления не поддерживаются.</string>
     <string name="firmware_update_uploading">Загрузка прошивки...</string>
+    <string name="firmware_update_uploading_after_bootloader">Загрузка прошивки, шаг 2 из 2...</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s часто поставляется с загрузчиком, который не может получить Bluetooth-обновления. Сначала обнови загрузчик.</string>
     <string name="firmware_update_usb_failed">Ошибка обновления USB</string>
     <string name="firmware_update_usb_instruction_text">Ваше устройство перезагрузилось в режим DFU и должно отображаться как USB-накопитель (например, RAK4631).\n\nКогда откроется окно выбора файлов, пожалуйста, выберите корневой каталог этого диска, чтобы сохранить файл прошивки.</string>
     <string name="firmware_update_usb_instruction_title">Выберите DFU USB-диск</string>
@@ -882,7 +905,6 @@
     <!-- IAQ -->
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
-    <string name="iaq_level_dangerously_polluted">Опасно загрязнённый</string>
     <string name="iaq_level_excellent">Отлично</string>
     <string name="iaq_level_extremely_polluted">Чрезвычайно загрязненный</string>
     <string name="iaq_level_good">Хороший</string>
@@ -1091,6 +1113,7 @@
     <string name="lux">Освещённость</string>
     <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
     <string name="manage_map_layers">Управление Слоями Карты</string>
+    <string name="managed_mode_recovery">Если все ключи администратора утеряны, управляемая нода не может быть изменена. Единственный способ восстановить её - удалить с помощью веб-программы по адресу https://flasher.meshtastic.org.</string>
     <string name="manual_position_request">Требуется запрос позиции вручную</string>
     <!-- MAP -->
     <string name="map">Карта сети</string>
@@ -1380,6 +1403,7 @@
     <string name="mqtt_root_problem_empty_segment">Темы не могут содержать два слэша в строке.</string>
     <string name="mqtt_root_problem_ends_with_version">Темы не могут заканчиваться на /2.</string>
     <string name="mqtt_root_problem_leading_slash">Темы не могут начинаться со слэша.</string>
+    <string name="mqtt_root_problem_too_long">Темы ограничены 31 байтом  (æ, ø и å используют два).</string>
     <string name="mqtt_root_problem_trailing_slash">Темы не могут заканчиваться слэшем.</string>
     <string name="mqtt_root_problem_whitespace">Темы не могут содержать пробелы или управляющие символы.</string>
     <string name="mqtt_root_problem_wildcard">Темы не могут содержать + или #.</string>
@@ -1398,6 +1422,7 @@
     <string name="mqtt_topic_finder_connecting">Подключение…</string>
     <string name="mqtt_topic_finder_counts">Счетчик количества нод, слышимые во время пробы. Оживленные темы заполняются в течение нескольких секунд; тихие темы могут оставаться на нуле.</string>
     <string name="mqtt_topic_finder_custom">Пользовательская тема</string>
+    <string name="mqtt_topic_finder_custom_hint">До 31 байт, нет начального или конечного слэша, нет + или #.</string>
     <string name="mqtt_topic_finder_failed_closed">Брокер закрыл соединение.</string>
     <string name="mqtt_topic_finder_failed_connect">Не удалось подключиться к брокеру.</string>
     <string name="mqtt_topic_finder_failed_error">Проба остановилась из-за непредвиденной ошибки.</string>
@@ -1741,6 +1766,12 @@
     <string name="radiation">Радиация</string>
     <!-- RADIO -->
     <string name="radio_configuration">Настройки устройства</string>
+    <string name="radio_setup_beacons_body">Радио поблизости может пригласить тебя в свою сеть. При прослушивании сохраняются приглашения, которые слышит твоя радиостанция; присоединяйся к одной из них, чтобы использовать ее канал.</string>
+    <string name="radio_setup_beacons_headline">Ближайшие сети</string>
+    <string name="radio_setup_beacons_listening">Слушать маяки</string>
+    <string name="radio_setup_beacons_none">Приглашений пока нет.</string>
+    <string name="radio_setup_beacons_settings">Настройки маяка</string>
+    <string name="radio_setup_beacons_waiting">Ожидание настройки радиомаяка…</string>
     <string name="radio_setup_intro_headline">Настройте ваше радио</string>
     <string name="radio_setup_name_headline">Понятное имя</string>
     <string name="radio_setup_reconnecting">Ожидание переподключения устройства…</string>
@@ -1799,8 +1830,6 @@
     <string name="remote_shell_modifier_locked">Заблокировано</string>
     <string name="remote_shell_modifier_once">Применить к следующей клавише</string>
     <string name="remote_shell_more_options">Больше параметров</string>
-    <string name="remote_shell_no_reply">Нет ответа от ноды. Она должна указывать открытый ключ вашего радио в качестве ключа администратора и находиться в зоне доступа.</string>
-    <string name="remote_shell_no_reply_reason">Не удалось открыть сессию (%1$s). Нода должна указать публичный ключ вашего радиоканала в качестве ключа администратора и находиться в зоне доступа.</string>
     <string name="remote_shell_open">Открыть терминал</string>
     <string name="remote_shell_open_description">Открыть терминал на этой ноде, при необходимости запустить удаленный сеанс администратора</string>
     <string name="remote_shell_reconnect">Переподключение</string>
@@ -1885,7 +1914,7 @@
     <string name="routing_error_no_interface">Нет радиоинтерфейса</string>
     <string name="routing_error_no_response">Нет ответа приложения</string>
     <string name="routing_error_no_route">Нет маршрута</string>
-    <string name="routing_error_none">Принято</string>
+    <string name="routing_error_none">Доставлено получателю</string>
     <string name="routing_error_not_authorized">Не авторизовано</string>
     <string name="routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
@@ -2316,6 +2345,10 @@
     <string name="write_nfc_subtext">Запись сохраняет эту ссылку на NFC-метку, к которой может прикоснуться любой.</string>
     <string name="write_nfc_success">Написано для метки</string>
     <string name="write_nfc_text">Поднеси записываемую NFC-метку к задней части своего телефона.</string>
+    <!-- XR -->
+    <string name="xr_full_space">Полное пространство</string>
+    <string name="xr_home_space">Домашнее пространство</string>
+    <string name="xr_terrain_layer_elevation">Высота</string>
     <string name="you">Вы</string>
     <string name="zoom_in">Увеличить</string>
     <string name="zoom_out">Уменьшить</string>

@@ -23,12 +23,14 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_arrow_back
 import org.meshtastic.core.resources.ic_arrow_downward
 import org.meshtastic.core.resources.ic_chevron_right
+import org.meshtastic.core.resources.ic_close_fullscreen
 import org.meshtastic.core.resources.ic_expand_less
 import org.meshtastic.core.resources.ic_expand_more
 import org.meshtastic.core.resources.ic_keyboard_arrow_down
 import org.meshtastic.core.resources.ic_keyboard_arrow_left
 import org.meshtastic.core.resources.ic_keyboard_arrow_right
 import org.meshtastic.core.resources.ic_keyboard_arrow_up
+import org.meshtastic.core.resources.ic_open_in_full
 
 val MeshtasticIcons.ArrowBack: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_arrow_back)
@@ -48,3 +50,7 @@ val MeshtasticIcons.ExpandMore: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_expand_more)
 val MeshtasticIcons.ExpandLess: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_expand_less)
+val MeshtasticIcons.OpenInFull: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_open_in_full)
+val MeshtasticIcons.CloseFullscreen: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_close_fullscreen)

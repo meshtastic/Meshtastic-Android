@@ -140,6 +140,7 @@ import org.meshtastic.feature.node.model.BananaForScale
 import org.meshtastic.feature.node.model.GlbBounds
 import org.meshtastic.feature.node.model.RestPose
 import org.meshtastic.feature.node.model.facingYawDegrees
+import org.meshtastic.feature.xr.spatialDeviceModelViewer
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
@@ -148,7 +149,7 @@ private const val SCRIM_ALPHA = 0.4f
 private const val NOTICE_ALPHA = 0.7f
 private const val YAW_DEGREES_PER_PX = 0.4f
 
-val deviceModelArViewer: DeviceModelArViewer? = GoogleDeviceModelArViewer
+val deviceModelArViewer: DeviceModelArViewer? = spatialDeviceModelViewer(GoogleDeviceModelArViewer)
 
 /**
  * The google flavor's AR viewer. A phone ARCore is still checking, or that only lacks the ARCore app, counts as

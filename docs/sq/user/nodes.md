@@ -242,7 +242,7 @@ Some of these are affiliate links. Both places say so above the links: product l
 
 ### Remote shell
 
-**Open terminal**, in the node's **Administration** card, opens a shell on a Linux node running `meshtasticd` 2.8.2 or later, carried over the mesh. The node accepts it only from a node whose public key is in its **Security → Admin key** list, the same list remote administration uses. The app starts that admin session first if there isn't one, and the card's title shows whether it is active. The row can appear on any `meshtasticd` node before the app knows its firmware version; an older node refuses the shell when it opens. The terminal takes the whole window. If the node never answers, the screen says so after a minute.
+**Open terminal**, in the node's **Administration** card, opens a shell on a Linux node running `meshtasticd` 2.8.2 or later, carried over the mesh. The node accepts it only from a node whose public key is in its **Security → Admin key** list, the same list remote administration uses. The shell is off unless the node's operator turns it on, with `DMShell: true` under `Security` in its `config.yaml`. The app starts that admin session first if there isn't one, and the card's title shows whether it is active. The row can appear on any `meshtasticd` node before the app knows its firmware version; an older node refuses the shell when it opens. The terminal takes the whole window. If the node never answers, the screen says so after a minute; a node with the shell off answers nothing.
 
 The mesh carries a few hundred bytes a second, and the terminal is built around that:
 

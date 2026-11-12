@@ -396,7 +396,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Примљена негативна потврда</string>
     <string name="routing_error_no_route">Нема руте</string>
-    <string name="routing_error_none">Потврђено</string>
     <string name="routing_error_timeout">Истекло време</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор јачине примљеног сигнала RSSI је мера која се користи за одређивање нивоа снаге која се прима преко антене. Виша вредност RSSI генерално указује на јачу и стабилнију везу.</string>
@@ -495,5 +494,6 @@
     <!-- WIND -->
     <string name="wind_speed">Брзина ветра</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Ти</string>
 </resources>

@@ -16,17 +16,26 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -35,9 +44,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvi
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.meshtastic.core.common.util.MeasureUnitKind
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.VOLT_SYMBOL
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.UnitConversions
@@ -140,25 +152,6 @@ private val LEGEND_DATA_5 =
         )
     }
 
-private const val PRESSURE_DEFAULT_MIN = 950.0
-private const val PRESSURE_DEFAULT_MAX = 1050.0
-private const val PRESSURE_WINDOW_HPA = PRESSURE_DEFAULT_MAX - PRESSURE_DEFAULT_MIN
-
-/**
- * Y-axis bounds for the barometric-pressure layer, given the plotted data's [dataMin]/[dataMax].
- *
- * Uses a fixed [PRESSURE_WINDOW_HPA]-wide window so a given pressure change is always the same visual size (design#53's
- * "consistent scale"). Near sea level this is the standard [PRESSURE_DEFAULT_MIN]–[PRESSURE_DEFAULT_MAX]; for a node at
- * altitude (lower station pressure) the same-width window slides down so readings aren't clipped. It only widens past
- * the fixed width if a single node's readings genuinely span more than the window.
- */
-internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, Double> = when {
-    dataMax - dataMin > PRESSURE_WINDOW_HPA -> dataMin to dataMax
-    dataMin < PRESSURE_DEFAULT_MIN -> dataMin to (dataMin + PRESSURE_WINDOW_HPA)
-    dataMax > PRESSURE_DEFAULT_MAX -> (dataMax - PRESSURE_WINDOW_HPA) to dataMax
-    else -> PRESSURE_DEFAULT_MIN to PRESSURE_DEFAULT_MAX
-}
-
 /**
  * Wind speed arrives in m/s and is charted in the unit the cards show — km/h for metric, mph for imperial — so a
  * reading and its graph never disagree. Temperatures are already converted upstream by the view model, so they pass
@@ -175,8 +168,8 @@ internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: B
     }
 
 /**
- * Unit suffix for a plotted metric's axis and marker labels, in the user's display units, or "" for metrics whose unit
- * would be noise on a shared axis. Includes any leading space, so it appends directly to a formatted value.
+ * Unit suffix for a plotted metric's axis and marker labels, in the user's display units, or "" for a dimensionless
+ * one. Includes any leading space, so it appends directly to a formatted value.
  */
 internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when {
     metric == Environment.TEMPERATURE ||
@@ -185,12 +178,36 @@ internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: 
 
     metric in Environment.adcVoltages -> " $VOLT_SYMBOL"
 
-    // Taken from the same source the cards format with, so an axis and its readings cannot drift apart —
-    // which is exactly how the chart kept m/s while the cards moved to km/h.
+    metric == Environment.HUMIDITY || metric == Environment.SOIL_MOISTURE -> "%"
+
+    metric == Environment.BAROMETRIC_PRESSURE -> " hPa"
+
+    metric == Environment.LUX -> " lx"
+
+    metric == Environment.UV_LUX -> " UVlx"
+
+    metric == Environment.RADIATION -> " µR/h"
+
+    metric == Environment.GAS_RESISTANCE -> " MΩ"
+
+    // Taken from the same source the cards format with, so an axis and its readings cannot drift apart.
     metric == Environment.WIND_SPEED ->
         " " + (if (isImperial) MeasureUnitKind.MILE_PER_HOUR else MeasureUnitKind.KILOMETER_PER_HOUR).symbol
 
     else -> ""
+}
+
+private val CHART_GROUP_HEIGHT_MIN = 140.dp
+private const val MAX_FILLING_GROUPS = 2
+
+private fun groupRangeProvider(group: EnvironmentChartGroup) = object : CartesianLayerRangeProvider {
+    override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+        environmentAxisRange(group, minY, maxY)?.first
+            ?: CartesianLayerRangeProvider.auto().getMinY(minY, maxY, extraStore)
+
+    override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+        environmentAxisRange(group, minY, maxY)?.second
+            ?: CartesianLayerRangeProvider.auto().getMaxY(minY, maxY, extraStore)
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -210,10 +227,6 @@ fun EnvironmentMetricsChart(
             return@Column
         }
 
-        val modelProducer = remember { CartesianChartModelProducer() }
-        val shouldPlot = graphData.shouldPlot
-        val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-
         val allLegendData =
             (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4 + LEGEND_DATA_5).filter {
                 graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
@@ -232,65 +245,22 @@ fun EnvironmentMetricsChart(
             legend.color to (metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: "")
         }
 
-        val showPressure =
-            shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics
-        val pressureData =
-            remember(telemetries, showPressure) {
-                if (!showPressure) return@remember emptyList()
-                telemetries.filter {
-                    val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
-                    it.time != 0 && v != null && !v.isNaN()
-                }
-            }
-
-        val otherMetrics =
-            remember(telemetries, shouldPlot, hiddenMetrics) {
-                Environment.entries.filter { metric ->
-                    metric != Environment.BAROMETRIC_PRESSURE &&
-                        metric !in hiddenMetrics &&
-                        shouldPlot[metric.ordinal] &&
-                        telemetries.any {
+        val metricData =
+            remember(telemetries, graphData) {
+                Environment.entries
+                    .filter { graphData.shouldPlot[it.ordinal] }
+                    .associateWith { metric ->
+                        telemetries.filter {
                             val v = metric.getValue(it)
                             it.time != 0 && v != null && !v.isNaN()
                         }
-                }
-            }
-
-        val otherMetricsData =
-            remember(telemetries, otherMetrics) {
-                otherMetrics.associateWith { metric ->
-                    telemetries.filter {
-                        val v = metric.getValue(it)
-                        it.time != 0 && v != null && !v.isNaN()
                     }
-                }
+                    .filterValues { it.isNotEmpty() }
             }
-
-        LaunchedEffect(pressureData, otherMetricsData, isImperial) {
-            modelProducer.runTransaction {
-                /* Pressure on its own layer/axis */
-                if (showPressure && pressureData.isNotEmpty()) {
-                    lineModel {
-                        series(
-                            x = pressureData.map { it.time },
-                            y = pressureData.mapNotNull { Environment.BAROMETRIC_PRESSURE.getValue(it) },
-                        )
-                    }
-                }
-                /* Everything else on the default axis */
-                otherMetrics.forEach { metric ->
-                    val metricData = otherMetricsData[metric] ?: emptyList()
-                    if (metricData.isNotEmpty()) {
-                        lineModel {
-                            series(
-                                x = metricData.map { it.time },
-                                y = metricData.mapNotNull { chartValue(metric, it, isImperial) },
-                            )
-                        }
-                    }
-                }
+        val groups =
+            remember(metricData, hiddenMetrics) {
+                groupEnvironmentMetrics(metricData.keys.filter { it !in hiddenMetrics })
             }
-        }
 
         val marker =
             ChartStyling.rememberMarker(
@@ -301,93 +271,38 @@ fun EnvironmentMetricsChart(
                 },
             )
 
-        // Fixed-width pressure window (design#53) so a given change is always the same visual size,
-        // sliding to the node's elevation so high-altitude readings aren't clipped. See [pressureAxisRange].
-        val pressureRangeProvider = remember {
-            object : CartesianLayerRangeProvider {
-                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
-                    pressureAxisRange(minY, maxY).first
-
-                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
-                    pressureAxisRange(minY, maxY).second
+        BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            val groupHeight =
+                (maxHeight / minOf(groups.size, MAX_FILLING_GROUPS).coerceAtLeast(1)).coerceAtLeast(
+                    CHART_GROUP_HEIGHT_MIN,
+                )
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                groups.forEachIndexed { index, (group, metrics) ->
+                    key(group) {
+                        EnvironmentGroupChart(
+                            group = group,
+                            metrics = metrics,
+                            metricData = metricData,
+                            isFahrenheit = isFahrenheit,
+                            isImperial = isImperial,
+                            marker = marker,
+                            vicoScrollState =
+                            if (index == 0) {
+                                vicoScrollState
+                            } else {
+                                rememberVicoScrollState(
+                                    autoScroll = Scroll.Absolute.End,
+                                    autoScrollCondition = AutoScrollCondition.OnModelGrowth,
+                                )
+                            },
+                            followsSelection = index != 0,
+                            selectedX = selectedX,
+                            onPointSelected = onPointSelected,
+                            modifier = Modifier.fillMaxWidth().height(groupHeight).padding(horizontal = 8.dp),
+                        )
+                    }
+                }
             }
-        }
-        val layers = mutableListOf<LineCartesianLayer>()
-        if (showPressure && pressureData.isNotEmpty()) {
-            layers.add(
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(Environment.BAROMETRIC_PRESSURE.color),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
-                    // otherwise trends (storms) are invisible.
-                    rangeProvider = pressureRangeProvider,
-                ),
-            )
-        }
-        otherMetrics.forEach { metric ->
-            // Radiation and wind speed use fixed minY=0 per Oscar's UX guidance
-            val rangeProvider =
-                when (metric) {
-                    Environment.RADIATION,
-                    Environment.WIND_SPEED,
-                    -> CartesianLayerRangeProvider.auto()
-
-                    else -> null
-                }
-            val lineStyle =
-                if (metric == Environment.WIND_SPEED) {
-                    ChartStyling.createDashedLine(metric.color)
-                } else {
-                    ChartStyling.createStyledLine(metric.color)
-                }
-            layers.add(
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(lineStyle),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                    rangeProvider = rangeProvider ?: CartesianLayerRangeProvider.auto(),
-                ),
-            )
-        }
-
-        if (layers.isNotEmpty()) {
-            val endAxisColor = if (otherMetrics.size == 1) otherMetrics.first().color else onSurfaceColor
-
-            GenericMetricChart(
-                modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-                layers = layers,
-                startAxis =
-                if (showPressure && pressureData.isNotEmpty()) {
-                    VerticalAxis.rememberStart(
-                        label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
-                        valueFormatter = { _, value, _ -> formatString("%.0f hPa", value) },
-                    )
-                } else {
-                    null
-                },
-                endAxis =
-                if (otherMetrics.isNotEmpty()) {
-                    // The end axis is shared, so it can only carry a unit when every metric on it uses the same
-                    // one.
-                    val endAxisUnit =
-                        otherMetrics.map { unitSuffix(it, isFahrenheit, isImperial) }.distinct().singleOrNull()
-                            ?: ""
-                    VerticalAxis.rememberEnd(
-                        label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f", value) + endAxisUnit },
-                    )
-                } else {
-                    null
-                },
-                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
-                marker = marker,
-                selectedX = selectedX,
-                onPointSelected = onPointSelected,
-                vicoScrollState = vicoScrollState,
-            )
         }
 
         Legend(
@@ -400,4 +315,73 @@ fun EnvironmentMetricsChart(
             },
         )
     }
+}
+
+@Composable
+private fun EnvironmentGroupChart(
+    group: EnvironmentChartGroup,
+    metrics: List<Environment>,
+    metricData: Map<Environment, List<Telemetry>>,
+    isFahrenheit: Boolean,
+    isImperial: Boolean,
+    marker: CartesianMarker,
+    vicoScrollState: VicoScrollState,
+    followsSelection: Boolean,
+    selectedX: Double?,
+    onPointSelected: (Double) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    // The screen scrolls the first chart on a log-row tap; the others follow the same selection.
+    LaunchedEffect(selectedX) {
+        if (followsSelection && selectedX != null) {
+            vicoScrollState.animateScroll(Scroll.Absolute.x(selectedX, CommonCharts.SCROLL_BIAS))
+        }
+    }
+    LaunchedEffect(metrics, metricData, isImperial) {
+        modelProducer.runTransaction {
+            metrics.forEach { metric ->
+                val data = metricData[metric].orEmpty()
+                lineModel {
+                    series(x = data.map { it.time }, y = data.mapNotNull { chartValue(metric, it, isImperial) })
+                }
+            }
+        }
+    }
+
+    val rangeProvider = remember(group) { groupRangeProvider(group) }
+    val layers = metrics.map { metric ->
+        val line =
+            when {
+                metric == Environment.WIND_SPEED -> ChartStyling.createDashedLine(metric.color)
+                group == EnvironmentChartGroup.PRESSURE -> ChartStyling.createGradientLine(metric.color)
+                else -> ChartStyling.createStyledLine(metric.color)
+            }
+        rememberLineCartesianLayer(
+            lineProvider = LineCartesianLayer.LineProvider.series(line),
+            verticalAxisPosition = Axis.Position.Vertical.Start,
+            rangeProvider = rangeProvider,
+        )
+    }
+
+    val unit = metrics.map { unitSuffix(it, isFahrenheit, isImperial) }.distinct().singleOrNull().orEmpty()
+    val axisColor = metrics.singleOrNull()?.color ?: MaterialTheme.colorScheme.onSurface
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier,
+        layers = layers,
+        startAxis =
+        VerticalAxis.rememberStart(
+            label = ChartStyling.rememberAxisLabel(color = axisColor),
+            valueFormatter = { context, value, position ->
+                val decimals = axisLabelDecimals(context.ranges.getYRange(position).length)
+                NumberFormatter.format(value, decimals) + unit
+            },
+        ),
+        bottomAxis = CommonCharts.rememberBottomTimeAxis(),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
+    )
 }

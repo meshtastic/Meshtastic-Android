@@ -231,11 +231,11 @@ on a network, a **Current connections:** card at the top shows its **Wi-Fi IP:**
 
 On **Settings → Device configuration → Bluetooth**, on nodes with Bluetooth.
 
-| Asetus             | Kuvaus                                                                                                                                      | Oletus                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Bluetooth käytössä | Turn the node's Bluetooth on or off                                                                                                         | On, except on some nodes with a color screen                          |
-| Fixed Pin          | PIN code for pairing, used with `FIXED_PIN`. Siinä on oltava **täsmälleen kuusi numeroa** — kenttä hylkää kaikki muut arvot | 123456                                                                |
-| Paritustila        | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                                             | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
+| Asetus             | Kuvaus                                                                                                                                  | Oletus                                                                |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Bluetooth käytössä | Turn the node's Bluetooth on or off                                                                                                     | On, except on some nodes with a color screen                          |
+| Fixed Pin          | PIN code for pairing, used with `FIXED_PIN`. Must be six digits from 100000 to 999999 — the field rejects anything else | 123456                                                                |
+| Paritustila        | Listed by firmware name: `RANDOM_PIN`, `FIXED_PIN`, or `NO_PIN`                                                         | `RANDOM_PIN` on nodes with a screen, `FIXED_PIN` on nodes without one |
 
 ## Turvallisuusasetukset
 

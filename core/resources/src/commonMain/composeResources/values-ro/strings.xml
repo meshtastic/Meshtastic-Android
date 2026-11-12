@@ -810,7 +810,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>
     <string name="routing_error_no_route">Nici o rută</string>
-    <string name="routing_error_none">Confirmat</string>
     <string name="routing_error_timeout">Expirat</string>
     <string name="rssi"> RSSI</string>
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
@@ -1027,5 +1026,6 @@
     <string name="wind_lull">Vânt critic</string>
     <string name="wind_speed">Viteza vântului</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Tu</string>
 </resources>

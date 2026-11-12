@@ -141,11 +141,12 @@ private val ALL_MODULES_FULL =
         ":feature:firmware",
         ":feature:wifi-provision",
         ":feature:widget",
+        ":feature:xr",
         ":desktopApp",
     )
 
 /** Android-only modules that don't apply the KMP plugin. */
-private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":core:nfc", ":feature:widget")
+private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":core:nfc", ":feature:widget", ":feature:xr")
 
 /**
  * Modules excluded from Dokka aggregation.
@@ -170,6 +171,6 @@ private fun allModules(): List<String> = ALL_MODULES_FULL
 
 /**
  * Modules that apply the KMP plugin and should be compiled for JVM and `iosSimulatorArm64`. Excludes pure-Android
- * modules (:androidApp, :core:barcode, :core:nfc, :feature:widget) and the desktop JVM-only module.
+ * modules (:androidApp, :core:barcode, :core:nfc, :feature:widget, :feature:xr) and the desktop JVM-only module.
  */
 private fun kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktopApp" }

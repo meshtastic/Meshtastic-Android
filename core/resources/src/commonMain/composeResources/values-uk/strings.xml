@@ -928,7 +928,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Отримано негативне підтвердження</string>
     <string name="routing_error_no_route">Маршрут відсутній</string>
-    <string name="routing_error_none">Підтверджено</string>
     <string name="routing_error_timeout">Таймаут</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
@@ -1149,6 +1148,7 @@
     <string name="wind_lull">Затишшя вітру</string>
     <string name="wind_speed">Швидкість вітру</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Ви</string>
     <string name="zoom_in">Приблизити</string>
     <string name="zoom_out">Віддалити</string>

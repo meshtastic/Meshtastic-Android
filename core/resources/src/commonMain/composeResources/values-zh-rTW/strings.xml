@@ -1049,7 +1049,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <!-- ROUTING -->
     <string name="routing_error_got_nak">接收到拒絕確認</string>
     <string name="routing_error_no_route">無路徑</string>
-    <string name="routing_error_none">已確認</string>
     <string name="routing_error_timeout">逾時</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
@@ -1309,6 +1308,8 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="wind_lull">風停</string>
     <string name="wind_speed">風速</string>
     <!-- WRITE -->
+    <!-- XR -->
+    <string name="xr_terrain_layer_elevation">高度</string>
     <string name="you">你</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">縮小</string>

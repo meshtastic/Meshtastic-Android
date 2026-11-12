@@ -423,7 +423,7 @@ class RemoteShellViewModel(
         }
     }
 
-    // A node that has not authorized us drops OPEN without replying, and so does one out of range.
+    // A node with the shell off, one that has not authorized us and one out of range all leave OPEN unanswered.
     private suspend fun closedNotice(reason: String, wasOpening: Boolean): String = when {
         wasOpening && reason.isEmpty() -> getString(Res.string.remote_shell_no_reply)
         wasOpening -> getString(Res.string.remote_shell_no_reply_reason, reason)

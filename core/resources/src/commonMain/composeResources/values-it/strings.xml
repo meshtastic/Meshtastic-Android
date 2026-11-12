@@ -1284,7 +1284,7 @@
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
     <string name="routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
     <string name="routing_error_no_route">Nessun percorso</string>
-    <string name="routing_error_none">Confermato</string>
+    <string name="routing_error_none">Consegnato al destinatario</string>
     <string name="routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
     <string name="routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
     <string name="routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>
@@ -1601,6 +1601,8 @@
     <string name="write_nfc_failed">Impossibile scrivere sul tag. Usa un tag NFC scrivibile e vuoto e tienilo fermo.</string>
     <string name="write_nfc_success">Scritto sul tag</string>
     <string name="write_nfc_text">Tieni un tag NFC scrivibile contro il retro del telefono.</string>
+    <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Altezza</string>
     <string name="you">Tu</string>
     <string name="zoom_in">Aumenta zoom</string>
     <string name="zoom_out">Riduci zoom</string>

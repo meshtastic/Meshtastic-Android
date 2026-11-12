@@ -624,7 +624,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Recibido un reconocimiento negativo</string>
     <string name="routing_error_no_route">Sin ruta</string>
-    <string name="routing_error_none">Reconocido</string>
     <string name="routing_error_timeout">Tiempo agotado</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
@@ -776,5 +775,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- WIND -->
     <string name="wind">Viento</string>
     <!-- WRITE -->
+    <!-- XR -->
     <string name="you">Usted</string>
 </resources>

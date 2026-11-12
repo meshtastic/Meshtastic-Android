@@ -141,6 +141,7 @@ bluetooth_feature_config
 bluetooth_feature_config_description
 bluetooth_feature_discovery
 bluetooth_feature_discovery_description
+bluetooth_fixed_pin_range
 bluetooth_permission
 bluetooth_permission_blocked_notice
 bluetooth_permission_blocked_notice_pre31
@@ -405,6 +406,7 @@ device_model_banana_for_scale
 device_model_capture
 device_model_capture_failed
 device_model_capture_saved
+device_model_in_space_hint
 device_model_load_failed
 device_model_rest_face_down
 device_model_rest_face_up
@@ -872,7 +874,6 @@ i_know_what_i_m_doing
 ### IAQ ###
 iaq
 iaq_definition
-iaq_level_dangerously_polluted
 iaq_level_excellent
 iaq_level_extremely_polluted
 iaq_level_good
@@ -2308,6 +2309,17 @@ write_nfc_failed
 write_nfc_subtext
 write_nfc_success
 write_nfc_text
+### XR ###
+xr_full_space
+xr_home_space
+xr_terrain_buildings
+xr_terrain_empty
+xr_terrain_flat
+xr_terrain_layer_elevation
+xr_terrain_loading
+xr_terrain_map
+xr_terrain_unavailable
+xr_terrain_zoom
 you
 zh_CN
 zh_TW

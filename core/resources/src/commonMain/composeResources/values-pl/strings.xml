@@ -596,7 +596,6 @@
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
     <string name="routing_error_no_route">Brak trasy</string>
-    <string name="routing_error_none">Potwierdzone</string>
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
@@ -736,6 +735,8 @@
     <!-- WIND -->
     <string name="wind">Wiatr</string>
     <!-- WRITE -->
+    <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Elewacja</string>
     <string name="you">Ty</string>
     <string name="zoom_in">Powiększ</string>
     <string name="zoom_out">Oddal</string>

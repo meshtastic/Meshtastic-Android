@@ -87,6 +87,13 @@
       ]
     },
     {
+      "description": "The `compose-screenshot` catalog ref is shared by this library and the com.android.compose.screenshot Gradle plugin, and Google publishes the library first. A bump raised on the library fails every job in settings evaluation until the plugin ships (see PR #7832), so only the plugin moves the ref.",
+      "matchPackageNames": [
+        "com.android.tools.screenshot:screenshot-validation-api"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Restrict sensitive infrastructure to manual minor updates",
       "matchUpdateTypes": [
         "minor"

@@ -1,0 +1,10 @@
+<!-- Material Symbols "close_fullscreen" (outlined), already in the 0..960 box. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M120,896L64,840L264,640L144,640L144,560L400,560L400,816L320,816L320,696L120,896ZM560,400L560,144L640,144L640,264L840,64L896,120L696,320L816,320L816,400L560,400Z"/>
+</vector>

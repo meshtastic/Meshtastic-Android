@@ -66,10 +66,11 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:docs` | In-app documentation browser |
 | `feature:wifi-provision` | Wi-Fi provisioning |
 | `feature:widget` | Android home screen widgets (an Android library, not KMP) |
+| `feature:xr` | Android XR spatial shell: Full Space and an orbiter on a headset (an Android library, not KMP; google flavor only) |
 | `feature:discovery` | Mesh network discovery |
 
 Feature modules:
-- Use the `meshtastic.kmp.feature` convention plugin, except `feature:widget`, which applies `meshtastic.android.library`
+- Use the `meshtastic.kmp.feature` convention plugin, except `feature:widget` and `feature:xr`, which apply `meshtastic.android.library`
 - Depend on `core` modules, not on other `feature` modules. The two exceptions are `feature:map-maplibre` and `feature:coverage`, which both build on `feature:map` and `feature:map-terrain`
 - Own their navigation entries and DI registrations
 - Contain platform-specific implementations in `androidMain`/`jvmMain`/`iosMain`

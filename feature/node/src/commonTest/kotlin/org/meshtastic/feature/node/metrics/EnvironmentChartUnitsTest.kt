@@ -102,9 +102,11 @@ class EnvironmentChartUnitsTest {
     }
 
     @Test
-    fun sharedAxisMetricsHaveNoSuffix() {
-        assertEquals("", unitSuffix(Environment.HUMIDITY, isFahrenheit = true, isImperial = true))
+    fun unitSuffixNamesEachMetricsOwnUnit() {
+        assertEquals("%", unitSuffix(Environment.HUMIDITY, isFahrenheit = true, isImperial = true))
+        assertEquals(" hPa", unitSuffix(Environment.BAROMETRIC_PRESSURE, isFahrenheit = true, isImperial = true))
+        assertEquals(" lx", unitSuffix(Environment.LUX, isFahrenheit = true, isImperial = true))
+        assertEquals(" µR/h", unitSuffix(Environment.RADIATION, isFahrenheit = true, isImperial = true))
         assertEquals("", unitSuffix(Environment.IAQ, isFahrenheit = true, isImperial = true))
-        assertEquals("", unitSuffix(Environment.LUX, isFahrenheit = true, isImperial = true))
     }
 }

@@ -162,6 +162,7 @@
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="bluetooth_feature_discovery">Discovery</string>
     <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
+    <string name="bluetooth_fixed_pin_range">Six digits, 100000 to 999999</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_permission_blocked_notice">Nearby devices access is turned off and Android will not ask again. Turn it on in app settings to connect over Bluetooth, or connect over Wi-Fi or USB instead.</string>
     <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>
@@ -444,6 +445,7 @@
     <string name="device_model_capture">Take a picture</string>
     <string name="device_model_capture_failed">Couldn't save the picture</string>
     <string name="device_model_capture_saved">Saved to Pictures</string>
+    <string name="device_model_in_space_hint">It's beside the app, at real size. Pinch and drag it to move it.</string>
     <string name="device_model_load_failed">Couldn't load the 3D model</string>
     <string name="device_model_rest_face_down">Face down</string>
     <string name="device_model_rest_face_up">Face up</string>
@@ -914,7 +916,6 @@
     <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
-    <string name="iaq_level_dangerously_polluted">Dangerously Polluted</string>
     <string name="iaq_level_excellent">Excellent</string>
     <string name="iaq_level_extremely_polluted">Extremely Polluted</string>
     <string name="iaq_level_good">Good</string>
@@ -1870,8 +1871,8 @@
     <string name="remote_shell_modifier_locked">Locked</string>
     <string name="remote_shell_modifier_once">Applies to the next key</string>
     <string name="remote_shell_more_options">More options</string>
-    <string name="remote_shell_no_reply">No reply from the node. It must list your radio's public key as an admin key, and be in range.</string>
-    <string name="remote_shell_no_reply_reason">Could not open the session (%1$s). The node must list your radio's public key as an admin key, and be in range.</string>
+    <string name="remote_shell_no_reply">No reply from the node. It must have DMShell turned on in its config.yaml, list your radio's public key as an admin key, and be in range.</string>
+    <string name="remote_shell_no_reply_reason">Could not open the session (%1$s). The node must have DMShell turned on in its config.yaml, list your radio's public key as an admin key, and be in range.</string>
     <string name="remote_shell_open">Open terminal</string>
     <string name="remote_shell_open_description">Opens a shell on this node, starting a remote admin session first if needed</string>
     <string name="remote_shell_reconnect">Reconnect</string>
@@ -2389,6 +2390,17 @@
     <string name="write_nfc_subtext">Writing saves this link to an NFC tag anyone can tap.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
+    <!-- XR -->
+    <string name="xr_full_space">Full Space</string>
+    <string name="xr_home_space">Home Space</string>
+    <string name="xr_terrain_buildings">Buildings</string>
+    <string name="xr_terrain_empty">No nodes with a position yet, so there is no area to show.</string>
+    <string name="xr_terrain_flat">No terrain data for this area, so the ground is flat.</string>
+    <string name="xr_terrain_layer_elevation">Elevation</string>
+    <string name="xr_terrain_loading">Building the terrain…</string>
+    <string name="xr_terrain_map">3D map</string>
+    <string name="xr_terrain_unavailable">The terrain could not be loaded. Check the connection and try again.</string>
+    <string name="xr_terrain_zoom">Zoom</string>
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>

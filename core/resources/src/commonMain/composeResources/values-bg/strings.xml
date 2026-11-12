@@ -1110,7 +1110,7 @@
     <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
     <string name="routing_error_no_interface">Няма радио интерфейс</string>
     <string name="routing_error_no_route">Няма маршрут</string>
-    <string name="routing_error_none">Признато</string>
+    <string name="routing_error_none">Доставено на получателя</string>
     <string name="routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
     <string name="routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
     <string name="routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
@@ -1363,6 +1363,8 @@
     <string name="wind_gust">Порив на вятъра</string>
     <string name="wind_speed">Скорост на вятъра</string>
     <!-- WRITE -->
+    <!-- XR -->
+    <string name="xr_terrain_layer_elevation">Височина</string>
     <string name="you">Вие</string>
     <string name="zoom_in">Увеличаване</string>
     <string name="zoom_out">Намаляване</string>
