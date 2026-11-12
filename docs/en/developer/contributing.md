@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-10-21
+last_updated: 2026-11-12
 description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
@@ -105,6 +105,7 @@ node scripts/check-doc-coverage.js .
 node scripts/check-doc-aliases.js .
 node scripts/check-doc-freshness.js docs/en --max-age-days=180
 python3 scripts/docs/sync-locale-front-matter.py --check
+bash scripts/check-docs-screenshots.sh
 ```
 
 Prose in `docs/en/` follows Section 11 of the [Meshtastic Client Design Standards](https://github.com/meshtastic/design/tree/master/standards) — see [Documentation Style](documentation-style) for what's specific to this repository.

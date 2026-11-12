@@ -21,6 +21,11 @@ on:
       - "scripts/check-doc-freshness.js"
       - "scripts/validate-doc-links.js"
       - "scripts/lib/frontmatter.js"
+      - "scripts/check-docs-screenshots.sh"
+      - "docs/assets/screenshots/**"
+      - "screenshot-tests/docs-screenshot-aliases.properties"
+      - "screenshot-tests/src/screenshotTestDebug/reference/**"
+      - "docs-screenshots/src/screenshotTestDebug/reference/**"
       - ".github/workflows/docs-quality.yml"
   workflow_dispatch:
 
@@ -104,6 +109,11 @@ jobs:
         # before render and stripped again by sync-android-docs.js — so an alias authored in
         # frontmatter and never registered is a search term no consumer ever sees.
         run: node scripts/check-doc-aliases.js .
+
+      - name: Check docs screenshots against their references
+        # A re-recorded reference does not update its copy under docs/assets/screenshots, so a
+        # PR that changes one has to run copyDocsScreenshots too, or the docs keep the old UI.
+        run: bash scripts/check-docs-screenshots.sh
 
       - name: Check locale front matter
         # layout and nav_order in every docs/<locale>/ page must match docs/en, and no locale
