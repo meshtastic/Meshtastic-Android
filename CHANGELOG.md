@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.5-internal.1)
+### Internal (v2.8.5-internal.2)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
 #### 🏗️ Features
@@ -51,6 +51,7 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(node): name the DMShell opt-in when a node never answers the terminal by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7996
 * fix(connections): reject connect link and settings PINs with a leading zero by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8006
 * fix(build): let R8 pass over the Android XR system extensions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8023
+* fix(map): bound the memory map layers and coverage terrain hold by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8030
 #### 📝 Other Changes
 * fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
 <!-- UNRELEASED_END -->
