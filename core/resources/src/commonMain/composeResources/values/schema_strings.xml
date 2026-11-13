@@ -435,6 +435,8 @@
     <string name="schema_meshbeacon_broadcast_message_description">Message for beacon broadcasts, up to 60 bytes.</string>
     <string name="schema_mqtt_address">Address</string>
     <string name="schema_mqtt_address_description">MQTT server address</string>
+    <string name="schema_mqtt_downlink_targeted_only">Targeted Downlink Only</string>
+    <string name="schema_mqtt_downlink_targeted_only_description">Only transmit downlinked packets that are addressed to this gateway.</string>
     <string name="schema_mqtt_enabled">MQTT Enabled</string>
     <string name="schema_mqtt_enabled_description">Enable MQTT gateway</string>
     <string name="schema_mqtt_encryption_enabled">Encryption Enabled</string>
