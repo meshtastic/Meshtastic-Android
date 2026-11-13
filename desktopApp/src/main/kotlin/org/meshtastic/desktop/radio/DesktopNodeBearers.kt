@@ -22,6 +22,7 @@ import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.network.radio.NodeBearers
 import org.meshtastic.node.BytesStore
 import org.meshtastic.node.desktop.JvmBearerFactory
+import org.meshtastic.node.desktop.parseExtraLoraRadios
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.store.file.AtomicFileStore
@@ -40,7 +41,11 @@ class DesktopNodeBearers : NodeBearers {
 
     override val hostSignals: StateFlow<HostState> = MutableStateFlow(HostState())
 
-    override fun factory(signals: StateFlow<HostState>): BearerFactory = JvmBearerFactory(signals)
+    override fun factory(signals: StateFlow<HostState>): BearerFactory = JvmBearerFactory(
+        signals,
+        extraLora =
+        parseExtraLoraRadios(System.getenv(LORA_EXTRA_VAR), System.getenv(LORA_BOARD_VAR), LORA_EXTRA_VAR),
+    )
 
     override fun storesDir(): String = nodeDir.path
 
@@ -49,5 +54,7 @@ class DesktopNodeBearers : NodeBearers {
     private companion object {
         const val NODE_DIR = "node"
         const val HOST_BEARERS_FILE = "host-bearers.bin"
+        const val LORA_EXTRA_VAR = "MESH_LORA_EXTRA"
+        const val LORA_BOARD_VAR = "MESH_LORA_BOARD"
     }
 }
