@@ -16,12 +16,53 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 class PositionPrecisionTest {
+
+    private fun settingsWithPrecision(bits: Int) = ChannelSettings.Builder()
+        .also { wb ->
+            wb.module_settings = ModuleSettings.Builder().also { mb -> mb.position_precision = bits }.build()
+        }
+        .build()
+
+    @Test
+    fun `a public key channel has precise location capped at the firmware ceiling`() {
+        val capped = settingsWithPrecision(32).withOnWirePrecision(usesPublicKey = true)
+
+        assertEquals(15, capped.module_settings?.position_precision)
+    }
+
+    @Test
+    fun `a public key channel with no module settings shares nothing explicitly`() {
+        val capped = ChannelSettings.Builder().build().withOnWirePrecision(usesPublicKey = true)
+
+        assertEquals(0, capped.module_settings?.position_precision)
+    }
+
+    @Test
+    fun `a public key channel keeps a coarser precision and position off`() {
+        val coarse = settingsWithPrecision(13)
+        val off = settingsWithPrecision(0)
+
+        assertSame(coarse, coarse.withOnWirePrecision(usesPublicKey = true))
+        assertSame(off, off.withOnWirePrecision(usesPublicKey = true))
+    }
+
+    @Test
+    fun `a private key channel is left as configured`() {
+        val precise = settingsWithPrecision(32)
+        val unset = ChannelSettings.Builder().build()
+
+        assertSame(precise, precise.withOnWirePrecision(usesPublicKey = false))
+        assertSame(unset, unset.withOnWirePrecision(usesPublicKey = false))
+    }
 
     @Test
     fun `radii match the values the OSMdroid marker used`() {
@@ -43,6 +84,26 @@ class PositionPrecisionTest {
         DEGRADED_PRECISION_BITS.forEach { bits ->
             assertNotNull(precisionRadiusMetersOrNull(bits), "no radius for precision_bits=$bits")
         }
+    }
+
+    @Test
+    fun `a public key caps precision at the firmware ceiling`() {
+        assertEquals(15, onWirePrecisionBits(32, usesPublicKey = true))
+        assertEquals(15, onWirePrecisionBits(19, usesPublicKey = true))
+        assertEquals(15, onWirePrecisionBits(15, usesPublicKey = true))
+        assertEquals(13, onWirePrecisionBits(13, usesPublicKey = true))
+    }
+
+    @Test
+    fun `a public key leaves position sharing off`() {
+        assertEquals(0, onWirePrecisionBits(0, usesPublicKey = true))
+    }
+
+    @Test
+    fun `a private key sends the configured precision`() {
+        assertEquals(32, onWirePrecisionBits(32, usesPublicKey = false))
+        assertEquals(19, onWirePrecisionBits(19, usesPublicKey = false))
+        assertEquals(0, onWirePrecisionBits(0, usesPublicKey = false))
     }
 
     @Test

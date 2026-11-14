@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.model.Channel
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 import org.meshtastic.proto.Position
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -27,6 +30,36 @@ import kotlin.math.sqrt
  * precision — and there is no uncertainty circle to draw.
  */
 val DEGRADED_PRECISION_BITS: IntRange = 10..19
+
+/** The finest precision firmware sends on a publicly decryptable channel (`MAX_POSITION_PRECISION_PUBLIC_KEY`). */
+const val MAX_PUBLIC_KEY_PRECISION_BITS = 15
+
+/** The precision firmware puts on the wire for a channel configured with [precisionBits]. */
+fun onWirePrecisionBits(precisionBits: Int, usesPublicKey: Boolean): Int =
+    if (usesPublicKey) precisionBits.coerceAtMost(MAX_PUBLIC_KEY_PRECISION_BITS) else precisionBits
+
+/**
+ * These settings with the public-key ceiling written into them, for whoever stores or sends them.
+ *
+ * Absent module settings become an explicit zero on a public key: firmware before 2.8 reads their absence on a primary
+ * channel as full precision.
+ */
+fun ChannelSettings.withOnWirePrecision(usesPublicKey: Boolean): ChannelSettings {
+    val module = module_settings
+    val onWire = onWirePrecisionBits(module?.position_precision ?: 0, usesPublicKey)
+    if (!usesPublicKey || onWire == module?.position_precision) return this
+    val capped =
+        (module ?: ModuleSettings.Builder().build()).newBuilder().also { wb -> wb.position_precision = onWire }.build()
+    return newBuilder().also { wb -> wb.module_settings = capped }.build()
+}
+
+/** Each channel with [withOnWirePrecision] applied, the first being the primary the others inherit a key from. */
+fun List<ChannelSettings>.withOnWirePrecision(): List<ChannelSettings> {
+    val primary = firstOrNull()
+    return mapIndexed { index, settings ->
+        settings.withOnWirePrecision(Channel.usesPublicKey(settings, primary.takeIf { index > 0 }))
+    }
+}
 
 /**
  * Radius, in metres, of the uncertainty circle a firmware `precision_bits` implies, or null when the position is not

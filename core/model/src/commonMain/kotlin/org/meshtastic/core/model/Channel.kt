@@ -70,6 +70,25 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
             )
 
         fun getRandomKey(size: Int = 32): ByteString = platformRandomBytes(size).toByteString()
+
+        /**
+         * Whether firmware treats this channel's key as publicly decryptable, as `Channels::usesPublicKey` does.
+         *
+         * @param primary the primary channel when [settings] is a secondary, which inherits its key when unset.
+         */
+        fun usesPublicKey(settings: ChannelSettings, primary: ChannelSettings? = null): Boolean {
+            val psk = settings.psk
+            return when (psk.size) {
+                0 -> primary == null || usesPublicKey(primary)
+
+                1 -> true
+
+                // The last byte selects a member of the default-key family, so it is not compared.
+                channelDefaultKey.size -> psk.rangeEquals(0, channelDefaultKey, 0, channelDefaultKey.size - 1)
+
+                else -> false
+            }
+        }
     }
 
     // Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec

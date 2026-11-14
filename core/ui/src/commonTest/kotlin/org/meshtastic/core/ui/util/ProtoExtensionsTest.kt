@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.util.getChannelReplacementList
 import org.meshtastic.core.model.util.normalizeReplacementSettings
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Channel
@@ -213,10 +214,10 @@ class ProtoExtensionsTest {
             radioController.localChannels.map { it.role },
         )
         assertEquals(
-            importedSettings + List(6) { ChannelSettings.Builder().build() },
+            importedSettings.withOnWirePrecision() + List(6) { ChannelSettings.Builder().build() },
             radioController.localChannels.map { it.settings ?: error("Channel write omitted settings") },
         )
-        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
+        assertEquals(importedSettings.withOnWirePrecision(), radioConfigRepository.currentChannelSet.settings)
     }
 
     @Test
@@ -286,7 +287,7 @@ class ProtoExtensionsTest {
         )
 
         assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
-        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
+        assertEquals(importedSettings.withOnWirePrecision(), radioConfigRepository.currentChannelSet.settings)
     }
 
     @Test
@@ -368,7 +369,10 @@ class ProtoExtensionsTest {
         )
 
         // Cache holds the normalized 7-entry set, not the raw 9-entry import.
-        assertEquals(listOf(ch0, ch1, ch2, ch3, ch4, ch5, ch6), radioConfigRepository.currentChannelSet.settings)
+        assertEquals(
+            listOf(ch0, ch1, ch2, ch3, ch4, ch5, ch6).withOnWirePrecision(),
+            radioConfigRepository.currentChannelSet.settings,
+        )
     }
 
     @Test

@@ -171,6 +171,7 @@ private fun ChannelConfigScreen(
             channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings.Builder().build(),
             modemPresetName = modemPresetName,
             initialPskEditState = pskEditStatesInput.getOrElse(index) { ChannelPskEditState() },
+            primarySettings = settingsListInput.firstOrNull().takeIf { index > 0 },
             onAddClick = { settings, pskEditState ->
                 if (settingsListInput.size > index) {
                     settingsListInput[index] = settings

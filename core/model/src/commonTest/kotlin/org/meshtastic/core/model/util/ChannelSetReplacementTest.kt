@@ -16,12 +16,16 @@
  */
 package org.meshtastic.core.model.util
 
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import org.meshtastic.core.model.Channel as ModelChannel
 
 class ChannelSetReplacementTest {
 
@@ -42,7 +46,7 @@ class ChannelSetReplacementTest {
                     requirePrimary = true,
                 )
 
-        assertEquals(listOf(primary) + uniqueSecondaries, plan.normalizedSettings)
+        assertEquals((listOf(primary) + uniqueSecondaries).map { it.name }, plan.normalizedSettings.map { it.name })
         assertEquals((0..7).toList(), plan.channelWrites.map(Channel::index))
         assertEquals(Channel.Role.PRIMARY, plan.channelWrites.first().role)
         assertEquals(List(7) { Channel.Role.SECONDARY }, plan.channelWrites.drop(1).map(Channel::role))
@@ -60,5 +64,59 @@ class ChannelSetReplacementTest {
                     requirePrimary = true,
                 )
         }
+    }
+
+    private val privateKey = ByteArray(32) { it.toByte() }.toByteString()
+
+    private fun channel(name: String, psk: ByteString, precision: Int?) = ChannelSettings.Builder()
+        .also { wb ->
+            wb.name = name
+            wb.psk = psk
+            if (precision != null) {
+                wb.module_settings =
+                    ModuleSettings.Builder().also { mb -> mb.position_precision = precision }.build()
+            }
+        }
+        .build()
+
+    private fun importedPrecisions(vararg settings: ChannelSettings): List<Int?> {
+        val plan =
+            ChannelSet.Builder()
+                .also { wb -> wb.settings = settings.toList() }
+                .build()
+                .toChannelReplacementPlan(currentSettings = emptyList(), fallbackLoraConfig = null)
+        val written = plan.channelWrites.take(settings.size).map { it.settings?.module_settings?.position_precision }
+        assertEquals(plan.normalizedSettings.map { it.module_settings?.position_precision }, written)
+        return written
+    }
+
+    @Test
+    fun `an imported public key channel is written with precise location capped`() {
+        val defaultKey = ModelChannel.default.settings.psk
+
+        assertEquals(listOf(15), importedPrecisions(channel("Public", defaultKey, precision = 32)))
+        assertEquals(listOf(13), importedPrecisions(channel("Public", defaultKey, precision = 13)))
+    }
+
+    @Test
+    fun `an imported public key channel with no module settings is written with position off`() {
+        assertEquals(listOf(0), importedPrecisions(channel("Public", ModelChannel.default.settings.psk, null)))
+    }
+
+    @Test
+    fun `an imported private key channel keeps what it carried`() {
+        assertEquals(listOf(32), importedPrecisions(channel("Private", privateKey, precision = 32)))
+        assertEquals(listOf(null), importedPrecisions(channel("Private", privateKey, precision = null)))
+    }
+
+    @Test
+    fun `an imported secondary with no key follows the primary`() {
+        val inheriting = channel("Inherits", ByteString.EMPTY, precision = 32)
+
+        assertEquals(
+            listOf(15, 15),
+            importedPrecisions(channel("Public", ModelChannel.default.settings.psk, precision = 32), inheriting),
+        )
+        assertEquals(listOf(32, 32), importedPrecisions(channel("Private", privateKey, precision = 32), inheriting))
     }
 }

@@ -34,11 +34,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.model.util.MAX_PUBLIC_KEY_PRECISION_BITS
+import org.meshtastic.core.model.util.onWirePrecisionBits
 import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.position_enabled
 import org.meshtastic.core.resources.precise_location
+import org.meshtastic.core.resources.precise_location_insecure_channel
 import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.math.roundToInt
 
@@ -55,7 +58,11 @@ fun PositionPrecisionPreference(
     enabled: Boolean,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    usesPublicKey: Boolean = false,
 ) {
+    // Firmware 2.8 caps a public key at this on the wire; the controls apply the same cap on every firmware.
+    val shown = onWirePrecisionBits(value, usesPublicKey)
+    val finest = if (usesPublicKey) MAX_PUBLIC_KEY_PRECISION_BITS else POSITION_PRECISION_MAX
     val unit =
         if (LocalInspectionMode.current) {
             // Previews and screenshot tests render with no Koin application; the value itself is arbitrary there.
@@ -70,7 +77,12 @@ fun PositionPrecisionPreference(
             checked = value != POSITION_DISABLED,
             enabled = enabled,
             onCheckedChange = { enabled ->
-                val newValue = if (enabled) POSITION_ENABLED else POSITION_DISABLED
+                val newValue =
+                    when {
+                        !enabled -> POSITION_DISABLED
+                        usesPublicKey -> POSITION_PRECISION_DEFAULT
+                        else -> POSITION_ENABLED
+                    }
                 onValueChanged(newValue)
             },
             padding = PaddingValues(0.dp),
@@ -78,8 +90,9 @@ fun PositionPrecisionPreference(
         if (value != POSITION_DISABLED) {
             SwitchPreference(
                 title = stringResource(Res.string.precise_location),
-                checked = value == POSITION_ENABLED,
-                enabled = enabled,
+                summary = if (usesPublicKey) stringResource(Res.string.precise_location_insecure_channel) else "",
+                checked = shown == POSITION_ENABLED,
+                enabled = enabled && !usesPublicKey,
                 onCheckedChange = { enabled ->
                     val newValue = if (enabled) POSITION_ENABLED else POSITION_PRECISION_DEFAULT
                     onValueChanged(newValue)
@@ -87,17 +100,17 @@ fun PositionPrecisionPreference(
                 padding = PaddingValues(0.dp),
             )
         }
-        if (value in (POSITION_DISABLED + 1) until POSITION_ENABLED) {
+        if (shown in (POSITION_DISABLED + 1) until POSITION_ENABLED) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Slider(
-                    value = value.toFloat(),
+                    value = shown.toFloat(),
                     onValueChange = { onValueChanged(it.roundToInt()) },
                     enabled = enabled,
-                    valueRange = POSITION_PRECISION_MIN.toFloat()..POSITION_PRECISION_MAX.toFloat(),
-                    steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
+                    valueRange = POSITION_PRECISION_MIN.toFloat()..finest.toFloat(),
+                    steps = finest - POSITION_PRECISION_MIN - 1,
                 )
 
-                val precisionMeters = precisionRadiusMetersOrNull(value)?.toInt()
+                val precisionMeters = precisionRadiusMetersOrNull(shown)?.toInt()
                 Text(
                     text = "± ${precisionMeters?.toDistanceString(unit).orEmpty()}",
                     modifier = Modifier.padding(bottom = 16.dp),
