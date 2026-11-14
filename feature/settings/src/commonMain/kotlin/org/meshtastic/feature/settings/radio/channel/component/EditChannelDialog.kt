@@ -72,7 +72,7 @@ fun EditChannelDialog(
         onDismiss = onDismissRequest,
         dismissText = stringResource(Res.string.cancel),
         confirmText = stringResource(Res.string.save),
-        onConfirm = { onAddClick(channelInput.withOnWirePrecision(usesPublicKey), pskEditState) },
+        onConfirm = { onAddClick(channelInput.confirmed(primarySettings), pskEditState) },
         modifier = modifier,
         title = "", // Title is handled internally by specific items if needed, or we could add one
         text = {
@@ -159,6 +159,10 @@ data class ChannelPskEditState(
     val generatedPskForName: Boolean = false,
     val pskExplicitlyEdited: Boolean = false,
 )
+
+/** The settings the dialog hands back on save, with precise location capped where the key is public. */
+internal fun ChannelSettings.confirmed(primarySettings: ChannelSettings?): ChannelSettings =
+    withOnWirePrecision(Channel.usesPublicKey(this, primarySettings))
 
 internal data class ChannelNameUpdate(val settings: ChannelSettings, val pskEditState: ChannelPskEditState)
 

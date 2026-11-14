@@ -18,6 +18,7 @@ package org.meshtastic.feature.settings.radio.channel.component
 
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -84,5 +85,41 @@ class EditChannelDialogTest {
         assertEquals("", update.settings.name)
         assertEquals(Channel.default.settings.psk, update.settings.psk)
         assertFalse(update.pskEditState.generatedPskForName)
+    }
+
+    private val privatePrimary = ChannelSettings.Builder().also { wb -> wb.psk = Channel.getRandomKey() }.build()
+
+    private fun ChannelSettings.withPrecision(bits: Int) = newBuilder()
+        .also { wb ->
+            wb.module_settings = ModuleSettings.Builder().also { mb -> mb.position_precision = bits }.build()
+        }
+        .build()
+
+    @Test
+    fun `saving a default key channel caps precise location`() {
+        val saved = Channel.default.settings.withPrecision(32).confirmed(primarySettings = null)
+
+        assertEquals(15, saved.module_settings?.position_precision)
+    }
+
+    @Test
+    fun `saving a default key channel with no module settings writes position off`() {
+        val saved = Channel.default.settings.confirmed(primarySettings = null)
+
+        assertEquals(0, saved.module_settings?.position_precision)
+    }
+
+    @Test
+    fun `saving a keyless secondary caps precise location under a public primary`() {
+        val keyless = ChannelSettings.Builder().build().withPrecision(32)
+
+        assertEquals(15, keyless.confirmed(Channel.default.settings).module_settings?.position_precision)
+    }
+
+    @Test
+    fun `saving a keyless secondary keeps precise location under a private primary`() {
+        val keyless = ChannelSettings.Builder().build().withPrecision(32)
+
+        assertEquals(32, keyless.confirmed(privatePrimary).module_settings?.position_precision)
     }
 }
