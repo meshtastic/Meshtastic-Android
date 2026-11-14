@@ -1734,6 +1734,7 @@
     <string name="powered">Powered</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Precise location</string>
+    <string name="precise_location_insecure_channel">Not available on a channel that is not securely encrypted</string>
     <string name="preferences_language">Language</string>
     <string name="preferences_system_default">System default</string>
     <string name="preserve_favorites">Preserve Favorites?</string>

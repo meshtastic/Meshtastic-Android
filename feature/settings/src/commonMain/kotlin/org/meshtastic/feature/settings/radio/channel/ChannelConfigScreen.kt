@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.cancel
@@ -171,6 +172,7 @@ private fun ChannelConfigScreen(
             channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings.Builder().build(),
             modemPresetName = modemPresetName,
             initialPskEditState = pskEditStatesInput.getOrElse(index) { ChannelPskEditState() },
+            primarySettings = settingsListInput.primaryFor(index),
             onAddClick = { settings, pskEditState ->
                 if (settingsListInput.size > index) {
                     settingsListInput[index] = settings
@@ -278,7 +280,8 @@ private fun ChannelConfigScreen(
                             positiveText = stringResource(Res.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                val committedSettings = settingsListInput.toList()
+                                // A key edit on the primary changes which keyless secondaries are public.
+                                val committedSettings = settingsListInput.toList().withOnWirePrecision()
                                 onPositiveClicked(committedSettings)
                                 settingsListInput.replaceWith(committedSettings)
                                 pskEditStatesInput.replaceAll(committedSettings.size, ChannelPskEditState())
@@ -315,6 +318,9 @@ private val channelPskEditStatesSaver =
 internal fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
     add(toIndex, removeAt(fromIndex))
 }
+
+/** The primary channel a secondary at [index] inherits an unset key from, or null for the primary itself. */
+internal fun List<ChannelSettings>.primaryFor(index: Int): ChannelSettings? = firstOrNull().takeIf { index > 0 }
 
 internal fun <T> MutableList<T>.replaceWith(values: List<T>) {
     clear()

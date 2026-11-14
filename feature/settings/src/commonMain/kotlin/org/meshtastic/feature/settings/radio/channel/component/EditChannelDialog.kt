@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.channel_name
@@ -58,18 +59,20 @@ fun EditChannelDialog(
     modifier: Modifier = Modifier,
     modemPresetName: String = stringResource(Res.string.default_),
     initialPskEditState: ChannelPskEditState = ChannelPskEditState(),
+    primarySettings: ChannelSettings? = null,
 ) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
     var pskEditState by remember(channelSettings, initialPskEditState) { mutableStateOf(initialPskEditState) }
+    val usesPublicKey = Channel.usesPublicKey(channelInput, primarySettings)
 
     MeshtasticDialog(
         onDismiss = onDismissRequest,
         dismissText = stringResource(Res.string.cancel),
         confirmText = stringResource(Res.string.save),
-        onConfirm = { onAddClick(channelInput, pskEditState) },
+        onConfirm = { onAddClick(channelInput.confirmed(primarySettings), pskEditState) },
         modifier = modifier,
         title = "", // Title is handled internally by specific items if needed, or we could add one
         text = {
@@ -137,6 +140,7 @@ fun EditChannelDialog(
                 val moduleSettings = channelInput.module_settings ?: ModuleSettings.Builder().build()
                 PositionPrecisionPreference(
                     enabled = true,
+                    usesPublicKey = usesPublicKey,
                     value = moduleSettings.position_precision,
                     onValueChanged = {
                         val updatedModule =
@@ -155,6 +159,10 @@ data class ChannelPskEditState(
     val generatedPskForName: Boolean = false,
     val pskExplicitlyEdited: Boolean = false,
 )
+
+/** The settings the dialog hands back on save, with precise location capped where the key is public. */
+internal fun ChannelSettings.confirmed(primarySettings: ChannelSettings?): ChannelSettings =
+    withOnWirePrecision(Channel.usesPublicKey(this, primarySettings))
 
 internal data class ChannelNameUpdate(val settings: ChannelSettings, val pskEditState: ChannelPskEditState)
 

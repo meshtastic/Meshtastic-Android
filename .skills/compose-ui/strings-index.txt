@@ -1668,6 +1668,7 @@ power_metrics_log
 powered
 ppm
 precise_location
+precise_location_insecure_channel
 preferences_language
 preferences_system_default
 preserve_favorites

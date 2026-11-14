@@ -16,9 +16,13 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import org.meshtastic.core.model.Channel
 import org.meshtastic.feature.settings.radio.channel.component.ChannelPskEditState
+import org.meshtastic.proto.ChannelSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ChannelConfigScreenTest {
@@ -83,5 +87,18 @@ class ChannelConfigScreenTest {
         list.replaceAll(size = 1, value = ChannelPskEditState())
 
         assertEquals(listOf(ChannelPskEditState()), list)
+    }
+
+    private val publicPrimary = Channel.default.settings
+    private val secondary = ChannelSettings.Builder().also { wb -> wb.name = "Second" }.build()
+
+    @Test
+    fun `editing a secondary resolves its key against the primary`() {
+        assertSame(publicPrimary, listOf(publicPrimary, secondary).primaryFor(index = 1))
+    }
+
+    @Test
+    fun `editing the primary has no other channel to inherit a key from`() {
+        assertNull(listOf(publicPrimary, secondary).primaryFor(index = 0))
     }
 }

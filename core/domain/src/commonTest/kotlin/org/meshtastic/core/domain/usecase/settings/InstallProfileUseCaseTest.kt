@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.log.expectedConditionLabel
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -269,8 +270,11 @@ class InstallProfileUseCaseTest {
             ),
             channelWrites.map { it.channel.role },
         )
-        assertEquals(listOf(primary, secondary), channelWrites.take(2).map { it.channel.settings })
-        assertEquals(listOf(primary, secondary), radioConfigRepository.currentChannelSet.settings)
+        assertEquals(
+            listOf(primary, secondary).withOnWirePrecision(),
+            channelWrites.take(2).map { it.channel.settings },
+        )
+        assertEquals(listOf(primary, secondary).withOnWirePrecision(), radioConfigRepository.currentChannelSet.settings)
         assertEquals(urlLoraConfig, radioConfigRepository.currentChannelSet.lora_config)
         assertEquals(
             listOf(
@@ -371,7 +375,7 @@ class InstallProfileUseCaseTest {
         )
 
         assertTrue(radioController.localConfigs.isEmpty())
-        assertEquals(listOf(importedPrimary), radioConfigRepository.currentChannelSet.settings)
+        assertEquals(listOf(importedPrimary).withOnWirePrecision(), radioConfigRepository.currentChannelSet.settings)
         assertEquals(cachedLoraConfig, radioConfigRepository.currentChannelSet.lora_config)
     }
 
@@ -440,7 +444,7 @@ class InstallProfileUseCaseTest {
                     .also { wb ->
                         wb.index = 0
                         wb.role = Channel.Role.PRIMARY
-                        wb.settings = remotePrimary
+                        wb.settings = remotePrimary.withOnWirePrecision(usesPublicKey = true)
                     }
                     .build(),
             ),
