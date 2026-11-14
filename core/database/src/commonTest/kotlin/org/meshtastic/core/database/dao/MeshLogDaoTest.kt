@@ -66,6 +66,29 @@ class MeshLogDaoTest {
     }
 
     @Test
+    fun getLatestOfTypeReturnsTheNewestLogOfThatTypeOrNull() = runTest {
+        meshLogDao.insert(logEntry("old-info", time = 100).copy(message_type = "MyInfo"))
+        meshLogDao.insert(logEntry("new-info", time = 300).copy(message_type = "MyInfo"))
+        meshLogDao.insert(logEntry("newer-packet", time = 400))
+
+        assertEquals("new-info", meshLogDao.getLatestOfType("MyInfo").first()?.uuid)
+        assertEquals(null, meshLogDao.getLatestOfType("Rebooted").first())
+    }
+
+    @Test
+    fun getLogsFromPortReturnsOnePortNewestFirstUpToTheLimit() = runTest {
+        meshLogDao.insert(logEntry("t-1", time = 100))
+        meshLogDao.insert(logEntry("t-2", time = 200))
+        meshLogDao.insert(logEntry("t-3", time = 300))
+        meshLogDao.insert(logEntry("position", portNum = PortNum.POSITION_APP.value, time = 400))
+        meshLogDao.insert(logEntry("other-node", time = 500).copy(fromNum = testFromNum + 1))
+
+        val logs = meshLogDao.getLogsFromPort(testFromNum, PortNum.TELEMETRY_APP.value, 2).first()
+
+        assertEquals(listOf("t-3", "t-2"), logs.map { it.uuid })
+    }
+
+    @Test
     fun testDeleteLogsByUuidAtomicRemovesAll() = runTest {
         meshLogDao.insert(logEntry("log-1", time = 100))
         meshLogDao.insert(logEntry("log-2", time = 200))

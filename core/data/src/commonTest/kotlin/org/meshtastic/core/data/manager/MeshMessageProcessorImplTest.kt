@@ -263,6 +263,36 @@ class MeshMessageProcessorImplTest {
         }
 
     @Test
+    fun `a second packet from another node soon after the first updates only its sender`() = runTest(testDispatcher) {
+        isNodeDbReady.value = true
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[2] as (suspend () -> Unit)
+                block()
+                true
+            }
+        processor = createProcessor(backgroundScope)
+        val updatedNodes = mutableListOf<Int>()
+        every { nodeManager.updateNodeForSession(any(), session, any(), any()) } calls
+            {
+                updatedNodes += it.arg<Int>(0)
+            }
+
+        for (id in 9..10) {
+            val packet = textPacket(id = id, from = 999)
+            processor.handleFromRadio(
+                frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
+                myNodeNum,
+            )
+        }
+        advanceUntilIdle()
+
+        assertEquals(listOf(myNodeNum, 999, 999), updatedNodes)
+    }
+
+    @Test
     fun `handleFromRadio names the handler by variant and port without payload`() = runTest(testDispatcher) {
         isNodeDbReady.value = true
         val labels = mutableListOf<String>()

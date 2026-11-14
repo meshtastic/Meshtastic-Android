@@ -168,7 +168,7 @@ class MeshMessageProcessorImpl(
                 proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
                 proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
-                myInfo != null -> "MyInfo" to myInfo.toOneLineString()
+                myInfo != null -> MeshLog.TYPE_MY_INFO to myInfo.toOneLineString()
                 nodeInfo != null -> "NodeInfo" to nodeInfo.toPIIString()
                 config != null -> "Config" to config.toOneLineString()
                 moduleConfig != null -> "ModuleConfig" to moduleConfig.toOneLineString()
@@ -299,9 +299,8 @@ class MeshMessageProcessorImpl(
                 applySenderPacketUpdate(node, packet, decoded).copy(lastHeard = nowSeconds.toInt())
             }
         } else {
-            nodeManager.updateNodeForSession(myNodeNum, session) { node: Node ->
-                node.copy(lastHeard = nowSeconds.toInt())
-            }
+            // Throttled: every packet from another node proves the link, but each write re-runs every nodes query.
+            refreshLocalNodeLastHeard(session, myNodeNum)
             nodeManager.updateNodeForSession(from, session, channel = packet.channel) { node ->
                 applySenderPacketUpdate(node, packet, decoded)
             }
@@ -354,12 +353,15 @@ class MeshMessageProcessorImpl(
      * is enabled), refreshes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS]. The write is scheduled
      * on the node's session lease like the packet updates, so the handler never waits on the database.
      */
-    private fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
+    private fun refreshLocalNodeLastHeard(
+        session: RadioSessionContext,
+        localNodeNum: Int? = nodeManager.myNodeNum.value,
+    ) {
         val now = nowMillis
         val sameGeneration = lastLocalNodeRefreshGeneration == session.generation
         if (sameGeneration && now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
 
-        val myNum = nodeManager.myNodeNum.value ?: return
+        val myNum = localNodeNum ?: return
         nodeManager.updateNodeForSession(myNum, session) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
         lastLocalNodeRefreshGeneration = session.generation
         lastLocalNodeRefreshMs = now

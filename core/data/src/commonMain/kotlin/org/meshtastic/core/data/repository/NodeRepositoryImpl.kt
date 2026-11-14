@@ -246,21 +246,15 @@ class NodeRepositoryImpl(
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(MetadataEntity(nodeNum, metadata)) }
 
-    /** Flow emitting the count of nodes currently considered "online". */
+    /**
+     * Flow emitting the count of nodes currently considered "online". Counted from [nodeDBbyNum], which already holds
+     * the table, so a collector adds no database query.
+     */
     override val onlineNodeCount: Flow<Int> =
-        nodeInfoReadDataSource
-            .nodeDBbyNumFlow()
-            .mapLatest { map -> map.values.count { it.node.lastHeard > onlineTimeThreshold() } }
-            .flowOn(dispatchers.io)
-            .conflate()
+        nodeDBbyNum.map { map -> map.values.count { it.lastHeard > onlineTimeThreshold() } }.distinctUntilChanged()
 
-    /** Flow emitting the total number of nodes in the database. */
-    override val totalNodeCount: Flow<Int> =
-        nodeInfoReadDataSource
-            .nodeDBbyNumFlow()
-            .mapLatest { map -> map.values.count() }
-            .flowOn(dispatchers.io)
-            .conflate()
+    /** Flow emitting the total number of nodes in the database, counted from [nodeDBbyNum]. */
+    override val totalNodeCount: Flow<Int> = nodeDBbyNum.map { it.size }.distinctUntilChanged()
 
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }

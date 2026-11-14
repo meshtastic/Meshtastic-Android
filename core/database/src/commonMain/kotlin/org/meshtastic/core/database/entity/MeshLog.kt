@@ -47,7 +47,14 @@ import org.meshtastic.core.model.MeshLog as ExternalMeshLog
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
 @Entity(
     tableName = "log",
-    indices = [Index(value = ["from_num"]), Index(value = ["port_num"]), Index(value = ["received_date"])],
+    indices =
+    [
+        Index(value = ["from_num"]),
+        Index(value = ["port_num"]),
+        Index(value = ["received_date"]),
+        Index(value = ["from_num", "port_num", "received_date"]),
+        Index(value = ["type", "received_date"]),
+    ],
 )
 data class MeshLog(
     @PrimaryKey val uuid: String,

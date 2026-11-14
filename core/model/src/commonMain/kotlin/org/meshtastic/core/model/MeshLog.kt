@@ -64,5 +64,8 @@ data class MeshLog(
          * changes.
          */
         const val NODE_NUM_LOCAL = 0
+
+        /** [message_type] of the log that holds the radio's `MyNodeInfo`, written once per config download. */
+        const val TYPE_MY_INFO = "MyInfo"
     }
 }

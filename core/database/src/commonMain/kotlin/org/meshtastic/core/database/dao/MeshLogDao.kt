@@ -66,6 +66,23 @@ interface MeshLogDao {
     @Query(LOGS_FROM_QUERY)
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
+    /**
+     * [getLogsFrom] for one port. Without the any-port branch SQLite walks the (from_num, port_num, received_date)
+     * index newest first and stops at [maxItem], with no sort.
+     */
+    @Query(
+        """
+        SELECT * FROM log
+        WHERE from_num = :fromNum AND port_num = :portNum
+        ORDER BY received_date DESC LIMIT :maxItem
+        """,
+    )
+    fun getLogsFromPort(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
+
+    /** The newest log of [type], or null. Re-runs on every log write, so it reads one row through its index. */
+    @Query("SELECT * FROM log WHERE type = :type ORDER BY received_date DESC LIMIT 1")
+    fun getLatestOfType(type: String): Flow<MeshLog?>
+
     /** Retrieves [MeshLog]s on 'port_num' (PortNum) from any node except [excludeFromNum]. */
     @Query(
         """
