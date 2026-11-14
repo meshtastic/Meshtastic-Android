@@ -70,7 +70,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -99,6 +98,7 @@ import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.resources.desktop_update_available_message
 import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.MeshLogCleanup
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
@@ -387,8 +387,8 @@ private fun rememberAvailableUpdate(notificationManager: DesktopNotificationMana
         updateInfo?.let { update ->
             notificationManager.dispatch(
                 Notification(
-                    title = getString(Res.string.desktop_update_available_title),
-                    message = getString(Res.string.desktop_update_available_message, update.versionName),
+                    title = getStringSuspend(Res.string.desktop_update_available_title),
+                    message = getStringSuspend(Res.string.desktop_update_available_message, update.versionName),
                     category = Notification.Category.Service,
                 ),
             )

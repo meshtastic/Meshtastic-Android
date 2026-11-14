@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -36,6 +35,7 @@ import org.meshtastic.core.resources.chirpy_error_unknown
 import org.meshtastic.core.resources.chirpy_error_unsupported_flavor
 import org.meshtastic.core.resources.chirpy_error_unsupported_platform
 import org.meshtastic.core.resources.chirpy_suggested_pages_help
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.ChirpyMessage
@@ -200,16 +200,23 @@ private suspend fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyM
     is AIDocAssistantResult.Error -> {
         val errorMessage =
             when (result.reason) {
-                DocsAiError.UnsupportedPlatform -> getString(CoreRes.string.chirpy_error_unsupported_platform)
-                DocsAiError.UnsupportedFlavor -> getString(CoreRes.string.chirpy_error_unsupported_flavor)
-                DocsAiError.ModelUnavailable -> getString(CoreRes.string.chirpy_error_model_unavailable)
-                DocsAiError.Busy -> getString(CoreRes.string.chirpy_error_busy)
-                DocsAiError.TokenBudgetExceeded -> getString(CoreRes.string.chirpy_error_token_budget_exceeded)
-                DocsAiError.Unknown -> getString(CoreRes.string.chirpy_error_unknown)
+                DocsAiError.UnsupportedPlatform ->
+                    getStringSuspend(CoreRes.string.chirpy_error_unsupported_platform)
+
+                DocsAiError.UnsupportedFlavor -> getStringSuspend(CoreRes.string.chirpy_error_unsupported_flavor)
+
+                DocsAiError.ModelUnavailable -> getStringSuspend(CoreRes.string.chirpy_error_model_unavailable)
+
+                DocsAiError.Busy -> getStringSuspend(CoreRes.string.chirpy_error_busy)
+
+                DocsAiError.TokenBudgetExceeded ->
+                    getStringSuspend(CoreRes.string.chirpy_error_token_budget_exceeded)
+
+                DocsAiError.Unknown -> getStringSuspend(CoreRes.string.chirpy_error_unknown)
             }
         val text =
             if (result.suggestedPages.isNotEmpty()) {
-                "$errorMessage ${getString(CoreRes.string.chirpy_suggested_pages_help)}"
+                "$errorMessage ${getStringSuspend(CoreRes.string.chirpy_suggested_pages_help)}"
             } else {
                 errorMessage
             }

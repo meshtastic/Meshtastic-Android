@@ -19,7 +19,6 @@ package org.meshtastic.feature.docs.data
 import kotlinx.coroutines.CancellationException
 import meshtasticandroid.feature.docs.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.currentLocaleTag
 import org.meshtastic.core.resources.doc_keywords_app_functions
@@ -66,6 +65,7 @@ import org.meshtastic.core.resources.doc_title_telemetry
 import org.meshtastic.core.resources.doc_title_translate
 import org.meshtastic.core.resources.doc_title_units
 import org.meshtastic.core.resources.doc_title_widget
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -476,11 +476,11 @@ class DefaultDocBundleLoader : DocBundleLoader {
     private suspend fun buildUserGuideIndex(): List<KeywordIndexEntry> = userPages.map { def ->
         KeywordIndexEntry(
             id = def.id,
-            title = getString(def.titleRes),
+            title = getStringSuspend(def.titleRes),
             section = "user",
             resourcePath = def.resourcePath,
             navOrder = def.navOrder,
-            keywords = parseKeywords(getString(def.keywordsRes)),
+            keywords = parseKeywords(getStringSuspend(def.keywordsRes)),
             aliases = def.aliases,
             charCount = def.charCount,
             iconId = def.iconId,

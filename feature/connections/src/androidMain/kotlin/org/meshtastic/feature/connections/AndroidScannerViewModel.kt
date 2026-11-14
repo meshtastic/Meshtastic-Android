@@ -23,7 +23,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
@@ -38,6 +37,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bonding_failed_retry
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -106,7 +106,7 @@ class AndroidScannerViewModel(
                                 "waiting for an explicit retry"
                         }
                         serviceRepository.setErrorMessage(
-                            text = getString(Res.string.bonding_failed_retry),
+                            text = getStringSuspend(Res.string.bonding_failed_retry),
                             severity = Severity.Warn,
                         )
                         false
@@ -129,7 +129,7 @@ class AndroidScannerViewModel(
                 } else {
                     Logger.e { "USB permission denied for device ${entry.address.anonymize()}" }
                     serviceRepository.setErrorMessage(
-                        text = getString(Res.string.usb_permission_denied),
+                        text = getStringSuspend(Res.string.usb_permission_denied),
                         severity = Severity.Warn,
                     )
                 }

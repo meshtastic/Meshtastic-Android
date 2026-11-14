@@ -20,7 +20,6 @@ import android.hardware.usb.UsbManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.database.DatabaseManager
@@ -32,6 +31,7 @@ import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -72,7 +72,7 @@ class AndroidGetDiscoveredDevicesUseCase(
 
         val processedTcpFlow =
             combine(resolvedList, recentAddressesDataSource.recentAddresses) { tcpServices, recentList ->
-                val defaultName = getString(Res.string.meshtastic)
+                val defaultName = getStringSuspend(Res.string.meshtastic)
                 processTcpServices(tcpServices, recentList, defaultName)
             }
 

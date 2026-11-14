@@ -48,7 +48,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.rememberResourceEnvironment
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.effectiveLongName
@@ -56,6 +55,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.rssi
@@ -116,8 +116,7 @@ fun DeviceListItem(
             is DeviceListEntry.Replay -> MeshtasticIcons.Add
         }
 
-    // Suspend getString, as in ConnectionsScreen: these rows render while the handshake keeps Dispatchers.Default busy,
-    // and a first-time stringResource load parks the main thread until it is free.
+    // getStringSuspend, as in ConnectionsScreen, so composition never blocks on the resource cache.
     val resourceEnvironment = rememberResourceEnvironment()
     val descriptionRes =
         when (device) {
@@ -129,16 +128,20 @@ fun DeviceListItem(
         }
     val contentDescription by
         produceState<String?>(null, descriptionRes, resourceEnvironment) {
-            value = getString(resourceEnvironment, descriptionRes)
+            value = getStringSuspend(resourceEnvironment, descriptionRes)
         }
     val selectLabel by
         produceState<String?>(null, resourceEnvironment) {
-            value = getString(resourceEnvironment, Res.string.action_select_device)
+            value = getStringSuspend(resourceEnvironment, Res.string.action_select_device)
         }
     val rssiLabel by
-        produceState<String?>(null, resourceEnvironment) { value = getString(resourceEnvironment, Res.string.rssi) }
+        produceState<String?>(null, resourceEnvironment) {
+            value = getStringSuspend(resourceEnvironment, Res.string.rssi)
+        }
     val removeLabel by
-        produceState<String?>(null, resourceEnvironment) { value = getString(resourceEnvironment, Res.string.remove) }
+        produceState<String?>(null, resourceEnvironment) {
+            value = getStringSuspend(resourceEnvironment, Res.string.remove)
+        }
     val isSelected = connectionState is ConnectionState.Connected
     val clickableModifier =
         if (onDelete != null) {
