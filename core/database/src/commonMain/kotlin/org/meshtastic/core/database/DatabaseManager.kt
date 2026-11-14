@@ -501,8 +501,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         val watchdog = launch {
             if (withTimeoutOrNull(timeoutMs) { firstEmission.await() } == null) {
                 throw DbFlowStalledException(
-                    "Database Flow produced no first emission within ${timeoutMs}ms; the Room connection pool " +
-                        "is not serving queries",
+                    "Database Flow ${name.name} produced no first emission within ${timeoutMs}ms; the Room " +
+                        "connection pool is not serving queries",
                 )
             }
         }

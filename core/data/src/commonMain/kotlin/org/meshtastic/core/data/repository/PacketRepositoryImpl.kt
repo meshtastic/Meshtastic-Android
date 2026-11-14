@@ -34,6 +34,7 @@ import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.toReaction
+import org.meshtastic.core.database.retryOnDbPoolFailure
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
@@ -64,6 +65,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
 
     override fun getContacts(): Flow<Map<String, DataPacket>> = dbManager
         .observeCurrentDb("PacketRepository.getContacts") { db -> db.packetDao().getContactKeys() }
+        .retryOnDbPoolFailure("PacketRepository.getContacts")
         .map { map -> map.mapValues { it.value.data } }
 
     override fun getContactsPaged(): Flow<PagingData<Pair<String, DataPacket>>> = Pager(
@@ -101,10 +103,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             db.packetDao().hasUnreadMessages(contact)
         }
 
-    override fun getUnreadCountTotal(): Flow<Int> =
-        dbManager.observeCurrentDb("PacketRepository.getUnreadCountTotal") { db ->
-            db.packetDao().getUnreadCountTotal()
-        }
+    override fun getUnreadCountTotal(): Flow<Int> = dbManager
+        .observeCurrentDb("PacketRepository.getUnreadCountTotal") { db -> db.packetDao().getUnreadCountTotal() }
+        .retryOnDbPoolFailure("PacketRepository.getUnreadCountTotal")
 
     // One-shot writes go through withDb so they register with the cross-transport merge drain barrier. The callback
     // is never replayed after it starts; callers needing retries must make that policy explicit where idempotency is
