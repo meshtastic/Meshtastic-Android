@@ -33,6 +33,22 @@ data class CameraPoseState(
     val thermal: HudThermal = HudThermal.NORMAL,
 )
 
+/**
+ * This state with a non-finite pose or heading accuracy cleared. A sensor can report NaN, and a NaN heading throws when
+ * it is rounded for display; no pose and no accuracy are states the view already draws.
+ */
+internal fun CameraPoseState.finiteOnly(): CameraPoseState {
+    val finitePose = pose?.takeIf { p -> listOf(p.right, p.up, p.forward).all { it.isFinite() } }
+    val finiteAccuracy = headingAccuracyDeg?.takeIf { it.isFinite() }
+    return if (finitePose === pose && finiteAccuracy == headingAccuracyDeg) {
+        this
+    } else {
+        copy(pose = finitePose, headingAccuracyDeg = finiteAccuracy)
+    }
+}
+
+private fun Vec3.isFinite() = x.isFinite() && y.isFinite() && z.isFinite()
+
 /** [HOT] slows the sensors and says so; [CRITICAL] also releases the camera, leaving the overlay as a compass. */
 enum class HudThermal {
     NORMAL,

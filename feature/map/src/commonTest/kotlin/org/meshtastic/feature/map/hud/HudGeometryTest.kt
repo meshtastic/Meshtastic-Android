@@ -230,4 +230,24 @@ class HudGeometryTest {
         val focal = CameraIntrinsics(focalLengthMm = 4f, sensorLongMm = 4f, sensorShortMm = 3f).focalPx(W, H)
         assertEquals(2000f, focal, 0.01f)
     }
+
+    @Test
+    fun `a pose with a NaN axis is dropped`() {
+        val broken = facingNorth.copy(forward = Vec3(Double.NaN, 1.0, 0.0))
+        assertTrue(broken.azimuthDeg.isNaN())
+        assertNull(CameraPoseState(pose = broken).finiteOnly().pose)
+    }
+
+    @Test
+    fun `a NaN heading accuracy is dropped and the pose kept`() {
+        val state = CameraPoseState(pose = facingNorth, headingAccuracyDeg = Double.NaN).finiteOnly()
+        assertNull(state.headingAccuracyDeg)
+        assertEquals(facingNorth, state.pose)
+    }
+
+    @Test
+    fun `a finite state passes through unchanged`() {
+        val state = CameraPoseState(pose = facingEast, headingAccuracyDeg = 4.5)
+        assertEquals(state, state.finiteOnly())
+    }
 }
