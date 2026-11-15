@@ -52,6 +52,7 @@ sealed interface EnsureSessionResult {
     data object AlreadyActive   : EnsureSessionResult  // passkey already fresh
     data object Refreshed       : EnsureSessionResult  // metadata response arrived
     data object Timeout         : EnsureSessionResult  // no response within 30 s
+    data class  Rejected(val nak: RoutingNak) : EnsureSessionResult  // a routing NAK answered the request
     data object Disconnected    : EnsureSessionResult  // radio not connected
 }
 ```

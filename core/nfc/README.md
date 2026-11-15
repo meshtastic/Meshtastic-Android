@@ -14,7 +14,10 @@ Writes a shared-contact or channel-set URL to the next NDEF tag tapped against t
 ### 3. `NfcEmulatorEffect`, `NfcTagEmulation` and `MeshtasticHostApduService`
 Host card emulation: while `NfcEmulatorEffect` is composed, `NfcTagEmulation` holds the armed URL and `MeshtasticHostApduService` (registered in `androidApp`'s manifest) serves it as a read-only NFC Forum Type 4 tag. An unarmed phone presents no tag.
 
-### 4. Composition locals (core:ui/commonMain)
+### 4. Tags that open the app
+A tag whose first NDEF record is a `meshtastic://meshtastic` link, a node's connect link included, reaches `MainActivity` as an `NDEF_DISCOVERED` intent through `androidApp`'s manifest filters, not through `NfcScannerEffect`. Only the first record is routed.
+
+### 5. Composition locals (core:ui/commonMain)
 `LocalNfcScannerProvider`, `LocalNfcWriterProvider` and `LocalNfcEmulatorProvider` carry the three effects into shared code, with `LocalNfcScannerSupported` and `LocalNfcEmulationSupported` as capability flags. `MainActivity` provides them.
 
 

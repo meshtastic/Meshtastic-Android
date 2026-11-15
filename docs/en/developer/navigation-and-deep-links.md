@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-11-08
+last_updated: 2026-11-15
 description: How typed Navigation 3 routes and DeepLinkRouter work together, the supported deep link URIs, and how to add a new one.
 aliases:
   - deeplinks
@@ -110,7 +110,7 @@ null for them, and the caller hands them to its import fallback.
 | `/settings/local-mesh-discovery/session/{sessionId}` | `DiscoveryRoute.DiscoverySummary(sessionId)` | Discovery session result |
 | `/nodes` | `NodesRoute.Nodes` | Node list |
 | `/nodes/{destNum}` | `NodesRoute.NodeDetail(destNum)` | Node detail; `/nodes?destNum={destNum}` also works |
-| `/nodes/{destNum}/{metric}` | e.g. `NodeDetailRoute.DeviceMetrics(destNum)` | Specific node metric tab (`device-metrics`, `map` or `position`, `environment`, `signal`, `power`, `traceroute`, `host-metrics`, `pax`, `neighbors`), from `nodeDetailSubRoutes` |
+| `/nodes/{destNum}/{metric}` | e.g. `NodeDetailRoute.DeviceMetrics(destNum)` | Specific node metric tab (`device-metrics`, `map` or `position`, `environment`, `signal`, `power`, `traceroute`, `host-metrics`, `pax`, `neighbors`), from `nodeDetailSubRoutes`; `mesh-view` opens `MapRoute.MeshHud` focused on the node |
 | `/messages` | `ContactsRoute.Contacts` | Conversation list |
 | `/messages/{contactKey}` | `ContactsRoute.Messages(contactKey)` | Specific conversation; `?message={text}` prefills the composer, and `/messages?contactKey={contactKey}` also works |
 | `/share` | `ContactsRoute.Share("")` | Share-to-contact composer, empty |

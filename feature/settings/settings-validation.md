@@ -172,7 +172,7 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 |-------|------|------------|-------|
 | `enabled` | Boolean | Toggle | — |
 | `mode` | Enum | Dropdown: `PairingMode` entries (excl. UNRECOGNIZED) | — |
-| `fixed_pin` | Integer | Exactly 6 digits | Applied only once all six digits are entered; shown zero-padded |
+| `fixed_pin` | Integer | Six digits, 100000 to 999999 (`isValidFixedPin`) | An edited invalid PIN blocks Save, as does an invalid one in `FIXED_PIN` mode; an unedited invalid stored PIN is left alone in the other modes. Shown zero-padded |
 
 ### Security (`Config.SecurityConfig`)
 
@@ -183,7 +183,7 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | `admin_key` | Base64 list | maxCount: 3 | Each entry must decode as Base64; proto max_size is 32 bytes, which the UI does not enforce |
 | `serial_enabled` | Boolean | Toggle | — |
 | `debug_log_api_enabled` | Boolean | Toggle | — |
-| `is_managed` | Boolean | Toggle | Enabled only when `admin_key` list is non-empty |
+| `is_managed` | Boolean | Toggle | Enabled only when an `admin_key` entry is a 32-byte key (`hasAdminKey`). `forSave()` clears it at save time when none is left |
 | Lockdown passphrase | String | Non-empty, maxSize: 64 bytes | `LockdownModeSetting`, firmware 2.8.0 and later (`supportsLockdown`). Boots remaining is clamped to 1–255; hours until expiry and session minutes to ≥ 0 |
 
 ---
@@ -201,7 +201,7 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | `encryption_enabled` | Boolean | Toggle | — |
 | `json_enabled` | Boolean | Toggle | Schema gate: deprecated from firmware 2.8.0, so shown only on older firmware or when set |
 | `tls_enabled` | Boolean | Toggle | Stored and sent exactly as shown. For the public broker the summary notes that the phone's MQTT proxy upgrades to TLS itself |
-| `root` | String | maxSize: 31 bytes (proto max_size: 32) | MQTT root topic |
+| `root` | String | maxSize: 31 bytes (proto max_size: 32); `MqttRootTopic.problem` must be null | MQTT root topic. Any script is accepted; whitespace or control characters, `+`, `#`, a leading or trailing slash, `//` and a final `/2` segment block Save. Empty is the firmware default |
 | `proxy_to_client_enabled` | Boolean | Toggle | — |
 | `map_reporting_enabled` | Boolean | Toggle | Controls visibility of map report fields. While on, Save requires the location-sharing consent and an interval of at least 3600 seconds |
 | `map_report_settings.publish_interval_secs` | Interval | Dropdown: `BROADCAST_MEDIUM` intervals | 1 hour – 72 hours |
@@ -413,7 +413,7 @@ Channel editing is handled by `EditChannelDialog`.
 | `psk` | ByteString | Must be 0, 16, or 32 bytes once the 1-byte default-key shorthand is expanded | Pre-shared key for encryption; a button generates a random key |
 | `uplink_enabled` | Boolean | Toggle | — |
 | `downlink_enabled` | Boolean | Toggle | — |
-| `module_settings.position_precision` | Integer | `PositionPrecisionPreference` | See [UI Component Validation](#ui-component-validation) |
+| `module_settings.position_precision` | Integer | `PositionPrecisionPreference` | See [UI Component Validation](#ui-component-validation). On a channel whose key is public (`Channel.usesPublicKey`), the precise-location switch is disabled and the value is capped at 15 bits, on save as well |
 
 ---
 
@@ -521,7 +521,7 @@ layer. Each component accepts validation parameters and rejects or flags invalid
 ### PositionPrecisionPreference
 
 - State machine with three modes: disabled (0), precision range (10–19), full precision (32).
-- Slider constrained to 10–19 with 8 discrete steps.
+- Slider constrained to 10–19 with 8 discrete steps. With `usesPublicKey` it stops at 15 (`MAX_PUBLIC_KEY_PRECISION_BITS`), turning precise location on is not offered, and the summary reads "Not available on a channel that is not securely encrypted".
 
 ### ConfigState
 

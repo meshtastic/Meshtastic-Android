@@ -1,7 +1,7 @@
 # `:core:barcode`
 
 ## Overview
-The `:core:barcode` module provides barcode and QR code scanning capabilities using CameraX and flavor-specific decoding engines. It is used for scanning node configuration, pairing, and contact sharing.
+The `:core:barcode` module provides barcode and QR code scanning capabilities using CameraX and flavor-specific decoding engines. It is used for scanning channel sets, shared contacts, connect codes (`meshtastic://meshtastic/connections?address=…`, checked by `connectLinkFrom` in `:feature:connections`), and Wi-Fi credentials.
 
 The shared contract (`BarcodeScanner` interface + `LocalBarcodeScannerProvider`) lives in `core:ui/commonMain`, keeping this module Android-only.
 

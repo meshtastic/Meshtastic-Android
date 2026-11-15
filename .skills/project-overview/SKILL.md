@@ -10,7 +10,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 - **Build System:** Gradle (Kotlin DSL). JDK 25 REQUIRED. Target SDK: API 37. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Google Maps, Firebase Crashlytics and Datadog RUM)
-- **Android-only Modules:** `core:barcode` (CameraX), `core:nfc` (NFC hardware), `feature:widget` (Glance home-screen widget), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
+- **Android-only Modules:** `core:barcode` (CameraX), `core:nfc` (NFC hardware), `feature:widget` (Glance home-screen widget), `feature:xr` (Android XR spatial shell), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
 
 ## Codebase Map
 
@@ -40,7 +40,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules. |
 | `core/konsist/` | Architecture rules as Konsist tests (`jvmTest` only), such as the `CancellationException` import and the `expect` declarations. |
-| `feature/` | Feature modules (e.g., `settings`, `map`, `map-maplibre`, `map-terrain`, `coverage`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `discovery`, `docs`, `widget`). Most are KMP and use the `meshtastic.kmp.feature` convention plugin; `widget` (Glance) is Android-only. |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `map-maplibre`, `map-terrain`, `coverage`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `discovery`, `docs`, `widget`, `xr`). Most are KMP and use the `meshtastic.kmp.feature` convention plugin; `widget` (Glance) and `xr` are Android-only. |
 | `feature/coverage` | Site Planner coverage computed on the device with `kp1812` over Mapterhorn terrain, returned as GeoJSON for the map. |
 | `screenshot-tests/`, `docs-screenshots/` | Compose preview screenshot modules: the CI visual-regression gate, and the generate-only docs images (see `testing-ci` §3b). |
 | `store-screenshots/` | Instrumented capture of the store-listing screenshots from the debug app on a device or emulator. |

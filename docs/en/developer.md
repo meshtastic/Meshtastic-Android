@@ -30,6 +30,8 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**November 2026** — [Persistence](developer/persistence) — A file database serves reads from Room's reader pool, and `MeshLog` has indexes for its per-node and per-type queries (schema version 68).
+
 **October 2026** — [Navigation & Deep Links](developer/navigation-and-deep-links) — The route table covers every pattern the router accepts, including the fallbacks that open the nearest nodes, map, or settings route for an unknown sub-path.
 
 **October 2026** — [Persistence](developer/persistence) — Each connected node has its own database, app data backup and restore are documented, and telemetry is read from `MeshLog` rather than `Packet`.

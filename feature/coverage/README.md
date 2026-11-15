@@ -30,7 +30,7 @@ The model, the `ElevationSource` seam, and the GeoJSON export live in `commonMai
 source sets hold only the terrain cache location (`coverageTerrainDirectory()`) and, in `jvmMain`,
 the `java.awt` demo renderer `CoverageDemo`. Terrain is cached through `feature:map-terrain`'s
 `TerrainTileStore` under `terrain/coverage` in the app's storage (`~/.meshtastic/terrain/coverage`
-on Desktop), apart from downloaded offline map regions. `ElevationSource` is a single suspend method: the app
+on Desktop), apart from downloaded offline map regions. Decoded tiles are about 1 MB each, so `SharedTerrain` holds them process-wide only while an estimate runs and drops them when the last one ends; the disk store makes the next estimate a decode, not a download. Contour coordinates are written to six decimals. `ElevationSource` is a single suspend method: the app
 backs it with Mapterhorn tiles, and tests back it with a lambda, so the suite needs no network,
 `WebView`, or terrain download.
 
