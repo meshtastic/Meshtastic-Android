@@ -24,8 +24,8 @@ import androidx.sqlite.execSQL
  * Wraps a [SQLiteDriver] so every connection it opens waits up to [busyTimeoutMs] for a competing connection's lock
  * instead of failing immediately with SQLITE_BUSY ("Error code: 5, message: database is locked").
  *
- * Each database normally holds a single connection (see `configureCommon`), but [DatabaseManager]'s wedge recovery can
- * leave an abandoned callback's connection open beside a replacement pool on the same file (see
+ * Each database normally holds one writer connection (see `configureCommon`), but [DatabaseManager]'s wedge recovery
+ * can leave an abandoned callback's connection open beside a replacement pool on the same file (see
  * `abandonWedgedDbBlock`). Recovery never publishes a replacement while another connection holds the write lock, so
  * this timeout only covers overlaps that begin afterwards. Room raises any timeout below 3s on open, and runs its
  * invalidation-tracker trigger sync (`TriggerBasedInvalidationTracker.syncTriggers`) under `BEGIN IMMEDIATE` with its

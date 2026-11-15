@@ -219,7 +219,7 @@ class DatabaseManagerAbandonedWriterJvmTest {
         awaitWritersDrained()
     }
 
-    /** Reads the busy timeout of [database]'s single connection, the one the write-lock probe ran on. */
+    /** Reads the busy timeout of [database]'s writer connection, the one the write-lock probe ran on. */
     private suspend fun busyTimeoutOf(database: MeshtasticDatabase): Long = database.useWriterConnection { connection ->
         connection.usePrepared("PRAGMA busy_timeout") { statement ->
             statement.step()

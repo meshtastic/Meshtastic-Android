@@ -19,6 +19,7 @@ package org.meshtastic.core.database
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room3.Room
 import androidx.room3.useReaderConnection
+import androidx.room3.useWriterConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -170,6 +171,11 @@ class DatabaseManagerCorruptDatabaseJvmTest {
         manager.switchActiveDatabase(ADDRESS)
         manager.currentDb.value.useReaderConnection { connection ->
             connection.usePrepared("SELECT count(*) FROM sqlite_master") { it.step() }
+        }
+        // A reader connection is query-only and cannot checkpoint when it closes, so the schema would stay in the
+        // -wal this function deletes. Checkpoint on the writer to put the whole database in the main file.
+        manager.currentDb.value.useWriterConnection { connection ->
+            connection.usePrepared("PRAGMA wal_checkpoint(TRUNCATE)") { it.step() }
         }
         val dbName = manager.builtNames.last { it != DatabaseConstants.DEFAULT_DB_NAME }
         manager.close()
