@@ -6,6 +6,7 @@ The `:feature:widget` module holds the **Android-only Jetpack Glance home-screen
 
 - `LocalStatsWidget` shows live mesh statistics for the connected node.
 - `NodeTrackerWidget` follows one node the user picks: battery, signal, last heard, hops away and distance from our node.
+- `TelemetryWidget` shows one node's environment, air quality and power readings as tiles (meshtastic/design#179).
 
 **Target: Android only** (not KMP — uses `meshtastic.android.library` + `meshtastic.android.library.compose` convention plugins)
 
@@ -32,6 +33,14 @@ src/main/kotlin/org/meshtastic/feature/widget/
 ├── NodeTrackerWidgetState.kt        ← NodeTrackerWidgetState, nodeTrackerState(), DataSource
 ├── NodeTrackerConfigActivity.kt     ← APPWIDGET_CONFIGURE node picker (Compose, Material 3)
 ├── NodeTrackerCandidates.kt         ← picker filter and order
+├── TelemetryWidget.kt               ← GlanceAppWidget, per-instance state, tap target
+├── TelemetryLayouts.kt              ← one tile, four in a row, paged 2x2 grid, footer
+├── TelemetryTiles.kt                ← each reading's icon, label, value, band line
+├── TelemetryReadings.kt             ← the readings in design order, the newest snapshot and its time
+├── TelemetryWidgetState.kt          ← TelemetryWidgetState, telemetryWidgetState(), DataSource, last-known keys
+├── TelemetryWidgetReceiver.kt       ← GlanceAppWidgetReceiver
+├── TelemetryConfigActivity.kt       ← APPWIDGET_CONFIGURE node and hidden-readings setup
+├── TelemetryPageAction.kt           ← ActionCallback (page button)
 ├── WidgetNodeChip.kt                ← node chip shared by both widgets
 ├── AndroidAppWidgetUpdater.kt       ← implements AppWidgetUpdater (core:repository)
 ├── RefreshLocalStatsAction.kt       ← ActionCallback (refresh button)
@@ -53,6 +62,20 @@ Each instance stores its node number under `TRACKED_NODE_NUM_KEY` in its Glance 
 `nodeTrackerState()` maps the node DB to what one instance renders. A node not heard within the app's online window keeps its chip colors and greys its values; the provider's 30-minute `updatePeriodMillis` re-renders a node that has gone quiet. Tapping opens the node's details through the `nodes/<num>` deep link. The picker lists favorites first, then the most recently heard, leaving out our own node and ignored nodes.
 
 The widget holds no lazy collection, which the `ActionTrampolineActivity` removal in `androidApp/src/main/AndroidManifest.xml` relies on.
+
+## Telemetry
+
+Each instance stores its node under `TELEMETRY_NODE_NUM_KEY`, the readings to hide under `TELEMETRY_HIDDEN_KEY`, and the page under `TELEMETRY_PAGE_KEY`. `TelemetryConfigActivity` writes the first two: it starts on our own node when that node reports any of these readings, lists only nodes that have, and shows every reading the chosen node has reported with a switch to hide it.
+
+The tiles are every reading the node has reported, in the design#179 order, less the hidden ones. The values come from the node DB, which holds each group's latest packet; the stored log (`MeshLogRepository.getTelemetryFrom`) adds the readings the node used to send and the time of the newest one, which it gives only when its newest row of a group holds the node DB's values. The instance also remembers every reading it has seen (`TELEMETRY_SEEN_KEY`), so a reading the node stops sending keeps its tile with a dash even with logging off; a reported zero is a value. With no time from the log, the reading counts as over two hours old once the node itself has not been heard for two hours.
+
+| Size | Data shown |
+|---|---|
+| Narrower than 130 dp (under two columns) | The first reading, with the chip above it from 90 dp tall; the age line drops its "Updated" prefix |
+| 130 dp and wider, under 180 dp tall | The first two in a row, four from 320 dp (four cells), with the chip in the footer from 90 dp tall; under 90 dp each tile keeps its icon and value. Four tiles in a two-cell row show only their icons |
+| 130 by 180 dp and up | Chip, a 2x2 grid of four, and a footer with the age and, with more than four readings, a page button |
+
+The page button runs `TelemetryPageAction`, which moves the stored page on and wraps it, and the layout wraps a stored page past the last, so hiding readings never strands it. A short last page keeps the grid's empty cells. Once the newest reading is over two hours old the footer says so in the error color; the tiles stay at full strength. The layouts fill their cell by weight, so they read no cell size beyond the three breakpoints. The last rendered snapshot sits under the `telemetry_last_*` keys, protos as base64, for when no node DB is open. Tapping opens the node's environment metrics, or power metrics when only power readings show. Nothing is sent over the mesh.
 
 ## Local Stats Content
 
@@ -145,10 +168,12 @@ class AndroidAppWidgetUpdater(
     private val context: Context,
     stateProvider: LocalStatsWidgetStateProvider,
     trackerDataSource: NodeTrackerWidgetDataSource,
+    telemetryDataSource: TelemetryWidgetDataSource,
 ) : AppWidgetUpdater {
     override suspend fun updateAll() {
         LocalStatsWidget().updateAll(context)
         NodeTrackerWidget().updateAll(context)
+        TelemetryWidget().updateAll(context)
     }
 }
 ```
@@ -157,6 +182,7 @@ It also drives re-renders itself, because Glance compositions are ephemeral:
 
 - Local Stats: observes `stateProvider.state` (debounced 500 ms, ignoring timestamp-only changes) while instances exist.
 - Node Tracker: samples `trackerDataSource.inputs` once a second, maps it to each instance's rendered state, and updates only when one of those changes. Sampling rather than debouncing keeps a busy mesh from starving the update.
+- Telemetry: samples `telemetryDataSource.checkedInputs` the same way and updates when a shown node's metrics, channel labels or identity change.
 
 This keeps the service layer platform-agnostic while still enabling widget refresh on data changes.
 

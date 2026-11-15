@@ -88,6 +88,49 @@ internal object WidgetSizes {
     val previewSizeMode: PreviewSizeMode =
         SizeMode.Responsive(setOf(ROW, SQUARE, TALL, PIXEL_2X2, EMULATOR_2X2, BIG, TWO_COLUMNS))
 
+    /**
+     * The Telemetry widget's three sizes from meshtastic/design#179: one tile narrower than two columns, four in a row
+     * when wide but under two rows, and a paged 2x2 grid from two columns by two rows. Its layouts fill whatever cell
+     * they are shown in by weight, so it needs no cell measurement and only these breakpoints.
+     */
+    val TELEMETRY_ONE = DpSize(40.dp, ONE_ROW_HEIGHT)
+    val TELEMETRY_ONE_TALL = DpSize(40.dp, COMPACT_HEIGHT)
+    val TELEMETRY_ROW = DpSize(NARROW_WIDTH, ONE_ROW_HEIGHT)
+    val TELEMETRY_ROW_TALL = DpSize(NARROW_WIDTH, COMPACT_HEIGHT)
+    val TELEMETRY_WIDE_ROW = DpSize(TWO_COLUMN_WIDTH, ONE_ROW_HEIGHT)
+    val TELEMETRY_WIDE_ROW_TALL = DpSize(TWO_COLUMN_WIDTH, COMPACT_HEIGHT)
+    val TELEMETRY_GRID = DpSize(NARROW_WIDTH, TWO_ROWS_HEIGHT)
+
+    /**
+     * The host may pick the breakpoint with the larger area, so a wide two-row cell needs a grid that outranks the row.
+     */
+    val TELEMETRY_WIDE_GRID = DpSize(TWO_COLUMN_WIDTH, TWO_ROWS_HEIGHT)
+
+    /**
+     * The layout reads its size from the breakpoint, so the small sizes each have a one-row and a taller variant, and
+     * the row a four-cell variant: four tiles in a two-cell row show nothing but icons, so a row narrower than four
+     * cells shows two.
+     */
+    val telemetrySizeMode: SizeMode =
+        SizeMode.Responsive(
+            setOf(
+                TELEMETRY_ONE,
+                TELEMETRY_ONE_TALL,
+                TELEMETRY_ROW,
+                TELEMETRY_ROW_TALL,
+                TELEMETRY_WIDE_ROW,
+                TELEMETRY_WIDE_ROW_TALL,
+                TELEMETRY_GRID,
+                TELEMETRY_WIDE_GRID,
+            ),
+        )
+
+    /** The picker preview adds the two measured 2x2 cells, so it shows the grid filling its frame. */
+    val telemetryPreviewSizeMode: PreviewSizeMode =
+        SizeMode.Responsive(
+            setOf(TELEMETRY_ONE_TALL, TELEMETRY_ROW, TELEMETRY_ROW_TALL, TELEMETRY_GRID, PIXEL_2X2, EMULATOR_2X2),
+        )
+
     fun isOneRow(size: DpSize): Boolean = size.height < COMPACT_HEIGHT
 
     fun isCompact(size: DpSize): Boolean = size.height < TWO_ROWS_HEIGHT

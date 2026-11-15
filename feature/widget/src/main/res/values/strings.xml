@@ -21,4 +21,6 @@
     <string name="widget_local_stats_description">Channel use, battery, nodes online and uptime for your connected radio</string>
     <string name="widget_node_tracker_label">Node Tracker</string>
     <string name="widget_node_tracker_description">Battery, signal and last heard for one node you pick</string>
+    <string name="widget_telemetry_label">Telemetry</string>
+    <string name="widget_telemetry_description">Environment, air quality and power readings from one node</string>
 </resources>

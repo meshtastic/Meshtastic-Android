@@ -52,6 +52,7 @@ dependencies {
 
     implementation(libs.compose.multiplatform.resources)
     implementation(libs.kermit)
+    implementation(libs.okio) // base64 for the Telemetry widget's last-known readings
 
     testImplementation(projects.core.testing)
     testImplementation(kotlin("test-junit"))
