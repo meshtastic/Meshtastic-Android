@@ -180,6 +180,7 @@ class SchemaFieldCoverageTest {
             "ModuleConfig.ExternalNotificationConfig.use_i2s_as_buzzer",
             "ModuleConfig.ExternalNotificationConfig.use_pwm",
             "ModuleConfig.MQTTConfig.address",
+            "ModuleConfig.MQTTConfig.downlink_targeted_only",
             "ModuleConfig.MQTTConfig.enabled",
             "ModuleConfig.MQTTConfig.encryption_enabled",
             "ModuleConfig.MQTTConfig.map_reporting_enabled",

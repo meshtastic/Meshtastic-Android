@@ -88,6 +88,8 @@ import org.meshtastic.core.resources.mqtt_test_connection
 import org.meshtastic.core.resources.mqtt_topic_finder
 import org.meshtastic.core.resources.schema_mqtt_address
 import org.meshtastic.core.resources.schema_mqtt_address_description
+import org.meshtastic.core.resources.schema_mqtt_downlink_targeted_only
+import org.meshtastic.core.resources.schema_mqtt_downlink_targeted_only_description
 import org.meshtastic.core.resources.schema_mqtt_enabled
 import org.meshtastic.core.resources.schema_mqtt_enabled_description
 import org.meshtastic.core.resources.schema_mqtt_encryption_enabled
@@ -112,6 +114,7 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.downlink_targeted_only
 import org.meshtastic.proto.json_enabled
 
 // json_enabled still drives MQTT JSON on firmware below its deprecated_since; beyond that the schema gate hides it
@@ -322,6 +325,12 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
+                MqttDownlinkTargetedOnlyPreference(
+                    capabilities = capabilities,
+                    enabled = state.connected,
+                    config = formState.value,
+                    onConfigChange = { formState.value = it },
+                )
             }
         }
 
@@ -414,6 +423,35 @@ internal fun MqttTlsPreference(
         onCheckedChange = onCheckedChange,
         containerColor = CardDefaults.cardColors().containerColor,
     )
+}
+
+/**
+ * Gateways with this set only transmit downlink that lists them in `ServiceEnvelope.target_gateways`. Offered from the
+ * firmware version the schema declares.
+ */
+@Composable
+internal fun MqttDownlinkTargetedOnlyPreference(
+    capabilities: Capabilities,
+    enabled: Boolean,
+    config: ModuleConfig.MQTTConfig,
+    onConfigChange: (ModuleConfig.MQTTConfig) -> Unit,
+) {
+    val checked = config.downlink_targeted_only
+    if (!capabilities.offers(ModuleConfig.MQTTConfig.downlink_targeted_only, isSet = checked)) return
+    Column {
+        HorizontalDivider()
+        SwitchPreference(
+            title = stringResource(Res.string.schema_mqtt_downlink_targeted_only),
+            modifier = Modifier.settingsField(Res.string.schema_mqtt_downlink_targeted_only),
+            summary = stringResource(Res.string.schema_mqtt_downlink_targeted_only_description),
+            checked = checked,
+            enabled = enabled,
+            onCheckedChange = {
+                onConfigChange(config.newBuilder().also { wb -> wb.downlink_targeted_only = it }.build())
+            },
+            containerColor = CardDefaults.cardColors().containerColor,
+        )
+    }
 }
 
 @Composable
