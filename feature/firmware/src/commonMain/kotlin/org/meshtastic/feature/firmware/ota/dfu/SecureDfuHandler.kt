@@ -524,6 +524,14 @@ internal fun Exception.toErrorState(): FirmwareUpdateState.Error = when (this) {
             nothingWritten = true,
         )
 
+    is DfuException.InvalidPackage,
+    is DfuException.BootloaderNotLegacy,
+    ->
+        FirmwareUpdateState.Error(
+            UiText.Resource(Res.string.firmware_update_ota_failed, message.orEmpty()),
+            nothingWritten = true,
+        )
+
     is BootloaderSwapTimeout ->
         FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_bootloader_not_back))
 
@@ -694,9 +702,7 @@ class SecureDfuHandler(
                 if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
                     // Nothing was written; reset it back to its application instead of leaving it in DFU mode.
                     resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)
-                    throw DfuException.TransferFailed(
-                        "Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package",
-                    )
+                    throw DfuException.BootloaderNotLegacy()
                 }
                 val budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS)
                 runDfuUploadWithRetry(

@@ -307,6 +307,10 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
     /** The DFU zip package is malformed or missing required entries. */
     class InvalidPackage(message: String) : DfuException(message)
 
+    /** The bootloader in DFU mode speaks Secure DFU, so the Legacy-only bootloader package was not sent. */
+    class BootloaderNotLegacy :
+        DfuException("Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package")
+
     /** The device returned a DFU error response for a given opcode. */
     class ProtocolError(val opcode: Byte, val resultCode: Byte, val extendedError: Byte? = null) :
         DfuException(
