@@ -569,6 +569,16 @@ private suspend fun enterDfuMode(
     return preStart
 }
 
+/** Unzips [artifact]; a size-limit or corrupt-archive failure surfaces as [DfuException.InvalidPackage]. */
+private suspend fun FirmwareFileHandler.extractPackageEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+    try {
+        extractZipEntries(artifact)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        throw DfuException.InvalidPackage("Could not read the DFU zip: ${e.message}", e)
+    }
+
 private fun DfuUploadResult.throwOnFailure() {
     if (this is DfuUploadResult.Failure) throw error
 }
@@ -613,7 +623,7 @@ class SecureDfuHandler(
                         ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
                     ),
                 )
-                val entries = firmwareFileHandler.extractZipEntries(zipFile)
+                val entries = firmwareFileHandler.extractPackageEntries(zipFile)
                 val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
@@ -674,7 +684,7 @@ class SecureDfuHandler(
             withContext(ioDispatcher) {
                 appZip = obtainZipFile(release, hardware, null, updateState)
                 val appArtifact = appZip ?: return@withContext null
-                val appPkg = parseDfuZipEntries(firmwareFileHandler.extractZipEntries(appArtifact))
+                val appPkg = parseDfuZipEntries(firmwareFileHandler.extractPackageEntries(appArtifact))
 
                 bootloaderZip =
                     downloadWithProgress(
@@ -695,7 +705,7 @@ class SecureDfuHandler(
                             return@withContext appArtifact
                         }
                 val bootloaderPkg =
-                    parseBootloaderDfuZipEntries(firmwareFileHandler.extractZipEntries(bootloaderArtifact))
+                    parseBootloaderDfuZipEntries(firmwareFileHandler.extractPackageEntries(bootloaderArtifact))
 
                 val preStart =
                     enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)

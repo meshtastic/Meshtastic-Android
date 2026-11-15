@@ -20,7 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-/** A run that wrote nothing owes no recovery record; a failure after the transfer began keeps it. */
+/** A run that wrote nothing owes no recovery record; a failure once the board is in its bootloader keeps it. */
 class DfuErrorStateTest {
 
     @Test
@@ -40,7 +40,7 @@ class DfuErrorStateTest {
     }
 
     @Test
-    fun `a mid-transfer failure keeps the recovery record`() {
+    fun `a failure after the board entered its bootloader keeps the recovery record`() {
         assertFalse(DfuException.TransferFailed("write failed").toErrorState().nothingWritten)
         assertFalse(DfuException.ConnectionFailed("link lost").toErrorState().nothingWritten)
         assertFalse(DfuException.StartTimedOut(kotlin.time.Duration.ZERO).toErrorState().nothingWritten)

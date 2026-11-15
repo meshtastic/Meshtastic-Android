@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -61,6 +62,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_no_device
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
@@ -69,6 +71,8 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.feature.firmware.ota.dfu.DfuException
+import org.meshtastic.feature.firmware.ota.dfu.toErrorState
 import org.meshtastic.proto.DeviceMetadata
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -431,6 +435,108 @@ class FirmwareUpdateViewModelTest {
 
         assertEquals(UiText.DynamicString("refused"), (viewModel.state.value as FirmwareUpdateState.Error).error)
         verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling during the download retires the recovery record`() = runTest {
+        advanceUntilIdle()
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling after the device entered its bootloader keeps the recovery record`() = runTest {
+        advanceUntilIdle()
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Updating(ProgressState(UiText.DynamicString("flashing"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    private fun TestScope.assertFailureRetiresRecord(failure: Exception) {
+        advanceUntilIdle()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(failure.toErrorState())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a Secure DFU refusal retires the recovery record`() = runTest {
+        assertFailureRetiresRecord(DfuException.BootloaderNotLegacy())
+    }
+
+    @Test
+    fun `an unreadable package retires the recovery record`() = runTest {
+        assertFailureRetiresRecord(DfuException.InvalidPackage("manifest.json not found"))
+    }
+
+    @Test
+    fun `a recovery re-flash with an unreadable package keeps the USB recovery guidance and the record`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        everySuspend { firmwareUpdateManager.recoverDfuDevice(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(DfuException.InvalidPackage("manifest.json not found").toErrorState())
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertEquals(
+            UiText.Resource(Res.string.firmware_recovery_ble_failed),
+            (viewModel.state.value as FirmwareUpdateState.Error).error,
+        )
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test
