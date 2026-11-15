@@ -75,7 +75,6 @@ import org.meshtastic.core.resources.signal_survey_location_permission
 import org.meshtastic.core.resources.signal_survey_no_fix
 import org.meshtastic.core.resources.signal_survey_readings
 import org.meshtastic.core.resources.signal_survey_record
-import org.meshtastic.core.resources.signal_survey_remote_radio
 import org.meshtastic.core.resources.signal_survey_title
 import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.icon.Delete
@@ -296,7 +295,6 @@ internal fun SignalLegend(modifier: Modifier = Modifier) {
 
 @Composable
 private fun statusText(blocker: SignalSurveyBlocker?, readingCount: Int): String = when (blocker) {
-    SignalSurveyBlocker.REMOTE_RADIO -> stringResource(Res.string.signal_survey_remote_radio)
     SignalSurveyBlocker.NOT_CONNECTED -> stringResource(Res.string.not_connected)
     SignalSurveyBlocker.LOCATION_PERMISSION -> stringResource(Res.string.signal_survey_location_permission)
     SignalSurveyBlocker.LOCATION_OFF -> stringResource(Res.string.signal_survey_location_off)

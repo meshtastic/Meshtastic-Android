@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -52,12 +51,9 @@ import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
-import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SignalSurveyBlocker
 import org.meshtastic.core.repository.SignalSurveyRepository
-import org.meshtastic.core.repository.isTcp
 import org.meshtastic.proto.MeshPacket
 import kotlin.time.Clock
 
@@ -65,8 +61,7 @@ import kotlin.time.Clock
 class SignalSurveyRepositoryImpl(
     private val serviceRepository: ServiceRepository,
     private val phoneLocationProvider: PhoneLocationProvider,
-    private val radioPrefs: RadioPrefs,
-    private val radioConfigRepository: RadioConfigRepository,
+    private val radio: SignalSurveyRadio,
     private val local: SignalSurveyLocalDataSource,
     private val clock: Clock,
     scope: ServiceScope,
@@ -107,9 +102,7 @@ class SignalSurveyRepositoryImpl(
 
     private suspend fun record() {
         // The preset is kept with the session because an SNR reading only means something against it.
-        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora
-        val preset = lora?.takeIf { it.use_preset }?.modem_preset?.name
-        val session = SignalSurveySessionEntity(startedAt = now(), modemPreset = preset)
+        val session = SignalSurveySessionEntity(startedAt = now(), modemPreset = radio.modemPresetName())
         val sessionId = safeCatching { local.openSession(session) }.getOrNull()
         if (sessionId == null) {
             _recording.value = false
@@ -128,16 +121,12 @@ class SignalSurveyRepositoryImpl(
     /** Stores a reading for each live reception until cancelled. */
     private suspend fun log(sessionId: Long) = coroutineScope {
         val location = locationStates().stateIn(this, SharingStarted.Eagerly, null)
+        val radioFix = radio.ownFix.stateIn(this, SharingStarted.Eagerly, null)
         val connectedAt = MutableStateFlow<Long?>(null)
         launch {
-            combine(location.filterNotNull(), serviceRepository.connectionState, radioPrefs.devAddr) {
-                    state,
-                    connection,
-                    _,
-                ->
-                blockerFor(state, connection)
+            combine(location.filterNotNull(), serviceRepository.connectionState, radioFix, ::blockerFor).collect {
+                _blocker.value = it
             }
-                .collect { _blocker.value = it }
         }
         launch {
             serviceRepository.connectionState.collect { state ->
@@ -149,8 +138,8 @@ class SignalSurveyRepositoryImpl(
         serviceRepository.meshPacketFlow.buffer(PACKET_BUFFER, BufferOverflow.DROP_OLDEST).collect { packet ->
             val now = now()
             val settled = connectedAt.value?.let { now - it >= CONNECT_SETTLE_MS } == true
-            val sample =
-                if (settled && !radioPrefs.isTcp()) surveySample(packet, location.value?.location, now) else null
+            val fix = surveyFix(location.value?.location, radioFix.value, radio.isRemote, now)
+            val sample = if (settled) surveySample(packet, fix, now) else null
             if (sample != null) safeCatching { local.insert(sample.asEntity(sessionId)) }
         }
     }
@@ -166,12 +155,22 @@ class SignalSurveyRepositoryImpl(
         }
     }
 
-    private fun blockerFor(state: PhoneLocationState, connection: ConnectionState): SignalSurveyBlocker? = when {
-        radioPrefs.isTcp() -> SignalSurveyBlocker.REMOTE_RADIO
+    private fun blockerFor(
+        state: PhoneLocationState,
+        connection: ConnectionState,
+        radioFix: RadioFix?,
+    ): SignalSurveyBlocker? = when {
         connection !is ConnectionState.Connected -> SignalSurveyBlocker.NOT_CONNECTED
+
+        // The radio says where it is, so the phone's location settings no longer decide whether a survey can log.
+        radioFix != null -> null
+
         !state.permissionGranted -> SignalSurveyBlocker.LOCATION_PERMISSION
+
         !state.providerEnabled -> SignalSurveyBlocker.LOCATION_OFF
+
         !state.hasFix -> SignalSurveyBlocker.NO_FIX
+
         else -> null
     }
 
@@ -191,18 +190,42 @@ internal const val SURVEY_MAX_FIX_AGE_MS = 15_000L
 internal const val SURVEY_MAX_FIX_ACCURACY_M = 50f
 private const val MS_PER_SECOND = 1000L
 
-/** The reading [packet] yields at [fix], or null when the packet is not a live reception or the fix is too poor. */
-internal fun surveySample(packet: MeshPacket, fix: PhoneLocation?, nowMillis: Long): SignalSample? {
+/** Where a reading is placed. */
+internal data class SurveyFix(val latitude: Double, val longitude: Double, val accuracyM: Float?)
+
+/**
+ * Where the radio is now, or null when nothing says so closely enough. A fix counts when it is under
+ * [SURVEY_MAX_FIX_AGE_MS] old and within [SURVEY_MAX_FIX_ACCURACY_M], or is the position of a radio that is still.
+ *
+ * A radio in hand is placed by its own GPS while that is fresh, then by the phone. A radio reached over the network may
+ * be anywhere, so the phone stands in for it only while it reports no position of its own.
+ */
+internal fun surveyFix(phone: PhoneLocation?, radio: RadioFix?, radioIsRemote: Boolean, nowMillis: Long): SurveyFix? {
+    val radioFresh = radio?.takeIf { nowMillis - it.timeMillis <= SURVEY_MAX_FIX_AGE_MS }
+    val radioUsable = radioFresh ?: radio?.takeIf { it.still }
+    val phoneFix =
+        phone?.takeIf { it.isUsableAt(nowMillis) }?.let { SurveyFix(it.latitude, it.longitude, it.accuracyM) }
+    return when {
+        radioIsRemote && radio != null -> radioUsable?.asSurveyFix()
+        radioIsRemote -> phoneFix
+        radioFresh?.fromGps == true -> radioFresh.asSurveyFix()
+        else -> phoneFix ?: radioUsable?.asSurveyFix()
+    }
+}
+
+private fun RadioFix.asSurveyFix() = SurveyFix(latitude, longitude, accuracyM = null)
+
+/** The reading [packet] yields at [fix], or null when the packet is not a live reception or there is no fix. */
+internal fun surveySample(packet: MeshPacket, fix: SurveyFix?, nowMillis: Long): SignalSample? {
     val rssi = packet.rx_rssi
-    val usableFix = fix?.takeIf { it.isUsableAt(nowMillis) }
-    return if (rssi == null || usableFix == null || !packet.isLiveLoraReception(nowMillis / MS_PER_SECOND)) {
+    return if (rssi == null || fix == null || !packet.isLiveLoraReception(nowMillis / MS_PER_SECOND)) {
         null
     } else {
         SignalSample(
             timeMillis = nowMillis,
-            latitude = usableFix.latitude,
-            longitude = usableFix.longitude,
-            accuracyM = usableFix.accuracyM,
+            latitude = fix.latitude,
+            longitude = fix.longitude,
+            accuracyM = fix.accuracyM,
             fromNum = packet.from,
             rssi = rssi,
             snr = packet.snrOrNull(),

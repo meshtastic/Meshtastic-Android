@@ -2006,7 +2006,6 @@ signal_survey_location_permission
 signal_survey_no_fix
 signal_survey_readings
 signal_survey_record
-signal_survey_remote_radio
 signal_survey_senders
 signal_survey_title
 signal_survey_unplaced

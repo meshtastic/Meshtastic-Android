@@ -23,8 +23,6 @@ import org.meshtastic.core.model.SignalSurveySession
 
 /** Why a running survey is logging nothing. */
 enum class SignalSurveyBlocker {
-    /** The radio is reached over the network, so the phone's position says nothing about where it hears from. */
-    REMOTE_RADIO,
     NOT_CONNECTED,
     LOCATION_PERMISSION,
     LOCATION_OFF,
@@ -32,8 +30,8 @@ enum class SignalSurveyBlocker {
 }
 
 /**
- * Logs the signal of each packet the connected radio hears against the phone's position. Passive: it sends nothing.
- * Each [start] opens a session, which [stop] or the end of the process closes.
+ * Logs the signal of each packet the connected radio hears against where the radio is. Passive: it sends nothing. Each
+ * [start] opens a session, which [stop] or the end of the process closes.
  */
 interface SignalSurveyRepository {
     val recording: StateFlow<Boolean>

@@ -2081,7 +2081,6 @@
         <item quantity="other">%1$d readings</item>
     </plurals>
     <string name="signal_survey_record">Record</string>
-    <string name="signal_survey_remote_radio">Not available for a radio connected over the network</string>
     <plurals name="signal_survey_senders">
         <item quantity="one">Heard %1$d node</item>
         <item quantity="other">Heard %1$d nodes</item>

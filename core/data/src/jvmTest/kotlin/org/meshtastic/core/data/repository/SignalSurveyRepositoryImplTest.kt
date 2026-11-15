@@ -32,18 +32,21 @@ import org.meshtastic.core.data.datasource.SignalSurveyLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SignalSurveySession
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.repository.SignalSurveyBlocker
 import org.meshtastic.core.testing.FakeDatabaseProvider
+import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Position
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -66,6 +69,7 @@ class SignalSurveyRepositoryImplTest {
     private val location = MutableStateFlow(PhoneLocationState(permissionGranted = true, providerEnabled = true))
     private val radioPrefs = FakeRadioPrefs()
     private val radioConfig = FakeRadioConfigRepository()
+    private val nodes = FakeNodeRepository()
     private val db = FakeDatabaseProvider()
     private var clock = 1_700_000_000_000L
 
@@ -79,8 +83,7 @@ class SignalSurveyRepositoryImplTest {
             object : PhoneLocationProvider {
                 override fun locationUpdates(): Flow<PhoneLocationState> = locationFlow()
             },
-            radioPrefs = radioPrefs,
-            radioConfigRepository = radioConfig,
+            radio = SignalSurveyRadio(radioPrefs, radioConfig, nodes),
             local = SignalSurveyLocalDataSource(db, dispatchers),
             clock =
             object : Clock {
@@ -279,15 +282,74 @@ class SignalSurveyRepositoryImplTest {
     }
 
     @Test
-    fun `a radio reached over the network logs nothing and says why`() = runBlocking {
+    fun `a radio reached over the network is placed by its own gps`() = runBlocking {
+        radioPrefs.setDevAddr("${InterfaceId.TCP.id}192.168.1.5")
+        startSettled()
+        nodes.setOurNode(Node(num = 1, position = radioPosition(31.0, Position.LocSource.LOC_INTERNAL)))
+
+        service.emitMeshPacket(heardNow())
+
+        val sample = repository.samplesOnce(awaitReadings(1).single().id).single()
+        assertEquals(31.0, sample.latitude, 1e-6)
+    }
+
+    @Test
+    fun `a radio reached over the network with no position of its own is placed by the phone`() = runBlocking {
         radioPrefs.setDevAddr("${InterfaceId.TCP.id}192.168.1.5")
         startSettled()
 
         service.emitMeshPacket(heardNow())
-        delay(SETTLE_FOR_NO_WRITE)
 
-        assertEquals(0, allSamples().size)
-        assertEquals(SignalSurveyBlocker.REMOTE_RADIO, settledBlocker())
+        assertEquals(30.0, repository.samplesOnce(awaitReadings(1).single().id).single().latitude)
+    }
+
+    @Test
+    fun `a radio that reports its own position needs no phone location`() = runBlocking {
+        service.setConnectionState(ConnectionState.Connected)
+        location.value = PhoneLocationState(permissionGranted = false, providerEnabled = true)
+        startRecording()
+        assertEquals(SignalSurveyBlocker.LOCATION_PERMISSION, settledBlocker())
+
+        nodes.setOurNode(Node(num = 1, position = radioPosition(31.0, Position.LocSource.LOC_MANUAL)))
+        assertNull(settledBlocker())
+    }
+
+    @Test
+    fun `a radio in hand is placed by its fresh gps then by the phone then by its standing fix`() {
+        val now = clock
+        val phone = PhoneLocation(latitude = 30.0, longitude = -95.0, altitude = null, timeMillis = now, accuracyM = 5f)
+        val gps = radioFix(fromGps = true, timeMillis = now)
+        val oldGps = gps.copy(timeMillis = now - SURVEY_MAX_FIX_AGE_MS - 1)
+
+        assertEquals(31.0, surveyFix(phone, gps, radioIsRemote = false, now)?.latitude)
+        assertEquals(30.0, surveyFix(phone, oldGps, radioIsRemote = false, now)?.latitude)
+        assertEquals(30.0, surveyFix(phone, oldGps.copy(still = true), radioIsRemote = false, now)?.latitude)
+        assertEquals(31.0, surveyFix(null, oldGps.copy(still = true), radioIsRemote = false, now)?.latitude)
+        assertNull(surveyFix(null, oldGps, radioIsRemote = false, now))
+    }
+
+    @Test
+    fun `a remote radio that reports a position is never placed by the phone`() {
+        val now = clock
+        val phone = PhoneLocation(latitude = 30.0, longitude = -95.0, altitude = null, timeMillis = now, accuracyM = 5f)
+        val moving = radioFix(fromGps = true, timeMillis = now - SURVEY_MAX_FIX_AGE_MS - 1)
+
+        assertNull(surveyFix(phone, moving, radioIsRemote = true, now))
+        assertEquals(31.0, surveyFix(phone, moving.copy(still = true), radioIsRemote = true, now)?.latitude)
+        assertEquals(30.0, surveyFix(phone, null, radioIsRemote = true, now)?.latitude)
+    }
+
+    @Test
+    fun `only a position the radio found itself counts as its own`() {
+        assertNull(radioPosition(31.0, Position.LocSource.LOC_EXTERNAL).toRadioFix())
+        assertNull(radioPosition(31.0, Position.LocSource.LOC_UNSET).toRadioFix())
+        assertNull(radioPosition(0.0, Position.LocSource.LOC_INTERNAL, longitude = 0.0).toRadioFix())
+
+        val fixed = assertNotNull(radioPosition(31.0, Position.LocSource.LOC_MANUAL).toRadioFix())
+        assertTrue(fixed.still)
+        val moving = assertNotNull(radioPosition(31.0, Position.LocSource.LOC_INTERNAL, kmph = 40).toRadioFix())
+        assertFalse(moving.still)
+        assertTrue(assertNotNull(radioPosition(31.0, Position.LocSource.LOC_INTERNAL, kmph = 0).toRadioFix()).still)
     }
 
     @Test
@@ -352,17 +414,37 @@ class SignalSurveyRepositoryImplTest {
     }
 
     @Test
-    fun `a stale or coarse fix yields no reading`() {
+    fun `a stale or coarse phone fix yields no reading`() {
         val now = clock
         val packet = heardNow()
         val fresh = PhoneLocation(latitude = 1.0, longitude = 2.0, altitude = null, timeMillis = now, accuracyM = 5f)
 
-        assertEquals(-101, surveySample(packet, fresh, now)?.rssi)
-        assertNull(surveySample(packet, null, now))
-        assertNull(surveySample(packet, fresh.copy(timeMillis = now - SURVEY_MAX_FIX_AGE_MS - 1), now))
-        assertNull(surveySample(packet, fresh.copy(accuracyM = SURVEY_MAX_FIX_ACCURACY_M + 1), now))
-        assertEquals(-101, surveySample(packet, fresh.copy(accuracyM = null), now)?.rssi)
+        fun sampleAt(fix: PhoneLocation?) = surveySample(packet, surveyFix(fix, null, radioIsRemote = false, now), now)
+
+        assertEquals(-101, sampleAt(fresh)?.rssi)
+        assertNull(sampleAt(null))
+        assertNull(sampleAt(fresh.copy(timeMillis = now - SURVEY_MAX_FIX_AGE_MS - 1)))
+        assertNull(sampleAt(fresh.copy(accuracyM = SURVEY_MAX_FIX_ACCURACY_M + 1)))
+        assertEquals(-101, sampleAt(fresh.copy(accuracyM = null))?.rssi)
     }
+
+    private fun radioFix(fromGps: Boolean, timeMillis: Long) =
+        RadioFix(latitude = 31.0, longitude = -95.0, timeMillis = timeMillis, still = false, fromGps = fromGps)
+
+    private fun radioPosition(
+        latitude: Double,
+        source: Position.LocSource,
+        longitude: Double = -95.0,
+        kmph: Int? = null,
+    ) = Position.Builder()
+        .also { wb ->
+            wb.latitude_i = (latitude * 1e7).toInt()
+            wb.longitude_i = (longitude * 1e7).toInt()
+            wb.location_source = source
+            wb.time = (clock / 1000).toInt()
+            wb.ground_speed = kmph
+        }
+        .build()
 
     private companion object {
         const val SETTLE_FOR_NO_WRITE = 300L
