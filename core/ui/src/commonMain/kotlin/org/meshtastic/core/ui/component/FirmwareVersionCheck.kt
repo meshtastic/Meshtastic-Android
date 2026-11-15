@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
@@ -39,6 +38,7 @@ import org.meshtastic.core.resources.firmware_gate_title
 import org.meshtastic.core.resources.firmware_gate_update
 import org.meshtastic.core.resources.firmware_old
 import org.meshtastic.core.resources.firmware_too_old
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
@@ -85,8 +85,8 @@ fun FirmwareVersionCheck(viewModel: UIViewModel, isFirmwareUpdateOpen: Boolean, 
                             "[FW_CHECK] Firmware too old - device: $ver < " +
                                 "absoluteMin: ${DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)}"
                         }
-                        val title = getString(Res.string.firmware_too_old)
-                        val message = getString(Res.string.firmware_old)
+                        val title = getStringSuspend(Res.string.firmware_too_old)
+                        val message = getStringSuspend(Res.string.firmware_old)
                         viewModel.showAlert(
                             title = title,
                             html = message,

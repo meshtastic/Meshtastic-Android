@@ -21,7 +21,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.pluralStringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -39,6 +38,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
 import org.meshtastic.core.resources.favorite_remove
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.ignore
 import org.meshtastic.core.resources.ignore_add
 import org.meshtastic.core.resources.ignore_remove
@@ -94,7 +94,7 @@ constructor(
     open fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(
+                getStringSuspend(
                     if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
                     node.effectiveLongName,
                 )
@@ -113,7 +113,10 @@ constructor(
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.effectiveLongName)
+                getStringSuspend(
+                    if (node.isMuted) Res.string.mute_remove else Res.string.mute_add,
+                    node.effectiveLongName,
+                )
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
@@ -129,7 +132,7 @@ constructor(
     open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(
+                getStringSuspend(
                     if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
                     node.effectiveLongName,
                 )

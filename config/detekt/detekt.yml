@@ -664,8 +664,15 @@ style:
         value: 'TODO:'
     allowedPatterns: ''
   ForbiddenImport:
-    active: false
-    forbiddenImports: []
+    active: true
+    excludes: ['**/core/resources/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
+    forbiddenImports:
+      - value: 'org.jetbrains.compose.resources.getString'
+        reason: 'A lookup waiting on the main dispatcher deadlocks stringResource. Use org.meshtastic.core.resources.getStringSuspend.'
+      - value: 'org.jetbrains.compose.resources.getPluralString'
+        reason: 'A lookup waiting on the main dispatcher deadlocks stringResource. Use org.meshtastic.core.resources.getPluralStringSuspend.'
+      - value: 'org.jetbrains.compose.resources.getStringArray'
+        reason: 'A lookup waiting on the main dispatcher deadlocks stringResource. Add a wrapper in core/resources/GetString.kt.'
     allowedImports: []
   ForbiddenMethodCall:
     active: false

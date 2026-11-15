@@ -21,10 +21,10 @@ import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 
 suspend fun Context.showToast(stringResource: StringResource, vararg formatArgs: Any) {
-    Toast.makeText(this, getString(stringResource, *formatArgs), Toast.LENGTH_SHORT).show()
+    Toast.makeText(this, getStringSuspend(stringResource, *formatArgs), Toast.LENGTH_SHORT).show()
 }
 
 fun Context.showToast(text: String) {

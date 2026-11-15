@@ -19,7 +19,6 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
@@ -28,6 +27,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.clean_node_database_confirmation
 import org.meshtastic.core.resources.clean_now
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 
@@ -77,7 +77,7 @@ class CleanNodeDatabaseViewModel(
     fun requestCleanNodes() {
         safeLaunch(tag = "requestCleanNodes") {
             val count = _nodesToDelete.value.size
-            val message = getString(Res.string.clean_node_database_confirmation, count)
+            val message = getStringSuspend(Res.string.clean_node_database_confirmation, count)
             alertManager.showAlert(
                 titleRes = Res.string.are_you_sure,
                 message = message,

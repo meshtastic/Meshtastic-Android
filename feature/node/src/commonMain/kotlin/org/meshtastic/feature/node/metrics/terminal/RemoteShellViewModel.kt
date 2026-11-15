@@ -34,7 +34,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
@@ -48,6 +47,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.remote_shell_error_notice
 import org.meshtastic.core.resources.remote_shell_full_screen
 import org.meshtastic.core.resources.remote_shell_input_dropped
@@ -407,13 +407,14 @@ class RemoteShellViewModel(
                 val result = output.append(event.bytes)
                 echo.onOutput(result.echo, nowMillis)
                 if (result.bell) _bell.tryEmit(Unit)
-                if (result.enteredFullScreen) output.notice(getString(Res.string.remote_shell_full_screen))
+                if (result.enteredFullScreen) output.notice(getStringSuspend(Res.string.remote_shell_full_screen))
             }
 
             is ShellEvent.RemoteError ->
-                output.notice(getString(Res.string.remote_shell_error_notice, event.message.ifEmpty { "?" }))
+                output.notice(getStringSuspend(Res.string.remote_shell_error_notice, event.message.ifEmpty { "?" }))
 
-            is ShellEvent.InputDropped -> output.notice(getString(Res.string.remote_shell_input_dropped, event.bytes))
+            is ShellEvent.InputDropped ->
+                output.notice(getStringSuspend(Res.string.remote_shell_input_dropped, event.bytes))
 
             is ShellEvent.Closed -> {
                 val wasOpening = _sessionState.value == SessionState.OPENING
@@ -425,10 +426,10 @@ class RemoteShellViewModel(
 
     // A node with the shell off, one that has not authorized us and one out of range all leave OPEN unanswered.
     private suspend fun closedNotice(reason: String, wasOpening: Boolean): String = when {
-        wasOpening && reason.isEmpty() -> getString(Res.string.remote_shell_no_reply)
-        wasOpening -> getString(Res.string.remote_shell_no_reply_reason, reason)
-        reason.isEmpty() -> getString(Res.string.remote_shell_session_closed)
-        else -> getString(Res.string.remote_shell_session_closed_reason, reason)
+        wasOpening && reason.isEmpty() -> getStringSuspend(Res.string.remote_shell_no_reply)
+        wasOpening -> getStringSuspend(Res.string.remote_shell_no_reply_reason, reason)
+        reason.isEmpty() -> getStringSuspend(Res.string.remote_shell_session_closed)
+        else -> getStringSuspend(Res.string.remote_shell_session_closed_reason, reason)
     }
 
     /** Caller holds [linkMutex]. */

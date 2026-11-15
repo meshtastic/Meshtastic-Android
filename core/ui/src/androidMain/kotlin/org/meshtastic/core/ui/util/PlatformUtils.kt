@@ -52,10 +52,10 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasBluetoothLe
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.resources.getStringSuspend
 import java.net.URLEncoder
 
 @Composable
@@ -101,7 +101,7 @@ actual fun rememberShowToast(): suspend (String) -> Unit {
 @Composable
 actual fun rememberShowToastResource(): suspend (StringResource) -> Unit {
     val context = LocalContext.current
-    return remember(context) { { stringResource -> context.showToast(getString(stringResource)) } }
+    return remember(context) { { stringResource -> context.showToast(getStringSuspend(stringResource)) } }
 }
 
 @Composable

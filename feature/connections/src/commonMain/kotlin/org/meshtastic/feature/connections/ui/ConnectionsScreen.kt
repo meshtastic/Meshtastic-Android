@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.ResourceEnvironment
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.rememberResourceEnvironment
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -102,6 +101,7 @@ import org.meshtastic.core.resources.firmware_update_notification_flasher
 import org.meshtastic.core.resources.firmware_update_open
 import org.meshtastic.core.resources.firmware_update_open_flasher
 import org.meshtastic.core.resources.firmware_version
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_network_permission
 import org.meshtastic.core.resources.local_network_permission_blocked_rationale
 import org.meshtastic.core.resources.local_network_permission_rationale
@@ -453,13 +453,12 @@ fun ConnectionsScreen(
     // Work around CMP-6615 in Compose Multiplatform 1.11.1: Android stringResource enters a blocking resource state.
     // Keep these stable slots outside AnimatedContent so connection-state transitions do not re-enter resource loading
     // while the main thread is applying an animation frame.
-    // Labels that first appear on connect load with suspend getString: a first-time stringResource load parks the main
-    // thread until Dispatchers.Default is free, and the handshake keeps it busy.
+    // Labels that first appear on connect load with getStringSuspend, so composition never blocks on resource loading.
     val resourceEnvironment = rememberResourceEnvironment()
     val rawFirmwareVersion = ourNode?.metadata?.firmware_version?.takeIf { it.isNotBlank() }
     val firmwareVersion by
         produceState<String?>(null, rawFirmwareVersion, resourceEnvironment) {
-            value = rawFirmwareVersion?.let { getString(resourceEnvironment, Res.string.firmware_version, it) }
+            value = rawFirmwareVersion?.let { getStringSuspend(resourceEnvironment, Res.string.firmware_version, it) }
         }
     val lora = localConfig.lora
     val loraSummaryText by
@@ -1067,9 +1066,10 @@ private suspend fun loraSummaryText(environment: ResourceEnvironment, lora: Conf
     val parts =
         loraSummary(
             lora = lora,
-            presetLabel = lora.modem_preset.schemaLabelRes()?.let { getString(environment, it) },
-            regionLabel = lora.region.schemaLabelRes()?.let { getString(environment, it) },
-            customLabel = getString(environment, Res.string.lora_preset_custom),
+            presetLabel = lora.modem_preset.schemaLabelRes()?.let { getStringSuspend(environment, it) },
+            regionLabel = lora.region.schemaLabelRes()?.let { getStringSuspend(environment, it) },
+            customLabel = getStringSuspend(environment, Res.string.lora_preset_custom),
         ) ?: return null
-    return parts.region?.let { getString(environment, Res.string.lora_preset_region, parts.preset, it) } ?: parts.preset
+    return parts.region?.let { getStringSuspend(environment, Res.string.lora_preset_region, parts.preset, it) }
+        ?: parts.preset
 }
