@@ -82,14 +82,21 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `wide under two rows shows four in a row`() = render(WidgetSizes.TELEMETRY_ROW_TALL) {
+    fun `two to three cells wide under two rows shows two in a row`() = render(WidgetSizes.TELEMETRY_ROW_TALL) {
+        onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(2)
+        onNode(hasText("48%")).assertExists()
+        onNode(hasText("BCS1")).assertExists()
+    }
+
+    @Test
+    fun `four cells wide under two rows shows four in a row`() = render(WidgetSizes.TELEMETRY_WIDE_ROW_TALL) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText("48%")).assertExists()
         onNode(hasText(pressure)).assertExists()
     }
 
     @Test
-    fun `a one-row cell keeps four compact tiles`() = render(WidgetSizes.TELEMETRY_ROW) {
+    fun `a one-row cell keeps four compact tiles`() = render(WidgetSizes.TELEMETRY_WIDE_ROW) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText(temperatureLabel)).assertDoesNotExist()
         onNode(hasText("21°C")).assertExists()

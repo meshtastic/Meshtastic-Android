@@ -77,6 +77,8 @@ internal fun TelemetryContent(
     val oneRow = WidgetSizes.isOneRow(size)
     val layout = telemetryLayout(size)
     val tiles = state.readings.map { it to telemetryTile(it, state) }
+    // Four from four cells wide; below that, four tiles in a row show only their icons.
+    val rowTiles = if (size.width >= WidgetSizes.TELEMETRY_WIDE_ROW.width) TELEMETRY_PAGE_SIZE else 2
     // The body sits directly in this column, weighted: Glance's unit-test harness caps nesting at ten levels.
     Column(modifier = modifier) {
         if (layout == TelemetryLayout.GRID || (layout == TelemetryLayout.ONE && !oneRow)) {
@@ -98,7 +100,7 @@ internal fun TelemetryContent(
 
             layout == TelemetryLayout.ROW ->
                 Row(modifier = body) {
-                    tiles.take(TELEMETRY_PAGE_SIZE).forEachIndexed { index, (_, tile) ->
+                    tiles.take(rowTiles).forEachIndexed { index, (_, tile) ->
                         if (index > 0) Spacer(GlanceModifier.width(TILE_GAP))
                         TileView(tile, compact = oneRow, GlanceModifier.defaultWeight().fillMaxHeight())
                     }
@@ -112,6 +114,7 @@ internal fun TelemetryContent(
             page = page(storedPage, tiles.size),
             pageCount = if (layout == TelemetryLayout.GRID) telemetryPageCount(tiles.size) else 1,
             showChip = layout == TelemetryLayout.ROW && !oneRow,
+            short = layout == TelemetryLayout.ONE,
         )
     }
 }
@@ -240,11 +243,16 @@ private fun TileValue(value: String, fontSize: TextUnit) {
  * [STALE_AFTER] old the line says so in the error color; the tiles stay at full strength (meshtastic/design#179).
  */
 @Composable
-private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: Int, showChip: Boolean) {
+private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: Int, showChip: Boolean, short: Boolean) {
     val age =
         when {
             state.isStale -> stringResource(Res.string.widget_telemetry_stale)
+
+            // One tile wide leaves no room for the prefix.
+            state.updatedAt != null && short -> formatAgo(state.updatedAt)
+
             state.updatedAt != null -> stringResource(Res.string.widget_telemetry_updated, formatAgo(state.updatedAt))
+
             else -> null
         }
     if (age == null && pageCount <= 1 && !showChip) return

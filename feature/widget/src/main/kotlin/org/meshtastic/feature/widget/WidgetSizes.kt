@@ -97,11 +97,27 @@ internal object WidgetSizes {
     val TELEMETRY_ONE_TALL = DpSize(40.dp, COMPACT_HEIGHT)
     val TELEMETRY_ROW = DpSize(NARROW_WIDTH, ONE_ROW_HEIGHT)
     val TELEMETRY_ROW_TALL = DpSize(NARROW_WIDTH, COMPACT_HEIGHT)
+    val TELEMETRY_WIDE_ROW = DpSize(TWO_COLUMN_WIDTH, ONE_ROW_HEIGHT)
+    val TELEMETRY_WIDE_ROW_TALL = DpSize(TWO_COLUMN_WIDTH, COMPACT_HEIGHT)
     val TELEMETRY_GRID = DpSize(NARROW_WIDTH, TWO_ROWS_HEIGHT)
 
-    /** The layout reads its size from the breakpoint, so a one-row and a taller variant of the small sizes each. */
+    /**
+     * The layout reads its size from the breakpoint, so the small sizes each have a one-row and a taller variant, and
+     * the row a four-cell variant: four tiles in a two-cell row show nothing but icons, so a row narrower than four
+     * cells shows two.
+     */
     val telemetrySizeMode: SizeMode =
-        SizeMode.Responsive(setOf(TELEMETRY_ONE, TELEMETRY_ONE_TALL, TELEMETRY_ROW, TELEMETRY_ROW_TALL, TELEMETRY_GRID))
+        SizeMode.Responsive(
+            setOf(
+                TELEMETRY_ONE,
+                TELEMETRY_ONE_TALL,
+                TELEMETRY_ROW,
+                TELEMETRY_ROW_TALL,
+                TELEMETRY_WIDE_ROW,
+                TELEMETRY_WIDE_ROW_TALL,
+                TELEMETRY_GRID,
+            ),
+        )
 
     /** The picker preview adds the two measured 2x2 cells, so it shows the grid filling its frame. */
     val telemetryPreviewSizeMode: PreviewSizeMode =
