@@ -257,7 +257,9 @@ internal fun environmentAxisRange(
 
     EnvironmentChartGroup.PRESSURE -> pressureAxisRange(dataMin, dataMax)
 
-    else -> null
+    // An autoscaled series with a single value (such as all zeros) gets a unit span so the axis never has zero
+    // height.
+    else -> if (dataMax <= dataMin) dataMin to (dataMin + 1.0) else null
 }
 
 private const val WHOLE_LABEL_MIN_SPAN = 8.0
@@ -321,7 +323,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
 
         // Relative Humidity
         val humidities = telemetries.mapNotNull {
-            it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f }
+            it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() }
         }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
@@ -399,7 +401,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
 
         // Radiation (uses separate fixed axis with minY=0 per Oscar's guidance)
         val radiationValues = telemetries.mapNotNull {
-            it.environment_metrics?.radiation?.takeIf { !it.isNaN() && it > 0f }
+            it.environment_metrics?.radiation?.takeIf { !it.isNaN() }
         }
         if (radiationValues.isNotEmpty()) {
             minValues.add(radiationValues.minOf { it })

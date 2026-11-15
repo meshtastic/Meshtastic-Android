@@ -81,9 +81,17 @@ class EnvironmentMetricsForGraphingTest {
     // ---- Humidity filtering ----
 
     @Test
-    fun humidity_zeroFilteredOut() {
+    fun humidity_reportedZeroPlots() {
         val metrics =
             listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0.0f }.build()))
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertTrue(result.shouldPlot[Environment.HUMIDITY.ordinal])
+    }
+
+    @Test
+    fun humidity_missingDoesNotPlot() {
+        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.HUMIDITY.ordinal])
@@ -224,7 +232,7 @@ class EnvironmentMetricsForGraphingTest {
     }
 
     @Test
-    fun radiation_positiveValuesOnly() {
+    fun radiation_reportedZeroIsKeptAlongsidePositiveReadings() {
         val metrics =
             listOf(
                 telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build()),
@@ -233,9 +241,28 @@ class EnvironmentMetricsForGraphingTest {
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.RADIATION.ordinal])
-        // 0f is filtered out (radiation > 0f only), so min should be 0.15
-        assertEquals(0.15f, result.rightMinMax.first, 0.01f)
+        assertEquals(0f, result.rightMinMax.first, 0.01f)
         assertEquals(0.15f, result.rightMinMax.second, 0.01f)
+    }
+
+    @Test
+    fun radiation_onlyZeroPlots() {
+        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build()))
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertTrue(result.shouldPlot[Environment.RADIATION.ordinal])
+    }
+
+    @Test
+    fun radiation_missingOrNaNDoesNotPlot() {
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = Float.NaN }.build()),
+            )
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertFalse(result.shouldPlot[Environment.RADIATION.ordinal])
     }
 
     // ---- Per-channel series (1-Wire probes, ADC inputs) ----

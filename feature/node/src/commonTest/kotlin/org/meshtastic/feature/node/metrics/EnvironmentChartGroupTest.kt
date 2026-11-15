@@ -164,4 +164,17 @@ class EnvironmentChartGroupTest {
         assertNull(environmentAxisRange(EnvironmentChartGroup.LUX, 0.0, 800.0))
         assertNull(environmentAxisRange(EnvironmentChartGroup.WIND, 0.0, 12.0))
     }
+
+    @Test
+    fun allZeroAutoscaledSeriesKeepsANonZeroSpan() {
+        val (min, max) = environmentAxisRange(EnvironmentChartGroup.RADIATION, 0.0, 0.0)!!
+
+        assertEquals(0.0, min)
+        assertTrue(max > min)
+    }
+
+    @Test
+    fun spreadAutoscaledSeriesStaysAutoscaled() {
+        assertNull(environmentAxisRange(EnvironmentChartGroup.RADIATION, 0.0, 0.3))
+    }
 }
