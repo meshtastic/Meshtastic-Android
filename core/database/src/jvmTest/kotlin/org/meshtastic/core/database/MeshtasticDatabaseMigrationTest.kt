@@ -720,6 +720,52 @@ class MeshtasticDatabaseMigrationTest {
             }
     }
 
+    /**
+     * [MeshtasticDatabase.MIGRATION_67_68] indexes `log` in place. The rows keep their rowids, one node's logs on one
+     * port come newest first from the three-column index with no sort, and the newest log of a type comes from the type
+     * index with no sort.
+     */
+    @Test
+    fun logGainsItsQueryIndexesWithoutRebuildingLog() = runTest {
+        helper.createDatabase(LOG_INDEXES_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO log (rowid, uuid, type, received_date, message, from_num, port_num) " +
+                    "VALUES (40, 'log-a', 'Packet', 1000, 'first', 42, 3)",
+            )
+            connection.execSQL(
+                "INSERT INTO log (rowid, uuid, type, received_date, message) " +
+                    "VALUES (7, 'log-b', 'MyInfo', 2000, 'second')",
+            )
+        }
+
+        helper
+            .runMigrationsAndValidate(
+                LOG_INDEXES_TO_VERSION,
+                listOf(MeshtasticDatabase.MIGRATION_67_68),
+            )
+            .use { connection ->
+                val logs = "FROM log ORDER BY received_date"
+                assertEquals(listOf("40", "7"), queryColumn(connection, "SELECT rowid $logs"))
+                assertEquals(listOf("log-a", "log-b"), queryColumn(connection, "SELECT uuid $logs"))
+
+                val fromPortPlan =
+                    queryPlan(
+                        connection,
+                        "SELECT * FROM log WHERE from_num = 42 AND port_num = 3 ORDER BY received_date DESC LIMIT 5000",
+                    )
+                assertTrue(
+                    fromPortPlan.any { "index_log_from_num_port_num_received_date" in it },
+                    fromPortPlan.toString(),
+                )
+                assertTrue(fromPortPlan.none { "TEMP B-TREE" in it }, fromPortPlan.toString())
+
+                val latestOfTypePlan =
+                    queryPlan(connection, "SELECT * FROM log WHERE type = 'MyInfo' ORDER BY received_date DESC LIMIT 1")
+                assertTrue(latestOfTypePlan.any { "index_log_type_received_date" in it }, latestOfTypePlan.toString())
+                assertTrue(latestOfTypePlan.none { "TEMP B-TREE" in it }, latestOfTypePlan.toString())
+            }
+    }
+
     /** The `detail` column of `EXPLAIN QUERY PLAN` for [sql], one entry per plan step. */
     private fun queryPlan(connection: SQLiteConnection, sql: String): List<String> =
         connection.prepare("EXPLAIN QUERY PLAN $sql").use { statement ->
@@ -773,10 +819,17 @@ class MeshtasticDatabaseMigrationTest {
         const val SCHEMA_64_TO_VERSION = 64
         const val REACTION_TRANSPORT_FROM_VERSION = 66
         const val REACTION_TRANSPORT_TO_VERSION = 67
+        const val LOG_INDEXES_FROM_VERSION = 67
+        const val LOG_INDEXES_TO_VERSION = 68
         const val QUERY_PLAN_DETAIL_COLUMN = 3
 
-        /** Every hand-written migration, which a walk across 52→53 or 63→64 must be given. */
-        val MANUAL_MIGRATIONS = listOf(MeshtasticDatabase.MIGRATION_52_53, MeshtasticDatabase.MIGRATION_63_64)
+        /** Every hand-written migration, which a walk across 52→53, 63→64 or 67→68 must be given. */
+        val MANUAL_MIGRATIONS =
+            listOf(
+                MeshtasticDatabase.MIGRATION_52_53,
+                MeshtasticDatabase.MIGRATION_63_64,
+                MeshtasticDatabase.MIGRATION_67_68,
+            )
         const val PUBLIC_KEY_BYTES = 32
         const val STORED_CHANNEL_SET_HEX = "0A0612044D657368"
 
