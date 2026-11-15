@@ -21,6 +21,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Telemetry
 import kotlin.test.Test
@@ -43,13 +44,13 @@ class RadiationSummaryTest {
     @Test
     fun reportedZeroRadiationIsShown() = runComposeUiTest {
         setSummary(EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build())
-        onNodeWithText("0.0 µR/h", substring = true).assertIsDisplayed()
+        onNodeWithText(formatString("%.1f µR/h", 0f), substring = true).assertIsDisplayed()
     }
 
     @Test
     fun reportedRadiationIsShown() = runComposeUiTest {
         setSummary(EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0.5f }.build())
-        onNodeWithText("0.5 µR/h", substring = true).assertIsDisplayed()
+        onNodeWithText(formatString("%.1f µR/h", 0.5f), substring = true).assertIsDisplayed()
     }
 
     @Test

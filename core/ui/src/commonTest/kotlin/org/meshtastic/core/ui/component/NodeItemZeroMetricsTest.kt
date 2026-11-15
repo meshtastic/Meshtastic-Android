@@ -159,6 +159,12 @@ class NodeItemZeroMetricsTest {
     }
 
     @Test
+    fun nodeItemCompact_hidesNaNHumidity() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = Float.NaN }.build())
+        onNodeWithText(MetricFormatter.humidity(Float.NaN)).assertDoesNotExist()
+    }
+
+    @Test
     fun nodeItemCompact_showsZeroCo2SensorHumidityWhenEnvironmentHasNone() = runComposeUiTest {
         setNodeItemCompact(
             EnvironmentMetrics.Builder().build(),
