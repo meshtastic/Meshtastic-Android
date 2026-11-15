@@ -59,6 +59,7 @@ import androidx.glance.layout.padding
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -92,14 +93,20 @@ class TelemetryWidget :
         val initialInputs = dataSource.currentInputs()
         val initialPrefs = getAppWidgetState<Preferences>(context, PreferencesGlanceStateDefinition, id)
         // Read once before composing, so the first render already carries the reading's age.
-        val initialHistory = initialPrefs[TELEMETRY_NODE_NUM_KEY]?.let { dataSource.currentHistory(it) }.orEmpty()
+        val initialNode = initialPrefs[TELEMETRY_NODE_NUM_KEY]
+        val initialHistory = initialNode?.let { dataSource.currentHistory(it) }.orEmpty()
         provideContent {
             val prefs = currentState<Preferences>()
             val nodeNum = prefs[TELEMETRY_NODE_NUM_KEY]
             val inputs by remember { dataSource.checkedInputs }.collectAsState(initialInputs)
-            val history by
-                remember(nodeNum) { nodeNum?.let(dataSource::history) ?: flowOf(emptyList()) }
-                    .collectAsState(initialHistory)
+            // Rows are tagged with the node they were read for, so another node's log never counts for this one.
+            val logged by
+                remember(nodeNum) {
+                    nodeNum?.let { num -> dataSource.history(num).map { num to it } } ?: flowOf(null to emptyList())
+                }
+                    .collectAsState(initialNode to initialHistory)
+            val historyLoaded = logged.first == nodeNum
+            val history = if (historyLoaded) logged.second else emptyList()
             val seen = prefs.readingSet(TELEMETRY_SEEN_KEY)
             val state =
                 telemetryWidgetState(
@@ -113,18 +120,12 @@ class TelemetryWidget :
             val node = nodeNum?.let { inputs.nodes[it] }
             // Remember what was reported and what was shown, so a reading the node stops sending keeps its tile, with
             // a dash, and the widget still shows its node with no radio connected.
-            LaunchedEffect(state, node) {
-                if (node == null || state !is TelemetryWidgetState.Showing) return@LaunchedEffect
-                val reported = seen + everReported(history) + state.snapshot.reported
+            LaunchedEffect(state, node, historyLoaded) {
+                if (node == null || state !is TelemetryWidgetState.Showing || !historyLoaded) return@LaunchedEffect
+                val reported = everReported(history) + state.snapshot.reported
                 val known = TelemetryLastKnown.of(node, state.snapshot)
-                if (reported != seen || prefs.lastKnownTelemetry() != known) {
-                    updateAppWidgetState(context, id) {
-                        // Setup may have moved this instance to another node since this composition read its state.
-                        if (it[TELEMETRY_NODE_NUM_KEY] == node.num) {
-                            it.putReadingSet(TELEMETRY_SEEN_KEY, reported)
-                            it.storeLastKnown(known)
-                        }
-                    }
+                if (!seen.containsAll(reported) || prefs.lastKnownTelemetry() != known) {
+                    updateAppWidgetState(context, id) { it.rememberReported(node.num, reported, known) }
                 }
             }
             WidgetContent(state, prefs[TELEMETRY_PAGE_KEY] ?: 0, appWidgetId)

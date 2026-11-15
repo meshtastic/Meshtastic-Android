@@ -147,6 +147,20 @@ internal fun MutablePreferences.storeTelemetrySettings(nodeNum: Int, hidden: Set
     this[TELEMETRY_PAGE_KEY] = 0
 }
 
+/**
+ * Adds [reported] to what the instance remembers and stores [known], unless setup has since moved the instance to
+ * another node. The stored set is merged rather than replaced, since this composition's copy of it may be older.
+ */
+internal fun MutablePreferences.rememberReported(
+    nodeNum: Int,
+    reported: Set<TelemetryReading>,
+    known: TelemetryLastKnown,
+) {
+    if (this[TELEMETRY_NODE_NUM_KEY] != nodeNum) return
+    putReadingSet(TELEMETRY_SEEN_KEY, readingSet(TELEMETRY_SEEN_KEY) + reported)
+    storeLastKnown(known)
+}
+
 /** Per-instance Glance state keys. */
 internal val TELEMETRY_NODE_NUM_KEY = intPreferencesKey("telemetry_node_num")
 internal val TELEMETRY_HIDDEN_KEY = stringSetPreferencesKey("telemetry_hidden")

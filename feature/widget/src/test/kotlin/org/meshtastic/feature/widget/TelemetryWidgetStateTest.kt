@@ -240,6 +240,33 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `remembering readings adds to the stored set instead of replacing it`() {
+        val node = telemetryNode(environment = weather)
+        val known = TelemetryLastKnown.of(node, telemetrySnapshot(node, emptyList()))
+        val prefs =
+            mutablePreferencesOf().apply {
+                storeTelemetrySettings(node.num, emptySet())
+                rememberReported(node.num, setOf(TelemetryReading.Lux), known)
+                rememberReported(node.num, setOf(TelemetryReading.Temperature), known)
+            }
+        assertEquals(setOf(TelemetryReading.Lux, TelemetryReading.Temperature), prefs.readingSet(TELEMETRY_SEEN_KEY))
+        assertEquals(known, prefs.lastKnownTelemetry())
+    }
+
+    @Test
+    fun `readings for a node setup has moved away from are not remembered`() {
+        val node = telemetryNode(num = 1, environment = weather)
+        val known = TelemetryLastKnown.of(node, telemetrySnapshot(node, emptyList()))
+        val prefs =
+            mutablePreferencesOf().apply {
+                storeTelemetrySettings(2, emptySet())
+                rememberReported(1, setOf(TelemetryReading.Rain), known)
+            }
+        assertEquals(emptySet(), prefs.readingSet(TELEMETRY_SEEN_KEY))
+        assertNull(prefs.lastKnownTelemetry())
+    }
+
+    @Test
     fun `the redraw key follows what the widget shows and ignores last heard`() {
         val node = telemetryNode(environment = weather, powerChannelLabels = listOf("Solar"))
         assertEquals(node.telemetryKey(), node.copy(lastHeard = node.lastHeard + 60).telemetryKey())
