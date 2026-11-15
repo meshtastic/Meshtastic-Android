@@ -140,11 +140,15 @@ class TelemetryConfigActivity :
     private suspend fun loadSetup(appWidgetId: Int): TelemetrySetup {
         // Read from the database directly; an empty one (no radio's DB open) shows the empty state, not a wait.
         val inputs = dataSource.currentInputs()
-        val prefs = runCatching {
-            val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
-            getAppWidgetState<Preferences>(this, PreferencesGlanceStateDefinition, glanceId)
-        }
-            .getOrNull()
+        // A widget id Glance does not know yet (first placement) has no settings to start from.
+        val prefs =
+            try {
+                val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
+                getAppWidgetState<Preferences>(this, PreferencesGlanceStateDefinition, glanceId)
+            } catch (e: IllegalArgumentException) {
+                Logger.d(e) { "Telemetry widget $appWidgetId has no Glance state yet" }
+                null
+            }
         val current = prefs?.get(TELEMETRY_NODE_NUM_KEY)?.let { inputs.nodes[it] }
         return TelemetrySetup(
             inputs = inputs,
