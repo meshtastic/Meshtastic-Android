@@ -191,15 +191,28 @@ class SignalSurveyContentTest {
                 lastHeardMillis = 1_700_000_000_000,
             )
         var dismissed = 0
-        setContent { SignalSurveyCellDialog(SurveyCellUi("a", cell, Quality.GOOD)) { dismissed++ } }
+        setContent { SignalSurveyCellCard(SurveyCellUi("a", cell, Quality.GOOD), SurveyLinks(), { dismissed++ }) }
 
         onNodeWithText("Good").assertIsDisplayed()
         onNodeWithText("SNR 4.5 dB").assertIsDisplayed()
         onNodeWithText("RSSI -101 dBm").assertIsDisplayed()
         onNodeWithText("3 readings").assertIsDisplayed()
         onNodeWithText("Heard 2 nodes").assertIsDisplayed()
-        onNodeWithText("Close").performClick()
+        onNodeWithText("Heard directly here").assertDoesNotExist()
+        onNodeWithContentDescription("Close").performClick()
         assertEquals(1, dismissed)
+    }
+
+    @Test
+    fun `a tapped square names the nodes heard directly and counts those without a position`() = runComposeUiTest {
+        val cell = SurveyCell(0.0, 0.0, 1.0, 1.0, 4.5f, -101, 3, 3, 0)
+        val link = SurveyLink(7, "DEEP", 0.5, 0.5, 0.6, 0.6, Quality.FAIR, 11_000.0)
+        val links = SurveyLinks(listOf(link), unplaced = 2)
+        setContent { SignalSurveyCellCard(SurveyCellUi("a", cell, Quality.GOOD), links, {}) }
+
+        onNodeWithText("Heard directly here").assertIsDisplayed()
+        onNodeWithText("DEEP").assertIsDisplayed()
+        onNodeWithText("2 more heard directly share no position").assertIsDisplayed()
     }
 
     private fun androidx.compose.ui.test.ComposeUiTest.onAllNodesWithTextCount(text: String, count: Int) {

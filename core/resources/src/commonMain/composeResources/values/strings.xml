@@ -2069,6 +2069,7 @@
     <string name="signal_survey_delete_confirm">Delete this session and its readings?</string>
     <string name="signal_survey_description">Listens only: logs the signal of each packet your radio hears, with your phone's location, and draws it on the map. Nothing is sent, and the log stays on this device.</string>
     <string name="signal_survey_export">Export CSV</string>
+    <string name="signal_survey_heard_directly">Heard directly here</string>
     <string name="signal_survey_heatmap">Show as heatmap</string>
     <string name="signal_survey_hud_recording">Recording survey · %1$s</string>
     <string name="signal_survey_last_reading">Last reading %1$s</string>
@@ -2086,6 +2087,10 @@
         <item quantity="other">Heard %1$d nodes</item>
     </plurals>
     <string name="signal_survey_title">Signal survey</string>
+    <plurals name="signal_survey_unplaced">
+        <item quantity="one">%1$d more heard directly shares no position</item>
+        <item quantity="other">%1$d more heard directly share no position</item>
+    </plurals>
     <!-- SITE -->
     <string name="site_planner">Site Planner</string>
     <string name="site_planner_antenna_gain_dbi">Antenna gain (dBi)</string>

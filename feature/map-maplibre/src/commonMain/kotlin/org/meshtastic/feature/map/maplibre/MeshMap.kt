@@ -84,6 +84,7 @@ import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.SignalSurveyHeatmapLayer
 import org.meshtastic.feature.map.maplibre.layers.SignalSurveyLayer
+import org.meshtastic.feature.map.maplibre.layers.SignalSurveyLinkLayer
 import org.meshtastic.feature.map.maplibre.layers.TerrainLayers
 import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -94,6 +95,7 @@ import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.meshtastic.feature.map.maplibre.tiles.InstallRadarSmoothing
 import org.meshtastic.feature.map.survey.SurveyCellUi
+import org.meshtastic.feature.map.survey.SurveyLink
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.seconds
 import org.maplibre.compose.layers.LocationIndicatorDefaults as CoreLocationIndicatorDefaults
@@ -148,6 +150,8 @@ fun rememberMeshMapState(
     /** The survey as heatmap points instead, one per street-level square. */
     surveyHeatPoints: List<SurveyCellUi> = emptyList(),
     surveyColors: Map<Quality, Color> = emptyMap(),
+    /** Lines from the tapped survey square to the nodes heard directly there. */
+    surveyLinks: List<SurveyLink> = emptyList(),
     onSurveyCellClick: (String) -> Unit = {},
 ): MapState {
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
@@ -184,6 +188,7 @@ fun rememberMeshMapState(
             CustomLayers(customLayers, layerOpacity)
             SignalSurveyLayer(surveyCells, surveyColors, onSurveyCellClick)
             SignalSurveyHeatmapLayer(surveyHeatPoints, surveyColors)
+            SignalSurveyLinkLayer(surveyLinks, surveyColors)
 
             if (filterState.showWaypoints) {
                 WaypointLayers(waypoints = waypoints.values, onWaypointClick = onWaypointClick)

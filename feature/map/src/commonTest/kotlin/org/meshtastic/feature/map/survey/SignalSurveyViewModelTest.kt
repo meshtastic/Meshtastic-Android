@@ -23,7 +23,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.snrLimit
+import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.component.Quality
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -48,7 +54,10 @@ class SignalSurveyViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = SignalSurveyViewModel(survey, visibility, SignalSurveyCellSource(survey, visibility))
+    private val nodes = FakeNodeRepository()
+
+    private fun viewModel() =
+        SignalSurveyViewModel(survey, visibility, SignalSurveyCellSource(survey, visibility), nodes)
 
     @Test
     fun `a hidden session draws nothing and a shown one draws its cells`() = runTest {
@@ -128,6 +137,54 @@ class SignalSurveyViewModelTest {
 
             viewModel.selectCell(null)
             assertNull(awaitItem())
+        }
+    }
+
+    @Test
+    fun `a tapped square stays selected as the map zooms and its square grows`() = runTest {
+        survey.add(1, reading(30.0, snr = 5f))
+        visibility.sessionIds.value = setOf(1)
+        val viewModel = viewModel()
+
+        viewModel.selectedCell.test {
+            assertNull(awaitItem())
+            viewModel.cells.test {
+                viewModel.selectCell(expectMostRecentItem().single().id)
+                viewModel.setCamera(zoom = 11.0, latitude = 30.0)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            val selected = expectMostRecentItem()
+            assertTrue(selected != null && selected.cell.north - selected.cell.south > 50 / 111_320.0 * 2)
+        }
+    }
+
+    @Test
+    fun `a tapped square links to the nodes heard directly that share a position`() = runTest {
+        val relayed = reading(30.0, snr = 5f).copy(fromNum = 9, direct = false)
+        survey.add(
+            1,
+            reading(30.0, snr = 5f).copy(fromNum = 1),
+            // A few dB under LongFast's floor rates Fair.
+            reading(30.0, snr = ModemPreset.LONG_FAST.snrLimit - 3f).copy(fromNum = 2),
+            reading(30.0, snr = 5f).copy(fromNum = 3),
+            relayed,
+        )
+        visibility.sessionIds.value = setOf(1)
+        nodes.setNodes(
+            listOf(placed(1, "NEAR", 30.001), placed(2, "FAR", 30.05), Node(num = 3), placed(9, "RELAY", 30.0)),
+        )
+        val viewModel = viewModel()
+
+        viewModel.selectedLinks.test {
+            assertTrue(awaitItem().links.isEmpty())
+            viewModel.cells.test { viewModel.selectCell(expectMostRecentItem().single().id) }
+
+            val links = expectMostRecentItem()
+            // Nearest first; the relay's copy draws no line, and node 3 shares no position.
+            assertEquals(listOf("NEAR", "FAR"), links.links.map { it.name })
+            assertEquals(listOf(Quality.GOOD, Quality.FAIR), links.links.map { it.quality })
+            assertEquals(1, links.unplaced)
         }
     }
 
@@ -212,4 +269,16 @@ class SignalSurveyViewModelTest {
         viewModel.setRecording(false)
         assertFalse(survey.recording.value)
     }
+
+    private fun placed(num: Int, name: String, lat: Double) = Node(
+        num = num,
+        user = User.Builder().also { wb -> wb.short_name = name }.build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = (lat * 1e7).toInt()
+                wb.longitude_i = (-95.0 * 1e7).toInt()
+            }
+            .build(),
+    )
 }

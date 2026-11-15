@@ -244,6 +244,7 @@ import org.meshtastic.feature.map.survey.SignalSurveyCellInfo
 import org.meshtastic.feature.map.survey.SignalSurveySection
 import org.meshtastic.feature.map.survey.SignalSurveyViewModel
 import org.meshtastic.feature.map.survey.SurveyCellUi
+import org.meshtastic.feature.map.survey.SurveyLink
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
@@ -466,7 +467,7 @@ fun MapView(
         snapshotFlow { cameraPositionState.position }
             .collect { camera -> survey.setCamera(zoom = camera.zoom.toDouble(), latitude = camera.target.latitude) }
     }
-    SignalSurveyCellInfo()
+    val surveyLinks by survey.selectedLinks.collectAsStateWithLifecycle()
 
     if (mode is GoogleMapMode.Main) {
         LaunchedEffect(cameraPositionState.isMoving, cameraInitialization) {
@@ -885,6 +886,7 @@ fun MapView(
             if (mode is GoogleMapMode.Main) {
                 SignalSurveyPolygons(surveyCells, surveyColors, survey::selectCell)
                 SignalSurveyHeatmap(surveyHeatPoints, surveyColors)
+                SignalSurveyLinkLines(surveyLinks.links, surveyColors)
             }
 
             when (mode) {
@@ -1122,6 +1124,8 @@ fun MapView(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
+
+        if (mode is GoogleMapMode.Main) SignalSurveyCellInfo(modifier = Modifier.align(Alignment.BottomStart))
 
         MapControlsOverlay(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
@@ -2220,6 +2224,34 @@ private fun SignalSurveyHeatmap(points: List<SurveyCellUi>, colors: Map<Quality,
                     .build()
             }
         key(quality, provider) { TileOverlay(tileProvider = provider, zIndex = SURVEY_Z_INDEX + index * 0.01f) }
+    }
+}
+
+// Above the survey squares and heat, below the mesh's own markers.
+private const val SURVEY_LINK_Z_INDEX = 0.5f
+private const val SURVEY_LINK_WIDTH = 8f
+private const val SURVEY_LINK_CASING_WIDTH = 13f
+
+/** Lines from the tapped survey square to each node heard directly there, cased so they read over the squares. */
+@Composable
+private fun SignalSurveyLinkLines(links: List<SurveyLink>, colors: Map<Quality, Color>) {
+    links.forEach { link ->
+        key(link.nodeNum) {
+            val points =
+                listOf(LatLng(link.fromLatitude, link.fromLongitude), LatLng(link.toLatitude, link.toLongitude))
+            Polyline(
+                points = points,
+                color = Color.Black,
+                width = SURVEY_LINK_CASING_WIDTH,
+                zIndex = SURVEY_LINK_Z_INDEX,
+            )
+            Polyline(
+                points = points,
+                color = colors[link.quality] ?: Color.Gray,
+                width = SURVEY_LINK_WIDTH,
+                zIndex = SURVEY_LINK_Z_INDEX + 0.01f,
+            )
+        }
     }
 }
 

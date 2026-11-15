@@ -41,7 +41,29 @@ class SignalSurveyVisibility {
 /**
  * One square as a map draws it. [id] is stable across updates, so a tapped square stays selected as it gains readings.
  */
-data class SurveyCellUi(val id: String, val cell: SurveyCell, val quality: Quality)
+data class SurveyCellUi(
+    val id: String,
+    val cell: SurveyCell,
+    val quality: Quality,
+    /** Each node heard directly in this square, rated the same way as the square. */
+    val directQuality: Map<Int, Quality> = emptyMap(),
+    val sessionId: Long = 0,
+)
+
+/** A point in one session, which stays put while the squares around it are rebuilt at another size. */
+data class SurveySpot(val sessionId: Long, val latitude: Double, val longitude: Double)
+
+private const val CENTER = 0.5
+
+internal fun SurveyCellUi.spot() =
+    SurveySpot(sessionId, (cell.south + cell.north) * CENTER, (cell.west + cell.east) * CENTER)
+
+/** The square of [spot]'s session that holds it, at whatever size the squares are now. */
+internal fun List<SurveyCellUi>.containing(spot: SurveySpot): SurveyCellUi? = firstOrNull {
+    it.sessionId == spot.sessionId &&
+        spot.latitude in it.cell.south..it.cell.north &&
+        spot.longitude in it.cell.west..it.cell.east
+}
 
 /** The rated squares of every visible session, shared by the map and the AR view so the two cannot disagree. */
 @Single
@@ -78,6 +100,8 @@ class SignalSurveyCellSource(
                     id = "$sessionId:${cell.south}:${cell.west}:$meters",
                     cell = cell,
                     quality = cell.quality(preset),
+                    directQuality = cell.direct.mapValues { (_, reception) -> reception.quality(preset) },
+                    sessionId = sessionId,
                 )
             }
         }

@@ -58,7 +58,15 @@ data class SurveyCell(
     val samples: Int,
     val senders: Int,
     val lastHeardMillis: Long,
+    /** The clearest direct reception from each node heard without a relay here, by node number. */
+    val direct: Map<Int, SurveyReception> = emptyMap(),
 )
+
+/** One reception's signal, the pair a quality rating is made from. */
+data class SurveyReception(val snr: Float?, val rssi: Int)
+
+/** A reading with no SNR sorts below every reading that has one; RSSI breaks the tie. */
+private val ClearestFirst = compareBy<SignalSample, Float?>(nullsFirst()) { it.snr }.thenBy { it.rssi }
 
 /**
  * Bins readings into squares about [cellMeters] on a side. A cell shows its clearest reading: one good reception proves
@@ -73,8 +81,7 @@ internal fun List<SignalSample>.toSurveyCells(cellMeters: Double = SURVEY_CELL_M
         .map { (cell, readings) ->
             val (row, column) = cell
             val lonStep = lonStep(row, latStep)
-            // A reading with no SNR sorts below every reading that has one; RSSI breaks the tie.
-            val clearest = readings.maxWith(compareBy<SignalSample, Float?>(nullsFirst()) { it.snr }.thenBy { it.rssi })
+            val clearest = readings.maxWith(ClearestFirst)
             SurveyCell(
                 south = row * latStep,
                 west = column * lonStep,
@@ -85,6 +92,13 @@ internal fun List<SignalSample>.toSurveyCells(cellMeters: Double = SURVEY_CELL_M
                 samples = readings.size,
                 senders = readings.distinctBy { it.fromNum }.size,
                 lastHeardMillis = readings.maxOf { it.timeMillis },
+                // A relayed copy carries the relay's signal, not the sender's, so only direct readings say who covers
+                // here.
+                direct =
+                readings
+                    .filter { it.direct }
+                    .groupBy { it.fromNum }
+                    .mapValues { (_, own) -> own.maxWith(ClearestFirst).let { SurveyReception(it.snr, it.rssi) } },
             )
         }
 }
@@ -111,10 +125,13 @@ internal fun surveyCellMeters(zoom: Double, latitude: Double): Double {
  * How good the cell's clearest reading is. SNR against the session's [preset] is the app's own signal rating; RSSI
  * alone stands in only when no reading reported an SNR.
  */
-internal fun SurveyCell.quality(preset: ModemPreset?): Quality {
-    val snr = bestSnr
+internal fun SurveyCell.quality(preset: ModemPreset?): Quality = SurveyReception(bestSnr, rssi).quality(preset)
+
+/** The same rating for one reception. */
+internal fun SurveyReception.quality(preset: ModemPreset?): Quality {
+    val measured = snr
     return when {
-        snr != null -> determineSignalQuality(snr, preset, rssi)
+        measured != null -> determineSignalQuality(measured, preset, rssi)
         rssi > RSSI_GOOD_THRESHOLD -> Quality.GOOD
         rssi > RSSI_FAIR_THRESHOLD -> Quality.FAIR
         rssi > RSSI_BAD_THRESHOLD -> Quality.BAD

@@ -64,6 +64,21 @@ class SignalSurveyCellsTest {
     }
 
     @Test
+    fun `a square keeps the clearest direct reception per node and skips relayed copies`() {
+        val readings =
+            listOf(
+                sample(1.0, 1.0, rssi = -100, snr = 1f, from = 1),
+                sample(1.0, 1.0, rssi = -110, snr = 4f, from = 1),
+                sample(1.0, 1.0, rssi = -90, snr = 9f, from = 2).copy(direct = false),
+            )
+
+        val cell = readings.toSurveyCells().single()
+
+        assertEquals(mapOf(1 to SurveyReception(4f, -110)), cell.direct)
+        assertEquals(2, cell.senders)
+    }
+
+    @Test
     fun `a reading with an snr outranks a louder one without`() {
         val cell =
             listOf(sample(1.0, 1.0, rssi = -60), sample(1.0, 1.0, rssi = -110, snr = -3f)).toSurveyCells().single()

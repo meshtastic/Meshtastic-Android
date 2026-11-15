@@ -217,7 +217,7 @@ class MapLibreMapViewProvider(
                 editor = waypointEditor,
             )
 
-            SignalSurveyCellInfo()
+            SignalSurveyCellInfo(modifier = Modifier.align(Alignment.BottomStart))
         }
     }
 }
@@ -250,10 +250,12 @@ private fun rememberMapScreenMapState(
     val survey: SignalSurveyViewModel = koinViewModel()
     val surveyCells by survey.cells.collectAsStateWithLifecycle()
     val surveyHeatPoints by survey.heatPoints.collectAsStateWithLifecycle()
+    val surveyLinks by survey.selectedLinks.collectAsStateWithLifecycle()
     val surveyColors = Quality.entries.associateWith { it.color() }
     return rememberMeshMapState(
         surveyCells = surveyCells,
         surveyHeatPoints = surveyHeatPoints,
+        surveyLinks = surveyLinks.links,
         surveyColors = surveyColors,
         onSurveyCellClick = survey::selectCell,
         viewModel = viewModel,

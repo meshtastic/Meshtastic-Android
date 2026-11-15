@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.SignalSurveySession
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.SignalSurveyBlocker
 import org.meshtastic.core.repository.SignalSurveyRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -52,10 +53,13 @@ class SignalSurveyViewModel(
     private val repository: SignalSurveyRepository,
     private val visibility: SignalSurveyVisibility,
     cellSource: SignalSurveyCellSource,
+    nodeRepository: NodeRepository,
 ) : ViewModel() {
 
     private val cellMeters = MutableStateFlow(SURVEY_CELL_METERS)
-    private val selectedCellId = MutableStateFlow<String?>(null)
+
+    /** The tapped spot rather than the tapped square, which is rebuilt at a new size on every zoom step. */
+    private val selectedSpot = MutableStateFlow<SurveySpot?>(null)
 
     val state: StateFlow<SignalSurveyUiState> =
         combine(
@@ -93,8 +97,18 @@ class SignalSurveyViewModel(
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val selectedCell: StateFlow<SurveyCellUi?> =
-        combine(cells, selectedCellId) { cells, id -> cells.firstOrNull { it.id == id } }
+        combine(cells, selectedSpot) { cells, spot -> spot?.let { cells.containing(it) } }
             .stateInWhileSubscribed(initialValue = null)
+
+    /**
+     * Lines from the tapped square to each node heard directly there that shares a position, ending where that node
+     * says it is (at the precision it chose), nearest first.
+     */
+    val selectedLinks: StateFlow<SurveyLinks> =
+        combine(selectedCell, nodeRepository.nodeDBbyNum) { selected, nodes ->
+            selected?.let { surveyLinks(it, nodes) } ?: SurveyLinks()
+        }
+            .stateInWhileSubscribed(initialValue = SurveyLinks())
 
     init {
         // A session shows on the map from the moment it starts, and stays on after it stops.
@@ -118,8 +132,9 @@ class SignalSurveyViewModel(
         cellMeters.value = surveyCellMeters(zoom, latitude)
     }
 
+    /** Selects the square [id] names, by its session and center, so the selection survives the map zooming. */
     fun selectCell(id: String?) {
-        selectedCellId.value = id
+        selectedSpot.value = id?.let { cellId -> cells.value.firstOrNull { it.id == cellId } }?.spot()
     }
 
     fun delete(sessionId: Long) {
