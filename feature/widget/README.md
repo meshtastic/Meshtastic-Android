@@ -65,7 +65,7 @@ The widget holds no lazy collection, which the `ActionTrampolineActivity` remova
 
 ## Telemetry
 
-Each instance stores its node under `TELEMETRY_NODE_NUM_KEY`, the readings to hide under `TELEMETRY_HIDDEN_KEY`, and the page under `TELEMETRY_PAGE_KEY`. `TelemetryConfigActivity` writes the first two: it starts on our own node when that node reports any of these readings, lists only nodes that have, and shows every reading the chosen node has reported with a switch to hide it.
+Each instance stores its node under `TELEMETRY_NODE_NUM_KEY`, the readings to hide under `TELEMETRY_HIDDEN_KEY`, and the page under `TELEMETRY_PAGE_KEY`. `TelemetryConfigActivity` writes the first two: it starts on our own node when that node reports any of these readings, lists only nodes that have, filtered by the search field against name and node id as the Node Tracker picker is, and shows every reading the chosen node has reported with a switch to hide it.
 
 The tiles are every reading the node has reported, in the design#179 order, less the hidden ones. The values come from the node DB, which holds each group's latest packet; the stored log (`MeshLogRepository.getTelemetryFrom`) adds the readings the node used to send and the time of the newest one, which it gives only when its newest row of a group holds the node DB's values. The instance also remembers every reading it has seen (`TELEMETRY_SEEN_KEY`), so a reading the node stops sending keeps its tile with a dash even with logging off; a reported zero is a value. With no time from the log, the reading counts as over two hours old once the node itself has not been heard for two hours.
 

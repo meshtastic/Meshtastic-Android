@@ -211,8 +211,9 @@ internal fun NodeTrackerPicker(nodes: Collection<Node>?, ourNodeNum: Int?, conne
     }
 }
 
+/** The rows both pickers list: chip, name and when the node was last heard. */
 @Composable
-private fun ColumnScope.CandidateList(nodes: List<Node>, onPick: (Node) -> Unit) {
+internal fun ColumnScope.CandidateList(nodes: List<Node>, onPick: (Node) -> Unit) {
     LazyColumn(modifier = Modifier.weight(1f)) {
         items(nodes, key = { it.num }) { node ->
             ListItem(

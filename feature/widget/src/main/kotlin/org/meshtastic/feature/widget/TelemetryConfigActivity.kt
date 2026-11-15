@@ -26,6 +26,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,11 +48,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.Preferences
@@ -69,6 +70,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.doc_no_results
+import org.meshtastic.core.resources.node_filter_placeholder
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.widget_telemetry_change_node
 import org.meshtastic.core.resources.widget_telemetry_choose
@@ -77,12 +80,13 @@ import org.meshtastic.core.resources.widget_telemetry_no_nodes_title
 import org.meshtastic.core.resources.widget_telemetry_readings_hint
 import org.meshtastic.core.resources.widget_telemetry_title
 import org.meshtastic.core.ui.component.EmptyState
+import org.meshtastic.core.ui.component.MeshtasticSearchBar
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
-import org.meshtastic.core.ui.util.formatAgo
 
 /**
  * Configures one [TelemetryWidget]: the node, and the readings to hide. The launcher opens it when the widget is placed
@@ -198,7 +202,8 @@ internal fun TelemetryConfigScreen(
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (node == null || picking) {
                 NodeList(
-                    nodes = telemetryCandidates(setup.inputs.nodes.values, setup.inputs.ourNodeNum),
+                    nodes = setup.inputs.nodes.values,
+                    ourNodeNum = setup.inputs.ourNodeNum,
                     onPick = { picked ->
                         if (picked.num != nodeNum) hiddenIds = emptySet()
                         nodeNum = picked.num
@@ -286,37 +291,37 @@ private fun ReadingList(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NodeList(nodes: List<Node>, onPick: (Node) -> Unit) {
-    if (nodes.isEmpty()) {
+private fun ColumnScope.NodeList(nodes: Collection<Node>, ourNodeNum: Int?, onPick: (Node) -> Unit) {
+    var query by rememberSaveable { mutableStateOf("") }
+    val all = remember(nodes, ourNodeNum) { telemetryCandidates(nodes, ourNodeNum) }
+    val matches = remember(nodes, ourNodeNum, query) { telemetryCandidates(nodes, ourNodeNum, query) }
+    if (all.isEmpty()) {
         EmptyState(
             icon = MeshtasticIcons.Nodes,
             title = stringResource(Res.string.widget_telemetry_no_nodes_title),
             supportingText = stringResource(Res.string.widget_telemetry_no_nodes_hint),
             modifier = Modifier.fillMaxSize(),
         )
-    } else {
-        LazyColumn {
-            item {
-                Text(
-                    stringResource(Res.string.widget_telemetry_choose),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
-            items(nodes, key = { it.num }) { node ->
-                ListItem(
-                    modifier = Modifier.clickable { onPick(node) },
-                    leadingContent = { NodeChip(node = node) },
-                    headlineContent = {
-                        Text(
-                            node.effectiveLongName.ifEmpty { node.user.id },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    supportingContent = { Text(formatAgo(node.lastHeard)) },
-                )
-            }
-        }
+        return
     }
+    MeshtasticSearchBar(
+        query = query,
+        onQueryChange = { query = it },
+        placeholder = stringResource(Res.string.node_filter_placeholder),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        expandedContent = {
+            if (matches.isEmpty()) {
+                EmptyState(icon = MeshtasticIcons.Search, title = stringResource(Res.string.doc_no_results))
+            } else {
+                CandidateList(matches, onPick)
+            }
+        },
+    )
+    Text(
+        stringResource(Res.string.widget_telemetry_choose),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+    CandidateList(all, onPick)
 }

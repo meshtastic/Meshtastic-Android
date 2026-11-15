@@ -92,7 +92,7 @@ The widget shows readings the app has already saved, so it works with no radio c
 2. Tap **Widgets**, then find **Meshtastic** in the list.
 3. Drag the **Meshtastic** (local stats), **Node Tracker** or **Telemetry** widget to your home screen.
 4. For a Node Tracker, pick the node to follow. Your favorites are listed first, then the most recently heard nodes; type in the search field to filter by name or node ID. Backing out without picking cancels the widget.
-5. For a Telemetry widget, the setup screen starts on your connected node when it reports any of these readings. Tap **Change node** to pick another; only nodes that have sent environment, air quality or power readings are listed. Turn off any reading you don't want, then tap **Save**.
+5. For a Telemetry widget, the setup screen starts on your connected node when it reports any of these readings. Tap **Change node** to pick another; only nodes that have sent environment, air quality or power readings are listed, and the search field filters them by name or node ID. Turn off any reading you don't want, then tap **Save**.
 6. Resize it as needed — the layout adapts to the available space.
 
 To track a different node or change the readings later, touch & hold the widget and choose the widget's settings or reconfigure option. The exact wording depends on your launcher.

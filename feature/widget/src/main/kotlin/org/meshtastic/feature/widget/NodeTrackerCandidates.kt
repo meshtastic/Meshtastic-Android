@@ -23,18 +23,19 @@ import org.meshtastic.core.model.Node
  * name, short name and node id. Our own radio is left out, since Local Stats already covers it, and so are ignored
  * nodes.
  */
-internal fun trackerCandidates(nodes: Collection<Node>, query: String, ourNodeNum: Int?): List<Node> {
+internal fun trackerCandidates(nodes: Collection<Node>, query: String, ourNodeNum: Int?): List<Node> = nodes
+    .asSequence()
+    .filter { !it.isIgnored && it.num != ourNodeNum }
+    .filter { it.matchesQuery(query) }
+    .sortedWith(compareByDescending<Node> { it.isFavorite }.thenByDescending { it.lastHeard }.thenBy { it.num })
+    .toList()
+
+/** Whether a picker's [query] finds this node by long name, short name or node id; a blank query finds every node. */
+internal fun Node.matchesQuery(query: String): Boolean {
     val needle = query.trim()
-    return nodes
-        .asSequence()
-        .filter { !it.isIgnored && it.num != ourNodeNum }
-        .filter { node ->
-            needle.isEmpty() ||
-                node.user.long_name.contains(needle, ignoreCase = true) ||
-                node.displayName.contains(needle, ignoreCase = true) ||
-                node.user.short_name.contains(needle, ignoreCase = true) ||
-                node.user.id.contains(needle, ignoreCase = true)
-        }
-        .sortedWith(compareByDescending<Node> { it.isFavorite }.thenByDescending { it.lastHeard }.thenBy { it.num })
-        .toList()
+    return needle.isEmpty() ||
+        user.long_name.contains(needle, ignoreCase = true) ||
+        displayName.contains(needle, ignoreCase = true) ||
+        user.short_name.contains(needle, ignoreCase = true) ||
+        user.id.contains(needle, ignoreCase = true)
 }

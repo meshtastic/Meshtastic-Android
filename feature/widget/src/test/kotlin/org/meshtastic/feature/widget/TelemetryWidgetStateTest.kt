@@ -203,6 +203,22 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `the picker query matches long name short name and id among telemetry nodes only`() {
+        val solar = telemetryNode(num = 0x11, environment = weather, lastHeard = 10)
+        val ridge = telemetryNode(num = 0x22, power = power { ch1_voltage = 3.3f }, lastHeard = 20)
+        val silent = testNode(0x33, lastHeard = 30)
+        val nodes = listOf(silent, ridge, solar)
+        fun found(query: String) = telemetryCandidates(nodes, ourNodeNum = null, query).map { it.num }
+
+        assertEquals(listOf(0x11), found(solar.user.long_name.uppercase()))
+        assertEquals(listOf(0x22), found(ridge.user.short_name.lowercase()))
+        assertEquals(listOf(0x22), found(" !00000022 "))
+        assertEquals(listOf(0x22, 0x11), found(" "))
+        assertEquals(emptyList(), found(silent.user.id))
+        assertEquals(emptyList(), found("zzz"))
+    }
+
+    @Test
     fun `a value splits from its unit only after a number`() {
         assertEquals("1,016" to "hPa", splitUnit("1,016 hPa"))
         assertEquals("9.4" to "mph", splitUnit("9.4\u00A0mph"))
