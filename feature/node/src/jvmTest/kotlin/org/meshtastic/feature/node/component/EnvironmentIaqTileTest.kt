@@ -54,6 +54,13 @@ class EnvironmentIaqTileTest {
         onNodeWithText("IAQ").assertDoesNotExist()
     }
 
+    @Test
+    fun unsetIaqSentinelShowsNoTile() = runComposeUiTest {
+        setIaq(Int.MIN_VALUE)
+        onNodeWithText("IAQ").assertDoesNotExist()
+        onNodeWithText("-2147483648", substring = true).assertDoesNotExist()
+    }
+
     private fun androidx.compose.ui.test.ComposeUiTest.setIaq(iaq: Int) = setContent {
         MaterialTheme {
             EnvironmentMetrics(

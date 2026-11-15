@@ -157,14 +157,17 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
                     },
                 ),
             )
-            iaq?.let { i ->
-                // The band name always accompanies the value, so the tile never relies on color alone.
-                val value =
-                    getIaq(i)?.let { stringResource(Res.string.aqi_value_with_severity, i, stringResource(it.label)) }
-                        ?: i.toString()
-                val card = VectorMetricInfo(label = Res.string.iaq, value = value, icon = MeshtasticIcons.AirQuality)
-                add(card.asGroup())
-            }
+            iaq?.takeUnless { it == Int.MIN_VALUE }
+                ?.let { i ->
+                    // The band name always accompanies the value, so the tile never relies on color alone.
+                    val value =
+                        getIaq(i)?.let {
+                            stringResource(Res.string.aqi_value_with_severity, i, stringResource(it.label))
+                        } ?: i.toString()
+                    val card =
+                        VectorMetricInfo(label = Res.string.iaq, value = value, icon = MeshtasticIcons.AirQuality)
+                    add(card.asGroup())
+                }
             distance?.let { d ->
                 add(
                     VectorMetricInfo(
@@ -303,6 +306,6 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
             }
         }
     }
-    val iaqColor = node.environmentMetrics.iaq?.let { getIaq(it)?.color }
+    val iaqColor = node.environmentMetrics.iaq?.let { getIaq(it)?.textColor() }
     MetricCardFlow(groups = groups, valueColor = { metric -> iaqColor.takeIf { metric.label == Res.string.iaq } })
 }
