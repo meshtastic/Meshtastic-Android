@@ -35,6 +35,7 @@
     <string name="camera_permission">Permisos de la càmera</string>
     <string name="cancel">Cancel·lar</string>
     <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
     <string name="channel_name">Nom del canal</string>
@@ -44,6 +45,7 @@
     <!-- CLEAR -->
     <string name="clear">Netejar</string>
     <string name="close">Tancar</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>

@@ -66,6 +66,7 @@
     <string name="cancel">Откажи</string>
     <string name="cant_change_no_radio">Није било могуће променити канал, јер радио још није повезан. Молимо покушајте поново.</string>
     <string name="cant_shutdown">Искључивање није подржано на овом уређају</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Искоришћење за тренутни канал, укључујући добро формиран TX, RX и неисправан RX (такође познат као шум).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Канал 1</string>
@@ -86,6 +87,8 @@
     <!-- CLEAR -->
     <string name="clear">Очисти</string>
     <string name="close">Затвори</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Добро</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Контролише трепћућу LED лампицу на уређају. За већину уређаја ово ће контролисати једну од до 4 LED лампице, LED лампице за пуњач и GPS нису контролисане.</string>
@@ -488,6 +491,7 @@
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Лош</string>
+    <string name="widget_telemetry_title">Телеметрија (сензори)</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP адреса</string>
     <string name="wifi_provision_success_username">Корисничко име</string>

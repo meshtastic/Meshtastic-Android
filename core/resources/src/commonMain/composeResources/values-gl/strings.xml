@@ -35,6 +35,7 @@
     <string name="camera_permission">Permiso da cámara</string>
     <string name="cancel">Cancelar</string>
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
     <string name="channel_name">Nome de canle</string>
@@ -44,6 +45,7 @@
     <!-- CLEAR -->
     <string name="clear">Limpar</string>
     <string name="close">Pechar</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>

@@ -43,6 +43,7 @@
     <string name="cancel">Anullo</string>
     <string name="cant_change_no_radio">Nuk mund të ndryshoni kanalin, sepse radioja ende nuk është lidhur. Ju lutemi provoni përsëri.</string>
     <string name="cant_shutdown">Fikja nuk mbështetet në këtë pajisje</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Përdorimi për kanalin aktual, duke përfshirë TX të formuar mirë, RX dhe RX të dëmtuar (në gjuhën e thjeshtë: zhurmë).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Ky URL kanal është i pavlefshëm dhe nuk mund të përdoret</string>
@@ -53,6 +54,8 @@
     <!-- CLEAR -->
     <string name="clear">Pastro</string>
     <string name="close">Mbylle</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Mirë</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Азимут: %1$s</string>
     <string name="compass_bearing_na">Азимут: Н/А</string>

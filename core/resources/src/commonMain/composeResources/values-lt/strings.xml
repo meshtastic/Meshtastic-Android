@@ -44,6 +44,7 @@
     <string name="cancel">Atšaukti</string>
     <string name="cant_change_no_radio">Nepavyko pakeisti kanalo, nes radijas dar nėra prisijungęs. Bandykite dar kartą.</string>
     <string name="cant_shutdown">Išjungimas nepalaikomas šiame įtaise</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
@@ -54,6 +55,8 @@
     <!-- CLEAR -->
     <string name="clear">Išvalyti</string>
     <string name="close">Uždaryti</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Geras</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>

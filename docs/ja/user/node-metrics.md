@@ -1,7 +1,7 @@
 ---
 title: ノードメトリクス
 nav_order: 5
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
@@ -103,7 +103,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. 大気質ビューでは、次のことができます：
 
-- グラフの**期間**を選択します。
+- グラフの**期間**を選択します。 Particulate readings share one axis scaled so zero readings stay visible, and CO₂ has its own axis on the right so it can't flatten them.
 - **メトリクスチップ**で絞り込みます。データがあるメトリクスのみが表示されます。
 - 最新の大気質テレメトリを**更新／要求**します。
 - 表計算ソフトで分析できるよう、**CSV にエクスポート**します。
@@ -158,7 +158,7 @@ The node detail screen shows a card for every channel that reported data, up to 
 2. アプリが対象のノードにルート追跡の要求を送信します。 The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
 
-The ring on the traceroute button counts down the seconds until the next request is allowed.
+The ring on the traceroute button shows the seconds left until the next request is allowed, and the node list's **Trace Route** reads **Trace Route in** _N_ **s** over the same wait.
 
 ### ルート追跡の結果の見方
 

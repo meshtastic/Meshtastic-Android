@@ -43,6 +43,7 @@
     <string name="calculating">Υπολογισμός…</string>
     <string name="camera_permission">Άδεια κάμερας</string>
     <string name="cancel">Ακύρωση</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_1">Κανάλι 1</string>
     <string name="channel_2">Κανάλι 2</string>
@@ -61,6 +62,7 @@
     <!-- CLEAR -->
     <string name="clear">Καθαρό, Εκκαθάριση,</string>
     <string name="close">Κλείσιμο</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
@@ -287,6 +289,7 @@
     <string name="waypoint_new">Νέο σημείο πορείας</string>
     <string name="weight">Βάρος</string>
     <!-- WIDGET -->
+    <string name="widget_telemetry_title">Τηλεμετρία</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP διεύθυνση</string>
     <string name="wifi_provision_success_username">Όνομα χρήστη</string>

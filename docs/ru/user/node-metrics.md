@@ -1,7 +1,7 @@
 ---
 title: Метрики ноды
 nav_order: 5
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Панели телеметрии для каждой ноды mesh-сети — состояние устройства, датчики окружающей среды, качество воздуха, качество сигнала, питание, трассировка и история местоположения.
 aliases:
   - metrics
@@ -103,7 +103,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. В режиме просмотра качества воздуха ты можешь:
 
-- Выбрать **временной интервал** для графиков.
+- Выбрать **временной интервал** для графиков. Particulate readings share one axis scaled so zero readings stay visible, and CO₂ has its own axis on the right so it can't flatten them.
 - Фильтровать с помощью **кнопок метрик** — отображаются только те метрики, по которым есть данные.
 - **Обновить / запросить** последнюю телеметрию о качестве воздуха.
 - **Экспортировать в CSV** для анализа в электронных таблицах.
@@ -158,7 +158,7 @@ The node detail screen shows a card for every channel that reported data, up to 
 2. Приложение отправляет запрос трассировки целевой ноде. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
 
-The ring on the traceroute button counts down the seconds until the next request is allowed.
+The ring on the traceroute button shows the seconds left until the next request is allowed, and the node list's **Trace Route** reads **Trace Route in** _N_ **s** over the same wait.
 
 ### Чтение результатов трассировки
 

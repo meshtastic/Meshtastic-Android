@@ -1,7 +1,7 @@
 ---
 title: MQTT
 nav_order: 11
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: 將您的 mesh 網路橋接至網際網路 — MQTT 代理伺服器設定、加密層級與地圖回報。
 aliases:
   - MQTT
@@ -46,9 +46,11 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **Encryption Enabled**  | Publish packets still encrypted with the channel key                                                                                                        | 已啟用                                                                                                    |
 | **JSON output enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | 已停用                                                                                                    |
 | **TLS Enabled**         | 與代理伺服器的安全連線                                                                                                                                                 | 已停用                                                                                                    |
-| **Root Topic**          | 訊息的基礎主題                                                                                                                                                     | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
+| **Root Topic**          | Base topic for messages. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
 | **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | 已停用                                                                                                    |
 | **Map Reporting**       | 將位置回報至公開地圖                                                                                                                                                  | 已停用                                                                                                    |
+
+A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
 ### Connection Status and Test Connection
 
@@ -116,7 +118,7 @@ When this app relays MQTT for the node, connections to that broker always use TL
 
 When **Map Reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider, with no label of its own, sets the position precision from 12 to 15, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
 
 Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
 

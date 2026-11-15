@@ -118,6 +118,74 @@
     <string name="canned_message_enabled">啟用罐頭訊息</string>
     <string name="cant_change_no_radio">無法更改頻道，因為裝置尚未連接。請再試一次。</string>
     <string name="cant_shutdown">此裝置不支援關機功能</string>
+    <!-- CARDINAL -->
+    <string name="cardinal_n">Meshtastic is a remarkable open-source project that leverages the power of low-power, long-range radio communication. It allows you to create a decentralized, encrypted, and resilient mesh network for text messaging and data transfer, even without cellular or WiFi connectivity.
+
+**Key Features of Meshtastic:**
+
+*   **Long-Range Communication:** Utilizing LoRa radio technology, Meshtastic devices can communicate over distances of several kilometers, depending on environmental conditions and antenna configurations.
+
+*   **Mesh Networking:** Devices automatically forward messages to each other, extending the network's reach and creating redundancy.
+
+*   **Encryption:** All messages are encrypted end-to-end, ensuring privacy and security.
+
+*   **Open Source:** The entire project is open source, allowing for community contributions, customization, and auditing.
+
+*   **Hardware Flexibility:** Meshtastic supports a variety of inexpensive, readily available hardware platforms, such as ESP32, nRF52, and RP2040 based boards.
+
+**Hardware Options:**
+
+Several popular hardware options are available for running Meshtastic, including:
+
+*   **RAK Wireless WisBlock:** A modular and versatile platform with a wide range of available modules.
+
+*   **T-Beam:** A popular, integrated solution with a built-in GPS module.
+
+*   **Heltec WiFi LoRa:** A compact and widely used board with WiFi and LoRa capabilities.
+
+*   **LilyGo T-Echo:** A ruggedized device designed for outdoor use.
+
+**Software and Configuration:**
+
+Meshtastic devices are typically configured using a companion app (available for Android and iOS) or via a CLI interface. The firmware can be updated over the air (OTA) via BLE or USB.
+
+**Technical Details:**
+
+*   **Radio Technology:** LoRa
+
+*   **Microcontrollers:** ESP32, nRF52, RP2040
+
+*   **Connectivity:** LoRa, BLE, WiFi (depending on the hardware)
+
+*   **Power:** Typically powered by USB or battery
+
+*   **Interfaces:** GPIO, USB, UART, SPI, I2C
+
+**Use Cases:**
+
+Meshtastic can be used in a variety of scenarios, including:
+
+*   **Emergency Communication:** Providing communication during natural disasters or other emergencies when cellular networks are down.
+
+*   **Outdoor Adventures:** Maintaining communication while hiking, camping, or engaging in other outdoor activities in areas with limited or no cellular coverage.
+
+*   **Off-Grid Communication:** Creating a local communication network in areas without internet access.
+
+*   **IoT Applications:** Connecting sensors and devices in remote locations.
+
+**Integration with Other Systems:**
+
+Meshtastic can be integrated with other systems via MQTT or a custom API. This allows for data to be exchanged between Meshtastic devices and other applications.
+
+**Getting Started:**
+
+To get started with Meshtastic, you will need:
+
+1.  A compatible hardware device (e.g., RAK, T-Beam, Heltec, LilyGo).
+2.  The Meshtastic firmware.
+3.  The Meshtastic companion app (Android or iOS) or CLI.
+
+You can find detailed instructions and documentation on the official Meshtastic website.</string>
     <string name="ch_util_definition">目前頻道的使用情況，包括格式正確的傳輸（TX）、接收（RX）和格式錯誤的接收（也稱為雜訊）。</string>
     <!-- CHANNEL -->
     <string name="channel">頻道</string>
@@ -168,6 +236,8 @@
     <string name="client_notification">客户端通知</string>
     <string name="close">關閉</string>
     <string name="close_selection">關閉選取</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">良好</string>
     <string name="collapse_chart">收起圖表</string>
     <string name="communicate_off_the_grid">無需手機訊號，也能與您的朋友和社群離線通訊。</string>
     <!-- COMPASS -->
@@ -939,6 +1009,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="preserve_favorites">保留我的最愛？</string>
     <string name="press_and_drag">長按後可拖曳排列順序</string>
     <string name="pressure">氣壓</string>
+    <string name="pressure_high">高</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">這是一個一個一個可客製化的組合元件</string>
     <string name="preview_custom_composable_line_two">還支援多行文字與多種樣式</string>
@@ -1272,6 +1343,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <!-- WIDGET -->
     <string name="widget_packets_bad">不良</string>
     <string name="widget_packets_received">已接收</string>
+    <string name="widget_telemetry_title">遙測</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="wifi_provision_available_networks">可用的網路</string>

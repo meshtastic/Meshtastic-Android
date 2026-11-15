@@ -57,6 +57,7 @@
     <string name="cancel">Annuleer</string>
     <string name="cant_change_no_radio">Kon kanaal niet wijzigen, omdat de radio nog niet is aangesloten. Probeer het opnieuw.</string>
     <string name="cant_shutdown">Uitschakelen niet ondersteund op dit apparaat</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Gebruik voor het huidige kanaal, inclusief goed gevormde TX, RX en misvormde RX (ruis).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Kanaal 1</string>
@@ -76,6 +77,8 @@
     <!-- CLEAR -->
     <string name="clear">Wis</string>
     <string name="close">Sluit</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Goed</string>
     <!-- COMPASS -->
     <string name="compass_north_top">Kompas Noorden bovenaan</string>
     <!-- CONFIG -->
@@ -431,6 +434,7 @@
     <string name="weight">Gewicht</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slecht</string>
+    <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adres</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>

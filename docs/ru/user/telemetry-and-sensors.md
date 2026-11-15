@@ -1,7 +1,7 @@
 ---
 title: Телеметрия и датчики
 nav_order: 9
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: Данные датчиков в mesh-сети — поддерживаемые датчики окружающей среды, качества воздуха и питания, а также руководства по настройке и просмотру.
 aliases:
   - sensors
@@ -92,7 +92,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | Напряжение  | Per-channel voltage reading     |
 | Ток         | Per-channel current draw, in mA |
 
-The node detail screen shows read-only cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
+The node detail screen shows read-only cards for every channel that reported data, up to eight. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Полезно для мониторинга солнечной зарядки или состояния батареи на удалённых нодах.
 

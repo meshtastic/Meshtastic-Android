@@ -1,7 +1,7 @@
 ---
 title: Sõlme mõõdikud
 nav_order: 5
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Telemeetria armatuurlauad iga võrgusõlme kohta – seadme tervis, keskkonnaandurid, õhu kvaliteet, signaali kvaliteet, võimsus, marsruut ja asukoha ajalugu.
 aliases:
   - meetriline
@@ -103,7 +103,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. From the Air Quality view you can:
 
-- Vali diagrammide jaoks **ajaraam**.
+- Vali diagrammide jaoks **ajaraam**. Particulate readings share one axis scaled so zero readings stay visible, and CO₂ has its own axis on the right so it can't flatten them.
 - Filtreeri **mõõdikute kiipide** abil — kuvatakse ainult andmeid sisaldavad mõõdikud.
 - **Refresh / request** the latest air-quality telemetry.
 - **Ekspordi CSV** analüüsimiseks arvutustabeli vaates.
@@ -158,7 +158,7 @@ Traceroute näitab sõnumi teed läbi kärgvõrgu:
 2. Rakendus saadab sihtsõlmele traceroute-päringu. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
 
-The ring on the traceroute button counts down the seconds until the next request is allowed.
+The ring on the traceroute button shows the seconds left until the next request is allowed, and the node list's **Trace Route** reads **Trace Route in** _N_ **s** over the same wait.
 
 ### Traceroute'i tulemuste lugemine
 

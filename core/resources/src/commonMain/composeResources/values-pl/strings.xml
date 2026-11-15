@@ -72,6 +72,7 @@
     <string name="canned_message_config">Konfiguracja gotowych wiadomości</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze podłączone. Proszę, spróbuj ponownie.</string>
     <string name="cant_shutdown">Wyłączenie nie jest obsługiwane w tym urządzeniu</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Wykorzystanie dla bieżącego kanału, w tym prawidłowego TX/RX oraz zniekształconego RX (czyli szumu).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Kanał 1</string>
@@ -97,6 +98,8 @@
     <string name="clear">Czyść</string>
     <string name="close">Zamknij</string>
     <string name="close_selection">Zamknij wybór</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">dobry</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Kurs: %1$s</string>
     <string name="compass_bearing_na">Kurs: N/A</string>
@@ -727,6 +730,7 @@
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %1$s</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">słaby</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_done">Wykonano</string>

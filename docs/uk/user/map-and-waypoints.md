@@ -1,7 +1,7 @@
 ---
 title: Map & Waypoints
 nav_order: 6
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -68,12 +68,13 @@ On an Android XR headset, the Google Play build adds a **Full Space** button. Fu
 
 **3D map** stands a terrain table beside the app, built from the positions your nodes have shared and anchored on your connected node. The table shows:
 
-- the terrain in relief, with any of the 2D map's base maps draped over it
-- elevation contours, in meters or feet by your [units setting](units-and-locale)
+- the terrain in relief, with any of the 2D map's raster base maps draped over it, satellite first, or in elevation colors when you pick **Elevation**
+- elevation contours when you turn on **Contours**, in meters or feet by your [units setting](units-and-locale)
 - buildings, where a downloaded offline region reaches zoom 13 or closer
-- nodes as the same chips as the 2D map, the links between them in signal colors, and the last traceroute
+- nodes as chips like the 2D map's, with routers and other infrastructure nodes standing as towers
+- comets that fly along the links from each node your node hears, colored by signal quality, and along both directions of the last traceroute that had a route
 
-The table's control panel holds the layer, **Buildings**, contour, and **Zoom** controls. With no positioned nodes there is no area to show. Where no terrain data exists, the ground is drawn flat.
+The table's control panel holds the base map and **Elevation** chips, **Contours**, **Buildings** and a **Zoom** slider, plus the credits for what is on the table. **Buildings** appears only when a downloaded region has them. The terrain downloads as the table builds, so it needs a network connection; if that fails the app says the terrain could not be loaded. With no positioned nodes there is no area to show. Where no terrain data exists, the ground is drawn flat.
 
 ## Waypoints
 
@@ -126,7 +127,9 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## Шари мапи
 
-Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. A file opened or shared this way is refused if it is over 50 MB. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. A file opened or shared this way is refused if it is over 50 MB (10 MB for GeoJSON). **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. The sheet scrolls as one page, so the layer list stays reachable under a long list of downloaded regions. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+
+A layer's size is capped to protect memory: a GeoJSON layer over 10 MB and a KML or KMZ over 50 MB are refused at import and not drawn, and a `.json` file that isn't GeoJSON is refused. On **Google Play** builds, a layer with more detail than the map has room to draw is left undrawn, and a message names the layer.
 
 Imported layers are listed with a toggle to show/hide each one and an option to remove it. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
@@ -156,7 +159,7 @@ Configure position behavior in **Settings → Device configuration → Position*
 
 ### Privacy Considerations
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, set **GPS Mode** to **Disabled**, or use a **Fixed Position** somewhere else. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
+> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, set **GPS Mode** to **Disabled**, or use a **Fixed Position** somewhere else. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point. A channel that is not securely encrypted (a one-byte key, the default key, or no key on the primary channel or on a secondary whose primary is one of these) cannot carry precise location: the switch is disabled with "Not available on a channel that is not securely encrypted", and the slider stops at 15 bits.
 
 ## Map Sources
 
@@ -221,7 +224,7 @@ the map. On **Google Play**, each downloaded region in the **Offline Manager** l
 button. Terrain attaches to that region and shares its storage limit, and an area too large for terrain asks
 you to zoom in or pick a smaller region. Once the terrain is downloaded, the button gives way to **Hillshade**
 and **Contours** switches, both off until you turn them on. Hillshade draws at full strength to one zoom level past
-the deepest terrain downloaded for that spot, fades over the next level and stops after it; contours keep drawing.
+the deepest terrain downloaded for that spot, fades to half strength at two levels past and is gone at three; contours keep drawing.
 On **Google Play**, turning on **Hillshade** also offers **Shade Valleys**, off by default, which darkens valleys and
 gorges by how little sky they see, whichever way they face the light. On **F-Droid** and **Desktop**, the layers sheet
 has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the hillshade and

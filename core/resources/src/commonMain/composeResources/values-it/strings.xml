@@ -156,6 +156,10 @@
     <string name="canned_message_enabled">Messaggi preconfezionati abilitati</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
     <string name="cant_shutdown">Spegnimento non supportato su questo dispositivo</string>
+    <!-- CARDINAL -->
+    <string name="cardinal_e">E</string>
+    <string name="cardinal_n">N</string>
+    <string name="cardinal_s">S</string>
     <string name="ch_util_definition">Impegno del canale attuale, inclusi TX e RX ben formati e RX malformati (cioè rumore).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -206,8 +210,10 @@
     <string name="client_notification">Notifiche Client</string>
     <string name="close">Chiudi</string>
     <string name="close_selection">Chiudi selezione</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ Umidità</string>
+    <string name="co2_level_good">Buono</string>
     <string name="co2_temperature">CO₂ Temperatura</string>
     <string name="collapse_chart">Minimizza grafico</string>
     <string name="collapsed">Minimizzato</string>
@@ -1171,6 +1177,7 @@
     <string name="preserve_favorites">Conservare I Preferiti?</string>
     <string name="press_and_drag">Premi e trascina per riordinare</string>
     <string name="pressure">Pressione</string>
+    <string name="pressure_high">Alto</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">Questo è un composable personalizzato</string>
     <string name="preview_custom_composable_line_two">Con più righe e stili</string>
@@ -1560,6 +1567,7 @@
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Scarso</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_devices">Provisioning Wi-Fi per mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Reti disponibili</string>

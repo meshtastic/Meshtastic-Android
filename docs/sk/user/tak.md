@@ -1,7 +1,7 @@
 ---
 title: TAK Integration
 nav_order: 10
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
 aliases:
   - tak
@@ -35,7 +35,7 @@ The TAK module allows Meshtastic nodes to:
 > ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 > work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
 > service runs in-process only. Do not install it. Interop runs over the app's own local
-> TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK/iTAK/WinTAK.
+> TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK on the same phone or WinTAK on the same computer.
 
 ### Configuration
 
@@ -56,20 +56,21 @@ Team colors are the standard TAK team colors, so coordinate with your TAK team t
 
 The app can also run a **local TAK server** so ATAK on the **same phone**, or WinTAK on the same computer running the desktop app, can connect directly without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network.
 
-Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0. On Android 17 and newer, turning the server on asks for the local network permission it needs to open its socket. If that permission is denied for good, the app turns the server back off and offers to open app settings:
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0. On Android 17 and newer, turning the server on asks for the local network permission it needs to open its socket, and explains why first if you declined once. If Android will not ask again, the app turns the server back off and offers to open app settings:
 
 ![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK connections from the same device.
-- **Status** — under the toggle: _Off_, _Starting TAK Server_, _Listening on 127.0.0.1:8089 — waiting for ATAK_, the count of local client connections, or _Unable to start TAK Server. Turn it off and on to retry._
-- **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
-- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK connections from the same device. **Mesh to CoT Converter**, **TAK Mesh Channel**, **Export** and **Regenerate Certificates** appear only while it is on.
+- **Status** — under the toggle: _Off_, _Starting TAK Server_, _Listening on 127.0.0.1:8089 — waiting for ATAK_, the count of local client connections, _TAK Server is not running_, or _Unable to start TAK Server. Turn it off and on to retry._ If a client is turned away because its certificate does not belong to this install, a warning appears under the status; export the data package again and import it in ATAK.
+- **Mesh to CoT Converter** — off by default. With the server
   running, this synthesizes a CoT contact for every node in your node database, so ordinary
   Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
   node visibility** — without it, only TAK-role nodes show up. When the connected node runs
-  firmware older than 2.8.0, a notice under the switch says that only location and chat messages
+  firmware older than 2.8.0 and the switch is on, a notice under it says that only location and chat messages
   bridge to ATAK.
-- **Export TAK Data Package** — generates a `.zip` data package that ATAK can import to connect to this server. The share icon in the top bar does the same.
+- **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
+- **Export TAK Data Package** — generates a `.zip` data package that ATAK can import to connect to this server. The share icon in the top bar does the same. The certificates in the package are unique to this install.
+- **Regenerate Certificates** — issues a new server and client identity after you confirm. Every package you exported before stops working, so export it again and re-import it in ATAK.
 
 ## TAK Roles
 

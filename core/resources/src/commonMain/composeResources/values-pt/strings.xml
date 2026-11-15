@@ -180,6 +180,7 @@
     <string name="canned_message_enabled">Mensagem pronta ativada</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio desligado. Tente novamente.</string>
     <string name="cant_shutdown">A função de desligar não suportada neste dispositivo</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utilização do canal atual, incluindo TX bem formado, RX e RX mal formado (ruído).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Canal 1</string>
@@ -236,7 +237,9 @@
     <string name="clear_selection">Limpar seleção</string>
     <string name="clear_time_zone">Limpar fuso horário</string>
     <string name="close">Fechar</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
+    <string name="co2_level_good">Bom</string>
     <string name="communicate_off_the_grid">Comunique com os seus amigos e a sua comunidade sem depender da rede móvel.</string>
     <!-- COMPASS -->
     <string name="compass_location_disabled">O fornecedor de localização está desativado. Ative os serviços de localização.</string>
@@ -769,6 +772,7 @@
     <string name="preferences_system_default">Padrão do sistema</string>
     <string name="press_and_drag">Pressionar e arrastar para reordenar</string>
     <string name="pressure">Pressão</string>
+    <string name="pressure_high">Alto</string>
     <!-- PREVIEW -->
     <string name="primary">Principal</string>
     <string name="primary_channel_feature">Difusão periódica da posição e telemetria</string>
@@ -913,6 +917,7 @@
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mau</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Endereço IP</string>
     <string name="wifi_provision_success_username">Utilizador</string>

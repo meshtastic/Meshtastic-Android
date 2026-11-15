@@ -104,6 +104,7 @@
     <string name="canned_message_enabled">Mensagem pronta ativada</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
     <string name="cant_shutdown">Desligamento não suportado neste dispositivo</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utilização para o canal atual, incluindo TX bem formado, RX e RX mal formado (conhecido como ruído).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Canal 1</string>
@@ -132,6 +133,8 @@
     <string name="client_notification">Notificação de cliente</string>
     <string name="close">Fechar</string>
     <string name="close_selection">Fechar seleção</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Bom</string>
     <string name="communicate_off_the_grid">Comunique-se off-grid com seus amigos e comunidades sem serviço de celular.</string>
     <!-- COMPASS -->
     <string name="compass_north_top">Norte da bússola no topo</string>
@@ -668,6 +671,7 @@
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Ruim</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_done">Concluído</string>
     <string name="wifi_provision_success_ip_address">Endereço IP</string>

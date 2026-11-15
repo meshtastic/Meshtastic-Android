@@ -43,6 +43,7 @@
     <string name="cancel">Cealaigh</string>
     <string name="cant_change_no_radio">Ní féidir an cainéal a athrú, toisc nach bhfuil an raidió nasctha fós. Déan iarracht arís.</string>
     <string name="cant_shutdown">Ní tacaítear le dúnadh ar an ngléas seo</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Úsáid na cainéil reatha, lena n-áirítear TX ceartaithe, RX agus RX mícheart (anáilís ar na fuaimeanna).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
@@ -53,6 +54,8 @@
     <!-- CLEAR -->
     <string name="clear">Glan</string>
     <string name="close">Dún</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Maith</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>

@@ -44,6 +44,7 @@
     <string name="cancel">Avbryt</string>
     <string name="cant_change_no_radio">Kunne ikke endre kanalen, fordi radio ikke er tilkoblet enda. Vennligst prøv på nytt.</string>
     <string name="cant_shutdown">Avslutning støttes ikke på denne enheten</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utnyttelse for denne kanalen, inkludert godt formet TX, RX og feilformet RX (aka støy).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
@@ -54,6 +55,8 @@
     <!-- CLEAR -->
     <string name="clear">Tøm</string>
     <string name="close">Lukk</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Godt</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Kontrollerer blinking av LED på enheten. For de fleste enheter vil dette kontrollere en av de opp til 4 lysdiodene. Laderen og GPS-lysene er ikke kontrollerbare.</string>

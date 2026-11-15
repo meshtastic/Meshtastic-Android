@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -104,7 +104,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. From the Air Quality view you can:
 
-- Select a **time frame** for the charts.
+- Select a **time frame** for the charts. Particulate readings share one axis scaled so zero readings stay visible, and CO₂ has its own axis on the right so it can't flatten them.
 - Filter with **metric chips** — only metrics that have data are shown.
 - **Refresh / request** the latest air-quality telemetry.
 - **Export to CSV** for analysis in a spreadsheet.
@@ -159,7 +159,7 @@ Traceroute shows the path a message takes through the mesh:
 2. The app sends a traceroute request to the target node. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
 
-The ring on the traceroute button counts down the seconds until the next request is allowed.
+The ring on the traceroute button shows the seconds left until the next request is allowed, and the node list's **Trace Route** reads **Trace Route in** _N_ **s** over the same wait.
 
 ### Reading Traceroute Results
 

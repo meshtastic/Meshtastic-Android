@@ -138,6 +138,7 @@
     <string name="cancel">Отказ</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="cant_shutdown">Изключването не се поддържа на това устройство</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Използване на текущия канал, включително добре формулиан TX, RX и деформиран RX (така наречен шум).</string>
     <!-- CHANNEL -->
     <string name="channel">К</string>
@@ -178,7 +179,9 @@
     <string name="client_notification">Известие за клиента</string>
     <string name="close">Затвори</string>
     <string name="close_selection">Затваряне на избраните</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
+    <string name="co2_level_good">Добър</string>
     <string name="collapse_chart">Свиване на диаграмата</string>
     <string name="communicate_off_the_grid">Комуникирайте извън мрежата с вашите приятели и общността без клетъчна услуга.</string>
     <!-- COMPASS -->
@@ -1010,6 +1013,8 @@
     <string name="preferences_system_default">По подразбиране на системата</string>
     <string name="press_and_drag">Натиснете и плъзнете, за да пренаредите</string>
     <string name="pressure">Налягане</string>
+    <string name="pressure_high">Високо</string>
+    <string name="pressure_low">Ниско</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_two">С множество линии и стилове</string>
     <string name="preview_dot">Точка</string>
@@ -1330,6 +1335,7 @@
     <string name="what_is_meshtastic_description">Мрежа с отворен код, работеща независимо от централизирана инфраструктура (off-grid), децентрализирана и изградена на принципа на мрежовата топология (mesh), която функционира чрез достъпни радиоустройства с ниска консумация на енергия.</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Лош</string>
+    <string name="widget_telemetry_title">Телеметрия</string>
     <!-- WIFI -->
     <string name="wifi_config">Опции за Wi-Fi</string>
     <string name="wifi_devices">Осигуряване на Wi-Fi за mPWRD-OS</string>

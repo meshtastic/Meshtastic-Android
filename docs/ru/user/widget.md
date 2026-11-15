@@ -1,23 +1,25 @@
 ---
 title: Виджет на главный экран
 nav_order: 20
-last_updated: 2026-11-04
-description: Добавь виджеты Meshtastic на главный экран, чтобы просматривать локальную статистику подключенных нод или следить за выбранной нодой не открывая приложение.
+last_updated: 2026-11-15
+description: Add Meshtastic home screen widgets to glance at your connected node's local stats, keep an eye on one node you pick, or read one node's sensors, without opening the app.
 aliases:
   - widget
   - home-screen-widget
   - local-stats-widget
   - node-tracker-widget
+  - telemetry-widget
 ---
 
 # Виджет на главный экран
 
-На Android Meshtastic предоставляет два **виджета** для главного экрана:
+On Android, Meshtastic provides three home screen **widgets**:
 
 - **Meshtastic** показывает в реальном времени локальную статистику с подключенной ноды.
 - **Трекер нод** отслеживает выбранную тобой нооду: уровень заряда, сигнал, время последнего приема, количество хопов и расстояние до подключенной ноды.
+- **Telemetry** shows one node's environment, air quality and power readings as tiles.
 
-Ты можешь разместить столько каждого, сколько захочешь. Каждый трекер нод запоминает свою собственную ноду.
+Ты можешь разместить столько каждого, сколько захочешь. Each Node Tracker and Telemetry widget remembers its own node.
 
 ## Локальная статистика
 
@@ -65,15 +67,34 @@ After you disconnect from your node in the app, the widget keeps the tracked nod
 
 If your node list does not include the node you picked, because you removed it or connected to a different node, the widget says **Node not found**. Tap it to choose another node.
 
+## Телеметрия
+
+The **Telemetry** widget shows one node's sensor readings as tiles, the same tiles the node's details show, with the same units and precision:
+
+- **Environment**: temperature, humidity, pressure, dew point, gas resistance, IAQ, light, wind, rain, soil temperature, soil moisture, radiation and weight
+- **Air quality**: PM1.0, PM2.5, PM10 and CO₂
+- **Power**: voltage and current for each channel, named with the labels you gave the channels
+
+It shows every reading the node reports, in that order, and you can hide any of them. The node's chip sits beside the readings, and the line under them says when the newest reading arrived.
+
+- A widget narrower than two columns shows the first reading.
+- A widget under two rows tall shows the first readings in a row: two up to three columns wide, four from four columns.
+- A widget at least two columns by two rows shows four at a time in a grid. With more than four readings, tap the page button in its corner, such as **1/2**, to see the next four.
+
+A reading the node has stopped sending shows a dash, while a reading of zero shows 0. Once the newest reading is more than two hours old, the line under the tiles says **Over 2 hours old**. The age comes from the app's packet log, so with logging turned off the widget can't tell when a reading arrived: it shows no age, and says **Over 2 hours old** only once the node itself has not been heard for two hours.
+
+The widget shows readings the app has already saved, so it works with no radio connected, and it never sends anything over the mesh. Tap it to open the node's metrics in the app. If its node is no longer in your node list, it says **No node chosen. Tap to choose one.**, and tapping it opens the widget's setup screen, where **Change node** opens the node picker.
+
 ## Добавление виджета
 
 1. Touch & hold an empty area of your Android home screen.
 2. Tap **Widgets**, then find **Meshtastic** in the list.
-3. Drag the **Meshtastic** (local stats) or **Node Tracker** widget to your home screen.
+3. Drag the **Meshtastic** (local stats), **Node Tracker** or **Telemetry** widget to your home screen.
 4. Чтобы отслеживать ноды, выберите ноду, за которой нужно следить. Сначала перечисляются твои избранные, затем самые последние прослушиваемые ноды; введи в поле поиска, чтобы выполнить фильтрацию по названию или идентификатору ноды. Отмена возврата без выбора приводит к отмене виджета.
-5. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
+5. For a Telemetry widget, the setup screen starts on your connected node when it reports any of these readings. Tap **Change node** to pick another; only nodes that have sent environment, air quality or power readings are listed, and the search field filters them by name or node ID. Turn off any reading you don't want, then tap **Save**.
+6. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
-Чтобы позже отследить другую ноду, нажми и удерживай кнопку отслеживания нод и выбери настройки виджета или вариант перенастройки. Точная формулировка зависит от твоего лаунчера.
+To track a different node or change the readings later, touch & hold the widget and choose the widget's settings or reconfigure option. Точная формулировка зависит от твоего лаунчера.
 
 > ℹ️ **Примечание:** виджеты доступны только на Android. Они не доступны в десктопном приложении
 
