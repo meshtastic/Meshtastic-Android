@@ -70,6 +70,7 @@
     <string name="canned_message_enabled">Önceden Hazırlanmış mesaj etkinleştirildi</string>
     <string name="cant_change_no_radio">Radyo bağlı olmadığından, kanal değiştirilemedi. Lütfen tekrar deneyin.</string>
     <string name="cant_shutdown">Bu cihazda kapatma desteklenmiyor</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">İyi biçimlendirilmiş TX ve RX ile hatalı biçimlendirilmiş RX (gürültü) dahil olmak üzere mevcut kanal için kullanım.</string>
     <!-- CHANNEL -->
     <string name="channel_1">Kanal 1</string>
@@ -89,6 +90,8 @@
     <!-- CLEAR -->
     <string name="clear">Temizle</string>
     <string name="close">Kapat</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">İyi</string>
     <!-- COMPASS -->
     <string name="compass_north_top">Pusula kuzey üstte</string>
     <!-- CONFIG -->
@@ -524,6 +527,7 @@
     <string name="weight">Ağırlık</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Kötü</string>
+    <string name="widget_telemetry_title">Telemetri</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresi</string>
     <string name="wifi_provision_success_username">Kullanıcı adı</string>

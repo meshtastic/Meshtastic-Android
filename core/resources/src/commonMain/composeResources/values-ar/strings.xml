@@ -42,6 +42,7 @@
     <string name="bottom_nav_settings">الإعدادات</string>
     <string name="calculating">جاري الحساب…</string>
     <string name="cancel">إلغاء</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_1">القناة 1</string>
     <string name="channel_2">القناة 2</string>
@@ -58,6 +59,8 @@
     <!-- CLEAR -->
     <string name="clear">مسح</string>
     <string name="close">أغلق</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">جيد</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>

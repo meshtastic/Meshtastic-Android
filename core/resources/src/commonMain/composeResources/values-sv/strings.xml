@@ -118,6 +118,7 @@
     <string name="canned_message_enabled">Fördefinierade meddelanden är aktiverat</string>
     <string name="cant_change_no_radio">Det gick inte att byta kanal, eftersom radiomodulen ännu inte är ansluten. Försök igen.</string>
     <string name="cant_shutdown">Enhet stöder inte avstängning</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utnyttjande av den nuvarande kanalen, inklusive välformad TX, RX och felformaterad RX (sk. brus).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -152,6 +153,8 @@
     <string name="client_notification">Meddelande från enheten</string>
     <string name="close">Stäng</string>
     <string name="close_selection">Stäng markerade</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Bra</string>
     <string name="collapse_chart">Minimera diagram</string>
     <string name="communicate_off_the_grid">Kommunicera med din släkt och dina vänner utan online- och mobiltjänster.</string>
     <!-- COMPASS -->
@@ -853,6 +856,7 @@
     <string name="preserve_favorites">Behåll favoriter?</string>
     <string name="press_and_drag">Tryck och dra för att ändra ordning</string>
     <string name="pressure">Tryck</string>
+    <string name="pressure_high">Hög</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_two">Med flera rader och stilar</string>
     <string name="preview_dot">Punkt</string>
@@ -1194,6 +1198,7 @@
     <string name="weight">Vikt</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Dålig</string>
+    <string name="widget_telemetry_title">Telemetri</string>
     <!-- WIFI -->
     <string name="wifi_provision_available_networks">Tillgängliga nätverk</string>
     <string name="wifi_provision_connect_failed">Kunde inte ansluta: %1$s</string>

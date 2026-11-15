@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -47,9 +47,11 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **Encryption Enabled**  | Publish packets still encrypted with the channel key                                                                                                        | Омогућено                                                                                              |
 | **JSON output enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | Онемогућено                                                                                            |
 | **TLS Enabled**         | Secure connection to broker                                                                                                                                 | Онемогућено                                                                                            |
-| **Root Topic**          | Base topic for messages                                                                                                                                     | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
+| **Root Topic**          | Base topic for messages. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
 | **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | Онемогућено                                                                                            |
 | **Map Reporting**       | Report position to public map                                                                                                                               | Онемогућено                                                                                            |
+
+A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
 ### Connection Status and Test Connection
 
@@ -117,7 +119,7 @@ Configure your node to point to your private broker with appropriate credentials
 
 When **Map Reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider, with no label of its own, sets the position precision from 12 to 15, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
 
 Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
 

@@ -177,6 +177,7 @@
     <string name="canned_message_enabled">Přednastavené zprávy povoleny</string>
     <string name="cant_change_no_radio">Kanál nelze změnit, protože rádio ještě není připojeno. Zkuste to znovu.</string>
     <string name="cant_shutdown">Vypnutí není na tomto zařízení podporováno</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Využití aktuálního kanálu, včetně dobře vytvořeného TX, RX a poškozeného RX (tzv. šumu).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -230,7 +231,9 @@
     <string name="client_notification">Oznámení klienta</string>
     <string name="close">Zavřít</string>
     <string name="close_selection">Zavřít výběr</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
+    <string name="co2_level_good">Silný</string>
     <string name="collapse_chart">Sbalit graf</string>
     <string name="communicate_off_the_grid">Komunikujte off-the-grid s přáteli a komunitou bez mobilních služeb.</string>
     <!-- COMPASS -->
@@ -1281,6 +1284,7 @@
     <string name="preserve_favorites">Chcete zachovat oblíbené položky?</string>
     <string name="press_and_drag">Stiskněte a přetáhněte pro změnu pořadí</string>
     <string name="pressure">Tlak</string>
+    <string name="pressure_high">Vysoká</string>
     <!-- PREVIEW -->
     <string name="primary">Primární</string>
     <string name="primary_channel_feature">Pravidelné vysílání pozice a telemetrie</string>
@@ -1667,6 +1671,7 @@
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Špatný</string>
+    <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>

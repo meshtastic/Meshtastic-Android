@@ -35,6 +35,7 @@
     <string name="camera_permission">Aðgangur að myndavél</string>
     <string name="cancel">Hætta við</string>
     <string name="cant_change_no_radio">Gat ekki skipt um rás vegna þess að radíó er ekki enn tengt. Vinsamlegast reyndu aftur.</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
     <string name="channel_name">Heiti rásar</string>
@@ -44,6 +45,7 @@
     <!-- CLEAR -->
     <string name="clear">Hreinsa</string>
     <string name="close">Loka</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>

@@ -1,7 +1,7 @@
 ---
 title: デバッグログ
 nav_order: 22
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
@@ -20,12 +20,13 @@ If you're filing an issue, export your logs (see [Exporting](#exporting)) and at
 
 ## 2 つのタブ
 
-デバッグパネルには 2 つのタブがあります：
+The Debug Panel has three tabs:
 
 - **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). メッシュやルーティングの動作を診断するのに役立ちます。
 - **アプリログ**：アプリ自身の診断ログ（Android の _logcat_）。アプリからの警告、エラー、スタックトレースを含みます。通常、バグ報告に必要なのはこちらです。
+- **Mirror** — a live view of the connected node's screen with remote controls; see [Mirror](#mirror).
 
-各タブには独自の**エクスポート**ボタンがあり、それぞれ別のファイルを生成するため、関連する方を、または両方を取得できます。
+The **Packets** and **App logs** tabs each have their own **export** button and produce their own file, so you can grab whichever is relevant — or both.
 
 ## Viewing packets
 
@@ -45,6 +46,16 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 - **更新**：更新アイコンで最新のログを読み直します。
 
 エラーと警告の行は色付けされ、問題が目立つようになっています。
+
+## Mirror
+
+The **Mirror** tab shows the screen of the connected node. It reads **Not connected to a device.** with no connection, and **Screen mirroring needs newer firmware** when the node does not report a display; the D-pad still sends keys in that case.
+
+- **Mirror off / Mirroring** — the switch streams the screen continuously, and **Refresh** fetches one frame. On an e-ink display prefer **Refresh**, since the screen updates slowly.
+- **D-pad** — arrow keys, **OK**, and **Back** press the node's buttons.
+- **Keyboard** — the **Keyboard** chip captures keys: arrows navigate, Enter is OK, Esc is back, and typed text reaches the node. On a node without a touch panel, tapping the mirrored screen toggles it too. On a touch-capable node, a tap or touch & hold on the image sends a touch, and a swipe sends one direction.
+
+Mirroring stops when you leave the tab, and the controls are off on a managed node.
 
 ## エクスポート
 

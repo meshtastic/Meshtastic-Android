@@ -1,7 +1,7 @@
 ---
 title: Telemetria ja anturit
 nav_order: 9
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
   - sensorit
@@ -92,7 +92,7 @@ INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 | Jännite          | Kanavakohtainen jännitemittaus                |
 | Virta            | Kanavakohtainen virta (mA) |
 
-The node detail screen shows read-only cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
+The node detail screen shows read-only cards for every channel that reported data, up to eight. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
 
 Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 

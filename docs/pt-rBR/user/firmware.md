@@ -1,7 +1,7 @@
 ---
 title: Firmware Updates
 nav_order: 13
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -46,7 +46,7 @@ The most common update method for Android users:
 4. Tap **Update via BLE OTA**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Wait for the update to complete. Do not disconnect during the update.
 
-While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
+While the update downloads, processes, uploads or verifies, the screen stays on. The system back button or gesture during an update, including the bootloader review, asks **Stop update?** with **Stop** and **Keep going**. The arrow in the top bar leaves without asking. A node that is mid-update stays in update mode until you finish or recover it. You can also tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
@@ -77,7 +77,7 @@ Wi-Fi OTA installs the ESP32 app image, a `.bin` file, rather than the `.uf2` a 
 
 When your nRF52 or RP2040 node is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection. It is not available over Bluetooth, and ESP32 nodes have no USB update path in the app.
 
-A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) can't be copied to the drive. Use the app's bootloader upgrade, or flash the `.zip` with a serial DFU tool such as `adafruit-nrfutil`. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
 
 ### Factory Erase and Bootloader Upgrade
 
@@ -91,7 +91,7 @@ Both a USB erase and a bootloader upgrade write two files in turn, so you are as
 
 The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything.
 
-For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. On firmware 2.8.2 and older the running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
+For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. When the running firmware doesn't report its bootloader, the installed version appears only once the device has restarted into update mode. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
 
 On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the node recoverable only with a hardware programmer.
 
@@ -104,7 +104,7 @@ The app picks the path from what the drive reports; you don't choose it.
 
 ### Bootloader version and upgrade over Bluetooth
 
-An nRF52 node on firmware newer than 2.8.2 reports its bootloader version while it runs. The device card on the firmware screen then shows a **Bootloader** row with the latest release beside it, on any connection. Every bootloader before 2.6.0 reports the same value, so those read **Bootloader: older than 2.6.0**. A node that reports no version shows no row. A node that reports the latest release isn't offered an upgrade.
+An nRF52 node on firmware that reports its bootloader version shows it while it runs. The device card on the firmware screen then shows a **Bootloader** row with the latest release beside it, on any connection. Every bootloader before 2.6.0 reports the same value, so those read **Bootloader: older than 2.6.0**. A node that reports no version shows no row. A node that reports the latest release isn't offered an upgrade.
 
 The screen offers **Upgrade bootloader** over Bluetooth when all of these hold:
 
@@ -116,7 +116,7 @@ Unplug the USB cable before starting. With a cable attached, the new bootloader 
 
 The app sends the new bootloader over Bluetooth, then reinstalls the selected firmware, because writing the bootloader erases it. The whole upgrade takes about 10 minutes. Afterward the **Bootloader** row shows the latest release.
 
-Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
+Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. Over Bluetooth the upgrade works only on a bootloader that uses Legacy DFU. On any other the update stops with nothing written and the app tries to return the node to its firmware. If it stays in update mode, see [Update Stuck](#update-stuck). If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
 
 A node that doesn't come back over Bluetooth after the bootloader is written can be finished either way: install the firmware from its update drive over USB, or unplug it, reset it, and use **Resume firmware update** on the **Connect** tab.
 
@@ -126,6 +126,7 @@ Version 2.6.0 and later of the Meshtastic nRF52 Bootloader does the following wh
 
 - **Backup.** `CURRENT.UF2` on the drive is a copy of the installed firmware. Copy it off to back up, or back onto the drive to reinstall.
 - **Screen.** On a node with a screen, the title reads BOOTLOADER, ERASE, WRONG FILE or NO FIRMWARE, and a progress bar shows the copy.
+- **Fault report.** After a fault the bootloader records it once, and the app shows **Bootloader reported a fault:** with the `id`, `pc` and `info` values the first time it reads the drive during a USB update.
 - **Wrong file.** A firmware file the board cannot take is refused as WRONG FILE.
 - **Interrupted copy.** If the cable is pulled mid-copy, the node has no firmware. Plug it in again and copy the firmware once more.
 - **Idle.** After 6 minutes with no update activity, a node with firmware boots it. A node with no firmware keeps waiting.
@@ -181,7 +182,7 @@ If the update appears frozen:
 - If it is still stuck after that, power-cycle the node.
 - Attempt the update again.
 
-The message **Verification timed out. Device did not reconnect in time.** means the image was written but the node did not come back within that window. Power-cycle it and check the version under **Currently Installed** before re-running the update.
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the node did not come back within that window. **Retry** waits for the node again without writing anything, and **Done** leaves the screen. If the node still doesn't return, power-cycle it and check the version under **Currently Installed** before re-running the update.
 
 ![Firmware update error](../../assets/screenshots/firmware_error.png)
 

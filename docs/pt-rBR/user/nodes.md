@@ -1,7 +1,7 @@
 ---
 title: Nós
 nav_order: 4
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -116,10 +116,11 @@ From the node list, you can:
 
 While a node is ignored, its favorite, message, trace route, and remove actions are disabled.
 
-Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
-User settings screen with the cursor already in the Status Message field. It appears only while the
-node is connected and running firmware 2.7.20 or newer with the Status Message module included. See
-[Settings — Radio & User](settings-radio-user) for the field itself.
+Touch & hold **your own node** instead and you get a menu of its own, with only these actions, each shown only while the node is connected:
+
+- **Update status** opens the User settings screen with the cursor already in the Status Message field. It needs firmware 2.7.20 or newer with the Status Message module included. See [Settings — Radio & User](settings-radio-user) for the field itself.
+- **Edit name** opens [Settings - Radio & User](settings-radio-user), where you change the name your node broadcasts to everyone.
+- **Share Contact** opens the [contact dialog](#sharing-a-contact), on firmware 2.6.8 or newer.
 
 ## Sharing a contact
 
@@ -137,7 +138,7 @@ The avatar always shows the node's broadcast short name. While a display name is
 
 Display names are stored only on this device. They are never sent over the mesh or handed to another app, so QR codes, contact sharing, opening a position in a maps app, and the message, node database and GPX exports all use the node's real name. App backups do include display names, the same as notes. Removing a node also removes its display name.
 
-Your own node can have a display name too, from its **Display name** card. The **Edit name** item in your own node's long-press menu does something different: it opens [Settings - Radio & User](settings-radio-user), where you change the name your node broadcasts to everyone.
+Your own node can have a display name too, from its **Display name** card. The **Edit name** item in your own node's long-press menu does something different: it changes the name your node broadcasts to everyone.
 
 ## Filtering & sorting
 

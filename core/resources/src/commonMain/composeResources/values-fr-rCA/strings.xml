@@ -170,6 +170,7 @@
     <string name="canned_message_enabled">Messages prédéfinis activés</string>
     <string name="cant_change_no_radio">Impossible de modifier le canal, car la radio n'est pas encore connectée. Veuillez réessayer.</string>
     <string name="cant_shutdown">Arrêt non pris en charge sur cet appareil</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utilisation pour le canal actuel, y compris TX bien formé, RX et RX mal formé (AKA bruit).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -220,8 +221,10 @@
     <string name="client_notification">Notification client</string>
     <string name="close">Fermer</string>
     <string name="close_selection">Fermer le choix</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ Humidité</string>
+    <string name="co2_level_good">Bon</string>
     <string name="co2_temperature">CO₂ Température</string>
     <string name="collapse_chart">Réduire le graphique</string>
     <string name="collapsed">Réduit</string>
@@ -1048,6 +1051,7 @@
     <string name="preserve_favorites">Conserver les favoris ?</string>
     <string name="press_and_drag">Appuyez et faites glisser pour réorganiser</string>
     <string name="pressure">Pression</string>
+    <string name="pressure_high">Haut</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">Ceci est un composable personnalisé</string>
     <string name="preview_custom_composable_line_two">Avec plusieurs lignes et styles</string>
@@ -1370,6 +1374,7 @@
     <string name="weight">Poids</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mauvais</string>
+    <string name="widget_telemetry_title">Télémetrie (Capteurs)</string>
     <!-- WIFI -->
     <string name="wifi_devices">Approvisionnement Wi-Fi pour mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Réseaux disponibles</string>

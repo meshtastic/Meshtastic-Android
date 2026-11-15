@@ -1,7 +1,7 @@
 ---
 title: Radion mittarit
 nav_order: 5
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -103,7 +103,7 @@ CO₂-lukemat on värikoodattu vakavuuden mukaan, joten ilmanlaadun näkee yhdel
 
 The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. Ilmanlaatu-näkymässä voit:
 
-- Valita kaavioille **aikajakson**.
+- Valita kaavioille **aikajakson**. Particulate readings share one axis scaled so zero readings stay visible, and CO₂ has its own axis on the right so it can't flatten them.
 - Suodattaa **mittarisiruilla** — vain mittarit, joista on dataa, näytetään.
 - **Päivittää ja pyytää** uusimmat ilmanlaatutelemetriatiedot.
 - **Viedä CSV-tiedostoon** analysoitavaksi taulukkolaskentaohjelmassa.
@@ -158,7 +158,7 @@ Reitinselvitys näyttää viestin kulkeman reitin verkossa:
 2. Sovellus lähettää reitinselvityspyynnön kohderadiolle. The request reads **Waiting for response** in the history until it settles.
 3. Results show each hop with its SNR.
 
-The ring on the traceroute button counts down the seconds until the next request is allowed.
+The ring on the traceroute button shows the seconds left until the next request is allowed, and the node list's **Trace Route** reads **Trace Route in** _N_ **s** over the same wait.
 
 ### Reitinselvityksen tulosten lukeminen
 

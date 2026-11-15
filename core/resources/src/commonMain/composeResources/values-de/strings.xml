@@ -155,6 +155,10 @@
     <string name="canned_message_enabled">Vordefinierte Nachrichten aktiviert</string>
     <string name="cant_change_no_radio">Konnte den Kanal nicht ändern, da das Funkgerät noch nicht verbunden ist. Bitte versuchen Sie es erneut.</string>
     <string name="cant_shutdown">Herunterfahren wird auf diesem Gerät nicht unterstützt</string>
+    <!-- CARDINAL -->
+    <string name="cardinal_e">E</string>
+    <string name="cardinal_n">N</string>
+    <string name="cardinal_s">S</string>
     <string name="ch_util_definition">Auslastung für den aktuellen Kanal, einschließlich fehlerfreier TX, RX und fehlerhaftem RX (Rauschen).</string>
     <!-- CHANNEL -->
     <string name="channel">Kanal</string>
@@ -205,7 +209,10 @@
     <string name="client_notification">Warnmeldung</string>
     <string name="close">Schließen</string>
     <string name="close_selection">Auswahl schließen</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
+    <string name="co2_level_good">Gut</string>
+    <string name="co2_level_poor">Schlecht</string>
     <string name="collapse_chart">Diagramm ausblenden</string>
     <string name="collapsed">Einklappen</string>
     <string name="communicate_off_the_grid">Kommunizieren Sie außerhalb des Netzwerks mit Ihren Freunden und der Gemeinschaft ohne Mobilfunkdienst.</string>
@@ -1081,6 +1088,7 @@
     <string name="preserve_favorites">Favoriten beibehalten?</string>
     <string name="press_and_drag">Drücken und ziehen, um neu zu sortieren</string>
     <string name="pressure">Druck</string>
+    <string name="pressure_high">Hoch</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">Dies ist eine benutzerdefinierte Komponente</string>
     <string name="preview_custom_composable_line_two">Mit mehreren Zeilen und Stilen</string>
@@ -1456,6 +1464,7 @@
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Schlecht</string>
+    <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>

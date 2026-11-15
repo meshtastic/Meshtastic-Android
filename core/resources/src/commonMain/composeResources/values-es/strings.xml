@@ -81,6 +81,7 @@
     <string name="canned_message_enabled">Mensaje predefinidos activados</string>
     <string name="cant_change_no_radio">No se puede cambiar de canal porque la radio aún no está conectada. Por favor inténtelo de nuevo.</string>
     <string name="cant_shutdown">Apagado no compatible con este dispositivo</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utilización del canal actual, incluyendo TX, RX bien formado y RX mal formado (ruido similar).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Canal 1</string>
@@ -109,6 +110,8 @@
     <string name="clear_selection">Limpiar selección</string>
     <string name="close">Cerrar</string>
     <string name="close_selection">Cerrar selección</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Bien</string>
     <!-- COMPASS -->
     <string name="compass_distance">Distancia: %1$s</string>
     <string name="compass_no_magnetometer">Este dispositivo no tiene un sensor de brújula. El rumbo no está disponible.</string>
@@ -768,6 +771,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mal</string>
+    <string name="widget_telemetry_title">Telemetría</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_done">Hecho</string>
     <string name="wifi_provision_success_ip_address">Dirección IP</string>

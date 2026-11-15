@@ -43,6 +43,7 @@
     <string name="cancel">Anile</string>
     <string name="cant_change_no_radio">Nou pa t kapab chanje kanal la paske radyo a poko konekte. Tanpri eseye ankò.</string>
     <string name="cant_shutdown">Fèmen pa sipòte sou aparèy sa a</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Itilizasyon pou kanal aktyèl la, ki enkli TX, RX byen fòme ak RX mal fòme (sa yo rele bri).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
@@ -53,6 +54,8 @@
     <!-- CLEAR -->
     <string name="clear">Netwaye</string>
     <string name="close">Fèmen</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Bon</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>

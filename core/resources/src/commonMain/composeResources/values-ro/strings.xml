@@ -93,6 +93,7 @@
     <string name="canned_message_enabled">Mesaj prestabilit activat</string>
     <string name="cant_change_no_radio">Nu s-a putut schimba canalul, deoarece radioul nu este conectat încă. Vă rugăm să încercați din nou.</string>
     <string name="cant_shutdown">Oprirea nu este acceptată pe acest dispozitiv</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Utilizarea pentru canalul curent, inclusiv TX bine format, RX și RX malformat (zgomot).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -126,6 +127,8 @@
     <string name="client_notification">Notificare client</string>
     <string name="close">Închide</string>
     <string name="close_selection">Închideți selecția</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Bun</string>
     <string name="collapse_chart">Restrânge graficul</string>
     <string name="communicate_off_the_grid">Comunicați în afara grilei cu prietenii și comunitatea dvs. fără serviciu celular.</string>
     <!-- COMPASS -->
@@ -1001,6 +1004,7 @@
     <string name="weight">Greutate</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slab</string>
+    <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Rețele disponibile</string>

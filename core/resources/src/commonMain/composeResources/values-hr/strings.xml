@@ -38,6 +38,7 @@
     <string name="camera_permission">Dozvola za kameru</string>
     <string name="cancel">Odustani</string>
     <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
     <string name="channel_name">Naziv kanala</string>
@@ -47,6 +48,7 @@
     <!-- CLEAR -->
     <string name="clear">Očisti</string>
     <string name="close">Zatvori</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>

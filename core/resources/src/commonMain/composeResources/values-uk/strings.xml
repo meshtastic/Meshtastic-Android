@@ -110,6 +110,7 @@
     <string name="canned_message_enabled">Шаблонне повідомлення активоване</string>
     <string name="cant_change_no_radio">Неможливо змінити канал, тому що радіо поки що не підключені. Будь ласка, спробуйте ще раз.</string>
     <string name="cant_shutdown">Вимкнення не підтримується на цьому пристрої</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Загальна завантаженість поточного каналу, включно з коректною передачею TX, прийом RX та помилкові пакети (шум).</string>
     <!-- CHANNEL -->
     <string name="channel">Кн</string>
@@ -148,8 +149,10 @@
     <string name="client_notification">Клієнтські повідомлення</string>
     <string name="close">Закрити</string>
     <string name="close_selection">Закрити вибір</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ Волог</string>
+    <string name="co2_level_good">Хороший</string>
     <string name="co2_temperature">CO₂ Темп</string>
     <string name="collapse_chart">Згорнути графік</string>
     <string name="communicate_off_the_grid">Спілкуйтеся з друзями та спільнотою поза мережею, навіть без мобільного зв'язку.</string>
@@ -819,6 +822,7 @@
     <string name="preserve_favorites">Зберегти улюблені?</string>
     <string name="press_and_drag">Натисніть і перетягніть, щоб змінити порядок</string>
     <string name="pressure">Атмосферний тиск</string>
+    <string name="pressure_high">Високий</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">Це кастомна комбінація</string>
     <string name="preview_custom_composable_line_two">З декількома лініями та стилями</string>
@@ -1124,6 +1128,7 @@
     <string name="weight">Вага</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Поганий</string>
+    <string name="widget_telemetry_title">Телеметрія</string>
     <!-- WIFI -->
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Доступні мережі</string>

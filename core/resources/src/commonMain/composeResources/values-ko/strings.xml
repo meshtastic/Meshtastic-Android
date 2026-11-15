@@ -63,6 +63,7 @@
     <string name="canned_message_enabled">빠른 답장 활성화</string>
     <string name="cant_change_no_radio">장치가 연결되지않아 채널을 변경할 수 없습니다. 다시 시도해주세요.</string>
     <string name="cant_shutdown">종료 기능이 이 장치에서 지원되지 않습니다</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">현재 채널 사용, 올바르게 형성된 TX, RX, 잘못 형성된 RX(일명 노이즈)를 포함.</string>
     <!-- CHANNEL -->
     <string name="channel_1">채널 1</string>
@@ -83,6 +84,8 @@
     <string name="clear">삭제</string>
     <string name="client_notification">클라이언트 알림</string>
     <string name="close">닫기</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">좋음</string>
     <!-- COMPASS -->
     <string name="compass_north_top">나침반 상단을 북쪽으로 고정</string>
     <string name="compromised_keys">손상된 키가 감지되었습니다. 다시 생성하려면 OK를 선택하세요.</string>
@@ -510,6 +513,7 @@
     <string name="weight">무게</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">나쁨</string>
+    <string name="widget_telemetry_title">텔레메트리</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP 주소</string>
     <string name="wifi_provision_success_username">사용자명</string>

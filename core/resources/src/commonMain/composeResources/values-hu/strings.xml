@@ -83,6 +83,7 @@
     <string name="canned_message_enabled">Előre beállított üzenet engedélyezve</string>
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
     <string name="cant_shutdown">Leállítás nem támogatott ezen az eszközön</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">A jelenlegi csatorna kihasználtsága, beleértve a megfelelő TX/RX és a hibás RX (zaj) csomagokat.</string>
     <!-- CHANNEL -->
     <string name="channel_1">1. csatorna</string>
@@ -112,6 +113,8 @@
     <string name="client_notification">Kliens értesítés</string>
     <string name="close">Bezárás</string>
     <string name="close_selection">Kijelölés bezárása</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Jó</string>
     <string name="communicate_off_the_grid">Kommunikálj a barátaiddal és a közösségeddel mobilhálózat nélkül, a hálózaton kívül is.</string>
     <!-- COMPASS -->
     <string name="compass_north_top">Iránytű észak felül</string>
@@ -763,6 +766,7 @@
     <string name="weight">Súly</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Rossz</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP cím</string>
     <string name="wifi_provision_success_username">Felhasználónév</string>

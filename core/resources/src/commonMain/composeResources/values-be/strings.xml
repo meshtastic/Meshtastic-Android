@@ -40,6 +40,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Налады</string>
     <string name="cancel">Скасаваць</string>
+    <!-- CARDINAL -->
     <!-- CHANNEL -->
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
@@ -56,6 +57,7 @@
     <!-- CLEAR -->
     <string name="clear">Скінуць</string>
     <string name="close">Закрыть</string>
+    <!-- CO2 -->
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="config_device_tripleClickAsAdHocPing_summary">Адсылае месцазнаходжанне на асноўным канале калі націснуць кнопку тройчы.</string>
@@ -306,6 +308,7 @@
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>
     <!-- WIDGET -->
+    <string name="widget_telemetry_title">Тэлеметрыя</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>

@@ -44,6 +44,7 @@
     <string name="cancel">Prekliči/zavrzi</string>
     <string name="cant_change_no_radio">Menjava ni možna ni radia.</string>
     <string name="cant_shutdown">Izklop na tej napravi ni podprt</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Uporaba za trenutni kanal, vključno z dobro oblikovanimi TX, RX in napačno oblikovanim RX (šum).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Neveljaven kanal</string>
@@ -54,6 +55,8 @@
     <!-- CLEAR -->
     <string name="clear">Počisti</string>
     <string name="close">Zapri</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Dober</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>

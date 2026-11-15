@@ -1,7 +1,7 @@
 ---
 title: Desktop App
 nav_order: 14
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -20,6 +20,7 @@ This page covers installing the Meshtastic desktop app, connecting a node, and h
 ### Linux
 
 - Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Each comes in an x86_64 and an arm64 (aarch64) build.
+- The `.deb` recommends the `fonts-noto-color-emoji` package. Emoji are drawn from the system's fonts, so on a minimal desktop without a color emoji font, such as Raspberry Pi OS, install it or emoji show as boxes. The `.rpm` and `.AppImage` carry no such recommendation.
 - The AppImage carries its own update information, so AppImageUpdate and other zsync-based updaters can update it in place to the latest production release.
 - Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Or build from source using `./gradlew :desktopApp:run`
@@ -34,7 +35,7 @@ This page covers installing the Meshtastic desktop app, connecting a node, and h
 - Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Both are x64 builds.
 - Or build from source
 
-## Connecting Your Radio
+## Connecting your node
 
 All three transports live on the **Connect** tab, the same as on Android. Pick one with the transport selector. See [Connections](connections) for the full walkthrough.
 
@@ -145,7 +146,7 @@ Requirements:
 - The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
   desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Some Android-specific features (widgets, specific notification channels) are unavailable
-- Performance may vary on low-spec hardware running Compose Desktop. The app takes at most a quarter of the machine's RAM for its heap. It runs on a 512 MB board, but slows down there on a mesh of several hundred nodes
+- Performance may vary on low-spec hardware running Compose Desktop. The JVM sizes the heap itself, at most a quarter of the machine's RAM, so a small board gets a small heap and a large mesh slows it down
 - BLE bonding is not supported on desktop (pairing works without bonding)
 
 ## Related Topics

@@ -58,6 +58,7 @@
     <string name="canned_message">Konzervovaná správa</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
     <string name="cant_shutdown">Toto zariadenie nepodporuje vypínanie</string>
+    <!-- CARDINAL -->
     <string name="ch_util_definition">Využitie pre aktuálny kanál, vrátane dobre vytvoreného TX, RX a poškodeného RX (známy ako šum).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Kanál 1</string>
@@ -77,6 +78,8 @@
     <!-- CLEAR -->
     <string name="clear">Zmazať</string>
     <string name="close">Zavrieť</string>
+    <!-- CO2 -->
+    <string name="co2_level_good">Dobrý</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Ovláda blikajúcu LED na zariadení. Pre väčšinu zariadení toto ovláda jednu zo štyroch LED, neovláda LED pre GPS a nabíjanie.</string>
@@ -466,6 +469,7 @@
     <string name="weight">Hmotnosť</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Zlý</string>
+    <string name="widget_telemetry_title">Telemetria</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Používateľské meno</string>
