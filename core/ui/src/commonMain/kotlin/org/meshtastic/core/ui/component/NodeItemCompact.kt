@@ -480,7 +480,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                     )
                 }
             }
-            reportedHumidity(env.relative_humidity)?.let { humidity ->
+            reportedHumidity(env.relative_humidity, thatNode.airQualityMetrics.co2_humidity)?.let { humidity ->
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Humidity,

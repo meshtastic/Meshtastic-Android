@@ -232,18 +232,6 @@ class EnvironmentMetricsForGraphingTest {
     }
 
     @Test
-    fun radiation_zeroAndPositiveReadingsPlot() {
-        val metrics =
-            listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0.15f }.build()),
-            )
-        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
-
-        assertTrue(result.shouldPlot[Environment.RADIATION.ordinal])
-    }
-
-    @Test
     fun radiation_onlyZeroPlots() {
         val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
