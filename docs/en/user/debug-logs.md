@@ -58,7 +58,7 @@ The **Mirror** tab shows the screen of the connected node. It reads **Not connec
 
 Mirroring stops when you leave the tab, and the controls are off on a managed node.
 
-Mirroring needs firmware newer than 2.8.2 on a node running BaseUI. InkHUD nodes can't be mirrored, and Meshtastic UI (MUI) nodes only on firmware built with MUI mirroring, which no release enables. An MUI node streams to one connection at a time, so a second app gets no picture until the first stops.
+Mirroring needs firmware newer than 2.8.2 on a node running BaseUI. InkHUD nodes can't be mirrored, and Meshtastic UI (MUI) nodes only on firmware built with MUI mirroring, which no release enables, and only on boards that can also run BaseUI. An MUI node streams to one connection at a time, so a second app gets no picture until the first stops.
 
 ## Exporting
 
