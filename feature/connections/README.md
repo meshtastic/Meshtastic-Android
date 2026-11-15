@@ -16,6 +16,8 @@ The `:feature:connections` module provides the **device discovery and connection
 - List the Demo Mode virtual devices (`Mock`, and `Replay` in debug builds) under whichever pane is showing
 - Manage the full connection flow: bond → connect → disconnect
 - Show connection status and progress while a device is being configured
+- Offer a connect code: the toolbar's **Scan a connect code** action (`LocalBarcodeScannerProvider`, shown only where a scanner exists) and an NFC tag holding a `meshtastic://meshtastic/connections` link both reach the same confirm prompt. `connectLinkFrom` accepts only Meshtastic's own hosts, and `isLinkableAddress` rejects a malformed Bluetooth MAC, a TCP address with no host and a serial address with no port name
+- Surface configuration-health cards for the connected node (`ConfigurationWarningCards`): **Set your region** (reads **Set up radio** once a region exists) opens the guided `RadioSetup` and `RadioSetupOfferEffect` opens it once per node while the region is unset; **Transmit is disabled** shows once a region is set. None shows for a managed node, a non-physical device or a locked-down session
 - Show a recovery banner for a firmware update that left a device in bootloader mode, and an event firmware card
   (`EventFirmwareCard`) when the connected device runs an event edition
 
@@ -134,7 +136,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
 }
 ```
 
-Route: `ConnectionsRoute.Connections(address: String? = null, pin: String? = null)`. A deep link to `connections?address=<prefixed address>` fills `address` and prompts to connect to that device. A BLE address may add `&pin=<6 digits>`: the prompt shows the PIN, Connect copies it to the clipboard (marked sensitive), and on Android the app pairs first, answering the PIN request itself where the OS allows (not on Android 17, where the system dialog asks and the PIN can be pasted).
+Route: `ConnectionsRoute.Connections(address: String? = null, pin: String? = null)`. A deep link to `connections?address=<prefixed address>`, or a scanned or NFC-read connect code, fills `address` and prompts to connect to that device. A scanned code that is not a connect code shows a toast. A BLE address may add `&pin=<6 digits>` (`blePairingPinFor` keeps only six digits from 100000 to 999999, since firmware passkeys never start with zero): the prompt shows the PIN, Connect copies it to the clipboard (marked sensitive), and on Android the app pairs first, answering the PIN request itself where the OS allows (not on Android 17, where the system dialog asks and the PIN can be pasted).
 
 ## Dependency Graph
 

@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: The app's three persistence layers — Room, DataStore, and core:prefs — and when a contributor should use each.
 aliases:
   - room
@@ -29,11 +29,12 @@ The primary structured data store:
 ### Key Points
 
 - Uses Room KMP for cross-platform compatibility
-- Migrations managed through Room's built-in migration system
+- Schema changes use Room auto-migrations, plus manual `Migration`s (registered in `MeshtasticDatabase.configureCommon`) where an auto-migration would copy a large table, as with the `MeshLog` indexes added in version 68
 - DAO interfaces live in `core:database`
 - Repository layer in `core:repository` provides the public API
 - Full-text message search is backed by an FTS5 content table (`PacketFts`) over `Packet`, kept in sync by Room-managed triggers
 - `DatabaseManager` keeps one Room database per connected device, with LRU eviction
+- A file database keeps Room's default connection pool: one writer and several readers in WAL, so the query an observed Flow re-runs after a write reads beside the next write. A guarded Flow that produces no first emission in time throws a `DbFlowStalledException`, which `DatabaseManager` recovers by replacing the pool. In-memory test databases use a single connection
 - `DatabaseBackupService` exports a device's database to a file the user picks, and stages a validated restore that replaces the database the next time it opens; a restore is never applied to an open database. `DatabaseBackup.SCHEMA_VERSION` must equal the `@Database` version, and a `jvmTest` checks that
 
 ### What's Stored in Room

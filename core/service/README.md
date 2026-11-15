@@ -21,7 +21,7 @@ The multiplatform connection orchestrator: connect, reconnect loop, device-addre
 The in-process `RadioController` composition root (Desktop, iOS, and single-process Android). It assembles four focused sub-controllers — `AdminControllerImpl`, `MessagingControllerImpl`, `NodeControllerImpl`, `QueryControllerImpl` — via Kotlin interface delegation, and owns the cross-cutting concerns (connection state, packet-id, location, device-address switching). Commands are direct suspend calls to `CommandSender`; admin sends are fire-and-forget (the device is the source of truth). Config writes use the `editSettings { }` transaction.
 
 ### 5. Platform pieces
-`androidMain` holds the notifications (`MeshNotificationManagerImpl`, `NotificationChannels`), WorkManager workers (`SendMessageWorker`, `MeshLogCleanupWorker`), `BootCompleteReceiver`, conversation shortcuts, and the encrypted stores for security-key backups and the lockdown passphrase. `jvmMain` holds the Desktop equivalents of the file, location and key stores.
+`androidMain` holds the notifications (`MeshNotificationManagerImpl`, `NotificationChannels`, and `NotificationChannelSpec`, which defines every channel with its group and importance; once a channel exists the app cannot raise its importance or change its sound, and the user can change both, so an importance there never drops below what an earlier release created), WorkManager workers (`SendMessageWorker`, `MeshLogCleanupWorker`), `BootCompleteReceiver`, conversation shortcuts, and the encrypted stores for security-key backups and the lockdown passphrase. `jvmMain` holds the Desktop equivalents of the file, location and key stores.
 
 
 ## Dependency Graph

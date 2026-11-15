@@ -6,7 +6,7 @@ The `:feature:firmware` module provides a unified interface for updating Meshtas
 
 ### Supported Platforms & Methods
 
-`DefaultFirmwareUpdateManager` picks the flow from the active connection and the device architecture: BLE reaches `Esp32OtaUpdateHandler` on ESP32 and `SecureDfuHandler` otherwise, TCP reaches `Esp32OtaUpdateHandler` (ESP32 only), and USB serial reaches `UsbUpdateHandler` (not ESP32). Four flows result:
+`DefaultFirmwareUpdateManager` picks the flow from the active connection and the device architecture: BLE reaches `Esp32OtaUpdateHandler` on ESP32 and `SecureDfuHandler` otherwise, TCP reaches `Esp32OtaUpdateHandler` (ESP32 only), and USB serial reaches `UsbUpdateHandler` (not ESP32). Five flows result:
 
 #### 1. ESP32 Unified OTA (Wi-Fi & BLE)
 Used for ESP32 devices (for example Heltec V3, T-Beam S3). This method uses the **Unified OTA Protocol** over TCP (port 3232) or BLE. The BLE transport uses the **Kable** multiplatform library.
@@ -91,7 +91,7 @@ Two runtime facts make the sketch path safety-critical, not just another UF2 wri
 - **The nRF52 erase sketch is SoftDevice-version-specific.** Writing the S140 6.1.1 image to a 7.3.0 device (or vice versa) corrupts the SoftDevice with no on-device recovery. `MaintenanceUf2.kt` treats the mounted volume's own `INFO_UF2.TXT` `SoftDevice:` line as authoritative over the bundled hardware-catalog hint — the two must agree, or the app refuses rather than guessing (`EraseImageResolution.Conflict`). The sketch also blocks in `while (!Serial)` until a host asserts DTR, which is what `UsbPassWriter`'s CDC unblock step is for (`MaintenanceUf2.requiresCdcUnblock`).
 - **OTAFIX bootloaders are resolved by `Board-ID`, not by build target or USB VID/PID** — both of the latter collide across multiple boards. `otafixUf2ForBoardId()` looks up the exact bootloader image for the `Board-ID:` line the volume reports; the Meshtastic build-target name is only ever used to decide whether to *offer* the action in the UI.
 
-A bootloader upgrade stops at `FirmwareUpdateState.ReviewingBootloader` once the drive is read and before anything is downloaded: `parseUf2BootloaderVersion()` takes the installed version from the `UF2 Bootloader` line and `reviewBootloader()` sets it beside the manifest's `otafixReleaseTag`. An exact match reads as up to date and skips the bootloader write; anything else is only "different", since bench and vendor tags carry no order. The running firmware cannot report its bootloader (the app only sees the packed `0x000902` the bootloader leaves in `NRF_TIMER2->CC[0]`, the same for stock and every OTAFIX build), so this is the first point the app knows the installed version.
+A bootloader upgrade stops at `FirmwareUpdateState.ReviewingBootloader` once the drive is read and before anything is downloaded: `parseUf2BootloaderVersion()` takes the installed version from the `UF2 Bootloader` line and `reviewBootloader()` sets it beside the manifest's `otafixReleaseTag`. An exact match reads as up to date and skips the bootloader write; anything else is only "different", since bench and vendor tags carry no order. The drive is the first point the app knows the installed version on firmware that predates `DeviceMetadata.bootloader_version`; newer firmware reports it while running (see below).
 
 ```mermaid
 sequenceDiagram
@@ -113,7 +113,13 @@ sequenceDiagram
 
 `FirmwareUpdateViewModel` holds a `RadioOperation.FirmwareMaintenance` lease on `RadioOperationLock` (`:core:common`) for the duration of the sequence. That operation suppresses the transport, so `SharedRadioInterfaceService` and its environmental-recovery listeners don't claim the erase firmware's bare CDC port out from under the flow. The lease is released when the sequence's terminal pass completes, fails, or the ViewModel is cleared mid-sequence. OTA and DFU flashes hold `RadioOperation.FirmwareUpdate` instead, which leaves the transport running for post-flash verification.
 
+#### 5. nRF52 bootloader upgrade over BLE
+A node that reports its bootloader (`DeviceMetadata.bootloader_version`, decoded by `decodeBootloaderVersion` in `BootloaderStatus.kt` as `major << 16 | minor << 8 | patch`) gets a **Bootloader** row on every transport. `0` or a major past one byte reads as no version, and `0.9.2`, which stock Adafruit and every Meshtastic nRF52 Bootloader before 2.6.0 report alike, reads as `OlderThanFirstNumbered`. `bleBootloaderUpgradeFor` offers the upgrade only for an nRF52 node on BLE with a release selected and a reported bootloader older than the latest release; a node that reports none gets no BLE offer. `SecureDfuHandler.upgradeBootloader` downloads and verifies both packages first, then writes the bootloader over Legacy DFU only (a bootloader that speaks Secure DFU is reset with nothing written) after checking the board and SoftDevice the bootloader reports, waits out its swap, and reinstalls the selected firmware as step 2 of 2.
+
 ### Key Classes
+
+- `BootloaderStatus.kt`: Decodes the reported bootloader version and compares it with the manifest's latest release.
+
 
 - `FirmwareUpdateManager.kt` / `DefaultFirmwareUpdateManager.kt`: Top-level orchestrator that routes an update to a handler by connection type and architecture.
 - `FirmwareUpdateViewModel.kt`: UI state management (MVI pattern) for the firmware update screen.

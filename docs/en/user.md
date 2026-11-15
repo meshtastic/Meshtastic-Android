@@ -17,6 +17,12 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**November 2026** — [Home Screen Widget](user/widget) — A Telemetry widget shows one node's environment, air quality and power readings as tiles.
+
+**November 2026** — [MQTT](user/mqtt) — A root topic can use letters in any script, and the field names the rules that would make the node reject one.
+
+**November 2026** — [Connections](user/connections) — A connect code can be scanned from the **Connect** tab or read from an NFC tag, and a PIN with a leading zero is ignored.
+
 **November 2026** — [Connections](user/connections) — A node with no region opens a guided setup for its region, preset, name, and nearby meshes.
 
 **November 2026** — [Firmware Updates](user/firmware) — The firmware screen shows the nRF52 bootloader version a node reports, and an outdated bootloader can be upgraded over Bluetooth.
@@ -26,12 +32,6 @@ Keep the last 5–8 entries and archive older ones by removing them.
 **November 2026** — [Node Metrics](user/node-metrics) — A traceroute request reads **Waiting for response**, **No Response**, or **Rate limited**, MQTT hops are marked, and environment readings chart one unit per chart.
 
 **November 2026** — [Map & Waypoints](user/map-and-waypoints) — On an Android XR headset, a 3D terrain table shows the mesh with base map, contours, buildings, and links.
-
-**October 2026** — [Firmware Updates](user/firmware) — What the Meshtastic nRF52 Bootloader does while the update drive is up, and where a node waits after a dropped Bluetooth update.
-
-**October 2026** — [Settings — Radio & User](user/settings-radio-user) — Each configuration screen has its own section, settings use the app's exact labels, and every table lists the default value.
-
-**October 2026** — [Map & Waypoints](user/map-and-waypoints) — The AR mesh view draws nodes and waypoints over the phone's camera and turns you toward the one you are finding.
 
 <!-- WHATS_NEW_END -->
 

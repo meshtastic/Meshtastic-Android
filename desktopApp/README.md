@@ -23,6 +23,8 @@ The Compose Desktop host for the shared KMP module graph. It runs the same `core
 
 Packaging builds the formats of the host it runs on: DMG on macOS, MSI and EXE on Windows, DEB, RPM and a jpackage app-image on Linux. CI wraps that app-image into a real `.AppImage` with `scripts/build-appimage.sh`. A release build (`-Pdesktop.release=true`) sets `IS_DEBUG=false`, which turns off debug HTTP logging and turns on the update check.
 
+The packaged app sets no `-Xmx`, so the JVM's default maximum heap applies, a quarter of the machine's RAM; a fixed cap above physical RAM would let the heap outgrow a small board. The `.deb` gets `Recommends: fonts-noto-color-emoji` in `RewriteDebDependencyNames`, because a minimal desktop has no color emoji font and draws emoji as boxes.
+
 ## Distribution
 
 Releases ship the installers on [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases) and a Flatpak on [Flathub](https://flathub.org/apps/org.meshtastic.MeshtasticDesktop). `RELEASE_PROCESS.md` covers signing and the store workflows.

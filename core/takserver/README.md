@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:core:takserver` module implements the **Meshtastic ↔ TAK (Team Awareness Kit) bridge**. It embeds an mTLS TCP server (port 8089) compatible with ATAK (Android), iTAK (iOS), and WinTAK clients, enabling mesh-networked position sharing and GeoChat with TAK-enabled devices.
+The `:core:takserver` module implements the **Meshtastic ↔ TAK (Team Awareness Kit) bridge**. It embeds an mTLS TCP server (port 8089) compatible with ATAK (Android) and WinTAK clients running on the same device, enabling mesh-networked position sharing and GeoChat with TAK-enabled devices.
 
 **Targets:** Android · JVM (Desktop) · iOS. `expect`/`actual` splits cover the TCP server, file I/O, zip archiving and test-fixture loading. Compression runs through the multiplatform TAKPacket-SDK on every target. On iOS the server is a stub that reports `isSupported = false`.
 
@@ -24,6 +24,7 @@ src/
 ├── commonMain/kotlin/org/meshtastic/core/takserver/
 │   ├── TAKServer.kt                 ← interface + expect createTAKServer()
 │   ├── TAKServerManager.kt          ← interface + TAKServerManagerImpl (offline queue)
+│   ├── TakCertificateProvider.kt    ← per-install certificates: data-package credentials, regenerate()
 │   ├── TAKMeshIntegration.kt        ← bridges mesh service ↔ TAK server
 │   ├── MeshToCotBroadcaster.kt      ← mesh nodes → CoT contacts (Mesh to CoT)
 │   ├── MeshNodeCoTConversion.kt     ← node eligibility, UID, callsign, remarks
@@ -147,7 +148,7 @@ core:takserver
 
 ## Local TAK Server Feature
 
-The Local TAK Server can be enabled from the app's Settings screen. When running, ATAK/iTAK clients on the same network can connect to `<device-ip>:8089` and their position reports are automatically bridged onto the mesh. CoT arriving from the mesh on ports 72/78 is forwarded to every connected TAK client.
+The Local TAK Server is enabled under **Settings → Advanced → TAK Server**. When running, ATAK on the same phone, or WinTAK on the same computer as the desktop app, connects to `127.0.0.1:8089` with the exported data package, and its position reports are automatically bridged onto the mesh. Other devices on the network cannot reach it. CoT arriving from the mesh on ports 72/78 is forwarded to every connected TAK client.
 
 ### Mesh to CoT (node contacts)
 

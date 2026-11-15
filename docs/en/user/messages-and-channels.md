@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-11-12
+last_updated: 2026-11-15
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -48,7 +48,7 @@ Key length alone does not change the icon: a 128-bit key and a 256-bit key both 
 6. Tap **Send** at the bottom of the channel list to write the changes to the node. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
 7. Optional: share the channels with the people who need access — see [Sharing and importing channels](#sharing-and-importing-channels).
 
-Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
+Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. On a channel that is not securely encrypted, **Precise location** is disabled and the precision slider stops at 15 bits. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
 
 ### Sharing and importing channels
 
@@ -98,10 +98,11 @@ can act on it directly:
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
   an unsent draft is the thing the row is waiting on *you* for.
 - **Unread badge.** A count sits on the row until you open the conversation.
-- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
-  first; muting shows a snackbar with **Undo**.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. A swipe mutes
+  until you unmute. Deleting asks first; muting shows a snackbar with **Undo**.
 - **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
-  **Mark unread**, mute or delete them together. When every selected conversation is already
+  **Mark unread**, mute or delete them together. The action bar's mute opens **Mute notifications**,
+  where you choose **8 hours**, **1 week**, or **Always**, or **Unmute**. When every selected conversation is already
   pinned, **Pin** becomes **Unpin**. Pinned conversations carry a pin marker and rise to the top
   of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each

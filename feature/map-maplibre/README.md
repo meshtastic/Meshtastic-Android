@@ -35,7 +35,7 @@ The secondary surfaces share the pieces in `SecondaryMapScaffold.kt` (`Secondary
 - **`component/`** — the map's own chrome: basemap menu, layers sheet, zoom, ornaments, dialogs.
 - **`terrain/`** — the one downloaded offline-terrain region (`OfflineTerrainRepository`, `OfflineTerrainRegion`),
   stored through `:feature:map-terrain`'s `TerrainTileStore`. `TerrainLayers` draws its hillshade and contours when
-  the region covers the viewport, and `OfflineTerrainSection` downloads it from the layers sheet.
+  the region covers the viewport, and `OfflineTerrainSection` downloads it from the layers sheet. Hillshade is full strength to one zoom past the deepest downloaded level, half at two past and absent at three, the same curve as the `google` flavor's `Hillshade.strength()`. The manifest records each Mapterhorn archive URL and ETag the tiles came from, and when the download finished.
 
 ## What lives in `:feature:map` instead
 
@@ -51,6 +51,7 @@ custom tile-source store and editor.
   on a raster basemap. `RasterBaseStyle` declares them, and `MapLibreMapTest` asserts every basemap's style does.
 - **Hillshade must stay Terrarium-encoded.** MapLibre defaults raster-DEM sources to Mapbox Terrain-RGB and the
   mismatch is silent: shading still renders, it is just wrong.
+- **The layers sheet is one scroll container.** The offline packs list grows with every saved region, and the imported-layer manager under it must stay reachable, so nothing in it may be a lazy list.
 - **Offline packs only download on Android.** The API compiles on every target and on Desktop will create a pack,
   list it, and never fetch a tile — hence `offlineMapsSupported`, off by default.
 - **`mbtiles://` needs a file that exists.** Pointing the native MBTiles source at a missing path aborts the process

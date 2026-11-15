@@ -12,16 +12,16 @@ The `:feature:node` module handles node-centric features, including the node lis
 Displays all nodes known to the application, with search and filters (`NodeFilterPreferences`, `GetFilteredNodesUseCase`). `AdaptiveNodeListScreen` pairs it with the detail pane.
 
 ### 2. `NodeDetailScreen` and `NodeDetailViewModel`
-Shows the details of one node: hardware info and its 3D device model (`DeviceModelViewModel`), position, last heard, notes, device links, and the remote administration and request actions.
+Shows the details of one node: hardware info and its 3D device model (`DeviceModelViewModel`, with an optional real-size banana for scale from `BananaForScale`), position, last heard, notes, device links, and the remote administration and request actions.
 
 ### 3. `MetricsViewModel`
-Backs the telemetry screens, each a chart plus a log: device, signal, power, environment, air quality, PAX, host metrics, neighbor info, position (`PositionLogScreens.kt`, with its embedded track map), and traceroute logs. `TracerouteMapScreen` draws a traceroute through the host's `LocalTracerouteMapProvider`.
+Backs the telemetry screens, each a chart plus a log: device, signal, power, environment, air quality, PAX, host metrics, neighbor info, position (`PositionLogScreens.kt`, with its embedded track map), and traceroute logs. `TracerouteMapScreen` draws a traceroute through the host's `LocalTracerouteMapProvider`. A requested traceroute reads as waiting, answered, no response or rate limited (`tracerouteRequestState()`, from the routing NAKs `RequestNakWatcher` reports and a two-minute answer window), and a hop whose node was last heard over MQTT is marked `(MQTT)` by `tracerouteHopName()`.
 
 ### 4. `CompassViewModel`
 Backs the compass bottom sheet, which shows the bearing and distance to another node from the phone's heading (`CompassHeadingProvider`).
 
 ### 5. `RemoteShellViewModel`
-A terminal session against the firmware's DMShell module (`metrics/terminal/`), in character mode (keystrokes streamed with local echo) or line mode (one frame per command).
+A terminal session against the firmware's DMShell module (`metrics/terminal/`), which answers only a node whose operator turned DMShell on, so a node that never replies gets a message naming that opt-in, in character mode (keystrokes streamed with local echo) or line mode (one frame per command).
 
 ## Navigation
 

@@ -33,6 +33,9 @@ markers with no compositing seam.
    with `min_zoom` reached are thinned to one per cell of a 5 x 8 grid over the view (at most 40).
    **`OfflineLabelMarkers`** draws each as a `Marker` whose icon is the text with a halo, cached per name, kind and
    theme. Labels show only while the offline layer draws with no network (`MapViewModel.mapNetworkAvailable`).
+7. **`OfflineBuildings`** reads the `buildings` layer, which the overlay does not draw, straight from the downloaded
+   archives (zoom 13 to 15, at most 36 tiles per region) and returns `BuildingFootprint`s for the 3D terrain map in
+   `:feature:xr`.
 
 ## Why this shape, not iOS's
 
@@ -78,6 +81,6 @@ math in `:feature:map-terrain`.
 `androidApp/src/testGoogle`, run by `:androidApp:testGoogleDebugUnitTest` — `MvtDecoderTest` (hand-encoded protobuf
 bytes, not a vendored fixture or a round-trip through the same encoder under test — see its own doc comment;
 ring grouping by winding), `OfflineMapStyleTest`, `OfflineVectorRendererTest` (cross-tile dedup), `OfflineMapLabelsTest` (ranking, zoom filter, grid cap),
-`WebMercatorTileMathTest`, `OfflineRegionTileSetTest`, `OfflineRegionStoreTest`.
+`WebMercatorTileMathTest`, `OfflineRegionTileSetTest`, `OfflineRegionStoreTest`, `OfflineBuildingsTest`.
 No test drives the network extractor itself; it's a thin loop over already-tested pieces (`Reader`, `MvtDecoder`,
 `OfflineVectorArchive`).

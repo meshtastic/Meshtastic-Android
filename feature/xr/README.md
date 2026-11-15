@@ -4,7 +4,7 @@
 
 The `:feature:xr` module holds the Android XR support on Jetpack XR (`androidx.xr.compose`, `scenecore`, `runtime`).
 
-- `SpatialShell` wraps `MainScreen`. In Home Space it draws the app as is, plus a button at the bottom start of the window that enters Full Space. In Full Space it keeps the app as the main panel at its Home Space size and adds an orbiter below it to go back.
+- `SpatialShell` wraps `MainScreen`. In Home Space it draws the app as is, plus a button at the bottom start of the window that enters Full Space. In Full Space it keeps the app as the main panel at its Home Space size and adds an orbiter below it with a button to go back and one for the terrain map.
 - Phones, tablets and desktop see no change: everything is gated on `LocalSpatialCapabilities` and `LocalSession`.
 
 **Target: Android only, google flavor only** (not KMP — uses the `meshtastic.android.library` + `meshtastic.android.library.compose` convention plugins). Jetpack XR depends on ARCore (`com.google.ar:core`) and a prebuilt native renderer (`com.google.ar:impress`), so `androidApp` takes this module with `googleImplementation` and the fdroid flavor's `AppSpatialShell` is a pass-through.
@@ -19,7 +19,7 @@ The `:feature:xr` module holds the Android XR support on Jetpack XR (`androidx.x
 
 ## Terrain map
 
-The orbiter's map button shows the mesh's ground as a turning table beside the app: a `CustomMesh` heightfield built from Mapterhorn tiles, with a compass bezel and a zoom slider. The model (frame, height grid, disk mesh, wheel, zoom, volume fit) is in `:feature:map-terrain` under `terrain/spatial`, ported from the Apple client.
+The orbiter's map button shows the mesh's ground as a turning table beside the app: a `CustomMesh` heightfield built from Mapterhorn tiles, with a compass bezel and a zoom slider. Its control panel picks a raster basemap from `MapTileCatalogue` to drape (`TerrainTexture`) or the elevation colors, toggles contours (`TerrainContours`, in the app's units) and buildings (`TerrainBuildings`, from a downloaded offline region at zoom 13 or deeper, offered only when one has them), and credits the sources. Nodes are pins, or towers for infrastructure roles (`TerrainMarkers`), and comets (`TerrainComets`) fly along each link the connected node hears and each way of the last traceroute that had a route. With no connected node the table anchors on the node nearest the median position. The model (frame, height grid, disk mesh, wheel, zoom, volume fit) is in `:feature:map-terrain` under `terrain/spatial`, ported from the Apple client.
 
 - Vertex color is `UBYTE4_NORM`, and the unlit material's base color is white; SceneCore rejects float colors, and without the white factor every mesh draws black.
 - Entities are disposed before the meshes and material they borrow, as with the device model.

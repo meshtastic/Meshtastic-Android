@@ -21,7 +21,9 @@ Displays the open-source libraries the app is built on, with their licenses.
 - See [settings-validation.md](settings-validation.md) for detailed radio/module settings validation rules used by this module.
 
 ## Features
-- **Channel Configuration**: Manage encryption keys, channel names, and LoRa frequency settings.
+- **Channel Configuration**: Manage encryption keys, channel names, and per-channel position precision. On a channel whose key is public, precise location is unavailable and the precision is capped at 15 bits (`Channel.usesPublicKey`, `withOnWirePrecision`).
+- **Radio setup** (`radio/setup/`): `RadioSetupScreen`, a guided region, preset, name and nearby-meshes flow (intro, `RegionPage` with a searchable list, `PresetPage`, `NamePage`, `BeaconsPage`, summary). It is bound to the connected node's address and writes only while that node stays connected (`radioSetupCanWrite`). The Connections tab offers it for a node with no region, and **Settings** has a **Set up radio** row.
+- **MQTT topic finder** (`MqttTopicFinderSheet`): samples the broker for a minute and lists the root topics in use nearby.
 - **Node Database Management**: `CleanNodeDatabaseScreen` removes nodes not heard for a chosen number of days, from the app's database and from the connected node's.
 - **Database backup and restore**: `DatabaseBackupViewModel` backs up the app database for the connected device and stages a restore that applies on the next launch.
 - **App Preferences**: Theme selection, display units (follow the system, metric, or imperial), and notification settings.

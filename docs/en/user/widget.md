@@ -84,7 +84,7 @@ It shows every reading the node reports, in that order, and you can hide any of 
 
 A reading the node has stopped sending shows a dash, while a reading of zero shows 0. Once the newest reading is more than two hours old, the line under the tiles says **Over 2 hours old**. The age comes from the app's packet log, so with logging turned off the widget can't tell when a reading arrived: it shows no age, and says **Over 2 hours old** only once the node itself has not been heard for two hours.
 
-The widget shows readings the app has already saved, so it works with no radio connected, and it never sends anything over the mesh. Tap it to open the node's metrics in the app.
+The widget shows readings the app has already saved, so it works with no radio connected, and it never sends anything over the mesh. Tap it to open the node's metrics in the app. If its node is no longer in your node list, it says **No node chosen. Tap to choose one.**, and tapping it opens the widget's setup screen, where **Change node** opens the node picker.
 
 ## Adding a Widget
 

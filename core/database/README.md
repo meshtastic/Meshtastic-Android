@@ -5,7 +5,7 @@ This module provides the local Room database persistence layer for the applicati
 ## Key Components
 
 -   **`MeshtasticDatabase`**: The main Room database class, defined in `commonMain`, with a `DatabaseBuilder.kt` per platform.
--   **`DatabaseManager`**: Opens one database per connected device (named `meshtastic_database_<hash>`) with LRU eviction, and publishes the active one through `DatabaseProvider`. DAO writes go through `withDb`, reads through `withReadDb`, and long-lived Flows through `observeCurrentDb`, which also recovers a wedged Room pool.
+-   **`DatabaseManager`**: Opens one database per connected device (named `meshtastic_database_<hash>`) with LRU eviction, and publishes the active one through `DatabaseProvider`. DAO writes go through `withDb`, reads through `withReadDb`, and long-lived Flows through `observeCurrentDb`, which also recovers a wedged Room pool. A file database keeps Room's default pool (one writer, several WAL readers); in-memory test databases use one connection.
 -   **`DatabaseMerger`**: Folds one device's database into another when the same node is reached over a second transport. `DatabaseBackupService` exports and restores a database file.
 -   **DAOs (Data Access Objects)**:
     -   `NodeInfoDao`: Manages storage and retrieval of node information (`NodeEntity`). Contains critical logic for handling Public Key Conflict (PKC) resolution and preventing identity wiping attacks.

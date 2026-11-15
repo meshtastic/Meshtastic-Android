@@ -2,7 +2,7 @@
 title: Getting Started
 parent: User Guide
 nav_order: 1
-last_updated: 2026-10-21
+last_updated: 2026-11-15
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your node.
 aliases:
   - first-launch
@@ -76,7 +76,7 @@ This step is not a runtime permission prompt. There is no grant/deny dialog: the
 
 ### Reviewing permissions later
 
-The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel and contact QR codes) and **Local network permission** (finding and reaching nodes on your Wi-Fi network). On hardware with no Bluetooth LE the **Nearby devices permission** row is left out. On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
+The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel, contact and connect-code QR codes) and **Local network permission** (finding and reaching nodes on your Wi-Fi network). On hardware with no Bluetooth LE the **Nearby devices permission** row is left out. On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
 
 The section reads *All allowed* when every permission is granted, *Nothing needs your attention* when some have never been asked for, and names a count when one is denied — in which case it expands itself. Tap the row to expand or collapse it at any time:
 
@@ -93,7 +93,7 @@ This matters most for notifications. If you decline them during setup, this row 
 
 ## After Setup
 
-After you grant permissions, the app opens the main interface. Your first action should be connecting to a Meshtastic node — see [Connections](connections) for detailed instructions.
+After you grant permissions, the app opens the main interface. Your first action should be connecting to a Meshtastic node — see [Connections](connections) for detailed instructions. A node that has no LoRa region yet opens a guided setup the first time you connect it — see [After your first connection](connections#after-your-first-connection).
 
 > 💡 **Tip:** If you skipped any permissions during setup, open the **Permissions** section of **Settings** in the app. Every runtime permission is listed there with its current state and a way back to it — including notifications, which the system will not prompt for a second time on its own.
 
