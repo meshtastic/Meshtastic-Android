@@ -191,16 +191,18 @@ internal fun TelemetryConfigScreen(
     onSave: (nodeNum: Int, hidden: Set<TelemetryReading>) -> Unit,
 ) {
     var nodeNum by rememberSaveable { mutableStateOf(setup.initialNode?.num) }
+    var picking by rememberSaveable { mutableStateOf(false) }
     var hiddenIds by rememberSaveable { mutableStateOf(setup.initialHidden.map { it.id }.toSet()) }
     val node = nodeNum?.let { setup.inputs.nodes[it] }
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(Res.string.widget_telemetry_title)) }) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (node == null) {
+            if (node == null || picking) {
                 NodeList(
                     nodes = telemetryCandidates(setup.inputs.nodes.values, setup.inputs.ourNodeNum),
                     onPick = { picked ->
                         if (picked.num != nodeNum) hiddenIds = emptySet()
                         nodeNum = picked.num
+                        picking = false
                     },
                 )
             } else {
@@ -218,7 +220,7 @@ internal fun TelemetryConfigScreen(
                     leadingContent = { NodeChip(node = node) },
                     headlineContent = { Text(node.effectiveLongName.ifEmpty { node.user.id }, maxLines = 1) },
                     trailingContent = {
-                        TextButton(onClick = { nodeNum = null }) {
+                        TextButton(onClick = { picking = true }) {
                             Text(stringResource(Res.string.widget_telemetry_change_node))
                         }
                     },

@@ -302,8 +302,14 @@ private fun Co2Severity.labelRes(): StringResource = when (this) {
  * Splits "1,016 hPa" into the number and its unit at the first space, including the no-break spaces locale formatters
  * use. A value with no space, or whose first part holds no digit, stays whole.
  */
+private val SPACES = setOf(' ', '\u00A0', '\u202F')
+
 internal fun splitUnit(value: String): Pair<String, String?> {
-    val space = value.indexOfFirst { it == ' ' || it == '\u00A0' || it == '\u202F' }
+    // A grouping space sits between digits ("1 016 hPa"); the unit's space is the first one not followed by a digit.
+    val space =
+        value.indices.firstOrNull { i ->
+            value[i] in SPACES && value.getOrNull(i + 1)?.isDigit() != true
+        } ?: -1
     val number = if (space > 0) value.substring(0, space) else return value to null
     return if (number.any { it.isDigit() }) number to value.substring(space + 1).trim() else value to null
 }

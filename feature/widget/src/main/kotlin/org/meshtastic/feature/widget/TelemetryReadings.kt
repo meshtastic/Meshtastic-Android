@@ -40,12 +40,14 @@ internal fun telemetrySnapshot(node: Node, history: List<Telemetry>): TelemetryS
     // turned off, or the row not yet written) never dates newer values with an older time.
     fun timeOf(group: TelemetryGroup): Int? = history
         .firstOrNull { group.carriedBy(it) }
-        ?.takeIf { group.readings.any { reading -> live.hasValue(reading) } }
         ?.let { row ->
             val logged = TelemetrySnapshot(row.environment_metrics, row.air_quality_metrics, row.power_metrics)
             row.time.takeIf { time -> time > 0 && group.readings.all { logged.value(it) == live.value(it) } }
         }
-    return live.copy(time = TelemetryGroup.entries.mapNotNull(::timeOf).maxOrNull())
+    val shown = TelemetryGroup.entries.filter { group -> group.readings.any { live.hasValue(it) } }
+    val times = shown.map(::timeOf)
+    // One undated group may be the newest reading, so an older group's time would wrongly label it old.
+    return live.copy(time = if (times.any { it == null }) null else times.filterNotNull().maxOrNull())
 }
 
 /** Every reading any of [history]'s rows carries, so a reading the node has stopped sending keeps its tile. */

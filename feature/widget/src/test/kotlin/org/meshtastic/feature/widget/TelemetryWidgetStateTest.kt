@@ -126,6 +126,16 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `an undated group leaves the age unknown rather than taking an older group's time`() {
+        val battery = power { ch1_voltage = 12.6f }
+        val node = telemetryNode(environment = weather, power = battery)
+        val history = listOf(row(NOW - 10_800, power = battery))
+        val state = showing(node, history = history)
+        assertNull(state.updatedAt)
+        assertFalse(state.isStale)
+    }
+
+    @Test
     fun `a reading over two hours old is stale`() {
         val history = listOf(row(NOW - STALE_AFTER.inWholeSeconds - 1, environment = weather))
         assertTrue(showing(telemetryNode(environment = weather), history = history).isStale)
@@ -197,6 +207,8 @@ class TelemetryWidgetStateTest {
         assertEquals("1,016" to "hPa", splitUnit("1,016 hPa"))
         assertEquals("9.4" to "mph", splitUnit("9.4\u00A0mph"))
         assertEquals("21°C" to null, splitUnit("21°C"))
+        assertEquals("1\u202F016" to "hPa", splitUnit("1\u202F016\u00A0hPa"))
+        assertEquals("1 016" to "hPa", splitUnit("1 016 hPa"))
         assertEquals(MISSING_VALUE to null, splitUnit(MISSING_VALUE))
     }
 

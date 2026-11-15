@@ -102,6 +102,11 @@ internal object WidgetSizes {
     val TELEMETRY_GRID = DpSize(NARROW_WIDTH, TWO_ROWS_HEIGHT)
 
     /**
+     * The host may pick the breakpoint with the larger area, so a wide two-row cell needs a grid that outranks the row.
+     */
+    val TELEMETRY_WIDE_GRID = DpSize(TWO_COLUMN_WIDTH, TWO_ROWS_HEIGHT)
+
+    /**
      * The layout reads its size from the breakpoint, so the small sizes each have a one-row and a taller variant, and
      * the row a four-cell variant: four tiles in a two-cell row show nothing but icons, so a row narrower than four
      * cells shows two.
@@ -116,6 +121,7 @@ internal object WidgetSizes {
                 TELEMETRY_WIDE_ROW,
                 TELEMETRY_WIDE_ROW_TALL,
                 TELEMETRY_GRID,
+                TELEMETRY_WIDE_GRID,
             ),
         )
 

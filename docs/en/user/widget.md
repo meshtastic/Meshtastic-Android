@@ -82,7 +82,7 @@ It shows every reading the node reports, in that order, and you can hide any of 
 - A widget under two rows tall shows the first readings in a row: two up to three columns wide, four from four columns.
 - A widget at least two columns by two rows shows four at a time in a grid. With more than four readings, tap the page button in its corner, such as **1/2**, to see the next four.
 
-A reading the node has stopped sending shows a dash, while a reading of zero shows 0. Once the newest reading is more than two hours old, the line under the tiles says **Over 2 hours old**.
+A reading the node has stopped sending shows a dash, while a reading of zero shows 0. Once the newest reading is more than two hours old, the line under the tiles says **Over 2 hours old**. The age comes from the app's packet log, so with logging turned off the widget can't tell when a reading arrived: it shows no age, and says **Over 2 hours old** only once the node itself has not been heard for two hours.
 
 The widget shows readings the app has already saved, so it works with no radio connected, and it never sends anything over the mesh. Tap it to open the node's metrics in the app.
 

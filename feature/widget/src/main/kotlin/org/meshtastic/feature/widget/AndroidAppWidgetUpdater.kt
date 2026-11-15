@@ -79,7 +79,10 @@ class AndroidAppWidgetUpdater(
         scope.launch {
             telemetryDataSource.checkedInputs
                 .sample(TRACKER_UPDATE_SAMPLE_MS)
-                .map { inputs -> telemetryNodeNums().map { num -> num?.let { inputs.nodes[it]?.telemetryKey() } } }
+                .map { inputs ->
+                    val units = listOf(inputs.units, inputs.temperatureUnit)
+                    units + telemetryNodeNums().map { num -> num?.let { inputs.nodes[it]?.telemetryKey() } }
+                }
                 .distinctUntilChanged()
                 .collect { keys -> if (keys.isNotEmpty()) update(TelemetryWidget()) }
         }

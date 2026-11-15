@@ -119,8 +119,11 @@ class TelemetryWidget :
                 val known = TelemetryLastKnown.of(node, state.snapshot)
                 if (reported != seen || prefs.lastKnownTelemetry() != known) {
                     updateAppWidgetState(context, id) {
-                        it.putReadingSet(TELEMETRY_SEEN_KEY, reported)
-                        it.storeLastKnown(known)
+                        // Setup may have moved this instance to another node since this composition read its state.
+                        if (it[TELEMETRY_NODE_NUM_KEY] == node.num) {
+                            it.putReadingSet(TELEMETRY_SEEN_KEY, reported)
+                            it.storeLastKnown(known)
+                        }
                     }
                 }
             }
