@@ -62,6 +62,9 @@ import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
 import org.meshtastic.feature.discovery.DiscoveryScanEngine
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
+import org.meshtastic.feature.widget.TelemetryWidgetReceiver
+import kotlin.reflect.KClass
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -150,15 +153,12 @@ open class MeshUtilApplication :
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             applicationScope.launch {
-                suspend fun pushPreview() {
+                suspend fun pushPreview(receiver: KClass<out GlanceAppWidgetReceiver> = LocalStatsWidgetReceiver::class) {
                     try {
                         Logger.i { "Pushing generated widget preview..." }
                         val result =
                             GlanceAppWidgetManager(this@MeshUtilApplication)
-                                .setWidgetPreviews(
-                                    LocalStatsWidgetReceiver::class,
-                                    intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
-                                )
+                                .setWidgetPreviews(receiver, intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN))
                         Logger.i { "setWidgetPreviews result: $result" }
                     } catch (e: CancellationException) {
                         throw e
@@ -168,6 +168,8 @@ open class MeshUtilApplication :
                 }
 
                 pushPreview()
+                // The Telemetry preview is mock data only, so it is pushed once.
+                pushPreview(TelemetryWidgetReceiver::class)
 
                 val widgetStateProvider: org.meshtastic.feature.widget.LocalStatsWidgetStateProvider = get()
                 try {

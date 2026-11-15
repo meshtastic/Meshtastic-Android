@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AppWidgetUpdater
 
 private const val WIDGET_UPDATE_DEBOUNCE_MS = 500L
@@ -45,6 +46,7 @@ class AndroidAppWidgetUpdater(
     private val context: Context,
     stateProvider: LocalStatsWidgetStateProvider,
     trackerDataSource: NodeTrackerWidgetDataSource,
+    telemetryDataSource: TelemetryWidgetDataSource,
 ) : AppWidgetUpdater {
     @Suppress("InjectDispatcher") // feature:widget does not depend on core:di, where CoroutineDispatchers lives
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -71,7 +73,23 @@ class AndroidAppWidgetUpdater(
                 .distinctUntilChanged()
                 .collect { states -> if (states.isNotEmpty()) update(NodeTrackerWidget()) }
         }
+
+        // Each telemetry packet replaces its group on the node, so a change to a shown node's metrics is a new
+        // reading. The instance reads the reading's time from the log when it renders.
+        @OptIn(FlowPreview::class)
+        scope.launch {
+            telemetryDataSource.checkedInputs
+                .sample(TRACKER_UPDATE_SAMPLE_MS)
+                .map { inputs -> telemetryNodeNums().map { num -> num?.let { inputs.nodes[it]?.telemetryKey() } } }
+                .distinctUntilChanged()
+                .collect { keys -> if (keys.isNotEmpty()) update(TelemetryWidget()) }
+        }
     }
+
+    private suspend fun telemetryNodeNums(): List<Int?> =
+        GlanceAppWidgetManager(context).getGlanceIds(TelemetryWidget::class.java).map { id ->
+            getAppWidgetState<Preferences>(context, PreferencesGlanceStateDefinition, id)[TELEMETRY_NODE_NUM_KEY]
+        }
 
     private suspend fun hasInstances(widget: Class<out GlanceAppWidget>): Boolean =
         GlanceAppWidgetManager(context).getGlanceIds(widget).isNotEmpty()
@@ -84,7 +102,12 @@ class AndroidAppWidgetUpdater(
     override suspend fun updateAll() {
         update(LocalStatsWidget())
         update(NodeTrackerWidget())
+        update(TelemetryWidget())
     }
+
+    /** What a Telemetry instance renders from its node, besides the log: the metrics, labels and identity. */
+    private fun Node.telemetryKey() =
+        listOf(environmentMetrics, airQualityMetrics, powerMetrics, powerChannelLabels, user.short_name, colors)
 
     private suspend fun update(widget: GlanceAppWidget) {
         @Suppress("TooGenericExceptionCaught")

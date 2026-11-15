@@ -202,6 +202,15 @@
     <string name="canned_message_enabled">Canned message enabled</string>
     <string name="cant_change_no_radio">Couldn't change channel, because radio is not yet connected. Please try again.</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
+    <!-- CARDINAL -->
+    <string name="cardinal_e">E</string>
+    <string name="cardinal_n">N</string>
+    <string name="cardinal_ne">NE</string>
+    <string name="cardinal_nw">NW</string>
+    <string name="cardinal_s">S</string>
+    <string name="cardinal_se">SE</string>
+    <string name="cardinal_sw">SW</string>
+    <string name="cardinal_w">W</string>
     <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -277,8 +286,14 @@
     <string name="client_notification">Client Notification</string>
     <string name="close">Close</string>
     <string name="close_selection">Close selection</string>
+    <!-- CO2 -->
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ Hum</string>
+    <string name="co2_level_evacuate">Evacuate</string>
+    <string name="co2_level_good">Good</string>
+    <string name="co2_level_poor">Poor</string>
+    <string name="co2_level_stuffy">Stuffy</string>
+    <string name="co2_level_unsafe">Unsafe</string>
     <string name="co2_temperature">CO₂ Temp</string>
     <string name="collapse_chart">Collapse chart</string>
     <string name="collapsed">Collapsed</string>
@@ -1740,6 +1755,8 @@
     <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="press_and_drag">Press and drag to reorder</string>
     <string name="pressure">Pressure</string>
+    <string name="pressure_high">High</string>
+    <string name="pressure_low">Low</string>
     <!-- PREVIEW -->
     <string name="preview_custom_composable_line_one">This is a custom composable</string>
     <string name="preview_custom_composable_line_two">With multiple lines and styles</string>
@@ -2310,6 +2327,19 @@
     <string name="widget_packets_sent">Sent</string>
     <string name="widget_relays">Relayed</string>
     <string name="widget_relays_canceled">Relays canceled</string>
+    <string name="widget_telemetry_change_node">Change node</string>
+    <string name="widget_telemetry_choose">Choose a node. Only nodes that have sent environment, air quality or power readings are listed.</string>
+    <string name="widget_telemetry_gust">Gust %1$s</string>
+    <string name="widget_telemetry_next_page">Next readings, page %1$d of %2$d</string>
+    <string name="widget_telemetry_no_nodes_hint">Nodes appear here once they send environment, air quality or power readings.</string>
+    <string name="widget_telemetry_no_nodes_title">No telemetry yet</string>
+    <string name="widget_telemetry_no_readings">No readings to show</string>
+    <string name="widget_telemetry_not_found">No node chosen. Tap to choose one.</string>
+    <string name="widget_telemetry_page">%1$d/%2$d</string>
+    <string name="widget_telemetry_readings_hint">The widget shows every reading the node reports. Turn off any you don\'t want.</string>
+    <string name="widget_telemetry_stale">Over 2 hours old</string>
+    <string name="widget_telemetry_title">Telemetry</string>
+    <string name="widget_telemetry_updated">Updated %1$s</string>
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
