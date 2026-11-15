@@ -120,9 +120,13 @@ internal fun telemetryWidgetState(
     )
 }
 
-/** The nodes the picker offers: those that have reported any telemetry this widget shows, ours first, then newest. */
-internal fun telemetryCandidates(nodes: Collection<Node>, ourNodeNum: Int?): List<Node> = nodes
+/**
+ * The nodes the picker offers: those that have reported any telemetry this widget shows, ours first, then newest,
+ * filtered by [query] against the long name, short name and node id.
+ */
+internal fun telemetryCandidates(nodes: Collection<Node>, ourNodeNum: Int?, query: String = ""): List<Node> = nodes
     .filter { !it.isIgnored && (it.hasEnvironmentMetrics || it.hasAirQualityMetrics || it.hasPowerMetrics) }
+    .filter { it.matchesQuery(query) }
     .filter {
         TelemetrySnapshot(it.environmentMetrics, it.airQualityMetrics, it.powerMetrics).reported.isNotEmpty()
     }
