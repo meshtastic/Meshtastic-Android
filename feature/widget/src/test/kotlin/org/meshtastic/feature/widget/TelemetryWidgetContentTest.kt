@@ -114,7 +114,8 @@ class TelemetryWidgetContentTest {
             onNode(hasText("21°C")).assertExists()
             onNode(hasText("48%")).assertExists()
             onNode(hasText(pressure)).assertExists()
-            onNode(hasText("10°C")).assertExists()
+            // The dew point, as its own tile and as the humidity tile's line.
+            onAllNodes(hasText("10°C")).assertCountEquals(2)
             onNode(hasText("42")).assertDoesNotExist()
             onNode(hasText("1/3")).assertExists()
             onNode(
@@ -201,6 +202,35 @@ class TelemetryWidgetContentTest {
             )
                 .assertExists()
         }
+
+    @Test
+    fun `the humidity tile carries the dew point as its own line`() {
+        val node =
+            telemetryNode(
+                environment =
+                environment {
+                    temperature = 20f
+                    relative_humidity = 50f
+                },
+            )
+        val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), emptyList(), now = NOW)
+        render(WidgetSizes.TELEMETRY_GRID, state) {
+            onNode(hasText("50%")).assertExists()
+            // The dew point tile and the humidity tile's own line.
+            onAllNodes(hasText("9°C")).assertCountEquals(2)
+        }
+    }
+
+    @Test
+    fun `a humidity tile with no temperature has no dew point line`() {
+        val node = telemetryNode(environment = environment { relative_humidity = 50f })
+        val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), emptyList(), now = NOW)
+        render(WidgetSizes.TELEMETRY_GRID, state) {
+            onNode(hasText("50%")).assertExists()
+            onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
+            onNode(hasText(MISSING_VALUE)).assertDoesNotExist()
+        }
+    }
 
     @Test
     fun `a Fahrenheit and imperial locale converts temperature and wind`() {

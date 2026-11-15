@@ -109,6 +109,7 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
                 R.drawable.widget_ic_water_drop,
                 Res.string.humidity,
                 env?.relative_humidity.finite()?.let { "${NumberFormatter.format(it, 0)}%" },
+                detail = snapshot.dewPoint()?.toTempString(fahrenheit),
             )
 
         TelemetryReading.Pressure -> {
