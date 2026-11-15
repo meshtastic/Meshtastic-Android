@@ -600,7 +600,7 @@ private fun EnvironmentMetricsCard(
 }
 
 @Composable
-private fun EnvironmentMetricsContent(
+internal fun EnvironmentMetricsContent(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
     isImperial: Boolean,
