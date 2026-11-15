@@ -196,7 +196,7 @@ internal fun DrawScope.drawReticle(color: Color, locked: Boolean) {
 }
 
 /** Where the phone's camera sits above the ground it stands on, for drawing things that lie on that ground. */
-private const val EYE_HEIGHT_M = 1.5
+internal const val EYE_HEIGHT_M = 1.5
 
 /** How tall a geofence's wall stands, so the fence reads as a boundary rather than a line on the grass. */
 private const val FENCE_WALL_M = 3.0

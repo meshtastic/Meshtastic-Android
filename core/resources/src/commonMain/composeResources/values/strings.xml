@@ -2063,8 +2063,29 @@
     <string name="shutdown">Shutdown</string>
     <string name="shutdown_node_name">Node: %1$s</string>
     <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
+    <!-- SIGNAL -->
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
+    <string name="signal_survey_delete_confirm">Delete this session and its readings?</string>
+    <string name="signal_survey_description">Listens only: logs the signal of each packet your radio hears, with your phone's location, and draws it on the map. Nothing is sent, and the log stays on this device.</string>
+    <string name="signal_survey_export">Export CSV</string>
+    <string name="signal_survey_heatmap">Show as heatmap</string>
+    <string name="signal_survey_hud_recording">Recording survey · %1$s</string>
+    <string name="signal_survey_last_reading">Last reading %1$s</string>
+    <string name="signal_survey_location_off">Turn on location to log readings</string>
+    <string name="signal_survey_location_permission">Allow location access to log readings</string>
+    <string name="signal_survey_no_fix">Waiting for a location fix</string>
+    <plurals name="signal_survey_readings">
+        <item quantity="one">%1$d reading</item>
+        <item quantity="other">%1$d readings</item>
+    </plurals>
+    <string name="signal_survey_record">Record</string>
+    <string name="signal_survey_remote_radio">Not available for a radio connected over the network</string>
+    <plurals name="signal_survey_senders">
+        <item quantity="one">Heard %1$d node</item>
+        <item quantity="other">Heard %1$d nodes</item>
+    </plurals>
+    <string name="signal_survey_title">Signal survey</string>
     <!-- SITE -->
     <string name="site_planner">Site Planner</string>
     <string name="site_planner_antenna_gain_dbi">Antenna gain (dBi)</string>

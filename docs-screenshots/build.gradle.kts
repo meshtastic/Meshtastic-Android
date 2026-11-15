@@ -39,4 +39,5 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.feature.connections)
     implementation(projects.feature.firmware)
+    implementation(projects.feature.map)
 }

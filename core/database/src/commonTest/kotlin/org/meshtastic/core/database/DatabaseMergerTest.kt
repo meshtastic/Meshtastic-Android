@@ -28,6 +28,8 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
+import org.meshtastic.core.database.entity.SignalSampleEntity
+import org.meshtastic.core.database.entity.SignalSurveySessionEntity
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
@@ -192,8 +194,31 @@ class DatabaseMergerTest {
         source
             .discoveryDao()
             .insertDiscoveredNodes(listOf(DiscoveredNodeEntity(presetResultId = srcPreset, nodeNum = 30L)))
+        // Both sides hold a survey session with the same id, so the source's is re-keyed and its reading follows it.
+        val srcSurvey =
+            source.signalSampleDao().insertSession(SignalSurveySessionEntity(startedAt = 5, modemPreset = "LONG_FAST"))
+        val dstSurvey = dest.signalSampleDao().insertSession(SignalSurveySessionEntity(startedAt = 6))
+        val reading =
+            SignalSampleEntity(
+                sessionId = srcSurvey,
+                time = 5,
+                latitude = 1.0,
+                longitude = 2.0,
+                fromNum = 30,
+                rssi = -90,
+                direct = true,
+            )
+        source.signalSampleDao().insert(reading)
+        dest.signalSampleDao().insert(reading.copy(sessionId = dstSurvey, time = 6, rssi = -100))
 
         DatabaseMerger.merge(source, dest, sourceName)
+
+        // Survey sessions from both transports are kept, each still holding its own reading.
+        val surveys = dest.signalSampleDao().getAllSessions().sortedBy { it.startedAt }
+        assertEquals(listOf<String?>("LONG_FAST", null), surveys.map { it.modemPreset })
+        assertEquals(2, surveys.map { it.id }.toSet().size)
+        assertEquals(listOf(-90), dest.signalSampleDao().getSamples(surveys[0].id).map { it.rssi })
+        assertEquals(listOf(-100), dest.signalSampleDao().getSamples(surveys[1].id).map { it.rssi })
 
         // Packets: 1 + 2, with fresh distinct non-zero uuids (no collision with dest's existing uuid).
         val packets = dest.packetDao().getAllPacketsSnapshot()

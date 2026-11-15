@@ -3,13 +3,14 @@ title: Map & Waypoints
 parent: User Guide
 nav_order: 6
 last_updated: 2026-11-15
-description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
+description: View node positions on the map, create and share waypoints, manage map layers, Site Planner and signal surveys, and control position sharing and privacy.
 aliases:
   - map
   - waypoints
   - gps
   - location
   - site-planner
+  - signal-survey
   - map-layers
   - geojson
   - kml
@@ -59,6 +60,7 @@ Tap the mesh view button (**Open mesh view**) in the map's top bar to see the wh
 - **Touch & hold** a node or waypoint to find it. The view says how far to turn and tilt, the phone ticks as you turn closer, and it pulses once you are on target.
 - A node whose position uncertainty covers your own spot has no meaningful direction, so it goes on the radar at the bottom instead. Point the phone down to enlarge the radar.
 - Waypoint geofences are outlined, and the view says when you are inside one.
+- [Signal survey](#signal-survey) sessions shown on the map are painted on the ground around you, in the same colors, out to about 300 m. While a survey records, the view says so with its reading count, so you can walk a route and watch coverage fill in.
 
 When your phone's position has no altitude, targets sit level with you and the view says elevation is approximate. Without camera access, or while the phone is too hot, the view carries on as a compass.
 
@@ -143,6 +145,22 @@ Imported layers are listed with a toggle to show/hide each one and an option to 
 - **Display**: **Color palette**.
 
 Tap **Estimate coverage** to run it. The app computes the estimate itself, using the ITU-R P.1812 propagation model over Mapterhorn terrain, on Google Play, F-Droid, and Desktop alike. The terrain downloads the first time an area is estimated, so that step needs a network connection; if it fails, the form comes back with a note to check your connection. The finished estimate is added under **Manage Map Layers** as a coverage estimate layer, and the map moves to it.
+
+### Signal Survey
+
+Site Planner predicts coverage; **Signal survey** measures it. Turn on **Record** at the bottom of the layers sheet, then walk or drive with your radio. Each packet the radio hears over LoRa is logged with its signal strength (RSSI and SNR) and your phone's location at that moment. The survey only listens: it sends nothing onto the mesh.
+
+![Signal survey controls recording a session, with the color legend, the heatmap switch, and two sessions listed](../../assets/screenshots/map_signal_survey.png)
+
+Each time you turn **Record** on starts a new session, and turning it off ends it. The session draws on the map as it records: colored squares along your route, each standing for the clearest reading taken inside it. Squares are about 50 m across at street level and grow as you zoom out, so a survey stays visible at city scale.
+
+- **Colors** rate the square's best SNR against the modem preset the session was recorded on, the same rating the signal meter uses: green is good, yellow fair, orange bad, and red too weak to rely on. See [How the Signal Meter Works](signal-meter).
+- **Tap a square** for its SNR and RSSI, how many readings it holds, how many nodes were heard there, and when the last one arrived.
+- **Show as heatmap** swaps the squares for a smooth glow in the same colors. Each color glows where the route passed through squares of that rating, so a spot you stood at for a while glows no brighter than one you drove past. Squares cannot be tapped while the heatmap shows.
+- **In the [AR mesh view](#ar-mesh-view)** the visible sessions are painted on the ground around you.
+- **Sessions** are listed under the switch, newest first. The eye shows or hides a session on the map, the download button exports its readings as CSV to a file you choose, and the trash deletes it.
+
+Recording is off until you turn it on, and stays on until you turn it off or the app shuts down, so it keeps using location while the app runs in the background. Readings are kept per radio. They stay on your device unless you export them, and they are included in a database backup. A reading needs a location fix no more than 15 seconds old and accurate to 50 m, so nothing is logged without location permission or a fix; the line under **Record** says what is missing, with a button to grant access or open location settings. It is also paused while no radio is connected, for the first 15 seconds after connecting, and is not available for a radio connected over the network, where your phone's location is not the radio's. Signal survey is on Android only.
 
 ## Position Sharing
 

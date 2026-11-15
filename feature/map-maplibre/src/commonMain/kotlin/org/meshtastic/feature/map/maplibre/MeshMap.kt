@@ -69,6 +69,7 @@ import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.MapEngineUnavailable
@@ -81,6 +82,8 @@ import org.meshtastic.feature.map.maplibre.layers.CustomLayers
 import org.meshtastic.feature.map.maplibre.layers.MapOverlayLayers
 import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
+import org.meshtastic.feature.map.maplibre.layers.SignalSurveyHeatmapLayer
+import org.meshtastic.feature.map.maplibre.layers.SignalSurveyLayer
 import org.meshtastic.feature.map.maplibre.layers.TerrainLayers
 import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -90,6 +93,7 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.meshtastic.feature.map.maplibre.tiles.InstallRadarSmoothing
+import org.meshtastic.feature.map.survey.SurveyCellUi
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.seconds
 import org.maplibre.compose.layers.LocationIndicatorDefaults as CoreLocationIndicatorDefaults
@@ -139,6 +143,12 @@ fun rememberMeshMapState(
      * user's own view is not yanked away from them.
      */
     frameOnNodes: Boolean = true,
+    /** The signal survey's squares, with the color each quality draws in. Drawn above imports, below the mesh. */
+    surveyCells: List<SurveyCellUi> = emptyList(),
+    /** The survey as heatmap points instead, one per street-level square. */
+    surveyHeatPoints: List<SurveyCellUi> = emptyList(),
+    surveyColors: Map<Quality, Color> = emptyMap(),
+    onSurveyCellClick: (String) -> Unit = {},
 ): MapState {
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
@@ -172,6 +182,8 @@ fun rememberMeshMapState(
                 displayUnits = displayUnits,
             )
             CustomLayers(customLayers, layerOpacity)
+            SignalSurveyLayer(surveyCells, surveyColors, onSurveyCellClick)
+            SignalSurveyHeatmapLayer(surveyHeatPoints, surveyColors)
 
             if (filterState.showWaypoints) {
                 WaypointLayers(waypoints = waypoints.values, onWaypointClick = onWaypointClick)

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
@@ -64,8 +65,11 @@ import org.meshtastic.core.resources.mesh_hud_cardinal_west
 import org.meshtastic.core.resources.mesh_hud_more
 import org.meshtastic.core.resources.mesh_hud_snr
 import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.signal_survey_hud_recording
+import org.meshtastic.core.resources.signal_survey_readings
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
+import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -76,6 +80,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.mapFilterActions
+import org.meshtastic.feature.map.survey.SignalSurveyViewModel
 import org.meshtastic.proto.Waypoint
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -158,6 +163,21 @@ fun MeshHudScreen(
     SideEffect { viewModel.setLocationPermissionGranted(location.isGranted) }
     val targets by viewModel.targets.collectAsStateWithLifecycle()
     val poseState = viewModel.pose.collectAsStateWithLifecycle()
+    // The survey is painted on the ground, and while one records the view says so, so a walk can be checked live.
+    val surveyTiles by viewModel.surveyTiles.collectAsStateWithLifecycle()
+    val surveyColors = Quality.entries.associateWith { it.color() }
+    val survey: SignalSurveyViewModel = koinViewModel()
+    val surveyState by survey.state.collectAsStateWithLifecycle()
+    val surveyLabel =
+        if (surveyState.recording) {
+            val count = surveyState.readingCount
+            stringResource(
+                Res.string.signal_survey_hud_recording,
+                pluralStringResource(Res.plurals.signal_survey_readings, count, count),
+            )
+        } else {
+            null
+        }
     var intrinsics by remember { mutableStateOf<CameraIntrinsics?>(null) }
     var still by remember { mutableStateOf<HudStill?>(null) }
     val overlayLayer = rememberGraphicsLayer()
@@ -277,6 +297,7 @@ fun MeshHudScreen(
                 val state = poseState.value
                 val pose = state.pose ?: return@Canvas
                 drawHorizon(pose, focalPx)
+                drawSurveyTiles(surveyTiles, surveyColors, pose, focalPx)
                 targets.fences.forEach { drawGeofence(it, pose, focalPx) }
                 val sparkSeconds = sparkMillis.longValue / MILLIS_PER_SECOND
                 track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels, sparkSeconds) }
@@ -344,6 +365,7 @@ fun MeshHudScreen(
             )
         HudTopNotices(
             status = sensorStatus,
+            surveyLabel = surveyLabel,
             modifier =
             Modifier.align(Alignment.TopStart)
                 .offset { IntOffset(0, topBarBottomPx + tapeClearancePx) }
