@@ -201,6 +201,56 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `saving settings for a new node forgets the old node's readings and starts on page one`() {
+        val prefs =
+            mutablePreferencesOf().apply {
+                storeTelemetrySettings(1, emptySet())
+                putReadingSet(TELEMETRY_SEEN_KEY, setOf(TelemetryReading.Rain))
+                this[TELEMETRY_PAGE_KEY] = 2
+                storeTelemetrySettings(2, setOf(TelemetryReading.Lux))
+            }
+        assertEquals(2, prefs[TELEMETRY_NODE_NUM_KEY])
+        assertEquals(setOf(TelemetryReading.Lux), prefs.readingSet(TELEMETRY_HIDDEN_KEY))
+        assertEquals(emptySet(), prefs.readingSet(TELEMETRY_SEEN_KEY))
+        assertEquals(0, prefs[TELEMETRY_PAGE_KEY])
+    }
+
+    @Test
+    fun `saving settings for the same node keeps the readings it has seen`() {
+        val prefs =
+            mutablePreferencesOf().apply {
+                storeTelemetrySettings(1, emptySet())
+                putReadingSet(TELEMETRY_SEEN_KEY, setOf(TelemetryReading.Rain))
+                storeTelemetrySettings(1, setOf(TelemetryReading.PowerCurrent(3)))
+            }
+        assertEquals(setOf(TelemetryReading.Rain), prefs.readingSet(TELEMETRY_SEEN_KEY))
+        assertEquals(setOf(TelemetryReading.PowerCurrent(3)), prefs.readingSet(TELEMETRY_HIDDEN_KEY))
+    }
+
+    @Test
+    fun `the redraw key follows what the widget shows and ignores last heard`() {
+        val node = telemetryNode(environment = weather, powerChannelLabels = listOf("Solar"))
+        assertEquals(node.telemetryKey(), node.copy(lastHeard = node.lastHeard + 60).telemetryKey())
+        val changes =
+            listOf(
+                node.copy(environmentMetrics = environment { temperature = 3f }),
+                node.copy(airQualityMetrics = airQuality { co2 = 400 }),
+                node.copy(powerMetrics = power { ch1_voltage = 4f }),
+                node.copy(powerChannelLabels = listOf("Battery")),
+                node.copy(user = node.user.newBuilder().short_name("NEW").build()),
+            )
+        changes.forEach { assertTrue(it.telemetryKey() != node.telemetryKey()) }
+    }
+
+    @Test
+    fun `a tap opens power metrics only when power is all the widget shows`() {
+        val power = power { ch1_voltage = 12f }
+        assertEquals("power", metricsScreen(showing(telemetryNode(power = power))))
+        assertEquals("environment", metricsScreen(showing(telemetryNode(environment = weather, power = power))))
+        assertEquals("environment", metricsScreen(showing(telemetryNode(airQuality = airQuality { co2 = 500 }))))
+    }
+
+    @Test
     fun `the page button wraps to the first page`() {
         assertEquals(1, TelemetryPageAction.nextPage(0, 3))
         assertEquals(0, TelemetryPageAction.nextPage(2, 3))

@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AppWidgetUpdater
 
 private const val WIDGET_UPDATE_DEBOUNCE_MS = 500L
@@ -104,10 +103,6 @@ class AndroidAppWidgetUpdater(
         update(NodeTrackerWidget())
         update(TelemetryWidget())
     }
-
-    /** What a Telemetry instance renders from its node, besides the log: the metrics, labels and identity. */
-    private fun Node.telemetryKey() =
-        listOf(environmentMetrics, airQualityMetrics, powerMetrics, powerChannelLabels, user.short_name, colors)
 
     private suspend fun update(widget: GlanceAppWidget) {
         @Suppress("TooGenericExceptionCaught")

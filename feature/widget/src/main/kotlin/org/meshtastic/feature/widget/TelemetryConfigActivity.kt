@@ -163,11 +163,7 @@ class TelemetryConfigActivity :
             try {
                 val glanceId = GlanceAppWidgetManager(this@TelemetryConfigActivity).getGlanceIdBy(appWidgetId)
                 updateAppWidgetState(this@TelemetryConfigActivity, glanceId) {
-                    // Readings remembered for another node would show as dashes on this one.
-                    if (it[TELEMETRY_NODE_NUM_KEY] != nodeNum) it.remove(TELEMETRY_SEEN_KEY)
-                    it[TELEMETRY_NODE_NUM_KEY] = nodeNum
-                    it.putReadingSet(TELEMETRY_HIDDEN_KEY, hidden)
-                    it[TELEMETRY_PAGE_KEY] = 0
+                    it.storeTelemetrySettings(nodeNum, hidden)
                 }
                 TelemetryWidget().update(this@TelemetryConfigActivity, glanceId)
                 setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))

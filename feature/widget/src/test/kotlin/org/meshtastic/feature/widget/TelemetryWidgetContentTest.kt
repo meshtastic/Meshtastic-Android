@@ -17,17 +17,22 @@
 package org.meshtastic.feature.widget
 
 import android.app.Application
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.compose.ui.unit.DpSize
+import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.hasRunCallbackClickAction
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
+import androidx.glance.testing.unit.hasStartActivityClickAction
 import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.TemperatureUnit
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.iaq_level_excellent
@@ -103,16 +108,22 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `two by two shows four tiles and a page button for the rest`() = render(WidgetSizes.TELEMETRY_GRID) {
-        onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
-        onNode(hasText("1/3")).assertExists()
-        onNode(
-            hasRunCallbackClickAction<TelemetryPageAction>(
-                actionParametersOf(TelemetryPageAction.PAGE_COUNT_KEY to 3),
-            ),
-        )
-            .assertExists()
-    }
+    fun `two by two shows the first four readings and a page button for the rest`() =
+        render(WidgetSizes.TELEMETRY_GRID) {
+            onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
+            onNode(hasText("21°C")).assertExists()
+            onNode(hasText("48%")).assertExists()
+            onNode(hasText(pressure)).assertExists()
+            onNode(hasText("10°C")).assertExists()
+            onNode(hasText("42")).assertDoesNotExist()
+            onNode(hasText("1/3")).assertExists()
+            onNode(
+                hasRunCallbackClickAction<TelemetryPageAction>(
+                    actionParametersOf(TelemetryPageAction.PAGE_COUNT_KEY to 3),
+                ),
+            )
+                .assertExists()
+        }
 
     @Test
     fun `the second page shows the next readings with their bands`() = render(WidgetSizes.TELEMETRY_GRID, page = 1) {
@@ -129,13 +140,19 @@ class TelemetryWidgetContentTest {
             // Nine readings make three pages; page 5 wraps to the third, which holds one tile in a 2x2 grid.
             onNode(hasText("3/3")).assertExists()
             onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
+            // The ninth reading, channel 1's current under its label.
+            onNode(hasText("Solar")).assertExists()
+            onNode(hasText("412.5")).assertExists()
+            onNode(hasText("21°C")).assertDoesNotExist()
         }
 
     @Test
     fun `four readings or fewer show no page button`() {
         val state = createMockTelemetryState().let { it.copy(readings = it.readings.take(4)) }
         render(WidgetSizes.TELEMETRY_GRID, state) {
+            onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
             onNode(hasText("1/1")).assertDoesNotExist()
+            onNode(hasRunCallbackClickAction<TelemetryPageAction>(actionParametersOf())).assertDoesNotExist()
         }
     }
 
@@ -157,12 +174,14 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `readings over two hours old are labeled without dimming`() {
+    fun `readings over two hours old are labeled and every tile keeps its value`() {
         val state = createMockTelemetryState().copy(isStale = true)
         render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText(staleLabel)).assertExists()
             onNode(hasTestTag(TelemetryWidget.STALE_TEST_TAG)).assertExists()
             onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
+            onNode(hasText("21°C")).assertExists()
+            onNode(hasText("48%")).assertExists()
         }
     }
 
@@ -172,10 +191,36 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `no node asks the user to choose one`() =
+    fun `no node asks the user to choose one and opens setup for this widget`() =
         render(WidgetSizes.TELEMETRY_GRID, TelemetryWidgetState.NodeNotFound) {
             onNode(hasText(notFoundLabel)).assertExists()
+            onNode(
+                hasStartActivityClickAction<TelemetryConfigActivity>(
+                    actionParametersOf(ActionParameters.Key<Int>(AppWidgetManager.EXTRA_APPWIDGET_ID) to WIDGET_ID),
+                ),
+            )
+                .assertExists()
         }
+
+    @Test
+    fun `a Fahrenheit and imperial locale converts temperature and wind`() {
+        val node =
+            telemetryNode(
+                environment =
+                environment {
+                    temperature = 21.4f
+                    wind_speed = 4.2f
+                },
+            )
+        val inputs =
+            inputsOf(node).copy(units = MeasurementSystem.IMPERIAL, temperatureUnit = TemperatureUnit.FAHRENHEIT)
+        val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputs, emptyList(), now = NOW)
+        render(WidgetSizes.TELEMETRY_GRID, state) {
+            onNode(hasText("71°F")).assertExists()
+            onNode(hasText("mph")).assertExists()
+            onNode(hasText("km/h")).assertDoesNotExist()
+        }
+    }
 
     private companion object {
         const val WIDGET_ID = 11

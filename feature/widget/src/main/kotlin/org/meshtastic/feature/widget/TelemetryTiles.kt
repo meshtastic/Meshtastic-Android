@@ -158,12 +158,9 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
         TelemetryReading.Wind -> {
             val direction = env?.wind_direction?.let { cardinal(it) }
             val gust =
-                env?.wind_gust
-                    .finite()
-                    ?.takeIf { it > 0f }
-                    ?.let {
-                        stringResource(Res.string.widget_telemetry_gust, MetricFormatter.windSpeed(it, imperial))
-                    }
+                env?.wind_gust.finite()?.let {
+                    stringResource(Res.string.widget_telemetry_gust, MetricFormatter.windSpeed(it, imperial))
+                }
             tile(
                 R.drawable.widget_ic_navigation,
                 Res.string.wind,

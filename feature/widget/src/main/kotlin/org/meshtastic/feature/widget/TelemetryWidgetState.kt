@@ -134,6 +134,19 @@ internal fun telemetryCandidates(nodes: Collection<Node>, ourNodeNum: Int?): Lis
 internal fun defaultTelemetryNode(nodes: Collection<Node>, ourNodeNum: Int?): Node? =
     telemetryCandidates(nodes, ourNodeNum).firstOrNull()?.takeIf { it.num == ourNodeNum }
 
+/** What a Telemetry instance renders from its node besides the log, so a change to it is a reason to redraw. */
+internal fun Node.telemetryKey(): List<Any> =
+    listOf(environmentMetrics, airQualityMetrics, powerMetrics, powerChannelLabels, user.short_name, colors)
+
+/** Writes what the setup screen chose; a new node starts over on page one with nothing remembered from the old one. */
+internal fun MutablePreferences.storeTelemetrySettings(nodeNum: Int, hidden: Set<TelemetryReading>) {
+    // Readings remembered for another node would show as dashes on this one.
+    if (this[TELEMETRY_NODE_NUM_KEY] != nodeNum) remove(TELEMETRY_SEEN_KEY)
+    this[TELEMETRY_NODE_NUM_KEY] = nodeNum
+    putReadingSet(TELEMETRY_HIDDEN_KEY, hidden)
+    this[TELEMETRY_PAGE_KEY] = 0
+}
+
 /** Per-instance Glance state keys. */
 internal val TELEMETRY_NODE_NUM_KEY = intPreferencesKey("telemetry_node_num")
 internal val TELEMETRY_HIDDEN_KEY = stringSetPreferencesKey("telemetry_hidden")

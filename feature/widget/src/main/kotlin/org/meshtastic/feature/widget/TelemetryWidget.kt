@@ -191,18 +191,15 @@ class TelemetryWidget :
         internal const val STALE_TEST_TAG = "telemetry_stale"
         internal const val TILE_TEST_TAG = "telemetry_tile"
 
-        /** The metrics screen for what the widget shows: environment (which carries air quality), else power. */
-        private fun openMetrics(context: Context, state: TelemetryWidgetState.Showing): Action {
-            val onlyPower =
-                state.readings.isNotEmpty() &&
-                    state.readings.all { it is TelemetryReading.PowerVoltage || it is TelemetryReading.PowerCurrent }
-            val screen = if (onlyPower) "power" else "environment"
-            return actionStartActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("$DEEP_LINK_BASE_URI/nodes/${state.nodeNum}/$screen"))
-                    .setClassName(context.packageName, MAIN_ACTIVITY_CLASS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        /** Opens the node's metrics on the screen [metricsScreen] picks. */
+        private fun openMetrics(context: Context, state: TelemetryWidgetState.Showing): Action = actionStartActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("$DEEP_LINK_BASE_URI/nodes/${state.nodeNum}/${metricsScreen(state)}"),
             )
-        }
+                .setClassName(context.packageName, MAIN_ACTIVITY_CLASS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        )
 
         private fun chooseNode(appWidgetId: Int): Action = actionStartActivity(
             TelemetryConfigActivity::class.java,
@@ -211,6 +208,14 @@ class TelemetryWidget :
 
         private const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
     }
+}
+
+/** The metrics screen a tap opens: environment (which carries air quality), or power when only power readings show. */
+internal fun metricsScreen(state: TelemetryWidgetState.Showing): String {
+    val onlyPower =
+        state.readings.isNotEmpty() &&
+            state.readings.all { it is TelemetryReading.PowerVoltage || it is TelemetryReading.PowerCurrent }
+    return if (onlyPower) "power" else "environment"
 }
 
 @Suppress("MagicNumber")
