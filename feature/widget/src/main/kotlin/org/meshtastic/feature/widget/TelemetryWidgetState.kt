@@ -161,7 +161,8 @@ internal data class TelemetryLastKnown(
             nodeNum = node.num,
             shortName = node.user.short_name.ifEmpty { "???" },
             colors = node.colors,
-            channelLabels = node.powerChannelLabels,
+            // No label at all reads back from Glance state as no list, so it is stored that way too.
+            channelLabels = node.powerChannelLabels.takeIf { labels -> labels.any { it.isNotBlank() } }.orEmpty(),
             snapshot = snapshot,
             lastHeard = node.lastHeard,
         )
@@ -188,7 +189,7 @@ internal fun Preferences.lastKnownTelemetry(): TelemetryLastKnown? = this[LAST_N
         nodeNum = num,
         shortName = this[LAST_SHORT_NAME_KEY].orEmpty(),
         colors = (this[LAST_FOREGROUND_KEY] ?: 0) to (this[LAST_BACKGROUND_KEY] ?: 0),
-        channelLabels = this[LAST_LABELS_KEY]?.split(LABEL_SEPARATOR).orEmpty(),
+        channelLabels = this[LAST_LABELS_KEY]?.takeIf { it.isNotEmpty() }?.split(LABEL_SEPARATOR).orEmpty(),
         snapshot =
         TelemetrySnapshot(
             environment = this[LAST_ENVIRONMENT_KEY]?.decodeBase64()?.let(EnvironmentMetrics.ADAPTER::decode),

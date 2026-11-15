@@ -77,7 +77,7 @@ internal fun TelemetryContent(
     val oneRow = WidgetSizes.isOneRow(size)
     val layout = telemetryLayout(size)
     val tiles = state.readings.map { it to telemetryTile(it, state) }
-    // Glance allows ten levels of nested views, so the body sits directly in this column, weighted, with no wrapper.
+    // The body sits directly in this column, weighted: Glance's unit-test harness caps nesting at ten levels.
     Column(modifier = modifier) {
         if (layout == TelemetryLayout.GRID || (layout == TelemetryLayout.ONE && !oneRow)) {
             WidgetNodeChip(shortName = state.shortName, colors = state.colors)

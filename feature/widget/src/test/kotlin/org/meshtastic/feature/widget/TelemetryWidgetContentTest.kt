@@ -19,7 +19,6 @@ package org.meshtastic.feature.widget
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.hasRunCallbackClickAction
@@ -75,7 +74,7 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `narrower than two columns shows the first reading only`() = render(DpSize(110.dp, 110.dp)) {
+    fun `narrower than two columns shows the first reading only`() = render(WidgetSizes.TELEMETRY_ONE_TALL) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
         onNode(hasText(temperatureLabel)).assertExists()
         onNode(hasText("21°C")).assertExists()
@@ -83,21 +82,21 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `wide under two rows shows four in a row`() = render(DpSize(320.dp, 110.dp)) {
+    fun `wide under two rows shows four in a row`() = render(WidgetSizes.TELEMETRY_ROW_TALL) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText("48%")).assertExists()
         onNode(hasText(pressure)).assertExists()
     }
 
     @Test
-    fun `a one-row cell keeps four compact tiles`() = render(DpSize(320.dp, 60.dp)) {
+    fun `a one-row cell keeps four compact tiles`() = render(WidgetSizes.TELEMETRY_ROW) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText(temperatureLabel)).assertDoesNotExist()
         onNode(hasText("21°C")).assertExists()
     }
 
     @Test
-    fun `two by two shows four tiles and a page button for the rest`() = render(DpSize(180.dp, 200.dp)) {
+    fun `two by two shows four tiles and a page button for the rest`() = render(WidgetSizes.TELEMETRY_GRID) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText("1/3")).assertExists()
         onNode(
@@ -109,7 +108,7 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `the second page shows the next readings with their bands`() = render(DpSize(180.dp, 200.dp), page = 1) {
+    fun `the second page shows the next readings with their bands`() = render(WidgetSizes.TELEMETRY_GRID, page = 1) {
         onNode(hasText("2/3")).assertExists()
         onNode(hasText("42")).assertExists()
         onNode(hasText(excellent)).assertExists()
@@ -117,16 +116,17 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `a short last page keeps the grid and wraps a stale stored page`() = render(DpSize(180.dp, 200.dp), page = 5) {
-        // Nine readings make three pages; page 5 wraps to the third, which holds one tile in a 2x2 grid.
-        onNode(hasText("3/3")).assertExists()
-        onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
-    }
+    fun `a short last page keeps the grid and wraps a stale stored page`() =
+        render(WidgetSizes.TELEMETRY_GRID, page = 5) {
+            // Nine readings make three pages; page 5 wraps to the third, which holds one tile in a 2x2 grid.
+            onNode(hasText("3/3")).assertExists()
+            onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
+        }
 
     @Test
     fun `four readings or fewer show no page button`() {
         val state = createMockTelemetryState().let { it.copy(readings = it.readings.take(4)) }
-        render(DpSize(180.dp, 200.dp), state) {
+        render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText("1/1")).assertDoesNotExist()
         }
     }
@@ -140,7 +140,7 @@ class TelemetryWidgetContentTest {
             )
         val history = listOf(row(NOW - 60, environment = environment { lux = 300f }))
         val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), history, now = NOW)
-        render(DpSize(180.dp, 200.dp), state) {
+        render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText("0°C")).assertExists()
             onNode(hasText("0 µg/m³")).assertExists()
             onNode(hasText(luxLabel)).assertExists()
@@ -151,7 +151,7 @@ class TelemetryWidgetContentTest {
     @Test
     fun `readings over two hours old are labeled without dimming`() {
         val state = createMockTelemetryState().copy(isStale = true)
-        render(DpSize(180.dp, 200.dp), state) {
+        render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText(staleLabel)).assertExists()
             onNode(hasTestTag(TelemetryWidget.STALE_TEST_TAG)).assertExists()
             onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
@@ -159,14 +159,15 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
-    fun `a fresh reading carries no stale label`() = render(DpSize(180.dp, 200.dp)) {
+    fun `a fresh reading carries no stale label`() = render(WidgetSizes.TELEMETRY_GRID) {
         onNode(hasTestTag(TelemetryWidget.STALE_TEST_TAG)).assertDoesNotExist()
     }
 
     @Test
-    fun `no node asks the user to choose one`() = render(DpSize(180.dp, 200.dp), TelemetryWidgetState.NodeNotFound) {
-        onNode(hasText(notFoundLabel)).assertExists()
-    }
+    fun `no node asks the user to choose one`() =
+        render(WidgetSizes.TELEMETRY_GRID, TelemetryWidgetState.NodeNotFound) {
+            onNode(hasText(notFoundLabel)).assertExists()
+        }
 
     private companion object {
         const val WIDGET_ID = 11

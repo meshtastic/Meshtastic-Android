@@ -61,7 +61,6 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
@@ -139,8 +138,8 @@ class TelemetryConfigActivity :
     }
 
     private suspend fun loadSetup(appWidgetId: Int): TelemetrySetup {
-        var inputs = dataSource.currentInputs()
-        if (inputs.nodes.isEmpty()) inputs = dataSource.checkedInputs.first { it.nodes.isNotEmpty() }
+        // Read from the database directly; an empty one (no radio's DB open) shows the empty state, not a wait.
+        val inputs = dataSource.currentInputs()
         val prefs = runCatching {
             val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
             getAppWidgetState<Preferences>(this, PreferencesGlanceStateDefinition, glanceId)
@@ -151,6 +150,7 @@ class TelemetryConfigActivity :
             inputs = inputs,
             initialNode = current ?: defaultTelemetryNode(inputs.nodes.values, inputs.ourNodeNum),
             initialHidden = if (current != null) prefs.readingSet(TELEMETRY_HIDDEN_KEY) else emptySet(),
+            seen = if (current != null) prefs.readingSet(TELEMETRY_SEEN_KEY) else emptySet(),
         )
     }
 
@@ -179,6 +179,8 @@ internal data class TelemetrySetup(
     val inputs: TelemetryWidgetInputs,
     val initialNode: Node?,
     val initialHidden: Set<TelemetryReading>,
+    /** What the instance has seen its node report, so a reading it shows with a dash can be hidden too. */
+    val seen: Set<TelemetryReading>,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -204,7 +206,13 @@ internal fun TelemetryConfigScreen(
             } else {
                 val history by produceState(emptyList(), node.num) { value = dataSource.currentHistory(node.num) }
                 val state =
-                    telemetryWidgetState(node.num, emptySet(), emptySet(), setup.inputs, history)
+                    telemetryWidgetState(
+                        node.num,
+                        emptySet(),
+                        if (node.num == setup.initialNode?.num) setup.seen else emptySet(),
+                        setup.inputs,
+                        history,
+                    )
                         as? TelemetryWidgetState.Showing
                 ListItem(
                     leadingContent = { NodeChip(node = node) },

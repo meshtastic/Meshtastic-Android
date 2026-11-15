@@ -93,15 +93,21 @@ internal object WidgetSizes {
      * when wide but under two rows, and a paged 2x2 grid from two columns by two rows. Its layouts fill whatever cell
      * they are shown in by weight, so it needs no cell measurement and only these breakpoints.
      */
-    val TELEMETRY_ONE = DpSize(40.dp, 40.dp)
+    val TELEMETRY_ONE = DpSize(40.dp, ONE_ROW_HEIGHT)
+    val TELEMETRY_ONE_TALL = DpSize(40.dp, COMPACT_HEIGHT)
     val TELEMETRY_ROW = DpSize(NARROW_WIDTH, ONE_ROW_HEIGHT)
+    val TELEMETRY_ROW_TALL = DpSize(NARROW_WIDTH, COMPACT_HEIGHT)
     val TELEMETRY_GRID = DpSize(NARROW_WIDTH, TWO_ROWS_HEIGHT)
 
-    val telemetrySizeMode: SizeMode = SizeMode.Responsive(setOf(TELEMETRY_ONE, TELEMETRY_ROW, TELEMETRY_GRID))
+    /** The layout reads its size from the breakpoint, so a one-row and a taller variant of the small sizes each. */
+    val telemetrySizeMode: SizeMode =
+        SizeMode.Responsive(setOf(TELEMETRY_ONE, TELEMETRY_ONE_TALL, TELEMETRY_ROW, TELEMETRY_ROW_TALL, TELEMETRY_GRID))
 
     /** The picker preview adds the two measured 2x2 cells, so it shows the grid filling its frame. */
     val telemetryPreviewSizeMode: PreviewSizeMode =
-        SizeMode.Responsive(setOf(TELEMETRY_ONE, TELEMETRY_ROW, TELEMETRY_GRID, PIXEL_2X2, EMULATOR_2X2))
+        SizeMode.Responsive(
+            setOf(TELEMETRY_ONE_TALL, TELEMETRY_ROW, TELEMETRY_ROW_TALL, TELEMETRY_GRID, PIXEL_2X2, EMULATOR_2X2),
+        )
 
     fun isOneRow(size: DpSize): Boolean = size.height < COMPACT_HEIGHT
 

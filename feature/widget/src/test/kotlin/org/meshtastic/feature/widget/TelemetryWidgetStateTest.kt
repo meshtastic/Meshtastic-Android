@@ -174,6 +174,14 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `a node with no channel labels reads back unchanged`() {
+        val node = telemetryNode(power = power { ch1_voltage = 3.3f }, powerChannelLabels = listOf(""))
+        val known = TelemetryLastKnown.of(node, telemetrySnapshot(node, emptyList()))
+        val prefs = mutablePreferencesOf().apply { storeLastKnown(known) }
+        assertEquals(known, prefs.lastKnownTelemetry())
+    }
+
+    @Test
     fun `the picker offers telemetry nodes with ours first and defaults to ours`() {
         val ours = telemetryNode(num = 1, environment = weather, lastHeard = 10)
         val newer = telemetryNode(num = 2, power = power { ch1_voltage = 3.3f }, lastHeard = 20)
