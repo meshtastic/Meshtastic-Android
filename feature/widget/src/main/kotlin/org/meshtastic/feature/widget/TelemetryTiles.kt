@@ -302,6 +302,16 @@ private fun Co2Severity.labelRes(): StringResource = when (this) {
 }
 
 /**
+ * Splits "1,016 hPa" into the number and its unit at the first space, including the no-break spaces locale formatters
+ * use. A value with no space, or whose first part holds no digit, stays whole.
+ */
+internal fun splitUnit(value: String): Pair<String, String?> {
+    val space = value.indexOfFirst { it == ' ' || it == '\u00A0' || it == '\u202F' }
+    val number = if (space > 0) value.substring(0, space) else return value to null
+    return if (number.any { it.isDigit() }) number to value.substring(space + 1).trim() else value to null
+}
+
+/**
  * One tile as the widget draws it. [value] is null for a reading the node has stopped sending, which shows a dash.
  * [detail] is the tile's own second line, with a dot in [band] when the line names a band.
  */

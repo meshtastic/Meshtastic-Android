@@ -156,7 +156,7 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
         modifier
             .background(GlanceTheme.colors.secondaryContainer)
             .cornerRadius(12.dp)
-            .padding(horizontal = 8.dp, vertical = if (compact) 2.dp else 6.dp)
+            .padding(horizontal = 6.dp, vertical = if (compact) 2.dp else 6.dp)
             .semantics {
                 contentDescription = "${tile.label} $value"
                 testTag = TelemetryWidget.TILE_TEST_TAG
@@ -182,9 +182,12 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
             }
         }
         if (!compact) {
-            TileValue(value, TILE_VALUE_SIZE)
-            tile.detail?.let { detail ->
+            // A narrow tile clips "1,016 hPa" at the value's size, so the unit moves to the smaller second line.
+            val (number, unit) = splitUnit(value)
+            TileValue(number, TILE_VALUE_SIZE)
+            if (unit != null || tile.detail != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    unit?.let { SecondaryText(if (tile.detail != null) "$it · " else it) }
                     tile.band?.let { band ->
                         Text(
                             text = "●",
@@ -192,19 +195,20 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
                         )
                         Spacer(GlanceModifier.width(3.dp))
                     }
-                    Text(
-                        text = detail,
-                        maxLines = 1,
-                        style =
-                        TextStyle(
-                            color = GlanceTheme.colors.onSecondaryContainer,
-                            fontSize = WidgetSizes.Type.footnote,
-                        ),
-                    )
+                    tile.detail?.let { SecondaryText(it) }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SecondaryText(text: String) {
+    Text(
+        text = text,
+        maxLines = 1,
+        style = TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontSize = WidgetSizes.Type.footnote),
+    )
 }
 
 @Composable

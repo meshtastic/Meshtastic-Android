@@ -193,6 +193,14 @@ class TelemetryWidgetStateTest {
     }
 
     @Test
+    fun `a value splits from its unit only after a number`() {
+        assertEquals("1,016" to "hPa", splitUnit("1,016 hPa"))
+        assertEquals("9.4" to "mph", splitUnit("9.4\u00A0mph"))
+        assertEquals("21°C" to null, splitUnit("21°C"))
+        assertEquals(MISSING_VALUE to null, splitUnit(MISSING_VALUE))
+    }
+
+    @Test
     fun `the page button wraps to the first page`() {
         assertEquals(1, TelemetryPageAction.nextPage(0, 3))
         assertEquals(0, TelemetryPageAction.nextPage(2, 3))

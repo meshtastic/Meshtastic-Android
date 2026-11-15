@@ -59,7 +59,7 @@ class TelemetryWidgetContentTest {
     private val notFoundLabel: String = getString(Res.string.widget_telemetry_not_found)
 
     // The locale's grouping, as node details shows it.
-    private val pressure = "${NumberFormatter.format(1016.2f, 0)} hPa"
+    private val pressure = NumberFormatter.format(1016.2f, 0)
 
     private fun render(
         size: DpSize,
@@ -112,7 +112,8 @@ class TelemetryWidgetContentTest {
         onNode(hasText("2/3")).assertExists()
         onNode(hasText("42")).assertExists()
         onNode(hasText(excellent)).assertExists()
-        onNode(hasText("640 ppm")).assertExists()
+        onNode(hasText("640")).assertExists()
+        onNode(hasText("ppm · ")).assertExists()
     }
 
     @Test
@@ -142,7 +143,7 @@ class TelemetryWidgetContentTest {
         val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), history, now = NOW)
         render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText("0°C")).assertExists()
-            onNode(hasText("0 µg/m³")).assertExists()
+            onNode(hasText("µg/m³")).assertExists()
             onNode(hasText(luxLabel)).assertExists()
             onNode(hasText(MISSING_VALUE)).assertExists()
         }
