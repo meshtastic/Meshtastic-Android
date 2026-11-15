@@ -71,8 +71,8 @@ The tiles are every reading the node has reported, in the design#179 order, less
 
 | Size | Data shown |
 |---|---|
-| Narrower than 130 dp (under two columns) | The first reading; the chip above it from 90 dp tall |
-| 130 dp and wider, under 180 dp tall | The first four in a row, with the chip in the footer from 90 dp tall; under 90 dp each tile keeps its icon and value |
+| Narrower than 130 dp (under two columns) | The first reading, with the chip above it from 90 dp tall; the age line drops its "Updated" prefix |
+| 130 dp and wider, under 180 dp tall | The first two in a row, four from 320 dp (four cells), with the chip in the footer from 90 dp tall; under 90 dp each tile keeps its icon and value. Four tiles in a two-cell row show only their icons |
 | 130 by 180 dp and up | Chip, a 2x2 grid of four, and a footer with the age and, with more than four readings, a page button |
 
 The page button runs `TelemetryPageAction`, which moves the stored page on and wraps it, and the layout wraps a stored page past the last, so hiding readings never strands it. A short last page keeps the grid's empty cells. Once the newest reading is over two hours old the footer says so in the error color; the tiles stay at full strength. The layouts fill their cell by weight, so they read no cell size beyond the three breakpoints. The last rendered snapshot sits under the `telemetry_last_*` keys, protos as base64, for when no node DB is open. Tapping opens the node's environment metrics, or power metrics when only power readings show. Nothing is sent over the mesh.

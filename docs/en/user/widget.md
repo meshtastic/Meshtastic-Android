@@ -79,7 +79,7 @@ The **Telemetry** widget shows one node's sensor readings as tiles, the same til
 It shows every reading the node reports, in that order, and you can hide any of them. The node's chip sits beside the readings, and the line under them says when the newest reading arrived.
 
 - A widget narrower than two columns shows the first reading.
-- A wide widget under two rows tall shows the first four in a row.
+- A widget under two rows tall shows the first readings in a row: two up to three columns wide, four from four columns.
 - A widget at least two columns by two rows shows four at a time in a grid. With more than four readings, tap the page button in its corner, such as **1/2**, to see the next four.
 
 A reading the node has stopped sending shows a dash, while a reading of zero shows 0. Once the newest reading is more than two hours old, the line under the tiles says **Over 2 hours old**.
