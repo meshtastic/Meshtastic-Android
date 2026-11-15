@@ -87,11 +87,14 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.GroundOverlay
 import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.StrokeStyle
 import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.SphericalUtil
@@ -1690,6 +1693,8 @@ private fun speedFromPosition(position: Position, displayUnits: MeasurementSyste
 
 // region --- Traceroute Map Content ---
 
+private val TracerouteReturnPattern: List<PatternItem> = listOf(Dash(24f), Gap(12f))
+
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun TracerouteMapContent(
@@ -1714,6 +1719,7 @@ private fun TracerouteMapContent(
             jointType = JointType.ROUND,
             color = TracerouteColors.ReturnRoute,
             width = 7f,
+            pattern = TracerouteReturnPattern,
             zIndex = 2.5f,
         )
     }
