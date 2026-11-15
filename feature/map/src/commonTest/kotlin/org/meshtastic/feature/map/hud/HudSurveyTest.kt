@@ -67,8 +67,10 @@ class HudSurveyTest {
         val tiles =
             listOf(square(200.0, 0.0), square(20.0, 0.0), square(2000.0, 0.0), square(100.0, 0.0)).toHudTiles(here, 0f)
 
-        assertEquals(3, tiles.size)
-        assertEquals(tiles.sortedByDescending { it.distanceM }, tiles)
+        // To each square's center, farthest first; the one 2 km out is dropped.
+        val expected = listOf(226.4, 127.5, 51.5)
+        assertEquals(expected.size, tiles.size)
+        expected.zip(tiles).forEach { (distance, tile) -> assertEquals(distance, tile.distanceM, 2.0) }
     }
 
     @Test

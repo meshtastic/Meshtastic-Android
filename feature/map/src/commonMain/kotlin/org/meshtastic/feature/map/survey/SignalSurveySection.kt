@@ -40,7 +40,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -99,11 +98,17 @@ private const val CSV_MIME_TYPE = "text/csv"
 fun SignalSurveySection(modifier: Modifier = Modifier, viewModel: SignalSurveyViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var exportSessionId by rememberSaveable { mutableStateOf<Long?>(null) }
-    val export = rememberFileExporter(content = { exportSessionId?.let { viewModel.csv(it) } })
+    var exportStartedAt by rememberSaveable { mutableStateOf<Long?>(null) }
+    val export =
+        rememberFileExporter(
+            content = {
+                val id = exportSessionId
+                val startedAt = exportStartedAt
+                if (id != null && startedAt != null) viewModel.csv(id, startedAt) else null
+            },
+        )
     val permission = rememberLocationPermissionState()
     val openLocationSettings = rememberOpenLocationSettings()
-    // Turning the survey on without location access asks for it first, and starts once it is granted.
-    var startWhenGranted by rememberSaveable { mutableStateOf(false) }
     val askForLocation = {
         if (permission.status == PermissionStatus.PERMANENTLY_DENIED) {
             permission.openAppSettings()
@@ -111,24 +116,15 @@ fun SignalSurveySection(modifier: Modifier = Modifier, viewModel: SignalSurveyVi
             permission.request()
         }
     }
-    if (startWhenGranted && permission.isGranted) {
-        SideEffect {
-            startWhenGranted = false
-            viewModel.setRecording(true)
-        }
-    }
     SignalSurveyContent(
         state = state,
         actions =
         SignalSurveyActions(
             onRecordingChange = { recording ->
-                if (recording && !permission.isGranted) {
-                    startWhenGranted = true
-                    askForLocation()
-                } else {
-                    startWhenGranted = false
-                    viewModel.setRecording(recording)
-                }
+                // A radio that reports its own position can be surveyed without the phone's location, so the survey
+                // starts either way and asks for access alongside.
+                viewModel.setRecording(recording)
+                if (recording && !permission.isGranted) askForLocation()
             },
             onFixBlocker = { blocker ->
                 if (blocker == SignalSurveyBlocker.LOCATION_OFF) openLocationSettings() else askForLocation()
@@ -136,6 +132,8 @@ fun SignalSurveySection(modifier: Modifier = Modifier, viewModel: SignalSurveyVi
             onVisibleChange = viewModel::setVisible,
             onExport = { sessionId ->
                 exportSessionId = sessionId
+                exportStartedAt =
+                    state.sessions.firstOrNull { it.session.id == sessionId }?.session?.startedAtMillis
                 export(SURVEY_FILE_NAME, CSV_MIME_TYPE)
             },
             onDelete = viewModel::delete,

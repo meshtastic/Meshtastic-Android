@@ -884,7 +884,12 @@ fun MapView(
             }
 
             if (mode is GoogleMapMode.Main) {
-                SignalSurveyPolygons(surveyCells, surveyColors, survey::selectCell)
+                SignalSurveyPolygons(
+                    surveyCells,
+                    surveyColors,
+                    survey::selectCell,
+                    clickable = boxAuthoringDraft == null,
+                )
                 SignalSurveyHeatmap(surveyHeatPoints, surveyColors)
                 SignalSurveyLinkLines(surveyLinks.links, surveyColors)
             }
@@ -2170,6 +2175,8 @@ private fun SignalSurveyPolygons(
     cells: List<SurveyCellUi>,
     colors: Map<Quality, Color>,
     onCellClick: (String) -> Unit,
+    // Off while a box is being drawn: a tapped polygon swallows the tap meant for the map.
+    clickable: Boolean = true,
 ) {
     cells.forEach { item ->
         val cell = item.cell
@@ -2185,7 +2192,7 @@ private fun SignalSurveyPolygons(
                 fillColor = (colors[item.quality] ?: Color.Gray).copy(alpha = SURVEY_FILL_ALPHA),
                 strokeColor = Color.Transparent,
                 strokeWidth = 0f,
-                clickable = true,
+                clickable = clickable,
                 onClick = { onCellClick(item.id) },
                 zIndex = SURVEY_Z_INDEX,
             )

@@ -24,11 +24,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,6 +66,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 internal const val SIGNAL_SURVEY_CELL_INFO_TAG = "signal_survey_cell_info"
 private const val CARD_MAX_WIDTH_DP = 480
 private const val MAP_CONTROLS_INSET_DP = 88
+private const val LINKS_MAX_HEIGHT_DP = 120
 
 /**
  * The tapped square's details, as a card a map mounts at its bottom edge. Not a dialog: the lines to the nodes heard
@@ -124,7 +128,11 @@ internal fun SignalSurveyCellCard(
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp),
                 )
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(end = 16.dp)) {
+                // A square heard by many nodes would otherwise push names past the map's edge.
+                val scroll = rememberScrollState()
+                val bounded =
+                    Modifier.padding(end = 16.dp).heightIn(max = LINKS_MAX_HEIGHT_DP.dp).verticalScroll(scroll)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = bounded) {
                     links.links.forEach { link ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.size(10.dp).background(link.quality.color(), CircleShape))

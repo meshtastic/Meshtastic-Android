@@ -24,8 +24,11 @@ const val SURVEY_MAX_PACKET_AGE_SECONDS = 30
 /** Whether the connected radio heard this packet over LoRa within the last [SURVEY_MAX_PACKET_AGE_SECONDS]. */
 fun MeshPacket.isLiveLoraReception(nowSeconds: Long): Boolean {
     val heardAt = rxTimeOrNull() ?: return false
-    val live = nowSeconds - heardAt <= SURVEY_MAX_PACKET_AGE_SECONDS
-    return live && rx_rssi != null && via_mqtt != true && isLora()
+    // A radio clock running ahead makes a queued packet look younger than it is, even negative.
+    val live = nowSeconds - heardAt in 0..SURVEY_MAX_PACKET_AGE_SECONDS
+    // Firmware that predates the field leaves it at TRANSPORT_INTERNAL on a LoRa reception.
+    val lora = isLora() || transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL
+    return live && rx_rssi != null && via_mqtt != true && lora
 }
 
 /** Whether the sender itself was heard, rather than a relay's copy. */

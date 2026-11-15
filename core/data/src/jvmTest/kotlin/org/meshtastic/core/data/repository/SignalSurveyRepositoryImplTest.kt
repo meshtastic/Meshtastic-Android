@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -143,10 +144,9 @@ class SignalSurveyRepositoryImplTest {
         delay(RECORDER_SETTLE)
     }
 
-    /** The blocker once the recorder has had time to react to the last change. */
-    private suspend fun settledBlocker(): SignalSurveyBlocker? {
-        delay(RECORDER_SETTLE)
-        return repository.blocker.value
+    /** Fails on timeout unless the blocker becomes [expected]. */
+    private suspend fun awaitBlocker(expected: SignalSurveyBlocker?) {
+        withTimeout(10.seconds) { repository.blocker.first { it == expected } }
     }
 
     /** Waits until the sessions hold [count] readings between them, and returns them newest first. */
@@ -308,10 +308,10 @@ class SignalSurveyRepositoryImplTest {
         service.setConnectionState(ConnectionState.Connected)
         location.value = PhoneLocationState(permissionGranted = false, providerEnabled = true)
         startRecording()
-        assertEquals(SignalSurveyBlocker.LOCATION_PERMISSION, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.LOCATION_PERMISSION)
 
         nodes.setOurNode(Node(num = 1, position = radioPosition(31.0, Position.LocSource.LOC_MANUAL)))
-        assertNull(settledBlocker())
+        awaitBlocker(null)
     }
 
     @Test
@@ -353,24 +353,49 @@ class SignalSurveyRepositoryImplTest {
     }
 
     @Test
+    fun `switching to another radio's database ends the survey without writing into it`() = runBlocking {
+        startSettled()
+        service.emitMeshPacket(heardNow())
+        awaitReadings(1)
+
+        db.switchToNewDatabase()
+        service.emitMeshPacket(heardNow())
+
+        withTimeout(10.seconds) { repository.recording.first { !it } }
+        assertTrue(repository.sessions.first().isEmpty())
+    }
+
+    @Test
+    fun `a location provider that fails ends the survey so it can be started again`() = runBlocking {
+        locationFlow = { flow { throw IllegalStateException("location request failed") } }
+        service.setConnectionState(ConnectionState.Connected)
+        repository.start()
+
+        withTimeout(10.seconds) { repository.recording.first { !it } }
+        locationFlow = { location }
+        startRecording()
+        assertTrue(repository.recording.value)
+    }
+
+    @Test
     fun `the blocker names the missing location piece and clears on stop`() = runBlocking {
         service.setConnectionState(ConnectionState.Connected)
         location.value = PhoneLocationState(permissionGranted = false, providerEnabled = true)
         startRecording()
-        assertEquals(SignalSurveyBlocker.LOCATION_PERMISSION, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.LOCATION_PERMISSION)
 
         location.value = PhoneLocationState(permissionGranted = true, providerEnabled = false)
-        assertEquals(SignalSurveyBlocker.LOCATION_OFF, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.LOCATION_OFF)
 
         location.value = PhoneLocationState(permissionGranted = true, providerEnabled = true)
-        assertEquals(SignalSurveyBlocker.NO_FIX, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.NO_FIX)
 
         fixNow()
-        assertNull(settledBlocker())
+        awaitBlocker(null)
 
         location.value = PhoneLocationState(permissionGranted = false, providerEnabled = true)
         repository.stop()
-        assertNull(settledBlocker())
+        awaitBlocker(null)
     }
 
     @Test
@@ -378,10 +403,10 @@ class SignalSurveyRepositoryImplTest {
         fixNow()
         startRecording()
 
-        assertEquals(SignalSurveyBlocker.NOT_CONNECTED, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.NOT_CONNECTED)
 
         service.setConnectionState(ConnectionState.Connected)
-        assertNull(settledBlocker())
+        awaitBlocker(null)
     }
 
     @Test
@@ -391,7 +416,7 @@ class SignalSurveyRepositoryImplTest {
             if (granted) location else flowOf(PhoneLocationState(permissionGranted = false, providerEnabled = false))
         }
         startSettled()
-        assertEquals(SignalSurveyBlocker.LOCATION_PERMISSION, settledBlocker())
+        awaitBlocker(SignalSurveyBlocker.LOCATION_PERMISSION)
 
         granted = true
         withTimeout(10.seconds) { repository.blocker.first { it == null } }

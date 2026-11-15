@@ -21,21 +21,34 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.repository.SignalSurveyRepository
 import org.meshtastic.core.ui.component.Quality
+import kotlin.math.pow
 
 /** What the map and the AR view show of the survey. Outlives both screens, so a choice holds across a tab switch. */
 @Single
-class SignalSurveyVisibility {
+class SignalSurveyVisibility(repository: SignalSurveyRepository, scope: ServiceScope) {
     /** The sessions drawn. */
     val sessionIds = MutableStateFlow<Set<Long>>(emptySet())
 
     /** Whether the map draws a heatmap rather than squares. */
     val heatmap = MutableStateFlow(false)
+
+    init {
+        // A session shows from the moment it starts. Held here, once, so a screen opened mid-recording cannot re-show
+        // a session the user has hidden.
+        scope.launch {
+            repository.activeSessionId.filterNotNull().collect { id -> sessionIds.update { it + id } }
+        }
+    }
 }
 
 /**
@@ -50,19 +63,35 @@ data class SurveyCellUi(
     val sessionId: Long = 0,
 )
 
-/** A point in one session, which stays put while the squares around it are rebuilt at another size. */
-data class SurveySpot(val sessionId: Long, val latitude: Double, val longitude: Double)
+/** A tapped square of one session, kept while the squares around it are rebuilt at another size. */
+data class SurveySpot(val sessionId: Long, val south: Double, val west: Double, val north: Double, val east: Double) {
+    val latitude: Double
+        get() = (south + north) * CENTER
+
+    val longitude: Double
+        get() = (west + east) * CENTER
+}
 
 private const val CENTER = 0.5
 
-internal fun SurveyCellUi.spot() =
-    SurveySpot(sessionId, (cell.south + cell.north) * CENTER, (cell.west + cell.east) * CENTER)
+internal fun SurveyCellUi.spot() = SurveySpot(sessionId, cell.south, cell.west, cell.north, cell.east)
 
-/** The square of [spot]'s session that holds it, at whatever size the squares are now. */
-internal fun List<SurveyCellUi>.containing(spot: SurveySpot): SurveyCellUi? = firstOrNull {
-    it.sessionId == spot.sessionId &&
-        spot.latitude in it.cell.south..it.cell.north &&
-        spot.longitude in it.cell.west..it.cell.east
+private val SurveyCellUi.centerLatitude: Double
+    get() = (cell.south + cell.north) * CENTER
+private val SurveyCellUi.centerLongitude: Double
+    get() = (cell.west + cell.east) * CENTER
+
+/**
+ * The square of [spot]'s session at whatever size the squares are now: the one holding the tapped square's center after
+ * zooming out, or after zooming in, the nearest smaller square inside it that holds readings.
+ */
+internal fun List<SurveyCellUi>.containing(spot: SurveySpot): SurveyCellUi? {
+    val own = filter { it.sessionId == spot.sessionId }
+    return own.firstOrNull {
+        spot.latitude in it.cell.south..it.cell.north && spot.longitude in it.cell.west..it.cell.east
+    }
+        ?: own.filter { it.centerLatitude in spot.south..spot.north && it.centerLongitude in spot.west..spot.east }
+            .minByOrNull { (it.centerLatitude - spot.latitude).pow(2) + (it.centerLongitude - spot.longitude).pow(2) }
 }
 
 /** The rated squares of every visible session, shared by the map and the AR view so the two cannot disagree. */

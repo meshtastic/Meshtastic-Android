@@ -52,6 +52,17 @@ class SignalSurveyTest {
     }
 
     @Test
+    fun `a packet stamped ahead of the phone is not live`() {
+        assertFalse(packet().isLiveLoraReception(now - 1))
+    }
+
+    @Test
+    fun `a reception from firmware that leaves the transport unset counts`() {
+        val unset = packet { it.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_INTERNAL }
+        assertTrue(unset.isLiveLoraReception(now))
+    }
+
+    @Test
     fun `a packet with no arrival time is not live`() {
         assertFalse(packet { it.rx_time = 0 }.isLiveLoraReception(now))
     }

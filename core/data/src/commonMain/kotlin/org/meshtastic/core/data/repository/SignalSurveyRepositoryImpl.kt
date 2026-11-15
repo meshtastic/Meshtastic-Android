@@ -39,6 +39,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.SignalSurveyLocalDataSource
+import org.meshtastic.core.data.datasource.SurveySessionHandle
 import org.meshtastic.core.database.entity.SignalSurveySessionEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
@@ -103,23 +104,24 @@ class SignalSurveyRepositoryImpl(
     private suspend fun record() {
         // The preset is kept with the session because an SNR reading only means something against it.
         val session = SignalSurveySessionEntity(startedAt = now(), modemPreset = radio.modemPresetName())
-        val sessionId = safeCatching { local.openSession(session) }.getOrNull()
-        if (sessionId == null) {
+        val handle = safeCatching { local.openSession(session) }.getOrNull()
+        if (handle == null) {
             _recording.value = false
             return
         }
-        _activeSessionId.value = sessionId
+        _activeSessionId.value = handle.id
         try {
-            log(sessionId)
+            // A failure ends the survey rather than leaving the switch on with nothing recording behind it.
+            safeCatching { log(handle) }.onFailure { _recording.value = false }
         } finally {
             _blocker.value = null
             _activeSessionId.value = null
-            withContext(NonCancellable) { safeCatching { local.closeSession(sessionId, endedAt = now()) } }
+            withContext(NonCancellable) { safeCatching { local.closeSession(handle, endedAt = now()) } }
         }
     }
 
     /** Stores a reading for each live reception until cancelled. */
-    private suspend fun log(sessionId: Long) = coroutineScope {
+    private suspend fun log(session: SurveySessionHandle) = coroutineScope {
         val location = locationStates().stateIn(this, SharingStarted.Eagerly, null)
         val radioFix = radio.ownFix.stateIn(this, SharingStarted.Eagerly, null)
         val connectedAt = MutableStateFlow<Long?>(null)
@@ -140,7 +142,10 @@ class SignalSurveyRepositoryImpl(
             val settled = connectedAt.value?.let { now - it >= CONNECT_SETTLE_MS } == true
             val fix = surveyFix(location.value?.location, radioFix.value, radio.isRemote, now)
             val sample = if (settled) surveySample(packet, fix, now) else null
-            if (sample != null) safeCatching { local.insert(sample.asEntity(sessionId)) }
+            // Switching radios swaps the database; the survey ends with the radio it was recording.
+            val kept =
+                sample == null || safeCatching { local.insert(session, sample.asEntity(session.id)) }.getOrDefault(true)
+            if (!kept) _recording.value = false
         }
     }
 

@@ -20,10 +20,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.SignalSampleEntity
 import org.meshtastic.core.database.entity.SignalSurveySessionEntity
 import org.meshtastic.core.database.entity.SignalSurveySessionRow
 import org.meshtastic.core.di.CoroutineDispatchers
+
+/** A session tied to the database that opened it, so its writes never reach another radio's database. */
+class SurveySessionHandle internal constructor(val id: Long, internal val db: MeshtasticDatabase)
 
 @Single
 class SignalSurveyLocalDataSource(
@@ -40,14 +44,20 @@ class SignalSurveyLocalDataSource(
     suspend fun samplesOnce(sessionId: Long): List<SignalSampleEntity> =
         withContext(dispatchers.io) { dbManager.withReadDb { it.signalSampleDao().getSamples(sessionId) } }
 
-    /** The new session's id, or null when the database is shutting down. */
-    suspend fun openSession(session: SignalSurveySessionEntity): Long? =
-        withContext(dispatchers.io) { dbManager.withDb { it.signalSampleDao().insertSession(session) } }
+    /** The new session, or null when the database is shutting down. */
+    suspend fun openSession(session: SignalSurveySessionEntity): SurveySessionHandle? = withContext(dispatchers.io) {
+        dbManager.withDb { db -> SurveySessionHandle(db.signalSampleDao().insertSession(session), db) }
+    }
 
-    /** Ends the session at [endedAt]. One that logged nothing is dropped, so the history holds only runs to show. */
-    suspend fun closeSession(sessionId: Long, endedAt: Long) {
+    /**
+     * Ends the session at [endedAt]. One that logged nothing is dropped, so the history holds only runs to show. Does
+     * nothing once another radio's database is active.
+     */
+    suspend fun closeSession(session: SurveySessionHandle, endedAt: Long) {
+        val sessionId = session.id
         withContext(dispatchers.io) {
             dbManager.withDb { db ->
+                if (db !== session.db) return@withDb
                 val dao = db.signalSampleDao()
                 if (dao.countSamples(sessionId) == 0) {
                     dao.deleteSession(sessionId)
@@ -58,9 +68,15 @@ class SignalSurveyLocalDataSource(
         }
     }
 
-    suspend fun insert(sample: SignalSampleEntity) {
-        withContext(dispatchers.io) { dbManager.withDb { it.signalSampleDao().insert(sample) } }
-    }
+    /** False, writing nothing, once [session]'s database is no longer the active one. */
+    suspend fun insert(session: SurveySessionHandle, sample: SignalSampleEntity): Boolean =
+        withContext(dispatchers.io) {
+            dbManager.withDb { db ->
+                val current = db === session.db
+                if (current) db.signalSampleDao().insert(sample)
+                current
+            }
+        } == true
 
     suspend fun deleteSession(sessionId: Long) {
         withContext(dispatchers.io) { dbManager.withDb { it.signalSampleDao().deleteSession(sessionId) } }

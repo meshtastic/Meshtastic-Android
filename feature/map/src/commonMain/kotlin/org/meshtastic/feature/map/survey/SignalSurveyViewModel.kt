@@ -22,7 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -110,13 +110,6 @@ class SignalSurveyViewModel(
         }
             .stateInWhileSubscribed(initialValue = SurveyLinks())
 
-    init {
-        // A session shows on the map from the moment it starts, and stays on after it stops.
-        viewModelScope.launch {
-            repository.activeSessionId.filterNotNull().collect { id -> visibility.sessionIds.update { it + id } }
-        }
-    }
-
     fun setRecording(recording: Boolean) = if (recording) repository.start() else repository.stop()
 
     fun setVisible(sessionId: Long, visible: Boolean) {
@@ -142,6 +135,16 @@ class SignalSurveyViewModel(
         viewModelScope.launch { repository.delete(sessionId) }
     }
 
-    suspend fun csv(sessionId: Long): ByteArray? =
-        repository.samplesOnce(sessionId).takeIf { it.isNotEmpty() }?.toSurveyCsv()?.encodeToByteArray()
+    /**
+     * The CSV of the session [sessionId] that started at [startedAtMillis]. The start time pins it to one radio: ids
+     * repeat across radios, and the radio can change while a file picker is open.
+     */
+    suspend fun csv(sessionId: Long, startedAtMillis: Long): ByteArray? {
+        val session = repository.sessions.first().firstOrNull { it.id == sessionId }
+        return if (session?.startedAtMillis != startedAtMillis) {
+            null
+        } else {
+            repository.samplesOnce(sessionId).takeIf { it.isNotEmpty() }?.toSurveyCsv()?.encodeToByteArray()
+        }
+    }
 }

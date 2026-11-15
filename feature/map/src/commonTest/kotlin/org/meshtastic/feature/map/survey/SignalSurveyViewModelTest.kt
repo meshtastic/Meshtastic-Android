@@ -17,12 +17,14 @@
 package org.meshtastic.feature.map.survey
 
 import app.cash.turbine.test
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.snrLimit
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -42,7 +44,7 @@ import kotlin.test.assertTrue
 class SignalSurveyViewModelTest {
 
     private val survey = FakeSignalSurveyRepository()
-    private val visibility = SignalSurveyVisibility()
+    private val visibility = SignalSurveyVisibility(survey, CoroutineScope(Dispatchers.Unconfined).asServiceScope())
 
     @BeforeTest
     fun setUp() {
@@ -160,6 +162,27 @@ class SignalSurveyViewModelTest {
     }
 
     @Test
+    fun `a tapped square zoomed into keeps the smaller square that holds its readings`() = runTest {
+        // Off the center of the large square it falls in.
+        survey.add(1, reading(30.0001, lon = -95.0001, snr = 5f))
+        visibility.sessionIds.value = setOf(1)
+        val viewModel = viewModel()
+        viewModel.setCamera(zoom = 11.0, latitude = 30.0)
+
+        viewModel.selectedCell.test {
+            assertNull(awaitItem())
+            viewModel.cells.test {
+                viewModel.selectCell(expectMostRecentItem().single().id)
+                viewModel.setCamera(zoom = 18.0, latitude = 30.0)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            val selected = expectMostRecentItem()
+            assertTrue(selected != null && selected.cell.north - selected.cell.south < 51 / 111_320.0)
+        }
+    }
+
+    @Test
     fun `a tapped square links to the nodes heard directly that share a position`() = runTest {
         val relayed = reading(30.0, snr = 5f).copy(fromNum = 9, direct = false)
         survey.add(
@@ -201,21 +224,36 @@ class SignalSurveyViewModelTest {
     }
 
     @Test
-    fun `the state lists sessions newest first with their visibility and the one recording`() = runTest {
+    fun `the state marks each session's visibility and the one recording`() = runTest {
         survey.add(1, reading(30.0, snr = 5f))
         survey.add(2, reading(30.0, snr = 5f), reading(30.1, snr = 5f))
+        survey.add(3, reading(30.0, snr = 5f))
         visibility.sessionIds.value = setOf(1)
         survey.recording.value = true
         survey.activeSessionId.value = 2
 
         viewModel().state.test {
-            val state = expectMostRecentItem()
-            assertEquals(listOf(2L, 1L), state.sessions.map { it.session.id })
-            assertEquals(listOf(true, false), state.sessions.map { it.recording })
-            assertTrue(state.sessions.all { it.visible })
+            val byId = expectMostRecentItem().let { state -> state.sessions.associateBy { it.session.id } to state }
+            val (sessions, state) = byId
+            assertEquals(setOf(2L), sessions.filterValues { it.recording }.keys)
+            // Session 2 is shown because it is recording; session 3 stays hidden.
+            assertEquals(setOf(1L, 2L), sessions.filterValues { it.visible }.keys)
             // While recording the count is the live session's own.
             assertEquals(2, state.readingCount)
         }
+    }
+
+    @Test
+    fun `a screen opened mid-recording leaves a hidden session hidden`() = runTest {
+        survey.add(7, reading(30.0, snr = 5f))
+        survey.activeSessionId.value = 7
+        viewModel()
+        viewModel().setVisible(7, false)
+
+        // The AR view opens its own view model while the survey keeps recording.
+        viewModel()
+
+        assertFalse(7 in visibility.sessionIds.value)
     }
 
     @Test
@@ -232,11 +270,20 @@ class SignalSurveyViewModelTest {
         survey.add(2)
         val viewModel = viewModel()
 
-        val lines = viewModel.csv(1)?.decodeToString()?.trim()?.lines().orEmpty()
+        // The fake starts each session at its id.
+        val lines = viewModel.csv(1, startedAtMillis = 1)?.decodeToString()?.trim()?.lines().orEmpty()
 
         assertEquals(SURVEY_CSV_HEADER, lines.first())
-        assertEquals(3, lines.size)
-        assertNull(viewModel.csv(2))
+        assertEquals(listOf(30.0, 30.1), lines.drop(1).map { it.split(",")[1].toDouble() })
+        assertNull(viewModel.csv(2, startedAtMillis = 2))
+    }
+
+    @Test
+    fun `an export whose session start no longer matches writes nothing`() = runTest {
+        survey.add(1, reading(30.0, snr = 5f))
+
+        // Another radio's database can reuse the id for a different session.
+        assertNull(viewModel().csv(1, startedAtMillis = 999))
     }
 
     @Test
@@ -253,7 +300,8 @@ class SignalSurveyViewModelTest {
                 assertTrue(awaitItem().isEmpty())
 
                 viewModel.setHeatmap(true)
-                assertEquals(2, expectMostRecentItem().size)
+                // Two readings share one street square, so it adds one point, not two.
+                assertEquals(listOf(2, 1), expectMostRecentItem().sortedBy { it.cell.south }.map { it.cell.samples })
             }
             assertTrue(expectMostRecentItem().isEmpty())
         }

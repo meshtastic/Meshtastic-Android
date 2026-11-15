@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.hud
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -126,7 +128,8 @@ class MeshHudViewModelTest {
     private val snapshots = FakeTracerouteSnapshotRepository()
     private val packetRepository: PacketRepository = mock()
     private val survey = FakeSignalSurveyRepository()
-    private val surveyVisibility = SignalSurveyVisibility()
+    private val surveyVisibility =
+        SignalSurveyVisibility(survey, CoroutineScope(Dispatchers.Unconfined).asServiceScope())
     private lateinit var viewModel: MeshHudViewModel
 
     @BeforeTest
