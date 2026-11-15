@@ -257,9 +257,7 @@ internal fun environmentAxisRange(
 
     EnvironmentChartGroup.PRESSURE -> pressureAxisRange(dataMin, dataMax)
 
-    // An autoscaled series with a single value (such as all zeros) gets a unit span so the axis never has zero
-    // height.
-    else -> if (dataMax <= dataMin) dataMin to (dataMin + 1.0) else null
+    else -> null
 }
 
 private const val WHOLE_LABEL_MIN_SPAN = 8.0
