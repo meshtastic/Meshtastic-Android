@@ -19,8 +19,10 @@ package org.meshtastic.core.data.datasource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,8 +85,12 @@ class NodeDeletionDatabaseSwitchTest {
     }
 
     @AfterTest
-    fun tearDown() {
+    fun tearDown() = runTest(testDispatcher) {
+        val repositoryScope = lifecycleOwner.lifecycle.coroutineScope
         lifecycleOwner.moveTo(Lifecycle.Event.ON_DESTROY)
+        // The repository's collectors finish cancelling on Room's threads. Wait for them, or one resumes on a main
+        // dispatcher that is already reset and its failure lands in whichever test runs next.
+        repositoryScope.coroutineContext[Job]?.join()
         dbA.close()
         dbB.close()
         Dispatchers.resetMain()

@@ -32,8 +32,8 @@ import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 
 /**
- * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. All platforms use Room KMP's
- * single-connection pool to avoid the reader-pool permit wedge; see [MeshtasticDatabase.configureCommon].
+ * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. The pool and query context are set
+ * for every platform in [MeshtasticDatabase.configureCommon].
  */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
     val dbFile = ContextServices.app.getDatabasePath(dbName)

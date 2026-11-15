@@ -1220,9 +1220,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * Closes and removes a cached database by name. Safe to call even if the database was already closed or not in the
      * cache. Does NOT delete the underlying file — the database can be re-opened on next access.
      *
-     * Room KMP is configured with a single-connection pool on every platform and has no common auto-close timeout, so
-     * an idle cached database keeps that connection open until explicitly closed. This method is the primary mechanism
-     * for releasing it when a database is no longer the active target. The caller must hold [mutex].
+     * Room KMP has no common auto-close timeout, so an idle cached database keeps its connections open until explicitly
+     * closed. This method is the primary mechanism for releasing them when a database is no longer the active target.
+     * The caller must hold [mutex].
      */
     @Suppress("TooGenericExceptionCaught")
     protected open suspend fun closeCachedDatabase(dbName: String) {
