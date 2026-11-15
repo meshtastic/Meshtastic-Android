@@ -35,20 +35,24 @@ internal fun telemetrySnapshot(node: Node, history: List<Telemetry>): TelemetryS
             airQuality = node.airQualityMetrics.takeIf { node.hasAirQualityMetrics },
             power = node.powerMetrics.takeIf { node.hasPowerMetrics },
         )
+
     // A log row dates a group only when it holds the node DB's values, so a log that has fallen behind (logging
     // turned off, or the row not yet written) never dates newer values with an older time.
-    fun timeOf(group: TelemetryGroup): Int? {
-        if (group.readings.none { live.hasValue(it) }) return null
-        val row = history.firstOrNull { group.carriedBy(it) } ?: return null
-        val logged = TelemetrySnapshot(row.environment_metrics, row.air_quality_metrics, row.power_metrics)
-        return row.time.takeIf { time -> time > 0 && group.readings.all { logged.value(it) == live.value(it) } }
-    }
+    fun timeOf(group: TelemetryGroup): Int? = history
+        .firstOrNull { group.carriedBy(it) }
+        ?.takeIf { group.readings.any { reading -> live.hasValue(reading) } }
+        ?.let { row ->
+            val logged = TelemetrySnapshot(row.environment_metrics, row.air_quality_metrics, row.power_metrics)
+            row.time.takeIf { time -> time > 0 && group.readings.all { logged.value(it) == live.value(it) } }
+        }
     return live.copy(time = TelemetryGroup.entries.mapNotNull(::timeOf).maxOrNull())
 }
 
 /** Every reading any of [history]'s rows carries, so a reading the node has stopped sending keeps its tile. */
 internal fun everReported(history: List<Telemetry>): Set<TelemetryReading> = history
-    .flatMap { row -> TelemetrySnapshot(row.environment_metrics, row.air_quality_metrics, row.power_metrics).reported }
+    .flatMap { row ->
+        TelemetrySnapshot(row.environment_metrics, row.air_quality_metrics, row.power_metrics).reported
+    }
     .toSet()
 
 /**
@@ -99,7 +103,9 @@ internal sealed class TelemetryReading(val id: String) {
     companion object {
         const val POWER_CHANNELS = 8
 
-        val environment: List<TelemetryReading> =
+        // Lazy: the subclasses extend this class, so touching one first would otherwise build these lists while its
+        // own instance is still null.
+        val environment: List<TelemetryReading> by lazy {
             listOf(
                 Temperature,
                 Humidity,
@@ -115,14 +121,16 @@ internal sealed class TelemetryReading(val id: String) {
                 Radiation,
                 Weight,
             )
-        val airQuality: List<TelemetryReading> = listOf(Pm1, Pm25, Pm10, Co2)
-        val power: List<TelemetryReading> =
+        }
+        val airQuality: List<TelemetryReading> by lazy { listOf(Pm1, Pm25, Pm10, Co2) }
+        val power: List<TelemetryReading> by lazy {
             (0 until POWER_CHANNELS).flatMap { listOf(PowerVoltage(it), PowerCurrent(it)) }
+        }
 
         /** Every reading in widget order: environment, air quality, then voltage and current for each channel. */
-        val all: List<TelemetryReading> = environment + airQuality + power
+        val all: List<TelemetryReading> by lazy { environment + airQuality + power }
 
-        private val byId = all.associateBy { it.id }
+        private val byId by lazy { all.associateBy { it.id } }
 
         fun fromId(id: String): TelemetryReading? = byId[id]
     }
@@ -183,41 +191,49 @@ internal data class TelemetrySnapshot(
 
     /** The dew point in °C, from the same temperature and humidity the tiles show. */
     fun dewPoint(): Float? {
-        val temperature = environment?.temperature.finite() ?: return null
-        val humidity = environment?.relative_humidity.finite()?.takeIf { it > 0f } ?: return null
-        return UnitConversions.calculateDewPoint(temperature, humidity).finite()
+        val temperature = environment?.temperature.finite()
+        val humidity = environment?.relative_humidity.finite()?.takeIf { it > 0f }
+        return if (temperature == null || humidity == null) {
+            null
+        } else {
+            UnitConversions.calculateDewPoint(temperature, humidity).finite()
+        }
     }
 
     // PowerMetrics ch4 to ch8 are deprecated in the proto but still sent by older firmware, as node details reads them.
     @Suppress("DEPRECATION", "MagicNumber")
-    fun powerVoltage(channel: Int): Float? = power?.let { pm ->
-        when (channel) {
-            0 -> pm.ch1_voltage
-            1 -> pm.ch2_voltage
-            2 -> pm.ch3_voltage
-            3 -> pm.ch4_voltage
-            4 -> pm.ch5_voltage
-            5 -> pm.ch6_voltage
-            6 -> pm.ch7_voltage
-            7 -> pm.ch8_voltage
-            else -> null
+    fun powerVoltage(channel: Int): Float? = power
+        ?.let { pm ->
+            when (channel) {
+                0 -> pm.ch1_voltage
+                1 -> pm.ch2_voltage
+                2 -> pm.ch3_voltage
+                3 -> pm.ch4_voltage
+                4 -> pm.ch5_voltage
+                5 -> pm.ch6_voltage
+                6 -> pm.ch7_voltage
+                7 -> pm.ch8_voltage
+                else -> null
+            }
         }
-    }.finite()
+        .finite()
 
     @Suppress("DEPRECATION", "MagicNumber")
-    fun powerCurrent(channel: Int): Float? = power?.let { pm ->
-        when (channel) {
-            0 -> pm.ch1_current
-            1 -> pm.ch2_current
-            2 -> pm.ch3_current
-            3 -> pm.ch4_current
-            4 -> pm.ch5_current
-            5 -> pm.ch6_current
-            6 -> pm.ch7_current
-            7 -> pm.ch8_current
-            else -> null
+    fun powerCurrent(channel: Int): Float? = power
+        ?.let { pm ->
+            when (channel) {
+                0 -> pm.ch1_current
+                1 -> pm.ch2_current
+                2 -> pm.ch3_current
+                3 -> pm.ch4_current
+                4 -> pm.ch5_current
+                5 -> pm.ch6_current
+                6 -> pm.ch7_current
+                7 -> pm.ch8_current
+                else -> null
+            }
         }
-    }.finite()
+        .finite()
 }
 
 internal fun Float?.finite(): Float? = this?.takeIf { it.isFinite() }

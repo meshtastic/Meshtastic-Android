@@ -25,6 +25,7 @@ import android.os.StrictMode
 import androidx.annotation.RequiresApi
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -64,7 +65,6 @@ import org.meshtastic.feature.discovery.DiscoveryScanEngine
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
 import org.meshtastic.feature.widget.TelemetryWidgetReceiver
 import kotlin.reflect.KClass
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -153,12 +153,17 @@ open class MeshUtilApplication :
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             applicationScope.launch {
-                suspend fun pushPreview(receiver: KClass<out GlanceAppWidgetReceiver> = LocalStatsWidgetReceiver::class) {
+                suspend fun pushPreview(
+                    receiver: KClass<out GlanceAppWidgetReceiver> = LocalStatsWidgetReceiver::class,
+                ) {
                     try {
                         Logger.i { "Pushing generated widget preview..." }
                         val result =
                             GlanceAppWidgetManager(this@MeshUtilApplication)
-                                .setWidgetPreviews(receiver, intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN))
+                                .setWidgetPreviews(
+                                    receiver,
+                                    intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
+                                )
                         Logger.i { "setWidgetPreviews result: $result" }
                     } catch (e: CancellationException) {
                         throw e

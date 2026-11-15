@@ -103,12 +103,6 @@ internal object WidgetSizes {
     val telemetryPreviewSizeMode: PreviewSizeMode =
         SizeMode.Responsive(setOf(TELEMETRY_ONE, TELEMETRY_ROW, TELEMETRY_GRID, PIXEL_2X2, EMULATOR_2X2))
 
-    fun telemetryLayout(size: DpSize): TelemetryLayout = when {
-        size.width < NARROW_WIDTH -> TelemetryLayout.ONE
-        size.height < TWO_ROWS_HEIGHT -> TelemetryLayout.ROW
-        else -> TelemetryLayout.GRID
-    }
-
     fun isOneRow(size: DpSize): Boolean = size.height < COMPACT_HEIGHT
 
     fun isCompact(size: DpSize): Boolean = size.height < TWO_ROWS_HEIGHT

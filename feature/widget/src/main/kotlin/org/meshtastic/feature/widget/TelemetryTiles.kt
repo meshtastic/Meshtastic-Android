@@ -74,18 +74,6 @@ import org.meshtastic.core.resources.wind
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.getIaq
 
-/**
- * One tile as the widget draws it. [value] is null for a reading the node has stopped sending, which shows a dash.
- * [detail] is the tile's own second line, with a dot in [band] when the line names a band.
- */
-internal data class TelemetryTile(
-    @DrawableRes val icon: Int,
-    val label: String,
-    val value: String?,
-    val detail: String? = null,
-    val band: Color? = null,
-)
-
 /** Shown in place of a value the node has stopped sending; the same mark the app uses for a missing temperature. */
 internal const val MISSING_VALUE = "--"
 
@@ -96,8 +84,8 @@ internal const val MISSING_VALUE = "--"
 private const val LOW_PRESSURE_HPA = 1009.144f
 
 /**
- * Formats [reading] the way the node details tiles do: the same labels, locale units and precision (meshtastic/design#53
- * and #99), with temperature and pressure as whole numbers and pressure always in hPa.
+ * Formats [reading] the way the node details tiles do: the same labels, locale units and precision
+ * (meshtastic/design#53 and #99), with temperature and pressure as whole numbers and pressure always in hPa.
  */
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
@@ -110,7 +98,11 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
     val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
     return when (reading) {
         TelemetryReading.Temperature ->
-            tile(R.drawable.widget_ic_thermostat, Res.string.temperature, env?.temperature.finite()?.toTempString(fahrenheit))
+            tile(
+                R.drawable.widget_ic_thermostat,
+                Res.string.temperature,
+                env?.temperature.finite()?.toTempString(fahrenheit),
+            )
 
         TelemetryReading.Humidity ->
             tile(
@@ -126,7 +118,11 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
                 Res.string.pressure,
                 hpa?.let { "${NumberFormatter.format(it, 0)} hPa" },
                 detail =
-                hpa?.let { stringResource(if (it <= LOW_PRESSURE_HPA) Res.string.pressure_low else Res.string.pressure_high) },
+                hpa?.let {
+                    stringResource(
+                        if (it <= LOW_PRESSURE_HPA) Res.string.pressure_low else Res.string.pressure_high,
+                    )
+                },
             )
         }
 
@@ -161,9 +157,13 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
 
         TelemetryReading.Wind -> {
             val direction = env?.wind_direction?.let { cardinal(it) }
-            val gust = env?.wind_gust.finite()?.takeIf { it > 0f }?.let {
-                stringResource(Res.string.widget_telemetry_gust, MetricFormatter.windSpeed(it, imperial))
-            }
+            val gust =
+                env?.wind_gust
+                    .finite()
+                    ?.takeIf { it > 0f }
+                    ?.let {
+                        stringResource(Res.string.widget_telemetry_gust, MetricFormatter.windSpeed(it, imperial))
+                    }
             tile(
                 R.drawable.widget_ic_navigation,
                 Res.string.wind,
@@ -187,7 +187,11 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
             )
 
         TelemetryReading.SoilMoisture ->
-            tile(R.drawable.widget_ic_soil_moisture, Res.string.soil_moisture, env?.soil_moisture.present()?.let { "$it%" })
+            tile(
+                R.drawable.widget_ic_soil_moisture,
+                Res.string.soil_moisture,
+                env?.soil_moisture.present()?.let { "$it%" },
+            )
 
         TelemetryReading.Radiation ->
             tile(
@@ -197,13 +201,19 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
             )
 
         TelemetryReading.Weight ->
-            tile(R.drawable.widget_ic_scale, Res.string.weight, env?.weight.finite()?.let { MetricFormatter.weight(it, imperial) })
+            tile(
+                R.drawable.widget_ic_scale,
+                Res.string.weight,
+                env?.weight.finite()?.let { MetricFormatter.weight(it, imperial) },
+            )
 
         TelemetryReading.Pm1 -> tile(R.drawable.widget_ic_air, Res.string.pm1_0, aq?.pm10_standard?.let { "$it $ugm3" })
 
-        TelemetryReading.Pm25 -> tile(R.drawable.widget_ic_air, Res.string.pm2_5, aq?.pm25_standard?.let { "$it $ugm3" })
+        TelemetryReading.Pm25 ->
+            tile(R.drawable.widget_ic_air, Res.string.pm2_5, aq?.pm25_standard?.let { "$it $ugm3" })
 
-        TelemetryReading.Pm10 -> tile(R.drawable.widget_ic_air, Res.string.pm10, aq?.pm100_standard?.let { "$it $ugm3" })
+        TelemetryReading.Pm10 ->
+            tile(R.drawable.widget_ic_air, Res.string.pm10, aq?.pm100_standard?.let { "$it $ugm3" })
 
         TelemetryReading.Co2 -> {
             val co2 = aq?.co2
@@ -257,7 +267,8 @@ private val CHANNEL_NAMES =
 /** The channel as node details names it: the node's own label, or Channel N when it has none. */
 @Composable
 private fun channelName(channel: Int, labels: List<String>): String? =
-    labels.getOrNull(channel)?.takeIf { it.isNotBlank() } ?: CHANNEL_NAMES.getOrNull(channel)?.let { stringResource(it) }
+    labels.getOrNull(channel)?.takeIf { it.isNotBlank() }
+        ?: CHANNEL_NAMES.getOrNull(channel)?.let { stringResource(it) }
 
 private val CARDINALS =
     listOf(
@@ -289,3 +300,15 @@ private fun Co2Severity.labelRes(): StringResource = when (this) {
     Co2Severity.UNSAFE -> Res.string.co2_level_unsafe
     Co2Severity.EVACUATE -> Res.string.co2_level_evacuate
 }
+
+/**
+ * One tile as the widget draws it. [value] is null for a reading the node has stopped sending, which shows a dash.
+ * [detail] is the tile's own second line, with a dot in [band] when the line names a band.
+ */
+internal data class TelemetryTile(
+    @DrawableRes val icon: Int,
+    val label: String,
+    val value: String?,
+    val detail: String? = null,
+    val band: Color? = null,
+)

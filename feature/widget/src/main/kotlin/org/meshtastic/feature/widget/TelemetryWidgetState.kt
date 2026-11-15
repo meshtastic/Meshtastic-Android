@@ -94,16 +94,18 @@ internal fun telemetryWidgetState(
     val known =
         when {
             node != null -> TelemetryLastKnown.of(node, telemetrySnapshot(node, history))
-            // An empty node DB means no radio's DB is open (disconnected, or no device selected), not that the node left.
+
+            // An empty node DB means no radio's DB is open (disconnected, or no device selected), not that the node
+            // left.
             nodeNum != null && inputs.nodes.isEmpty() -> lastKnown?.takeIf { it.nodeNum == nodeNum }
+
             else -> null
         } ?: return TelemetryWidgetState.NodeNotFound
     val reported = seen + everReported(history) + known.snapshot.reported
     val updatedAt = known.snapshot.time
     val threshold = now - STALE_AFTER.inWholeSeconds
     // Without a logged time the node's last heard is an upper bound: when even that is old, so is every reading.
-    val isStale =
-        if (updatedAt != null) updatedAt < threshold else known.lastHeard > 0 && known.lastHeard < threshold
+    val isStale = if (updatedAt != null) updatedAt < threshold else known.lastHeard > 0 && known.lastHeard < threshold
     return TelemetryWidgetState.Showing(
         nodeNum = known.nodeNum,
         shortName = known.shortName,
@@ -121,8 +123,12 @@ internal fun telemetryWidgetState(
 /** The nodes the picker offers: those that have reported any telemetry this widget shows, ours first, then newest. */
 internal fun telemetryCandidates(nodes: Collection<Node>, ourNodeNum: Int?): List<Node> = nodes
     .filter { !it.isIgnored && (it.hasEnvironmentMetrics || it.hasAirQualityMetrics || it.hasPowerMetrics) }
-    .filter { TelemetrySnapshot(it.environmentMetrics, it.airQualityMetrics, it.powerMetrics).reported.isNotEmpty() }
-    .sortedWith(compareByDescending<Node> { it.num == ourNodeNum }.thenByDescending { it.lastHeard }.thenBy { it.num })
+    .filter {
+        TelemetrySnapshot(it.environmentMetrics, it.airQualityMetrics, it.powerMetrics).reported.isNotEmpty()
+    }
+    .sortedWith(
+        compareByDescending<Node> { it.num == ourNodeNum }.thenByDescending { it.lastHeard }.thenBy { it.num },
+    )
 
 /** The node a new widget starts on: ours when it reports anything this widget shows. */
 internal fun defaultTelemetryNode(nodes: Collection<Node>, ourNodeNum: Int?): Node? =
@@ -200,8 +206,14 @@ internal fun MutablePreferences.storeLastKnown(known: TelemetryLastKnown) {
     this[LAST_FOREGROUND_KEY] = known.colors.first
     this[LAST_BACKGROUND_KEY] = known.colors.second
     this[LAST_LABELS_KEY] = known.channelLabels.joinToString(LABEL_SEPARATOR)
-    putOrRemove(LAST_ENVIRONMENT_KEY, known.snapshot.environment?.let { EnvironmentMetrics.ADAPTER.encodeByteString(it).base64() })
-    putOrRemove(LAST_AIR_QUALITY_KEY, known.snapshot.airQuality?.let { AirQualityMetrics.ADAPTER.encodeByteString(it).base64() })
+    putOrRemove(
+        LAST_ENVIRONMENT_KEY,
+        known.snapshot.environment?.let { EnvironmentMetrics.ADAPTER.encodeByteString(it).base64() },
+    )
+    putOrRemove(
+        LAST_AIR_QUALITY_KEY,
+        known.snapshot.airQuality?.let { AirQualityMetrics.ADAPTER.encodeByteString(it).base64() },
+    )
     putOrRemove(LAST_POWER_KEY, known.snapshot.power?.let { PowerMetrics.ADAPTER.encodeByteString(it).base64() })
     putOrRemove(LAST_TIME_KEY, known.snapshot.time)
     this[LAST_HEARD_KEY] = known.lastHeard

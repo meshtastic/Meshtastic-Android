@@ -160,26 +160,27 @@ class TelemetryWidget :
         WidgetResourceEnvironment {
             GlanceTheme {
                 Scaffold(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
-                    Column(modifier = GlanceModifier.fillMaxSize().padding(vertical = 6.dp)) {
-                        if (state == TelemetryWidgetState.NodeNotFound && !oneRow) {
-                            WidgetHeader(
-                                title = stringResource(Res.string.widget_telemetry_title),
-                                compact = WidgetSizes.isCompact(size),
-                            )
-                            Spacer(GlanceModifier.height(4.dp))
-                        }
-                        Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-                            when (state) {
-                                TelemetryWidgetState.NodeNotFound ->
+                    when (state) {
+                        TelemetryWidgetState.NodeNotFound ->
+                            Column(modifier = GlanceModifier.fillMaxSize().padding(vertical = 6.dp)) {
+                                if (!oneRow) {
+                                    WidgetHeader(
+                                        title = stringResource(Res.string.widget_telemetry_title),
+                                        compact = WidgetSizes.isCompact(size),
+                                    )
+                                    Spacer(GlanceModifier.height(4.dp))
+                                }
+                                Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
                                     StatusBody(
                                         text = stringResource(Res.string.widget_telemetry_not_found),
                                         connecting = false,
                                         oneRow = oneRow,
                                     )
-
-                                is TelemetryWidgetState.Showing -> TelemetryContent(state, storedPage)
+                                }
                             }
-                        }
+
+                        is TelemetryWidgetState.Showing ->
+                            TelemetryContent(state, storedPage, GlanceModifier.fillMaxSize().padding(vertical = 6.dp))
                     }
                 }
             }

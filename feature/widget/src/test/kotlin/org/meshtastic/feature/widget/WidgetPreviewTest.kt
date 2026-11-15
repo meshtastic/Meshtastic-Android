@@ -60,7 +60,7 @@ class WidgetPreviewTest {
     @Test
     fun `the telemetry picker preview composes without a glance id`() = runTest {
         val views = TelemetryWidget().composeForPreview(context, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-        assertContains(texts(views), "BCS1")
+        assertContains(texts(views), "21°C")
     }
 
     @Test

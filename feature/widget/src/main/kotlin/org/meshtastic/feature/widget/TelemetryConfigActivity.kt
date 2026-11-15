@@ -47,7 +47,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -132,7 +131,9 @@ class TelemetryConfigActivity :
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
                 // One snapshot: a live list re-sorts under the user's finger on a busy mesh.
                 val setup by produceState<TelemetrySetup?>(null) { value = loadSetup(appWidgetId) }
-                setup?.let { TelemetryConfigScreen(it, dataSource, onSave = { node, hidden -> save(appWidgetId, node, hidden) }) }
+                setup?.let {
+                    TelemetryConfigScreen(it, dataSource, onSave = { node, hidden -> save(appWidgetId, node, hidden) })
+                }
             }
         }
     }
@@ -140,12 +141,11 @@ class TelemetryConfigActivity :
     private suspend fun loadSetup(appWidgetId: Int): TelemetrySetup {
         var inputs = dataSource.currentInputs()
         if (inputs.nodes.isEmpty()) inputs = dataSource.checkedInputs.first { it.nodes.isNotEmpty() }
-        val prefs =
-            runCatching {
-                val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
-                getAppWidgetState<Preferences>(this, PreferencesGlanceStateDefinition, glanceId)
-            }
-                .getOrNull()
+        val prefs = runCatching {
+            val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
+            getAppWidgetState<Preferences>(this, PreferencesGlanceStateDefinition, glanceId)
+        }
+            .getOrNull()
         val current = prefs?.get(TELEMETRY_NODE_NUM_KEY)?.let { inputs.nodes[it] }
         return TelemetrySetup(
             inputs = inputs,
@@ -219,28 +219,12 @@ internal fun TelemetryConfigScreen(
                     stringResource(Res.string.widget_telemetry_readings_hint),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    if (state == null) return@LazyColumn
-                    items(state.readings, key = { it.id }) { reading ->
-                        val tile = telemetryTile(reading, state)
-                        val shown = reading.id !in hiddenIds
-                        ListItem(
-                            modifier =
-                            Modifier.clickable { hiddenIds = if (shown) hiddenIds + reading.id else hiddenIds - reading.id },
-                            leadingContent = {
-                                Icon(painterResource(tile.icon), contentDescription = null, modifier = Modifier.size(24.dp))
-                            },
-                            headlineContent = { Text(tile.label) },
-                            supportingContent = { Text(tile.value ?: MISSING_VALUE) },
-                            trailingContent = {
-                                Switch(
-                                    checked = shown,
-                                    onCheckedChange = { on -> hiddenIds = if (on) hiddenIds - reading.id else hiddenIds + reading.id },
-                                )
-                            },
-                        )
-                    }
-                }
+                ReadingList(
+                    state = state,
+                    hiddenIds = hiddenIds,
+                    onToggle = { id, shown -> hiddenIds = if (shown) hiddenIds - id else hiddenIds + id },
+                    modifier = Modifier.weight(1f),
+                )
                 Button(
                     onClick = { onSave(node.num, hiddenIds.mapNotNull(TelemetryReading::fromId).toSet()) },
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -248,6 +232,46 @@ internal fun TelemetryConfigScreen(
                     Text(stringResource(Res.string.save))
                 }
             }
+        }
+    }
+}
+
+/** Every reading the node has reported, each with a switch; off hides it from the widget. */
+@Composable
+private fun ReadingList(
+    state: TelemetryWidgetState.Showing?,
+    hiddenIds: Set<String>,
+    onToggle: (id: String, shown: Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier) {
+        if (state == null) return@LazyColumn
+        items(state.readings, key = { it.id }) { reading ->
+            val tile = telemetryTile(reading, state)
+            val shown = reading.id !in hiddenIds
+            ListItem(
+                modifier =
+                Modifier.clickable {
+                    onToggle(reading.id, !shown)
+                },
+                leadingContent = {
+                    Icon(
+                        painterResource(tile.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                headlineContent = { Text(tile.label) },
+                supportingContent = { Text(tile.value ?: MISSING_VALUE) },
+                trailingContent = {
+                    Switch(
+                        checked = shown,
+                        onCheckedChange = { on ->
+                            onToggle(reading.id, on)
+                        },
+                    )
+                },
+            )
         }
     }
 }
@@ -261,22 +285,28 @@ private fun NodeList(nodes: List<Node>, onPick: (Node) -> Unit) {
             supportingText = stringResource(Res.string.widget_telemetry_no_nodes_hint),
             modifier = Modifier.fillMaxSize(),
         )
-        return
-    }
-    Text(
-        stringResource(Res.string.widget_telemetry_choose),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    )
-    LazyColumn {
-        items(nodes, key = { it.num }) { node ->
-            ListItem(
-                modifier = Modifier.clickable { onPick(node) },
-                leadingContent = { NodeChip(node = node) },
-                headlineContent = {
-                    Text(node.effectiveLongName.ifEmpty { node.user.id }, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
-                supportingContent = { Text(formatAgo(node.lastHeard)) },
-            )
+    } else {
+        LazyColumn {
+            item {
+                Text(
+                    stringResource(Res.string.widget_telemetry_choose),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+            items(nodes, key = { it.num }) { node ->
+                ListItem(
+                    modifier = Modifier.clickable { onPick(node) },
+                    leadingContent = { NodeChip(node = node) },
+                    headlineContent = {
+                        Text(
+                            node.effectiveLongName.ifEmpty { node.user.id },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    supportingContent = { Text(formatAgo(node.lastHeard)) },
+                )
+            }
         }
     }
 }

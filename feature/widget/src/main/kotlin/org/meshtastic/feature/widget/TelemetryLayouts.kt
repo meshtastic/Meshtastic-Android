@@ -18,6 +18,7 @@ package org.meshtastic.feature.widget
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,6 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
-import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
@@ -60,46 +60,51 @@ import org.meshtastic.core.resources.widget_telemetry_stale
 import org.meshtastic.core.resources.widget_telemetry_updated
 import org.meshtastic.core.ui.util.formatAgo
 
-internal enum class TelemetryLayout {
-    ONE,
-    ROW,
-    GRID,
-}
-
 /** Readings on one page of the grid. */
 internal const val TELEMETRY_PAGE_SIZE = 4
 private const val GRID_COLUMNS = 2
 
-internal fun telemetryPageCount(readings: Int): Int = maxOf(1, (readings + TELEMETRY_PAGE_SIZE - 1) / TELEMETRY_PAGE_SIZE)
+internal fun telemetryPageCount(readings: Int): Int =
+    maxOf(1, (readings + TELEMETRY_PAGE_SIZE - 1) / TELEMETRY_PAGE_SIZE)
 
 @Composable
-internal fun TelemetryContent(state: TelemetryWidgetState.Showing, storedPage: Int) {
+internal fun TelemetryContent(
+    state: TelemetryWidgetState.Showing,
+    storedPage: Int,
+    modifier: GlanceModifier = GlanceModifier,
+) {
     val size = LocalSize.current
     val oneRow = WidgetSizes.isOneRow(size)
-    val layout = WidgetSizes.telemetryLayout(size)
+    val layout = telemetryLayout(size)
     val tiles = state.readings.map { it to telemetryTile(it, state) }
-    Column(modifier = GlanceModifier.fillMaxSize()) {
+    // Glance allows ten levels of nested views, so the body sits directly in this column, weighted, with no wrapper.
+    Column(modifier = modifier) {
         if (layout == TelemetryLayout.GRID || (layout == TelemetryLayout.ONE && !oneRow)) {
             WidgetNodeChip(shortName = state.shortName, colors = state.colors)
             Spacer(GlanceModifier.height(6.dp))
         }
-        Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-            when {
-                tiles.isEmpty() ->
-                    StatusBody(stringResource(Res.string.widget_telemetry_no_readings), connecting = false, oneRow = oneRow)
+        val body = GlanceModifier.fillMaxWidth().defaultWeight()
+        when {
+            tiles.isEmpty() ->
+                Box(modifier = body) {
+                    StatusBody(
+                        stringResource(Res.string.widget_telemetry_no_readings),
+                        connecting = false,
+                        oneRow = oneRow,
+                    )
+                }
 
-                layout == TelemetryLayout.ONE -> TileView(tiles.first().second, compact = oneRow, GlanceModifier.fillMaxSize())
+            layout == TelemetryLayout.ONE -> TileView(tiles.first().second, compact = oneRow, body)
 
-                layout == TelemetryLayout.ROW ->
-                    Row(modifier = GlanceModifier.fillMaxSize()) {
-                        tiles.take(TELEMETRY_PAGE_SIZE).forEachIndexed { index, (_, tile) ->
-                            if (index > 0) Spacer(GlanceModifier.width(TILE_GAP))
-                            TileView(tile, compact = oneRow, GlanceModifier.defaultWeight().fillMaxHeight())
-                        }
+            layout == TelemetryLayout.ROW ->
+                Row(modifier = body) {
+                    tiles.take(TELEMETRY_PAGE_SIZE).forEachIndexed { index, (_, tile) ->
+                        if (index > 0) Spacer(GlanceModifier.width(TILE_GAP))
+                        TileView(tile, compact = oneRow, GlanceModifier.defaultWeight().fillMaxHeight())
                     }
+                }
 
-                else -> Grid(tiles.map { it.second }, page(storedPage, tiles.size))
-            }
+            else -> Grid(tiles.map { it.second }, page(storedPage, tiles.size), body)
         }
         Spacer(GlanceModifier.height(4.dp))
         Footer(
@@ -111,14 +116,16 @@ internal fun TelemetryContent(state: TelemetryWidgetState.Showing, storedPage: I
     }
 }
 
-/** The stored page wrapped to the pages there are now, so hiding readings never leaves the widget past its last page. */
+/**
+ * The stored page wrapped to the pages there are now, so hiding readings never leaves the widget past its last page.
+ */
 private fun page(storedPage: Int, readings: Int): Int = Math.floorMod(storedPage, telemetryPageCount(readings))
 
 /** Four tiles a page; a short last page keeps empty cells, so its tiles stay the size of a full page's. */
 @Composable
-private fun Grid(tiles: List<TelemetryTile>, page: Int) {
+private fun Grid(tiles: List<TelemetryTile>, page: Int, modifier: GlanceModifier = GlanceModifier) {
     val onPage = tiles.drop(page * TELEMETRY_PAGE_SIZE).take(TELEMETRY_PAGE_SIZE)
-    Column(modifier = GlanceModifier.fillMaxSize()) {
+    Column(modifier = modifier) {
         repeat(TELEMETRY_PAGE_SIZE / GRID_COLUMNS) { row ->
             if (row > 0) Spacer(GlanceModifier.height(TILE_GAP))
             Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
@@ -142,7 +149,7 @@ private fun Grid(tiles: List<TelemetryTile>, page: Int) {
  */
 @SuppressLint("RestrictedApi")
 @Composable
-private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModifier) {
+private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModifier = GlanceModifier) {
     val value = tile.value ?: MISSING_VALUE
     Column(
         modifier =
@@ -167,7 +174,10 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
                     text = tile.label,
                     maxLines = 1,
                     style =
-                    TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontSize = WidgetSizes.Type.footnote),
+                    TextStyle(
+                        color = GlanceTheme.colors.onSecondaryContainer,
+                        fontSize = WidgetSizes.Type.footnote,
+                    ),
                 )
             }
         }
@@ -176,14 +186,20 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
             tile.detail?.let { detail ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     tile.band?.let { band ->
-                        Text(text = "●", style = TextStyle(color = ColorProvider(band), fontSize = WidgetSizes.Type.footnote))
+                        Text(
+                            text = "●",
+                            style = TextStyle(color = ColorProvider(band), fontSize = WidgetSizes.Type.footnote),
+                        )
                         Spacer(GlanceModifier.width(3.dp))
                     }
                     Text(
                         text = detail,
                         maxLines = 1,
                         style =
-                        TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontSize = WidgetSizes.Type.footnote),
+                        TextStyle(
+                            color = GlanceTheme.colors.onSecondaryContainer,
+                            fontSize = WidgetSizes.Type.footnote,
+                        ),
                     )
                 }
             }
@@ -207,7 +223,11 @@ private fun TileValue(value: String, fontSize: TextUnit) {
         text = value,
         maxLines = 1,
         style =
-        TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontSize = fontSize, fontWeight = FontWeight.Medium),
+        TextStyle(
+            color = GlanceTheme.colors.onSecondaryContainer,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Medium,
+        ),
     )
 }
 
@@ -239,7 +259,9 @@ private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: In
                 fontWeight = if (state.isStale) FontWeight.Medium else FontWeight.Normal,
             ),
             modifier =
-            GlanceModifier.defaultWeight().let { if (state.isStale) it.semantics { testTag = TelemetryWidget.STALE_TEST_TAG } else it },
+            GlanceModifier.defaultWeight().let {
+                if (state.isStale) it.semantics { testTag = TelemetryWidget.STALE_TEST_TAG } else it
+            },
         )
         if (pageCount > 1) PageButton(page, pageCount)
     }
@@ -278,3 +300,16 @@ private fun PageButton(page: Int, pageCount: Int) {
 
 private val TILE_GAP = 6.dp
 private val TILE_VALUE_SIZE = 18.sp
+
+internal enum class TelemetryLayout {
+    ONE,
+    ROW,
+    GRID,
+}
+
+/** Which of the three layouts a breakpoint gets, by the thresholds in [WidgetSizes.telemetrySizeMode]. */
+internal fun telemetryLayout(size: DpSize): TelemetryLayout = when {
+    size.width < WidgetSizes.TELEMETRY_ROW.width -> TelemetryLayout.ONE
+    size.height < WidgetSizes.TELEMETRY_GRID.height -> TelemetryLayout.ROW
+    else -> TelemetryLayout.GRID
+}

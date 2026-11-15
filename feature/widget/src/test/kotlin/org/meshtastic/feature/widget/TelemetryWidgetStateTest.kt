@@ -26,12 +26,11 @@ import kotlin.test.assertTrue
 
 class TelemetryWidgetStateTest {
 
-    private val weather =
-        environment {
-            temperature = 21.5f
-            relative_humidity = 48f
-            barometric_pressure = 1016f
-        }
+    private val weather = environment {
+        temperature = 21.5f
+        relative_humidity = 48f
+        barometric_pressure = 1016f
+    }
 
     private fun showing(
         node: org.meshtastic.core.model.Node,
@@ -113,7 +112,8 @@ class TelemetryWidgetStateTest {
 
     @Test
     fun `the newest matching log row dates the reading`() {
-        val state = showing(telemetryNode(environment = weather), history = listOf(row(NOW - 300, environment = weather)))
+        val state =
+            showing(telemetryNode(environment = weather), history = listOf(row(NOW - 300, environment = weather)))
         assertEquals((NOW - 300).toInt(), state.updatedAt)
         assertFalse(state.isStale)
     }
@@ -189,7 +189,7 @@ class TelemetryWidgetStateTest {
         assertEquals(1, TelemetryPageAction.nextPage(0, 3))
         assertEquals(0, TelemetryPageAction.nextPage(2, 3))
         // A page stored before readings were hidden counts against the pages there are now.
-        assertEquals(1, TelemetryPageAction.nextPage(4, 3))
+        assertEquals(2, TelemetryPageAction.nextPage(4, 3))
         assertEquals(0, TelemetryPageAction.nextPage(null, 1))
     }
 }

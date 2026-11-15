@@ -28,6 +28,7 @@ import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.iaq_level_excellent
@@ -41,9 +42,9 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Unit tests for [TelemetryWidget.WidgetContent] on Glance's own harness, which asserts on the composed tree rather than
- * pixels. As in [LocalStatsWidgetContentTest], any string rendering at all proves the [WidgetResourceEnvironment] bridge
- * still resolves Compose Multiplatform resources.
+ * Unit tests for [TelemetryWidget.WidgetContent] on Glance's own harness, which asserts on the composed tree rather
+ * than pixels. As in [LocalStatsWidgetContentTest], any string rendering at all proves the [WidgetResourceEnvironment]
+ * bridge still resolves Compose Multiplatform resources.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [34])
@@ -57,6 +58,9 @@ class TelemetryWidgetContentTest {
     private val excellent: String = getString(Res.string.iaq_level_excellent)
     private val staleLabel: String = getString(Res.string.widget_telemetry_stale)
     private val notFoundLabel: String = getString(Res.string.widget_telemetry_not_found)
+
+    // The locale's grouping, as node details shows it.
+    private val pressure = "${NumberFormatter.format(1016.2f, 0)} hPa"
 
     private fun render(
         size: DpSize,
@@ -82,7 +86,7 @@ class TelemetryWidgetContentTest {
     fun `wide under two rows shows four in a row`() = render(DpSize(320.dp, 110.dp)) {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText("48%")).assertExists()
-        onNode(hasText("1016 hPa")).assertExists()
+        onNode(hasText(pressure)).assertExists()
     }
 
     @Test
@@ -97,8 +101,7 @@ class TelemetryWidgetContentTest {
         onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(4)
         onNode(hasText("1/3")).assertExists()
         onNode(
-            hasRunCallbackClickAction(
-                TelemetryPageAction::class.java,
+            hasRunCallbackClickAction<TelemetryPageAction>(
                 actionParametersOf(TelemetryPageAction.PAGE_COUNT_KEY to 3),
             ),
         )
