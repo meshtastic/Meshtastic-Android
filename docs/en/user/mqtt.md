@@ -50,7 +50,7 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **MQTT Client Proxy** | Relay MQTT through the connected app | Disabled |
 | **Map Reporting** | Report position to public map | Disabled |
 
-A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, a last segment of `2`, or more than 31 bytes (æ, ø and å count as two).
+A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
 ### Connection Status and Test Connection
 

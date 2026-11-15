@@ -158,7 +158,7 @@ Configure position behavior in **Settings → Device configuration → Position*
 
 ### Privacy Considerations
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, set **GPS Mode** to **Disabled**, or use a **Fixed Position** somewhere else. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point. A channel that is not securely encrypted (no key, a one-byte key or the default key) cannot carry precise location: the switch is disabled with "Not available on a channel that is not securely encrypted", and the slider stops at 15 bits.
+> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, set **GPS Mode** to **Disabled**, or use a **Fixed Position** somewhere else. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point. A channel that is not securely encrypted (a one-byte key, the default key, or no key on the primary channel or on a secondary whose primary is one of these) cannot carry precise location: the switch is disabled with "Not available on a channel that is not securely encrypted", and the slider stops at 15 bits.
 
 ## Map Sources
 

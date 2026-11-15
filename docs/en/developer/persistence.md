@@ -34,7 +34,7 @@ The primary structured data store:
 - Repository layer in `core:repository` provides the public API
 - Full-text message search is backed by an FTS5 content table (`PacketFts`) over `Packet`, kept in sync by Room-managed triggers
 - `DatabaseManager` keeps one Room database per connected device, with LRU eviction
-- A file database keeps Room's default connection pool: one writer and several readers in WAL, so the query an observed Flow re-runs after a write reads beside the next write. A reader pool that stops serving surfaces as a `DbFlowStalledException`, which `DatabaseManager` recovers by replacing the pool. In-memory test databases use a single connection
+- A file database keeps Room's default connection pool: one writer and several readers in WAL, so the query an observed Flow re-runs after a write reads beside the next write. A guarded Flow that produces no first emission in time throws a `DbFlowStalledException`, which `DatabaseManager` recovers by replacing the pool. In-memory test databases use a single connection
 - `DatabaseBackupService` exports a device's database to a file the user picks, and stages a validated restore that replaces the database the next time it opens; a restore is never applied to an open database. `DatabaseBackup.SCHEMA_VERSION` must equal the `@Database` version, and a `jvmTest` checks that
 
 ### What's Stored in Room

@@ -47,7 +47,7 @@ The most common update method for Android users:
 4. Tap **Update via BLE OTA**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Wait for the update to complete. Do not disconnect during the update.
 
-While the update downloads, processes, uploads or verifies, the screen stays on. Back during an update, including the bootloader review, asks **Stop update?** with **Stop** and **Keep going**. A node that is mid-update stays in update mode until you finish or recover it. You can also tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
+While the update downloads, processes, uploads or verifies, the screen stays on. The system back button or gesture during an update, including the bootloader review, asks **Stop update?** with **Stop** and **Keep going**. The arrow in the top bar leaves without asking. A node that is mid-update stays in update mode until you finish or recover it. You can also tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
@@ -117,7 +117,7 @@ Unplug the USB cable before starting. With a cable attached, the new bootloader 
 
 The app sends the new bootloader over Bluetooth, then reinstalls the selected firmware, because writing the bootloader erases it. The whole upgrade takes about 10 minutes. Afterward the **Bootloader** row shows the latest release.
 
-Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. Over Bluetooth the upgrade works only on a bootloader that uses Legacy DFU. On any other the update stops with nothing written and the node returns to its firmware. If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
+Before writing, the app verifies the download and reads the board name from the bootloader. If the package fails verification, nothing is written. Over Bluetooth the upgrade works only on a bootloader that uses Legacy DFU. On any other the update stops with nothing written and the app tries to return the node to its firmware. If it stays in update mode, see [Update Stuck](#update-stuck). If the bootloader names a different board or none, nothing is written and the node restarts into its firmware.
 
 A node that doesn't come back over Bluetooth after the bootloader is written can be finished either way: install the firmware from its update drive over USB, or unplug it, reset it, and use **Resume firmware update** on the **Connect** tab.
 

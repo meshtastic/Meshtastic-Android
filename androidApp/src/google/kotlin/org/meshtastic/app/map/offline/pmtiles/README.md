@@ -34,7 +34,7 @@ markers with no compositing seam.
    **`OfflineLabelMarkers`** draws each as a `Marker` whose icon is the text with a halo, cached per name, kind and
    theme. Labels show only while the offline layer draws with no network (`MapViewModel.mapNetworkAvailable`).
 7. **`OfflineBuildings`** reads the `buildings` layer, which the overlay does not draw, straight from the downloaded
-   archives (zoom 13 to 15, at most 36 tiles per map) and returns `BuildingFootprint`s for the 3D terrain map in
+   archives (zoom 13 to 15, at most 36 tiles per region) and returns `BuildingFootprint`s for the 3D terrain map in
    `:feature:xr`.
 
 ## Why this shape, not iOS's
