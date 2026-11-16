@@ -62,9 +62,10 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
     LineLayer(
         id = "traceroute-return",
         source = back,
-        cap = const(LineCap.Round),
+        cap = const(LineCap.Butt),
         join = const(LineJoin.Round),
         color = const(TracerouteColors.ReturnRoute),
+        dasharray = const(RETURN_DASH),
         width = const(RETURN_WIDTH_DP.dp),
         translate = const(DpOffset(0.dp, ROUTE_SEPARATION_DP.dp)),
     )
@@ -80,12 +81,11 @@ internal fun routeToFeatureCollection(
     route: List<Int>,
     nodeLookup: Map<Int, Node>,
 ): FeatureCollection<LineString, JsonObject?> {
-    val positions =
-        route.mapNotNull { nodeNum ->
-            val node = nodeLookup[nodeNum] ?: return@mapNotNull null
-            node.validPosition ?: return@mapNotNull null
-            Position(longitude = node.longitude, latitude = node.latitude)
-        }
+    val positions = route.mapNotNull { nodeNum ->
+        val node = nodeLookup[nodeNum] ?: return@mapNotNull null
+        node.validPosition ?: return@mapNotNull null
+        Position(longitude = node.longitude, latitude = node.latitude)
+    }
     if (positions.size < 2) return FeatureCollection(emptyList())
     return FeatureCollection(
         listOf(Feature(geometry = LineString(positions), properties = buildJsonObject { put("hops", route.size) })),
@@ -93,6 +93,9 @@ internal fun routeToFeatureCollection(
 }
 
 private const val ROUTE_SEPARATION_DP = 3
+
+/** Dash and gap in line-width units; design#165 draws the return path dashed. Butt caps keep the gaps open. */
+private val RETURN_DASH = listOf(2f, 1.5f)
 
 /**
  * The outbound leg is drawn thicker than the return, as on the Google map, so the two read apart where they overlap.
