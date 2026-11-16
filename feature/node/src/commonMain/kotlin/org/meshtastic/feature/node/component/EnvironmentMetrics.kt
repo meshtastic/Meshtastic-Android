@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
@@ -30,6 +31,7 @@ import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toStormDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_voltage
+import org.meshtastic.core.resources.aqi_value_with_severity
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.dew_point
 import org.meshtastic.core.resources.distance
@@ -53,6 +55,7 @@ import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.resources.weight
 import org.meshtastic.core.resources.wind
+import org.meshtastic.core.ui.component.getIaq
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.Altitude
 import org.meshtastic.core.ui.icon.Humidity
@@ -154,12 +157,17 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
                     },
                 ),
             )
-            iaq?.let { i ->
-                add(
-                    VectorMetricInfo(label = Res.string.iaq, value = i.toString(), icon = MeshtasticIcons.AirQuality)
-                        .asGroup(),
-                )
-            }
+            iaq?.takeUnless { it == Int.MIN_VALUE }
+                ?.let { i ->
+                    // The band name always accompanies the value, so the tile never relies on color alone.
+                    val value =
+                        getIaq(i)?.let {
+                            stringResource(Res.string.aqi_value_with_severity, i, stringResource(it.label))
+                        } ?: i.toString()
+                    val card =
+                        VectorMetricInfo(label = Res.string.iaq, value = value, icon = MeshtasticIcons.AirQuality)
+                    add(card.asGroup())
+                }
             distance?.let { d ->
                 add(
                     VectorMetricInfo(
@@ -298,5 +306,6 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
             }
         }
     }
-    MetricCardFlow(groups = groups)
+    val iaqColor = node.environmentMetrics.iaq?.let { getIaq(it)?.textColor() }
+    MetricCardFlow(groups = groups, valueColor = { metric -> iaqColor.takeIf { metric.label == Res.string.iaq } })
 }

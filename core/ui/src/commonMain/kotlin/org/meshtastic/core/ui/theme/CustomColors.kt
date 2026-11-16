@@ -141,6 +141,22 @@ object IAQColors {
     val IAQHeavilyPolluted = Color(0xFFFF0000)
     val IAQSeverelyPolluted = Color(0xFF99004C)
     val IAQExtremelyPolluted = Color(0xFF663300)
+
+    /**
+     * Text tones for the Bosch bands. The fill colors above are made for white-on-pill and are unreadable as text
+     * (`#FFFF00` is 1.0:1 on the light surface), so each band is re-toned per theme in the same hue order.
+     * `IaqColorsTest` pins every tone at WCAG AA text contrast. The band name always accompanies the value.
+     */
+    @Suppress("MagicNumber")
+    object Text {
+        val Excellent = AqiSeverityColors.Tones(light = Color(0xFF0F5C29), dark = Color(0xFF8DE0A6))
+        val Good = AqiSeverityColors.Tones(light = Color(0xFF3D5C00), dark = Color(0xFFC5E384))
+        val LightlyPolluted = AqiSeverityColors.Tones(light = Color(0xFF6B5300), dark = Color(0xFFF5D07A))
+        val ModeratelyPolluted = AqiSeverityColors.Tones(light = Color(0xFF7A2E00), dark = Color(0xFFFFB07A))
+        val HeavilyPolluted = AqiSeverityColors.Tones(light = Color(0xFF8C0F16), dark = Color(0xFFFF9F98))
+        val SeverelyPolluted = AqiSeverityColors.Tones(light = Color(0xFF7A0040), dark = Color(0xFFFF9CC8))
+        val ExtremelyPolluted = AqiSeverityColors.Tones(light = Color(0xFF4A2800), dark = Color(0xFFD9B38C))
+    }
 }
 
 object GraphColors {
