@@ -2329,6 +2329,7 @@
     <string name="widget_relays_canceled">Relays canceled</string>
     <string name="widget_telemetry_change_node">Change node</string>
     <string name="widget_telemetry_choose">Choose a node. Only nodes that have sent environment, air quality or power readings are listed.</string>
+    <string name="widget_telemetry_dew">Dew %1$s</string>
     <string name="widget_telemetry_gust">Gust %1$s</string>
     <string name="widget_telemetry_next_page">Next readings, page %1$d of %2$d</string>
     <string name="widget_telemetry_no_nodes_hint">Nodes appear here once they send environment, air quality or power readings.</string>

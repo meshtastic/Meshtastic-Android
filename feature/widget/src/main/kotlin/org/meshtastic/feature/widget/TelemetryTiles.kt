@@ -69,6 +69,7 @@ import org.meshtastic.core.resources.soil_temperature
 import org.meshtastic.core.resources.temperature
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.resources.weight
+import org.meshtastic.core.resources.widget_telemetry_dew
 import org.meshtastic.core.resources.widget_telemetry_gust
 import org.meshtastic.core.resources.wind
 import org.meshtastic.core.ui.component.Co2Severity
@@ -109,7 +110,10 @@ internal fun telemetryTile(reading: TelemetryReading, state: TelemetryWidgetStat
                 R.drawable.widget_ic_water_drop,
                 Res.string.humidity,
                 env?.relative_humidity.finite()?.let { "${NumberFormatter.format(it, 0)}%" },
-                detail = snapshot.dewPoint()?.toTempString(fahrenheit),
+                detail =
+                snapshot.dewPoint()?.toTempString(fahrenheit)?.let {
+                    stringResource(Res.string.widget_telemetry_dew, it)
+                },
             )
 
         TelemetryReading.Pressure -> {

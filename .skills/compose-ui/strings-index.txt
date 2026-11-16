@@ -2251,6 +2251,7 @@ widget_relays
 widget_relays_canceled
 widget_telemetry_change_node
 widget_telemetry_choose
+widget_telemetry_dew
 widget_telemetry_gust
 widget_telemetry_next_page
 widget_telemetry_no_nodes_hint
