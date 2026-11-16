@@ -25,6 +25,7 @@ import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.testing.unit.GlanceAppWidgetUnitTest
 import androidx.glance.appwidget.testing.unit.hasRunCallbackClickAction
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
+import androidx.glance.testing.unit.hasContentDescriptionEqualTo
 import androidx.glance.testing.unit.hasStartActivityClickAction
 import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
@@ -35,9 +36,11 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.TemperatureUnit
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq_level_excellent
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.resources.widget_telemetry_dew
 import org.meshtastic.core.resources.widget_telemetry_not_found
 import org.meshtastic.core.resources.widget_telemetry_stale
 import org.robolectric.RobolectricTestRunner
@@ -58,6 +61,9 @@ class TelemetryWidgetContentTest {
 
     // Resolved at construction: getString() wraps runBlocking, which can deadlock inside runGlanceAppWidgetUnitTest.
     private val temperatureLabel: String = getString(Res.string.temperature)
+    private val humidityLabel: String = getString(Res.string.humidity)
+    private val dewLine: String = getString(Res.string.widget_telemetry_dew, "9°C")
+    private val dewLineFahrenheit: String = getString(Res.string.widget_telemetry_dew, "51°F")
     private val luxLabel: String = getString(Res.string.lux)
     private val excellent: String = getString(Res.string.iaq_level_excellent)
     private val staleLabel: String = getString(Res.string.widget_telemetry_stale)
@@ -114,7 +120,8 @@ class TelemetryWidgetContentTest {
             onNode(hasText("21°C")).assertExists()
             onNode(hasText("48%")).assertExists()
             onNode(hasText(pressure)).assertExists()
-            onNode(hasText("10°C")).assertExists()
+            // The Dew Point tile and the humidity tile's labeled "Dew 10°C" line both contain the value.
+            onAllNodes(hasText("10°C")).assertCountEquals(2)
             onNode(hasText("42")).assertDoesNotExist()
             onNode(hasText("1/3")).assertExists()
             onNode(
@@ -203,12 +210,44 @@ class TelemetryWidgetContentTest {
         }
 
     @Test
+    fun `the humidity tile carries the dew point as its own line`() {
+        val node =
+            telemetryNode(
+                environment =
+                environment {
+                    temperature = 20f
+                    relative_humidity = 50f
+                },
+            )
+        val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), emptyList(), now = NOW)
+        render(WidgetSizes.TELEMETRY_GRID, state) {
+            onNode(hasText("50%")).assertExists()
+            // The Dew Point tile shows the bare value; the humidity tile's own line is labeled and spoken with it.
+            onAllNodes(hasText("9°C")).assertCountEquals(2)
+            onNode(hasContentDescriptionEqualTo("$humidityLabel 50%, $dewLine")).assertExists()
+        }
+    }
+
+    @Test
+    fun `a humidity tile with no temperature has no dew point line`() {
+        val node = telemetryNode(environment = environment { relative_humidity = 50f })
+        val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), emptyList(), now = NOW)
+        render(WidgetSizes.TELEMETRY_GRID, state) {
+            onNode(hasText("50%")).assertExists()
+            onAllNodes(hasTestTag(TelemetryWidget.TILE_TEST_TAG)).assertCountEquals(1)
+            onNode(hasContentDescriptionEqualTo("$humidityLabel 50%")).assertExists()
+            onNode(hasText(MISSING_VALUE)).assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun `a Fahrenheit and imperial locale converts temperature and wind`() {
         val node =
             telemetryNode(
                 environment =
                 environment {
                     temperature = 21.4f
+                    relative_humidity = 50f
                     wind_speed = 4.2f
                 },
             )
@@ -217,6 +256,8 @@ class TelemetryWidgetContentTest {
         val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputs, emptyList(), now = NOW)
         render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText("71°F")).assertExists()
+            // The humidity tile's dew point line follows the same unit.
+            onNode(hasContentDescriptionEqualTo("$humidityLabel 50%, $dewLineFahrenheit")).assertExists()
             onNode(hasText("mph")).assertExists()
             onNode(hasText("km/h")).assertDoesNotExist()
         }

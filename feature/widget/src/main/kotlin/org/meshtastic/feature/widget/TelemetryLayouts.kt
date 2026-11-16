@@ -161,7 +161,7 @@ private fun TileView(tile: TelemetryTile, compact: Boolean, modifier: GlanceModi
             .cornerRadius(12.dp)
             .padding(horizontal = 6.dp, vertical = if (compact) 2.dp else 6.dp)
             .semantics {
-                contentDescription = "${tile.label} $value"
+                contentDescription = listOfNotNull("${tile.label} $value", tile.detail).joinToString(", ")
                 testTag = TelemetryWidget.TILE_TEST_TAG
             },
         verticalAlignment = Alignment.CenterVertically,
