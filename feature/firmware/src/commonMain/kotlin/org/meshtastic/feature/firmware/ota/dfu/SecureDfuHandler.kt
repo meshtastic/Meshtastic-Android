@@ -710,8 +710,14 @@ class SecureDfuHandler(
                 val preStart =
                     enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
                 if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
-                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode.
-                    resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)
+                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode. If the
+                    // reset could not be sent the board may still be in its bootloader, so the failure keeps its
+                    // record.
+                    if (!resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)) {
+                        throw DfuException.TransferFailed(
+                            "Bootloader speaks Secure DFU and could not be reset back to its application",
+                        )
+                    }
                     throw DfuException.BootloaderNotLegacy()
                 }
                 val budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS)
@@ -947,7 +953,12 @@ class SecureDfuHandler(
      * abort are best-effort (swallowed by [DfuUploadTransport.abort]); structured-concurrency cancellation and [Error]
      * subtypes propagate per the abort contract.
      */
-    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String, preStart: PreStartBudget) {
+    private suspend fun resetStaleBootloader(
+        protocol: DfuProtocolKind,
+        target: String,
+        preStart: PreStartBudget,
+    ): Boolean {
+        var resetSent = false
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
         val transport = createTransport(protocol, target)
         try {
@@ -956,6 +967,7 @@ class SecureDfuHandler(
                     .connectToDfuMode()
                     .onSuccess {
                         transport.abort()
+                        resetSent = true
                         Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
                     }
                     .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
@@ -964,6 +976,7 @@ class SecureDfuHandler(
             withContext(NonCancellable) { transport.close() }
         }
         delay(RESET_PRIME_REBOOT_WAIT_MS)
+        return resetSent
     }
 
     /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */

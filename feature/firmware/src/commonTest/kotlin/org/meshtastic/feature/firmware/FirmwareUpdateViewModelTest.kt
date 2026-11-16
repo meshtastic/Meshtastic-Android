@@ -459,6 +459,39 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `cancelling a recovery re-flash during its download keeps the recovery record`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.recoverDfuDevice(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
     fun `cancelling after the device entered its bootloader keeps the recovery record`() = runTest {
         advanceUntilIdle()
         val parked = CompletableDeferred<Unit>()

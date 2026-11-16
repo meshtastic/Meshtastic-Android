@@ -615,11 +615,14 @@ class FirmwareUpdateViewModel(
                 }
             } catch (e: CancellationException) {
                 Logger.w(e) { "Firmware update cancelled" }
-                if (!strandedBefore && _state.value is FirmwareUpdateState.Downloading) {
-                    withContext(NonCancellable) { retireRecoveryRecord() }
+                // A run that a newer one replaced must not touch the shared state or the newer run's record.
+                if (updateJob === coroutineContext[Job]) {
+                    if (!strandedBefore && _state.value is FirmwareUpdateState.Downloading) {
+                        withContext(NonCancellable) { retireRecoveryRecord() }
+                    }
+                    _state.value = FirmwareUpdateState.Idle
+                    checkForUpdates()
                 }
-                _state.value = FirmwareUpdateState.Idle
-                checkForUpdates()
                 throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Firmware update failed" }

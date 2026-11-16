@@ -35,6 +35,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.SoftDeviceVariant
+import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.firmware.BootloaderDfuZip
@@ -44,7 +45,8 @@ import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** A run that is refused before any write reports `nothingWritten`, so its recovery record is retired. */
@@ -59,14 +61,14 @@ class SecureDfuHandlerTest {
             default = Dispatchers.Unconfined,
         )
 
-    private fun startWith(failure: Exception): List<FirmwareUpdateState> {
+    private fun startWith(failure: Exception, radio: FakeRadioController): List<FirmwareUpdateState> {
         val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
         everySuspend { fileHandler.extractZipEntries(any()) } throws failure
         val handler =
             SecureDfuHandler(
                 firmwareRetriever = FirmwareRetriever(fileHandler),
                 firmwareFileHandler = fileHandler,
-                radioController = FakeRadioController(),
+                radioController = radio,
                 bleScanner = mock<BleScanner>(MockMode.autofill),
                 bleConnectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
                 dispatchers = dispatchers,
@@ -85,19 +87,25 @@ class SecureDfuHandlerTest {
     }
 
     @Test
-    fun `a zip over the size limit wrote nothing`() {
-        val error = startWith(IllegalArgumentException("entry too large")).last()
-        assertTrue(assertIs<FirmwareUpdateState.Error>(error).nothingWritten)
+    fun `an extraction that rejects the archive wrote nothing`() {
+        val radio = FakeRadioController()
+        val states = startWith(IllegalArgumentException("entry too large"), radio)
+        assertTrue(states.filterIsInstance<FirmwareUpdateState.Error>().single().nothingWritten)
+        assertNull(radio.lastSetDeviceAddress, "the device never left its application")
     }
 
     @Test
-    fun `a corrupt archive wrote nothing`() {
-        val error = startWith(Exception("invalid entry")).last()
-        assertTrue(assertIs<FirmwareUpdateState.Error>(error).nothingWritten)
+    fun `an extraction that fails on a corrupt archive wrote nothing`() {
+        val radio = FakeRadioController()
+        val states = startWith(Exception("invalid entry"), radio)
+        assertTrue(states.filterIsInstance<FirmwareUpdateState.Error>().single().nothingWritten)
+        assertNull(radio.lastSetDeviceAddress, "the device never left its application")
     }
 
-    @Test
-    fun `a bootloader that speaks Secure DFU refuses the package with nothing written`() {
+    private fun upgradeAgainstSecureBootloader(
+        resetConnects: Boolean,
+        radio: FakeRadioController,
+    ): List<FirmwareUpdateState> {
         val target = "AA:BB:CC:DD:EE:FF"
         val appManifest = """{"manifest":{"application":{"bin_file":"app.bin","dat_file":"app.dat"}}}"""
         val bootloaderManifest =
@@ -137,25 +145,43 @@ class SecureDfuHandlerTest {
         everySuspend { retriever.retrieveBootloaderDfuZip(any(), any()) } returns bootloaderZip
         // Only the Secure DFU service is advertised, so detection observes a Secure bootloader.
         val scanner: BleScanner = mock(MockMode.autofill)
+        var secureScans = 0
         every { scanner.scan(any(), any(), any()) } calls
             {
-                if (it.args[1] == SecureDfuUuids.SERVICE) flowOf(FakeBleDevice(target)) else emptyFlow()
+                val advertised = it.args[1] == SecureDfuUuids.SERVICE && (resetConnects || secureScans++ == 0)
+                if (advertised) flowOf(FakeBleDevice(target)) else emptyFlow()
             }
         val handler =
             SecureDfuHandler(
                 firmwareRetriever = retriever,
                 firmwareFileHandler = fileHandler,
-                radioController = FakeRadioController(),
+                radioController = radio,
                 bleScanner = scanner,
-                bleConnectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
+                bleConnectionFactory = FakeBleConnectionFactory(),
                 dispatchers = dispatchers,
             )
         val states = mutableListOf<FirmwareUpdateState>()
 
         runBlocking { handler.upgradeBootloader(release, hardware, target, asset, states::add) }
+        return states
+    }
 
-        val error = assertIs<FirmwareUpdateState.Error>(states.last())
+    @Test
+    fun `a bootloader that speaks Secure DFU is reset and refuses the package with nothing written`() {
+        val radio = FakeRadioController()
+        val states = upgradeAgainstSecureBootloader(resetConnects = true, radio = radio)
+
+        val error = states.filterIsInstance<FirmwareUpdateState.Error>().single()
         assertTrue(error.nothingWritten)
         assertEquals(DfuException.BootloaderNotLegacy().toErrorState(), error)
+        assertEquals("n", radio.lastSetDeviceAddress, "the buttonless trigger already released the app link")
+    }
+
+    @Test
+    fun `a Secure DFU bootloader that cannot be reset keeps its recovery record`() {
+        val radio = FakeRadioController()
+        val states = upgradeAgainstSecureBootloader(resetConnects = false, radio = radio)
+
+        assertFalse(states.filterIsInstance<FirmwareUpdateState.Error>().single().nothingWritten)
     }
 }
