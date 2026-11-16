@@ -16,6 +16,7 @@ a11y_nodes_at_hop
 a11y_temperature
 about
 accept
+ack_relayed_by
 acknowledgements
 ### ACTION ###
 action_copy_message
@@ -1760,6 +1761,7 @@ refresh
 refresh_metadata
 regenerate_keys_confirmation
 regenerate_private_key
+relayed_by
 relays
 ### REMOTE ###
 remote

@@ -37,6 +37,7 @@
     <string name="a11y_temperature">Temperature</string>
     <string name="about">About</string>
     <string name="accept">Accept</string>
+    <string name="ack_relayed_by">Ack relayed by %1$s</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->
     <string name="action_copy_message">Copy message</string>
@@ -1826,6 +1827,7 @@
     <string name="refresh_metadata">Refresh metadata</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
+    <string name="relayed_by">Relayed by %1$s</string>
     <plurals name="relays">
         <item quantity="one">Heard %1$d relay</item>
         <item quantity="other">Heard %1$d relays</item>

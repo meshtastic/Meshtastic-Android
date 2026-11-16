@@ -149,6 +149,7 @@ internal fun MessageListPaged(
         MessageStatusDialog(
             message = message,
             isDirectMessage = isDirectMessageConversation,
+            relayNodeLabel = relayNodeLabel(message.relayNode, state.nodes, state.ourNode?.num),
             resendOption = message.isStatusRetryable(isDirectMessageConversation) && state.canSend,
             onResend = {
                 handlers.onResendMessage(message)

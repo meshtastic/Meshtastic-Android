@@ -42,6 +42,7 @@ fun DeliveryInfo(
     text: StringResource? = null,
     detail: StringResource? = null,
     relays: Int = 0,
+    relay: String? = null,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
 ) = MeshtasticDialog(
@@ -70,6 +71,14 @@ fun DeliveryInfo(
             if (relays != 0) {
                 Text(
                     text = pluralStringResource(Res.plurals.relays, relays, relays),
+                    modifier = Modifier.padding(top = 8.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            relay?.let {
+                Text(
+                    text = it,
                     modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
