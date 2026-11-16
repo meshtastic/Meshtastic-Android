@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -426,9 +427,84 @@ class SignalSurveyRepositoryImplTest {
     }
 
     @Test
+    fun `a second start on a running survey keeps its session`() = runBlocking {
+        startSettled()
+        val session = repository.activeSessionId.value
+
+        repository.start()
+        delay(SETTLE_FOR_NO_WRITE)
+        service.emitMeshPacket(heardNow())
+
+        assertEquals(session, repository.activeSessionId.value)
+        assertEquals(1, awaitReadings(1).size)
+    }
+
+    /**
+     * Fails an open survey while holding its session close on a gate, so the test acts during cleanup. Returns the
+     * failed session's id and the gate that lets the close finish.
+     */
+    private suspend fun failSurveyHoldingCleanup(): Pair<Long?, CompletableDeferred<Unit>> {
+        val failNow = CompletableDeferred<Unit>()
+        val closeGate = CompletableDeferred<Unit>()
+        locationFlow = {
+            flow {
+                failNow.await()
+                throw IllegalStateException("location request failed")
+            }
+        }
+        service.setConnectionState(ConnectionState.Connected)
+        startRecording()
+        val failed = repository.activeSessionId.value
+        db.beforeWithDb = { closeGate.await() }
+        failNow.complete(Unit)
+        withTimeout(10.seconds) { repository.recording.first { !it } }
+        withTimeout(10.seconds) { repository.activeSessionId.first { it == null } }
+        return failed to closeGate
+    }
+
+    @Test
+    fun `a start while a failed survey is closing opens a new session`() = runBlocking {
+        val (failed, closeGate) = failSurveyHoldingCleanup()
+
+        locationFlow = { location }
+        repository.start()
+        assertTrue(repository.recording.value)
+        closeGate.complete(Unit)
+
+        withTimeout(10.seconds) { repository.activeSessionId.first { it != null && it != failed } }
+        assertTrue(repository.recording.value)
+    }
+
+    @Test
+    fun `a stop while a failed survey is closing leaves it off`() = runBlocking {
+        val (_, closeGate) = failSurveyHoldingCleanup()
+
+        repository.stop()
+        closeGate.complete(Unit)
+        delay(SETTLE_FOR_NO_WRITE)
+
+        assertFalse(repository.recording.value)
+        assertNull(repository.activeSessionId.value)
+    }
+
+    @Test
+    fun `a start right after a stop opens a new session`() = runBlocking {
+        startSettled()
+        val first = repository.activeSessionId.value
+
+        repository.stop()
+        repository.start()
+
+        withTimeout(10.seconds) { repository.activeSessionId.first { it != null && it != first } }
+        assertTrue(repository.recording.value)
+    }
+
+    @Test
     fun `starting twice and stopping once leaves the survey off`() = runBlocking {
         startSettled()
+        val session = repository.activeSessionId.value
         startRecording()
+        assertEquals(session, repository.activeSessionId.value)
         repository.stop()
 
         service.emitMeshPacket(heardNow())
@@ -436,6 +512,7 @@ class SignalSurveyRepositoryImplTest {
 
         assertEquals(0, allSamples().size)
         assertFalse(repository.recording.value)
+        assertNull(repository.activeSessionId.value)
     }
 
     @Test

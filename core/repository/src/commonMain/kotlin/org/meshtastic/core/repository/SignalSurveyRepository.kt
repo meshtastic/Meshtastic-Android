@@ -45,6 +45,7 @@ interface SignalSurveyRepository {
     /** Every session of the connected radio, newest first. */
     val sessions: Flow<List<SignalSurveySession>>
 
+    /** Starts a survey; a no-op while one is already on. */
     fun start()
 
     fun stop()
