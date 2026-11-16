@@ -205,20 +205,22 @@ fun MeshtasticImportFAB(
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
         contentDescription =
-        stringResource(importFabContentDescriptionRes(importKind, onShareChannels, onShareContact)),
+        stringResource(
+            importFabContentDescriptionRes(
+                importKind = importKind,
+                canScan = isNfcSupported || isBarcodeSupported,
+                canShare = onShareChannels != null || onShareContact != null,
+            ),
+        ),
         testTag = testTag,
     )
 }
 
 internal fun normalizeImportContents(contents: String?): String? = contents?.trim()?.takeIf { it.isNotEmpty() }
 
-private fun importFabContentDescriptionRes(
-    importKind: ImportKind,
-    onShareChannels: (() -> Unit)?,
-    onShareContact: (() -> Unit)?,
-) = when {
-    onShareChannels != null || onShareContact != null -> Res.string.import_export_label
-    importKind == ImportKind.ConnectCode -> Res.string.scan_connect_code
+private fun importFabContentDescriptionRes(importKind: ImportKind, canScan: Boolean, canShare: Boolean) = when {
+    canShare -> Res.string.import_export_label
+    importKind == ImportKind.ConnectCode && canScan -> Res.string.scan_connect_code
     else -> Res.string.import_label
 }
 

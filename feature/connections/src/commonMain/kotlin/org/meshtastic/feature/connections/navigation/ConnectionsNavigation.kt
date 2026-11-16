@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -84,9 +85,12 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         val onConnectCode: (String) -> Unit = { contents ->
             val link = connectLinkFrom(contents)?.takeIf { it.address?.let(admits) == true }
             if (link != null) {
-                pendingAddress = link.address
-                pendingPinParam = link.pin
-                pendingFromScan = true
+                // NFC delivers this on a binder thread; one snapshot keeps the address from showing without its flag.
+                Snapshot.withMutableSnapshot {
+                    pendingAddress = link.address
+                    pendingPinParam = link.pin
+                    pendingFromScan = true
+                }
             } else {
                 scope.launch { showToast(Res.string.connect_code_invalid) }
             }
