@@ -329,6 +329,52 @@ class MessageItemTest {
     }
 
     @Test
+    fun messageStatusDialog_namesTheRelay() = runComposeUiTest {
+        val message =
+            localMessage(node = NodePreviewParameterProvider().mickeyMouse, status = MessageStatus.RECEIVED)
+                .copy(fromLocal = false)
+
+        setContent {
+            MessageStatusDialog(
+                message = message,
+                resendOption = false,
+                onResend = {},
+                onDismiss = {},
+                relayNodeLabel = "Ridge (0x5A)",
+            )
+        }
+
+        onNodeWithText("Relayed by Ridge (0x5A)").assertIsDisplayed()
+    }
+
+    @Test
+    fun messageStatusDialog_labelsTheAckRelayOfASentDirectMessage() = runComposeUiTest {
+        val message = localMessage(node = NodePreviewParameterProvider().mickeyMouse, status = MessageStatus.RECEIVED)
+
+        setContent {
+            MessageStatusDialog(
+                message = message,
+                resendOption = false,
+                onResend = {},
+                onDismiss = {},
+                isDirectMessage = true,
+                relayNodeLabel = "Ridge (0x5A)",
+            )
+        }
+
+        onNodeWithText("Ack relayed by Ridge (0x5A)").assertIsDisplayed()
+    }
+
+    @Test
+    fun messageStatusDialog_showsNoRelayWithoutALabel() = runComposeUiTest {
+        val message = localMessage(node = NodePreviewParameterProvider().mickeyMouse, status = MessageStatus.RECEIVED)
+
+        setContent { MessageStatusDialog(message = message, resendOption = false, onResend = {}, onDismiss = {}) }
+
+        onNodeWithText("elayed by", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun localMessageStatus_invokesStatusClick() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().mickeyMouse
         val message = localMessage(node = testNode, status = MessageStatus.QUEUED)

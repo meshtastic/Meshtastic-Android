@@ -102,6 +102,33 @@ class NodeTest {
     }
 
     @Test
+    fun getRelayNode_ranksUnknownHopsAfterKnownHops() {
+        val direct = Node(num = 0x000001AA, lastHeard = 100, hopsAway = 0)
+        val unknownHops = Node(num = 0x000002AA, lastHeard = 200, hopsAway = -1)
+
+        val relayNode = Node.getRelayNode(relayNodeId = 0xAA, nodes = listOf(unknownHops, direct), ourNodeNum = null)
+
+        assertEquals(direct, relayNode)
+    }
+
+    @Test
+    fun getRelayNode_picksUnknownHopsWhenNoKnownHopsMatch() {
+        val unknownHops = Node(num = 0x000002AA, lastHeard = 200, hopsAway = -1)
+
+        assertEquals(unknownHops, Node.getRelayNode(relayNodeId = 0xAA, nodes = listOf(unknownHops), ourNodeNum = null))
+    }
+
+    @Test
+    fun getRelayNode_breaksHopTiesByMostRecentlyHeard() {
+        val older = Node(num = 0x000001AA, lastHeard = 100, hopsAway = 0)
+        val newer = Node(num = 0x000002AA, lastHeard = 300, hopsAway = 0)
+
+        val relayNode = Node.getRelayNode(relayNodeId = 0xAA, nodes = listOf(older, newer), ourNodeNum = null)
+
+        assertEquals(newer, relayNode)
+    }
+
+    @Test
     fun isUnknownUser_falseWhenHardwareModelIsKnown() {
         val node = Node(num = 1, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TLORA_V2 }.build())
 

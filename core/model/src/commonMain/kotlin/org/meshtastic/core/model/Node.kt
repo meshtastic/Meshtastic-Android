@@ -251,18 +251,17 @@ data class Node(
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
-            val candidateRelayNodes = nodes.filter {
-                it.num != ourNodeNum && it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-            }
-
-            val closestRelayNode =
-                if (candidateRelayNodes.size == 1) {
-                    candidateRelayNodes.first()
-                } else {
-                    candidateRelayNodes.minByOrNull { it.hopsAway }
+            // hopsAway is -1 when unknown, so it must rank after every known hop count, not before 0.
+            return nodes
+                .filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
                 }
-
-            return closestRelayNode
+                .minWithOrNull(
+                    compareBy<Node> { if (it.hopsAway < 0) Int.MAX_VALUE else it.hopsAway }
+                        .thenByDescending { it.lastHeard },
+                )
         }
 
         /** Creates a fallback [Node] when the node is not found in the database. */
