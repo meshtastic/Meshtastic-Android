@@ -763,6 +763,9 @@ class FirmwareUpdateViewModel(
         expectedFirmwareVersion = release.reportedVersion()
         maintenanceHardware = currentState.deviceHardware
         destructiveWriteDone = false
+        // A maintenance run is a new flow: it owns no record, whatever an earlier run left in these flags.
+        runStrandedBefore = false
+        runPersistedRecord = false
         _bootloaderFault.value = null
 
         viewModelScope.launch {
@@ -1431,8 +1434,9 @@ class FirmwareUpdateViewModel(
             // The opted-in wipe is deliberately skipped: a device we could not verify is never wiped.
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
-            // Device is back and healthy: retire the record this update wrote, or the one it recovered from.
-            if (runPersistedRecord || runStrandedBefore) retireRecoveryRecord()
+            // Device is back and healthy — retire any recovery record (covers both normal and recovery updates).
+            pendingRecovery = null
+            firmwareRecoveryDataSource.clear()
             val wiped = factoryResetAfterVerify && sendPostUpdateFactoryReset()
             _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped, verified = true)
         }

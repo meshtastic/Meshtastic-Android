@@ -663,6 +663,49 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `a maintenance run on another device does not inherit an earlier run's record`() = runTest {
+        // A BLE run persists a record and fails after writing, so the record stays and the run still owns it.
+        useRecoverableBleNode()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("link lost"), nothingWritten = false))
+                null
+            }
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+
+        // A USB bootloader upgrade on another device parks in its download, then the user cancels.
+        val usbHardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52840",
+                platformioTarget = "rak4631",
+                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(usbHardware)
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(otafixReleaseTag = "2.6.0", otafixSupportedTargets = listOf("rak4631"))
+        every { usbManager.supportsUf2Maintenance } returns true
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        val parked = CompletableDeferred<FirmwareArtifact?>()
+        everySuspend { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) } calls { parked.await() }
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+
+        viewModel.startBootloaderUpgrade()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value)
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
     fun `startUpdate without wipe never factory-resets`() = runTest {
         advanceUntilIdle()
 
