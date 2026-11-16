@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
           distribution: temurin
           java-version: 25.0.5+8.0.LTS
@@ -58,7 +58,7 @@ jobs:
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
       # Fatal: foojay lists no JBR 25, so the build cannot configure without it.
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
           distribution: jetbrains
           java-version: 25
