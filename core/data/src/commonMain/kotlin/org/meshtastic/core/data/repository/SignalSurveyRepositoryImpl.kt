@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -68,8 +69,10 @@ class SignalSurveyRepositoryImpl(
     scope: ServiceScope,
 ) : SignalSurveyRepository {
 
-    private val _recording = MutableStateFlow(false)
-    override val recording: StateFlow<Boolean> = _recording.asStateFlow()
+    // Each start and stop is a distinct value, so a start that lands while the last recorder is still shutting down
+    // is seen by the collector instead of being conflated into the value it had already read.
+    private val request = MutableStateFlow(Request(on = false, id = 0))
+    override val recording: StateFlow<Boolean> = request.map { it.on }.stateIn(scope, SharingStarted.Eagerly, false)
 
     private val _blocker = MutableStateFlow<SignalSurveyBlocker?>(null)
     override val blocker: StateFlow<SignalSurveyBlocker?> = _blocker.asStateFlow()
@@ -82,16 +85,23 @@ class SignalSurveyRepositoryImpl(
 
     init {
         // One collector owns the recorder, so a start that races a stop cannot leave a recorder running unowned.
-        scope.launch { _recording.collectLatest { recording -> if (recording) record() } }
+        scope.launch { request.collectLatest { if (it.on) record(it) } }
     }
 
     override fun start() {
-        _recording.value = true
+        request.update { Request(on = true, id = it.id + 1) }
     }
 
     override fun stop() {
-        _recording.value = false
+        request.update { Request(on = false, id = it.id + 1) }
     }
+
+    /** Ends the survey [started] opened, unless a later start or stop has already replaced it. */
+    private fun end(started: Request) {
+        request.compareAndSet(started, Request(on = false, id = started.id + 1))
+    }
+
+    private data class Request(val on: Boolean, val id: Long)
 
     override fun samples(sessionId: Long): Flow<List<SignalSample>> =
         local.samples(sessionId).map { rows -> rows.map { it.asExternalModel() } }
@@ -101,27 +111,29 @@ class SignalSurveyRepositoryImpl(
 
     override suspend fun delete(sessionId: Long) = local.deleteSession(sessionId)
 
-    private suspend fun record() {
+    private suspend fun record(started: Request) {
         // The preset is kept with the session because an SNR reading only means something against it.
         val session = SignalSurveySessionEntity(startedAt = now(), modemPreset = radio.modemPresetName())
         val handle = safeCatching { local.openSession(session) }.getOrNull()
         if (handle == null) {
-            _recording.value = false
+            end(started)
             return
         }
         _activeSessionId.value = handle.id
+        var failed = false
         try {
             // A failure ends the survey rather than leaving the switch on with nothing recording behind it.
-            safeCatching { log(handle) }.onFailure { _recording.value = false }
+            safeCatching { log(handle, started) }.onFailure { failed = true }
         } finally {
             _blocker.value = null
             _activeSessionId.value = null
             withContext(NonCancellable) { safeCatching { local.closeSession(handle, endedAt = now()) } }
         }
+        if (failed) end(started)
     }
 
     /** Stores a reading for each live reception until cancelled. */
-    private suspend fun log(session: SurveySessionHandle) = coroutineScope {
+    private suspend fun log(session: SurveySessionHandle, started: Request) = coroutineScope {
         val location = locationStates().stateIn(this, SharingStarted.Eagerly, null)
         val radioFix = radio.ownFix.stateIn(this, SharingStarted.Eagerly, null)
         val connectedAt = MutableStateFlow<Long?>(null)
@@ -145,7 +157,7 @@ class SignalSurveyRepositoryImpl(
             // Switching radios swaps the database; the survey ends with the radio it was recording.
             val kept =
                 sample == null || safeCatching { local.insert(session, sample.asEntity(session.id)) }.getOrDefault(true)
-            if (!kept) _recording.value = false
+            if (!kept) end(started)
         }
     }
 
