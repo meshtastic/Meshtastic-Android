@@ -648,7 +648,8 @@ class FirmwareUpdateViewModel(
         _state.value = error
         tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         if (!error.nothingWritten || strandedBefore) return
-        retireRecoveryRecord()
+        // Only a record this run wrote is its own to retire; another device's record stays.
+        if (runPersistedRecord) retireRecoveryRecord()
         originalDeviceAddress?.takeIf { it != radioPrefs.devAddr.value }?.let { radioController.setDeviceAddress(it) }
     }
 
@@ -1430,9 +1431,8 @@ class FirmwareUpdateViewModel(
             // The opted-in wipe is deliberately skipped: a device we could not verify is never wiped.
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
-            // Device is back and healthy — retire any recovery record (covers both normal and recovery updates).
-            pendingRecovery = null
-            firmwareRecoveryDataSource.clear()
+            // Device is back and healthy: retire the record this update wrote, or the one it recovered from.
+            if (runPersistedRecord || runStrandedBefore) retireRecoveryRecord()
             val wiped = factoryResetAfterVerify && sendPostUpdateFactoryReset()
             _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped, verified = true)
         }

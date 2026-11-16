@@ -425,7 +425,7 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `an error that wrote nothing retires the recovery record`() = runTest {
-        advanceUntilIdle()
+        useRecoverableBleNode()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
             .calls {
                 @Suppress("UNCHECKED_CAST")
@@ -544,7 +544,7 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `cancelling a download that persisted no record leaves another device's record alone`() = runTest {
-        advanceUntilIdle() // the default ESP32 node persists no recovery record
+        advanceUntilIdle() // the default node has a non-BLE address, so it persists no recovery record
         val parked = CompletableDeferred<Unit>()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
             .calls {
@@ -585,7 +585,7 @@ class FirmwareUpdateViewModelTest {
     }
 
     private fun TestScope.assertFailureRetiresRecord(failure: Exception) {
-        advanceUntilIdle()
+        useRecoverableBleNode()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
             .calls {
                 @Suppress("UNCHECKED_CAST")
@@ -641,6 +641,24 @@ class FirmwareUpdateViewModelTest {
             UiText.Resource(Res.string.firmware_recovery_ble_failed),
             (viewModel.state.value as FirmwareUpdateState.Error).error,
         )
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a failed run that persisted no record leaves another device's record alone`() = runTest {
+        advanceUntilIdle() // the default node has a non-BLE address, so it persists no recovery record
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("offline"), nothingWritten = true))
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
