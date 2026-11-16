@@ -63,6 +63,7 @@ class TelemetryWidgetContentTest {
     private val temperatureLabel: String = getString(Res.string.temperature)
     private val humidityLabel: String = getString(Res.string.humidity)
     private val dewLine: String = getString(Res.string.widget_telemetry_dew, "9°C")
+    private val dewLineFahrenheit: String = getString(Res.string.widget_telemetry_dew, "51°F")
     private val luxLabel: String = getString(Res.string.lux)
     private val excellent: String = getString(Res.string.iaq_level_excellent)
     private val staleLabel: String = getString(Res.string.widget_telemetry_stale)
@@ -246,6 +247,7 @@ class TelemetryWidgetContentTest {
                 environment =
                 environment {
                     temperature = 21.4f
+                    relative_humidity = 50f
                     wind_speed = 4.2f
                 },
             )
@@ -254,6 +256,8 @@ class TelemetryWidgetContentTest {
         val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputs, emptyList(), now = NOW)
         render(WidgetSizes.TELEMETRY_GRID, state) {
             onNode(hasText("71°F")).assertExists()
+            // The humidity tile's dew point line follows the same unit.
+            onNode(hasContentDescriptionEqualTo("$humidityLabel 50%, $dewLineFahrenheit")).assertExists()
             onNode(hasText("mph")).assertExists()
             onNode(hasText("km/h")).assertDoesNotExist()
         }
