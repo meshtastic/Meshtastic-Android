@@ -12,7 +12,7 @@ A Crashlytics issue id or console URL, a crash signature / exception class, an a
 
 ## Procedure
 
-1. **Pull the issue + events** with the Crashlytics MCP tools (mounted as `mcp__firebase__crashlytics_*` or, from the `firebase` plugin, `mcp__plugin_firebase_firebase__crashlytics_*`): `get_issue` for the summary, `list_events`/`batch_get_events` for representative stack traces, affected versions, device/OS/state breakdown, and event volume over time. Read `list_notes` for prior triage. Use `get_report` for aggregate trends when a time-series matters.
+1. **Pull the issue + events** with the Crashlytics MCP tools (mounted as `mcp__firebase__crashlytics_*` or, from the `firebase` plugin, `mcp__plugin_firebase_firebase__crashlytics_*`): `get_issue` for the summary, `list_events`/`batch_get_events` for representative stack traces, affected versions, device/OS/state breakdown, and event volume over time. Read `list_notes` for prior triage. Use `get_report` for aggregate trends when a time-series matters. Nest every `get_report` filter under `filter` (a top-level one is silently dropped), and never filter by `versionDisplayNames`: its `version (build)` validator rejects this app's display names (`2.8.2 (29322268) google`). Scope to a build with the `topVersions` report filtered by `issueId`.
 
 2. **Map versionCode → tag / commit / Play track.** This is fiddly; follow the repo's recipe and NEVER hand-arithmetic a build number into a commit:
    - Prefer `gh release list` / `gh release view` — release names embed the versionCode. Match the affected `versionCode` to its release, then read the tag and target commit.
