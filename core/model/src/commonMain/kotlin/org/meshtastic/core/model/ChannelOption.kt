@@ -46,13 +46,13 @@ private fun hash(name: String): UInt {
     return hash
 }
 
-private val ModemPreset.bandwidth: Float
-    get() {
-        for (option in ChannelOption.entries) {
-            if (option.modemPreset == this) return option.bandwidth
-        }
-        return 0f
-    }
+/** Firmware `modemPresetToParams` bandwidth in MHz: a wide-LoRa region widens only presets with a wide variant. */
+private fun ModemPreset.bandwidth(wideLora: Boolean): Float {
+    val option = ChannelOption.entries.firstOrNull { it.modemPreset == this } ?: return 0f
+    return if (wideLora && option.widensOnWideLora) option.bandwidth * WIDE_LORA_BANDWIDTH_SCALE else option.bandwidth
+}
+
+private const val WIDE_LORA_BANDWIDTH_SCALE = 3.25f
 
 /**
  * The SNR (in dB) at or above which a packet sent with this modem preset can still be demodulated — i.e. the
@@ -67,7 +67,7 @@ val ModemPreset?.snrLimit: Float
     get() = (ChannelOption.from(this) ?: ChannelOption.DEFAULT).snrLimit
 
 private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
-    modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
+    modem_preset.bandwidth(wideLora = regionInfo?.wideLora == true)
 } else {
     loraBandwidthMegahertz(bandwidth)
 }
@@ -93,13 +93,18 @@ val LoRaConfig.numChannels: Int
         return if (num > 0) num.toInt() else 1
     }
 
+/**
+ * Firmware `RadioInterface::resolveFrequencySlot`: `channel_num` and then the region's override slot win only while
+ * they fit the region's slot count; firmware never tunes a slot past it.
+ */
 internal fun LoRaConfig.channelNum(primaryName: String): Int {
+    val slots = numChannels
     val overrideSlot = RegionInfo.fromRegionCode(region)?.overrideSlot ?: 0
     return when {
-        channel_num != 0 -> channel_num
-        numChannels == 0 -> 0
-        overrideSlot > 0 -> overrideSlot
-        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+        channel_num in 1..slots -> channel_num
+        slots == 0 -> 0
+        overrideSlot in 1..slots -> overrideSlot
+        else -> (hash(primaryName) % slots.toUInt()).toInt() + 1
     }
 }
 
@@ -153,7 +158,7 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
  * @property spacing Gap between frequency slots (and at the start of the band) in MHz, from the firmware's region
  *   profile
  * @property padding Gap at each side of a frequency slot in MHz, from the firmware's region profile (coerces the modem
- *   bandwidth up to the region's slot width, e.g. ham 15.625 kHz -> 20 kHz)
+ *   bandwidth up to the region's slot width, e.g. ham 15.6 kHz -> 20 kHz)
  * @property overrideSlot The region's fixed default frequency slot (1-based), or 0 to derive the slot from the primary
  *   channel-name hash as usual
  * @property minFirmware The first firmware release whose region table contains this region, or null for regions all
@@ -492,6 +497,8 @@ enum class ChannelOption(
     val codingRate: Int,
     val minFirmware: DeviceVersion? = null,
     val removedInFirmware: DeviceVersion? = null,
+    /** Whether a wide-LoRa (2.4 GHz) region scales [bandwidth] by 3.25, as firmware does for the original presets. */
+    val widensOnWideLora: Boolean = true,
 ) {
     // Grouped by range and speed for better readability.
     // Preset parameters mirror firmware's modemPresetToParams (src/mesh/MeshRadio.h).
@@ -517,15 +524,58 @@ enum class ChannelOption(
     SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, spreadingFactor = 7, codingRate = 5),
     SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, spreadingFactor = 8, codingRate = 5),
     SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, spreadingFactor = 7, codingRate = 5),
-    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, spreadingFactor = 9, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, spreadingFactor = 10, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, spreadingFactor = 7, codingRate = 6, minFirmware = FIRMWARE_2_8),
-    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
 
-    // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
-    // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
-    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, spreadingFactor = 7, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
+    // LITE, NARROW and TINY have no wide variant in firmware.
+    LITE_FAST(
+        ModemPreset.LITE_FAST,
+        0.125f,
+        spreadingFactor = 9,
+        codingRate = 5,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
+    LITE_SLOW(
+        ModemPreset.LITE_SLOW,
+        0.125f,
+        spreadingFactor = 10,
+        codingRate = 5,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
+    NARROW_FAST(
+        ModemPreset.NARROW_FAST,
+        0.0625f,
+        spreadingFactor = 7,
+        codingRate = 6,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
+    NARROW_SLOW(
+        ModemPreset.NARROW_SLOW,
+        0.0625f,
+        spreadingFactor = 8,
+        codingRate = 6,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
+
+    // Firmware computes slots with 15.6 kHz, not the chip's exact 15.625; the proto's "20kHz" is the padded slot width.
+    TINY_FAST(
+        ModemPreset.TINY_FAST,
+        0.0156f,
+        spreadingFactor = 7,
+        codingRate = 5,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
+    TINY_SLOW(
+        ModemPreset.TINY_SLOW,
+        0.0156f,
+        spreadingFactor = 8,
+        codingRate = 6,
+        minFirmware = FIRMWARE_2_8,
+        widensOnWideLora = false,
+    ),
     ;
 
     // Semtech demodulation floor: -7.5 dB at SF7, improving 2.5 dB per SF step.
