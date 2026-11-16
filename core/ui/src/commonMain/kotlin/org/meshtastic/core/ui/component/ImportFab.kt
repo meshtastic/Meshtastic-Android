@@ -32,16 +32,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.import_export_label
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.input_channel_url
+import org.meshtastic.core.resources.input_connect_code_url
 import org.meshtastic.core.resources.input_shared_contact_url
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.scan_channels_nfc
 import org.meshtastic.core.resources.scan_channels_qr
+import org.meshtastic.core.resources.scan_connect_code
+import org.meshtastic.core.resources.scan_connect_code_nfc
+import org.meshtastic.core.resources.scan_connect_code_qr
 import org.meshtastic.core.resources.scan_nfc
 import org.meshtastic.core.resources.scan_nfc_text
 import org.meshtastic.core.resources.scan_shared_contact_nfc
@@ -74,6 +79,7 @@ import org.meshtastic.proto.SharedContact
  * @param onShareChannels Optional callback to trigger sharing channels.
  * @param onShareContact Optional callback to trigger sharing the connected node as a contact.
  * @param isContactContext Hint to customize UI strings for contact importing context.
+ * @param importKind What is being imported, which picks the UI strings. Derived from [isContactContext] by default.
  * @param testTag Optional test tag for UI testing.
  * @param importDialog Composable to display the import dialog. Defaults to [SharedContactImportDialog].
  */
@@ -87,6 +93,7 @@ fun MeshtasticImportFAB(
     onShareChannels: (() -> Unit)? = null,
     onShareContact: (() -> Unit)? = null,
     isContactContext: Boolean = true,
+    importKind: ImportKind = if (isContactContext) ImportKind.Contact else ImportKind.Channel,
     testTag: String? = null,
     importDialog: @Composable (SharedContact, () -> Unit) -> Unit = { contact, dismiss ->
         SharedContactImportDialog(sharedContact = contact, onDismiss = dismiss)
@@ -126,10 +133,7 @@ fun MeshtasticImportFAB(
 
     if (showUrlDialog) {
         InputUrlDialog(
-            title =
-            stringResource(
-                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
-            ),
+            title = stringResource(importKind.inputUrlRes),
             onDismiss = { showUrlDialog = false },
             onConfirm = { contents ->
                 normalizeImportContents(contents)?.let {
@@ -145,10 +149,7 @@ fun MeshtasticImportFAB(
     if (isNfcSupported) {
         items.add(
             MenuFABItem(
-                label =
-                stringResource(
-                    if (isContactContext) Res.string.scan_shared_contact_nfc else Res.string.scan_channels_nfc,
-                ),
+                label = stringResource(importKind.scanNfcRes),
                 icon = MeshtasticIcons.Nfc,
                 onClick = { isNfcScanning = true },
                 testTag = "nfc_import",
@@ -159,10 +160,7 @@ fun MeshtasticImportFAB(
     if (isBarcodeSupported) {
         items.add(
             MenuFABItem(
-                label =
-                stringResource(
-                    if (isContactContext) Res.string.scan_shared_contact_qr else Res.string.scan_channels_qr,
-                ),
+                label = stringResource(importKind.scanQrRes),
                 icon = MeshtasticIcons.QrCodeScanner,
                 onClick = { barcodeScanner.startScan() },
                 testTag = "qr_import",
@@ -172,10 +170,7 @@ fun MeshtasticImportFAB(
 
     items.add(
         MenuFABItem(
-            label =
-            stringResource(
-                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
-            ),
+            label = stringResource(importKind.inputUrlRes),
             icon = MeshtasticIcons.LinkIcon,
             onClick = { showUrlDialog = true },
             testTag = "url_import",
@@ -209,15 +204,36 @@ fun MeshtasticImportFAB(
         onExpandedChange = { expanded = it },
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
-        contentDescription = stringResource(importFabContentDescriptionRes(onShareChannels, onShareContact)),
+        contentDescription =
+        stringResource(
+            importFabContentDescriptionRes(
+                importKind = importKind,
+                canScan = isNfcSupported || isBarcodeSupported,
+                canShare = onShareChannels != null || onShareContact != null,
+            ),
+        ),
         testTag = testTag,
     )
 }
 
 internal fun normalizeImportContents(contents: String?): String? = contents?.trim()?.takeIf { it.isNotEmpty() }
 
-private fun importFabContentDescriptionRes(onShareChannels: (() -> Unit)?, onShareContact: (() -> Unit)?) =
-    if (onShareChannels != null || onShareContact != null) Res.string.import_export_label else Res.string.import_label
+private fun importFabContentDescriptionRes(importKind: ImportKind, canScan: Boolean, canShare: Boolean) = when {
+    canShare -> Res.string.import_export_label
+    importKind == ImportKind.ConnectCode && canScan -> Res.string.scan_connect_code
+    else -> Res.string.import_label
+}
+
+/** What [MeshtasticImportFAB] imports, and the strings its menu shows for it. */
+enum class ImportKind(
+    internal val scanNfcRes: StringResource,
+    internal val scanQrRes: StringResource,
+    internal val inputUrlRes: StringResource,
+) {
+    Contact(Res.string.scan_shared_contact_nfc, Res.string.scan_shared_contact_qr, Res.string.input_shared_contact_url),
+    Channel(Res.string.scan_channels_nfc, Res.string.scan_channels_qr, Res.string.input_channel_url),
+    ConnectCode(Res.string.scan_connect_code_nfc, Res.string.scan_connect_code_qr, Res.string.input_connect_code_url),
+}
 
 @Composable
 private fun NfcScanningDialog(onDismiss: () -> Unit) {

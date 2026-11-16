@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -49,8 +50,6 @@ import org.meshtastic.core.resources.deep_link_disconnect_message
 import org.meshtastic.core.resources.deep_link_disconnect_title
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
-import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
@@ -83,18 +82,19 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         val scope = rememberCoroutineScope()
         val showToast = rememberShowToastResource()
 
-        val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
-            val link = contents?.let(::connectLinkFrom)?.takeIf { it.address?.let(admits) == true }
+        val onConnectCode: (String) -> Unit = { contents ->
+            val link = connectLinkFrom(contents)?.takeIf { it.address?.let(admits) == true }
             if (link != null) {
-                pendingAddress = link.address
-                pendingPinParam = link.pin
-                pendingFromScan = true
-            } else if (contents != null) {
+                // NFC delivers this on a binder thread; one snapshot keeps the address from showing without its flag.
+                Snapshot.withMutableSnapshot {
+                    pendingAddress = link.address
+                    pendingPinParam = link.pin
+                    pendingFromScan = true
+                }
+            } else {
                 scope.launch { showToast(Res.string.connect_code_invalid) }
             }
         }
-        val scannerSupported = LocalBarcodeScannerSupported.current
-        val onScanConnectCode = barcodeScanner::startScan.takeIf { scannerSupported }
 
         pendingAddress?.let { address ->
             DeepLinkConnectPrompt(
@@ -124,7 +124,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
             onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },
-            onScanConnectCode = onScanConnectCode,
+            onConnectCode = onConnectCode,
         )
     }
 }

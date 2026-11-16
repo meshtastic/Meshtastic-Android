@@ -125,6 +125,41 @@ class ImportFabUiTest {
     }
 
     @Test
+    fun importFab_usesConnectCodeLabels_forConnectCodeKind() = runComposeUiTest {
+        val testTag = "import_fab"
+        setContent {
+            CompositionLocalProvider(
+                LocalBarcodeScannerSupported provides true,
+                LocalNfcScannerSupported provides true,
+            ) {
+                MeshtasticImportFAB(onImport = {}, importKind = ImportKind.ConnectCode, testTag = testTag)
+            }
+        }
+
+        onNodeWithContentDescription("Scan a connect code").assertIsDisplayed()
+        onNodeWithTag(testTag).performClick()
+
+        onNodeWithText("Scan Connect Code NFC").assertIsDisplayed()
+        onNodeWithText("Scan Connect Code QR Code").assertIsDisplayed()
+        onNodeWithText("Input Connect Code URL").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_describesConnectCodeAsImport_whenNoScannerExists() = runComposeUiTest {
+        setContent {
+            CompositionLocalProvider(
+                LocalBarcodeScannerSupported provides false,
+                LocalNfcScannerSupported provides false,
+            ) {
+                MeshtasticImportFAB(onImport = {}, importKind = ImportKind.ConnectCode)
+            }
+        }
+
+        onNodeWithContentDescription("Import").assertIsDisplayed()
+        onNodeWithContentDescription("Scan a connect code").assertDoesNotExist()
+    }
+
+    @Test
     fun importFab_describesClose_whenExpanded() = runComposeUiTest {
         val testTag = "import_fab"
         setContent {

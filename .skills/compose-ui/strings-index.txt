@@ -915,6 +915,7 @@ incoming_messages
 indoor_air_quality_iaq
 info
 input_channel_url
+input_connect_code_url
 input_shared_contact_url
 insert
 insert_link_message
@@ -1899,6 +1900,8 @@ scan_bluetooth_devices
 scan_channels_nfc
 scan_channels_qr
 scan_connect_code
+scan_connect_code_nfc
+scan_connect_code_qr
 scan_network_devices
 scan_nfc
 scan_nfc_text
