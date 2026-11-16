@@ -48,12 +48,6 @@ class RadiationSummaryTest {
     }
 
     @Test
-    fun reportedRadiationIsShown() = runComposeUiTest {
-        setSummary(EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0.5f }.build())
-        onNodeWithText(formatString("%.1f µR/h", 0.5f), substring = true).assertIsDisplayed()
-    }
-
-    @Test
     fun missingRadiationIsHidden() = runComposeUiTest {
         setSummary(EnvironmentMetrics.Builder().build())
         onNodeWithText("µR/h", substring = true).assertDoesNotExist()

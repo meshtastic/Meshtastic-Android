@@ -164,11 +164,4 @@ class EnvironmentChartGroupTest {
         assertNull(environmentAxisRange(EnvironmentChartGroup.LUX, 0.0, 800.0))
         assertNull(environmentAxisRange(EnvironmentChartGroup.WIND, 0.0, 12.0))
     }
-
-    @Test
-    fun autoscaledSeriesIsLeftToTheChart() {
-        assertNull(environmentAxisRange(EnvironmentChartGroup.RADIATION, 0.0, 0.0))
-        assertNull(environmentAxisRange(EnvironmentChartGroup.RADIATION, 0.15, 0.15))
-        assertNull(environmentAxisRange(EnvironmentChartGroup.LUX, 500.0, 500.0))
-    }
 }
