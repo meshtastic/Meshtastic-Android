@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.5-internal.2)
+### Internal (v2.8.5-internal.3)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
 #### 🏗️ Features
@@ -26,8 +26,14 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(xr): stand the device model in the room on Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7987
 * feat(xr): 3D terrain map on Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7989
 * feat(xr): map the terrain table with imagery, buildings, contours, routes and comets by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8001
+* perf(database): cut the queries each log and node write re-runs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8048
+* perf(database): serve reads from Room's reader pool by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8053
+* feat(widget): add a Telemetry widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8057
+* feat(widget): filter the Telemetry widget's node picker by name or id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8059
+* feat(map): signal survey with live map overlay, heatmap and AR ground view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8066
 #### 🖥️ Desktop
 * fix(desktop): let the JVM size the heap from available RAM by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8015
+* fix(resources): keep suspending string lookups off the main dispatcher by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8050
 #### 🛠️ Fixes
 * fix(widget): compose the picker preview without a glance id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7934
 * fix(map): download regional terrain from every z6 archive a region touches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7943
@@ -52,6 +58,15 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(connections): reject connect link and settings PINs with a leading zero by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8006
 * fix(build): let R8 pass over the Android XR system extensions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8023
 * fix(map): bound the memory map layers and coverage terrain hold by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8030
+* fix(settings): gate precise location on public-key channels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8043
+* fix(map): drop a non-finite pose before the Mesh HUD rounds its heading by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8049
+* fix(data): retry contact and unread flows after a Room pool stall and name the stalled flow by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8052
+* fix(node): show the IAQ band color and label on the node detail tile by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8071
+* fix(widget): show the dew point under humidity on the Telemetry widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8073
+* fix(node): plot and show a reported 0 for humidity and radiation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8067
+* fix(firmware): clear the recovery record when a bootloader upgrade fails before writing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8068
+* fix(map): draw the traceroute return route dashed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8076
+* fix(survey): do not lose a start that lands while the last recorder shuts down by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8078
 #### 📝 Other Changes
 * fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
 <!-- UNRELEASED_END -->
