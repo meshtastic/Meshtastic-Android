@@ -524,6 +524,14 @@ internal fun Exception.toErrorState(): FirmwareUpdateState.Error = when (this) {
             nothingWritten = true,
         )
 
+    is DfuException.InvalidPackage,
+    is DfuException.BootloaderNotLegacy,
+    ->
+        FirmwareUpdateState.Error(
+            UiText.Resource(Res.string.firmware_update_ota_failed, message.orEmpty()),
+            nothingWritten = true,
+        )
+
     is BootloaderSwapTimeout ->
         FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_bootloader_not_back))
 
@@ -560,6 +568,16 @@ private suspend fun enterDfuMode(
     delay(DFU_REBOOT_WAIT_MS)
     return preStart
 }
+
+/** Unzips [artifact]; a size-limit or corrupt-archive failure surfaces as [DfuException.InvalidPackage]. */
+private suspend fun FirmwareFileHandler.extractPackageEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+    try {
+        extractZipEntries(artifact)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        throw DfuException.InvalidPackage("Could not read the DFU zip: ${e.message}", e)
+    }
 
 private fun DfuUploadResult.throwOnFailure() {
     if (this is DfuUploadResult.Failure) throw error
@@ -605,7 +623,7 @@ class SecureDfuHandler(
                         ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
                     ),
                 )
-                val entries = firmwareFileHandler.extractZipEntries(zipFile)
+                val entries = firmwareFileHandler.extractPackageEntries(zipFile)
                 val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
@@ -666,7 +684,7 @@ class SecureDfuHandler(
             withContext(ioDispatcher) {
                 appZip = obtainZipFile(release, hardware, null, updateState)
                 val appArtifact = appZip ?: return@withContext null
-                val appPkg = parseDfuZipEntries(firmwareFileHandler.extractZipEntries(appArtifact))
+                val appPkg = parseDfuZipEntries(firmwareFileHandler.extractPackageEntries(appArtifact))
 
                 bootloaderZip =
                     downloadWithProgress(
@@ -687,16 +705,20 @@ class SecureDfuHandler(
                             return@withContext appArtifact
                         }
                 val bootloaderPkg =
-                    parseBootloaderDfuZipEntries(firmwareFileHandler.extractZipEntries(bootloaderArtifact))
+                    parseBootloaderDfuZipEntries(firmwareFileHandler.extractPackageEntries(bootloaderArtifact))
 
                 val preStart =
                     enterDfuMode(target, radioController, bleScanner, bleConnectionFactory, dispatchers, updateState)
                 if (detectBootloaderProtocol(target, updateState) == BootloaderDetection.SecureObserved) {
-                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode.
-                    resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)
-                    throw DfuException.TransferFailed(
-                        "Bootloader speaks Secure DFU; only Legacy DFU bootloaders take this package",
-                    )
+                    // Nothing was written; reset it back to its application instead of leaving it in DFU mode. If the
+                    // reset could not be sent the board may still be in its bootloader, so the failure keeps its
+                    // record.
+                    if (!resetStaleBootloader(DfuProtocolKind.SECURE, target, preStart)) {
+                        throw DfuException.TransferFailed(
+                            "Bootloader speaks Secure DFU and could not be reset back to its application",
+                        )
+                    }
+                    throw DfuException.BootloaderNotLegacy()
                 }
                 val budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS)
                 runDfuUploadWithRetry(
@@ -931,7 +953,12 @@ class SecureDfuHandler(
      * abort are best-effort (swallowed by [DfuUploadTransport.abort]); structured-concurrency cancellation and [Error]
      * subtypes propagate per the abort contract.
      */
-    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String, preStart: PreStartBudget) {
+    private suspend fun resetStaleBootloader(
+        protocol: DfuProtocolKind,
+        target: String,
+        preStart: PreStartBudget,
+    ): Boolean {
+        var resetSent = false
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
         val transport = createTransport(protocol, target)
         try {
@@ -939,7 +966,13 @@ class SecureDfuHandler(
                 transport
                     .connectToDfuMode()
                     .onSuccess {
-                        transport.abort()
+                        // Only a Secure transport reports whether the RESET write completed; other callers ignore it.
+                        resetSent =
+                            (transport as? SecureDfuTransport)?.sendAbort()
+                                ?: run {
+                                    transport.abort()
+                                    true
+                                }
                         Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
                     }
                     .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
@@ -948,6 +981,7 @@ class SecureDfuHandler(
             withContext(NonCancellable) { transport.close() }
         }
         delay(RESET_PRIME_REBOOT_WAIT_MS)
+        return resetSent
     }
 
     /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */

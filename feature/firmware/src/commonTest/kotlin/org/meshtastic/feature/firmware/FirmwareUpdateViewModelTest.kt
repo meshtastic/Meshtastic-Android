@@ -29,15 +29,20 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -61,6 +66,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_no_device
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
@@ -69,6 +75,8 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.feature.firmware.ota.dfu.DfuException
+import org.meshtastic.feature.firmware.ota.dfu.toErrorState
 import org.meshtastic.proto.DeviceMetadata
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -417,7 +425,7 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `an error that wrote nothing retires the recovery record`() = runTest {
-        advanceUntilIdle()
+        useRecoverableBleNode()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
             .calls {
                 @Suppress("UNCHECKED_CAST")
@@ -431,6 +439,270 @@ class FirmwareUpdateViewModelTest {
 
         assertEquals(UiText.DynamicString("refused"), (viewModel.state.value as FirmwareUpdateState.Error).error)
         verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    /** An nRF52 node over BLE, whose normal update persists a recovery record. */
+    private fun TestScope.useRecoverableBleNode() {
+        val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        every { radioPrefs.devName } returns MutableStateFlow(null)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `cancelling during the download retires the recovery record`() = runTest {
+        useRecoverableBleNode()
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling a recovery re-flash during its download keeps the recovery record`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.recoverDfuDevice(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a cancelled run that unwinds late leaves the replacement run alone`() = runTest {
+        useRecoverableBleNode()
+        val releaseOld = CompletableDeferred<Unit>()
+        val parkedNew = CompletableDeferred<Unit>()
+        var runs = 0
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                if (runs++ == 0) {
+                    // The first run keeps unwinding after it is cancelled, as DFU transport cleanup can.
+                    withContext(NonCancellable) { releaseOld.await() }
+                    currentCoroutineContext().ensureActive()
+                } else {
+                    parkedNew.await()
+                }
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        runCurrent()
+        viewModel.startUpdate()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value)
+
+        releaseOld.complete(Unit)
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value, "the replacement run keeps its state")
+        verifySuspend(mode = VerifyMode.exactly(1)) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling a download that persisted no record leaves another device's record alone`() = runTest {
+        advanceUntilIdle() // the default node has a non-BLE address, so it persists no recovery record
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling after the device entered its bootloader keeps the recovery record`() = runTest {
+        advanceUntilIdle()
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Updating(ProgressState(UiText.DynamicString("flashing"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    private fun TestScope.assertFailureRetiresRecord(failure: Exception) {
+        useRecoverableBleNode()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(failure.toErrorState())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a Secure DFU refusal retires the recovery record`() = runTest {
+        assertFailureRetiresRecord(DfuException.BootloaderNotLegacy())
+    }
+
+    @Test
+    fun `an unreadable package retires the recovery record`() = runTest {
+        assertFailureRetiresRecord(DfuException.InvalidPackage("manifest.json not found"))
+    }
+
+    @Test
+    fun `a recovery re-flash with an unreadable package keeps the USB recovery guidance and the record`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        everySuspend { firmwareUpdateManager.recoverDfuDevice(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(DfuException.InvalidPackage("manifest.json not found").toErrorState())
+                null
+            }
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertEquals(
+            UiText.Resource(Res.string.firmware_recovery_ble_failed),
+            (viewModel.state.value as FirmwareUpdateState.Error).error,
+        )
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a failed run that persisted no record leaves another device's record alone`() = runTest {
+        advanceUntilIdle() // the default node has a non-BLE address, so it persists no recovery record
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("offline"), nothingWritten = true))
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a maintenance run on another device does not inherit an earlier run's record`() = runTest {
+        // A BLE run persists a record and fails after writing, so the record stays and the run still owns it.
+        useRecoverableBleNode()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Error(UiText.DynamicString("link lost"), nothingWritten = false))
+                null
+            }
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+
+        // A USB bootloader upgrade on another device parks in its download, then the user cancels.
+        val usbHardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52840",
+                platformioTarget = "rak4631",
+                softDeviceVariant = SoftDeviceVariant.S140_6_1_1,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(usbHardware)
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            MaintenanceUf2Manifest(otafixReleaseTag = "2.6.0", otafixSupportedTargets = listOf("rak4631"))
+        every { usbManager.supportsUf2Maintenance } returns true
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        val parked = CompletableDeferred<FirmwareArtifact?>()
+        everySuspend { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) } calls { parked.await() }
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+
+        viewModel.startBootloaderUpgrade()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value)
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test

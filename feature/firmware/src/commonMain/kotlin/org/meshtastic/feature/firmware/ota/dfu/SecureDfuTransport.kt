@@ -303,15 +303,19 @@ class SecureDfuTransport(
      * accept a fresh DFU session.
      */
     override suspend fun abort() {
-        safeCatching {
-            bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
-                val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
-                service.write(controlChar, byteArrayOf(DfuOpcode.ABORT), BleWriteType.WITH_RESPONSE)
-            }
-            Logger.i { "DFU: Abort sent to device." }
-        }
-            .onFailure { Logger.w(it) { "DFU: Failed to send abort (device may have disconnected)" } }
+        sendAbort()
     }
+
+    /** Writes ABORT to the control point; returns whether the write completed. */
+    suspend fun sendAbort(): Boolean = safeCatching {
+        bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
+            val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
+            service.write(controlChar, byteArrayOf(DfuOpcode.ABORT), BleWriteType.WITH_RESPONSE)
+        }
+        Logger.i { "DFU: Abort sent to device." }
+    }
+        .onFailure { Logger.w(it) { "DFU: Failed to send abort (device may have disconnected)" } }
+        .isSuccess
 
     /** Disconnect from the DFU target and cancel the transport coroutine scope. */
     override suspend fun close() {
