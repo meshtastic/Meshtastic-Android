@@ -669,6 +669,7 @@
     <string name="shutdown">Leállítás</string>
     <string name="shutdown_node_name">Csomópont: %1$s</string>
     <string name="shutdown_warning">⚠️ Ez LEÁLLÍTJA a csomópontot. Újraindításhoz fizikai beavatkozás szükséges.</string>
+    <!-- SIGNAL -->
     <string name="signal">Jel</string>
     <string name="signal_quality">Jelminőség</string>
     <!-- SITE -->

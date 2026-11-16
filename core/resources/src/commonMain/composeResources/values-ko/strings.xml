@@ -441,6 +441,7 @@
     <string name="show_precision_circle">정밀도 반경 보이기</string>
     <string name="show_waypoints">웨이포인트 보기</string>
     <string name="shutdown">종료</string>
+    <!-- SIGNAL -->
     <string name="signal">신호</string>
     <string name="signal_quality">신호 감도</string>
     <!-- SITE -->

@@ -262,6 +262,7 @@
     <string name="share_to">Delite z…</string>
     <!-- SHOW -->
     <string name="shutdown">Ugasni</string>
+    <!-- SIGNAL -->
     <string name="signal">Signal</string>
     <string name="signal_quality">Kakovost signala</string>
     <!-- SITE -->

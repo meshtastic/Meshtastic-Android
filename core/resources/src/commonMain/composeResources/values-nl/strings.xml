@@ -371,6 +371,7 @@
     <!-- SHOW -->
     <string name="show_password">Wachtwoord tonen</string>
     <string name="shutdown">Zet uit</string>
+    <!-- SIGNAL -->
     <string name="signal">Signaal</string>
     <string name="signal_quality">Signaalkwaliteit</string>
     <!-- SITE -->

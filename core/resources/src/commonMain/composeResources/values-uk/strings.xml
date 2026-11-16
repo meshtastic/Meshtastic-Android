@@ -995,6 +995,7 @@
     <string name="shutdown">Вимкнути</string>
     <string name="shutdown_node_name">Вузол: %1$s</string>
     <string name="shutdown_warning">⚠️ Це призведе до ВИМКНЕННЯ вузла. Знадобиться фізична взаємодія для його увімкнення.</string>
+    <!-- SIGNAL -->
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Якість сигналу</string>
     <!-- SITE -->

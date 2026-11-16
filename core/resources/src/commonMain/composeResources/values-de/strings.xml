@@ -1279,6 +1279,7 @@
     <string name="shutdown">Herunterfahren</string>
     <string name="shutdown_node_name">Knoten: %1$s</string>
     <string name="shutdown_warning">⚠️ Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
+    <!-- SIGNAL -->
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalqualität</string>
     <!-- SITE -->

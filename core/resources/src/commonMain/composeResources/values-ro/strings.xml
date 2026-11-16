@@ -875,6 +875,7 @@
     <string name="shutdown">Oprire</string>
     <string name="shutdown_node_name">Nod: %1$s</string>
     <string name="shutdown_warning">⚠️ Aceasta va OPRI nodul. Pentru a-l repune în funcțiune, va fi necesară o intervenție fizică.</string>
+    <!-- SIGNAL -->
     <string name="signal">Semnal</string>
     <string name="signal_quality">Calitatea semnalului</string>
     <!-- SITE -->

@@ -223,6 +223,7 @@
     <string name="share">Compartir</string>
     <!-- SHOW -->
     <string name="shutdown">Apagar</string>
+    <!-- SIGNAL -->
     <!-- SITE -->
     <string name="swipe_action_delete">Eliminar</string>
     <string name="swipe_action_mute">Silenciar</string>
