@@ -159,6 +159,7 @@ org.meshtastic.feature.map.kml
 org.meshtastic.feature.map.layers
 org.meshtastic.feature.map.navigation
 org.meshtastic.feature.map.node
+org.meshtastic.feature.map.survey
 org.meshtastic.feature.map.tiles
 module:feature-map-maplibre
 org.meshtastic.feature.map.maplibre
