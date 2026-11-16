@@ -409,6 +409,7 @@
     <!-- SHOW -->
     <string name="show_password">Zobraziť heslo</string>
     <string name="shutdown">Vypnúť</string>
+    <!-- SIGNAL -->
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
     <!-- SITE -->

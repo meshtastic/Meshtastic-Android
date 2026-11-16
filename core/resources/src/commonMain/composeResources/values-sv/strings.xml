@@ -1042,6 +1042,7 @@
     <string name="shutdown">Stäng av</string>
     <string name="shutdown_node_name">Nod: %1$s</string>
     <string name="shutdown_warning">⚠️ Detta kommer STÄNGA AV noden. Fysisk interaktion kommer att krävas för att slå på den.</string>
+    <!-- SIGNAL -->
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalkvalité</string>
     <!-- SITE -->

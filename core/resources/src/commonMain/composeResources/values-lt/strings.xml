@@ -260,6 +260,7 @@
     <string name="share_to">Dalintis su…</string>
     <!-- SHOW -->
     <string name="shutdown">Išjungti</string>
+    <!-- SIGNAL -->
     <string name="signal">Signalas</string>
     <string name="signal_quality">Signalo kokybė</string>
     <!-- SITE -->

@@ -1184,6 +1184,7 @@
     <string name="shutdown">Изключване</string>
     <string name="shutdown_node_name">Възел: %1$s</string>
     <string name="shutdown_warning">⚠️ Това ще ИЗКЛЮЧИ възела. Ще е необходимо физическо взаимодействие, за да се включи отново.</string>
+    <!-- SIGNAL -->
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
     <!-- SITE -->

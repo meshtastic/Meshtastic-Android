@@ -452,6 +452,7 @@
     <!-- SHOW -->
     <string name="show_password">Şifreyi göster</string>
     <string name="shutdown">Kapat</string>
+    <!-- SIGNAL -->
     <string name="signal">Sinyal</string>
     <string name="signal_quality">Sinyal Kalitesi</string>
     <!-- SITE -->

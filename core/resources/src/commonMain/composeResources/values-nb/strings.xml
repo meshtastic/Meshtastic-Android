@@ -260,6 +260,7 @@
     <string name="share_to">Del med…</string>
     <!-- SHOW -->
     <string name="shutdown">Avslutt</string>
+    <!-- SIGNAL -->
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalstyrke</string>
     <!-- SITE -->

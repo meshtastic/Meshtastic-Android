@@ -423,6 +423,7 @@
     <string name="short_name">Кратко име</string>
     <!-- SHOW -->
     <string name="shutdown">Искључи</string>
+    <!-- SIGNAL -->
     <string name="signal">Сингал</string>
     <string name="signal_quality">Квалитет сигнала</string>
     <!-- SITE -->

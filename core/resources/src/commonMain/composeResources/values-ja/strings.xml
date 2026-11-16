@@ -1375,6 +1375,7 @@
     <string name="shutdown">シャットダウン</string>
     <string name="shutdown_node_name">ノード：%1$s</string>
     <string name="shutdown_warning">⚠️ ノードをシャットダウンします。再びオンにするには物理的な操作が必要になります。</string>
+    <!-- SIGNAL -->
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
     <!-- SITE -->

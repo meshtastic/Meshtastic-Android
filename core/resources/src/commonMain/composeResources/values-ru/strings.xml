@@ -2043,6 +2043,7 @@
     <string name="shutdown">Выключение</string>
     <string name="shutdown_node_name">Узел: %1$s</string>
     <string name="shutdown_warning">⚠️ Эта нода будет ВЫКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
+    <!-- SIGNAL -->
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
     <!-- SITE -->

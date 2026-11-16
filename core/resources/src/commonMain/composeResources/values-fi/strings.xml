@@ -1569,6 +1569,7 @@
     <string name="shutdown">Sammuta</string>
     <string name="shutdown_node_name">Laite: %1$s</string>
     <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
+    <!-- SIGNAL -->
     <string name="signal">Signaali </string>
     <string name="signal_quality">Signaalin laatu</string>
     <!-- SITE -->

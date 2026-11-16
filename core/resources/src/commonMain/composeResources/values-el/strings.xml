@@ -254,6 +254,7 @@
     <string name="share">Κοινοποίηση</string>
     <!-- SHOW -->
     <string name="shutdown">Τερματισμός λειτουργίας</string>
+    <!-- SIGNAL -->
     <!-- SITE -->
     <string name="site_planner_section_display">Οθόνη</string>
     <string name="swipe_action_delete">Διαγραφή</string>

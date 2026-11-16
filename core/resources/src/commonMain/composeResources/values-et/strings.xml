@@ -1525,6 +1525,7 @@
     <string name="shutdown">Lülita välja</string>
     <string name="shutdown_node_name">Sõlm: %1$s</string>
     <string name="shutdown_warning">⚠️ See LÜLITAB sõlme välja. Uuesti sisselülitamiseks on vaja füüsilist sekkumist.</string>
+    <!-- SIGNAL -->
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
     <!-- SITE -->

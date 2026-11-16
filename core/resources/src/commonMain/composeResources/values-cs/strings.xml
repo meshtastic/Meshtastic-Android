@@ -1476,6 +1476,7 @@
     <string name="shutdown">Vypnout</string>
     <string name="shutdown_node_name">Uzel: %1$s</string>
     <string name="shutdown_warning">⚠️ Tímto dojde k VYPNUTÍ uzlu. K jeho opětovnému zapnutí bude nutný fyzický zásah.</string>
+    <!-- SIGNAL -->
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
     <!-- SITE -->
