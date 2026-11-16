@@ -16,6 +16,7 @@
  */
 package org.meshtastic.app.map
 
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
@@ -26,6 +27,7 @@ import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.component.CustomTileSourcesMenuItem
 import org.meshtastic.feature.map.maplibre.component.ImportedLayersSlot
 import org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers
+import org.meshtastic.feature.map.survey.SignalSurveySection
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     customLayers = {
@@ -42,5 +44,10 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     offlineMapsSupported = true,
     sitePlanner = { session -> SitePlannerSlot(session) },
     // The same imported-layer manager the Google flavour opens from its layers button.
-    layersSheetExtra = { ImportedLayersSlot() },
+    // The survey follows it here and not in the shared slot: desktop has no location provider to log against.
+    layersSheetExtra = {
+        ImportedLayersSlot()
+        HorizontalDivider()
+        SignalSurveySection()
+    },
 )

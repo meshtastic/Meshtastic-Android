@@ -181,8 +181,9 @@ internal fun HudTopBar(
 
 /** Sensor and phone notices, under the compass tape so they never push it down. */
 @Composable
-internal fun HudTopNotices(status: HudSensorStatus, modifier: Modifier = Modifier) {
+internal fun HudTopNotices(status: HudSensorStatus, modifier: Modifier = Modifier, surveyLabel: String? = null) {
     Column(modifier.padding(horizontal = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        surveyLabel?.let { HudLabel(it) }
         when {
             !status.hasSensor -> HudLabel(stringResource(Res.string.compass_no_magnetometer))
             status.waitingForSensor -> HudLabel(stringResource(Res.string.mesh_hud_waiting_sensor))

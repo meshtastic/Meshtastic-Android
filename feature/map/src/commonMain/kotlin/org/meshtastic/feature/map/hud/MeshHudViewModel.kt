@@ -59,6 +59,8 @@ import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.repository.toNodeMapFilter
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.feature.map.survey.SURVEY_CELL_METERS
+import org.meshtastic.feature.map.survey.SignalSurveyCellSource
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -149,6 +151,7 @@ class MeshHudViewModel(
     private val notificationPrefs: NotificationPrefs,
     localeUnitsProvider: LocaleUnitsProvider,
     dispatchers: CoroutineDispatchers,
+    surveyCells: SignalSurveyCellSource,
 ) : ViewModel() {
 
     private val focusKey = MutableStateFlow<String?>(null)
@@ -326,6 +329,14 @@ class MeshHudViewModel(
         }
             .flowOn(dispatchers.default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MeshHudTargets())
+
+    /** The signal survey's visible squares laid on the ground around the phone, farthest first. */
+    val surveyTiles: StateFlow<List<HudSurveyTile>> =
+        combine(location, declinationDeg, surveyCells.cells(flowOf(SURVEY_CELL_METERS))) { state, declination, cells ->
+            state.location?.let { here -> cells.toHudTiles(here, declination) }.orEmpty()
+        }
+            .flowOn(dispatchers.default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
 
     /** The traceroute in view, if one was opened, as legs of points from here. */
     val route: StateFlow<HudRoute?> =

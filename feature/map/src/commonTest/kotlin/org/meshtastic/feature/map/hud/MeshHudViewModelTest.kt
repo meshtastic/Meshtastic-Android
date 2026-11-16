@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.hud
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -49,6 +51,10 @@ import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeTracerouteSnapshotRepository
+import org.meshtastic.feature.map.survey.FakeSignalSurveyRepository
+import org.meshtastic.feature.map.survey.SignalSurveyCellSource
+import org.meshtastic.feature.map.survey.SignalSurveyVisibility
+import org.meshtastic.feature.map.survey.reading
 import org.meshtastic.proto.Position
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -121,6 +127,9 @@ class MeshHudViewModelTest {
     private val traceroutes = FakeTracerouteResponses()
     private val snapshots = FakeTracerouteSnapshotRepository()
     private val packetRepository: PacketRepository = mock()
+    private val survey = FakeSignalSurveyRepository()
+    private val surveyVisibility =
+        SignalSurveyVisibility(survey, CoroutineScope(Dispatchers.Unconfined).asServiceScope())
     private lateinit var viewModel: MeshHudViewModel
 
     @BeforeTest
@@ -142,8 +151,26 @@ class MeshHudViewModelTest {
                 notificationPrefs = FakeNotificationPrefs(),
                 localeUnitsProvider = FakeLocaleUnitsProvider(),
                 dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
+                surveyCells = SignalSurveyCellSource(survey, surveyVisibility),
             )
     }
+
+    @Test
+    fun `visible survey squares near the phone are laid on the ground and far ones are not`() =
+        runTest(testDispatcher) {
+            // One square about 30 m north of the phone, one about 1.1 km north.
+            survey.add(1, reading(LAT + 0.0003, LON), reading(LAT + 0.01, LON))
+            backgroundScope.launch { viewModel.surveyTiles.collect {} }
+            runCurrent()
+            assertTrue(viewModel.surveyTiles.value.isEmpty())
+
+            surveyVisibility.sessionIds.value = setOf(1)
+            runCurrent()
+
+            val tile = viewModel.surveyTiles.value.single()
+            assertTrue(tile.distanceM < SURVEY_TILE_RADIUS_M)
+            assertTrue(tile.corners.all { (_, north) -> north > 0 }, "the square lies north of the phone")
+        }
 
     @AfterTest
     fun tearDown() {

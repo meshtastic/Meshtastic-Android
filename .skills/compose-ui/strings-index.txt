@@ -1991,8 +1991,24 @@ show_waypoints
 shutdown
 shutdown_node_name
 shutdown_warning
+### SIGNAL ###
 signal
 signal_quality
+signal_survey_delete_confirm
+signal_survey_description
+signal_survey_export
+signal_survey_heard_directly
+signal_survey_heatmap
+signal_survey_hud_recording
+signal_survey_last_reading
+signal_survey_location_off
+signal_survey_location_permission
+signal_survey_no_fix
+signal_survey_readings
+signal_survey_record
+signal_survey_senders
+signal_survey_title
+signal_survey_unplaced
 ### SITE ###
 site_planner
 site_planner_antenna_gain_dbi

@@ -59,6 +59,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -123,6 +124,8 @@ import com.google.maps.android.data.renderer.model.MultiGeometry
 import com.google.maps.android.data.renderer.model.PointGeometry
 import com.google.maps.android.data.renderer.model.PointStyle
 import com.google.maps.android.data.renderer.model.PolygonStyle
+import com.google.maps.android.heatmaps.Gradient
+import com.google.maps.android.heatmaps.HeatmapTileProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -190,6 +193,7 @@ import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -236,6 +240,11 @@ import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.mergeStationaryRuns
 import org.meshtastic.feature.map.stackCoincident
+import org.meshtastic.feature.map.survey.SignalSurveyCellInfo
+import org.meshtastic.feature.map.survey.SignalSurveySection
+import org.meshtastic.feature.map.survey.SignalSurveyViewModel
+import org.meshtastic.feature.map.survey.SurveyCellUi
+import org.meshtastic.feature.map.survey.SurveyLink
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
@@ -447,6 +456,18 @@ fun MapView(
         if (mode is GoogleMapMode.Main) mapViewModel.cameraPositionState else rememberCameraPositionState()
     val cameraInitialization by mapViewModel.cameraInitialization.collectAsStateWithLifecycle()
     var isMapLoaded by remember { mutableStateOf(false) }
+
+    // --- Signal survey ---
+    val survey: SignalSurveyViewModel = koinViewModel()
+    val surveyCells by survey.cells.collectAsStateWithLifecycle()
+    val surveyHeatPoints by survey.heatPoints.collectAsStateWithLifecycle()
+    val surveyColors = Quality.entries.associateWith { it.color() }
+    // Squares grow as the map zooms out, so a survey stays visible at city scale.
+    LaunchedEffect(cameraPositionState, survey) {
+        snapshotFlow { cameraPositionState.position }
+            .collect { camera -> survey.setCamera(zoom = camera.zoom.toDouble(), latitude = camera.target.latitude) }
+    }
+    val surveyLinks by survey.selectedLinks.collectAsStateWithLifecycle()
 
     if (mode is GoogleMapMode.Main) {
         LaunchedEffect(cameraPositionState.isMoving, cameraInitialization) {
@@ -862,6 +883,17 @@ fun MapView(
                 }
             }
 
+            if (mode is GoogleMapMode.Main) {
+                SignalSurveyPolygons(
+                    surveyCells,
+                    surveyColors,
+                    survey::selectCell,
+                    clickable = boxAuthoringDraft == null,
+                )
+                SignalSurveyHeatmap(surveyHeatPoints, surveyColors)
+                SignalSurveyLinkLines(surveyLinks.links, surveyColors)
+            }
+
             when (mode) {
                 is GoogleMapMode.Main ->
                     MainMapContent(
@@ -1098,6 +1130,8 @@ fun MapView(
             )
         }
 
+        if (mode is GoogleMapMode.Main) SignalSurveyCellInfo(modifier = Modifier.align(Alignment.BottomStart))
+
         MapControlsOverlay(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
             onToggleFilterMenu = { mapFilterMenuExpanded = true },
@@ -1245,6 +1279,8 @@ fun MapView(
                     opacity = layerOpacity,
                     onOpacityChange = { key, value -> mapViewModel.setLayerOpacity(key, value) },
                 )
+                HorizontalDivider()
+                SignalSurveySection()
             }
         }
     }
@@ -2124,6 +2160,107 @@ private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = Bounding
     .build()
 
 // endregion
+
+private const val SURVEY_FILL_ALPHA = 0.6f
+
+// Above the tile overlays, below tracks and the mesh's own markers.
+private const val SURVEY_Z_INDEX = 0.1f
+
+/**
+ * The signal survey's squares, colored by signal quality and tappable. No outline: neighbors share edges, and a stroke
+ * on each would draw a grid over what should read as one band along the route.
+ */
+@Composable
+private fun SignalSurveyPolygons(
+    cells: List<SurveyCellUi>,
+    colors: Map<Quality, Color>,
+    onCellClick: (String) -> Unit,
+    // Off while a box is being drawn: a tapped polygon swallows the tap meant for the map.
+    clickable: Boolean = true,
+) {
+    cells.forEach { item ->
+        val cell = item.cell
+        key(item.id) {
+            Polygon(
+                points =
+                listOf(
+                    LatLng(cell.south, cell.west),
+                    LatLng(cell.north, cell.west),
+                    LatLng(cell.north, cell.east),
+                    LatLng(cell.south, cell.east),
+                ),
+                fillColor = (colors[item.quality] ?: Color.Gray).copy(alpha = SURVEY_FILL_ALPHA),
+                strokeColor = Color.Transparent,
+                strokeWidth = 0f,
+                clickable = clickable,
+                onClick = { onCellClick(item.id) },
+                zIndex = SURVEY_Z_INDEX,
+            )
+        }
+    }
+}
+
+// Google's heatmap radius is in screen pixels and fixed across zooms; 40 px keeps a 50 m route one band at street zoom.
+private const val SURVEY_HEAT_RADIUS_PX = 40
+private const val SURVEY_HEAT_OPACITY = 0.75f
+private const val SURVEY_HEAT_FAINT_START = 0.15f
+
+/**
+ * The signal survey as a heatmap: one tile layer per signal band, each fading from clear to that band's color, drawn
+ * worst first so good coverage reads on top where bands meet. Heat counts 50 m squares, not raw readings.
+ */
+@Composable
+private fun SignalSurveyHeatmap(points: List<SurveyCellUi>, colors: Map<Quality, Color>) {
+    val bands = remember(points) { points.groupBy { it.quality } }
+    Quality.entries.reversed().forEachIndexed { index, quality ->
+        val band = bands[quality].orEmpty()
+        val color = colors[quality] ?: return@forEachIndexed
+        if (band.isEmpty()) return@forEachIndexed
+        val provider =
+            remember(band, color) {
+                HeatmapTileProvider.Builder()
+                    .data(band.map { LatLng((it.cell.south + it.cell.north) / 2, (it.cell.west + it.cell.east) / 2) })
+                    .radius(SURVEY_HEAT_RADIUS_PX)
+                    .opacity(SURVEY_HEAT_OPACITY.toDouble())
+                    .gradient(
+                        Gradient(
+                            intArrayOf(color.copy(alpha = 0f).toArgb(), color.toArgb()),
+                            floatArrayOf(SURVEY_HEAT_FAINT_START, 1f),
+                        ),
+                    )
+                    .build()
+            }
+        key(quality, provider) { TileOverlay(tileProvider = provider, zIndex = SURVEY_Z_INDEX + index * 0.01f) }
+    }
+}
+
+// Above the survey squares and heat, below the mesh's own markers.
+private const val SURVEY_LINK_Z_INDEX = 0.5f
+private const val SURVEY_LINK_WIDTH = 8f
+private const val SURVEY_LINK_CASING_WIDTH = 13f
+
+/** Lines from the tapped survey square to each node heard directly there, cased so they read over the squares. */
+@Composable
+private fun SignalSurveyLinkLines(links: List<SurveyLink>, colors: Map<Quality, Color>) {
+    links.forEach { link ->
+        key(link.nodeNum) {
+            val points =
+                listOf(LatLng(link.fromLatitude, link.fromLongitude), LatLng(link.toLatitude, link.toLongitude))
+            Polyline(
+                points = points,
+                color = Color.Black,
+                width = SURVEY_LINK_CASING_WIDTH,
+                zIndex = SURVEY_LINK_Z_INDEX,
+            )
+            Polyline(
+                points = points,
+                color = colors[link.quality] ?: Color.Gray,
+                width = SURVEY_LINK_WIDTH,
+                zIndex = SURVEY_LINK_Z_INDEX + 0.01f,
+            )
+        }
+    }
+}
 
 /** A shared [MapBounds] as the box the Google map wants. */
 private fun MapBounds.toLatLngBounds(): LatLngBounds = LatLngBounds(LatLng(south, west), LatLng(north, east))

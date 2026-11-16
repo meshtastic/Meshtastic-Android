@@ -30,11 +30,11 @@ import org.meshtastic.core.database.entity.MergeMarkerEntity
  * Every per-device table is unified so switching transport is seamless: messages (+FTS), reactions, contact mute/read
  * settings, nodes and their notes, per-node metadata, quick-chat actions, the audit log (each session's received-packet
  * history — the source of the telemetry timelines, position history, and traceroute results the UI reconstructs),
- * traceroute positions, and discovery sessions. Where the same row exists on both sides the destination is preferred
- * (it will be refreshed by the same radio's re-dump on connect); source-only rows and strictly newer history are
- * brought over. Packets/reactions in [source] and [dest] already share the same `myNodeNum` (same node), so no key
- * remapping is needed there; autoincrement-keyed rows (packets, discovery) are re-inserted with fresh ids to avoid
- * collisions.
+ * traceroute positions, discovery sessions, and signal survey readings. Where the same row exists on both sides the
+ * destination is preferred (it will be refreshed by the same radio's re-dump on connect); source-only rows and strictly
+ * newer history are brought over. Packets/reactions in [source] and [dest] already share the same `myNodeNum` (same
+ * node), so no key remapping is needed there; autoincrement-keyed rows (packets, discovery) are re-inserted with fresh
+ * ids to avoid collisions.
  */
 internal class StaleAssociationException : Exception("Transport session no longer authorizes database association")
 
@@ -81,6 +81,7 @@ object DatabaseMerger {
                 mergeLogs(source, dest)
                 mergeTraceroutePositions(source, dest)
                 mergeDiscovery(source, dest)
+                mergeSignalSurveys(source, dest)
                 dest.mergeMarkerDao().insertMarker(MergeMarkerEntity(sourceDbName = sourceName, mergedAt = nowMillis))
                 // Keep the defensive authority check as the final transaction statement. The caller-held lifecycle
                 // lease prevents rollover until commit returns; this check still rolls back if authority was lost
@@ -208,5 +209,16 @@ object DatabaseMerger {
                 if (nodes.isNotEmpty()) dst.insertDiscoveredNodes(nodes)
             }
         }
+    }
+}
+
+/** Survey sessions are separate events, so each is appended with its readings under fresh ids. */
+private suspend fun mergeSignalSurveys(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
+    val src = source.signalSampleDao()
+    val dst = dest.signalSampleDao()
+    src.getAllSessions().forEach { session ->
+        val newSessionId = dst.insertSession(session.copy(id = 0))
+        val samples = src.getSamples(session.id).map { it.copy(id = 0, sessionId = newSessionId) }
+        if (samples.isNotEmpty()) dst.insertAll(samples)
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
 import org.maplibre.compose.map.MapState
+import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -74,6 +76,8 @@ import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
+import org.meshtastic.feature.map.survey.SignalSurveyCellInfo
+import org.meshtastic.feature.map.survey.SignalSurveyViewModel
 
 /**
  * MapLibre implementation of [MapViewProvider], shared by the F-Droid flavor and the desktop app.
@@ -161,6 +165,7 @@ class MapLibreMapViewProvider(
             )
 
         SaveCameraPosition(mapState)
+        SurveyCellSizeFollowsZoom(mapState)
 
         // Following the user means the screen is the thing being watched — the Google flavor holds it awake for the
         // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
@@ -211,7 +216,22 @@ class MapLibreMapViewProvider(
                 editing = waypoints,
                 editor = waypointEditor,
             )
+
+            SignalSurveyCellInfo(modifier = Modifier.align(Alignment.BottomStart))
         }
+    }
+}
+
+/**
+ * Keeps the signal survey's squares large enough to see as the map zooms out. MapLibre counts zoom in 512 px tiles, one
+ * level below the 256 px convention the survey's sizing uses.
+ */
+@Composable
+private fun SurveyCellSizeFollowsZoom(mapState: MapState) {
+    val survey: SignalSurveyViewModel = koinViewModel()
+    LaunchedEffect(mapState, survey) {
+        snapshotFlow { mapState.cameraPosition }
+            .collect { camera -> survey.setCamera(zoom = camera.zoom + 1, latitude = camera.center.latitude) }
     }
 }
 
@@ -227,7 +247,17 @@ private fun rememberMapScreenMapState(
     navigateToNodeDetails: (Int) -> Unit,
 ): MapState {
     val viewModel: SharedMapViewModel = koinViewModel()
+    val survey: SignalSurveyViewModel = koinViewModel()
+    val surveyCells by survey.cells.collectAsStateWithLifecycle()
+    val surveyHeatPoints by survey.heatPoints.collectAsStateWithLifecycle()
+    val surveyLinks by survey.selectedLinks.collectAsStateWithLifecycle()
+    val surveyColors = Quality.entries.associateWith { it.color() }
     return rememberMeshMapState(
+        surveyCells = surveyCells,
+        surveyHeatPoints = surveyHeatPoints,
+        surveyLinks = surveyLinks.links,
+        surveyColors = surveyColors,
+        onSurveyCellClick = survey::selectCell,
         viewModel = viewModel,
         navigateToNodeDetails = navigateToNodeDetails,
         basemap = basemap,
