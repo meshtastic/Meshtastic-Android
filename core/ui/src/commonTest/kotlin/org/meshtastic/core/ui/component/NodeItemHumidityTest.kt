@@ -48,4 +48,9 @@ class NodeItemHumidityTest {
         assertEquals(40f, reportedHumidity(40f, 55f))
         assertEquals(55f, reportedHumidity(Float.NaN, 55f))
     }
+
+    @Test
+    fun `a reported zero from the environment sensor wins over a non-zero CO2 sensor`() {
+        assertEquals(0f, reportedHumidity(0f, 40f))
+    }
 }

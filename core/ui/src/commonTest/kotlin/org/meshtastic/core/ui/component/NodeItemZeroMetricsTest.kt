@@ -159,6 +159,26 @@ class NodeItemZeroMetricsTest {
     }
 
     @Test
+    fun nodeItem_zeroEnvironmentHumidityWinsOverCo2SensorHumidity() = runComposeUiTest {
+        setNodeItem(
+            EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 40f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+        onNodeWithText(MetricFormatter.humidity(40f)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_zeroEnvironmentHumidityWinsOverCo2SensorHumidity() = runComposeUiTest {
+        setNodeItemCompact(
+            EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 40f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+        onNodeWithText(MetricFormatter.humidity(40f)).assertDoesNotExist()
+    }
+
+    @Test
     fun nodeItemCompact_hidesNaNHumidity() = runComposeUiTest {
         setNodeItemCompact(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = Float.NaN }.build())
         onNodeWithText(MetricFormatter.humidity(Float.NaN)).assertDoesNotExist()
