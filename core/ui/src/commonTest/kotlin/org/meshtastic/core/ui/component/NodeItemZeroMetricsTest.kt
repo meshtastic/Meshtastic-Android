@@ -23,8 +23,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -117,11 +119,88 @@ class NodeItemZeroMetricsTest {
         onNodeWithText("0.0°C").assertDoesNotExist()
     }
 
-    private fun ComposeUiTest.setNodeItem(metrics: EnvironmentMetrics) = setContent {
+    @Test
+    fun nodeItem_showsZeroHumidity() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build())
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItem_hidesAbsentHumidity() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics.Builder().build())
+        onNodeWithText(MetricFormatter.humidity(0f)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItem_hidesNaNHumidity() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = Float.NaN }.build())
+        onNodeWithText(MetricFormatter.humidity(Float.NaN)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItem_showsZeroCo2SensorHumidityWhenEnvironmentHasNone() = runComposeUiTest {
+        setNodeItem(
+            EnvironmentMetrics.Builder().build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 0f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItemCompact_showsZeroHumidity() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build())
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItemCompact_hidesAbsentHumidity() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics.Builder().build())
+        onNodeWithText(MetricFormatter.humidity(0f)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItem_zeroEnvironmentHumidityWinsOverCo2SensorHumidity() = runComposeUiTest {
+        setNodeItem(
+            EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 40f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+        onNodeWithText(MetricFormatter.humidity(40f)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_zeroEnvironmentHumidityWinsOverCo2SensorHumidity() = runComposeUiTest {
+        setNodeItemCompact(
+            EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 40f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+        onNodeWithText(MetricFormatter.humidity(40f)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_hidesNaNHumidity() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = Float.NaN }.build())
+        onNodeWithText(MetricFormatter.humidity(Float.NaN)).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_showsZeroCo2SensorHumidityWhenEnvironmentHasNone() = runComposeUiTest {
+        setNodeItemCompact(
+            EnvironmentMetrics.Builder().build(),
+            AirQualityMetrics.Builder().also { wb -> wb.co2_humidity = 0f }.build(),
+        )
+        onNodeWithText(MetricFormatter.humidity(0f)).assertIsDisplayed()
+    }
+
+    private fun ComposeUiTest.setNodeItem(
+        metrics: EnvironmentMetrics,
+        airQuality: AirQualityMetrics = AirQualityMetrics.Builder().build(),
+    ) = setContent {
         MaterialTheme {
             NodeItem(
                 thisNode = null,
-                thatNode = node(metrics),
+                thatNode = node(metrics, airQuality),
                 distanceUnits = MeasurementSystem.METRIC,
                 tempInFahrenheit = false,
                 connectionState = ConnectionState.Connected,
@@ -129,13 +208,20 @@ class NodeItemZeroMetricsTest {
         }
     }
 
-    private fun ComposeUiTest.setNodeItemCompact(metrics: EnvironmentMetrics) = setContent {
+    private fun ComposeUiTest.setNodeItemCompact(
+        metrics: EnvironmentMetrics,
+        airQuality: AirQualityMetrics = AirQualityMetrics.Builder().build(),
+    ) = setContent {
         MaterialTheme {
-            NodeItemCompact(thisNode = null, thatNode = node(metrics), distanceUnits = MeasurementSystem.METRIC)
+            NodeItemCompact(
+                thisNode = null,
+                thatNode = node(metrics, airQuality),
+                distanceUnits = MeasurementSystem.METRIC,
+            )
         }
     }
 
-    private fun node(metrics: EnvironmentMetrics) = Node(
+    private fun node(metrics: EnvironmentMetrics, airQuality: AirQualityMetrics) = Node(
         num = 2,
         user =
         User.Builder()
@@ -145,5 +231,6 @@ class NodeItemZeroMetricsTest {
             }
             .build(),
         environmentMetrics = metrics,
+        airQualityMetrics = airQuality,
     )
 }

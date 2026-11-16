@@ -381,7 +381,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
 @Composable
 private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     envMetrics.radiation?.let { radiation ->
-        if (!radiation.isNaN() && radiation > 0f) {
+        if (!radiation.isNaN()) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.RADIATION.color)
@@ -600,7 +600,7 @@ private fun EnvironmentMetricsCard(
 }
 
 @Composable
-private fun EnvironmentMetricsContent(
+internal fun EnvironmentMetricsContent(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
     isImperial: Boolean,

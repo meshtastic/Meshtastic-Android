@@ -480,13 +480,13 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                     )
                 }
             }
-            if ((env.relative_humidity ?: 0f) != 0f) {
+            reportedHumidity(env.relative_humidity, thatNode.airQualityMetrics.co2_humidity)?.let { humidity ->
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Humidity,
                         contentDescription = stringResource(Res.string.a11y_humidity),
                         contentColor = contentColor,
-                        text = MetricFormatter.humidity(env.relative_humidity ?: 0f),
+                        text = MetricFormatter.humidity(humidity),
                     )
                 }
             }

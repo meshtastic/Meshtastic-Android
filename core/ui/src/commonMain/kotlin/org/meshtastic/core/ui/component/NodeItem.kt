@@ -350,6 +350,10 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
     }
 }
 
+/** The humidity to show on a node tile: [relativeHumidity] if reported, else [co2Humidity], never NaN or missing. */
+internal fun reportedHumidity(relativeHumidity: Float?, co2Humidity: Float? = null): Float? =
+    relativeHumidity?.takeIf { !it.isNaN() } ?: co2Humidity?.takeIf { !it.isNaN() }
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: Color): List<@Composable () -> Unit> {
     val items = mutableListOf<@Composable () -> Unit>()
@@ -368,15 +372,10 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
 
-    // Humidity keeps its zero-guard: 0% RH is not physically reachable, and the humidity chart filters it too.
-    if ((env.relative_humidity ?: 0f) != 0f) {
-        items.add {
-            HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
-        }
-    } else if ((aq.co2_humidity ?: 0f) != 0f) {
-        items.add {
-            HumidityInfo(humidity = MetricFormatter.humidity(aq.co2_humidity ?: 0f), contentColor = contentColor)
-        }
+    // A reported 0% RH is a reading, like the humidity chart; only a missing (null) or NaN value is hidden. The
+    // environment sensor wins, then the SCD4x CO₂ sensor's own.
+    reportedHumidity(env.relative_humidity, aq.co2_humidity)?.let { humidity ->
+        items.add { HumidityInfo(humidity = MetricFormatter.humidity(humidity), contentColor = contentColor) }
     }
 
     if ((env.barometric_pressure ?: 0f) != 0f) {
