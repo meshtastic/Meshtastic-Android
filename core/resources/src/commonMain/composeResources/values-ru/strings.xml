@@ -211,7 +211,11 @@
     <!-- CARDINAL -->
     <string name="cardinal_e">В</string>
     <string name="cardinal_n">С</string>
+    <string name="cardinal_ne">С-В</string>
+    <string name="cardinal_nw">С-З</string>
     <string name="cardinal_s">Ю</string>
+    <string name="cardinal_se">Ю-В</string>
+    <string name="cardinal_sw">Ю-З</string>
     <string name="cardinal_w">З</string>
     <string name="ch_util_definition">Использование для текущего канала, включая хорошо сформированный TX, RX и неправильно сформированный RX (так называемый шум).</string>
     <!-- CHANNEL -->
