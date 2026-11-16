@@ -426,9 +426,50 @@ class SignalSurveyRepositoryImplTest {
     }
 
     @Test
+    fun `a second start on a running survey keeps its session`() = runBlocking {
+        startSettled()
+        val session = repository.activeSessionId.value
+
+        repository.start()
+        delay(SETTLE_FOR_NO_WRITE)
+        service.emitMeshPacket(heardNow())
+
+        assertEquals(session, repository.activeSessionId.value)
+        assertEquals(1, awaitReadings(1).size)
+    }
+
+    @Test
+    fun `a stop right after a failed survey leaves it off`() = runBlocking {
+        locationFlow = { flow { throw IllegalStateException("location request failed") } }
+        service.setConnectionState(ConnectionState.Connected)
+        repository.start()
+        withTimeout(10.seconds) { repository.recording.first { !it } }
+
+        repository.stop()
+        delay(SETTLE_FOR_NO_WRITE)
+
+        assertFalse(repository.recording.value)
+        assertNull(repository.activeSessionId.value)
+    }
+
+    @Test
+    fun `a start right after a stop opens a new session`() = runBlocking {
+        startSettled()
+        val first = repository.activeSessionId.value
+
+        repository.stop()
+        repository.start()
+
+        withTimeout(10.seconds) { repository.activeSessionId.first { it != null && it != first } }
+        assertTrue(repository.recording.value)
+    }
+
+    @Test
     fun `starting twice and stopping once leaves the survey off`() = runBlocking {
         startSettled()
+        val session = repository.activeSessionId.value
         startRecording()
+        assertEquals(session, repository.activeSessionId.value)
         repository.stop()
 
         service.emitMeshPacket(heardNow())
@@ -436,6 +477,7 @@ class SignalSurveyRepositoryImplTest {
 
         assertEquals(0, allSamples().size)
         assertFalse(repository.recording.value)
+        assertNull(repository.activeSessionId.value)
     }
 
     @Test

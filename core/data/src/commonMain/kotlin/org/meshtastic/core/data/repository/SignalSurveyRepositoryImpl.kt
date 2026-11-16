@@ -89,7 +89,8 @@ class SignalSurveyRepositoryImpl(
     }
 
     override fun start() {
-        request.update { Request(on = true, id = it.id + 1) }
+        // A start on a survey that is already on must not restart it: that would close the session and reopen it.
+        request.update { if (it.on) it else Request(on = true, id = it.id + 1) }
     }
 
     override fun stop() {
@@ -120,16 +121,15 @@ class SignalSurveyRepositoryImpl(
             return
         }
         _activeSessionId.value = handle.id
-        var failed = false
         try {
-            // A failure ends the survey rather than leaving the switch on with nothing recording behind it.
-            safeCatching { log(handle, started) }.onFailure { failed = true }
+            // A failure ends the survey at once, before the session is closed, so the switch never reads on with
+            // nothing recording behind it and a start during the close is a new request.
+            safeCatching { log(handle, started) }.onFailure { end(started) }
         } finally {
             _blocker.value = null
             _activeSessionId.value = null
             withContext(NonCancellable) { safeCatching { local.closeSession(handle, endedAt = now()) } }
         }
-        if (failed) end(started)
     }
 
     /** Stores a reading for each live reception until cancelled. */
