@@ -67,7 +67,7 @@ After you disconnect from your node in the app, the widget keeps the tracked nod
 
 If your node list does not include the node you picked, because you removed it or connected to a different node, the widget says **Node not found**. Tap it to choose another node.
 
-## Telemetry
+## 遥测传感器
 
 The **Telemetry** widget shows one node's sensor readings as tiles, the same tiles the node's details show, with the same units and precision:
 
