@@ -205,6 +205,9 @@ class FirmwareUpdateViewModel(
     /** True while the running update job started on a device already stranded in its bootloader. */
     private var runStrandedBefore = false
 
+    /** True once the running update job persisted its own recovery record, so only it may retire one. */
+    private var runPersistedRecord = false
+
     /** Remaining legs of an in-flight USB maintenance sequence, head first. Empty outside a maintenance flow. */
     private var pendingUsbPasses: List<UsbFileSavePass> = emptyList()
 
@@ -287,7 +290,7 @@ class FirmwareUpdateViewModel(
 
     fun cancelUpdate() {
         // Still downloading means the device never left its application, so no recovery record is owed.
-        val retireRecord = !runStrandedBefore && _state.value is FirmwareUpdateState.Downloading
+        val retireRecord = !runStrandedBefore && runPersistedRecord && _state.value is FirmwareUpdateState.Downloading
         updateJob?.cancel()
         if (retireRecord) viewModelScope.launch { retireRecoveryRecord() }
         val write = maintenanceWriteJob
@@ -572,7 +575,7 @@ class FirmwareUpdateViewModel(
             launchUpdateJob {
                 // Persist a recovery record before flashing so a stranded bootloader (interrupted upload, app closed,
                 // missed reconnect) can be re-flashed later while disconnected.
-                maybeRecordRecovery(currentState)
+                runPersistedRecord = maybeRecordRecovery(currentState)
                 runUpdate()
             }
         }
@@ -595,6 +598,7 @@ class FirmwareUpdateViewModel(
         val endFailed: suspend (FirmwareUpdateState.Error) -> Unit = { endFailedUpdate(mapError(it), strandedBefore) }
         updateJob?.cancel()
         runStrandedBefore = strandedBefore
+        runPersistedRecord = false
         updateJob = viewModelScope.launch {
             val failed = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
             try {
@@ -616,12 +620,16 @@ class FirmwareUpdateViewModel(
             } catch (e: CancellationException) {
                 Logger.w(e) { "Firmware update cancelled" }
                 // A run that a newer one replaced must not touch the shared state or the newer run's record.
-                if (updateJob === coroutineContext[Job]) {
-                    if (!strandedBefore && _state.value is FirmwareUpdateState.Downloading) {
+                val self = coroutineContext[Job]
+                if (updateJob === self) {
+                    if (!strandedBefore && runPersistedRecord && _state.value is FirmwareUpdateState.Downloading) {
                         withContext(NonCancellable) { retireRecoveryRecord() }
                     }
-                    _state.value = FirmwareUpdateState.Idle
-                    checkForUpdates()
+                    // Retiring the record suspends, so ownership is checked again before the shared-state writes.
+                    if (updateJob === self) {
+                        _state.value = FirmwareUpdateState.Idle
+                        checkForUpdates()
+                    }
                 }
                 throw e
             } catch (e: Exception) {
@@ -661,17 +669,18 @@ class FirmwareUpdateViewModel(
      * device in bootloader mode can be recovered later. Scoped to BLE + non-ESP32 + a re-fetchable release channel
      * (STABLE/ALPHA/NIGHTLY); ESP32 OTA and local-file flashes are intentionally not recoverable in this flow. A
      * NIGHTLY record re-asserts the hidden-features unlock on recovery (see [enterRecoveryModeOrError]).
+     *
+     * @return True when a record was persisted.
      */
-    private suspend fun maybeRecordRecovery(state: FirmwareUpdateState.Ready) {
+    private suspend fun maybeRecordRecovery(state: FirmwareUpdateState.Ready): Boolean {
         val type = _selectedReleaseType.value
         val recoverable =
             state.updateMethod is FirmwareUpdateMethod.Ble &&
                 !state.deviceHardware.isEsp32Arc &&
                 type != FirmwareReleaseType.LOCAL
-        if (!recoverable) return
         val fullAddress = radioPrefs.devAddr.value
         val pioEnv = nodeRepository.myNodeInfo.value?.pioEnv
-        if (fullAddress == null || pioEnv == null) return
+        if (!recoverable || fullAddress == null || pioEnv == null) return false
         firmwareRecoveryDataSource.set(
             PendingFirmwareRecovery(
                 fullAddress = fullAddress,
@@ -681,6 +690,7 @@ class FirmwareUpdateViewModel(
                 deviceName = radioPrefs.devName.value ?: state.deviceHardware.displayName,
             ),
         )
+        return true
     }
 
     /**

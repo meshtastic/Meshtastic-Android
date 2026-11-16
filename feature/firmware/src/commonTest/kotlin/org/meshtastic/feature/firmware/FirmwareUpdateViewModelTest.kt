@@ -441,9 +441,20 @@ class FirmwareUpdateViewModelTest {
         verifySuspend { firmwareRecoveryDataSource.clear() }
     }
 
+    /** An nRF52 node over BLE, whose normal update persists a recovery record. */
+    private fun TestScope.useRecoverableBleNode() {
+        val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        every { radioPrefs.devName } returns MutableStateFlow(null)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+    }
+
     @Test
     fun `cancelling during the download retires the recovery record`() = runTest {
-        advanceUntilIdle()
+        useRecoverableBleNode()
         val parked = CompletableDeferred<Unit>()
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
             .calls {
@@ -497,7 +508,7 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `a cancelled run that unwinds late leaves the replacement run alone`() = runTest {
-        advanceUntilIdle()
+        useRecoverableBleNode()
         val releaseOld = CompletableDeferred<Unit>()
         val parkedNew = CompletableDeferred<Unit>()
         var runs = 0
@@ -529,6 +540,27 @@ class FirmwareUpdateViewModelTest {
 
         assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value, "the replacement run keeps its state")
         verifySuspend(mode = VerifyMode.exactly(1)) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `cancelling a download that persisted no record leaves another device's record alone`() = runTest {
+        advanceUntilIdle() // the default ESP32 node persists no recovery record
+        val parked = CompletableDeferred<Unit>()
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                parked.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test
