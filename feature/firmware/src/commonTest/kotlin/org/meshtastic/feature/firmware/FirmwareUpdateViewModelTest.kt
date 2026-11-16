@@ -29,6 +29,9 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -39,6 +42,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -489,6 +493,42 @@ class FirmwareUpdateViewModelTest {
         advanceUntilIdle()
 
         verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
+    }
+
+    @Test
+    fun `a cancelled run that unwinds late leaves the replacement run alone`() = runTest {
+        advanceUntilIdle()
+        val releaseOld = CompletableDeferred<Unit>()
+        val parkedNew = CompletableDeferred<Unit>()
+        var runs = 0
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Downloading(ProgressState(UiText.DynamicString("downloading"))))
+                if (runs++ == 0) {
+                    // The first run keeps unwinding after it is cancelled, as DFU transport cleanup can.
+                    withContext(NonCancellable) { releaseOld.await() }
+                    currentCoroutineContext().ensureActive()
+                } else {
+                    parkedNew.await()
+                }
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+        viewModel.cancelUpdate()
+        runCurrent()
+        viewModel.startUpdate()
+        runCurrent()
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value)
+
+        releaseOld.complete(Unit)
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Downloading>(viewModel.state.value, "the replacement run keeps its state")
+        verifySuspend(mode = VerifyMode.exactly(1)) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test

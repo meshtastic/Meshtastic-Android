@@ -966,8 +966,13 @@ class SecureDfuHandler(
                 transport
                     .connectToDfuMode()
                     .onSuccess {
-                        transport.abort()
-                        resetSent = true
+                        // Only a Secure transport reports whether the RESET write completed; other callers ignore it.
+                        resetSent =
+                            (transport as? SecureDfuTransport)?.sendAbort()
+                                ?: run {
+                                    transport.abort()
+                                    true
+                                }
                         Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
                     }
                     .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }

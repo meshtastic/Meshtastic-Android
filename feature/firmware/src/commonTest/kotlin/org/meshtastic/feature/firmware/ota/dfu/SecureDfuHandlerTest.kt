@@ -35,6 +35,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.SoftDeviceVariant
+import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeRadioController
@@ -105,6 +106,7 @@ class SecureDfuHandlerTest {
     private fun upgradeAgainstSecureBootloader(
         resetConnects: Boolean,
         radio: FakeRadioController,
+        connection: FakeBleConnection = FakeBleConnection(),
     ): List<FirmwareUpdateState> {
         val target = "AA:BB:CC:DD:EE:FF"
         val appManifest = """{"manifest":{"application":{"bin_file":"app.bin","dat_file":"app.dat"}}}"""
@@ -157,7 +159,7 @@ class SecureDfuHandlerTest {
                 firmwareFileHandler = fileHandler,
                 radioController = radio,
                 bleScanner = scanner,
-                bleConnectionFactory = FakeBleConnectionFactory(),
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
                 dispatchers = dispatchers,
             )
         val states = mutableListOf<FirmwareUpdateState>()
@@ -169,12 +171,26 @@ class SecureDfuHandlerTest {
     @Test
     fun `a bootloader that speaks Secure DFU is reset and refuses the package with nothing written`() {
         val radio = FakeRadioController()
-        val states = upgradeAgainstSecureBootloader(resetConnects = true, radio = radio)
+        val connection = FakeBleConnection()
+        val states = upgradeAgainstSecureBootloader(resetConnects = true, radio = radio, connection = connection)
 
+        assertTrue(
+            connection.service.writes.any { it.data.contentEquals(byteArrayOf(DfuOpcode.ABORT)) },
+            "the RESET was written to the control point",
+        )
         val error = states.filterIsInstance<FirmwareUpdateState.Error>().single()
         assertTrue(error.nothingWritten)
         assertEquals(DfuException.BootloaderNotLegacy().toErrorState(), error)
         assertEquals("n", radio.lastSetDeviceAddress, "the buttonless trigger already released the app link")
+    }
+
+    @Test
+    fun `a Secure DFU bootloader whose RESET write fails keeps its recovery record`() {
+        val connection = FakeBleConnection().apply { service.writeException = IllegalStateException("write failed") }
+        val states =
+            upgradeAgainstSecureBootloader(resetConnects = true, radio = FakeRadioController(), connection = connection)
+
+        assertFalse(states.filterIsInstance<FirmwareUpdateState.Error>().single().nothingWritten)
     }
 
     @Test
