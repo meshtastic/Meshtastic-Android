@@ -44,7 +44,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -114,7 +113,6 @@ import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.open_wifi_settings
 import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.rssi
-import org.meshtastic.core.resources.scan_connect_code
 import org.meshtastic.core.resources.set_your_region
 import org.meshtastic.core.resources.transmit_disabled
 import org.meshtastic.core.resources.transmit_disabled_summary
@@ -122,8 +120,10 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.resources.wifi_unavailable
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
+import org.meshtastic.core.ui.component.ImportKind
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.component.RecoveryCard
@@ -134,7 +134,6 @@ import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
-import org.meshtastic.core.ui.icon.QrCodeScanner
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.PermissionGateAction
@@ -264,7 +263,7 @@ fun ConnectionsScreen(
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
-    onScanConnectCode: (() -> Unit)? = null,
+    onConnectCode: ((String) -> Unit)? = null,
 ) {
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
@@ -482,18 +481,14 @@ fun ConnectionsScreen(
                 showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
-                actions = {
-                    onScanConnectCode?.let { scan ->
-                        IconButton(onClick = scan) {
-                            Icon(
-                                imageVector = MeshtasticIcons.QrCodeScanner,
-                                contentDescription = stringResource(Res.string.scan_connect_code),
-                            )
-                        }
-                    }
-                },
+                actions = {},
                 onClickChip = { onClickNodeChip(it.num) },
             )
+        },
+        floatingActionButton = {
+            onConnectCode?.let {
+                MeshtasticImportFAB(onImport = it, importKind = ImportKind.ConnectCode, testTag = "connect_code_fab")
+            }
         },
     ) { paddingValues ->
         val uiState =
@@ -877,6 +872,7 @@ fun ConnectionsScreen(
             }
         }
 
+        val fabClearance = if (onConnectCode != null) FabClearance else 0.dp
         if (isAdaptiveTwoPaneSplit()) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp),
@@ -894,7 +890,9 @@ fun ConnectionsScreen(
                             header(this)
                         }
                     },
-                    second = { deviceList(Modifier.weight(1f).fillMaxWidth(), PaddingValues(0.dp), null) },
+                    second = {
+                        deviceList(Modifier.weight(1f).fillMaxWidth(), PaddingValues(bottom = fabClearance), null)
+                    },
                 )
             }
         } else {
@@ -905,7 +903,7 @@ fun ConnectionsScreen(
                     start = paddingValues.calculateStartPadding(layoutDirection) + 16.dp,
                     top = paddingValues.calculateTopPadding() + 20.dp,
                     end = paddingValues.calculateEndPadding(layoutDirection) + 16.dp,
-                    bottom = paddingValues.calculateBottomPadding(),
+                    bottom = paddingValues.calculateBottomPadding() + fabClearance,
                 ),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(HeaderItemSpacing)) { header(this) }
@@ -916,6 +914,9 @@ fun ConnectionsScreen(
 
 /** The one gap between the header's cards and controls; the device list spaces its own items. */
 private val HeaderItemSpacing = 12.dp
+
+/** Room under the last list row so the connect-code FAB never covers it. */
+private val FabClearance = 96.dp
 
 /** Informational, non-dismissible nudge for a connected device with a newer stable firmware release. */
 @Composable

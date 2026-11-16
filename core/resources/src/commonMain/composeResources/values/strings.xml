@@ -957,6 +957,7 @@
     <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>
     <string name="info">Information</string>
     <string name="input_channel_url">Input Shared Channels URL</string>
+    <string name="input_connect_code_url">Input Connect Code URL</string>
     <string name="input_shared_contact_url">Input Shared Contact URL</string>
     <string name="insert">Insert</string>
     <string name="insert_link_message">Enter the URL for the selected text</string>
@@ -1971,6 +1972,8 @@
     <string name="scan_channels_nfc">Scan Shared Channels NFC</string>
     <string name="scan_channels_qr">Scan Shared Channels QR Code</string>
     <string name="scan_connect_code">Scan a connect code</string>
+    <string name="scan_connect_code_nfc">Scan Connect Code NFC</string>
+    <string name="scan_connect_code_qr">Scan Connect Code QR Code</string>
     <string name="scan_network_devices">Scan for network devices</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
