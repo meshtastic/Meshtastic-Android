@@ -916,7 +916,7 @@ fun ConnectionsScreen(
 private val HeaderItemSpacing = 12.dp
 
 /** Room under the last list row so the connect-code FAB never covers it. */
-private val FabClearance = 96.dp
+private val FabClearance = 112.dp
 
 /** Informational, non-dismissible nudge for a connected device with a newer stable firmware release. */
 @Composable
