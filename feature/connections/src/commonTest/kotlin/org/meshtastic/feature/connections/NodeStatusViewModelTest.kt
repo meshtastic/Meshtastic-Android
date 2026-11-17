@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.network.radio.NodeStatusRepository
+import org.meshtastic.feature.connections.model.SensorsUi
 import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.NodeIdentityStore
 import org.meshtastic.node.NodeSettingsStore
@@ -42,6 +43,7 @@ import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
 import org.meshtastic.node.loadOrCreate
+import org.meshtastic.node.sensors.I2cBusState
 import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.ExperimentalTransportApi
 import org.meshtastic.node.transport.MeshTransport
@@ -58,6 +60,7 @@ class NodeStatusViewModelTest {
 
     private class FakeRepository : NodeStatusRepository {
         override val status = MutableStateFlow<NodeStatus?>(null)
+        override val sensors = MutableStateFlow<I2cBusState?>(null)
         val hostBearerWrites = mutableListOf<Pair<Bearer, Boolean>>()
         var refreshes = 0
         var usbRequests = 0
@@ -117,6 +120,9 @@ class NodeStatusViewModelTest {
                 assertEquals(NodePhase.Running, ui?.phase)
                 assertEquals(running.longName, ui?.longName)
                 assertEquals(NODE_ID_LENGTH, ui?.nodeId?.length)
+                assertNull(ui?.sensors, "a host with no bus has no sensors section")
+                repository.sensors.value = I2cBusState.Scanning
+                assertEquals(SensorsUi.Scanning, awaitItem()?.sensors)
                 repository.status.value = null
                 assertNull(awaitItem())
             }

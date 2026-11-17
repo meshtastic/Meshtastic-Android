@@ -22,7 +22,7 @@ import org.meshtastic.node.host.Requirement
 import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.TransportAvailability
 
-/** The in-process node as the status card shows it. */
+/** The in-process node as the status card shows it; [sensors] is null on a host with no sensor bus. */
 data class NodeStatusUi(
     val phase: NodePhase,
     val nodeId: String?,
@@ -32,6 +32,7 @@ data class NodeStatusUi(
     val failure: String?,
     val settingsReset: Boolean,
     val bearers: List<BearerRowUi>,
+    val sensors: SensorsUi? = null,
 )
 
 /**

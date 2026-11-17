@@ -52,7 +52,8 @@ class NodeRadioTransport(
     private val bearers: NodeBearers,
     private val statusRepository: NodeStatusRepositoryImpl,
     private val isDebug: Boolean,
-    private val newNode: (CoroutineScope, NodeBearers, BearerFactory, MeshLogger) -> EmbeddedNode = ::embeddedNode,
+    private val newNode: (CoroutineScope, NodeBearers, BearerFactory, MeshLogger, NodeSensors?) -> EmbeddedNode =
+        ::embeddedNode,
 ) : RadioTransport {
     private val lifecycle = TransportLifecycleGate("Node")
     private val transportJob = SupervisorJob(scope.coroutineContext[Job])
@@ -66,8 +67,10 @@ class NodeRadioTransport(
     override fun start() {
         lifecycle.runIfOpen {
             val built = bearers.factory(bearers.hostSignals).also { factory = it }
-            val live = newNode(transportScope, bearers, built, KermitMeshLogger(isDebug)).also { node = it }
-            statusRepository.attach(live, built, transportScope)
+            val logger = KermitMeshLogger(isDebug)
+            val sensors = bearers.sensors(transportScope, logger)
+            val live = newNode(transportScope, bearers, built, logger, sensors).also { node = it }
+            statusRepository.attach(live, built, transportScope, sensors?.bus)
             transportScope.launch { live.status.collect(::onPhase) }
             transportScope.launch {
                 live.phoneApi.fromRadio.collect { bytes -> lifecycle.runIfOpen { callback.handleFromRadio(bytes) } }
@@ -140,6 +143,7 @@ internal fun embeddedNode(
     bearers: NodeBearers,
     factory: BearerFactory,
     logger: MeshLogger,
+    sensors: NodeSensors?,
 ): EmbeddedNode = EmbeddedNode(
     scope = scope,
     stores = nodeFileStores(bearers.storesDir()),
@@ -150,11 +154,9 @@ internal fun embeddedNode(
     defaults = firstRunDefaults()
     this.logger = logger
     positionSource = bearers.positionSource
-    bearers.sensors(scope, logger)?.let { sensors ->
-        environment = sensors.environment
-        airQuality = sensors.airQuality
-        powerMetrics = sensors.powerMetrics
-    }
+    environment = sensors?.environment
+    airQuality = sensors?.airQuality
+    powerMetrics = sensors?.powerMetrics
     // VIRTUAL_NODE, by number until the protobufs pin names it (protobufs#1126).
     hardwareModel = HardwareModel.fromValue(VIRTUAL_NODE) ?: HardwareModel.PRIVATE_HW
 }

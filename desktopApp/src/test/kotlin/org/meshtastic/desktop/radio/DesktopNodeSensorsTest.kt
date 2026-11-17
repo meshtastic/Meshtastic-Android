@@ -21,11 +21,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.node.MeshLogLevel
 import org.meshtastic.node.MeshLogger
+import org.meshtastic.node.sensors.I2cBusState
 import kotlin.test.Test
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -52,6 +55,16 @@ class DesktopNodeSensorsTest {
         assertNull(sensors.environment?.read())
         assertNull(sensors.airQuality?.read())
         assertNull(sensors.powerMetrics?.read())
+        scope.cancel()
+    }
+
+    @Test
+    fun `a bus that cannot be opened reports itself failed for the node card`() = runBlocking {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val bus = assertNotNull(i2cSensors("/dev/i2c-no-such-bus", scope, MeshLogger.None)?.bus)
+        val failed = withTimeout(10.seconds) { bus.first { it is I2cBusState.Failed } }
+        assertIs<I2cBusState.Failed>(failed)
+        assertTrue(failed.reason.isNotBlank())
         scope.cancel()
     }
 }

@@ -83,5 +83,5 @@ internal fun i2cSensors(
 ): NodeSensors? {
     val device = path?.trim()?.takeIf { it.isNotEmpty() } ?: return null
     val bus = I2cSensorSources(scope, dispatcher, logger = logger) { linuxI2cBus(device) }
-    return NodeSensors(bus.environment, bus.airQuality, bus.powerMetrics)
+    return NodeSensors(bus.environment, bus.airQuality, bus.powerMetrics, bus.bus)
 }

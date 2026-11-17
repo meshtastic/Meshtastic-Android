@@ -26,6 +26,7 @@ import org.meshtastic.node.PositionSource
 import org.meshtastic.node.PowerMetricsSource
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
+import org.meshtastic.node.sensors.I2cBusState
 
 /**
  * What a platform supplies for the in-process node: its bearer factory, its lifecycle signals and where the node's
@@ -55,9 +56,13 @@ interface NodeBearers {
     fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? = null
 }
 
-/** A host's sensor readings as the three telemetry sources a node takes; a source the host lacks is null. */
+/**
+ * A host's sensor readings as the three telemetry sources a node takes; a source the host lacks is null. [bus] is the
+ * I2C bus they are read from as the node card shows it, null for a host that reads its sensors some other way.
+ */
 class NodeSensors(
     val environment: EnvironmentSource? = null,
     val airQuality: AirQualitySource? = null,
     val powerMetrics: PowerMetricsSource? = null,
+    val bus: StateFlow<I2cBusState>? = null,
 )

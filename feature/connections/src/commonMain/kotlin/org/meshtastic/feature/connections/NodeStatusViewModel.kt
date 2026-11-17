@@ -18,12 +18,13 @@ package org.meshtastic.feature.connections
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.network.radio.NodeStatusRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.NodeStatusUi
+import org.meshtastic.feature.connections.model.toSensorsUi
 import org.meshtastic.feature.connections.model.toUi
 import org.meshtastic.node.transport.Bearer
 
@@ -32,7 +33,10 @@ import org.meshtastic.node.transport.Bearer
 class NodeStatusViewModel(private val repository: NodeStatusRepository) : ViewModel() {
 
     val status: StateFlow<NodeStatusUi?> =
-        repository.status.map { it?.toUi() }.stateInWhileSubscribed(initialValue = null)
+        combine(repository.status, repository.sensors) { status, bus ->
+            status?.toUi()?.copy(sensors = bus?.toSensorsUi())
+        }
+            .stateInWhileSubscribed(initialValue = null)
 
     /**
      * Every bearer but MQTT is one entry in the node's stored transport section, which the node writes itself. MQTT

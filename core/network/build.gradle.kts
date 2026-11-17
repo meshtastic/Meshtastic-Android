@@ -50,6 +50,7 @@ kotlin {
             api(project.dependencies.platform(libs.meshtastic.node.bom))
             api(libs.meshtastic.node.host)
             implementation(libs.meshtastic.node.store.file) // nodeFileStores and AtomicFileStore
+            api(libs.meshtastic.node.sensors) // I2cBusState, a host's sensor bus as the node card shows it
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)

@@ -26,6 +26,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.EmbeddedNode
 import org.meshtastic.node.host.NodeStatus
+import org.meshtastic.node.sensors.I2cBusState
 import org.meshtastic.node.transport.Bearer
 import kotlin.concurrent.Volatile
 
@@ -35,6 +36,9 @@ import kotlin.concurrent.Volatile
  */
 interface NodeStatusRepository {
     val status: StateFlow<NodeStatus?>
+
+    /** The host's I2C sensor bus: null while no node runs, and on a host that has no bus. */
+    val sensors: StateFlow<I2cBusState?>
 
     /** Switch a host bearer (Wi-Fi Aware, audio, video) on or off; persisted by the node. */
     suspend fun setHostBearer(bearer: Bearer, on: Boolean)
@@ -56,14 +60,29 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
     @Volatile private var live: Live? = null
     private val statusState = MutableStateFlow<NodeStatus?>(null)
 
+    private val sensorsState = MutableStateFlow<I2cBusState?>(null)
+
     override val status: StateFlow<NodeStatus?> = statusState.asStateFlow()
 
-    /** The transport calls this once its node exists; the node's status is mirrored until [detach]. */
-    internal fun attach(node: EmbeddedNode, factory: BearerFactory, scope: CoroutineScope) {
+    override val sensors: StateFlow<I2cBusState?> = sensorsState.asStateFlow()
+
+    /**
+     * The transport calls this once its node exists; the node's status, and its host's sensor [bus] when it has one,
+     * are mirrored until [detach].
+     */
+    internal fun attach(
+        node: EmbeddedNode,
+        factory: BearerFactory,
+        scope: CoroutineScope,
+        bus: StateFlow<I2cBusState>?,
+    ) {
         val next = Live(node, factory)
         live = next
         // A value already in flight when detach runs must not land on an emptied repository.
-        next.mirror = scope.launch { node.status.collect { if (live === next) statusState.value = it } }
+        next.mirror = scope.launch {
+            bus?.let { launch { it.collect { state -> if (live === next) sensorsState.value = state } } }
+            node.status.collect { if (live === next) statusState.value = it }
+        }
     }
 
     /** The transport calls this on close. A stale call for a node that was already replaced changes nothing. */
@@ -73,6 +92,7 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
             live = null
             current.mirror?.cancel()
             statusState.value = null
+            sensorsState.value = null
         }
     }
 

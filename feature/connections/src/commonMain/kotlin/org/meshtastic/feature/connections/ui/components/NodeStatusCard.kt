@@ -106,6 +106,7 @@ fun NodeStatusCard(
                     onRequestUsbPermission = onRequestUsbPermission,
                 )
             }
+            status.sensors?.let { NodeSensorsSection(sensors = it) }
         }
     }
 }

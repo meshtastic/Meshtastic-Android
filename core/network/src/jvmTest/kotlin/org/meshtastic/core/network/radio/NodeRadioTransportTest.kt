@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -30,10 +32,13 @@ import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.node.BytesStore
 import org.meshtastic.node.EnvironmentSource
+import org.meshtastic.node.InternalNodeApi
 import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.host.NodePhase
+import org.meshtastic.node.sensors.I2cBusState
+import org.meshtastic.node.sensors.i2cBusFailed
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.ToRadio
 import java.nio.file.Files
@@ -89,10 +94,11 @@ class NodeRadioTransportTest {
         override fun hostBearerStore(): BytesStore = BytesStore.inMemory()
 
         val sensorScopes = mutableListOf<CoroutineScope>()
+        val bus = MutableStateFlow<I2cBusState>(I2cBusState.Scanning)
 
         override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors {
             sensorScopes += scope
-            return NodeSensors(environment = EnvironmentSource { null })
+            return NodeSensors(environment = EnvironmentSource { null }, bus = bus)
         }
     }
 
@@ -104,12 +110,45 @@ class NodeRadioTransportTest {
     private fun configRequest(nonce: Int): ByteArray = ToRadio.Builder().want_config_id(nonce).build().encode()
 
     @Test
-    fun `the node is built with its host's sensors, asked for once on the node's own scope`() = runTest {
+    fun `the node is built with its host's sensors, asked for once on the transport's own scope`() = runTest {
         val scope = transportScope()
         val bearers = FakeNodeBearers(tempDir())
-        embeddedNode(scope, bearers, bearers.factory, MeshLogger.None)
-        assertEquals(listOf(scope), bearers.sensorScopes)
-        scope.cancel()
+        val repository = NodeStatusRepositoryImpl()
+        try {
+            val transport = NodeRadioTransport(RecordingCallback(), scope, bearers, repository, isDebug = false)
+            transport.start()
+            repository.status.first { it?.phase == NodePhase.Running }
+
+            val asked = bearers.sensorScopes.single()
+            assertTrue(asked.coroutineContext.job in scope.coroutineContext.job.children)
+            transport.close()
+            assertFalse(asked.isActive, "the sensors stop reading with the transport")
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @OptIn(InternalNodeApi::class)
+    @Test
+    fun `the repository mirrors the host's sensor bus while the node runs`() = runTest {
+        val scope = transportScope()
+        val bearers = FakeNodeBearers(tempDir())
+        val repository = NodeStatusRepositoryImpl()
+        try {
+            assertNull(repository.sensors.value)
+            val transport = NodeRadioTransport(RecordingCallback(), scope, bearers, repository, isDebug = false)
+            transport.start()
+            assertEquals(I2cBusState.Scanning, repository.sensors.first { it != null })
+
+            val failed = i2cBusFailed("no such bus")
+            bearers.bus.value = failed
+            assertEquals(failed, repository.sensors.first { it != I2cBusState.Scanning })
+
+            transport.close()
+            assertNull(repository.sensors.value, "close leaves no bus behind")
+        } finally {
+            scope.cancel()
+        }
     }
 
     @Test
