@@ -75,6 +75,13 @@ class DocTranslationCoverageTest {
     }
 
     @Test
+    fun `nine tenths English text scores exactly the threshold`() {
+        val source = "a".repeat(90)
+
+        assertEquals(UNTRANSLATED_DOC_THRESHOLD, untranslatedShare(source + "\n" + "b".repeat(10), source))
+    }
+
+    @Test
     fun `an empty page counts as untranslated`() {
         assertEquals(1.0, untranslatedShare("\n\n", english))
     }

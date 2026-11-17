@@ -21,6 +21,8 @@ import org.meshtastic.feature.docs.data.DefaultDocBundleLoader
 import org.meshtastic.feature.docs.model.DocSection
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -73,6 +75,27 @@ class DocBundleLoaderTest {
     fun `read page returns null for invalid page id`() = runTest {
         val content = loader.readPage("nonexistent-page")
         assertEquals(null, content)
+    }
+
+    @Test
+    fun `localized read serves a bundled translation`() = runTest {
+        assertTrue(loader.hasTranslatedResource("onboarding", "ru"))
+
+        val (content, wasLocalized) = loader.readPageLocalized("onboarding", "ru")
+
+        assertTrue(wasLocalized)
+        assertNotEquals(loader.readPage("onboarding")?.markdown, content?.markdown)
+    }
+
+    @Test
+    fun `localized read falls back to English when the locale has no bundled page`() = runTest {
+        assertFalse(loader.hasTranslatedResource("onboarding", "zz"))
+
+        val (content, wasLocalized) = loader.readPageLocalized("onboarding", "zz")
+
+        assertFalse(wasLocalized)
+        assertNotNull(content)
+        assertEquals(loader.readPage("onboarding")?.markdown, content.markdown)
     }
 
     @Test
