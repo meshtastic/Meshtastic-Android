@@ -47,10 +47,7 @@ class SchemaFieldCoverageTest {
 
     private val notOffered =
         mapOf(
-            "Config.DisplayConfig.enable_message_bubbles" to Reason.NO_CONTROL,
-            "Config.DisplayConfig.use_long_node_name" to Reason.NO_CONTROL,
             "Config.LoRaConfig.ignore_incoming" to Reason.NO_CONTROL,
-            "ModuleConfig.TelemetryConfig.air_quality_screen_enabled" to Reason.NO_CONTROL,
             "ModuleConfig.TrafficManagementConfig.nodeinfo_direct_response_max_hops" to Reason.NO_SCREEN,
             "ModuleConfig.TrafficManagementConfig.position_min_interval_secs" to Reason.NO_SCREEN,
             "ModuleConfig.TrafficManagementConfig.rate_limit_max_packets" to Reason.NO_SCREEN,

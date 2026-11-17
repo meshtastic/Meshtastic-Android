@@ -37,6 +37,8 @@ import org.meshtastic.core.resources.schema_display_compass_orientation
 import org.meshtastic.core.resources.schema_display_compass_orientation_description
 import org.meshtastic.core.resources.schema_display_displaymode
 import org.meshtastic.core.resources.schema_display_displaymode_description
+import org.meshtastic.core.resources.schema_display_enable_message_bubbles
+import org.meshtastic.core.resources.schema_display_enable_message_bubbles_description
 import org.meshtastic.core.resources.schema_display_flip_screen
 import org.meshtastic.core.resources.schema_display_flip_screen_description
 import org.meshtastic.core.resources.schema_display_heading_bold
@@ -49,6 +51,8 @@ import org.meshtastic.core.resources.schema_display_units
 import org.meshtastic.core.resources.schema_display_units_description
 import org.meshtastic.core.resources.schema_display_use_12h_clock
 import org.meshtastic.core.resources.schema_display_use_12h_clock_description
+import org.meshtastic.core.resources.schema_display_use_long_node_name
+import org.meshtastic.core.resources.schema_display_use_long_node_name_description
 import org.meshtastic.core.resources.schema_display_wake_on_tap_or_motion
 import org.meshtastic.core.resources.schema_display_wake_on_tap_or_motion_description
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -61,7 +65,9 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.compass_north_top
+import org.meshtastic.proto.enable_message_bubbles
 import org.meshtastic.proto.use_12h_clock
+import org.meshtastic.proto.use_long_node_name
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
@@ -91,6 +97,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     setOf(
                         "schema_display_compass_north_top",
                         "schema_display_use_12h_clock",
+                        "schema_display_use_long_node_name",
+                        "schema_display_enable_message_bubbles",
                         "schema_display_heading_bold",
                         "schema_display_units",
                     )
@@ -126,6 +134,36 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         checked = formState.value.use_12h_clock,
                         onCheckedChange = {
                             formState.value = formState.value.newBuilder().also { wb -> wb.use_12h_clock = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
+                if (capabilities.offers(Config.DisplayConfig.use_long_node_name)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.schema_display_use_long_node_name),
+                        modifier = Modifier.settingsField(Res.string.schema_display_use_long_node_name),
+                        summary = stringResource(Res.string.schema_display_use_long_node_name_description),
+                        enabled = state.connected,
+                        checked = formState.value.use_long_node_name,
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.use_long_node_name = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
+                if (capabilities.offers(Config.DisplayConfig.enable_message_bubbles)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.schema_display_enable_message_bubbles),
+                        modifier = Modifier.settingsField(Res.string.schema_display_enable_message_bubbles),
+                        summary = stringResource(Res.string.schema_display_enable_message_bubbles_description),
+                        enabled = state.connected,
+                        checked = formState.value.enable_message_bubbles,
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.enable_message_bubbles = it }.build()
                         },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
