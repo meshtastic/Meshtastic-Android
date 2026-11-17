@@ -129,6 +129,9 @@ class NodeRadioTransport(
                     transportJob.cancelAndJoin()
                 },
             )
+        // A teardown cut off by its time bound never reaches cancelAndJoin; the scope's work (sensor reads, mirrors)
+        // must still end with the transport.
+        transportJob.cancel()
         if (!completed) Logger.w { "Node transport teardown did not complete within its lifecycle bounds" }
     }
 
