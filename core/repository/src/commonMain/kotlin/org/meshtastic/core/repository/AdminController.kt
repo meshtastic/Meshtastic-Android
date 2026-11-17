@@ -101,6 +101,12 @@ interface AdminController {
     /** Updates the notification ringtone on a remote node. */
     suspend fun setRingtone(destNum: Int, ringtone: String)
 
+    /**
+     * Plays the node's saved ringtone once via `AdminMessage.play_ringtone_request`. Fire-and-forget: the firmware
+     * sends no response, and builds without RTTTL support ignore it.
+     */
+    suspend fun playRingtone(destNum: Int)
+
     /** Updates the canned messages configuration on a remote node. */
     suspend fun setCannedMessages(destNum: Int, messages: String)
 

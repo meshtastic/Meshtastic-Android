@@ -935,6 +935,28 @@ class RadioControllerImplTest {
     }
 
     @Test
+    fun playRingtoneSendsPlayRequestWithoutAskingForAResponse() = runTest {
+        val controller = createController(scope = backgroundScope)
+
+        var sentTo: Int? = null
+        var wantResponse: Boolean? = null
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                sentTo = it.args[0] as Int
+                wantResponse = it.args[2] as Boolean
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.playRingtone(destNum = 101)
+
+        assertEquals(101, sentTo)
+        assertEquals(false, wantResponse)
+        assertEquals(true, sentMessage?.play_ringtone_request)
+    }
+
+    @Test
     fun refreshMetadataSendsAdminWithWantResponse() = runTest {
         val controller = createController(scope = backgroundScope)
 

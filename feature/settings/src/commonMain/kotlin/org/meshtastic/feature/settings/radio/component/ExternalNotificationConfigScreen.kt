@@ -39,6 +39,9 @@ import org.meshtastic.core.resources.external_notification_config
 import org.meshtastic.core.resources.notifications_on_alert_bell_receipt
 import org.meshtastic.core.resources.notifications_on_message_receipt
 import org.meshtastic.core.resources.ringtone
+import org.meshtastic.core.resources.ringtone_play_on_node
+import org.meshtastic.core.resources.ringtone_play_on_node_summary
+import org.meshtastic.core.resources.ringtone_play_on_node_unsaved
 import org.meshtastic.core.resources.schema_externalnotification_active
 import org.meshtastic.core.resources.schema_externalnotification_active_description
 import org.meshtastic.core.resources.schema_externalnotification_alert_bell
@@ -71,8 +74,11 @@ import org.meshtastic.core.resources.schema_externalnotification_use_pwm
 import org.meshtastic.core.resources.schema_externalnotification_use_pwm_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
@@ -352,6 +358,23 @@ fun ExternalNotificationConfigScreenCommon(
                             enabled = state.connected,
                         )
                     },
+                )
+                // The node plays the ringtone it has saved, so an unsaved edit would play the old one.
+                val ringtoneSaved = ringtoneInput == ringtone
+                RegularPreference(
+                    title = stringResource(Res.string.ringtone_play_on_node),
+                    subtitle = "",
+                    summary =
+                    stringResource(
+                        if (ringtoneSaved) {
+                            Res.string.ringtone_play_on_node_summary
+                        } else {
+                            Res.string.ringtone_play_on_node_unsaved
+                        },
+                    ),
+                    onClick = viewModel::playRingtone,
+                    enabled = state.connected && ringtoneSaved && ringtone.isNotBlank(),
+                    trailingIcon = MeshtasticIcons.VolumeUp,
                 )
                 HorizontalDivider()
                 SwitchPreference(
