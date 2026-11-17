@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.schemaLabelRes
+import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_bearer_lora_extra
 import org.meshtastic.core.resources.node_extra_radio_board
@@ -49,6 +50,7 @@ import org.meshtastic.core.resources.node_extra_radio_receive_only
 import org.meshtastic.core.resources.node_extra_radio_rtl_sdr
 import org.meshtastic.core.resources.node_extra_radio_transmits
 import org.meshtastic.core.resources.node_extra_radio_usb_stick
+import org.meshtastic.core.resources.node_primary_radio
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.feature.connections.model.ExtraRadioPart
 import org.meshtastic.feature.connections.model.ExtraRadioUi
@@ -143,6 +145,15 @@ internal fun ExtraRadioFailure(reason: String) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error,
     )
+}
+
+/** What the host's first LoRa radio is, then that it is the primary: `Board lora-aio · primary`. */
+@Composable
+internal fun primaryRadioText(primary: PrimaryRadio): String {
+    val kind = stringResource(primary.device.label())
+    val id = primary.id?.trim()?.takeIf { it.isNotEmpty() }
+    val named = if (id != null) "$kind $id" else kind
+    return "$named$BEARER_TEXT_SEPARATOR${stringResource(Res.string.node_primary_radio)}"
 }
 
 private fun ExtraRadioDevice.label(): StringResource = when (this) {

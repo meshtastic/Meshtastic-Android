@@ -1644,6 +1644,7 @@
     <string name="node_list_long_click_label">Node options</string>
     <string name="node_not_heard_on_current_lora">Not heard on your current LoRa settings</string>
     <string name="node_number">Node Number</string>
+    <string name="node_primary_radio">primary</string>
     <string name="node_request_send_failed">Couldn't send request. Try again.</string>
     <string name="node_restarting">Restarting…</string>
     <string name="node_sensor_failing">Failing: %1$s</string>

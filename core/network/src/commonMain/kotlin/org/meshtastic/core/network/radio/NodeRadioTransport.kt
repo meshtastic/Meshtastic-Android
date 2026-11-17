@@ -70,7 +70,7 @@ class NodeRadioTransport(
             val logger = KermitMeshLogger(isDebug)
             val sensors = bearers.sensors(transportScope, logger)
             val live = newNode(transportScope, bearers, built, logger, sensors).also { node = it }
-            statusRepository.attach(live, built, transportScope, sensors?.bus)
+            statusRepository.attach(live, built, transportScope, sensors?.bus, bearers.primaryRadio())
             transportScope.launch { live.status.collect(::onPhase) }
             transportScope.launch {
                 live.phoneApi.fromRadio.collect { bytes -> lifecycle.runIfOpen { callback.handleFromRadio(bytes) } }

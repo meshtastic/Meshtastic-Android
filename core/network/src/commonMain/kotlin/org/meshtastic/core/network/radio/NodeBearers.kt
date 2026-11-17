@@ -25,6 +25,7 @@ import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.PositionSource
 import org.meshtastic.node.PowerMetricsSource
 import org.meshtastic.node.host.BearerFactory
+import org.meshtastic.node.host.ExtraRadioDevice
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.sensors.I2cBusState
 
@@ -60,7 +61,13 @@ interface NodeBearers {
      * reads none. Called once per node start.
      */
     fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? = null
+
+    /** What the host's first LoRa radio is, as its configuration names it, or null on a host that says nothing. */
+    fun primaryRadio(): PrimaryRadio? = null
 }
+
+/** The host's first LoRa radio: a USB stick or a board, by the [id] the host named it with, if any. */
+data class PrimaryRadio(val device: ExtraRadioDevice, val id: String? = null)
 
 /**
  * A host's sensor readings as the three telemetry sources a node takes; a source the host lacks is null. [bus] is the

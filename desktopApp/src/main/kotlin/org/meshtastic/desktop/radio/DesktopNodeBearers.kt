@@ -24,11 +24,13 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.network.radio.NodeBearers
 import org.meshtastic.core.network.radio.NodeSensors
+import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.node.BytesStore
 import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.desktop.JvmBearerFactory
 import org.meshtastic.node.desktop.parseExtraLoraRadios
 import org.meshtastic.node.host.BearerFactory
+import org.meshtastic.node.host.ExtraRadioDevice
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.sensors.I2cSensorSources
 import org.meshtastic.node.sensors.linuxI2cBus
@@ -64,13 +66,34 @@ class DesktopNodeBearers : NodeBearers {
     override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? =
         i2cSensors(System.getenv(I2C_DEVICE_VAR), scope, logger)
 
+    override fun primaryRadio(): PrimaryRadio? =
+        primaryRadioFor(System.getenv(LORA_BOARD_VAR), System.getenv(LORA_SPIDEV_VAR))
+
     private companion object {
         const val NODE_DIR = "node"
+        const val LORA_SPIDEV_VAR = "MESH_LORA_SPIDEV"
         const val HOST_BEARERS_FILE = "host-bearers.bin"
         const val EXTRA_RADIOS_FILE = "extra-radios.bin"
         const val LORA_EXTRA_VAR = "MESH_LORA_EXTRA"
         const val LORA_BOARD_VAR = "MESH_LORA_BOARD"
         const val I2C_DEVICE_VAR = "MESH_I2C_DEVICE"
+    }
+}
+
+/**
+ * The first LoRa radio as the node opens it: the board a `MESH_LORA_BOARD` [board] config names, by its file name, or
+ * the default CH341 stick when none is set. A [spidev] bus with no board opens no radio, so there is nothing to say.
+ * Read from configuration only: a board config may itself wire a stick, as the extra radios' descriptions also allow.
+ */
+internal fun primaryRadioFor(board: String?, spidev: String?): PrimaryRadio? {
+    val named = board?.trim()?.takeIf { it.isNotEmpty() }
+    return when {
+        named != null ->
+            PrimaryRadio(ExtraRadioDevice.BOARD, named.substringAfterLast('/').removeSuffix(".yaml").ifEmpty { named })
+
+        spidev.isNullOrBlank() -> PrimaryRadio(ExtraRadioDevice.USB_STICK)
+
+        else -> null
     }
 }
 

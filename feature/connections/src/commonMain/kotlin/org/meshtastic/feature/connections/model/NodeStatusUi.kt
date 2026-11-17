@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.connections.model
 
+import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.node.host.ExtraRadio
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
@@ -51,6 +52,8 @@ data class BearerRowUi(
     val sent: Long,
     val relayed: Long,
     val extra: ExtraRadioUi? = null,
+    /** What the LoRa bearer's own radio is, when the host says; null on every other row. */
+    val primary: PrimaryRadio? = null,
 ) {
     /** The extra radio's number, 2 for `lora-2`, or null for the bearer itself. */
     val radio: Int?
@@ -135,38 +138,42 @@ sealed interface BearerRowState {
     data class Unsupported(val reason: String) : BearerRowState
 }
 
-/** The card's state; [extraRadiosOff] names the extra LoRa radios switched off by themselves. */
-fun NodeStatus.toUi(extraRadiosOff: Set<String> = emptySet()): NodeStatusUi = nodeStatusUi(
-    phase = phase,
-    nodeNum = nodeNum,
-    longName = longName,
-    shortName = shortName,
-    peerCount = peerCount,
-    failure = failure,
-    settingsReset = settingsReset,
-    extraRadioFailure = extraRadioFailure,
-    bearers =
-    Bearer.entries
-        .filter { it.onCard }
-        .flatMap { bearer ->
-            val status = bearers[bearer] ?: return@flatMap emptyList()
-            val row =
-                bearerRow(
-                    bearer = bearer,
-                    enabled = status.enabled,
-                    availability = status.availability,
-                    requirement = status.requirement,
-                    received = status.counters.rx,
-                    sent = status.counters.tx,
-                    relayed = status.counters.relayed,
-                )
-            if (bearer == Bearer.LORA) {
-                listOf(row) + extraRadioRows(extraRadiosOff, status.enabled)
-            } else {
-                listOf(row)
-            }
-        },
-)
+/**
+ * The card's state; [extraRadiosOff] names the extra LoRa radios switched off by themselves, and [primaryRadio] is what
+ * the host says its first LoRa radio is.
+ */
+fun NodeStatus.toUi(extraRadiosOff: Set<String> = emptySet(), primaryRadio: PrimaryRadio? = null): NodeStatusUi =
+    nodeStatusUi(
+        phase = phase,
+        nodeNum = nodeNum,
+        longName = longName,
+        shortName = shortName,
+        peerCount = peerCount,
+        failure = failure,
+        settingsReset = settingsReset,
+        extraRadioFailure = extraRadioFailure,
+        bearers =
+        Bearer.entries
+            .filter { it.onCard }
+            .flatMap { bearer ->
+                val status = bearers[bearer] ?: return@flatMap emptyList()
+                val row =
+                    bearerRow(
+                        bearer = bearer,
+                        enabled = status.enabled,
+                        availability = status.availability,
+                        requirement = status.requirement,
+                        received = status.counters.rx,
+                        sent = status.counters.tx,
+                        relayed = status.counters.relayed,
+                    )
+                if (bearer == Bearer.LORA) {
+                    listOf(row.copy(primary = primaryRadio)) + extraRadioRows(extraRadiosOff, status.enabled)
+                } else {
+                    listOf(row)
+                }
+            },
+    )
 
 /** The host's further LoRa radios, in number order, each a row under the LoRa bearer's. */
 private fun NodeStatus.extraRadioRows(off: Set<String>, loraOn: Boolean): List<BearerRowUi> = extraRadios

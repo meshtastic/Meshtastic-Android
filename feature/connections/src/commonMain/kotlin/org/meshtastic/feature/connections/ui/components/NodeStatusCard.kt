@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.node_bearer_ble_adv
 import org.meshtastic.core.resources.node_bearer_counters
 import org.meshtastic.core.resources.node_bearer_gatt
 import org.meshtastic.core.resources.node_bearer_lora
+import org.meshtastic.core.resources.node_bearer_lora_extra
 import org.meshtastic.core.resources.node_bearer_mqtt
 import org.meshtastic.core.resources.node_bearer_needs_hardware
 import org.meshtastic.core.resources.node_bearer_needs_permission
@@ -173,9 +174,17 @@ private fun BearerRow(
     onRequestUsbPermission: () -> Unit,
 ) {
     val state = row.state
+    val primary = row.primary
     BasicListItem(
-        text = stringResource(row.bearer.label()),
-        supportingText = row.supportingText(),
+        text =
+        if (primary != null) {
+            stringResource(Res.string.node_bearer_lora_extra, PRIMARY_RADIO_NUMBER)
+        } else {
+            stringResource(row.bearer.label())
+        },
+        supportingText =
+        primary?.let { "${primaryRadioText(it)}$BEARER_TEXT_SEPARATOR${row.supportingText()}" }
+            ?: row.supportingText(),
         leadingIcon = row.bearer.icon(),
         trailingContent =
         when {
@@ -254,6 +263,9 @@ private fun BearerRowUi.supportingText(): String {
 }
 
 internal const val BEARER_TEXT_SEPARATOR = " · "
+
+/** The host's first LoRa radio is radio 1; its extras are numbered from 2 by their transport names. */
+private const val PRIMARY_RADIO_NUMBER = 1
 
 private fun NodePhase.label(): StringResource = when (this) {
     NodePhase.Starting -> Res.string.node_status_phase_starting

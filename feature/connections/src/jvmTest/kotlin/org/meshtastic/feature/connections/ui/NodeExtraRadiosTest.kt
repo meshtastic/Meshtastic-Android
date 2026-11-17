@@ -28,6 +28,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.schema_lora_modempreset_short_fast
@@ -92,6 +93,45 @@ class NodeExtraRadiosTest {
                 }
             }
         }
+
+    private fun primaryRow(primary: PrimaryRadio?) = BearerRowUi(
+        bearer = Bearer.LORA,
+        enabled = true,
+        switchable = true,
+        state = BearerRowState.Active,
+        received = 4,
+        sent = 0,
+        relayed = 0,
+        primary = primary,
+    )
+
+    @Test
+    fun `a described first radio is radio 1 and says what it is ahead of its state`() = runComposeUiTest {
+        setCard(
+            primaryRow(PrimaryRadio(ExtraRadioDevice.BOARD, id = "lora-aio")),
+            extraRow(2, ExtraRadio(ExtraRadioDevice.RTL_SDR, id = "00000001")),
+        )
+
+        onNodeWithText("LoRa radio 1").assertIsDisplayed()
+        onNodeWithText("Board lora-aio · primary · Active · 4 received · 0 sent · 0 relayed").assertIsDisplayed()
+        onNodeWithText("LoRa stick").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a first radio with no id names its kind alone`() = runComposeUiTest {
+        setCard(primaryRow(PrimaryRadio(ExtraRadioDevice.USB_STICK)))
+
+        onNodeWithText("USB stick · primary · Active · 4 received · 0 sent · 0 relayed").assertIsDisplayed()
+    }
+
+    @Test
+    fun `a first radio the host does not describe keeps the plain LoRa row`() = runComposeUiTest {
+        setCard(primaryRow(primary = null))
+
+        onNodeWithText("LoRa stick").assertIsDisplayed()
+        onNodeWithText("Active · 4 received · 0 sent · 0 relayed").assertIsDisplayed()
+        onNodeWithText("LoRa radio 1").assertDoesNotExist()
+    }
 
     @Test
     fun `each kind of radio says what it is and what it does ahead of its state`() = runComposeUiTest {

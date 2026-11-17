@@ -40,6 +40,10 @@ interface NodeStatusRepository {
     /** The host's I2C sensor bus: null while no node runs, and on a host that has no bus. */
     val sensors: StateFlow<I2cBusState?>
 
+    /** What the host's first LoRa radio is: null while no node runs, and on a host that does not say. */
+    val primaryRadio: StateFlow<PrimaryRadio?>
+        get() = MutableStateFlow(null)
+
     /** Switch a host bearer (Wi-Fi Aware, audio, video) on or off; persisted by the node. */
     suspend fun setHostBearer(bearer: Bearer, on: Boolean)
 
@@ -75,6 +79,10 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
 
     override val sensors: StateFlow<I2cBusState?> = sensorsState.asStateFlow()
 
+    private val primaryRadioState = MutableStateFlow<PrimaryRadio?>(null)
+
+    override val primaryRadio: StateFlow<PrimaryRadio?> = primaryRadioState.asStateFlow()
+
     private val extraRadiosOffState = MutableStateFlow<Set<String>>(emptySet())
 
     override val extraRadiosOff: StateFlow<Set<String>> = extraRadiosOffState.asStateFlow()
@@ -88,9 +96,11 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
         factory: BearerFactory,
         scope: CoroutineScope,
         bus: StateFlow<I2cBusState>?,
+        primary: PrimaryRadio? = null,
     ) {
         val next = Live(node, factory)
         live = next
+        primaryRadioState.value = primary
         // A value already in flight when detach runs must not land on an emptied repository.
         next.mirror = scope.launch {
             bus?.let { launch { it.collect { state -> if (live === next) sensorsState.value = state } } }
@@ -109,6 +119,7 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
             current.mirror?.cancel()
             statusState.value = null
             sensorsState.value = null
+            primaryRadioState.value = null
             extraRadiosOffState.value = emptySet()
         }
     }

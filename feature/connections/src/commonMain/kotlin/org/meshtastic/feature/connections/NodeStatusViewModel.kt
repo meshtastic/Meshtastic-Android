@@ -45,8 +45,13 @@ class NodeStatusViewModel(
 ) : ViewModel() {
 
     val status: StateFlow<NodeStatusUi?> =
-        combine(repository.status, repository.sensors, repository.extraRadiosOff) { status, bus, extraRadiosOff ->
-            status?.toUi(extraRadiosOff)?.copy(sensors = bus?.toSensorsUi())
+        combine(repository.status, repository.sensors, repository.extraRadiosOff, repository.primaryRadio) {
+                status,
+                bus,
+                extraRadiosOff,
+                primary,
+            ->
+            status?.toUi(extraRadiosOff, primary)?.copy(sensors = bus?.toSensorsUi())
         }
             .stateInWhileSubscribed(initialValue = null)
 
