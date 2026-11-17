@@ -56,7 +56,16 @@ reviews:
     - "!**/emoji-data.json"
     - "!**/flatpak-sources.json"
     # Crowdin-managed translations — owned upstream, not hand-edited here.
+    # Fixes belong in Crowdin; a local edit is overwritten on the next sync.
+    # The character classes skip every locale but en / en-US.
     - "!**/values-*/strings.xml"
+    - "!**/values-*/schema_strings.xml"
+    - "!docs/[a-df-z]*/user/**"
+    - "!docs/e[a-mo-z]*/user/**"
+    - "!docs/[a-df-z]*/index.md"
+    - "!docs/e[a-mo-z]*/index.md"
+    - "!fastlane/metadata/android/[a-df-z]*/**"
+    - "!fastlane/metadata/android/e[a-mo-z]*/**"
     # Spec Kit scaffolding — vendored tooling, not hand-maintained here.
     - "!.specify/**"
 
