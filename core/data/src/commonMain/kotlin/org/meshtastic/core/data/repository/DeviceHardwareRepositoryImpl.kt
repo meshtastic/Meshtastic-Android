@@ -197,7 +197,10 @@ class DeviceHardwareRepositoryImpl(
             }
 
             val hardware = resolveHardware(hwModel, entities, target)
-            resolved.put(generation, hwModel, target, ResolvedHardware(hardware, entities, database))
+            // A miss from an empty table is a failed seed, not an answer: leave it uncached so the next lookup reseeds.
+            if (entities.isNotEmpty() || localDataSource.hasAnyEntries()) {
+                resolved.put(generation, hwModel, target, ResolvedHardware(hardware, entities, database))
+            }
             Result.success(hardware)
         }
     }
