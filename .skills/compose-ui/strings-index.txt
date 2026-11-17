@@ -1834,6 +1834,7 @@ request_power_metrics
 request_telemetry
 request_user_info
 requesting_from
+requesting_neighbor_info_from
 resend
 reset
 reset_to_defaults

@@ -1906,6 +1906,7 @@
     <string name="request_telemetry">Request Telemetry</string>
     <string name="request_user_info">Request User Info</string>
     <string name="requesting_from">Requesting %1$s from %2$s</string>
+    <string name="requesting_neighbor_info_from">Requesting neighbor info from %1$s. It only answers if its Neighbor Info module is enabled.</string>
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>
     <string name="reset_to_defaults">Reset to defaults</string>

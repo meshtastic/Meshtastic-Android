@@ -31,6 +31,11 @@ import org.meshtastic.proto.Telemetry
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
+    /**
+     * Whether the connected radio has the neighbor-info module enabled. Firmware drops every neighbor-info packet on a
+     * node with it off, including the reply to its own request, so the request is offered only when it is on.
+     */
+    val canRequestNeighborInfo: Boolean = false,
     val isFahrenheit: Boolean = false,
     val displayUnits: MeasurementSystem = MeasurementSystem.METRIC,
     val node: Node? = null,

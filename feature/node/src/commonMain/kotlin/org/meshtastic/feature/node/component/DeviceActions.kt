@@ -80,6 +80,7 @@ fun DeviceActions(
     hasConversation: Boolean = false,
     airQualityHistory: List<Telemetry> = emptyList(),
     trackedInLiveUpdate: Boolean? = null,
+    canRequestNeighborInfo: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionCard(title = Res.string.actions) {
@@ -107,6 +108,7 @@ fun DeviceActions(
             onAction = onAction,
             isLocal = isLocal,
             airQualityHistory = airQualityHistory,
+            canRequestNeighborInfo = canRequestNeighborInfo,
         )
     }
 }

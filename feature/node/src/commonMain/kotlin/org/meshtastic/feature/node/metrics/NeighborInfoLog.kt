@@ -82,7 +82,7 @@ fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewM
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
-                    if (!state.isLocal) {
+                    if (!state.isLocal && state.canRequestNeighborInfo) {
                         CooldownIconButton(
                             onClick = { viewModel.requestNeighborInfo() },
                             cooldownTimestamp = lastRequestNeighborsTime,
