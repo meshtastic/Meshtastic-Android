@@ -53,6 +53,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device_manually
+import org.meshtastic.core.resources.add_usb_device
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.network
@@ -111,6 +112,7 @@ fun DeviceList(
     virtualDevices: List<DeviceListEntry> = emptyList(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: (@Composable () -> Unit)? = null,
+    onRequestUsbDevice: (() -> Unit)? = null,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -171,6 +173,7 @@ fun DeviceList(
                     connectionState = connectionState,
                     selectedDevice = selectedDevice,
                     onSelectDevice = onSelectDevice,
+                    onRequestUsbDevice = onRequestUsbDevice,
                 )
         }
         if (virtualDevices.isNotEmpty()) {
@@ -251,6 +254,7 @@ private fun LazyListScope.usbSection(
     connectionState: ConnectionState,
     selectedDevice: String,
     onSelectDevice: (DeviceListEntry) -> Unit,
+    onRequestUsbDevice: (() -> Unit)?,
 ) {
     item(key = "header:usb", contentType = "header") { DeviceSectionHeader(title = stringResource(Res.string.usb)) }
     items(usbDevices, key = { device -> "usb:${device.fullAddress}" }, contentType = { "device" }) { device ->
@@ -267,6 +271,19 @@ private fun LazyListScope.usbSection(
                 text = stringResource(Res.string.no_usb_devices_seen),
                 supportingText = stringResource(Res.string.no_usb_devices_hint),
                 imageVector = MeshtasticIcons.Usb,
+            )
+        }
+    }
+    // Only present on platforms whose USB discovery needs an explicit grant step (web's Web Serial picker) rather
+    // than passive enumeration (JVM/Android already list every attached serial device without prompting).
+    if (onRequestUsbDevice != null) {
+        item(key = "action:add-usb", contentType = "action") {
+            ConnectionActionButton(
+                onClick = onRequestUsbDevice,
+                icon = MeshtasticIcons.Add,
+                text = stringResource(Res.string.add_usb_device),
+                modifier = Modifier.fillMaxWidth(),
+                style = ConnectionActionButtonStyle.Tonal,
             )
         }
     }

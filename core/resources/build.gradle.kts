@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
 import org.meshtastic.buildlogic.GenerateSupportedLocalesTask
 
 plugins {
@@ -30,6 +33,9 @@ val generateSupportedLocales =
     }
 
 kotlin {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
     android {
         androidResources {
             enable = true
@@ -38,11 +44,19 @@ kotlin {
         withHostTest { isIncludeAndroidResources = true }
     }
 
+    // runBlocking has no wasmJs implementation, so the blocking getString() overloads live in nonWebMain.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
+
     sourceSets {
         commonMain {
             kotlin.srcDir(generateSupportedLocales.flatMap { it.outputDir })
             dependencies { implementation(projects.core.common) }
         }
+        getByName("nonWebMain").dependencies { implementation(libs.kotlinx.coroutines.core) }
     }
 }
 

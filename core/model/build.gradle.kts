@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
@@ -22,6 +24,9 @@ plugins {
 }
 
 kotlin {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
     android {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
@@ -69,6 +74,17 @@ kotlin {
             }
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // Tests that use core:testing, which has no wasmJs target.
+        val nonWebTest by creating {
+            dependsOn(commonTest.get())
+            dependencies { implementation(projects.core.testing) }
+        }
+        matching {
+            it.name == "jvmTest" ||
+                it.name == "androidHostTest" ||
+                it.name == "iosArm64Test" ||
+                it.name == "iosSimulatorArm64Test"
+        }
+            .configureEach { dependsOn(nonWebTest) }
     }
 }

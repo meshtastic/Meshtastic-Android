@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.android.room)
@@ -30,10 +34,18 @@ kotlin {
 
     compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain: sqlite-bundled and datastore-preferences have no wasmJs variant.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
+
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.androidx.sqlite.bundled)
-            implementation(libs.androidx.datastore.preferences)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
@@ -45,7 +57,18 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
-        commonTest.dependencies {
+        getByName("nonWebMain").dependencies {
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.androidx.datastore.preferences)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.androidx.sqlite.web)
+            implementation(libs.kotlinx.browser)
+            // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS.
+            implementation(npm("sqlite-wasm-worker", file("worker")))
+        }
+        // core:testing has no wasmJs target, and an in-memory Room database has no OPFS equivalent.
+        getByName("nonWebTest").dependencies {
             implementation(projects.core.testing)
             implementation(libs.androidx.room.testing)
         }
@@ -76,4 +99,6 @@ dependencies {
     "kspJvm"(libs.ksp.symbol.processing.aa.embeddable)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+    // Without it the klib compiles and fails at runtime with IrLinkageError on the generated constructor actual.
+    "kspWasmJs"(libs.androidx.room.compiler)
 }

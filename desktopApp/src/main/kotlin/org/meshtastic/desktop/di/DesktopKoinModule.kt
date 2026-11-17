@@ -21,6 +21,7 @@ import org.meshtastic.core.ble.di.CoreBleModule
 import org.meshtastic.core.common.di.CoreCommonModule
 import org.meshtastic.core.data.di.CoreDataModule
 import org.meshtastic.core.database.di.CoreDatabaseModule
+import org.meshtastic.core.database.di.CoreDatabaseNonWebModule
 import org.meshtastic.core.datastore.di.CoreDatastoreModule
 import org.meshtastic.core.network.di.CoreNetworkModule
 import org.meshtastic.core.prefs.di.CorePrefsModule
@@ -54,6 +55,7 @@ import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
         CoreDataModule::class,
         org.meshtastic.core.domain.di.CoreDomainModule::class,
         CoreDatabaseModule::class,
+        CoreDatabaseNonWebModule::class,
         org.meshtastic.core.repository.di.CoreRepositoryModule::class,
         CoreDatastoreModule::class,
         CorePrefsModule::class,

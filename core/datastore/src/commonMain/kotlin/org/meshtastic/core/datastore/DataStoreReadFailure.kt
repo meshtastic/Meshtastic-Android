@@ -21,5 +21,4 @@ package org.meshtastic.core.datastore
  * (the base of its `CorruptionException`) from the contents. Both alias `java.io.IOException` on the JVM, but on Native
  * they are separate classes, so a check for one alone misses the other.
  */
-internal fun Throwable.isDataStoreReadFailure(): Boolean =
-    this is okio.IOException || this is androidx.datastore.core.IOException
+internal expect fun Throwable.isDataStoreReadFailure(): Boolean

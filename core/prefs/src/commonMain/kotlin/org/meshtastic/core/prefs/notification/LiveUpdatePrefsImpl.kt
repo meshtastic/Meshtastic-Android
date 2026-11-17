@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.notification
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -26,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.repository.LiveUpdatePrefs
 
@@ -43,6 +42,6 @@ class LiveUpdatePrefsImpl(private val dataStore: UiDataStore, private val scope:
     }
 
     private companion object {
-        val KEY_LIVE_UPDATE_MODE = stringPreferencesKey("live_update_mode")
+        val KEY_LIVE_UPDATE_MODE = stringPrefsKey("live_update_mode")
     }
 }

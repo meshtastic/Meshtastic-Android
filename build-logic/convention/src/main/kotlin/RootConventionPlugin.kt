@@ -22,6 +22,7 @@ import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
 import org.meshtastic.buildlogic.configureKoverAggregation
+import org.meshtastic.buildlogic.configureWasmToolingDownloads
 
 /**
  * Root convention plugin applied to the top-level project.
@@ -48,6 +49,7 @@ class RootConventionPlugin : Plugin<Project> {
             configureGraphTasks()
             registerKmpSmokeCompileTask()
             registerBuildLogicLintTasks()
+            configureWasmToolingDownloads()
         }
     }
 }

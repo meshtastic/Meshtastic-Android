@@ -83,7 +83,7 @@ class KoinConventionPlugin : Plugin<Project> {
 }
 
 /** Modules declaring a `@KoinApplication`. A new app target must be added here or it is never validated. */
-private val KOIN_ENTRY_POINTS = setOf(":androidApp", ":desktopApp")
+private val KOIN_ENTRY_POINTS = setOf(":androidApp", ":desktopApp", ":webApp")
 
 /** Kotlin versions newer than the Koin plugin's own verified list that resolve every reference in its ABI check. */
 private val KOIN_ABI_CHECKED_KOTLIN = setOf("2.4.21")

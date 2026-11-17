@@ -16,10 +16,6 @@
  */
 package org.meshtastic.core.prefs.discovery
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +26,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.intPrefsKey
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.DiscoveryPrefs
 
 @Single
@@ -72,10 +71,10 @@ class DiscoveryPrefsImpl(private val dataStore: UiDataStore, dispatchers: Corout
     }
 
     companion object {
-        private val KEY_DWELL_MINUTES = intPreferencesKey("discovery_dwell_minutes")
-        private val KEY_SELECTED_PRESETS = stringPreferencesKey("discovery_selected_presets")
-        private val KEY_AI_ENABLED = booleanPreferencesKey("discovery_ai_enabled")
-        private val KEY_TOPOLOGY_OVERLAY = booleanPreferencesKey("discovery_topology_overlay")
+        private val KEY_DWELL_MINUTES = intPrefsKey("discovery_dwell_minutes")
+        private val KEY_SELECTED_PRESETS = stringPrefsKey("discovery_selected_presets")
+        private val KEY_AI_ENABLED = booleanPrefsKey("discovery_ai_enabled")
+        private val KEY_TOPOLOGY_OVERLAY = booleanPrefsKey("discovery_topology_overlay")
         private const val PRESET_DELIMITER = ","
     }
 }

@@ -15,14 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {
     // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain holds the TAK screens: core:takserver binds a TLS server socket, which a browser cannot. jvmAndroid
+    // nests inside nonWeb because a project takes one hierarchy template, so meshtastic.kmp.jvm.android is not applied.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common {
+            group("nonWeb") {
+                withCompilations { it.target.targetName != "wasmJs" }
+                group("jvmAndroid") {
+                    withCompilations { it.target.targetName == "android" || it.target.targetName == "jvm" }
+                }
+            }
+        }
+    }
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -36,7 +57,6 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
             implementation(projects.core.di)
-            implementation(projects.core.takserver)
 
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
@@ -44,12 +64,15 @@ kotlin {
             implementation(libs.coil)
         }
 
+        getByName("nonWebMain").dependencies { implementation(projects.core.takserver) }
+
         androidMain.dependencies { implementation(libs.androidx.appcompat) }
 
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.compose.multiplatform.ui.test)
-        }
+        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        // Tests that use core:testing, which has no wasmJs target; KmpFeatureConventionPlugin wires it here.
+        matching { it.name == "jvmTest" || it.name == "iosArm64Test" || it.name == "iosSimulatorArm64Test" }
+            .configureEach { dependsOn(getByName("nonWebTest")) }
 
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }

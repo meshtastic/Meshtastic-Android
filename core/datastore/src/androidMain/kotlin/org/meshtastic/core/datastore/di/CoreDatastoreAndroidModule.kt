@@ -35,6 +35,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.core.datastore.store.asStore
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -66,6 +67,7 @@ class LocalConfigDataStoreModule {
         produceNewData = { LocalConfig.Builder().build() },
         scope = scope,
     )
+        .asStore()
         .asCoreLocalConfigDataStore()
 }
 
@@ -78,6 +80,7 @@ class ModuleConfigDataStoreModule {
         produceNewData = { LocalModuleConfig.Builder().build() },
         scope = scope,
     )
+        .asStore()
         .asCoreModuleConfigDataStore()
 }
 
@@ -90,6 +93,7 @@ class LocalStatsDataStoreModule {
         produceNewData = { LocalStats.Builder().build() },
         scope = scope,
     )
+        .asStore()
         .asCoreLocalStatsDataStore()
 }
 

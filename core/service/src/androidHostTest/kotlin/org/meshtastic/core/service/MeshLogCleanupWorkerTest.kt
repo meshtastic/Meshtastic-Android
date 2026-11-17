@@ -17,8 +17,6 @@
 package org.meshtastic.core.service
 
 import android.content.Context
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.preferencesOf
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
@@ -41,6 +39,8 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MeshLogDataStore
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
+import org.meshtastic.core.prefs.store.PrefsKey
+import org.meshtastic.core.prefs.store.PrefsSnapshot
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.robolectric.RobolectricTestRunner
@@ -169,23 +169,28 @@ class MeshLogCleanupWorkerTest {
         private val loadGate = CompletableDeferred<Unit>()
         private val persisted =
             MutableStateFlow(
-                preferencesOf(
-                    MeshLogPrefsImpl.KEY_LOGGING_ENABLED_PREF to loggingEnabled,
-                    MeshLogPrefsImpl.KEY_RETENTION_DAYS_PREF to retentionDays,
+                FakePrefsSnapshot(
+                    mapOf(
+                        MeshLogPrefsImpl.KEY_LOGGING_ENABLED_PREF to loggingEnabled,
+                        MeshLogPrefsImpl.KEY_RETENTION_DAYS_PREF to retentionDays,
+                    ),
                 ),
             )
 
         var collectionCount: Int = 0
             private set
 
-        override val data: Flow<Preferences> = flow {
+        override val data: Flow<PrefsSnapshot> = flow {
             collectionCount += 1
             loadGate.await()
             emitAll(persisted)
         }
 
-        override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences =
-            transform(persisted.value).also { persisted.value = it }
+        override suspend fun edit(transform: (PrefsSnapshot.Editor) -> Unit) {
+            val editor = FakePrefsEditor(persisted.value.values)
+            transform(editor)
+            persisted.value = FakePrefsSnapshot(editor.values)
+        }
 
         fun releaseLoad() {
             loadGate.complete(Unit)
@@ -193,6 +198,31 @@ class MeshLogCleanupWorkerTest {
 
         fun failLoad(cause: Throwable) {
             loadGate.completeExceptionally(cause)
+        }
+    }
+
+    /** Minimal in-memory [PrefsSnapshot]/[PrefsSnapshot.Editor] test double — no real DataStore/localStorage. */
+    private class FakePrefsSnapshot(val values: Map<PrefsKey<*>, Any?>) : PrefsSnapshot {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> get(key: PrefsKey<T>): T? = values[key] as T?
+
+        override fun contains(key: PrefsKey<*>): Boolean = values.containsKey(key)
+    }
+
+    private class FakePrefsEditor(initial: Map<PrefsKey<*>, Any?>) : PrefsSnapshot.Editor {
+        val values: MutableMap<PrefsKey<*>, Any?> = initial.toMutableMap()
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> get(key: PrefsKey<T>): T? = values[key] as T?
+
+        override fun contains(key: PrefsKey<*>): Boolean = values.containsKey(key)
+
+        override fun <T> set(key: PrefsKey<T>, value: T) {
+            values[key] = value
+        }
+
+        override fun <T> remove(key: PrefsKey<T>) {
+            values.remove(key)
         }
     }
 }

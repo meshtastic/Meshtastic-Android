@@ -84,6 +84,7 @@ import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.tak.isTakSupportedOnPlatform
 
 @Composable
 fun RadioConfigItemList(
@@ -285,12 +286,14 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
         )
 
-        ListItem(
-            text = stringResource(Res.string.tak_server),
-            leadingIcon = MeshtasticIcons.Settings,
-            enabled = enabled,
-            onClick = { onNavigate(SettingsRoute.TakServer) },
-        )
+        if (isTakSupportedOnPlatform) {
+            ListItem(
+                text = stringResource(Res.string.tak_server),
+                leadingIcon = MeshtasticIcons.Settings,
+                enabled = enabled,
+                onClick = { onNavigate(SettingsRoute.TakServer) },
+            )
+        }
 
         ListItem(
             text = stringResource(Res.string.discovery_local_mesh),

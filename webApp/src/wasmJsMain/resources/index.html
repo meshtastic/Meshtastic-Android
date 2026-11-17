@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Meshtastic</title>
+    <!-- No <script src="skiko.js">: redundant for Kotlin/Wasm targets since Compose Multiplatform 1.7 (skiko's
+         web runtime ships as an ES module bundled directly into webApp.js). -->
+    <script type="application/javascript" src="webApp.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            overflow: hidden;
+        }
+
+        #webApp {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="webApp"></div>
+</body>
+</html>

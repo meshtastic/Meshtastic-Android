@@ -855,6 +855,12 @@ fun ConnectionsScreen(
                         gateTcpConnect { scanModel.connectToManualAddress(fullAddress) }
                     },
                     onRemoveRecentAddress = { scanModel.removeRecentAddress(it.fullAddress) },
+                    onRequestUsbDevice =
+                    if (scanModel.usbNeedsExplicitDeviceRequest) {
+                        { scanModel.requestUsbDevice() }
+                    } else {
+                        null
+                    },
                 )
             }
 

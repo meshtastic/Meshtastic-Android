@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.database
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.room3.RoomDatabase
 import okio.FileSystem
 import okio.Path
@@ -39,6 +37,3 @@ expect fun deleteDatabase(dbName: String)
 
 /** Returns the [FileSystem] to use for database file operations. */
 expect fun getFileSystem(): FileSystem
-
-/** Creates a platform-specific [DataStore] for database-related preferences. */
-expect fun createDatabaseDataStore(name: String): DataStore<Preferences>

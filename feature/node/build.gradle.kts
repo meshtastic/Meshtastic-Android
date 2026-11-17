@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
@@ -22,6 +26,16 @@ plugins {
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain: sceneview-compose has no wasmJs variant.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -41,6 +55,15 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
             implementation(libs.vico.compose.m3)
+
+            // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
+            implementation(libs.jetbrains.compose.material3.adaptive)
+            implementation(libs.jetbrains.compose.material3.adaptive.layout)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
+        }
+
+        getByName("nonWebMain").dependencies {
             // The desktop renderer's POM drags a mac-only Compose runtime onto every OS's classpath. The
             // string form is the one overload that takes an exclude; the version still comes from the catalog.
             implementation("io.github.sceneview:sceneview-compose:${libs.versions.sceneview.get()}") {
@@ -48,12 +71,6 @@ kotlin {
                 // Fuel 2.3.1 (the Android renderer's URL loader, unused here) ships the pre-Parcelize runtime.
                 exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
             }
-
-            // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
-            implementation(libs.jetbrains.compose.material3.adaptive)
-            implementation(libs.jetbrains.compose.material3.adaptive.layout)
-            implementation(libs.jetbrains.compose.material3.adaptive.navigation)
-            implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
         androidMain.dependencies {

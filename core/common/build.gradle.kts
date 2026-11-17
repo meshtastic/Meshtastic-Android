@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
@@ -23,6 +25,9 @@ plugins {
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 

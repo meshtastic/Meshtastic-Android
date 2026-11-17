@@ -19,6 +19,9 @@ plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
     // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -43,6 +46,11 @@ kotlin {
         androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
         commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        // Tests that use core:testing, which has no wasmJs target; KmpFeatureConventionPlugin wires it here.
+        val nonWebTest by creating { dependsOn(commonTest.get()) }
+        matching { it.name == "jvmTest" || it.name == "iosArm64Test" || it.name == "iosSimulatorArm64Test" }
+            .configureEach { dependsOn(nonWebTest) }
 
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }

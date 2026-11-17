@@ -23,6 +23,15 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain: the last-BLE-node recorder writes through core:datastore's Preferences-backed data source.
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)
@@ -36,7 +45,6 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.resources)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.kotlinx.atomicfu)
@@ -60,6 +68,8 @@ kotlin {
             }
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // Tests that use core:testing, which has no wasmJs target.
+        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
+        getByName("androidHostTest") { dependsOn(getByName("nonWebTest")) }
     }
 }

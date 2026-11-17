@@ -69,8 +69,22 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
 
                     implementation(libs.library("compose-multiplatform-ui"))
                 }
+            }
 
-                sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }
+            // core:testing has no wasmJs target, so a module with wasmJs takes it in nonWebTest. Deferred because
+            // that source set is created by the module's own build script, after this plugin applies.
+            target.afterEvaluate {
+                extensions.configure<KotlinMultiplatformExtension> {
+                    val hasWasmJsTarget = targets.findByName("wasmJs") != null
+                    val nonWebTest = sourceSets.findByName("nonWebTest")
+                    check(!hasWasmJsTarget || nonWebTest != null) {
+                        "${target.path} registers wasmJs() but has no `nonWebTest` source set — " +
+                            "core:testing has no wasmJs target, so it must be routed away from commonTest. " +
+                            "See feature/connections/build.gradle.kts for the pattern."
+                    }
+                    val testSourceSet = nonWebTest ?: sourceSets.getByName("commonTest")
+                    testSourceSet.dependencies { implementation(project(":core:testing")) }
+                }
             }
         }
     }

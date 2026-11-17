@@ -15,10 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain: the adapters over core:datastore's Preferences-backed data sources, which have no wasmJs target.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+
+    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -42,5 +58,8 @@ kotlin {
             implementation(libs.compose.multiplatform.ui.test)
             implementation(compose.desktop.currentOs)
         }
+
+        // Tests that use core:testing, which has no wasmJs target; KmpFeatureConventionPlugin wires it here.
+        getByName("nonWebTest") { dependsOn(commonTest.get()) }
     }
 }

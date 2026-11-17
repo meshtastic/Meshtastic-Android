@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.koin)
@@ -22,6 +26,19 @@ plugins {
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
+
+    // nonWebMain: Kable has no wasmJs target. A compilation predicate, because withAndroidTarget()/withApple() drop
+    // androidMain under com.android.kotlin.multiplatform.library (KT-80409).
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+
+    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -32,14 +49,18 @@ kotlin {
 
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kable.core)
         }
+
+        getByName("nonWebMain").dependencies { implementation(libs.kable.core) }
+
+        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
 
         androidMain.dependencies {
             implementation(libs.androidx.lifecycle.process)
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // Tests that use Kable or core:testing, neither of which has a wasmJs target.
+        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
     }
 }

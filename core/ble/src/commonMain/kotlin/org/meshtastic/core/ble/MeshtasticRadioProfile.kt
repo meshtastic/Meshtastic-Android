@@ -47,3 +47,6 @@ interface MeshtasticRadioProfile {
      */
     suspend fun awaitSubscriptionReady() {}
 }
+
+/** Extension to convert a [BleService] to a [MeshtasticRadioProfile]. */
+expect fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile

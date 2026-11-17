@@ -16,9 +16,9 @@
  */
 package org.meshtastic.core.prefs.ui
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import org.meshtastic.core.model.NodeListDensity
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.stringPrefsKey
 
 /**
  * DataStore preference keys for node list layout configuration. Key strings are used directly by DataStore — do not
@@ -40,15 +40,15 @@ enum class NodeListLayoutPreferences(val key: String, val defaultBoolean: Boolea
         private const val DENSITY_KEY = "node-list-density"
         val DEFAULT_DENSITY = NodeListDensity.COMPLETE.name
 
-        val KEY_DENSITY = stringPreferencesKey(DENSITY_KEY)
-        val KEY_SHOW_POWER = booleanPreferencesKey(SHOULD_SHOW_POWER.key)
-        val KEY_SHOW_LAST_HEARD = booleanPreferencesKey(SHOULD_SHOW_LAST_HEARD.key)
-        val KEY_LAST_HEARD_RELATIVE = booleanPreferencesKey(LAST_HEARD_IS_RELATIVE.key)
-        val KEY_SHOW_LOCATION = booleanPreferencesKey(SHOULD_SHOW_LOCATION.key)
-        val KEY_SHOW_HOPS = booleanPreferencesKey(SHOULD_SHOW_HOPS.key)
-        val KEY_SHOW_SIGNAL = booleanPreferencesKey(SHOULD_SHOW_SIGNAL.key)
-        val KEY_SHOW_CHANNEL = booleanPreferencesKey(SHOULD_SHOW_CHANNEL.key)
-        val KEY_SHOW_ROLE = booleanPreferencesKey(SHOULD_SHOW_ROLE.key)
-        val KEY_SHOW_TELEMETRY = booleanPreferencesKey(SHOULD_SHOW_TELEMETRY.key)
+        val KEY_DENSITY = stringPrefsKey(DENSITY_KEY)
+        val KEY_SHOW_POWER = booleanPrefsKey(SHOULD_SHOW_POWER.key)
+        val KEY_SHOW_LAST_HEARD = booleanPrefsKey(SHOULD_SHOW_LAST_HEARD.key)
+        val KEY_LAST_HEARD_RELATIVE = booleanPrefsKey(LAST_HEARD_IS_RELATIVE.key)
+        val KEY_SHOW_LOCATION = booleanPrefsKey(SHOULD_SHOW_LOCATION.key)
+        val KEY_SHOW_HOPS = booleanPrefsKey(SHOULD_SHOW_HOPS.key)
+        val KEY_SHOW_SIGNAL = booleanPrefsKey(SHOULD_SHOW_SIGNAL.key)
+        val KEY_SHOW_CHANNEL = booleanPrefsKey(SHOULD_SHOW_CHANNEL.key)
+        val KEY_SHOW_ROLE = booleanPrefsKey(SHOULD_SHOW_ROLE.key)
+        val KEY_SHOW_TELEMETRY = booleanPrefsKey(SHOULD_SHOW_TELEMETRY.key)
     }
 }

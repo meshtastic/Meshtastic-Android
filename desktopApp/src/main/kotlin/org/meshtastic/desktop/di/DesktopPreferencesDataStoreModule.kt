@@ -53,6 +53,7 @@ import org.meshtastic.core.prefs.di.asMeshDataStore
 import org.meshtastic.core.prefs.di.asMeshLogDataStore
 import org.meshtastic.core.prefs.di.asRadioDataStore
 import org.meshtastic.core.prefs.di.asUiDataStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 
 /** Typed preference-datastore singletons for each preference domain, one file each under the data directory. */
 @Suppress("TooManyFunctions")
@@ -61,39 +62,46 @@ class DesktopPreferencesDataStoreModule {
 
     @Single
     fun analyticsDataStore(scope: DataStoreScope): AnalyticsDataStore =
-        prefsStore("analytics", scope).asAnalyticsDataStore()
+        prefsStore("analytics", scope).asPrefsStore().asAnalyticsDataStore()
 
     @Single
     fun homoglyphEncodingDataStore(scope: DataStoreScope): HomoglyphEncodingDataStore =
-        prefsStore("homoglyph_encoding", scope).asHomoglyphEncodingDataStore()
+        prefsStore("homoglyph_encoding", scope).asPrefsStore().asHomoglyphEncodingDataStore()
 
-    @Single fun appDataStore(scope: DataStoreScope): AppDataStore = prefsStore("app", scope).asAppDataStore()
+    @Single
+    fun appDataStore(scope: DataStoreScope): AppDataStore = prefsStore("app", scope).asPrefsStore().asAppDataStore()
 
     @Single
     fun customEmojiDataStore(scope: DataStoreScope): CustomEmojiDataStore =
-        prefsStore("custom_emoji", scope).asCustomEmojiDataStore()
+        prefsStore("custom_emoji", scope).asPrefsStore().asCustomEmojiDataStore()
 
-    @Single fun mapDataStore(scope: DataStoreScope): MapDataStore = prefsStore("map", scope).asMapDataStore()
+    @Single
+    fun mapDataStore(scope: DataStoreScope): MapDataStore = prefsStore("map", scope).asPrefsStore().asMapDataStore()
 
     @Single
     fun mapConsentDataStore(scope: DataStoreScope): MapConsentDataStore =
-        prefsStore("map_consent", scope).asMapConsentDataStore()
+        prefsStore("map_consent", scope).asPrefsStore().asMapConsentDataStore()
 
     @Single
     fun mapTileProviderDataStore(scope: DataStoreScope): MapTileProviderDataStore =
-        prefsStore("map_tile_provider", scope).asMapTileProviderDataStore()
-
-    @Single fun meshDataStore(scope: DataStoreScope): MeshDataStore = prefsStore("mesh", scope).asMeshDataStore()
-
-    @Single fun radioDataStore(scope: DataStoreScope): RadioDataStore = prefsStore("radio", scope).asRadioDataStore()
-
-    @Single fun uiDataStore(scope: DataStoreScope): UiDataStore = prefsStore("ui", scope).asUiDataStore()
+        prefsStore("map_tile_provider", scope).asPrefsStore().asMapTileProviderDataStore()
 
     @Single
-    fun meshLogDataStore(scope: DataStoreScope): MeshLogDataStore = prefsStore("meshlog", scope).asMeshLogDataStore()
+    fun meshDataStore(scope: DataStoreScope): MeshDataStore = prefsStore("mesh", scope).asPrefsStore().asMeshDataStore()
 
     @Single
-    fun filterDataStore(scope: DataStoreScope): FilterDataStore = prefsStore("filter", scope).asFilterDataStore()
+    fun radioDataStore(scope: DataStoreScope): RadioDataStore =
+        prefsStore("radio", scope).asPrefsStore().asRadioDataStore()
+
+    @Single fun uiDataStore(scope: DataStoreScope): UiDataStore = prefsStore("ui", scope).asPrefsStore().asUiDataStore()
+
+    @Single
+    fun meshLogDataStore(scope: DataStoreScope): MeshLogDataStore =
+        prefsStore("meshlog", scope).asPrefsStore().asMeshLogDataStore()
+
+    @Single
+    fun filterDataStore(scope: DataStoreScope): FilterDataStore =
+        prefsStore("filter", scope).asPrefsStore().asFilterDataStore()
 
     @Single
     fun corePreferencesDataStore(scope: DataStoreScope): CorePreferencesDataStore =

@@ -33,8 +33,6 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
-import org.meshtastic.core.takserver.MeshToCotBroadcaster
-import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.robolectric.RobolectricTestRunner
@@ -77,23 +75,7 @@ class QuickSettingsTileControllerTest {
             nodeManager = mock(MockMode.autofill),
             messageProcessor = mock(MockMode.autofill),
             serviceNotifications = mock(MockMode.autofill),
-            takServerManager = mock(MockMode.autofill),
-            takMeshIntegration =
-            TAKMeshIntegration(
-                takServerManager = mock(MockMode.autofill),
-                commandSender = mock(MockMode.autofill),
-                serviceRepository = mock(MockMode.autofill),
-                meshConfigHandler = mock(MockMode.autofill),
-                nodeRepository = mock(MockMode.autofill),
-                meshToCotBroadcaster =
-                MeshToCotBroadcaster(
-                    takServerManager = mock(MockMode.autofill),
-                    nodeRepository = mock(MockMode.autofill),
-                    takPrefs = mock(MockMode.autofill),
-                    dispatchers = dispatchers,
-                ),
-                takPrefs = mock(MockMode.autofill),
-            ),
+            takServerIntegration = mock(MockMode.autofill),
             takPrefs = mock(MockMode.autofill),
             databaseManager = mock(MockMode.autofill),
             connectionManager = mock(MockMode.autofill),

@@ -44,11 +44,9 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
-import org.meshtastic.core.ble.MeshtasticBleDevice
 import org.meshtastic.core.ble.NordicDfu
+import org.meshtastic.core.ble.addressOnlyBleDevice
 import org.meshtastic.core.common.util.safeCatchingAll
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -69,6 +67,9 @@ import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
+import org.meshtastic.feature.connections.data.RecentAddressesSource
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -156,17 +157,19 @@ open class ScannerViewModel(
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
     private val radioPrefs: RadioPrefs,
-    private val recentAddressesDataSource: RecentAddressesDataSource,
+    private val recentAddressesDataSource: RecentAddressesSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
     private val networkRepository: NetworkRepository,
     private val dispatchers: CoroutineDispatchers,
     private val uiPrefs: UiPrefs,
-    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
+    private val firmwareRecoveryDataSource: PendingFirmwareRecoverySource,
     private val bleScanner: BleScanner? = null,
     /** False on hardware with no Bluetooth LE: the BLE pane is hidden and never selected or scanned. */
     val bluetoothSupported: Boolean = true,
     /** False on hardware with no USB host: the USB pane is hidden and never selected. */
     val usbSupported: Boolean = true,
+    /** Set where a USB device must be requested explicitly, as with Web Serial. */
+    private val usbScanner: UsbScanner? = null,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -498,6 +501,23 @@ open class ScannerViewModel(
     }
 
     /**
+     * Whether discovering a new USB/serial device needs an explicit request action (e.g. a button) rather than passive
+     * scanning alone — true only on web (Web Serial's `requestPort()` picker), false everywhere else.
+     */
+    val usbNeedsExplicitDeviceRequest: Boolean
+        get() = usbScanner?.needsExplicitDeviceRequest() == true
+
+    /**
+     * Triggers the platform's explicit USB/serial device-request flow. No-op where [usbNeedsExplicitDeviceRequest] is
+     * false. Must be called from the same event-handler chain as a user gesture (e.g. a button's onClick) — see
+     * [UsbScanner.requestNewDevice]'s KDoc.
+     */
+    fun requestUsbDevice() {
+        if (usbScanner?.needsExplicitDeviceRequest() != true) return
+        safeLaunch(tag = "requestUsbDevice") { usbScanner.requestNewDevice() }
+    }
+
+    /**
      * Starts BLE scanning for screen-entry auto-scan only when no device is already selected. Manual scan toggles call
      * [startBleScan] directly so users can still discover/switch devices while connected.
      */
@@ -735,7 +755,7 @@ open class ScannerViewModel(
         }
         stopAllScans()
         recordSelectedTransport(address)
-        val device = MeshtasticBleDevice(address.removePrefix(BLE_DEVICE_PREFIX))
+        val device = addressOnlyBleDevice(address.removePrefix(BLE_DEVICE_PREFIX))
         requestBonding(DeviceListEntry.Ble(device, bonded = false), linkPin)
     }
 

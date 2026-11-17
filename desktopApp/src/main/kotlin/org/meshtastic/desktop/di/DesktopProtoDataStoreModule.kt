@@ -36,6 +36,7 @@ import org.meshtastic.core.datastore.di.asCoreModuleConfigDataStore
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.core.datastore.store.asStore
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -47,16 +48,19 @@ class DesktopProtoDataStoreModule {
     @Single
     fun localConfigDataStore(scope: DataStoreScope): CoreLocalConfigDataStore =
         protoStore(LocalConfigSerializer, "local_config.pb", { LocalConfig.Builder().build() }, scope)
+            .asStore()
             .asCoreLocalConfigDataStore()
 
     @Single
     fun moduleConfigDataStore(scope: DataStoreScope): CoreModuleConfigDataStore =
         protoStore(ModuleConfigSerializer, "module_config.pb", { LocalModuleConfig.Builder().build() }, scope)
+            .asStore()
             .asCoreModuleConfigDataStore()
 
     @Single
     fun localStatsDataStore(scope: DataStoreScope): CoreLocalStatsDataStore =
         protoStore(LocalStatsSerializer, "local_stats.pb", { LocalStats.Builder().build() }, scope)
+            .asStore()
             .asCoreLocalStatsDataStore()
 }
 
