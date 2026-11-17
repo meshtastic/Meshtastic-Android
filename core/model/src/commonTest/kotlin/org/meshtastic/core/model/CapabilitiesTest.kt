@@ -47,6 +47,13 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun canPlayRingtone_waits_for_a_firmware_release() {
+        assertFalse(caps("2.8.2").canPlayRingtone)
+        assertFalse(caps("3.0.0").canPlayRingtone)
+        assertTrue(Capabilities("2.8.2", forceEnableAll = true).canPlayRingtone)
+    }
+
+    @Test
     fun supportsHeardOnCurrentLora_requires_V2_8_1_even_with_forceEnableAll() {
         assertFalse(caps("2.8.0").supportsHeardOnCurrentLora)
         assertTrue(caps("2.8.1").supportsHeardOnCurrentLora)
@@ -240,6 +247,7 @@ class CapabilitiesTest {
         val c = caps(null)
         assertFalse(c.canMuteNode)
         assertFalse(c.canRequestNeighborInfo)
+        assertFalse(c.canPlayRingtone)
         assertFalse(c.canSendVerifiedContacts)
         assertFalse(c.canToggleUnmessageable)
         assertFalse(c.supportsQrCodeSharing)
