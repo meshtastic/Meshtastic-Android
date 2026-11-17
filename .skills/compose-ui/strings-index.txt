@@ -129,7 +129,6 @@ bandwidth_unsupported
 bandwidth_unsupported_summary
 baro_pressure
 battery
-battery_ina_2xx_i2c_address
 biochemical_oxygen_demand
 ble_devices
 ble_scan_needs_location_services
@@ -930,7 +929,6 @@ intro_welcome
 ip
 ip_address
 ip_port
-json_output_enabled
 jump_to_latest_from
 jump_to_latest_from_and_more
 ### KEY ###
@@ -1332,7 +1330,6 @@ messages
 metric_channel_label
 micrograms_per_cubic_meter
 min
-minimum_wake_time_seconds
 ### MIRROR ###
 mirror_active
 mirror_back
@@ -1601,7 +1598,6 @@ options
 orient_north
 orp
 overflow_menu
-override_console_serial_port
 ### PACKET ###
 packet_authenticity
 packet_authenticity_balanced
@@ -2066,7 +2062,6 @@ stop_connecting
 store_forward
 store_forward_config
 success
-super_deep_sleep_duration_seconds
 supported
 supported_by_community
 supported_by_maker
