@@ -150,6 +150,11 @@ internal fun embeddedNode(
     defaults = firstRunDefaults()
     this.logger = logger
     positionSource = bearers.positionSource
+    bearers.sensors(scope, logger)?.let { sensors ->
+        environment = sensors.environment
+        airQuality = sensors.airQuality
+        powerMetrics = sensors.powerMetrics
+    }
     // VIRTUAL_NODE, by number until the protobufs pin names it (protobufs#1126).
     hardwareModel = HardwareModel.fromValue(VIRTUAL_NODE) ?: HardwareModel.PRIVATE_HW
 }

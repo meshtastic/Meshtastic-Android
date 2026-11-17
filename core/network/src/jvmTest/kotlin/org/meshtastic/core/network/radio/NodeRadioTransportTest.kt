@@ -29,6 +29,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.node.BytesStore
+import org.meshtastic.node.EnvironmentSource
+import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.host.NodePhase
@@ -85,6 +87,13 @@ class NodeRadioTransportTest {
         override fun storesDir(): String = dir
 
         override fun hostBearerStore(): BytesStore = BytesStore.inMemory()
+
+        val sensorScopes = mutableListOf<CoroutineScope>()
+
+        override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors {
+            sensorScopes += scope
+            return NodeSensors(environment = EnvironmentSource { null })
+        }
     }
 
     // The node's loops never complete, so the transport gets its own cancellable scope on the test scheduler.
@@ -93,6 +102,15 @@ class NodeRadioTransportTest {
     private fun tempDir(): String = Files.createTempDirectory("node-transport").toString()
 
     private fun configRequest(nonce: Int): ByteArray = ToRadio.Builder().want_config_id(nonce).build().encode()
+
+    @Test
+    fun `the node is built with its host's sensors, asked for once on the node's own scope`() = runTest {
+        val scope = transportScope()
+        val bearers = FakeNodeBearers(tempDir())
+        embeddedNode(scope, bearers, bearers.factory, MeshLogger.None)
+        assertEquals(listOf(scope), bearers.sensorScopes)
+        scope.cancel()
+    }
 
     @Test
     fun `start connects once the node runs and answers the config dump within the frame cap`() = runTest {

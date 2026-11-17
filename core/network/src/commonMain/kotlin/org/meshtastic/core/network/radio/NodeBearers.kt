@@ -16,9 +16,14 @@
  */
 package org.meshtastic.core.network.radio
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.node.AirQualitySource
 import org.meshtastic.node.BytesStore
+import org.meshtastic.node.EnvironmentSource
+import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.PositionSource
+import org.meshtastic.node.PowerMetricsSource
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 
@@ -42,4 +47,17 @@ interface NodeBearers {
     /** The device's position for the node's beacon, or null when the platform offers none. */
     val positionSource: PositionSource?
         get() = null
+
+    /**
+     * The sensors wired to this host, read for the node's telemetry while [scope] lives, or null when the platform
+     * reads none. Called once per node start.
+     */
+    fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? = null
 }
+
+/** A host's sensor readings as the three telemetry sources a node takes; a source the host lacks is null. */
+class NodeSensors(
+    val environment: EnvironmentSource? = null,
+    val airQuality: AirQualitySource? = null,
+    val powerMetrics: PowerMetricsSource? = null,
+)

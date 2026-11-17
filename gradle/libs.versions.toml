@@ -343,6 +343,7 @@ meshtastic-node-bom = { module = "org.meshtastic:node-bom", version.ref = "mesht
 meshtastic-node-host = { module = "org.meshtastic:node-host" }
 meshtastic-node-android = { module = "org.meshtastic:node-android" }
 meshtastic-node-desktop = { module = "org.meshtastic:node-desktop" }
+meshtastic-node-sensors = { module = "org.meshtastic:node-sensors" }
 meshtastic-node-store-file = { module = "org.meshtastic:node-store-file" }
 meshtastic-node-testing = { module = "org.meshtastic:node-testing" }
 meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }

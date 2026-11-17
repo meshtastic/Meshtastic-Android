@@ -406,6 +406,7 @@ dependencies {
     implementation(projects.core.network)
     implementation(libs.meshtastic.node.desktop) // JvmBearerFactory for the in-process node on desktop
     implementation(libs.meshtastic.node.store.file) // AtomicFileStore for the host bearer picks
+    implementation(libs.meshtastic.node.sensors) // the I2C sensors a Linux board carries, for the node's telemetry
     implementation(projects.core.takserver)
     implementation(projects.core.resources)
     implementation(projects.core.service)
