@@ -32,6 +32,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TestTimeSource
+import org.meshtastic.feature.connections.model.host.SensorKind as CardSensorKind
 
 @OptIn(InternalNodeApi::class)
 class SensorsUiTest {
@@ -92,7 +93,7 @@ class SensorsUiTest {
     fun `what a sensor feeds is listed in telemetry order`() {
         val kinds = setOf(SensorKind.POWER, SensorKind.AIR_QUALITY, SensorKind.ENVIRONMENT)
         assertEquals(
-            listOf(SensorKind.ENVIRONMENT, SensorKind.AIR_QUALITY, SensorKind.POWER),
+            listOf(CardSensorKind.ENVIRONMENT, CardSensorKind.AIR_QUALITY, CardSensorKind.POWER),
             row(sensor(kinds = kinds)).feeds,
         )
     }
@@ -149,7 +150,7 @@ class SensorsUiTest {
     fun `a device nothing reads says why`() {
         SensorUnread.entries.forEach { reason ->
             val unread = sensor(sensorName = null, unread = reason, reads = emptyMap())
-            assertEquals(SensorRowState.Unread(reason), row(unread).state)
+            assertEquals(SensorRowState.Unread(reason.toApp()), row(unread).state)
         }
     }
 

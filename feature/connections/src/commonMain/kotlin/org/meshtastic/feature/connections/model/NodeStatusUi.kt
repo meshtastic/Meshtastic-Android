@@ -16,13 +16,10 @@
  */
 package org.meshtastic.feature.connections.model
 
-import org.meshtastic.core.network.radio.PrimaryRadio
-import org.meshtastic.node.host.ExtraRadio
-import org.meshtastic.node.host.NodePhase
-import org.meshtastic.node.host.NodeStatus
-import org.meshtastic.node.host.Requirement
-import org.meshtastic.node.transport.Bearer
-import org.meshtastic.node.transport.TransportAvailability
+import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.host.ExtraRadio
+import org.meshtastic.feature.connections.model.host.NodePhase
+import org.meshtastic.feature.connections.model.host.PrimaryRadio
 
 /** The in-process node as the status card shows it; [sensors] is null on a host with no sensor bus. */
 data class NodeStatusUi(
@@ -138,60 +135,6 @@ sealed interface BearerRowState {
     data class Unsupported(val reason: String) : BearerRowState
 }
 
-/**
- * The card's state; [extraRadiosOff] names the extra LoRa radios switched off by themselves, and [primaryRadio] is what
- * the host says its first LoRa radio is.
- */
-fun NodeStatus.toUi(extraRadiosOff: Set<String> = emptySet(), primaryRadio: PrimaryRadio? = null): NodeStatusUi =
-    nodeStatusUi(
-        phase = phase,
-        nodeNum = nodeNum,
-        longName = longName,
-        shortName = shortName,
-        peerCount = peerCount,
-        failure = failure,
-        settingsReset = settingsReset,
-        extraRadioFailure = extraRadioFailure,
-        bearers =
-        Bearer.entries
-            .filter { it.onCard }
-            .flatMap { bearer ->
-                val status = bearers[bearer] ?: return@flatMap emptyList()
-                val row =
-                    bearerRow(
-                        bearer = bearer,
-                        enabled = status.enabled,
-                        availability = status.availability,
-                        requirement = status.requirement,
-                        received = status.counters.rx,
-                        sent = status.counters.tx,
-                        relayed = status.counters.relayed,
-                    )
-                if (bearer == Bearer.LORA) {
-                    listOf(row.copy(primary = primaryRadio)) + extraRadioRows(extraRadiosOff, status.enabled)
-                } else {
-                    listOf(row)
-                }
-            },
-    )
-
-/** The host's further LoRa radios, in number order, each a row under the LoRa bearer's. */
-private fun NodeStatus.extraRadioRows(off: Set<String>, loraOn: Boolean): List<BearerRowUi> = extraRadios
-    .mapNotNull { (name, status) ->
-        val extra = extraRadioUi(name, extraRadioDetails[name], off, loraOn) ?: return@mapNotNull null
-        bearerRow(
-            bearer = Bearer.LORA,
-            enabled = status.enabled,
-            availability = status.availability,
-            requirement = status.requirement,
-            received = status.counters.rx,
-            sent = status.counters.tx,
-            relayed = status.counters.relayed,
-            extra = extra,
-        )
-    }
-    .sortedBy { it.radio }
-
 /** The extra radio named [name] as its row shows it, or null for a name that numbers no extra radio. */
 internal fun extraRadioUi(name: String, details: ExtraRadio?, off: Set<String>, loraOn: Boolean): ExtraRadioUi? =
     extraRadioNumber(name)?.let { ExtraRadioUi(name, it, details, switchedOn = name !in off, loraOn = loraOn) }
@@ -200,7 +143,7 @@ internal fun extraRadioUi(name: String, details: ExtraRadio?, off: Set<String>, 
 internal fun extraRadioNumber(name: String): Int? =
     name.substringAfterLast('-', missingDelimiterValue = "").toIntOrNull()?.takeIf { it > 1 }
 
-/** The card's header from the node's fields; [NodeStatus] has no public constructor, so tests build the card here. */
+/** The card's header from the node's fields; node-kmp's `NodeStatus` has no public constructor, so tests build here. */
 @Suppress("LongParameterList")
 internal fun nodeStatusUi(
     phase: NodePhase,
@@ -223,54 +166,6 @@ internal fun nodeStatusUi(
     bearers = bearers,
     // The store can fail on a host with no extra radio, where there is nothing to say it about.
     extraRadioFailure = extraRadioFailure?.takeIf { bearers.any { row -> row.extra != null } },
-)
-
-/** A requirement outranks the availability: the user can act on it, while availability only reports. */
-@Suppress("LongParameterList")
-internal fun bearerRow(
-    bearer: Bearer,
-    enabled: Boolean,
-    availability: TransportAvailability?,
-    requirement: Requirement,
-    received: Long,
-    sent: Long,
-    relayed: Long,
-    extra: ExtraRadioUi? = null,
-): BearerRowUi = BearerRowUi(
-    bearer = bearer,
-    enabled = enabled,
-    switchable = bearer.switchable,
-    extra = extra,
-    state =
-    when (requirement) {
-        is Requirement.NeedsPermission -> BearerRowState.NeedsPermission(requirement.permission)
-
-        is Requirement.NeedsUsbPermission -> BearerRowState.NeedsUsbPermission(requirement.device)
-
-        is Requirement.NeedsHardware -> BearerRowState.NeedsHardware(requirement.what)
-
-        is Requirement.Unsupported -> BearerRowState.Unsupported(requirement.reason)
-
-        Requirement.Ready ->
-            when {
-                !enabled && bearer == Bearer.LORA && extra == null -> BearerRowState.RegionUnset
-
-                !enabled -> BearerRowState.Off
-
-                availability is TransportAvailability.Active -> BearerRowState.Active
-
-                availability is TransportAvailability.Unavailable ->
-                    BearerRowState.Unavailable(availability.reason)
-
-                availability is TransportAvailability.NeedsPermission ->
-                    BearerRowState.NeedsPermission(availability.permission)
-
-                else -> BearerRowState.Ready
-            }
-    },
-    received = received,
-    sent = sent,
-    relayed = relayed,
 )
 
 private const val NODE_ID_DIGITS = 8

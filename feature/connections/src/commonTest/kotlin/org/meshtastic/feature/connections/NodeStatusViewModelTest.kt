@@ -60,6 +60,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.meshtastic.feature.connections.model.host.Bearer as CardBearer
+import org.meshtastic.feature.connections.model.host.NodePhase as CardNodePhase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeStatusViewModelTest {
@@ -152,7 +154,7 @@ class NodeStatusViewModelTest {
                 assertNull(awaitItem())
                 repository.status.value = running
                 val ui = awaitItem()
-                assertEquals(NodePhase.Running, ui?.phase)
+                assertEquals(CardNodePhase.Running, ui?.phase)
                 assertEquals(running.longName, ui?.longName)
                 assertEquals(NODE_ID_LENGTH, ui?.nodeId?.length)
                 assertNull(ui?.sensors, "a host with no bus has no sensors section")
@@ -170,7 +172,7 @@ class NodeStatusViewModelTest {
     @Test
     fun `actions reach the repository`() = runTest(dispatcher) {
         val viewModel = viewModel()
-        viewModel.setBearer(Bearer.AUDIO, true)
+        viewModel.setBearer(CardBearer.AUDIO, true)
         viewModel.refreshRequirements()
         viewModel.requestUsbPermission()
         assertEquals(listOf(Bearer.AUDIO to true), repository.hostBearerWrites)
@@ -181,9 +183,9 @@ class NodeStatusViewModelTest {
     @Test
     fun `every bearer with a transport entry is switched in the node`() = runTest(dispatcher) {
         val viewModel = viewModel()
-        viewModel.setBearer(Bearer.UDP, false)
-        viewModel.setBearer(Bearer.GATT, false)
-        viewModel.setBearer(Bearer.LORA, true)
+        viewModel.setBearer(CardBearer.UDP, false)
+        viewModel.setBearer(CardBearer.GATT, false)
+        viewModel.setBearer(CardBearer.LORA, true)
         assertEquals(
             listOf(Bearer.UDP to false, Bearer.GATT to false, Bearer.LORA to true),
             repository.hostBearerWrites,
@@ -192,7 +194,7 @@ class NodeStatusViewModelTest {
 
     @Test
     fun `MQTT switches nothing`() = runTest(dispatcher) {
-        viewModel().setBearer(Bearer.MQTT, true)
+        viewModel().setBearer(CardBearer.MQTT, true)
         assertTrue(repository.hostBearerWrites.isEmpty())
     }
 

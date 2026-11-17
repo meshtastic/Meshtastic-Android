@@ -28,7 +28,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.schema_lora_modempreset_short_fast
@@ -36,11 +35,12 @@ import org.meshtastic.feature.connections.model.BearerRowState
 import org.meshtastic.feature.connections.model.BearerRowUi
 import org.meshtastic.feature.connections.model.ExtraRadioUi
 import org.meshtastic.feature.connections.model.NodeStatusUi
+import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.host.ExtraRadio
+import org.meshtastic.feature.connections.model.host.ExtraRadioDevice
+import org.meshtastic.feature.connections.model.host.NodePhase
+import org.meshtastic.feature.connections.model.host.PrimaryRadio
 import org.meshtastic.feature.connections.ui.components.NodeStatusCard
-import org.meshtastic.node.host.ExtraRadio
-import org.meshtastic.node.host.ExtraRadioDevice
-import org.meshtastic.node.host.NodePhase
-import org.meshtastic.node.transport.Bearer
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.test.Test
 import kotlin.test.assertEquals

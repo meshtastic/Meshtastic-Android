@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.connections.model
 
-import org.meshtastic.node.host.ExtraRadio
-import org.meshtastic.node.host.ExtraRadioDevice
-import org.meshtastic.node.host.NodePhase
+import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.host.ExtraRadio
+import org.meshtastic.feature.connections.model.host.ExtraRadioDevice
+import org.meshtastic.feature.connections.model.host.NodePhase
 import org.meshtastic.node.host.Requirement
-import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.TransportAvailability
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.test.Test

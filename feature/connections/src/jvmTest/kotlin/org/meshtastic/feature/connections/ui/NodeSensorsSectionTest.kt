@@ -32,11 +32,11 @@ import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.SensorRowState
 import org.meshtastic.feature.connections.model.SensorRowUi
 import org.meshtastic.feature.connections.model.SensorsUi
+import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.host.NodePhase
+import org.meshtastic.feature.connections.model.host.SensorKind
+import org.meshtastic.feature.connections.model.host.SensorUnread
 import org.meshtastic.feature.connections.ui.components.NodeStatusCard
-import org.meshtastic.node.host.NodePhase
-import org.meshtastic.node.sensors.SensorKind
-import org.meshtastic.node.sensors.SensorUnread
-import org.meshtastic.node.transport.Bearer
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
 

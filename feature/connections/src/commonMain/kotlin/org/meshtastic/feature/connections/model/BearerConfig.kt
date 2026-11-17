@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.connections.model
 
-import org.meshtastic.node.transport.Bearer
+import org.meshtastic.feature.connections.model.host.Bearer
 
 /** MQTT is set up on its own module screen, so the card leaves it out. */
 internal val Bearer.onCard: Boolean

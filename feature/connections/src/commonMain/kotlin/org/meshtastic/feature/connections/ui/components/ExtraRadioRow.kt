@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.schemaLabelRes
-import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_bearer_lora_extra
 import org.meshtastic.core.resources.node_extra_radio_board
@@ -54,7 +53,8 @@ import org.meshtastic.core.resources.node_primary_radio
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.feature.connections.model.ExtraRadioPart
 import org.meshtastic.feature.connections.model.ExtraRadioUi
-import org.meshtastic.node.host.ExtraRadioDevice
+import org.meshtastic.feature.connections.model.host.ExtraRadioDevice
+import org.meshtastic.feature.connections.model.host.PrimaryRadio
 import org.meshtastic.proto.Config
 
 /**

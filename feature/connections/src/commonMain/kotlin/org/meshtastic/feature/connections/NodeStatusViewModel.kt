@@ -32,9 +32,10 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.extraRadioNumber
+import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.toNode
 import org.meshtastic.feature.connections.model.toSensorsUi
 import org.meshtastic.feature.connections.model.toUi
-import org.meshtastic.node.transport.Bearer
 
 /** The node status card's state: null while this device is not running as the node. */
 @KoinViewModel
@@ -61,7 +62,7 @@ class NodeStatusViewModel(
      */
     fun setBearer(bearer: Bearer, on: Boolean) {
         if (!bearer.switchable) return
-        safeLaunch(tag = "setBearer") { repository.setHostBearer(bearer, on) }
+        safeLaunch(tag = "setBearer") { repository.setHostBearer(bearer.toNode(), on) }
     }
 
     /**

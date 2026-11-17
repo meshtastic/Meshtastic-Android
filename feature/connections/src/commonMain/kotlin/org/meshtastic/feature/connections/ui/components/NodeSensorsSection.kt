@@ -53,8 +53,8 @@ import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.connections.model.SensorRowState
 import org.meshtastic.feature.connections.model.SensorRowUi
 import org.meshtastic.feature.connections.model.SensorsUi
-import org.meshtastic.node.sensors.SensorKind
-import org.meshtastic.node.sensors.SensorUnread
+import org.meshtastic.feature.connections.model.host.SensorKind
+import org.meshtastic.feature.connections.model.host.SensorUnread
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
