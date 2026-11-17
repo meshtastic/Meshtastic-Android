@@ -169,6 +169,29 @@ class DeviceHardwareRepositoryImplTest {
     }
 
     @Test
+    fun failedSeedIsRetriedOnTheNextLookupWithoutARefresh() = runBlocking {
+        assetReader.failuresBeforeSuccess = 1
+        api.deviceHardware = { emptyList() }
+        assertNull(repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel).getOrThrow())
+
+        val afterSeed = repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel).getOrThrow()
+
+        assertEquals(knownHardware.displayName, afterSeed?.displayName)
+        assertEquals(1, api.deviceHardwareCalls)
+    }
+
+    @Test
+    fun repeatedLookupWithNoBundledCatalogReadsTheDatabaseOnce() = runBlocking {
+        assetReader.remove("device_hardware.json")
+        api.deviceHardware = { emptyList() }
+
+        repeat(3) { assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow()) }
+
+        assertEquals(1, quirks.snapshotCalls)
+        assertEquals(1, api.deviceHardwareCalls)
+    }
+
+    @Test
     fun targetsOfOneModelResolveSeparately() = runBlocking {
         repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel)
         val withTarget = repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel, target = "other")

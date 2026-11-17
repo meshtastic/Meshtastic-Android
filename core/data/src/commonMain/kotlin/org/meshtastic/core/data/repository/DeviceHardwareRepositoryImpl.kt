@@ -183,7 +183,7 @@ class DeviceHardwareRepositoryImpl(
                 Logger.d { "DeviceHardwareRepository: forceRefresh=true, bypassing refresh gate" }
             }
 
-            ensureSeeded()
+            val seeded = ensureSeeded()
 
             var generation = resolved.generation
             var database = localDataSource.currentDatabase()
@@ -197,7 +197,10 @@ class DeviceHardwareRepositoryImpl(
             }
 
             val hardware = resolveHardware(hwModel, entities, target)
-            resolved.put(generation, hwModel, target, ResolvedHardware(hardware, entities, database))
+            // A miss after a failed seed is not an answer: leave it uncached so the next lookup reseeds.
+            if (seeded || entities.isNotEmpty()) {
+                resolved.put(generation, hwModel, target, ResolvedHardware(hardware, entities, database))
+            }
             Result.success(hardware)
         }
     }
@@ -227,18 +230,16 @@ class DeviceHardwareRepositoryImpl(
             target?.let { listOfNotNull(localDataSource.getByTarget(it)) } ?: emptyList()
         }
 
-    /** Seeds the local DB from bundled JSON if completely empty. */
-    private suspend fun ensureSeeded() {
-        if (!localDataSource.hasAnyEntries()) {
-            safeCatching {
-                Logger.d { "DeviceHardwareRepository: seeding cache from bundled JSON" }
-                val jsonHardware =
-                    assetReader.decode<List<NetworkDeviceHardware>>("device_hardware.json", json).orEmpty()
-                localDataSource.insertAllDeviceHardware(jsonHardware)
-            }
-                .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
+    /** Seeds the local DB from bundled JSON if completely empty. Returns false only when the seed attempt failed. */
+    private suspend fun ensureSeeded(): Boolean = localDataSource.hasAnyEntries() ||
+        safeCatching {
+            Logger.d { "DeviceHardwareRepository: seeding cache from bundled JSON" }
+            val jsonHardware =
+                assetReader.decode<List<NetworkDeviceHardware>>("device_hardware.json", json).orEmpty()
+            localDataSource.insertAllDeviceHardware(jsonHardware)
         }
-    }
+            .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
+            .isSuccess
 
     /** Resolves entities into a [DeviceHardware] domain model with quirk application. */
     private suspend fun resolveHardware(
