@@ -78,9 +78,14 @@ class DeviceHardwareRepositoryImplTest {
     ) : BootloaderOtaQuirksRepository {
         var reconcileCalls = 0
 
-        override suspend fun getSnapshot(): BootloaderOtaQuirksResponse =
-            safeCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
-                .getOrNull() ?: BootloaderOtaQuirksResponse()
+        /** One per lookup that reaches the database: every resolve reads the quirk snapshot exactly once. */
+        var snapshotCalls = 0
+
+        override suspend fun getSnapshot(): BootloaderOtaQuirksResponse = safeCatching {
+            snapshotCalls += 1
+            assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json)
+        }
+            .getOrNull() ?: BootloaderOtaQuirksResponse()
 
         override suspend fun reconcile() {
             reconcileCalls += 1
@@ -116,6 +121,7 @@ class DeviceHardwareRepositoryImplTest {
     private lateinit var api: FakeApiService
     private lateinit var links: FakeDeviceLinkRepository
     private lateinit var assetReader: FakeBundledAssetReader
+    private lateinit var quirks: FakeBootloaderOtaQuirksRepository
     private lateinit var repository: DeviceHardwareRepositoryImpl
 
     /** An asset reader serving [hardware] as the bundled catalog and, when given, [quirks] as the raw quirks asset. */
@@ -131,6 +137,7 @@ class DeviceHardwareRepositoryImplTest {
         api = FakeApiService(deviceHardware = { listOf(knownHardware) })
         links = FakeDeviceLinkRepository()
         assetReader = bundledAssets(listOf(knownHardware))
+        quirks = FakeBootloaderOtaQuirksRepository(assetReader, json)
         repository =
             DeviceHardwareRepositoryImpl(
                 remoteDataSource = DeviceHardwareRemoteDataSource(api, dispatchers),
@@ -138,12 +145,66 @@ class DeviceHardwareRepositoryImplTest {
                 assetReader = assetReader,
                 json = json,
                 deviceLinkRepository = links,
-                bootloaderOtaQuirksRepository = FakeBootloaderOtaQuirksRepository(assetReader, json),
+                bootloaderOtaQuirksRepository = quirks,
                 dispatchers = dispatchers,
             )
     }
 
     @AfterTest fun tearDown() = databaseProvider.close()
+
+    @Test
+    fun repeatedLookupOfAKnownModelReadsTheDatabaseOnce() = runBlocking {
+        val lookups = List(3) { repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel).getOrThrow() }
+
+        assertEquals(listOf("Known", "Known", "Known"), lookups.map { it?.displayName })
+        assertEquals(1, quirks.snapshotCalls)
+    }
+
+    @Test
+    fun repeatedLookupOfAMissingModelReadsTheDatabaseOnce() = runBlocking {
+        repeat(3) { assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow()) }
+
+        assertEquals(1, quirks.snapshotCalls)
+        assertEquals(1, api.deviceHardwareCalls)
+    }
+
+    @Test
+    fun targetsOfOneModelResolveSeparately() = runBlocking {
+        repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel)
+        val withTarget = repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel, target = "other")
+
+        assertEquals("other", withTarget.getOrThrow()?.platformioTarget)
+        assertEquals(2, quirks.snapshotCalls)
+    }
+
+    @Test
+    fun catalogRefreshResolvesEveryModelAgain() = runBlocking {
+        assertNull(repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow())
+        assertNull(repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow())
+        assertEquals(1, quirks.snapshotCalls)
+
+        // The refresh is requested for another model, so the first one is re-read because the catalog changed.
+        api.deviceHardware = { listOf(knownHardware, remoteOnlyHardware) }
+        repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel, forceRefresh = true).getOrThrow()
+        val afterRefresh = repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow()
+        repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow()
+
+        assertEquals(remoteOnlyHardware.displayName, afterRefresh?.displayName)
+        assertEquals(3, quirks.snapshotCalls)
+    }
+
+    @Test
+    fun databaseSwitchResolvesTheModelAgain() = runBlocking {
+        api.deviceHardware = { listOf(remoteOnlyHardware) }
+        val beforeSwitch = repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow()
+        assertEquals(remoteOnlyHardware.displayName, beforeSwitch?.displayName)
+
+        // The new database holds only the bundled catalog, and the refresh gate is still closed.
+        databaseProvider.switchToNewDatabase()
+
+        assertNull(repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow())
+        assertEquals(2, quirks.snapshotCalls)
+    }
 
     @Test
     fun repeatedMissingModelUsesOneSuccessfulCatalogRefresh() = runBlocking {
