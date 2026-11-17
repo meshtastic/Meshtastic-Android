@@ -129,7 +129,6 @@ bandwidth_unsupported
 bandwidth_unsupported_summary
 baro_pressure
 battery
-battery_ina_2xx_i2c_address
 biochemical_oxygen_demand
 ble_devices
 ble_scan_needs_location_services
@@ -930,7 +929,6 @@ intro_welcome
 ip
 ip_address
 ip_port
-json_output_enabled
 jump_to_latest_from
 jump_to_latest_from_and_more
 ### KEY ###
@@ -1332,7 +1330,6 @@ messages
 metric_channel_label
 micrograms_per_cubic_meter
 min
-minimum_wake_time_seconds
 ### MIRROR ###
 mirror_active
 mirror_back
@@ -1601,7 +1598,6 @@ options
 orient_north
 orp
 overflow_menu
-override_console_serial_port
 ### PACKET ###
 packet_authenticity
 packet_authenticity_balanced
@@ -2066,7 +2062,6 @@ stop_connecting
 store_forward
 store_forward_config
 success
-super_deep_sleep_duration_seconds
 supported
 supported_by_community
 supported_by_maker
@@ -2623,6 +2618,8 @@ schema_display_displaymode_inverted
 schema_display_displaymode_twocolor
 schema_display_displayunits_imperial
 schema_display_displayunits_metric
+schema_display_enable_message_bubbles
+schema_display_enable_message_bubbles_description
 schema_display_flip_screen
 schema_display_flip_screen_description
 schema_display_heading_bold
@@ -2641,6 +2638,8 @@ schema_display_units
 schema_display_units_description
 schema_display_use_12h_clock
 schema_display_use_12h_clock_description
+schema_display_use_long_node_name
+schema_display_use_long_node_name_description
 schema_display_wake_on_tap_or_motion
 schema_display_wake_on_tap_or_motion_description
 schema_externalnotification_active
@@ -2780,6 +2779,8 @@ schema_mqtt_enabled
 schema_mqtt_enabled_description
 schema_mqtt_encryption_enabled
 schema_mqtt_encryption_enabled_description
+schema_mqtt_json_enabled
+schema_mqtt_json_enabled_description
 schema_mqtt_map_reporting_enabled
 schema_mqtt_map_reporting_enabled_description
 schema_mqtt_password
@@ -2865,10 +2866,16 @@ schema_position_rx_gpio_description
 schema_position_tx_gpio
 schema_position_tx_gpio_description
 schema_power_adc_multiplier_override
+schema_power_device_battery_ina_address
+schema_power_device_battery_ina_address_description
 schema_power_is_power_saving
 schema_power_is_power_saving_description
+schema_power_min_wake_secs
+schema_power_min_wake_secs_description
 schema_power_on_battery_shutdown_after_secs
 schema_power_on_battery_shutdown_after_secs_description
+schema_power_sds_secs
+schema_power_sds_secs_description
 schema_power_wait_bluetooth_secs
 schema_rangetest_enabled
 schema_rangetest_enabled_description
@@ -2902,6 +2909,8 @@ schema_serial_enabled
 schema_serial_enabled_description
 schema_serial_mode
 schema_serial_mode_description
+schema_serial_override_console_serial_port
+schema_serial_override_console_serial_port_description
 schema_serial_rxd
 schema_serial_rxd_description
 schema_serial_serial_baud_baud_110
@@ -2965,6 +2974,8 @@ schema_telemetry_air_quality_enabled
 schema_telemetry_air_quality_enabled_description
 schema_telemetry_air_quality_interval
 schema_telemetry_air_quality_interval_description
+schema_telemetry_air_quality_screen_enabled
+schema_telemetry_air_quality_screen_enabled_description
 schema_telemetry_device_telemetry_enabled
 schema_telemetry_device_telemetry_enabled_description
 schema_telemetry_device_update_interval

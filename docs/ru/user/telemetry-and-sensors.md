@@ -12,19 +12,19 @@ aliases:
 
 # Телеметрия и датчики
 
-Ноды Meshtastic могут собирать и передавать данные датчиков по всей mesh-сети. Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.
+Ноды Meshtastic могут собирать и передавать данные датчиков по всей mesh-сети. Телеметрия позволяет нодам, оснащенным датчиками, транслировать информацию об окружающей среде, мощности и состоянии устройства, отображаемую на экране деталей ноды и записываемую во времени.
 
 ## Телеметрия устройства
 
 Все ноды Meshtastic передают базовую телеметрию устройства:
 
-| Метрика        | Описание                                        | Типичный диапазон                                                  |
-| -------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
-| Уровень заряда | Процент заряда                                  | 0–100%                                                             |
-| Напряжение     | Напряжение батареи                              | 3.0–4.2V (LiPo) |
-| ChUtil         | % of local airtime in use                       | 0–100%                                                             |
-| AirUtil        | % of the last hour this node spent transmitting | 0–100%                                                             |
-| Аптайм         | Секунд с последней загрузки                     | Варьируется                                                        |
+| Метрика        | Описание                                            | Типичный диапазон                                                  |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| Уровень заряда | Процент заряда                                      | 0–100%                                                             |
+| Напряжение     | Напряжение батареи                                  | 3.0–4.2V (LiPo) |
+| ChUtil         | % эфирного времени в использовании                  | 0–100%                                                             |
+| AirUtil        | % от последнего часа эта нода потратила на передачу | 0–100%                                                             |
+| Аптайм         | Секунд с последней загрузки                         | Варьируется                                                        |
 
 ## Датчики окружающей среды
 
@@ -45,20 +45,20 @@ aliases:
 | Sensor   | Метрика                                            | Заметки                                                                                                                                                                                                                    |
 | -------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BME680   | Сопротивление газа / IAQ                           | Летучие органические соединения                                                                                                                                                                                            |
-| PMSA003I | PM1.0, PM2.5, PM10 | See [Air Quality Metrics](#air-quality-metrics)                                                                                                                                                                            |
-| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts                                                                                      |
-| SEN6x    | PM, CO₂, Temp, Humidity                            | Its status register is always exported; when it reports a fault (fan, RH&T, gas, CO₂, HCHO or PM), the fault names appear as a Sensor Status card and on each Air Quality log entry |
+| PMSA003I | PM1.0, PM2.5, PM10 | См. [Метрики качества воздуха](#air-quality-metrics)                                                                                                                                                       |
+| SEN55    | PM, Темп, Влажность                                | Мультисенсор. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts                                                                                      |
+| SEN6x    | PM, CO₂, Темп, Влажность                           | Its status register is always exported; when it reports a fault (fan, RH&T, gas, CO₂, HCHO or PM), the fault names appear as a Sensor Status card and on each Air Quality log entry |
 
-### Soil
+### Влажность почвы
 
-| Метрика     | Единица | Заметки                                         |
-| ----------- | ------- | ----------------------------------------------- |
-| Темп почвы  | °C / °F | Reported alongside soil moisture by soil probes |
-| Влажн почвы | %       | Volumetric water content                        |
+| Метрика     | Единица | Заметки                                                         |
+| ----------- | ------- | --------------------------------------------------------------- |
+| Темп почвы  | °C / °F | Данные о влажности почвы, полученные с помощью почвенных зондов |
+| Влажн почвы | %       | Объемное содержание воды                                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
-Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. It has no chart or log screen, and the row has no request button.
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. У него нет графика или экрана журнала, и строка не имеет кнопки запроса.
 
 ### Освещённость и УФ
 
@@ -68,29 +68,29 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | VEML7700 | Окружающая освещённость (люкс) |
 | LTR390   | УФ-индекс                                         |
 
-### Weather and Other Readings
+### Погода и другие данные
 
-| Метрическая                                            | Единица              | Where it appears                                                                                                                                                                                                              |
-| ------------------------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card                                                                   |
-| Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
-| Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
-| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometers |
-| Радиация                                               | µR/h                 | Card and chart                                                                                                                                                                                                                |
-| Вес                                                    | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                                                                                               |
-| Расстояние                                             | mm or in             | Card only — water level, from a distance sensor                                                                                                                                                                               |
-| Dew point                                              | °C or °F             | Card only — computed from temperature and humidity                                                                                                                                                                            |
-| 1-Wire temperature                                     | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                                                                                              |
-| ADC voltage                                            | V                    | Card and chart, up to eight raw analog channels                                                                                                                                                                               |
+| Метрическая                                        | Единица                  | Где он появляется                                                                                                                                                                                                         |
+| -------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Скорость ветра                                     | км/ч или миль/ч          | Карта и график. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card                                                               |
+| Wind direction, gust, and lull                     | градусы, км/ч или миль/ч | Отображается вместе с каждым показанием на экране метрик среды; не отображается на графике                                                                                                                                |
+| Дождь, последний час и за 24 часа                  | мм или дюймы             | Отображается вместе с каждым показанием на экране показателей среды; не отображается на графике                                                                                                                           |
+| Молния, удары за последний час и расстояние шторма | количество км или ми     | Card and listed with each reading on the Environment Metrics screen; not charted. Из детектора AS3935. Storm distance is always in km or mi, since the detector resolves whole kilometers |
+| Радиация                                           | μR/h                     | Карта и график                                                                                                                                                                                                            |
+| Вес                                                | кг или фунт              | Только для карт — тензодатчики, такие как шкала для улья                                                                                                                                                                  |
+| Расстояние                                         | мм или дюйм              | Только карта — уровень воды, от датчика расстояния                                                                                                                                                                        |
+| Точка росы                                         | °C или °F                | Только карта — вычисленные из температуры и влажности                                                                                                                                                                     |
+| 1-проводная температура                            | °C или °F                | Карта и график, до восьми DS18B20 зондов                                                                                                                                                                                  |
+| Напряжение АЦП                                     | V                        | Карта и график, до восьми аналоговых каналов                                                                                                                                                                              |
 
 ## Метрики питания
 
 Ноды с датчиками питания серии INA могут сообщать:
 
-| Метрическая | Описание                        |
-| ----------- | ------------------------------- |
-| Напряжение  | Per-channel voltage reading     |
-| Ток         | Per-channel current draw, in mA |
+| Метрическая | Описание                                |
+| ----------- | --------------------------------------- |
+| Напряжение  | Считывание напряжения по каждому каналу |
+| Ток         | Потребляемый ток на канал, мА           |
 
 The node detail screen shows read-only cards for every channel that reported data, up to eight. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 

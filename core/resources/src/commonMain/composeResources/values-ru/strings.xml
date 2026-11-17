@@ -39,6 +39,7 @@
     <string name="a11y_temperature">Температура</string>
     <string name="about">О приложении</string>
     <string name="accept">Принять</string>
+    <string name="ack_relayed_by">Подтверждение передано на %1$s</string>
     <string name="acknowledgements">Благодарности</string>
     <!-- ACTION -->
     <string name="action_copy_message">Скопировать сообщение</string>
@@ -228,9 +229,21 @@
     <string name="channel_6">Канал 6</string>
     <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
+    <plurals name="channel_already_on_radio">
+        <item quantity="one">%1$d канал, указанный по этой ссылке, уже транслировался и был пропущен.</item>
+        <item quantity="few">%1$d канала, указанных по этой ссылке, уже транслировались и были пропущены.</item>
+        <item quantity="many">%1$d каналов, указанных по этой ссылке, уже транслировались и были пропущены.</item>
+        <item quantity="other">%1$d каналов, указанных по этой ссылке, уже транслировались и были пропущены.</item>
+    </plurals>
     <string name="channel_features">Особенности канала</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="channel_name">Имя канала</string>
+    <plurals name="channel_slots_full">
+        <item quantity="one">В твоём радиоприемнике доступен %2$d канал. Сними флажок с %1$d канала для создания комнаты. При снятии флажка с канала, уже включенного в твоём радиоприемнике, он будет удален.</item>
+        <item quantity="few">В твоём радиоприемнике доступны %2$d канала. Сними флажок с %1$d каналов для создания комнаты. При снятии флажка с канала, уже включенного в твоём радиоприемнике, он будет удален.</item>
+        <item quantity="many">В твоём радиоприемнике доступны %2$d каналов. Сними флажок с %1$d каналов для создания комнаты. При снятии флажка с канала, уже включенного в твоём радиоприемнике, он будет удален.</item>
+        <item quantity="other">В твоём радиоприемнике доступны %2$d каналов. Сними флажок с %1$d каналов для создания комнаты. При снятии флажка с канала, уже включенного в твоём радиоприемнике, он будет удален.</item>
+    </plurals>
     <string name="channel_slots_used">Используется %1$d слотов канала %2$d</string>
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
@@ -458,6 +471,7 @@
     <string name="device_model_capture">Сделать снимок</string>
     <string name="device_model_capture_failed">Невозможно сохранить изображение</string>
     <string name="device_model_capture_saved">Сохранено в изображениях</string>
+    <string name="device_model_in_space_hint">Он находится рядом с приложением, в реальном размере. Нажми и перетащи его, чтобы переместить.</string>
     <string name="device_model_load_failed">Не удалось загрузить 3D модель</string>
     <string name="device_model_rest_face_down">Экраном вниз</string>
     <string name="device_model_rest_face_up">Экраном вверх</string>
@@ -749,6 +763,7 @@
     <string name="firmware_maintenance_wrong_destination">Это расположение не является диском обновления устройства, поэтому на устройство ничего не записано. Выбери съёмный диск, который появляется, когда устройство находится в режиме обновления.</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
     <string name="firmware_recovery_banner">Завершение обновления %1$s</string>
+    <string name="firmware_recovery_ble_failed">Не удалось завершить загрузку по Bluetooth. Этот стандартный загрузчик не может возобновить прерванное обновление. Подключи его через USB и перепрошей с помощью последовательного DFU, такого как adafruit-nrfutil.</string>
     <string name="firmware_recovery_button">Возобновить обновление прошивки</string>
     <string name="firmware_recovery_dismiss">Отменить восстановление прошивки</string>
     <string name="firmware_recovery_explanation">Это устройство находится в режиме загрузчика из-за того, что обновление прошивки не завершилось. Держи его рядом, и оно будет перепрошито для завершения обновления.</string>
@@ -764,6 +779,7 @@
     <string name="firmware_update_bootloader_latest">Последний загрузчик: %1$s</string>
     <string name="firmware_update_bootloader_mismatch">Загрузчик сообщает об %1$s, но этот пакет предназначен для %2$s. Ничего не было записано.</string>
     <string name="firmware_update_bootloader_model_unknown">Загрузчик не сообщил о модели, поэтому этот пакет для %1$s не был записан.</string>
+    <string name="firmware_update_bootloader_not_back">Устройство не восстановилось по Bluetooth. На USB оно работает как накопитель: установи на него встроенное ПО или отключи его от сети, сбрось настройки и воспользуйся функцией восстановления.</string>
     <string name="firmware_update_bootloader_not_upgraded">Прошивка переустановлена, но загрузчик сообщает о %1$s вместо %2$s.</string>
     <string name="firmware_update_bootloader_older_than">Загрузчик: старше чем %1$s</string>
     <string name="firmware_update_bootloader_unverified">Пакет загрузчика %1$s не удалось проверить. Ничего не было записано.</string>
@@ -816,6 +832,7 @@
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
     <string name="firmware_update_preparing_flash">Подготовка устройства: стирание флеш-памяти. Это может занять до минуты...</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Скопировать файл RAK bootloader.zip на диск не получится. Воспользуйся обновлением загрузчика в этом приложении или программным обеспечением для последовательного DFU, таким как adafruit-nrfutil.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
     <string name="firmware_update_requires_bin">Для %1$s требуется файл .bin.</string>
@@ -827,6 +844,7 @@
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
+    <string name="firmware_update_slow_bootloader_hint">В этом загрузчике обновления выполняются медленно. Загрузчик Meshtastic nRF52 значительно ускоряет обновление по Bluetooth.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_start_timed_out">Не удалось запустить обновление. Попробуй обновить снова.</string>
@@ -948,6 +966,7 @@
     <string name="indoor_air_quality_iaq">Качество воздуха в помещении (IAQ)</string>
     <string name="info">Информация</string>
     <string name="input_channel_url">Введи URL общих каналов</string>
+    <string name="input_connect_code_url">Введи код подключения URL</string>
     <string name="input_shared_contact_url">Введите URL контакта</string>
     <string name="insert">Вставить</string>
     <string name="insert_link_message">Введи URL для выделенного текста</string>
@@ -1153,8 +1172,11 @@
     <string name="map_filter_show_ignored">Показать игнорируемые ноды</string>
     <string name="map_filter_title">Фильтр карты</string>
     <string name="map_layer_formats">Слои карты поддерживают форматы .kml, .kmz или GeoJSON.</string>
+    <string name="map_layer_not_map_data">%1$s не является картой KML или GeoJSON и не может быть отрисована.</string>
     <string name="map_layer_opacity">Прозрачность: %1$d%</string>
     <string name="map_layer_open_failed">Не удалось открыть файл карты.</string>
+    <string name="map_layer_stored_too_large">Размер %1$s превышает %2$d МБ и не может быть отрисована.</string>
+    <string name="map_layer_too_detailed">У %1$s слишком много деталей для отображения на карте.</string>
     <string name="map_layer_too_large">Файлы карт более %1$d МБ не могут быть импортированы.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
     <string name="map_offline_banner">Оффлайн — отображение кэшированных данных</string>
@@ -1174,6 +1196,7 @@
     <string name="map_offline_terrain_download_failed_io">Загрузка местности не удалась — проверь подключение и попробуй снова</string>
     <string name="map_offline_terrain_download_failed_tile_limit">Выбранная область слишком большая для местности — увеличь масштаб или выбери меньший участок</string>
     <string name="map_offline_terrain_downloading_progress">Загрузка местности… %1$d / %2$d плиток</string>
+    <string name="map_offline_terrain_shade_valleys">Тенистые долины</string>
     <string name="map_offline_unavailable">Оффлайн карты недоступны на этом устройстве</string>
     <string name="map_overlay_hillshade">Тень на склоне</string>
     <string name="map_overlay_precipitation">Осадки</string>
@@ -1746,6 +1769,7 @@
     <string name="powered">Питание</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Точность местоположения</string>
+    <string name="precise_location_insecure_channel">Недоступно на канале, который не является надежно зашифрованным</string>
     <string name="preferences_language">Язык</string>
     <string name="preferences_system_default">По умолчанию</string>
     <string name="preserve_favorites">Сохранить избранное?</string>
@@ -1790,12 +1814,20 @@
     <string name="radio_setup_beacons_none">Приглашений пока нет.</string>
     <string name="radio_setup_beacons_settings">Настройки маяка</string>
     <string name="radio_setup_beacons_waiting">Ожидание настройки радиомаяка…</string>
+    <string name="radio_setup_done_body">Радиостанция будет передавать данные с этими настройками. Измени их в любое время в разделе Настройки радиостанции.</string>
+    <string name="radio_setup_done_headline">Готово</string>
+    <string name="radio_setup_intro_body">Для того чтобы радиостанция могла передавать данные, ей необходим определенный регион. На следующих страницах задаются регион, настройки модема и название, которое будет видно другим пользователям.</string>
     <string name="radio_setup_intro_headline">Настройте ваше радио</string>
     <string name="radio_setup_name_body">Другие люди видят эти имена в списках нод и на их картах.</string>
     <string name="radio_setup_name_headline">Понятное имя</string>
+    <string name="radio_setup_preset_body">Пресет задает диапазон и скорость передачи сети. Все пользователи сети используют один и тот же пресет.</string>
+    <string name="radio_setup_preset_custom">В этом радиоприемнике используются пользовательские настройки модема. Они сохраняются до тех пор, пока ты не выберешь пресет.</string>
     <string name="radio_setup_reconnecting">Ожидание переподключения устройства…</string>
+    <string name="radio_setup_region_body">Выбери регион, в котором используется этот радиоприемник. Здесь задаются частоты и мощность, которые может использовать радиоприемник.</string>
     <string name="radio_setup_region_none">Регион не совпадает.</string>
     <string name="radio_setup_region_search">Поиск по регионам</string>
+    <string name="radio_setup_region_suggested">Предлагается регион твоего телефона. Подтверди его или выбери другой.</string>
+    <string name="radio_setup_restart_notice">Радио перезагрузится после сохранения. Установка продолжится после переподключения.</string>
     <string name="radio_setup_title">Настроить радио</string>
     <string name="rainfall_1h">Дождь (1ч)</string>
     <string name="rainfall_24h">Дождь (24ч)</string>
@@ -1811,6 +1843,7 @@
     <string name="refresh_metadata">Обновить метаданные</string>
     <string name="regenerate_keys_confirmation">Вы уверены, что хотите пересоздать свой приватный ключ?\n\nНоды, которые ранее обменивались ключами с этой нодой, должны будут удалить её и повторно обменяться ключами для того, чтобы возобновить защищённую связь.</string>
     <string name="regenerate_private_key">Пересоздать приватный ключ</string>
+    <string name="relayed_by">Ретранслируется на %1$s</string>
     <plurals name="relays">
         <item quantity="one">Услышано %1$d ретранслятором</item>
         <item quantity="few">Услышано %1$d ретрансляторами</item>
@@ -1849,6 +1882,8 @@
     <string name="remote_shell_modifier_locked">Заблокировано</string>
     <string name="remote_shell_modifier_once">Применить к следующей клавише</string>
     <string name="remote_shell_more_options">Больше параметров</string>
+    <string name="remote_shell_no_reply">Ответа от ноды нет. В её конфигурации должна быть включена функция DMShell.yaml, открытый ключ твоего радиоприемника должен быть указан как ключ администратора, и она должна быть в зоне действия.</string>
+    <string name="remote_shell_no_reply_reason">Не удалось открыть сеанс (%1$s). В файле config.yaml ноды должна быть включена функция DMShell, открытый ключ твоего радиоприемника должен быть указан как ключ администратора, и нода должна быть в зоне действия.</string>
     <string name="remote_shell_open">Открыть терминал</string>
     <string name="remote_shell_open_description">Открыть терминал на этой ноде, при необходимости запустить удаленный сеанс администратора</string>
     <string name="remote_shell_reconnect">Переподключение</string>
@@ -1955,6 +1990,8 @@
     <string name="scan_channels_nfc">Сканировать общие каналы NFC</string>
     <string name="scan_channels_qr">Сканировать QR-код общих каналов</string>
     <string name="scan_connect_code">Сканировать код подключения</string>
+    <string name="scan_connect_code_nfc">Сканировать код подключения NFC</string>
+    <string name="scan_connect_code_qr">Сканировать QR-код подключения</string>
     <string name="scan_network_devices">Сканировать сетевые устройства</string>
     <string name="scan_nfc">Сканировать NFC</string>
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
@@ -2022,6 +2059,8 @@
     <string name="share_action">Поделиться ссылкой</string>
     <string name="share_by_tap_subtext">Пока это открыто, другой телефон также может принять приглашение, коснувшись твоего.</string>
     <string name="share_channels">Поделиться каналами</string>
+    <string name="share_channels_add_hint">Добавление сохраняет свои настройки каналов и LoRa и добавляет твои.</string>
+    <string name="share_channels_replace_hint">Замена перезаписывает каждый канал на их радиостанции твоими и применяет твои настройки LoRa.</string>
     <string name="share_channels_subject">Каналы Meshtastic</string>
     <string name="share_connected_node">Поделиться подключенной нодой</string>
     <string name="share_contact">Отправить контакт</string>
@@ -2050,6 +2089,30 @@
     <!-- SIGNAL -->
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
+    <string name="signal_survey_delete_confirm">Удалить этот сеанс и его показания?</string>
+    <string name="signal_survey_description">Только для прослушивания: записывает данные каждого пакета, который прослушивает твоё радио, с указанием местоположения твоего телефона и наносит их на карту. Ничего не отправляется, и журнал остается на этом устройстве.</string>
+    <string name="signal_survey_export">Экспорт в CSV</string>
+    <string name="signal_survey_heard_directly">Слушать прямо здесь</string>
+    <string name="signal_survey_heatmap">Показать в виде тепловой карты</string>
+    <string name="signal_survey_hud_recording">Запись опроса · %1$s</string>
+    <string name="signal_survey_last_reading">Последнее вещание %1$s</string>
+    <string name="signal_survey_location_off">Включи функцию определения местоположения для регистрации показаний</string>
+    <string name="signal_survey_location_permission">Разрешить доступ к местоположению для чтения журнала</string>
+    <string name="signal_survey_no_fix">Ожидание исправления местоположения</string>
+    <plurals name="signal_survey_readings">
+        <item quantity="one">%1$d показание</item>
+        <item quantity="few">%1$d показания</item>
+        <item quantity="many">%1$d показаний</item>
+        <item quantity="other">%1$d показаний</item>
+    </plurals>
+    <string name="signal_survey_record">Запись</string>
+    <plurals name="signal_survey_senders">
+        <item quantity="one">Услышана %1$d нода</item>
+        <item quantity="few">Услышаны %1$d ноды</item>
+        <item quantity="many">Услышаны %1$d нод</item>
+        <item quantity="other">Услышаны %1$d нод</item>
+    </plurals>
+    <string name="signal_survey_title">Опрос сигнала</string>
     <!-- SITE -->
     <string name="site_planner">Планировщик места</string>
     <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
@@ -2186,6 +2249,7 @@
     <string name="traceroute_no_response">Без ответа</string>
     <string name="traceroute_observed">Наблюдаемый</string>
     <string name="traceroute_outgoing_route">Исходящий маршрут</string>
+    <string name="traceroute_rate_limited">Скорость ограничена: радиостанция отправляет одну трассировку каждые 30 секунд</string>
     <string name="traceroute_return_hops">Передач от цели</string>
     <string name="traceroute_return_route">Обратный маршрут</string>
     <string name="traceroute_round_trip">Полное время</string>
@@ -2314,7 +2378,20 @@
     <string name="widget_packets_sent">Отправлено</string>
     <string name="widget_relays">Ретранслировано</string>
     <string name="widget_relays_canceled">Ретрансляция отменена</string>
+    <string name="widget_telemetry_change_node">Сменить ноду</string>
+    <string name="widget_telemetry_choose">Выбери ноду. В списке отображаются только те ноды, которые отправили данные об окружающей среде, качестве воздуха или мощности.</string>
+    <string name="widget_telemetry_dew">Роса %1$s</string>
+    <string name="widget_telemetry_gust">Порывы %1$s</string>
+    <string name="widget_telemetry_next_page">Следующие данные, страница %1$d из %2$d</string>
+    <string name="widget_telemetry_no_nodes_hint">Ноды появляются здесь, как только они отправляют данные об окружающей среде, качестве воздуха или мощности.</string>
+    <string name="widget_telemetry_no_nodes_title">Пока нет телеметрии</string>
+    <string name="widget_telemetry_no_readings">Нет данных для отображения</string>
+    <string name="widget_telemetry_not_found">Нода не выбрана. Нажми чтобы выбрать.</string>
+    <string name="widget_telemetry_page">%1$d/%2$d</string>
+    <string name="widget_telemetry_readings_hint">В виджете отображаются отчеты о каждом показании ноды. Отключи все, что тебе не нужно.</string>
+    <string name="widget_telemetry_stale">Более 2 часов</string>
     <string name="widget_telemetry_title">Телеметрия</string>
+    <string name="widget_telemetry_updated">Обновлено %1$s</string>
     <!-- WIFI -->
     <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
@@ -2369,7 +2446,14 @@
     <!-- XR -->
     <string name="xr_full_space">Полное пространство</string>
     <string name="xr_home_space">Домашнее пространство</string>
+    <string name="xr_terrain_buildings">Здания</string>
+    <string name="xr_terrain_empty">Нет нод с позицией, поэтому области для отображения нет.</string>
+    <string name="xr_terrain_flat">Нет данных о местности для этой области, поэтому земля гладкая.</string>
     <string name="xr_terrain_layer_elevation">Высота</string>
+    <string name="xr_terrain_loading">Построение местности…</string>
+    <string name="xr_terrain_map">3D карта</string>
+    <string name="xr_terrain_unavailable">Не удалось загрузить местность. Проверь подключение и повтори попытку.</string>
+    <string name="xr_terrain_zoom">Масштаб</string>
     <string name="you">Вы</string>
     <string name="zoom_in">Увеличить</string>
     <string name="zoom_out">Уменьшить</string>

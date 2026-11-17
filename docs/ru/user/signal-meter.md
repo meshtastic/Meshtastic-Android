@@ -12,54 +12,54 @@ aliases:
 
 # Как работает измеритель сигнала Meshtastic
 
-The Meshtastic signal meter — the bars or status color next to a node — is calculated differently from the bars on a cell phone or Wi-Fi router. This page explains what it measures and why the same reading can mean something different on another preset.
+Индикатор сигнала Meshtastic — полосы или цвет состояния рядом с нодой — рассчитывается иначе, чем полосы на сотовом телефоне или Wi-Fi-маршрутизаторе. На этой странице объясняется, что он измеряет и почему одно и то же значение может означать что-то другое в другом пресете.
 
-## RSSI and SNR
+## RSSI и SNR
 
-Every time the LoRa radio receives a message, it reports two measurements:
+Каждый раз, когда радиочип LoRa получает сообщение, он сообщает два измерения:
 
-- **RSSI (Received Signal Strength Indicator)** — the raw power hitting the antenna.
-- **SNR (Signal-to-Noise Ratio)** — how far the signal stands above the background noise.
+- \*\*RSSI (Индикатор уровня принятого сигнала) - сырая мощность, поступающая на твою антенну.
+- **SNR (отношение сигнал/шум)** - насколько сигнал превосходит фоновый шум.
 
-> 💡 **Tip:** Think of RSSI as how loud a friend is talking and SNR as how easily you can pick their voice out of the noise in the room. A friend shouting at a rock concert can be loud (high RSSI) yet unintelligible (bad SNR), while a whisper in a quiet library is faint (low RSSI) yet perfectly clear (great SNR).
+> 💡 \*\* Совет:\*\* Воспринимайте RSSI как громкость разговора твоего друга, а SNR - как то, насколько легко ты можешь различить его голос среди шума в комнате. Крик друга на рок-концерте может быть громким (высокий RSSI), но неразборчивым (плохой SNR), в то время как шепот в тихой библиотеке может быть слабым (низкий RSSI), но совершенно отчетливым (отличный SNR).
 
-## Decoding Below the Noise Floor
+## Расшифровка при минимальном уровне шума
 
-Standard radios such as FM or Wi-Fi lose a signal to static once the background noise is louder than it (a negative SNR). LoRa's spread spectrum modulation lets the radio pull a signal out of the noise even when the noise is louder, so negative SNR values are common and expected in Meshtastic — for example, −10 dB means the signal is 10 decibels weaker than the background noise.
+Стандартные радиостанции, такие как FM или Wi-Fi, теряют сигнал из-за статических помех, когда фоновый шум становится громче (отрицательный SNR). Расширенная спектральная модуляция LoRa позволяет радиостанции выделять сигнал из шума, даже если шум громче, поэтому отрицательные значения SNR являются обычными и ожидаемыми в Meshtastic — например, -10 дБ означает, что сигнал на 10 децибел слабее фонового шума.
 
-Each modem preset has an SNR limit: the lowest SNR at which that preset can still decode a message. Slower presets tolerate a weaker, noisier signal (a more negative limit, longer range); faster presets need a stronger signal (a less negative limit, shorter range).
+Каждый пресет модема имеет лимит SNR: самый низкий SNR, при котором пресет все еще может декодировать сообщение. Более медленные пресеты допускают более слабый и шумный сигнал (более низкий предел, большая дальность действия); более быстрые пресеты требуют более сильного сигнала (менее отрицательный предел, меньшая дальность действия).
 
-## Rating Signal Quality
+## Оценка качества сигнала
 
-The app rates signal quality (None, Bad, Fair, or Good) from SNR relative to the active preset's SNR limit. When RSSI and a noise-floor reading are both available, it also rates the difference between them against that limit and uses the worse rating. Otherwise, it uses SNR alone.
+Приложение оценивает качество сигнала (Нет, плохое, удовлетворительное или хорошее) по SNR относительно предела SNR активного пресета. Когда доступны как RSSI, так и показания минимального уровня шума, оно также сравнивает разницу между ними с этим пределом и использует худшую оценку. В противном случае оно использует только SNR.
 
-Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let `limit` be the active preset's SNR limit:
+Поскольку номинал зависит от пресета, один и тот же SNR по-разному отображается на разных пресетах. Показатель SNR в -16 дБ хорош на Long Fast (предел SNR -17,5 дБ), но не работает на Short Fast (предел SNR -7,5 дБ). Пусть `limit` будет порогом SNR для активного пресета:
 
-| Уровень     | Деления | Критерии                                                       | Значение                                                                                            |
-| ----------- | ------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Хороший     | Full    | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
-| Средний     | 3       | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
-| Плохой      | 2       | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
-| Отсутствует | 1       | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
+| Уровень     | Деления | Критерии                         | Значение                                                                                                  |
+| ----------- | ------- | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Хороший     | Полные  | SNR выше `limit`                 | Удобное расположенние над порогом для демодуляции — надежное соединение.                  |
+| Средний     | 3       | менее чем на 5,5 дБ ниже `limit` | Поддающийся расшифровке, но приближающийся к порогу.                                      |
+| Плохой      | 2       | от 5,5 до 7,5 дБ ниже `limit`    | На пределе того, что может восстановить пресет.                                           |
+| Отсутствует | 1       | более чем на 7,5 дБ ниже `limit` | Намного ниже порога пресета; дальнейшие пакеты с этой ноды, скорее всего, будут потеряны. |
 
-The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
+Значок никогда не гаснет, поэтому внимательно считайте количество полос: одна полоса означает "Нет", это не слабое, а полезное звено, и "Хорошо" - это сплошной клин, а не набор полос. Серая пиктограмма с тремя полосками с надписью "Неизвестно" снова указывает на другое состояние - в пакете вообще не было измерения SNR, что совсем не то же самое, что измерить сигнал и обнаружить, что он слишком слабый.
 
-> ℹ️ **Note:** Traceroute and neighbor-info SNR colors use the active preset's limits too. RSSI text has separate strength colors: green above −115 dBm, yellow above −120 dBm, orange above −126 dBm, and red at or below −126 dBm.
+> ℹ️ **Примечание:** Цвета SNR трассировки и neighbor-info также используют ограничения активного пресета. Текст RSSI имеет отдельные цвета усиления: зеленый выше -115 дБм, желтый выше -120 дБм, оранжевый выше -126 дБм и красный при -126 дБм или ниже.
 
-## Diagnosing Local Interference
+## Диагностика локальных помех
 
-A great RSSI paired with a one- or two-bar rating (None or Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
+Отличный сигнал RSSI в сочетании с оценкой в один или два бара (нет или плохой) указывает на локальные помехи, а не на расстояние. Дешевый источник питания, шумящий компьютер или находящийся поблизости передатчик могут создавать достаточно помех, чтобы заглушить сильный сигнал.
 
 ## Где появляется информация о сигнале
 
-In the app, signal data appears in several places:
+В приложении данные о сигнале отображаются в нескольких местах:
 
-- **Node list** — a signal-bars icon, shown only for nodes your node heard directly over LoRa. A node reached through a relay shows its hop count instead, because the SNR your node measured describes the last hop, not the whole path
-- **Node detail** — SNR, RSSI, and the quality word in the **Details** card at the top of the screen
+- **Список нод** — иконка со значком сигнала, показанная только для нод, которые ваша нода услышала напрямую через LoRa. Нода, к которой обращаются через ретранслятор, вместо этого показывает количество хопов, поскольку SNR, измеренный вашей нодой, описывает последний хоп, а не весь путь
+- **Детали ноды** — SNR, RSSI и качество слов в карточке **Подробности** в верхней части экрана
 - **Трассировка** — качество сигнала на каждой промежуточной ноде
-- **Signal Quality** — historical SNR and RSSI data in the metrics charts
+- **Качество сигнала** — данные SNR и RSSI в диаграммах метрик
 
-![Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon](../../assets/screenshots/nodes_signal_info.png)
+![Запись в списке нод, показывающая хороший уровень сигнала: SNR 12,5 дБ, RSSI -42 дБм и зеленый значок уровня сигнала](../../assets/screenshots/nodes_signal_info.png)
 
 ## Связанные темы
 

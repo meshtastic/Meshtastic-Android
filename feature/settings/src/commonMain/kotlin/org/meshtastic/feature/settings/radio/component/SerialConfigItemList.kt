@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.override_console_serial_port
 import org.meshtastic.core.resources.schema_serial_baud
 import org.meshtastic.core.resources.schema_serial_baud_description
 import org.meshtastic.core.resources.schema_serial_echo
@@ -35,6 +34,8 @@ import org.meshtastic.core.resources.schema_serial_enabled
 import org.meshtastic.core.resources.schema_serial_enabled_description
 import org.meshtastic.core.resources.schema_serial_mode
 import org.meshtastic.core.resources.schema_serial_mode_description
+import org.meshtastic.core.resources.schema_serial_override_console_serial_port
+import org.meshtastic.core.resources.schema_serial_override_console_serial_port_description
 import org.meshtastic.core.resources.schema_serial_rxd
 import org.meshtastic.core.resources.schema_serial_rxd_description
 import org.meshtastic.core.resources.schema_serial_timeout
@@ -160,7 +161,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.override_console_serial_port),
+                    title = stringResource(Res.string.schema_serial_override_console_serial_port),
+                    modifier = Modifier.settingsField(Res.string.schema_serial_override_console_serial_port),
+                    summary = stringResource(Res.string.schema_serial_override_console_serial_port_description),
                     checked = formState.value.override_console_serial_port,
                     enabled = state.connected,
                     onCheckedChange = {
