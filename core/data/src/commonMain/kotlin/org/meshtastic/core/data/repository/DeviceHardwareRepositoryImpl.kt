@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -76,6 +77,34 @@ internal class DeviceHardwareRefreshGate(private val retryIntervalMs: Long, priv
     }
 }
 
+/** One resolved lookup, valid while [database] is the active database and the refresh gate holds for [entities]. */
+private class ResolvedHardware(
+    val hardware: DeviceHardware?,
+    val entities: List<DeviceHardwareEntity>,
+    val database: Any,
+)
+
+/**
+ * Resolved lookups since the last catalog refresh. [generation] moves on every [clear], so a lookup that read the
+ * tables before a refresh replaced them cannot store its result after it.
+ */
+private class ResolvedHardwareCache {
+    private class State(val generation: Int, val entries: Map<Pair<Int, String?>, ResolvedHardware>)
+
+    private val state = atomic(State(generation = 0, entries = emptyMap()))
+
+    val generation: Int
+        get() = state.value.generation
+
+    operator fun get(hwModel: Int, target: String?): ResolvedHardware? = state.value.entries[hwModel to target]
+
+    fun put(generation: Int, hwModel: Int, target: String?, resolved: ResolvedHardware) = state.update {
+        if (it.generation == generation) State(generation, it.entries + ((hwModel to target) to resolved)) else it
+    }
+
+    fun clear() = state.update { State(it.generation + 1, emptyMap()) }
+}
+
 @Single
 class DeviceHardwareRepositoryImpl(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
@@ -96,29 +125,36 @@ class DeviceHardwareRepositoryImpl(
             successTtlMs = CACHE_EXPIRATION_TIME_MS,
         )
 
+    private val resolved = ResolvedHardwareCache()
+
     private val refresher =
         SingleFlightRefresher(dispatchers.io, "DeviceHardwareRepository") {
-            refreshGate.recordAttempt(nowMillis)
-            Logger.d { "DeviceHardwareRepository: fetching from remote API" }
-            val remoteHardware = remoteDataSource.getAllDeviceHardware()
-            Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
-            if (remoteHardware.isNotEmpty()) {
-                localDataSource.replaceAllDeviceHardware(remoteHardware)
-                refreshGate.recordSuccess(nowMillis)
-            } else {
-                Logger.w { "DeviceHardwareRepository: remote catalog was empty; retaining cached data" }
+            try {
+                refreshGate.recordAttempt(nowMillis)
+                Logger.d { "DeviceHardwareRepository: fetching from remote API" }
+                val remoteHardware = remoteDataSource.getAllDeviceHardware()
+                Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
+                if (remoteHardware.isNotEmpty()) {
+                    localDataSource.replaceAllDeviceHardware(remoteHardware)
+                    refreshGate.recordSuccess(nowMillis)
+                } else {
+                    Logger.w { "DeviceHardwareRepository: remote catalog was empty; retaining cached data" }
+                }
+                // Refresh msh.to device links and the bootloader/OTA quirk catalog after a hardware refresh. When the
+                // hardware fetch itself succeeds, its freshness is recorded before either of these — so neither one
+                // failing can cause another full hardware fetch on the next packet-driven lookup.
+                deviceLinkRepository.reconcile()
+                bootloaderOtaQuirksRepository.reconcile()
+            } finally {
+                resolved.clear()
             }
-            // Refresh msh.to device links and the bootloader/OTA quirk catalog after a hardware refresh. When the
-            // hardware fetch itself succeeds, its freshness is recorded before either of these — so neither one
-            // failing can cause another full hardware fetch on the next packet-driven lookup.
-            deviceLinkRepository.reconcile()
-            bootloaderOtaQuirksRepository.reconcile()
         }
 
     /**
      * Retrieves device hardware information by its model ID and optional target string.
      *
      * Pipeline:
+     * 0. A lookup already resolved since the last catalog refresh is answered from memory.
      * 1. If the local DB is empty, seed it from the bundled JSON asset (instant baseline).
      * 2. If the cached entry is stale or missing, refresh from the remote API with a timeout.
      * 3. Return the best available data from the DB (never blocks longer than [NETWORK_REFRESH_TIMEOUT_MS]).
@@ -127,26 +163,43 @@ class DeviceHardwareRepositoryImpl(
         hwModel: Int,
         target: String?,
         forceRefresh: Boolean,
-    ): Result<DeviceHardware?> = withContext(dispatchers.io) {
-        Logger.d {
-            "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel," +
-                " target=$target, forceRefresh=$forceRefresh)"
+    ): Result<DeviceHardware?> {
+        val cached =
+            resolved[hwModel, target]?.takeIf {
+                val cacheNeedsRefresh = it.entities.isEmpty() || it.entities.any { entity -> entity.isStale() }
+                !forceRefresh &&
+                    it.database === localDataSource.currentDatabase() &&
+                    !refreshGate.shouldRefresh(nowMillis, forceRefresh = false, cacheNeedsRefresh)
+            }
+        if (cached != null) return Result.success(cached.hardware)
+
+        return withContext(dispatchers.io) {
+            Logger.d {
+                "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel," +
+                    " target=$target, forceRefresh=$forceRefresh)"
+            }
+
+            if (forceRefresh) {
+                Logger.d { "DeviceHardwareRepository: forceRefresh=true, bypassing refresh gate" }
+            }
+
+            ensureSeeded()
+
+            var generation = resolved.generation
+            var database = localDataSource.currentDatabase()
+            var entities = lookupEntities(hwModel, target)
+            val cacheNeedsRefresh = entities.isEmpty() || entities.any { it.isStale() }
+            if (refreshGate.shouldRefresh(nowMillis, forceRefresh, cacheNeedsRefresh)) {
+                refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+                generation = resolved.generation
+                database = localDataSource.currentDatabase()
+                entities = lookupEntities(hwModel, target)
+            }
+
+            val hardware = resolveHardware(hwModel, entities, target)
+            resolved.put(generation, hwModel, target, ResolvedHardware(hardware, entities, database))
+            Result.success(hardware)
         }
-
-        if (forceRefresh) {
-            Logger.d { "DeviceHardwareRepository: forceRefresh=true, bypassing refresh gate" }
-        }
-
-        ensureSeeded()
-
-        var entities = lookupEntities(hwModel, target)
-        val cacheNeedsRefresh = entities.isEmpty() || entities.any { it.isStale() }
-        if (refreshGate.shouldRefresh(nowMillis, forceRefresh, cacheNeedsRefresh)) {
-            refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
-            entities = lookupEntities(hwModel, target)
-        }
-
-        Result.success(resolveHardware(hwModel, entities, target))
     }
 
     /**

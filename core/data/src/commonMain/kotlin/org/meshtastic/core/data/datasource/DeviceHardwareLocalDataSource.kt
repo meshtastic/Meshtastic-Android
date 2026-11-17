@@ -24,6 +24,9 @@ import org.meshtastic.core.model.NetworkDeviceHardware
 
 @Single
 class DeviceHardwareLocalDataSource(private val dbManager: DatabaseProvider) {
+    /** Identity of the database the reads below hit; it changes when the active device database switches. */
+    fun currentDatabase(): Any = dbManager.currentDb.value
+
     suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) {
         dbManager.withDb { it.deviceHardwareDao().insertAll(deviceHardware.map { hw -> hw.asEntity() }) }
     }
@@ -32,14 +35,17 @@ class DeviceHardwareLocalDataSource(private val dbManager: DatabaseProvider) {
         dbManager.withDb { it.deviceHardwareDao().replaceAll(deviceHardware.map { hw -> hw.asEntity() }) }
     }
 
-    suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity> =
-        dbManager.withReadDb { it.deviceHardwareDao().getByHwModel(hwModel) }
+    suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity> = dbManager.withReadDb {
+        it.deviceHardwareDao().getByHwModel(hwModel)
+    }
 
-    suspend fun getByTarget(target: String): DeviceHardwareEntity? =
-        dbManager.withReadDb { it.deviceHardwareDao().getByTarget(target) }
+    suspend fun getByTarget(target: String): DeviceHardwareEntity? = dbManager.withReadDb {
+        it.deviceHardwareDao().getByTarget(target)
+    }
 
-    suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? =
-        dbManager.withReadDb { it.deviceHardwareDao().getByModelAndTarget(hwModel, target) }
+    suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? = dbManager.withReadDb {
+        it.deviceHardwareDao().getByModelAndTarget(hwModel, target)
+    }
 
     suspend fun hasAnyEntries(): Boolean = dbManager.withReadDb { it.deviceHardwareDao().count() > 0 }
 
