@@ -743,11 +743,12 @@ open class ScannerViewModel(
     }
 
     /**
-     * Persists [address] in the recent-TCP list under [name]. No-op when [address] does not start with
-     * [TCP_DEVICE_PREFIX], or where TCP cannot open.
+     * Persists [address] in the recent network list under [name]. No-op when [address] does not start with
+     * [TCP_DEVICE_PREFIX] or [WEBSOCKET_DEVICE_PREFIX], or where no network transport can open.
      */
     fun addRecentAddress(address: String, name: String) {
-        if (!address.startsWith(TCP_DEVICE_PREFIX) || !networkSupported) return
+        if (!networkSupported) return
+        if (!address.startsWith(TCP_DEVICE_PREFIX) && !address.startsWith(WEBSOCKET_DEVICE_PREFIX)) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
@@ -763,7 +764,7 @@ open class ScannerViewModel(
      */
     fun connectToManualAddress(fullAddress: String) {
         if (!networkSupported) return
-        val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
+        val displayAddress = fullAddress.drop(1)
         stopAllScans()
         uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
         addRecentAddress(fullAddress, displayAddress)

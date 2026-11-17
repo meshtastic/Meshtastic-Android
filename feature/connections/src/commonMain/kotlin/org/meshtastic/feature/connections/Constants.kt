@@ -28,6 +28,9 @@ const val NO_DEVICE_SELECTED: String = "n"
 /** One-char prefix marking a TCP/Network device's `fullAddress`. See [DeviceListEntry.Tcp]. */
 const val TCP_DEVICE_PREFIX: String = "t"
 
+/** One-char prefix marking a WebSocket device's `fullAddress`, listed with the network devices. */
+const val WEBSOCKET_DEVICE_PREFIX: String = "w"
+
 /** One-char prefix marking a BLE device's `fullAddress`. See [DeviceListEntry.Ble]. */
 const val BLE_DEVICE_PREFIX: String = "x"
 
@@ -37,6 +40,12 @@ private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
 // The forms TcpTransport splits: `host`, `host:port`, or a bracketed IPv6 literal with an optional port.
 private val TCP_ADDRESS = Regex("""(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]]+)(:\d{1,5})?""")
+
+// A WebSocket URL: the scheme, a host as TCP_ADDRESS takes it, and an optional path such as firmware's /api/v1/ws.
+private val WEBSOCKET_URL = Regex("""wss?://(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]/?#]+)(:\d{1,5})?(/[^\s#]*)?""")
+
+/** Whether [url] is a `ws://` or `wss://` URL a WebSocket phone link can connect to. */
+fun isWebSocketUrl(url: String): Boolean = WEBSOCKET_URL.matches(url)
 
 /**
  * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails this
@@ -51,6 +60,8 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
         InterfaceId.NOP -> rest.isEmpty()
 
         InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
+
+        InterfaceId.WEBSOCKET -> isWebSocketUrl(rest)
 
         InterfaceId.MOCK,
         InterfaceId.REPLAY,

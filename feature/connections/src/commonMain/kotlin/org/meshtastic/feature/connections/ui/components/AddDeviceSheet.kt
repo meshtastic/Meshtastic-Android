@@ -48,6 +48,9 @@ import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.ip_port
+import org.meshtastic.feature.connections.TCP_DEVICE_PREFIX
+import org.meshtastic.feature.connections.WEBSOCKET_DEVICE_PREFIX
+import org.meshtastic.feature.connections.isWebSocketUrl
 
 /** Sheet for manually adding a TCP device by IP address and port. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,8 +108,8 @@ internal fun AddDeviceForm(onCancel: () -> Unit, onClickAdd: (address: String, f
 
             Button(
                 onClick = {
-                    manualTcpAddress(addressState.text.toString(), portState.text.toString())?.let { address ->
-                        onClickAdd(address, "t$address")
+                    manualAddress(addressState.text.toString(), portState.text.toString())?.let { fullAddress ->
+                        onClickAdd(fullAddress.drop(1), fullAddress)
                     }
                 },
             ) {
@@ -117,6 +120,19 @@ internal fun AddDeviceForm(onCancel: () -> Unit, onClickAdd: (address: String, f
 }
 
 private val VALID_PORTS = 1..65535
+
+/**
+ * The full address a manual entry adds, prefix included, or null when it can't be connected to. A `ws://` or `wss://`
+ * URL in the address field is a WebSocket phone link, firmware's `/api/v1/ws`, taken as written with the port field
+ * ignored; anything else is a TCP host checked by [manualTcpAddress].
+ */
+internal fun manualAddress(address: String, portText: String): String? {
+    val trimmed = address.trim()
+    if (trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true)) {
+        return trimmed.takeIf(::isWebSocketUrl)?.let { WEBSOCKET_DEVICE_PREFIX + it }
+    }
+    return manualTcpAddress(address, portText)?.let { TCP_DEVICE_PREFIX + it }
+}
 
 /**
  * The address a manual entry adds, or null when it can't be connected to: an invalid host, or a numeric port outside

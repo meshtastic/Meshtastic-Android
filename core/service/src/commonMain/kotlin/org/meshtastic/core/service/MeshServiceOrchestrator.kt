@@ -112,7 +112,9 @@ class MeshServiceOrchestrator(
         // later successful manual connect with no recovery layer for the life of the process. The OS enforces the
         // permission at the socket, so a genuinely local connect fails exactly as it would have; the difference is
         // the user now has an explanation and the fix in hand.
-        if (DeviceAddress.parse(address)?.interfaceId == InterfaceId.TCP && !localNetworkAccess.isGranted()) {
+        val networked =
+            DeviceAddress.parse(address)?.interfaceId.let { it == InterfaceId.TCP || it == InterfaceId.WEBSOCKET }
+        if (networked && !localNetworkAccess.isGranted()) {
             Logger.w { "Local network access not granted; the persisted TCP reconnect may time out" }
             serviceStateWriter.setErrorMessage(
                 // Same shape as ScannerViewModel's scan-failure messages: resource lookup can fail outside a

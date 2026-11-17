@@ -30,7 +30,10 @@ enum class DeviceType {
 
                 InterfaceId.SERIAL -> USB
 
-                InterfaceId.TCP -> TCP
+                // A network radio either way: the WebSocket is another route to the same device a TCP address reaches.
+                InterfaceId.TCP,
+                InterfaceId.WEBSOCKET,
+                -> TCP
 
                 InterfaceId.NOP,
                 InterfaceId.MOCK,

@@ -120,6 +120,8 @@ class AndroidRadioTransportFactory(
             -> NopRadioTransport(rest)
 
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
+
+            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
         }
     }
 
@@ -130,10 +132,11 @@ class AndroidRadioTransportFactory(
      * the entry still yields a working virtual device.
      */
     private fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
-        val replayFrames =
-            runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() } }
-                .getOrNull()
-                ?.takeIf { it.isNotEmpty() }
+        val replayFrames = runCatching {
+            context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() }
+        }
+            .getOrNull()
+            ?.takeIf { it.isNotEmpty() }
         return if (replayFrames != null) {
             Logger.i { "Replay device → replaying $REPLAY_ASSET_NAME (${replayFrames.size} bytes)" }
             ReplayRadioTransport(

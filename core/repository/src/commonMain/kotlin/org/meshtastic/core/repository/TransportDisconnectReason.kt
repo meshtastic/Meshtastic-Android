@@ -20,4 +20,7 @@ package org.meshtastic.core.repository
 enum class TransportDisconnectReason {
     /** Android denied USB device access for the current connection attempt. */
     UsbPermissionDenied,
+
+    /** The radio gave its one WebSocket client slot to another client, WebSocket close code 4001. */
+    ReplacedByAnotherClient,
 }

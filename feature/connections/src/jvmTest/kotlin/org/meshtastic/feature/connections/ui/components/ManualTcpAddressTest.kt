@@ -49,4 +49,25 @@ class ManualTcpAddressTest {
     fun nonNumericPortFallsBackToTheDefault() {
         assertEquals("192.168.1.20", manualTcpAddress("192.168.1.20", "abc"))
     }
+
+    @Test
+    fun aHostIsATcpAddress() {
+        assertEquals("t192.168.1.20:4404", manualAddress("192.168.1.20", "4404"))
+    }
+
+    @Test
+    fun aWebSocketUrlIsTakenAsWrittenWithThePortFieldIgnored() {
+        assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("ws://192.168.1.20/api/v1/ws", "4403"))
+        assertEquals(
+            "wwss://meshtastic.local:9443/api/v1/ws",
+            manualAddress(" wss://meshtastic.local:9443/api/v1/ws ", ""),
+        )
+        assertEquals("wws://[fe80::1]:80/api/v1/ws", manualAddress("ws://[fe80::1]:80/api/v1/ws", "4403"))
+    }
+
+    @Test
+    fun aMalformedWebSocketUrlIsRejected() {
+        assertNull(manualAddress("ws://", "4403"))
+        assertNull(manualAddress("wss://host with space/api/v1/ws", "4403"))
+    }
 }

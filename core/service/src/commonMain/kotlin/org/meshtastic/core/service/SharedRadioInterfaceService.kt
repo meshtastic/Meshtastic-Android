@@ -89,6 +89,8 @@ import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 
 private const val USB_PERMISSION_DENIED_ERROR = "USB permission denied. Reconnect the device to try again."
+private const val REPLACED_BY_ANOTHER_CLIENT_ERROR =
+    "Another app took this radio's WebSocket connection. Connect again to take it back."
 
 /**
  * Immutable per-start transport identity. [generation] is bumped on every transport start (including same-address
@@ -160,6 +162,7 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
 
 private fun TransportDisconnectReason.toConnectionErrorMessage(): String = when (this) {
     TransportDisconnectReason.UsbPermissionDenied -> USB_PERMISSION_DENIED_ERROR
+    TransportDisconnectReason.ReplacedByAnotherClient -> REPLACED_BY_ANOTHER_CLIENT_ERROR
 }
 
 private val LINK_UP_PHASES =
@@ -635,7 +638,9 @@ class SharedRadioInterfaceService(
                                 if (connectionRequested && !radioOperationLock.suppressesTransport) {
                                     startTransportLocked()
                                 }
-                            } else if (runningTransportId == InterfaceId.TCP) {
+                            } else if (
+                                runningTransportId == InterfaceId.TCP || runningTransportId == InterfaceId.WEBSOCKET
+                            ) {
                                 stopTransportLocked()
                             }
                         }

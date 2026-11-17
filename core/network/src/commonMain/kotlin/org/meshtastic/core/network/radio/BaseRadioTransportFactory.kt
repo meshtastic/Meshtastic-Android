@@ -47,7 +47,9 @@ abstract class BaseRadioTransportFactory(
         return when (spec) {
             // A saved TCP address restored where the platform has no TCP transport (the browser) is kept but never
             // armed.
-            InterfaceId.TCP.id -> DeviceType.TCP in supportedDeviceTypes
+            InterfaceId.TCP.id,
+            InterfaceId.WEBSOCKET.id,
+            -> DeviceType.TCP in supportedDeviceTypes
 
             // A saved serial address restored onto hardware with no USB host is kept but never armed.
             InterfaceId.SERIAL.id -> isSerialSupported
@@ -89,6 +91,14 @@ abstract class BaseRadioTransportFactory(
                         address = bleAddress,
                     )
                 }
+
+                // Common to every platform: Ktor finds the engine each one ships.
+                address.startsWith(InterfaceId.WEBSOCKET.id) ->
+                    WebSocketRadioTransport(
+                        callback = service,
+                        scope = service.serviceScope,
+                        url = address.removePrefix(InterfaceId.WEBSOCKET.id.toString()),
+                    )
 
                 else -> createPlatformTransport(address, service)
             }

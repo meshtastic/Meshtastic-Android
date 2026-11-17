@@ -43,6 +43,16 @@ class LinkableAddressTest {
     }
 
     @Test
+    fun `a WebSocket address needs a ws or wss URL with a host`() {
+        assertTrue(isLinkableAddress("wws://192.168.1.20/api/v1/ws"))
+        assertTrue(isLinkableAddress("wwss://meshtastic.local:9443/api/v1/ws"))
+        assertTrue(isLinkableAddress("wws://[fe80::1]:80"))
+        listOf("w", "w192.168.1.20", "whttp://host/api/v1/ws", "wws://", "wws://:80/api/v1/ws", "wws://a b/").forEach {
+            assertFalse(isLinkableAddress(it), "'$it' should be rejected")
+        }
+    }
+
+    @Test
     fun `a serial address needs a port name`() {
         assertTrue(isLinkableAddress("s/dev/ttyUSB0"))
         assertFalse(isLinkableAddress("s"))
