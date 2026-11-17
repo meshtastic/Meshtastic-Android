@@ -1573,6 +1573,7 @@
     <string name="node_bearer_counters">%1$d received · %2$d sent · %3$d relayed</string>
     <string name="node_bearer_gatt">Bluetooth connection</string>
     <string name="node_bearer_lora">LoRa stick</string>
+    <string name="node_bearer_lora_extra">LoRa radio %1$d</string>
     <string name="node_bearer_mqtt">MQTT</string>
     <string name="node_bearer_needs_hardware">Needs %1$s</string>
     <string name="node_bearer_needs_permission">Needs a permission</string>

@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.node_bearer_ble_adv
 import org.meshtastic.core.resources.node_bearer_counters
 import org.meshtastic.core.resources.node_bearer_gatt
 import org.meshtastic.core.resources.node_bearer_lora
+import org.meshtastic.core.resources.node_bearer_lora_extra
 import org.meshtastic.core.resources.node_bearer_mqtt
 import org.meshtastic.core.resources.node_bearer_needs_hardware
 import org.meshtastic.core.resources.node_bearer_needs_permission
@@ -158,7 +159,9 @@ private fun BearerRow(
 ) {
     val state = row.state
     BasicListItem(
-        text = stringResource(row.bearer.label()),
+        text =
+        row.radio?.let { stringResource(Res.string.node_bearer_lora_extra, it) }
+            ?: stringResource(row.bearer.label()),
         supportingText = row.supportingText(),
         leadingIcon = row.bearer.icon(),
         trailingContent =

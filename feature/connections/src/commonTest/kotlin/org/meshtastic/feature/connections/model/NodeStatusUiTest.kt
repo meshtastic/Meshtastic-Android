@@ -47,6 +47,34 @@ class NodeStatusUiTest {
     }
 
     @Test
+    fun `a further LoRa radio is a row of its own with no switch`() {
+        val extra =
+            bearerRow(
+                Bearer.LORA,
+                enabled = true,
+                availability = TransportAvailability.Active,
+                requirement = Requirement.Ready,
+                received = 4,
+                sent = 0,
+                relayed = 0,
+                radio = 2,
+            )
+        assertEquals(2, extra.radio)
+        assertFalse(extra.switchable)
+        assertEquals(BearerRowState.Active, extra.state)
+        assertEquals(null, row(Bearer.LORA).radio)
+    }
+
+    @Test
+    fun `an extra radio is numbered from its transport name`() {
+        assertEquals(2, extraRadioNumber("lora-2"))
+        assertEquals(12, extraRadioNumber("lora-12"))
+        assertEquals(null, extraRadioNumber("lora"))
+        assertEquals(null, extraRadioNumber("lora-1"))
+        assertEquals(null, extraRadioNumber("lora-x"))
+    }
+
+    @Test
     fun `MQTT stays off the card`() {
         assertEquals(Bearer.entries - Bearer.MQTT, Bearer.entries.filter { it.onCard })
     }

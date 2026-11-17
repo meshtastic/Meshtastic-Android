@@ -34,7 +34,11 @@ data class NodeStatusUi(
     val bearers: List<BearerRowUi>,
 )
 
-/** One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). */
+/**
+ * One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). [radio] numbers a
+ * LoRa radio the host runs beside its first, 2 for `lora-2`, and is null for the bearer itself. Such a radio follows
+ * the LoRa bearer's switch and has none of its own.
+ */
 data class BearerRowUi(
     val bearer: Bearer,
     val enabled: Boolean,
@@ -43,6 +47,7 @@ data class BearerRowUi(
     val received: Long,
     val sent: Long,
     val relayed: Long,
+    val radio: Int? = null,
 )
 
 sealed interface BearerRowState {
@@ -77,19 +82,42 @@ fun NodeStatus.toUi(): NodeStatusUi = nodeStatusUi(
     bearers =
     Bearer.entries
         .filter { it.onCard }
-        .mapNotNull { bearer ->
-            val status = bearers[bearer] ?: return@mapNotNull null
-            bearerRow(
-                bearer = bearer,
-                enabled = status.enabled,
-                availability = status.availability,
-                requirement = status.requirement,
-                received = status.counters.rx,
-                sent = status.counters.tx,
-                relayed = status.counters.relayed,
-            )
+        .flatMap { bearer ->
+            val status = bearers[bearer] ?: return@flatMap emptyList()
+            val row =
+                bearerRow(
+                    bearer = bearer,
+                    enabled = status.enabled,
+                    availability = status.availability,
+                    requirement = status.requirement,
+                    received = status.counters.rx,
+                    sent = status.counters.tx,
+                    relayed = status.counters.relayed,
+                )
+            if (bearer == Bearer.LORA) listOf(row) + extraRadioRows() else listOf(row)
         },
 )
+
+/** The host's further LoRa radios, in number order, each a row under the LoRa bearer's. */
+private fun NodeStatus.extraRadioRows(): List<BearerRowUi> = extraRadios
+    .mapNotNull { (name, status) ->
+        val radio = extraRadioNumber(name) ?: return@mapNotNull null
+        bearerRow(
+            bearer = Bearer.LORA,
+            enabled = status.enabled,
+            availability = status.availability,
+            requirement = status.requirement,
+            received = status.counters.rx,
+            sent = status.counters.tx,
+            relayed = status.counters.relayed,
+            radio = radio,
+        )
+    }
+    .sortedBy { it.radio }
+
+/** The number in an extra radio's transport name, 2 for `lora-2`, or null for a name of another shape. */
+internal fun extraRadioNumber(name: String): Int? =
+    name.substringAfterLast('-', missingDelimiterValue = "").toIntOrNull()?.takeIf { it > 1 }
 
 /** The card's header from the node's fields; [NodeStatus] has no public constructor, so tests build the card here. */
 @Suppress("LongParameterList")
@@ -123,10 +151,12 @@ internal fun bearerRow(
     received: Long,
     sent: Long,
     relayed: Long,
+    radio: Int? = null,
 ): BearerRowUi = BearerRowUi(
     bearer = bearer,
     enabled = enabled,
-    switchable = bearer.switchable,
+    switchable = bearer.switchable && radio == null,
+    radio = radio,
     state =
     when (requirement) {
         is Requirement.NeedsPermission -> BearerRowState.NeedsPermission(requirement.permission)
