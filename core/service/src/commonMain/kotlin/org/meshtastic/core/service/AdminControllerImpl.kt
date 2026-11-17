@@ -248,6 +248,12 @@ internal class AdminControllerImpl(
         }
     }
 
+    override suspend fun playRingtone(destNum: Int) {
+        commandSender.sendAdmin(destNum) {
+            AdminMessage.Builder().also { wb -> wb.play_ringtone_request = true }.build()
+        }
+    }
+
     override suspend fun getRingtone(destNum: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
             AdminMessage.Builder().also { wb -> wb.get_ringtone_request = true }.build()

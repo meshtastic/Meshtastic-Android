@@ -384,6 +384,10 @@ class FakeRadioController :
         recordAdminRequest("setRingtone", destNum, ringtone, packetId = null)
     }
 
+    override suspend fun playRingtone(destNum: Int) {
+        recordAdminRequest("playRingtone", destNum, payload = null, packetId = null)
+    }
+
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
         recordAdminRequest("setCannedMessages", destNum, messages, packetId = null)
     }

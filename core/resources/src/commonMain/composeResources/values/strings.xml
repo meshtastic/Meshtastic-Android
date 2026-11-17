@@ -1918,10 +1918,14 @@
     <string name="restore_keys_confirmation">Restores the backed-up public and private keys to this node.</string>
     <string name="restore_keys_pick_backup">Pick the backup to restore to this node. A factory reset or a new key changes the node's ID, so older backups stay under the old ID. Only restore a backup taken from this same radio: another radio's key gives both radios the same identity.</string>
     <string name="retry">Retry</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Ringtone</string>
     <string name="ringtone_file_empty">File is empty</string>
     <string name="ringtone_import_error">Error importing: %1$s</string>
     <string name="ringtone_imported">Imported ringtone</string>
+    <string name="ringtone_play_on_node">Play on node</string>
+    <string name="ringtone_play_on_node_summary">Plays the saved ringtone on the node once. Needs a buzzer.</string>
+    <string name="ringtone_play_on_node_unsaved">Save the ringtone first to play it on the node.</string>
     <!-- ROLE -->
     <string name="role">Device Role</string>
     <string name="role_client">Client</string>

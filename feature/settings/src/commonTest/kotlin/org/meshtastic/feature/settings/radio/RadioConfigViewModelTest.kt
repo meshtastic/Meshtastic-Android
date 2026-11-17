@@ -1696,6 +1696,19 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `playRingtone asks the destination node to play`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.playRingtone(any()) } returns Unit
+
+        viewModel.playRingtone()
+
+        verifySuspend { radioConfigUseCase.playRingtone(123) }
+    }
+
+    @Test
     fun `setCannedMessages calls useCase`() = runTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
         nodeRepository.setNodes(listOf(node))

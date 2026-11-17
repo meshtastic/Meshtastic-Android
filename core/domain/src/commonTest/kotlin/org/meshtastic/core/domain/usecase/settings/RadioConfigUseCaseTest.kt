@@ -144,6 +144,14 @@ class RadioConfigUseCaseTest {
     }
 
     @Test
+    fun `playRingtone asks the node to play its ringtone`() = runTest {
+        assertSends(AdminRequest("playRingtone", DEST, null, null)) {
+            useCase.playRingtone(DEST)
+            null
+        }
+    }
+
+    @Test
     fun `setCannedMessages sends the messages`() = runTest {
         assertSends(AdminRequest("setCannedMessages", DEST, "messages", null)) {
             useCase.setCannedMessages(DEST, "messages")

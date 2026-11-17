@@ -1846,10 +1846,14 @@ restore_keys
 restore_keys_confirmation
 restore_keys_pick_backup
 retry
+### RINGTONE ###
 ringtone
 ringtone_file_empty
 ringtone_import_error
 ringtone_imported
+ringtone_play_on_node
+ringtone_play_on_node_summary
+ringtone_play_on_node_unsaved
 ### ROLE ###
 role
 role_client

@@ -190,6 +190,11 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
         radioController.setRingtone(destNum, ringtone)
     }
 
+    /** Plays the saved ringtone on the radio once. */
+    open suspend fun playRingtone(destNum: Int) {
+        radioController.playRingtone(destNum)
+    }
+
     /**
      * Requests the ringtone from the radio.
      *

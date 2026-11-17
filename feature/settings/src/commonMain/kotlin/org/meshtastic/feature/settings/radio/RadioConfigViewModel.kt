@@ -662,6 +662,11 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
     }
 
+    fun playRingtone() {
+        val destNum = destNum ?: destNode.value?.num ?: return
+        safeLaunch(tag = "playRingtone") { radioConfigUseCase.playRingtone(destNum) }
+    }
+
     fun setCannedMessages(messages: String) {
         val destNum = destNum ?: destNode.value?.num ?: return
         retireReadRequestsForRoute(radioConfigState.value.route)
