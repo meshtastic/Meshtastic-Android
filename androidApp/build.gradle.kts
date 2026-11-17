@@ -180,6 +180,11 @@ androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
     }
+    // Native libs are over half of the fdroid APK and deflate to under half their size. F-Droid and IzzyOnDroid ship
+    // the APK itself, so compress them there; google ships an AAB and keeps them stored for mmap loading.
+    onVariants(selector().withFlavor("marketplace" to "fdroid")) { variant ->
+        variant.packaging.jniLibs.useLegacyPackaging.set(true)
+    }
     onVariants { variant ->
         val generateLocaleConfig =
             tasks.register<GenerateLocaleConfigTask>(
