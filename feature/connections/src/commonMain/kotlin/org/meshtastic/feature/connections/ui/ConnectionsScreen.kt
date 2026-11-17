@@ -671,6 +671,7 @@ fun ConnectionsScreen(
                 NodeStatusCard(
                     status = status,
                     onSetBearer = nodeStatusViewModel::setBearer,
+                    onSetExtraRadio = nodeStatusViewModel::setExtraRadio,
                     onRefreshRequirements = nodeStatusViewModel::refreshRequirements,
                     onRequestUsbPermission = nodeStatusViewModel::requestUsbPermission,
                 )

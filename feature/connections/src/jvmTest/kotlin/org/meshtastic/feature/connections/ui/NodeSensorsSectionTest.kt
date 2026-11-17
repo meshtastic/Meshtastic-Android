@@ -64,6 +64,7 @@ class NodeSensorsSectionTest {
                         bearers = listOf(BearerRowUi(Bearer.UDP, true, true, BearerRowState.Active, 0, 0, 0)),
                     ),
                     onSetBearer = { _, _ -> },
+                    onSetExtraRadio = { _, _ -> },
                     onRefreshRequirements = {},
                     onRequestUsbPermission = {},
                 )

@@ -43,6 +43,15 @@ interface NodeStatusRepository {
     /** Switch a host bearer (Wi-Fi Aware, audio, video) on or off; persisted by the node. */
     suspend fun setHostBearer(bearer: Bearer, on: Boolean)
 
+    /** The host's extra LoRa radios that are off by themselves, by transport name (`lora-2`); empty with no node. */
+    val extraRadiosOff: StateFlow<Set<String>>
+
+    /**
+     * Switch one extra LoRa radio by itself, under LoRa's switch. Throws [IllegalStateException] when the switch was
+     * made but the choice was not kept, and [IllegalArgumentException] for a name that is no extra radio of this host.
+     */
+    suspend fun setExtraRadio(name: String, on: Boolean)
+
     /** Re-read permission and hardware state after a grant or an attach. */
     fun refreshRequirements()
 
@@ -66,6 +75,10 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
 
     override val sensors: StateFlow<I2cBusState?> = sensorsState.asStateFlow()
 
+    private val extraRadiosOffState = MutableStateFlow<Set<String>>(emptySet())
+
+    override val extraRadiosOff: StateFlow<Set<String>> = extraRadiosOffState.asStateFlow()
+
     /**
      * The transport calls this once its node exists; the node's status, and its host's sensor [bus] when it has one,
      * are mirrored until [detach].
@@ -81,6 +94,9 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
         // A value already in flight when detach runs must not land on an emptied repository.
         next.mirror = scope.launch {
             bus?.let { launch { it.collect { state -> if (live === next) sensorsState.value = state } } }
+            launch {
+                node.hostBearers.extraRadiosOff.collect { off -> if (live === next) extraRadiosOffState.value = off }
+            }
             node.status.collect { if (live === next) statusState.value = it }
         }
     }
@@ -93,11 +109,16 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
             current.mirror?.cancel()
             statusState.value = null
             sensorsState.value = null
+            extraRadiosOffState.value = emptySet()
         }
     }
 
     override suspend fun setHostBearer(bearer: Bearer, on: Boolean) {
         live?.node?.hostBearers?.set(bearer, on)
+    }
+
+    override suspend fun setExtraRadio(name: String, on: Boolean) {
+        live?.node?.hostBearers?.setExtraRadio(name, on)
     }
 
     override fun refreshRequirements() {

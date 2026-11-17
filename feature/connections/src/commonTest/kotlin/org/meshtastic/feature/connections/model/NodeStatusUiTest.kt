@@ -16,13 +16,18 @@
  */
 package org.meshtastic.feature.connections.model
 
+import org.meshtastic.node.host.ExtraRadio
+import org.meshtastic.node.host.ExtraRadioDevice
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.Requirement
 import org.meshtastic.node.transport.Bearer
 import org.meshtastic.node.transport.TransportAvailability
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NodeStatusUiTest {
@@ -46,23 +51,177 @@ class NodeStatusUiTest {
         assertFalse(row(Bearer.MQTT).switchable)
     }
 
+    private fun extra(
+        name: String = "lora-2",
+        details: ExtraRadio? = ExtraRadio(ExtraRadioDevice.RTL_SDR),
+        off: Set<String> = emptySet(),
+        loraOn: Boolean = true,
+    ): ExtraRadioUi = assertNotNull(extraRadioUi(name, details, off, loraOn))
+
+    private fun extraRow(extra: ExtraRadioUi, enabled: Boolean = true) = bearerRow(
+        Bearer.LORA,
+        enabled = enabled,
+        availability = TransportAvailability.Active,
+        requirement = Requirement.Ready,
+        received = 4,
+        sent = 0,
+        relayed = 0,
+        extra = extra,
+    )
+
     @Test
-    fun `a further LoRa radio is a row of its own with no switch`() {
-        val extra =
-            bearerRow(
-                Bearer.LORA,
-                enabled = true,
-                availability = TransportAvailability.Active,
-                requirement = Requirement.Ready,
-                received = 4,
-                sent = 0,
-                relayed = 0,
-                radio = 2,
+    fun `a further LoRa radio is a row of its own with a switch of its own`() {
+        val row = extraRow(extra())
+        assertEquals(2, row.radio)
+        assertEquals("lora-2", row.extra?.name)
+        assertTrue(row.switchable)
+        assertEquals(BearerRowState.Active, row.state)
+        assertNull(row(Bearer.LORA).radio)
+        assertNull(extraRadioUi("lora", null, emptySet(), loraOn = true))
+    }
+
+    @Test
+    fun `every device kind is described with its role and that it only receives`() {
+        ExtraRadioDevice.entries.forEach { device ->
+            val described = extra(details = ExtraRadio(device))
+            assertEquals(device, described.details?.device)
+            assertEquals(
+                listOf(ExtraRadioPart.KIND, ExtraRadioPart.ROLE, ExtraRadioPart.RECEIVE_ONLY),
+                described.parts(),
+                "$device",
             )
-        assertEquals(2, extra.radio)
-        assertFalse(extra.switchable)
-        assertEquals(BearerRowState.Active, extra.state)
-        assertEquals(null, row(Bearer.LORA).radio)
+        }
+    }
+
+    @Test
+    fun `an id is described only where the host named one`() {
+        val named = extra(details = ExtraRadio(ExtraRadioDevice.USB_STICK, id = " 3A7F01 "))
+        assertEquals("3A7F01", named.id)
+        assertTrue(ExtraRadioPart.ID in named.parts())
+
+        listOf(null, "", "  ").forEach { id ->
+            val unnamed = extra(details = ExtraRadio(ExtraRadioDevice.USB_STICK, id = id))
+            assertNull(unnamed.id)
+            assertFalse(ExtraRadioPart.ID in unnamed.parts())
+        }
+    }
+
+    @Test
+    fun `a mirror and a listening radio differ by their preset`() {
+        val mirror = extra(details = ExtraRadio(ExtraRadioDevice.RTL_SDR))
+        val listener = extra(details = ExtraRadio(ExtraRadioDevice.RTL_SDR, preset = ModemPreset.SHORT_FAST))
+        assertNull(mirror.details?.preset)
+        assertEquals(ModemPreset.SHORT_FAST, listener.details?.preset)
+        assertTrue(ExtraRadioPart.ROLE in mirror.parts())
+        assertTrue(ExtraRadioPart.ROLE in listener.parts())
+    }
+
+    @Test
+    fun `a duplex radio transmits and a bridging radio says so`() {
+        val details =
+            ExtraRadio(
+                ExtraRadioDevice.USB_STICK,
+                id = "3A7F01",
+                preset = ModemPreset.SHORT_FAST,
+                bridge = true,
+                duplex = true,
+            )
+        assertEquals(
+            listOf(
+                ExtraRadioPart.KIND,
+                ExtraRadioPart.ID,
+                ExtraRadioPart.ROLE,
+                ExtraRadioPart.TRANSMITS,
+                ExtraRadioPart.BRIDGES,
+            ),
+            extra(details = details).parts(),
+        )
+        val bridgeOnly =
+            extra(details = ExtraRadio(ExtraRadioDevice.BOARD, preset = ModemPreset.SHORT_FAST, bridge = true))
+        assertEquals(
+            listOf(ExtraRadioPart.KIND, ExtraRadioPart.ROLE, ExtraRadioPart.RECEIVE_ONLY, ExtraRadioPart.BRIDGES),
+            bridgeOnly.parts(),
+        )
+    }
+
+    @Test
+    fun `a short row gives up receive only then the id then the bridge and keeps the rest`() {
+        val receiver =
+            extra(
+                details =
+                ExtraRadio(
+                    ExtraRadioDevice.RTL_SDR,
+                    id = "00000001",
+                    preset = ModemPreset.SHORT_FAST,
+                    bridge = true,
+                ),
+            )
+        assertEquals(3, receiver.droppable)
+        assertEquals(
+            listOf(ExtraRadioPart.KIND, ExtraRadioPart.ID, ExtraRadioPart.ROLE, ExtraRadioPart.BRIDGES),
+            receiver.parts(dropped = 1),
+        )
+        assertEquals(
+            listOf(ExtraRadioPart.KIND, ExtraRadioPart.ROLE, ExtraRadioPart.BRIDGES),
+            receiver.parts(dropped = 2),
+        )
+        assertEquals(listOf(ExtraRadioPart.KIND, ExtraRadioPart.ROLE), receiver.parts(dropped = 3))
+        assertEquals(listOf(ExtraRadioPart.KIND, ExtraRadioPart.ROLE), receiver.parts(dropped = 9))
+
+        val transmitter =
+            extra(details = ExtraRadio(ExtraRadioDevice.USB_STICK, preset = ModemPreset.SHORT_FAST, duplex = true))
+        assertEquals(0, transmitter.droppable)
+        assertTrue(ExtraRadioPart.TRANSMITS in transmitter.parts(dropped = 9))
+    }
+
+    @Test
+    fun `a radio the host does not describe has no description`() {
+        val undescribed = extra(details = null)
+        assertTrue(undescribed.parts().isEmpty())
+        assertEquals(0, undescribed.droppable)
+    }
+
+    @Test
+    fun `the switch position comes from the off set`() {
+        val off = setOf("lora-3")
+        assertTrue(extra("lora-2", off = off).switchedOn)
+        assertFalse(extra("lora-3", off = off).switchedOn)
+    }
+
+    @Test
+    fun `an extra radio that is off reads off and never region unset`() {
+        val row = extraRow(extra(off = setOf("lora-2")), enabled = false)
+        assertEquals(BearerRowState.Off, row.state)
+        assertFalse(row.offWithLora, "its own switch already says why")
+    }
+
+    @Test
+    fun `LoRa off disables the switch and the row says LoRa is why`() {
+        val on = extra(loraOn = false)
+        assertFalse(on.loraOn)
+        assertTrue(on.switchedOn, "the radio's own choice is kept under the master")
+        assertTrue(extraRow(on, enabled = false).offWithLora)
+
+        assertFalse(extraRow(extra(off = setOf("lora-2"), loraOn = false), enabled = false).offWithLora)
+        assertFalse(extraRow(extra(loraOn = true)).offWithLora)
+        assertFalse(row(Bearer.LORA, enabled = false).offWithLora)
+    }
+
+    @Test
+    fun `the extra radio failure is carried only on a host with extra radios`() {
+        fun card(bearers: List<BearerRowUi>) = nodeStatusUi(
+            phase = NodePhase.Running,
+            nodeNum = 1L,
+            longName = null,
+            shortName = null,
+            peerCount = 0,
+            failure = null,
+            settingsReset = false,
+            bearers = bearers,
+            extraRadioFailure = "could not be read: denied",
+        )
+        assertEquals("could not be read: denied", card(listOf(row(Bearer.LORA), extraRow(extra()))).extraRadioFailure)
+        assertNull(card(listOf(row(Bearer.LORA))).extraRadioFailure)
     }
 
     @Test

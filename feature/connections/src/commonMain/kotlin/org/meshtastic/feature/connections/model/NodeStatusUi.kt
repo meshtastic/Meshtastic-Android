@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.connections.model
 
+import org.meshtastic.node.host.ExtraRadio
 import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
@@ -33,12 +34,13 @@ data class NodeStatusUi(
     val settingsReset: Boolean,
     val bearers: List<BearerRowUi>,
     val sensors: SensorsUi? = null,
+    val extraRadioFailure: String? = null,
 )
 
 /**
- * One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). [radio] numbers a
- * LoRa radio the host runs beside its first, 2 for `lora-2`, and is null for the bearer itself. Such a radio follows
- * the LoRa bearer's switch and has none of its own.
+ * One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). [extra] marks a LoRa
+ * radio the host runs beside its first and is null for the bearer itself. Such a radio has a switch of its own under
+ * the LoRa bearer's.
  */
 data class BearerRowUi(
     val bearer: Bearer,
@@ -48,8 +50,69 @@ data class BearerRowUi(
     val received: Long,
     val sent: Long,
     val relayed: Long,
-    val radio: Int? = null,
-)
+    val extra: ExtraRadioUi? = null,
+) {
+    /** The extra radio's number, 2 for `lora-2`, or null for the bearer itself. */
+    val radio: Int?
+        get() = extra?.number
+
+    /** An extra radio that is off only because LoRa is, while its own switch still reads on. */
+    val offWithLora: Boolean
+        get() = extra != null && state == BearerRowState.Off && extra.switchedOn && !extra.loraOn
+}
+
+/**
+ * An extra LoRa radio's part of its row. [details] is what the host says the radio is, null where it describes none.
+ * [switchedOn] is the radio's own switch and [loraOn] the LoRa bearer's, the master: the card disables the radio's
+ * switch while LoRa is off.
+ */
+data class ExtraRadioUi(
+    val name: String,
+    val number: Int,
+    val details: ExtraRadio?,
+    val switchedOn: Boolean,
+    val loraOn: Boolean,
+) {
+    val id: String?
+        get() = details?.id?.trim()?.takeIf { it.isNotEmpty() }
+
+    private val described: List<ExtraRadioPart>
+        get() {
+            val radio = details ?: return emptyList()
+            return listOfNotNull(
+                ExtraRadioPart.KIND,
+                ExtraRadioPart.ID.takeIf { id != null },
+                ExtraRadioPart.ROLE,
+                if (radio.duplex) ExtraRadioPart.TRANSMITS else ExtraRadioPart.RECEIVE_ONLY,
+                ExtraRadioPart.BRIDGES.takeIf { radio.bridge },
+            )
+        }
+
+    /** How many parts the card may leave out to keep the row short. */
+    val droppable: Int
+        get() = DROP_ORDER.count { it in described }
+
+    /** The description in reading order, with the [dropped] least important parts left out. */
+    fun parts(dropped: Int = 0): List<ExtraRadioPart> {
+        val all = described
+        return all - DROP_ORDER.filter { it in all }.take(dropped).toSet()
+    }
+
+    private companion object {
+        // The kind, what the radio listens to and that it transmits always stay.
+        val DROP_ORDER = listOf(ExtraRadioPart.RECEIVE_ONLY, ExtraRadioPart.ID, ExtraRadioPart.BRIDGES)
+    }
+}
+
+/** One piece of an extra radio's description. */
+enum class ExtraRadioPart {
+    KIND,
+    ID,
+    ROLE,
+    RECEIVE_ONLY,
+    TRANSMITS,
+    BRIDGES,
+}
 
 sealed interface BearerRowState {
     data object Off : BearerRowState
@@ -72,7 +135,8 @@ sealed interface BearerRowState {
     data class Unsupported(val reason: String) : BearerRowState
 }
 
-fun NodeStatus.toUi(): NodeStatusUi = nodeStatusUi(
+/** The card's state; [extraRadiosOff] names the extra LoRa radios switched off by themselves. */
+fun NodeStatus.toUi(extraRadiosOff: Set<String> = emptySet()): NodeStatusUi = nodeStatusUi(
     phase = phase,
     nodeNum = nodeNum,
     longName = longName,
@@ -80,6 +144,7 @@ fun NodeStatus.toUi(): NodeStatusUi = nodeStatusUi(
     peerCount = peerCount,
     failure = failure,
     settingsReset = settingsReset,
+    extraRadioFailure = extraRadioFailure,
     bearers =
     Bearer.entries
         .filter { it.onCard }
@@ -95,14 +160,18 @@ fun NodeStatus.toUi(): NodeStatusUi = nodeStatusUi(
                     sent = status.counters.tx,
                     relayed = status.counters.relayed,
                 )
-            if (bearer == Bearer.LORA) listOf(row) + extraRadioRows() else listOf(row)
+            if (bearer == Bearer.LORA) {
+                listOf(row) + extraRadioRows(extraRadiosOff, status.enabled)
+            } else {
+                listOf(row)
+            }
         },
 )
 
 /** The host's further LoRa radios, in number order, each a row under the LoRa bearer's. */
-private fun NodeStatus.extraRadioRows(): List<BearerRowUi> = extraRadios
+private fun NodeStatus.extraRadioRows(off: Set<String>, loraOn: Boolean): List<BearerRowUi> = extraRadios
     .mapNotNull { (name, status) ->
-        val radio = extraRadioNumber(name) ?: return@mapNotNull null
+        val extra = extraRadioUi(name, extraRadioDetails[name], off, loraOn) ?: return@mapNotNull null
         bearerRow(
             bearer = Bearer.LORA,
             enabled = status.enabled,
@@ -111,10 +180,14 @@ private fun NodeStatus.extraRadioRows(): List<BearerRowUi> = extraRadios
             received = status.counters.rx,
             sent = status.counters.tx,
             relayed = status.counters.relayed,
-            radio = radio,
+            extra = extra,
         )
     }
     .sortedBy { it.radio }
+
+/** The extra radio named [name] as its row shows it, or null for a name that numbers no extra radio. */
+internal fun extraRadioUi(name: String, details: ExtraRadio?, off: Set<String>, loraOn: Boolean): ExtraRadioUi? =
+    extraRadioNumber(name)?.let { ExtraRadioUi(name, it, details, switchedOn = name !in off, loraOn = loraOn) }
 
 /** The number in an extra radio's transport name, 2 for `lora-2`, or null for a name of another shape. */
 internal fun extraRadioNumber(name: String): Int? =
@@ -131,6 +204,7 @@ internal fun nodeStatusUi(
     failure: String?,
     settingsReset: Boolean,
     bearers: List<BearerRowUi>,
+    extraRadioFailure: String? = null,
 ): NodeStatusUi = NodeStatusUi(
     phase = phase,
     nodeId = nodeNum?.let { nodeId(it) },
@@ -140,6 +214,8 @@ internal fun nodeStatusUi(
     failure = failure,
     settingsReset = settingsReset,
     bearers = bearers,
+    // The store can fail on a host with no extra radio, where there is nothing to say it about.
+    extraRadioFailure = extraRadioFailure?.takeIf { bearers.any { row -> row.extra != null } },
 )
 
 /** A requirement outranks the availability: the user can act on it, while availability only reports. */
@@ -152,12 +228,12 @@ internal fun bearerRow(
     received: Long,
     sent: Long,
     relayed: Long,
-    radio: Int? = null,
+    extra: ExtraRadioUi? = null,
 ): BearerRowUi = BearerRowUi(
     bearer = bearer,
     enabled = enabled,
-    switchable = bearer.switchable && radio == null,
-    radio = radio,
+    switchable = bearer.switchable,
+    extra = extra,
     state =
     when (requirement) {
         is Requirement.NeedsPermission -> BearerRowState.NeedsPermission(requirement.permission)
@@ -170,7 +246,7 @@ internal fun bearerRow(
 
         Requirement.Ready ->
             when {
-                !enabled && bearer == Bearer.LORA -> BearerRowState.RegionUnset
+                !enabled && bearer == Bearer.LORA && extra == null -> BearerRowState.RegionUnset
 
                 !enabled -> BearerRowState.Off
 

@@ -58,6 +58,8 @@ class DesktopNodeBearers : NodeBearers {
 
     override fun hostBearerStore(): BytesStore = AtomicFileStore(File(nodeDir, HOST_BEARERS_FILE).path)
 
+    override fun extraRadioStore(): BytesStore = AtomicFileStore(File(nodeDir, EXTRA_RADIOS_FILE).path)
+
     /** The sensors on the I2C bus `MESH_I2C_DEVICE` names, such as `/dev/i2c-1` on a Raspberry Pi; none when unset. */
     override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? =
         i2cSensors(System.getenv(I2C_DEVICE_VAR), scope, logger)
@@ -65,6 +67,7 @@ class DesktopNodeBearers : NodeBearers {
     private companion object {
         const val NODE_DIR = "node"
         const val HOST_BEARERS_FILE = "host-bearers.bin"
+        const val EXTRA_RADIOS_FILE = "extra-radios.bin"
         const val LORA_EXTRA_VAR = "MESH_LORA_EXTRA"
         const val LORA_BOARD_VAR = "MESH_LORA_BOARD"
         const val I2C_DEVICE_VAR = "MESH_I2C_DEVICE"

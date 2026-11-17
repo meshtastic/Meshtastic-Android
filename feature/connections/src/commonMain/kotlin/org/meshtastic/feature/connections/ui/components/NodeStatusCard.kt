@@ -45,7 +45,6 @@ import org.meshtastic.core.resources.node_bearer_ble_adv
 import org.meshtastic.core.resources.node_bearer_counters
 import org.meshtastic.core.resources.node_bearer_gatt
 import org.meshtastic.core.resources.node_bearer_lora
-import org.meshtastic.core.resources.node_bearer_lora_extra
 import org.meshtastic.core.resources.node_bearer_mqtt
 import org.meshtastic.core.resources.node_bearer_needs_hardware
 import org.meshtastic.core.resources.node_bearer_needs_permission
@@ -57,6 +56,7 @@ import org.meshtastic.core.resources.node_bearer_udp
 import org.meshtastic.core.resources.node_bearer_unsupported
 import org.meshtastic.core.resources.node_bearer_video
 import org.meshtastic.core.resources.node_bearer_wifi_aware
+import org.meshtastic.core.resources.node_extra_radio_off_with_lora
 import org.meshtastic.core.resources.node_status_peers
 import org.meshtastic.core.resources.node_status_phase_failed
 import org.meshtastic.core.resources.node_status_phase_rebooting
@@ -86,11 +86,13 @@ import org.meshtastic.node.transport.Bearer
 /**
  * This device as the node: its phase, identity and one row per bearer. Every bearer but LoRa carries a switch; one
  * driven by the Network settings writes them, so both places agree. A bearer waiting on a permission offers the grant.
+ * A host's extra LoRa radios each get a row and a switch of their own under LoRa's.
  */
 @Composable
 fun NodeStatusCard(
     status: NodeStatusUi,
     onSetBearer: (Bearer, Boolean) -> Unit,
+    onSetExtraRadio: (String, Boolean) -> Unit,
     onRefreshRequirements: () -> Unit,
     onRequestUsbPermission: () -> Unit,
     modifier: Modifier = Modifier,
@@ -98,13 +100,25 @@ fun NodeStatusCard(
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             NodeStatusHeader(status = status, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-            status.bearers.forEach { row ->
-                BearerRow(
-                    row = row,
-                    onSetBearer = onSetBearer,
-                    onRefreshRequirements = onRefreshRequirements,
-                    onRequestUsbPermission = onRequestUsbPermission,
-                )
+            val lastExtra = status.bearers.indexOfLast { it.extra != null }
+            status.bearers.forEachIndexed { index, row ->
+                val extra = row.extra
+                if (extra == null) {
+                    BearerRow(
+                        row = row,
+                        onSetBearer = onSetBearer,
+                        onRefreshRequirements = onRefreshRequirements,
+                        onRequestUsbPermission = onRequestUsbPermission,
+                    )
+                } else {
+                    ExtraRadioRow(
+                        extra = extra,
+                        icon = row.bearer.icon(),
+                        stateText = row.supportingText(),
+                        onSetExtraRadio = onSetExtraRadio,
+                    )
+                }
+                if (index == lastExtra) status.extraRadioFailure?.let { ExtraRadioFailure(reason = it) }
             }
             status.sensors?.let { NodeSensorsSection(sensors = it) }
         }
@@ -160,9 +174,7 @@ private fun BearerRow(
 ) {
     val state = row.state
     BasicListItem(
-        text =
-        row.radio?.let { stringResource(Res.string.node_bearer_lora_extra, it) }
-            ?: stringResource(row.bearer.label()),
+        text = stringResource(row.bearer.label()),
         supportingText = row.supportingText(),
         leadingIcon = row.bearer.icon(),
         trailingContent =
@@ -216,19 +228,32 @@ private fun GrantPermissionButton(permission: String, onGrant: () -> Unit) {
 private fun BearerRowUi.supportingText(): String {
     val stateText =
         when (val s = state) {
-            BearerRowState.Off -> stringResource(Res.string.node_bearer_off)
+            BearerRowState.Off ->
+                stringResource(
+                    if (offWithLora) Res.string.node_extra_radio_off_with_lora else Res.string.node_bearer_off,
+                )
+
             BearerRowState.RegionUnset -> stringResource(Res.string.node_bearer_region_unset)
+
             BearerRowState.Ready -> stringResource(Res.string.node_bearer_ready)
+
             BearerRowState.Active -> stringResource(Res.string.node_bearer_active)
+
             is BearerRowState.Unavailable -> s.reason
+
             is BearerRowState.NeedsPermission -> stringResource(Res.string.node_bearer_needs_permission)
+
             is BearerRowState.NeedsUsbPermission -> stringResource(Res.string.node_bearer_needs_usb, s.device)
+
             is BearerRowState.NeedsHardware -> stringResource(Res.string.node_bearer_needs_hardware, s.what)
+
             is BearerRowState.Unsupported -> stringResource(Res.string.node_bearer_unsupported, s.reason)
         }
     val counters = stringResource(Res.string.node_bearer_counters, received, sent, relayed)
-    return if (enabled) "$stateText · $counters" else stateText
+    return if (enabled) "$stateText$BEARER_TEXT_SEPARATOR$counters" else stateText
 }
+
+internal const val BEARER_TEXT_SEPARATOR = " · "
 
 private fun NodePhase.label(): StringResource = when (this) {
     NodePhase.Starting -> Res.string.node_status_phase_starting

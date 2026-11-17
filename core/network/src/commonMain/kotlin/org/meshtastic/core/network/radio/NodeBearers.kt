@@ -45,6 +45,12 @@ interface NodeBearers {
     /** Where the node remembers which host bearers (Wi-Fi Aware, audio, video) the user switched on. */
     fun hostBearerStore(): BytesStore
 
+    /**
+     * Where the node remembers which extra LoRa radios the user switched off, or null on a platform that builds one
+     * radio.
+     */
+    fun extraRadioStore(): BytesStore? = null
+
     /** The device's position for the node's beacon, or null when the platform offers none. */
     val positionSource: PositionSource?
         get() = null

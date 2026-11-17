@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.connections
 
+import androidx.compose.material3.SnackbarDuration
 import app.cash.turbine.test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.network.radio.NodeStatusRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.node_extra_radio_not_kept
+import org.meshtastic.core.resources.node_extra_radio_switch_failed
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.connections.model.SensorsUi
 import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.NodeIdentityStore
@@ -65,8 +71,17 @@ class NodeStatusViewModelTest {
         var refreshes = 0
         var usbRequests = 0
 
+        override val extraRadiosOff = MutableStateFlow<Set<String>>(emptySet())
+        val extraRadioWrites = mutableListOf<Pair<String, Boolean>>()
+        var extraRadioFailure: Exception? = null
+
         override suspend fun setHostBearer(bearer: Bearer, on: Boolean) {
             hostBearerWrites += bearer to on
+        }
+
+        override suspend fun setExtraRadio(name: String, on: Boolean) {
+            extraRadioWrites += name to on
+            extraRadioFailure?.let { throw it }
         }
 
         override fun refreshRequirements() {
@@ -90,7 +105,27 @@ class NodeStatusViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val repository = FakeRepository()
 
-    private fun viewModel() = NodeStatusViewModel(repository)
+    private class RecordingSnackbarManager : SnackbarManager() {
+        val messages = mutableListOf<String>()
+
+        override fun showSnackbar(
+            message: String,
+            actionLabel: String?,
+            withDismissAction: Boolean,
+            duration: SnackbarDuration,
+            onAction: (() -> Unit)?,
+        ) {
+            messages += message
+        }
+    }
+
+    private val snackbars = RecordingSnackbarManager()
+    private val resolved = mutableListOf<UiText>()
+
+    private fun viewModel() = NodeStatusViewModel(repository, snackbars) { text ->
+        resolved += text
+        RESOLVED
+    }
 
     @BeforeTest
     fun setUp() {
@@ -161,7 +196,36 @@ class NodeStatusViewModelTest {
         assertTrue(repository.hostBearerWrites.isEmpty())
     }
 
+    @Test
+    fun `an extra radio switch reaches the repository and says nothing when it is kept`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        viewModel.setExtraRadio("lora-2", false)
+        viewModel.setExtraRadio("lora-3", true)
+        assertEquals(listOf("lora-2" to false, "lora-3" to true), repository.extraRadioWrites)
+        assertTrue(snackbars.messages.isEmpty())
+    }
+
+    @Test
+    fun `a switch the node could not keep tells the user a restart will forget it`() = runTest(dispatcher) {
+        repository.extraRadioFailure = IllegalStateException("the choice for 'lora-2' was not kept")
+        viewModel().setExtraRadio("lora-2", false)
+        assertEquals(listOf("lora-2" to false), repository.extraRadioWrites)
+        assertEquals(listOf<UiText>(UiText.Resource(Res.string.node_extra_radio_not_kept, 2)), resolved)
+        assertEquals(listOf(RESOLVED), snackbars.messages)
+    }
+
+    @Test
+    fun `a radio the host does not have is reported as a failed switch`() = runTest(dispatcher) {
+        repository.extraRadioFailure = IllegalArgumentException("this host has no extra radio 'lora-9'")
+        viewModel().setExtraRadio("lora-9", false)
+        assertEquals(listOf("lora-9" to false), repository.extraRadioWrites)
+        assertEquals(listOf<UiText>(UiText.Resource(Res.string.node_extra_radio_switch_failed)), resolved)
+        assertEquals(listOf(RESOLVED), snackbars.messages)
+    }
+
     private companion object {
+        const val RESOLVED = "resolved"
+
         /** `!` and eight hex digits, firmware's node id. */
         const val NODE_ID_LENGTH = 9
     }

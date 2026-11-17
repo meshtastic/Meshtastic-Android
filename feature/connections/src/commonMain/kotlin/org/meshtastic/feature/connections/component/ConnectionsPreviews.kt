@@ -427,6 +427,7 @@ fun NodeStatusCardPreview() {
                 ),
             ),
             onSetBearer = { _, _ -> },
+            onSetExtraRadio = { _, _ -> },
             onRefreshRequirements = {},
             onRequestUsbPermission = {},
         )

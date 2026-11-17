@@ -17,24 +17,36 @@
 package org.meshtastic.feature.connections
 
 import androidx.lifecycle.ViewModel
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.network.radio.NodeStatusRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.node_extra_radio_not_kept
+import org.meshtastic.core.resources.node_extra_radio_switch_failed
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.NodeStatusUi
+import org.meshtastic.feature.connections.model.extraRadioNumber
 import org.meshtastic.feature.connections.model.toSensorsUi
 import org.meshtastic.feature.connections.model.toUi
 import org.meshtastic.node.transport.Bearer
 
 /** The node status card's state: null while this device is not running as the node. */
 @KoinViewModel
-class NodeStatusViewModel(private val repository: NodeStatusRepository) : ViewModel() {
+class NodeStatusViewModel(
+    private val repository: NodeStatusRepository,
+    private val snackbarManager: SnackbarManager,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
+) : ViewModel() {
 
     val status: StateFlow<NodeStatusUi?> =
-        combine(repository.status, repository.sensors) { status, bus ->
-            status?.toUi()?.copy(sensors = bus?.toSensorsUi())
+        combine(repository.status, repository.sensors, repository.extraRadiosOff) { status, bus, extraRadiosOff ->
+            status?.toUi(extraRadiosOff)?.copy(sensors = bus?.toSensorsUi())
         }
             .stateInWhileSubscribed(initialValue = null)
 
@@ -45,6 +57,37 @@ class NodeStatusViewModel(private val repository: NodeStatusRepository) : ViewMo
     fun setBearer(bearer: Bearer, on: Boolean) {
         if (!bearer.switchable) return
         safeLaunch(tag = "setBearer") { repository.setHostBearer(bearer, on) }
+    }
+
+    /**
+     * Switch one extra LoRa radio by itself. A switch the node made and could not keep is still made, so the user is
+     * told only that a restart will forget it; a name the host does not have is told as a failure.
+     */
+    fun setExtraRadio(name: String, on: Boolean) {
+        safeLaunch(tag = "setExtraRadio") {
+            try {
+                repository.setExtraRadio(name, on)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IllegalStateException) {
+                Logger.w(e) { "Extra radio $name switched, choice not kept" }
+                val radio = extraRadioNumber(name)
+                showMessage(
+                    if (radio != null) {
+                        UiText.Resource(Res.string.node_extra_radio_not_kept, radio)
+                    } else {
+                        UiText.Resource(Res.string.node_extra_radio_switch_failed)
+                    },
+                )
+            } catch (e: IllegalArgumentException) {
+                Logger.w(e) { "No extra radio $name to switch" }
+                showMessage(UiText.Resource(Res.string.node_extra_radio_switch_failed))
+            }
+        }
+    }
+
+    private suspend fun showMessage(text: UiText) {
+        snackbarManager.showSnackbar(message = resolveUiText(text))
     }
 
     fun refreshRequirements() = repository.refreshRequirements()

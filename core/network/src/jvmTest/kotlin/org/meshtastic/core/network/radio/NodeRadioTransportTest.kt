@@ -44,6 +44,7 @@ import org.meshtastic.proto.ToRadio
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -83,8 +84,9 @@ class NodeRadioTransportTest {
         }
     }
 
-    private class FakeNodeBearers(private val dir: String) : NodeBearers {
-        val factory = FakeBearerFactory()
+    private class FakeNodeBearers(private val dir: String, extraRadios: List<String> = emptyList()) : NodeBearers {
+        val factory = FakeBearerFactory(extraRadios)
+        val extraRadioChoices = BytesStore.inMemory()
         override val hostSignals: StateFlow<HostState> = MutableStateFlow(HostState())
 
         override fun factory(signals: StateFlow<HostState>): BearerFactory = factory
@@ -92,6 +94,8 @@ class NodeRadioTransportTest {
         override fun storesDir(): String = dir
 
         override fun hostBearerStore(): BytesStore = BytesStore.inMemory()
+
+        override fun extraRadioStore(): BytesStore = extraRadioChoices
 
         val sensorScopes = mutableListOf<CoroutineScope>()
         val bus = MutableStateFlow<I2cBusState>(I2cBusState.Scanning)
@@ -146,6 +150,29 @@ class NodeRadioTransportTest {
 
             transport.close()
             assertNull(repository.sensors.value, "close leaves no bus behind")
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `an extra radio is switched through the repository and its choice kept in the host's store`() = runTest {
+        val scope = transportScope()
+        val bearers = FakeNodeBearers(tempDir(), extraRadios = listOf("lora-2", "lora-3"))
+        val repository = NodeStatusRepositoryImpl()
+        try {
+            val transport = NodeRadioTransport(RecordingCallback(), scope, bearers, repository, isDebug = false)
+            transport.start()
+            repository.status.first { it?.phase == NodePhase.Running && it.extraRadios.size == 2 }
+            repository.extraRadiosOff.first { it.isEmpty() }
+
+            repository.setExtraRadio("lora-3", on = false)
+            assertEquals(setOf("lora-3"), repository.extraRadiosOff.first { it.isNotEmpty() })
+            assertNotNull(bearers.extraRadioChoices.load(), "the choice reaches the store the host passed")
+            assertFailsWith<IllegalArgumentException> { repository.setExtraRadio("lora-9", on = false) }
+
+            transport.close()
+            assertTrue(repository.extraRadiosOff.value.isEmpty(), "close leaves no radio behind")
         } finally {
             scope.cancel()
         }

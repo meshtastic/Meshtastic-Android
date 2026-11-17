@@ -29,11 +29,14 @@ import org.meshtastic.node.transport.ExperimentalTransportApi
 import org.meshtastic.node.transport.MeshTransport
 import org.meshtastic.proto.Config
 
-/** Hands the node the same fake UDP and GATT bearers on every build, with every requirement met. */
+/**
+ * Hands the node the same fake UDP and GATT bearers on every build, with every requirement met, and a fake transport
+ * for each name in [extraRadios].
+ */
 @OptIn(ExperimentalTransportApi::class)
-internal class FakeBearerFactory : BearerFactory {
+internal class FakeBearerFactory(extraRadios: List<String> = emptyList()) : BearerFactory {
     private val transports: List<MeshTransport> =
-        listOf(FakeTransport(BearerNames.UDP), FakeTransport(BearerNames.GATT))
+        listOf(FakeTransport(BearerNames.UDP), FakeTransport(BearerNames.GATT)) + extraRadios.map(::FakeTransport)
 
     override val hostCapabilities: HostCapabilities = HostCapabilities(hasWifi = true, hasBluetooth = true)
 

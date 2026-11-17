@@ -151,6 +151,7 @@ internal fun embeddedNode(
     signals = bearers.hostSignals,
 ) {
     hostBearerStore = bearers.hostBearerStore()
+    extraRadioStore = bearers.extraRadioStore()
     defaults = firstRunDefaults()
     this.logger = logger
     positionSource = bearers.positionSource

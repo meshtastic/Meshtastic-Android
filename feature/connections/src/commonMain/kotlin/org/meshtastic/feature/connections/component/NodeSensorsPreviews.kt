@@ -66,6 +66,7 @@ internal fun SensorsCard(sensors: SensorsUi) {
             sensors = sensors,
         ),
         onSetBearer = { _, _ -> },
+        onSetExtraRadio = { _, _ -> },
         onRefreshRequirements = {},
         onRequestUsbPermission = {},
     )
