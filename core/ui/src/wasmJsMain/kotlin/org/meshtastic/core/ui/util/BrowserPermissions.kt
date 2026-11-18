@@ -22,11 +22,14 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * A browser permission as a [PermissionUiState], kept live by the Permissions API's `change` event. [initialState] is
@@ -40,10 +43,7 @@ internal fun rememberBrowserPermissionState(
     request: (onResult: (String) -> Unit) -> Unit,
 ): PermissionUiState {
     var state by remember { mutableStateOf(initialState) }
-    DisposableEffect(name) {
-        val watch = watchPermission(name) { state = it }
-        onDispose { stopWatching(watch) }
-    }
+    LaunchedEffect(name) { browserPermissionState(name).collect { state = it } }
     return remember(state) {
         PermissionUiState(
             status = browserPermissionStatus(state),
@@ -78,18 +78,32 @@ internal fun requestGeolocationPermission(onResult: (String) -> Unit) {
     )
 }
 
+/**
+ * The Permissions API state of permission [name] (`granted`, `prompt`, `denied`), followed for changes while collected.
+ * Where the browser cannot answer for [name] the flow emits [unanswered], or nothing when that is null.
+ */
+fun browserPermissionState(name: String, unanswered: String? = null): Flow<String> = callbackFlow {
+    val watch = watchPermission(name, unanswered) { trySend(it) }
+    awaitClose { stopWatching(watch) }
+}
+
 /** Subscribes [onState] to a permission's state; returns a handle for [stopWatching]. */
-private fun watchPermission(name: String, onState: (String) -> Unit): JsAny = js(
+private fun watchPermission(name: String, unanswered: String?, onState: (String) -> Unit): JsAny = js(
     """{
     let status = null;
     let stopped = false;
     const fire = () => { if (!stopped && status) onState(status.state); };
+    const fallBack = () => { if (!stopped && unanswered !== null) onState(unanswered); };
     if (navigator.permissions && navigator.permissions.query) {
         navigator.permissions.query({ name: name }).then((s) => {
+            // Stopped before the query answered: attaching now would leave a listener nothing removes.
+            if (stopped) return;
             status = s;
             s.addEventListener('change', fire);
             fire();
-        }, () => {});
+        }, fallBack);
+    } else {
+        fallBack();
     }
     return () => {
         stopped = true;
