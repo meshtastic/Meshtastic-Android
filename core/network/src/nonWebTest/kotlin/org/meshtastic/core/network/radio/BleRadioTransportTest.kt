@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.network.radio
 
+import com.juul.kable.NotConnectedException
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -43,6 +44,8 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
@@ -634,6 +637,88 @@ class BleRadioTransportTest {
                 connection.connectAndAwaitCalls >= 2,
                 "transport must reconnect after cache invalidation (got ${connection.connectAndAwaitCalls} calls)",
             )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * A node in random-PIN mode refuses notification subscriptions from an unpaired central: Kable suppresses the
+     * refusal, the FROMNUM subscription then fails, and the next attempt subscribes once the device is paired.
+     */
+    @Test
+    fun `a subscription refused for want of pairing publishes each phase then waits with pairing needed`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        connection.service.observeBeforeSubscriptionExceptionByCharacteristic[FROMNUM_CHARACTERISTIC] =
+            NotConnectedException("Connection lost during BLE profile execution")
+        connection.lastFailureCause =
+            RuntimeException("Failed to start notification", IllegalStateException("GATT Error Unknown."))
+        val radioService = FakeRadioInterfaceService()
+        val bleTransport = bleTransportOn(this, radioService)
+        bleTransport.start()
+
+        try {
+            // 3 s settle, then the first attempt fails at once; the retry waits 5 s backoff plus the 3 s settle.
+            advanceTimeBy(4_000L)
+            val firstAttempt = radioService.reportedStatuses.toList()
+            assertEquals(
+                listOf(
+                    TransportPhase.FindingDevice,
+                    TransportPhase.Connecting,
+                    TransportPhase.DiscoveringServices,
+                    TransportPhase.Subscribing,
+                    TransportPhase.WaitingToRetry,
+                ),
+                firstAttempt.map { it.phase },
+            )
+            assertTrue(firstAttempt.dropLast(1).all { it.lastFailure == null })
+            val waiting = firstAttempt.last()
+            assertEquals(TransportFailureKind.PairingRequired, waiting.lastFailure?.kind)
+            assertEquals(2, waiting.nextAttempt)
+            assertNotNull(waiting.retryAtMillis)
+
+            advanceTimeBy(8_000L)
+            val secondAttempt = radioService.reportedStatuses.drop(firstAttempt.size)
+            assertEquals(
+                listOf(
+                    TransportPhase.FindingDevice,
+                    TransportPhase.Connecting,
+                    TransportPhase.DiscoveringServices,
+                    TransportPhase.Subscribing,
+                ),
+                secondAttempt.map { it.phase },
+            )
+            assertTrue(
+                secondAttempt.all { it.lastFailure?.kind == TransportFailureKind.PairingRequired },
+                "the next attempt must keep saying why the last one failed",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `a connect the platform rejects as out of range waits to retry with out of range`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.failNextN = 1
+        connection.lastFailureCause = IllegalStateException("Bluetooth Device is no longer in range.")
+        val radioService = FakeRadioInterfaceService()
+        val bleTransport = bleTransportOn(this, radioService)
+        bleTransport.start()
+
+        try {
+            advanceTimeBy(4_000L)
+            assertEquals(
+                listOf(TransportPhase.FindingDevice, TransportPhase.Connecting, TransportPhase.WaitingToRetry),
+                radioService.reportedStatuses.map { it.phase },
+            )
+            assertEquals(TransportFailureKind.OutOfRange, radioService.reportedStatuses.last().lastFailure?.kind)
         } finally {
             bleTransport.close()
         }

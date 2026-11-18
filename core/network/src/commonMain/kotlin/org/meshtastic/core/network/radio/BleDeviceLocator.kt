@@ -24,11 +24,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleDeviceNotFoundException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.bleAddressesMatch
-import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -98,7 +98,7 @@ internal class BleDeviceLocator(
                 delay(SCAN_RETRY_DELAY)
             }
         }
-        throw RadioNotConnectedException("Device not found at address ${address.anonymize()}")
+        throw BleDeviceNotFoundException("Device not found at address ${address.anonymize()}")
     }
 
     /**

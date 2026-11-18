@@ -345,6 +345,23 @@
     <string name="connected_device">Connected Device</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="connecting">Connecting</string>
+    <!-- CONNECTION -->
+    <string name="connection_failure_bluetooth_unavailable">Bluetooth or location services are off.</string>
+    <string name="connection_failure_connect_failed">Could not connect. The radio may be connected to another phone, too far away, or holding an old pairing.</string>
+    <string name="connection_failure_link_lost">The connection dropped.</string>
+    <string name="connection_failure_out_of_range">Radio not found. Make sure it is on and in range.</string>
+    <string name="connection_failure_pairing_failed">Pairing failed. The PIN shows on the radio's screen, or is the fixed PIN set in its Bluetooth config.</string>
+    <string name="connection_failure_pairing_required">The radio needs pairing. Enter the PIN shown on its screen, or its fixed PIN if one is set.</string>
+    <string name="connection_failure_unknown">Connection failed.</string>
+    <string name="connection_phase_connecting">Opening the link</string>
+    <string name="connection_phase_discovering_services">Reading the radio's services</string>
+    <string name="connection_phase_finding_device">Looking for the radio</string>
+    <string name="connection_phase_handshake_config">Loading radio config</string>
+    <string name="connection_phase_handshake_nodes">Loading node list</string>
+    <string name="connection_phase_pairing">Pairing</string>
+    <string name="connection_phase_subscribing">Subscribing to the radio</string>
+    <string name="connection_retry_in">Retrying in %1$d s (attempt %2$d)</string>
+    <string name="connection_retry_now">Retrying now (attempt %1$d)</string>
     <string name="connection_status">Current connections:</string>
     <string name="connections">Connection</string>
     <string name="contact_draft_prefix">Draft: %1$s</string>

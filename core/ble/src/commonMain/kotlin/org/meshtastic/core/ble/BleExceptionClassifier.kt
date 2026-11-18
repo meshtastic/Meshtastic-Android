@@ -20,6 +20,8 @@ import com.juul.kable.GattRequestRejectedException
 import com.juul.kable.GattStatusException
 import com.juul.kable.NotConnectedException
 import com.juul.kable.UnmetRequirementException
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
 
 /**
  * Inspects this [Throwable] and returns a [BleExceptionInfo] if it is a known platform BLE exception, or `null` if it
@@ -52,6 +54,124 @@ fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
         BleExceptionInfo(isPermanent = false, message = message ?: "Bluetooth LE unavailable")
 
     else -> null
+}
+
+/**
+ * Classifies why a BLE connection attempt failed, for the connection card. Walks the cause chain and keeps the most
+ * specific kind found, so a dropped link whose cause was a refused subscription reads as pairing rather than a drop.
+ *
+ * @param setupHint a failure the platform reported out of band during this attempt (a suppressed notification
+ *   subscription), consulted only when [this] alone says no more than that the link dropped
+ */
+fun Throwable.classifyBleFailure(setupHint: Throwable? = null): TransportFailure {
+    val own = mostSpecificFailure()
+    val hinted = setupHint?.mostSpecificFailure()?.takeIf { it.first in PAIRING_KINDS }
+    val (kind, source) =
+        when {
+            hinted != null && (own == null || own.first == TransportFailureKind.LinkLost) -> hinted
+            own != null -> own
+            else -> TransportFailureKind.Unknown to this
+        }
+    return TransportFailure(kind = kind, detail = source.message ?: source::class.simpleName)
+}
+
+/** Most specific first: the first kind in this list that any link of a cause chain maps to wins. */
+private val FAILURE_KIND_PRIORITY =
+    listOf(
+        TransportFailureKind.PairingFailed,
+        TransportFailureKind.PairingRequired,
+        TransportFailureKind.BluetoothUnavailable,
+        TransportFailureKind.OutOfRange,
+        TransportFailureKind.ConnectFailed,
+        TransportFailureKind.LinkLost,
+    )
+
+private val PAIRING_KINDS = setOf(TransportFailureKind.PairingFailed, TransportFailureKind.PairingRequired)
+
+private const val MAX_CAUSE_DEPTH = 10
+
+// Deepest link first, so a tie keeps the platform's own message rather than a wrapper's.
+private fun Throwable.mostSpecificFailure(): Pair<TransportFailureKind, Throwable>? =
+    generateSequence(this) { it.cause }
+        .take(MAX_CAUSE_DEPTH)
+        .toList()
+        .asReversed()
+        .mapNotNull { link -> link.ownFailureKind()?.let { it to link } }
+        .minByOrNull { (kind, _) -> FAILURE_KIND_PRIORITY.indexOf(kind) }
+
+private fun Throwable.ownFailureKind(): TransportFailureKind? = typedFailureKind() ?: webBluetoothFailureKind()
+
+private fun Throwable.typedFailureKind(): TransportFailureKind? = when (this) {
+    is BlePairingFailedException -> TransportFailureKind.PairingFailed
+
+    is BleDeviceNotFoundException -> TransportFailureKind.OutOfRange
+
+    is BleConnectFailedException -> TransportFailureKind.ConnectFailed
+
+    is UnmetRequirementException,
+    is BluetoothUnsupportedException,
+    -> TransportFailureKind.BluetoothUnavailable
+
+    is GattStatusException -> gattStatusFailureKind(status)
+
+    is NotConnectedException -> TransportFailureKind.LinkLost
+
+    else -> null
+}
+
+@Suppress("MagicNumber")
+private fun gattStatusFailureKind(status: Int): TransportFailureKind? = when (status) {
+    // GATT_INSUFFICIENT_AUTHENTICATION, GATT_INSUFFICIENT_ENCRYPTION: the characteristic needs a bonded link
+    5,
+    15,
+    -> TransportFailureKind.PairingRequired
+
+    // GATT_AUTH_FAIL
+    137 -> TransportFailureKind.PairingFailed
+
+    // GATT_CONN_TIMEOUT: link supervision timeout, the peer went out of range
+    8 -> TransportFailureKind.OutOfRange
+
+    // GATT_CONN_TERMINATE_PEER_USER, GATT_CONN_LMP_TIMEOUT
+    19,
+    22,
+    -> TransportFailureKind.LinkLost
+
+    // GATT_CONN_FAIL_ESTABLISH, GATT_ERROR (the infamous 133), GATT_CONNECTION_TIMEOUT
+    62,
+    133,
+    147,
+    -> TransportFailureKind.ConnectFailed
+
+    else -> null
+}
+
+/**
+ * Web Bluetooth rejects with a DOMException that Kotlin/Wasm surfaces as `JsException`, a type common code cannot name,
+ * so these match Chrome's own message text. Every other platform is classified by type above.
+ */
+private val WEB_BLUETOOTH_MESSAGES =
+    listOf(
+        // gatt.connect(): "Bluetooth Device is no longer in range."
+        "no longer in range" to TransportFailureKind.OutOfRange,
+        // gatt.connect(): "Connection Error: Connection attempt failed."
+        "Connection attempt failed" to TransportFailureKind.ConnectFailed,
+        // gatt.connect() on a pairing the user or the node refused: "Authentication failed." and its siblings
+        "Authentication failed" to TransportFailureKind.PairingFailed,
+        "Authentication rejected" to TransportFailureKind.PairingFailed,
+        "Authentication canceled" to TransportFailureKind.PairingFailed,
+        "Authentication timeout" to TransportFailureKind.PairingFailed,
+        // startNotifications() or readValue() on a node that needs an encrypted link: "GATT Error Unknown."
+        "GATT Error Unknown" to TransportFailureKind.PairingRequired,
+        // "GATT Error: Not paired."
+        "Not paired" to TransportFailureKind.PairingRequired,
+        // Any call on a dropped link: "GATT Server is disconnected. Cannot perform GATT operations. ..."
+        "GATT Server is disconnected" to TransportFailureKind.LinkLost,
+    )
+
+private fun Throwable.webBluetoothFailureKind(): TransportFailureKind? {
+    val text = message ?: return null
+    return WEB_BLUETOOTH_MESSAGES.firstOrNull { (fragment, _) -> fragment in text }?.second
 }
 
 /**

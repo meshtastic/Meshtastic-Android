@@ -43,10 +43,13 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import org.meshtastic.core.ble.BleConnectFailedException
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleDeviceNotFoundException
+import org.meshtastic.core.ble.BlePairingFailedException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
@@ -54,16 +57,22 @@ import org.meshtastic.core.ble.DisconnectReason
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticRadioProfile
 import org.meshtastic.core.ble.classifyBleException
+import org.meshtastic.core.ble.classifyBleFailure
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.ble.toMeshtasticRadioProfile
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -216,6 +225,13 @@ class BleRadioTransport(
     internal var sendRejectionLogger: (String) -> Unit = { message -> Logger.w { message } }
 
     @Volatile private var isFullyConnected = false
+
+    // Why the last attempt failed, repeated in every phase of the next one so the card can say why it is retrying.
+    @Volatile private var lastFailure: TransportFailure? = null
+
+    // Whether the current attempt handed the link to the handshake; out-of-band setup failures only explain an
+    // attempt that never got that far.
+    @Volatile private var reachedHandshake = false
     private var connectionJob: Job? = null
 
     // Guards against duplicate callbacks when multiple writes or a write + fromRadio failure
@@ -297,8 +313,36 @@ class BleRadioTransport(
                         callback.onDisconnect(isPermanent = true, errorMessage = msg)
                     }
                 },
+                onRetryScheduled = ::publishRetry,
             )
         }
+    }
+
+    private fun publishPhase(phase: TransportPhase) {
+        callback.onStatus(TransportStatus(phase = phase, lastFailure = lastFailure))
+    }
+
+    private fun publishRetry(outcome: BleReconnectPolicy.Outcome, nextAttempt: Int, wait: Duration) {
+        val failure =
+            when (outcome) {
+                is BleReconnectPolicy.Outcome.Failed -> {
+                    val hint = if (reachedHandshake) null else bleConnection.lastFailureCause
+                    outcome.error.classifyBleFailure(setupHint = hint)
+                }
+
+                is BleReconnectPolicy.Outcome.Disconnected ->
+                    if (outcome.wasIntentional) null else TransportFailure(TransportFailureKind.LinkLost)
+            }
+        failure?.let { Logger.i { "[${address.anonymize()}] BLE attempt ended: ${it.kind}; next attempt in $wait" } }
+        lastFailure = failure
+        callback.onStatus(
+            TransportStatus(
+                phase = TransportPhase.WaitingToRetry,
+                lastFailure = failure,
+                nextAttempt = nextAttempt,
+                retryAtMillis = nowMillis + wait.inWholeMilliseconds,
+            ),
+        )
     }
 
     /**
@@ -314,6 +358,8 @@ class BleRadioTransport(
 
         awaitPendingSessionCleanup()
         sessionFailed.value = false
+        reachedHandshake = false
+        publishPhase(TransportPhase.FindingDevice)
 
         // Long-streak probe: once the retry ladder has saturated, a bonded device that is still absent fails most
         // full-price attempts (GATT open + connection timeout) identically. Probe by scan alone instead — but
@@ -345,7 +391,7 @@ class BleRadioTransport(
                     }
                 }
                 deviceLocator.scanForFreshDevice(SCAN_TIMEOUT)
-                    ?: throw RadioNotConnectedException("No advertisement during scan-only probe")
+                    ?: throw BleDeviceNotFoundException("No advertisement during scan-only probe")
             } else {
                 null
             }
@@ -354,10 +400,14 @@ class BleRadioTransport(
 
         bondDeviceBeforeConnect(device)
 
+        publishPhase(TransportPhase.Connecting)
         val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
 
         if (state !is BleConnectionState.Connected) {
-            throw RadioNotConnectedException("Failed to connect to device at address ${address.anonymize()}")
+            throw BleConnectFailedException(
+                "Failed to connect to device at address ${address.anonymize()} ($state)",
+                bleConnection.lastFailureCause,
+            )
         }
 
         // GATT cache invalidation has two triggers, both repaired the same way — refresh the platform's cached
@@ -387,6 +437,7 @@ class BleRadioTransport(
         isFullyConnected = true
         onConnected()
 
+        publishPhase(TransportPhase.DiscoveringServices)
         val session = discoverServicesAndSetupCharacteristics()
 
         // If a fatal session failure (fromRadio/logRadio error) forced disconnect during setup,
@@ -517,8 +568,9 @@ class BleRadioTransport(
         delay(POST_INVALIDATION_RECONNECT_DELAY)
         val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
         if (reconnectState !is BleConnectionState.Connected) {
-            throw RadioNotConnectedException(
+            throw BleConnectFailedException(
                 "Failed to reconnect after GATT cache refresh ($reason, state=$reconnectState)",
+                bleConnection.lastFailureCause,
             )
         }
         Logger.i { "[${address.anonymize()}] Reconnected after GATT cache refresh ($reason)" }
@@ -530,6 +582,7 @@ class BleRadioTransport(
         // Bond before connecting: firmware may require an encrypted link, and without a bond Android fails with
         // status 5 or 133. Non-Android targets use repository-specific no-op behavior.
         Logger.i { "[${address.anonymize()}] Device not bonded, initiating bonding" }
+        publishPhase(TransportPhase.Pairing)
         try {
             bluetoothRepository.bond(device)
             Logger.i { "[${address.anonymize()}] Bonding successful" }
@@ -546,7 +599,7 @@ class BleRadioTransport(
                     "[${address.anonymize()}] Bonding failed and device is still not bonded; " +
                         "stopping connection attempt"
                 }
-                throw RadioNotConnectedException("Bonding failed and device is still not bonded", e)
+                throw BlePairingFailedException(e)
             }
         }
     }
@@ -612,6 +665,7 @@ class BleRadioTransport(
                     .launchIn(this)
 
                 Logger.i { "[${address.anonymize()}] Profile service active and characteristics subscribed" }
+                publishPhase(TransportPhase.Subscribing)
 
                 // Wait for FROMNUM CCCD write before triggering the Meshtastic handshake.
                 // Bounded: if fromRadio fails before subscriptionReady completes, handleFailure
@@ -667,7 +721,11 @@ class BleRadioTransport(
                 // is retained.
                 val published =
                     if (!sessionFailed.value && activeSession.value === session) {
-                        lifecycle.runIfOpen { this@BleRadioTransport.callback.onConnect() } != null
+                        lifecycle.runIfOpen {
+                            reachedHandshake = true
+                            lastFailure = null
+                            this@BleRadioTransport.callback.onConnect()
+                        } != null
                     } else {
                         false
                     }

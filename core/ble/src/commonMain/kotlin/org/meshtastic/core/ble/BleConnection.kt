@@ -103,6 +103,13 @@ interface BleConnection {
      * service cache.
      */
     fun invalidateServiceCache(): Boolean = false
+
+    /**
+     * The latest failure this connection absorbed instead of throwing since the last [connect] began: a rejected
+     * connect inside [connectAndAwait], or a notification subscription the platform reported out of band.
+     */
+    val lastFailureCause: Throwable?
+        get() = null
 }
 
 /** Represents a BLE service for commonMain. */

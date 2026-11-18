@@ -115,11 +115,14 @@ class BleReconnectPolicy(
      * @param attempt performs a single connection attempt and returns the outcome
      * @param onTransientDisconnect called when the policy decides to signal a transient disconnect
      * @param onPermanentDisconnect called when the policy gives up permanently
+     * @param onRetryScheduled called before each wait for the next attempt, with the outcome that ended this one, the
+     *   1-based number of the next attempt in the current failure streak and the whole wait, settle delay included
      */
     suspend fun execute(
         attempt: suspend () -> Outcome,
         onTransientDisconnect: suspend (Throwable?) -> Unit,
         onPermanentDisconnect: suspend (Throwable?) -> Unit,
+        onRetryScheduled: suspend (outcome: Outcome, nextAttempt: Int, wait: Duration) -> Unit = { _, _, _ -> },
     ) {
         while (coroutineContext.isActive) {
             delay(settleDelay)
@@ -127,26 +130,29 @@ class BleReconnectPolicy(
             val outcome = attempt()
             val lastError = (outcome as? Outcome.Failed)?.error
 
-            when (val action = processOutcome(outcome)) {
-                is Action.Continue -> continue
+            val wait =
+                when (val action = processOutcome(outcome)) {
+                    is Action.Continue -> Duration.ZERO
 
-                is Action.Retry -> {
-                    Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
-                    delay(action.backoff)
-                }
+                    is Action.Retry -> {
+                        Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
+                        action.backoff
+                    }
 
-                is Action.SignalTransient -> {
-                    onTransientDisconnect(lastError)
-                    Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
-                    delay(action.backoff)
-                }
+                    is Action.SignalTransient -> {
+                        onTransientDisconnect(lastError)
+                        Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
+                        action.backoff
+                    }
 
-                is Action.GiveUp -> {
-                    Logger.e { "Giving up after $consecutiveFailures consecutive failures" }
-                    onPermanentDisconnect(lastError)
-                    return
+                    is Action.GiveUp -> {
+                        Logger.e { "Giving up after $consecutiveFailures consecutive failures" }
+                        onPermanentDisconnect(lastError)
+                        return
+                    }
                 }
-            }
+            onRetryScheduled(outcome, consecutiveFailures + 1, wait + settleDelay)
+            delay(wait)
         }
     }
 

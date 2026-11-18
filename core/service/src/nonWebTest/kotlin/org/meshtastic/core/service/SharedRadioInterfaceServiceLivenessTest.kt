@@ -49,6 +49,10 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
@@ -943,6 +947,47 @@ class SharedRadioInterfaceServiceLivenessTest {
             advanceTimeBy(1_000L)
         }
     }
+
+    @Test
+    fun `transport status clears on explicit disconnect and on a device switch and ignores a stale transport`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF", startConnected = false)
+            every { transportFactory.createTransport(any(), any()) } calls
+                {
+                    callbacks += it.args[1] as RadioInterfaceService
+                    FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+                }
+            val failing =
+                TransportStatus(
+                    phase = TransportPhase.WaitingToRetry,
+                    lastFailure = TransportFailure(TransportFailureKind.PairingRequired),
+                    nextAttempt = 2,
+                    retryAtMillis = 1_000L,
+                )
+            try {
+                service.connect()
+                testDispatcher.scheduler.runCurrent()
+                callbacks.last().onStatus(failing)
+                assertEquals(failing, service.transportStatus.value)
+
+                service.setDeviceAddress("x11:22:33:44:55:66")
+                testDispatcher.scheduler.runCurrent()
+                assertNull(service.transportStatus.value, "a device switch must drop the old device's status")
+
+                callbacks.first().onStatus(failing)
+                assertNull(service.transportStatus.value, "the replaced transport's status must be dropped")
+
+                callbacks.last().onStatus(failing)
+                assertEquals(failing, service.transportStatus.value)
+
+                service.disconnect()
+                testDispatcher.scheduler.runCurrent()
+                assertNull(service.transportStatus.value, "an explicit disconnect must clear the status")
+            } finally {
+                service.disconnect()
+            }
+        }
 
     @Test
     fun `transport admission is closed after disconnect`() = runTest(testDispatcher) {

@@ -19,6 +19,7 @@ package org.meshtastic.core.ble
 import co.touchlab.kermit.Logger
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.logs.Logging
+import kotlin.concurrent.Volatile
 
 /**
  * Verbosity for Kable's internal BLE logging. Wraps [Logging.Level] so callers and the Koin DI graph don't leak Kable
@@ -88,5 +89,15 @@ internal fun PeripheralBuilder.meshtasticConfig(loggingConfig: BleLoggingConfig,
     logging { applyConfig(loggingConfig, identifier) }
     observationExceptionHandler { cause ->
         Logger.w(cause) { "[${identifier.orEmpty()}] Observation failure suppressed" }
+        BleObservationFailures.latest = cause
     }
+}
+
+/**
+ * The latest notification-subscription failure Kable suppressed on any peripheral. Process-wide because the web picker
+ * builds the peripheral, and its handler, before any [KableBleConnection] exists; the app holds one radio link at a
+ * time, and each connect clears it.
+ */
+internal object BleObservationFailures {
+    @Volatile var latest: Throwable? = null
 }

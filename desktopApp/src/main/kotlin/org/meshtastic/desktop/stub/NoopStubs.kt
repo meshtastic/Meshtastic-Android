@@ -31,6 +31,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.Location
@@ -88,6 +89,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override val receivedData = MutableSharedFlow<ReceivedRadioFrame>()
     override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>()
     override val connectionError: Flow<String> = MutableSharedFlow<String>()
+    override val transportStatus: StateFlow<TransportStatus?> = MutableStateFlow(null)
 
     override fun trySendToRadio(bytes: ByteArray): Boolean {
         logWarn("NoopRadioInterfaceService.trySendToRadio(${bytes.size} bytes)")

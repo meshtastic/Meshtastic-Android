@@ -125,6 +125,11 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var connectionScope: CoroutineScope? = null
 
+    @Volatile private var connectFailure: Throwable? = null
+
+    override val lastFailureCause: Throwable?
+        get() = connectFailure ?: BleObservationFailures.latest
+
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
         private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
@@ -144,6 +149,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     override suspend fun connect(device: BleDevice) {
         val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
         var autoConnect = meshtasticDevice.advertisement == null
+        connectFailure = null
+        BleObservationFailures.latest = null
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
@@ -207,6 +214,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                 } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                    connectFailure = e
                     if (autoConnect) {
                         // Already on the autoConnect path and still failing: surface a clear Disconnected
                         // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
@@ -245,7 +253,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     } catch (e: CancellationException) {
         // External cancellation (scope closed) — must propagate.
         throw e
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        connectFailure = e
         BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed)
     }
 

@@ -53,6 +53,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -200,6 +201,10 @@ open class ScannerViewModel(
      * `ConnectionsViewModel.connectionStatus` so the UI can choose `progress ?: status`.
      */
     val connectionProgressText: StateFlow<String?> = _connectionProgressText.asStateFlow()
+
+    /** What the selected device's transport is doing and why it last failed; shown on the connecting card. */
+    val transportStatus: StateFlow<TransportStatus?>
+        get() = radioInterfaceService.transportStatus
 
     // ── BLE scanning ──────────────────────────────────────────────────────────────────────────
     private val _isBleScanning = MutableStateFlow(false)

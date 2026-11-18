@@ -312,6 +312,23 @@ connected
 connected_device
 connected_sleeping
 connecting
+### CONNECTION ###
+connection_failure_bluetooth_unavailable
+connection_failure_connect_failed
+connection_failure_link_lost
+connection_failure_out_of_range
+connection_failure_pairing_failed
+connection_failure_pairing_required
+connection_failure_unknown
+connection_phase_connecting
+connection_phase_discovering_services
+connection_phase_finding_device
+connection_phase_handshake_config
+connection_phase_handshake_nodes
+connection_phase_pairing
+connection_phase_subscribing
+connection_retry_in
+connection_retry_now
 connection_status
 connections
 contact_draft_prefix

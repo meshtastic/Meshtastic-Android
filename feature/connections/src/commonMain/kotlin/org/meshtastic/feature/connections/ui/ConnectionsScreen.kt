@@ -73,6 +73,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.FirmwareRoute
@@ -266,6 +267,7 @@ fun ConnectionsScreen(
     onConnectCode: ((String) -> Unit)? = null,
 ) {
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
+    val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
@@ -571,6 +573,7 @@ fun ConnectionsScreen(
                                     virtualDevices = virtualDevices,
                                     connectionStatus = connectionStatus,
                                     connectionProgress = connectionProgress,
+                                    transportStatus = transportStatus,
                                     onClickDisconnect = { scanModel.disconnect() },
                                 )
 
@@ -1010,6 +1013,7 @@ private fun ConnectingDeviceContent(
     virtualDevices: List<DeviceListEntry>,
     connectionStatus: ConnectionStatus,
     connectionProgress: String?,
+    transportStatus: TransportStatus?,
     onClickDisconnect: () -> Unit,
 ) {
     val selectedEntry =
@@ -1029,6 +1033,7 @@ private fun ConnectingDeviceContent(
         deviceAddress = address,
         connectionStatus = connectionStatus,
         connectionProgress = connectionProgress,
+        transportStatus = transportStatus,
         onClickDisconnect = onClickDisconnect,
     )
 }

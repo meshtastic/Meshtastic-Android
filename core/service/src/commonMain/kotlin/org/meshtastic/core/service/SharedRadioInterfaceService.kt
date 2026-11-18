@@ -71,6 +71,8 @@ import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
@@ -159,6 +161,9 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
 private fun TransportDisconnectReason.toConnectionErrorMessage(): String = when (this) {
     TransportDisconnectReason.UsbPermissionDenied -> USB_PERMISSION_DENIED_ERROR
 }
+
+private val LINK_UP_PHASES =
+    setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes, TransportPhase.Connected)
 
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
@@ -455,6 +460,9 @@ class SharedRadioInterfaceService(
 
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
     override val connectionError: Flow<String> = _connectionError.asFlow()
+
+    private val _transportStatus = MutableStateFlow<TransportStatus?>(null)
+    override val transportStatus: StateFlow<TransportStatus?> = _transportStatus.asStateFlow()
 
     override val serviceScope: CoroutineScope
         get() = _serviceScope
@@ -1000,6 +1008,8 @@ class SharedRadioInterfaceService(
             isStarted = false
             radioTransport = null
             runningTransportId = null
+            // Admission is already revoked, so no late status from the stopped transport can land after this.
+            _transportStatus.value = null
             try {
                 currentTransport?.close()
             } finally {
@@ -1244,12 +1254,19 @@ class SharedRadioInterfaceService(
         synchronized(sessionCallbackLock) { publishDisconnected(isPermanent, errorMessage, reason) }
     }
 
+    /** Handshake-level phases arrive here directly; they apply only while a transport session is admitted. */
+    override fun onStatus(status: TransportStatus) {
+        synchronized(sessionCallbackLock) { if (activeTransportSession != null) _transportStatus.value = status }
+    }
+
     /** Applies a callback already admitted under [sessionCallbackLock]. */
     private fun publishDisconnected(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
         val resolvedErrorMessage = errorMessage ?: reason?.toConnectionErrorMessage()
         if (resolvedErrorMessage != null) {
             processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(resolvedErrorMessage) }
         }
+        // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.
+        if (_transportStatus.value?.phase in LINK_UP_PHASES) _transportStatus.value = null
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             Logger.d { "Broadcasting connection state change to $newTargetState" }
@@ -1279,6 +1296,13 @@ class SharedRadioInterfaceService(
                 runIfTransportSessionActive(session) { publishDisconnected(isPermanent, errorMessage, reason) }
             if (!admitted) {
                 Logger.d { "Dropping stale onDisconnect gen=${session.generation} addr=${session.address.anonymize}" }
+            }
+        }
+
+        override fun onStatus(status: TransportStatus) {
+            val admitted = runIfTransportSessionActive(session) { _transportStatus.value = status }
+            if (!admitted) {
+                Logger.d { "Dropping stale onStatus gen=${session.generation} addr=${session.address.anonymize}" }
             }
         }
 

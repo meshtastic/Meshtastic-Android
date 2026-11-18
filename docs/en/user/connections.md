@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-11-15
+last_updated: 2026-11-18
 description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -72,6 +72,17 @@ These are the four states the app models. "Device sleeping" is normal on power-s
 When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
+
+Over Bluetooth, the status line names the step in progress: looking for the radio, pairing, opening the link, reading its services, subscribing, then loading its config and node list. When an attempt fails, a line under it says why, and the status line counts down to the next attempt:
+
+| Message | What to do |
+|---|---|
+| Radio not found | Turn the node on and move closer. |
+| Could not connect | Disconnect the node from any other phone. Otherwise move closer, or forget the node in your Bluetooth settings and pair again. |
+| The radio needs pairing | Pair when asked, with the PIN on the node's screen, or its fixed PIN if one is set. |
+| Pairing failed | Check the PIN and pair again. |
+| The connection dropped | Move closer. The app keeps retrying. |
+| Bluetooth or location services are off | Turn them on. |
 
 Once connected, the connection card shows the node's name and firmware version, its signal strength over Bluetooth, and its LoRa modem preset and region, for example "Long Range - Fast · United States". A node on custom modem settings shows **Custom** in place of the preset. Tap the preset row to open the LoRa screen.
 
