@@ -14,14 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress(
-    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-    "UnusedParameter",
-)
-
 package org.meshtastic.web.platform
 
 import co.touchlab.kermit.Logger
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -29,6 +25,8 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
+import org.w3c.notifications.NotificationOptions
+import org.w3c.notifications.Notification as BrowserNotification
 
 /**
  * Shows [Notification]s through the browser's Notifications API, gated on the same preferences as desktop. Without the
@@ -40,7 +38,7 @@ import org.meshtastic.core.repository.NotificationPrefs
  */
 class WebNotificationManager(private val prefs: NotificationPrefs, scope: CoroutineScope) : NotificationManager {
 
-    private val shown = mutableMapOf<String, JsAny>()
+    private val shown = mutableMapOf<String, BrowserNotification>()
     private var untaggedCount = 0
 
     init {
@@ -70,7 +68,7 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
 
     private fun show(notification: Notification): Boolean {
         val key = notification.id?.let(::keyFor) ?: "untagged-${untaggedCount++}"
-        var handle: JsAny? = null
+        var handle: BrowserNotification? = null
         handle =
             showNotification(
                 title = notification.title,
@@ -85,11 +83,11 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
     }
 
     override fun cancel(id: Int) {
-        shown.remove(keyFor(id))?.let(::closeNotification)
+        shown.remove(keyFor(id))?.close()
     }
 
     override fun cancelAll() {
-        shown.values.toList().forEach(::closeNotification)
+        shown.values.toList().forEach(BrowserNotification::close)
         shown.clear()
     }
 
@@ -105,7 +103,7 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
                     notificationPermission() == "default" &&
                     hasUserActivation()
                 ) {
-                    requestNotificationPermission()
+                    BrowserNotification.requestPermission().catch { null }
                 }
             }
             .launchIn(scope)
@@ -116,32 +114,31 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
 
 private fun notificationsSupported(): Boolean = js("typeof Notification !== 'undefined'")
 
-private fun notificationPermission(): String = js("Notification.permission")
+private fun notificationPermission(): String = BrowserNotification.permission.toString()
 
 /** True while the page holds transient user activation; assumed where `navigator.userActivation` is missing. */
 private fun hasUserActivation(): Boolean = js("navigator.userActivation ? navigator.userActivation.isActive : true")
 
-private fun requestNotificationPermission() {
-    js("{ Notification.requestPermission().catch(() => {}); }")
-}
-
-/** Shows a notification that focuses the tab when clicked; null when the browser refuses to construct one. */
-private fun showNotification(title: String, body: String, tag: String?, silent: Boolean, onClose: () -> Unit): JsAny? =
-    js(
-        """{
-    try {
-        const options = { body: body, silent: silent };
-        if (tag) options.tag = tag;
-        const n = new Notification(title, options);
-        n.onclick = () => { window.focus(); n.close(); };
-        n.onclose = () => onClose();
-        return n;
-    } catch (e) {
-        return null;
+/**
+ * Shows a notification that focuses the tab when clicked; null when the browser refuses to construct one. Android
+ * Chrome shows notifications only from a service worker, and its constructor throws a raw JS `TypeError` that
+ * Kotlin/Wasm surfaces as a bare [Throwable].
+ */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+private fun showNotification(
+    title: String,
+    body: String,
+    tag: String?,
+    silent: Boolean,
+    onClose: () -> Unit,
+): BrowserNotification? = try {
+    BrowserNotification(title, NotificationOptions(body = body, tag = tag.orEmpty(), silent = silent)).apply {
+        onclick = {
+            window.focus()
+            close()
+        }
+        addEventListener("close", { onClose() })
     }
-}""",
-    )
-
-private fun closeNotification(notification: JsAny) {
-    js("notification.close()")
+} catch (t: Throwable) {
+    null
 }

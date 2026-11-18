@@ -24,6 +24,12 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.khronos.webgl.ArrayBuffer
+import org.khronos.webgl.ArrayBufferView
+import org.meshtastic.core.common.util.copyBytes
+import org.meshtastic.core.common.util.toUint8Array
+import org.w3c.dom.MessageChannel
+import org.w3c.dom.MessagePort
 import org.w3c.dom.Worker
 
 /** Whether this tab holds the web database. The `opfs-sahpool` VFS lets one tab at a time open its files. */
@@ -53,11 +59,14 @@ internal object SqliteWasmWorker {
 
     private val pending = mutableMapOf<Int, CompletableDeferred<JsAny?>>()
     private var nextId = 0
-    private lateinit var controlPort: JsAny
+    private lateinit var controlPort: MessagePort
 
     val worker: Worker by lazy {
         val created = createWorker()
-        controlPort = connectControlPort(created) { message -> onControlMessage(message) }
+        val channel = MessageChannel()
+        channel.port1.onmessage = { event -> event.data?.let { onControlMessage(it.unsafeCast<ControlMessage>()) } }
+        created.postMessage(controlPortMessage(channel.port2), listOf<JsAny>(channel.port2).toJsArray())
+        controlPort = channel.port1
         created
     }
 
@@ -65,37 +74,47 @@ internal object SqliteWasmWorker {
     val driver: WebWorkerSQLiteDriver by lazy { WebWorkerSQLiteDriver(worker) }
 
     /** The bytes of pool file [path], or null when it does not exist. */
-    suspend fun exportFile(path: String): ByteArray? =
-        request(exportFileRequest(nextRequestId(), path))?.let { it.unsafeCast<JsUint8Array>().toByteArray() }
+    suspend fun exportFile(path: String): ByteArray? = request { id ->
+        exportFileRequest(id, path)
+    }
+        ?.unsafeCast<ArrayBufferView>()
+        ?.copyBytes()
 
     /** Writes [bytes] as pool file [path]; the worker refuses an open file or bytes that are not a database. */
     suspend fun importFile(path: String, bytes: ByteArray) {
-        request(importFileRequest(nextRequestId(), path, bytes.toUint8Array()))
+        val array = bytes.toUint8Array()
+        request(transfer = array.buffer) { id -> importFileRequest(id, path, array) }
     }
 
     suspend fun moveFile(from: String, to: String) {
-        request(moveFileRequest(nextRequestId(), from, to))
+        request { id -> moveFileRequest(id, from, to) }
     }
 
     /** Opens pool file [path] on its own and reports its `user_version` and `PRAGMA integrity_check` result. */
     suspend fun inspectDatabase(path: String): DatabaseInspection =
-        checkNotNull(request(inspectDatabaseRequest(nextRequestId(), path))).unsafeCast<DatabaseInspection>()
+        checkNotNull(request { id -> inspectDatabaseRequest(id, path) }).unsafeCast<DatabaseInspection>()
 
     fun deleteFileDetached(path: String) {
-        send(deleteFileRequest(nextRequestId(), path)).invokeOnCompletion { cause ->
-            if (cause != null) Logger.w(cause) { "Deleting a web database file failed" }
-        }
+        send(transfer = null) { id -> deleteFileRequest(id, path) }
+            .invokeOnCompletion { cause ->
+                if (cause != null) Logger.w(cause) { "Deleting a web database file failed" }
+            }
     }
 
-    private fun nextRequestId(): Int = nextId++
+    private suspend fun request(transfer: ArrayBuffer? = null, message: (id: Int) -> JsAny): JsAny? =
+        send(transfer, message).await()
 
-    private suspend fun request(message: JsAny): JsAny? = send(message).await()
-
-    private fun send(message: JsAny): CompletableDeferred<JsAny?> {
+    /** Posts the request [message] builds for a fresh id, handing [transfer] over to the worker without a copy. */
+    private fun send(transfer: ArrayBuffer?, message: (id: Int) -> JsAny): CompletableDeferred<JsAny?> {
         worker
+        val id = nextId++
         val reply = CompletableDeferred<JsAny?>()
-        pending[requestId(message)] = reply
-        postControl(controlPort, message)
+        pending[id] = reply
+        if (transfer == null) {
+            controlPort.postMessage(message(id))
+        } else {
+            controlPort.postMessage(message(id), listOf<JsAny>(transfer).toJsArray())
+        }
         return reply
     }
 
@@ -130,8 +149,6 @@ private external interface ControlMessage : JsAny {
     val data: JsAny?
 }
 
-internal external interface JsUint8Array : JsAny
-
 internal external interface DatabaseInspection : JsAny {
     val userVersion: Int
     val integrity: String?
@@ -140,23 +157,11 @@ internal external interface DatabaseInspection : JsAny {
 /** Starts the `sqlite-wasm-worker` npm package's worker; webpack resolves the URL. */
 private fun createWorker(): Worker = js("""new Worker(new URL("sqlite-wasm-worker/worker.js", import.meta.url))""")
 
-private fun connectControlPort(worker: Worker, onMessage: (ControlMessage) -> Unit): JsAny = js(
-    """{
-        const channel = new MessageChannel();
-        channel.port1.onmessage = (e) => onMessage(e.data);
-        worker.postMessage({ controlPort: channel.port2 }, [channel.port2]);
-        return channel.port1;
-    }""",
-)
-
-private fun postControl(port: JsAny, message: JsAny): Unit =
-    js("message.bytes ? port.postMessage(message, [message.bytes.buffer]) : port.postMessage(message)")
-
-private fun requestId(message: JsAny): Int = js("message.id")
+private fun controlPortMessage(port: MessagePort): JsAny = js("({ controlPort: port })")
 
 private fun exportFileRequest(id: Int, path: String): JsAny = js("({ id: id, cmd: 'exportFile', path: path })")
 
-private fun importFileRequest(id: Int, path: String, bytes: JsUint8Array): JsAny =
+private fun importFileRequest(id: Int, path: String, bytes: JsAny): JsAny =
     js("({ id: id, cmd: 'importFile', path: path, bytes: bytes })")
 
 private fun moveFileRequest(id: Int, from: String, to: String): JsAny =
@@ -166,19 +171,3 @@ private fun inspectDatabaseRequest(id: Int, path: String): JsAny =
     js("({ id: id, cmd: 'inspectDatabase', path: path })")
 
 private fun deleteFileRequest(id: Int, path: String): JsAny = js("({ id: id, cmd: 'deleteFile', path: path })")
-
-private fun newUint8Array(size: Int): JsUint8Array = js("new Uint8Array(size)")
-
-private fun setByte(array: JsUint8Array, index: Int, value: Byte): Unit = js("array[index] = value")
-
-private fun byteLength(array: JsUint8Array): Int = js("array.byteLength")
-
-private fun signedByteAt(array: JsUint8Array, index: Int): Byte = js("(array[index] << 24) >> 24")
-
-internal fun ByteArray.toUint8Array(): JsUint8Array {
-    val array = newUint8Array(size)
-    for (i in indices) setByte(array, i, this[i])
-    return array
-}
-
-internal fun JsUint8Array.toByteArray(): ByteArray = ByteArray(byteLength(this)) { signedByteAt(this, it) }

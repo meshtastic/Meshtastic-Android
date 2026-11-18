@@ -15,25 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress(
-    // Each js("...") snippet below references its Kotlin parameter (size/array/index) INSIDE the embedded JS
-    // source string, which detekt's static analysis can't see — a false positive, not a real unused parameter.
+    // The js("...") snippet references its Kotlin parameter inside the JS source, which detekt cannot see.
     "UnusedParameter",
 )
 
 package org.meshtastic.core.model.util
 
+import org.khronos.webgl.Uint8Array
+import org.meshtastic.core.common.util.copyBytes
+
 // Backs channel PSK/private-key generation -- must be cryptographically secure. crypto.getRandomValues()
 // is the Web Crypto CSPRNG; never Math.random() here.
-actual fun platformRandomBytes(size: Int): ByteArray {
-    val array = newUint8Array(size)
-    fillWithCryptoRandomValues(array)
-    return ByteArray(size) { i -> uint8ArrayGet(array, i).toByte() }
-}
+actual fun platformRandomBytes(size: Int): ByteArray = Uint8Array(size).also(::fillWithCryptoRandomValues).copyBytes()
 
-internal external interface JsUint8Array : JsAny
-
-private fun newUint8Array(size: Int): JsUint8Array = js("new Uint8Array(size)")
-
-private fun fillWithCryptoRandomValues(array: JsUint8Array): Unit = js("crypto.getRandomValues(array)")
-
-private fun uint8ArrayGet(array: JsUint8Array, index: Int): Int = js("array[index]")
+private fun fillWithCryptoRandomValues(array: Uint8Array): Unit = js("crypto.getRandomValues(array)")
