@@ -21,6 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
@@ -58,12 +59,32 @@ private fun giveDomExceptionsAStack(): Unit = js(
     }""",
 )
 
+/**
+ * Compose resolves resources and [androidx.compose.ui.text.intl.Locale.current] from `navigator.languages`, which a page
+ * cannot set. This getter answers with the app's language while one is chosen ([chooseLanguage]) and with the
+ * browser's otherwise, the override Compose Multiplatform's resource docs give for web.
+ */
+private fun installLanguageOverride(): Unit = js(
+    """{
+        const browser = Object.getOwnPropertyDescriptor(Navigator.prototype, 'languages');
+        Object.defineProperty(Navigator.prototype, 'languages', {
+            configurable: true,
+            get() { return globalThis.__meshtasticLanguage ? [globalThis.__meshtasticLanguage] : browser.get.call(this); },
+        });
+    }""",
+)
+
+/** Sets the app's language as a BCP 47 tag, or the browser's with a blank one. */
+@Suppress("UnusedParameter") // read by name inside the js() body
+private fun chooseLanguage(tag: String): Unit = js("{ globalThis.__meshtasticLanguage = tag || null; }")
+
 private fun removeStaticLoader(): Unit = js("{ const loader = document.getElementById('loading'); if (loader) loader.remove(); }")
 
 /** The wasmJs entry point. `webApp` is the `<div>` id in `index.html` and the webpack output name. */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     giveDomExceptionsAStack()
+    installLanguageOverride()
     val koinApp = startKoin<WebKoinApp> {}
     Logger.i { "Meshtastic Web — Starting" }
 
@@ -97,14 +118,18 @@ private fun MeshServiceLifecycle() {
     }
 }
 
-/** Resolves the theme preference and renders [WebMainScreen]. The browser's language drives resource resolution. */
+/** Applies the theme and language preferences and renders [WebMainScreen]. */
 @Suppress("ViewModelForwarding")
 @Composable
 private fun ThemeAndContent(uiViewModel: UIViewModel) {
     val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
+    val languagePref by uiPrefs.locale.collectAsState(initial = "")
+    chooseLanguage(languagePref)
 
     val multiBackstack = rememberMultiBackstack(startDestination(uiViewModel.currentDeviceAddressFlow.value))
 
-    AppTheme(darkTheme = isDarkTheme(themePref)) { WebMainScreen(uiViewModel, multiBackstack) }
+    // Compose reads the language when it resolves a resource, not as state, so a new language recomposes from here.
+    // The back stack is kept above it.
+    key(languagePref) { AppTheme(darkTheme = isDarkTheme(themePref)) { WebMainScreen(uiViewModel, multiBackstack) } }
 }
