@@ -19,15 +19,16 @@ package org.meshtastic.web.db
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseConstants
 
 /**
  * [DatabaseManager] over the one OPFS database `SingleDatabaseProvider` opens: nothing to switch, evict or associate.
  */
 class WebDatabaseManager : DatabaseManager {
-    // Nothing is evicted; the settings slider still reads a real number.
-    override val cacheLimit: StateFlow<Int> = MutableStateFlow(Int.MAX_VALUE)
+    // The one database is the whole cache, which is the smallest limit the preference offers.
+    override val cacheLimit: StateFlow<Int> = MutableStateFlow(DatabaseConstants.MIN_CACHE_LIMIT)
 
-    override fun getCurrentCacheLimit(): Int = Int.MAX_VALUE
+    override fun getCurrentCacheLimit(): Int = DatabaseConstants.MIN_CACHE_LIMIT
 
     override fun setCacheLimit(limit: Int) = Unit
 
