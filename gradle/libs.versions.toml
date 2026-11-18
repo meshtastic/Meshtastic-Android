@@ -170,6 +170,8 @@ androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref
 androidx-room-paging = { module = "androidx.room3:room3-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref = "room" }
+# Suspend SQLiteConnection calls for common code, where androidx.sqlite blocks off web and suspends on web
+androidx-sqlite-async = { module = "androidx.sqlite:sqlite-async", version.ref = "androidx-sqlite-bundled" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite-bundled" }
 # JVM variant provides the host-platform native library for BundledSQLiteDriver in host/Robolectric tests
 androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "androidx-sqlite-bundled" }

@@ -54,6 +54,7 @@ kotlin {
             api(projects.core.model)
             implementation(libs.meshtastic.protobufs)
             implementation(libs.androidx.room.paging)
+            implementation(libs.androidx.sqlite.async)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }

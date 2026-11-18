@@ -18,6 +18,7 @@ package org.meshtastic.core.database
 
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteDriver
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -53,4 +54,5 @@ actual fun deleteDatabase(dbName: String) = SqliteWasmWorker.deleteFileDetached(
 /** Okio's FileSystem is synchronous, and the pool answers only asynchronously from its worker. */
 actual fun getFileSystem(): FileSystem = error("getFileSystem() is not supported on wasmJs")
 
-internal fun webSqliteDriver(): BusyTimeoutSQLiteDriver = BusyTimeoutSQLiteDriver(SqliteWasmWorker.driver)
+// No busy_timeout wrapper: the worker allows one connection per database, so nothing ever contends for its lock.
+private fun webSqliteDriver(): SQLiteDriver = SqliteWasmWorker.driver
