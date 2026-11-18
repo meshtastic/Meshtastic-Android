@@ -13,37 +13,37 @@ aliases:
 
 # Настольное приложение
 
-This page covers installing the Meshtastic desktop app, connecting a node, and how it differs from Android. The desktop app shares its core codebase with Android via Kotlin Multiplatform, so most features work identically across Linux, macOS, and Windows.
+Эта страница описывает установку приложения Meshtastic для десктопа, подключение ноды и как оно отличается от Android. Десктопное приложение разделяет основной код с Android через Kotlin Multiplatform, так что большинство функций работают идентично Linux, macOS и Windows.
 
 ## Установка
 
 ### Linux
 
-- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Each comes in an x86_64 and an arm64 (aarch64) build.
-- The `.deb` recommends the `fonts-noto-color-emoji` package. Emoji are drawn from the system's fonts, so on a minimal desktop without a color emoji font, such as Raspberry Pi OS, install it or emoji show as boxes. The `.rpm` and `.AppImage` carry no such recommendation.
-- The AppImage carries its own update information, so AppImageUpdate and other zsync-based updaters can update it in place to the latest production release.
-- Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
+- Скачай `.deb`, `.rpm`, или `.AppImage` со [страницы релизов](https://github.com/meshtastic/Meshtastic-Android/releases). Каждый из них содержит сборку x86_64 и arm64 (aarch64).
+- `.deb` пакет рекомендует `fonts-noto-color-emoji`. Эмодзи рисуются из системных шрифтов, поэтому на минимальном десктопе без шрифта цветовых эмодзи, таких как Raspberry Pi OS, установи его или эмодзи будут отображаться как коробки. `.rpm` и `.AppImage` не содержат такой рекомендации.
+- AppImage содержит свою собственную информацию об обновлении, так что AppImageUpdate и другие обновляющие серверы могут обновить её до последнего выпуска продукта.
+- Или установи из Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Или соберите из исходного кода с помощью `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). It is built for Apple silicon only.
+- Загрузи `.dmg` со [страницы релизов](https://github.com/meshtastic/Meshtastic-Android/releases). Он создан только для Apple silicon.
 - Или соберите из исходных кодов
 
 ### Windows
 
-- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Both are x64 builds.
+- Загрузи `.msi` или `.exe` инсталлятор со [страницы релизов](https://github.com/meshtastic/Meshtastic-Android/releases). Обе сборки x64.
 - Или соберите из исходных кодов
 
-## Connecting your node
+## Подключение к ноде
 
-All three transports live on the **Connect** tab, the same as on Android. Pick one with the transport selector. See [Connections](connections) for the full walkthrough.
+Все три вида транспорта доступны на вкладке "Подключение", так же, как и на Android. Выбери один с помощью транспортного селектора. Полное пошаговое руководство приведено в разделе [Подключения] (connections).
 
 ### Последовательная USB (Основной)
 
-The most reliable connection method on desktop:
+Самый надежный метод подключения к компьютеру:
 
-Connect your node by USB, select **USB** in the transport selector, and click the node's serial port in the list. The list refreshes on its own as ports appear and disappear.
+Подключите свою ноду по USB, выбери **USB** в транспортном селекторе и нажми на последовательный порт ноды в списке. The list refreshes on its own as ports appear and disappear.
 
 ### TCP/IP
 

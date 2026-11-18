@@ -215,6 +215,7 @@
     <string name="resend">Reenviar</string>
     <string name="reset">Restablir</string>
     <string name="reset_to_defaults">Restablir els defectes</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rebuda confirmació negativa</string>

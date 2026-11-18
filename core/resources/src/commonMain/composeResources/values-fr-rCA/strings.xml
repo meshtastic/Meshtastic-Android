@@ -120,7 +120,6 @@
     <string name="bandwidth_unsupported_summary">Cette bande passante n'est pas prise en charge par la radio connectée dans la région sélectionnée. Choisissez une valeur supportée avant d'enregistrer.</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Batterie</string>
-    <string name="battery_ina_2xx_i2c_address">Adresse I2C de la batterie INA_2XX</string>
     <string name="ble_devices">Appareils Bluetooth</string>
     <string name="ble_scan_needs_location_services">La recherche Bluetooth nécessite également des services de localisation activés pour cette version d'Android. Votre position n'est pas utilisée.</string>
     <!-- BLUETOOTH -->
@@ -686,7 +685,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Adresse IP:</string>
     <string name="ip_port">Port :</string>
-    <string name="json_output_enabled">Sortie JSON activée</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Vérification de la clé terminée</string>
@@ -856,7 +854,6 @@
     <string name="message_status_unknown">Inconnu</string>
     <string name="messages">Messages</string>
     <string name="min">Min</string>
-    <string name="minimum_wake_time_seconds">Durée minimale de réveil</string>
     <!-- MIRROR -->
     <string name="mirror_back">Retour</string>
     <string name="mirror_key_down">Bas</string>
@@ -1001,7 +998,6 @@
     <string name="options">Options</string>
     <string name="orient_north">Orienter vers le nord</string>
     <string name="overflow_menu">Menu supplémentaire</string>
-    <string name="override_console_serial_port">Outrepasser le port série de la console</string>
     <!-- PACKET -->
     <string name="password">Mot de passe</string>
     <!-- PAX -->
@@ -1140,6 +1136,7 @@
     <string name="reset">Réinitialiser</string>
     <string name="reset_to_defaults">Rétablir les valeurs par défaut</string>
     <string name="retry">Réessayer</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Sonnerie</string>
     <string name="ringtone_file_empty">Le fichier est vide</string>
     <string name="ringtone_import_error">Erreur d'importation : %1$s</string>
@@ -1248,7 +1245,6 @@
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>
     <string name="store_forward">Stocker &amp; Transférer</string>
     <string name="store_forward_config">Stocker &amp; Transférer la configuration</string>
-    <string name="super_deep_sleep_duration_seconds">Durée du sommeil extra profond</string>
     <string name="supported">Pris en charge</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
     <string name="swipe_action_delete">Effacer</string>

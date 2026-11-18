@@ -237,6 +237,7 @@
     <string name="resend">Seol arís</string>
     <string name="reset">Athshocraigh</string>
     <string name="reset_to_defaults">Athshocrú go dtí na réamhshocruithe</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Fáilte atá faighte le haghaidh niúúáil</string>

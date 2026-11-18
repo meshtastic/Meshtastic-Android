@@ -2,7 +2,7 @@
 title: Карта и путевые точки
 nav_order: 6
 last_updated: 2026-11-15
-description: View node positions on the map, create and share waypoints, manage map layers, Site Planner and signal surveys, and control position sharing and privacy.
+description: Просматривай расположение нод на карте, создавай путевые точки и делись ими, управляй слоями карты, планировщиком местности и обзорами сигналов, а также контролируй совместное использование местоположения и конфиденциальность.
 aliases:
   - map
   - waypoints
@@ -29,7 +29,7 @@ aliases:
 
 ### Маркеры нод
 
-Каждая нода, передающая своё местоположение, отображается в виде **маркера-бирки** с коротким именем ноды. Цвет бирки определяется собственным цветом идентификации ноды (постоянным цветом, получаемым из её номера) — тем же самым, что используется в списке нод, поэтому нода везде выглядит одинаково. Цвет маркера **не** отображает статус в сети/не в сети. Когда местоположение ноды обновляется в реальном времени, её маркер ненадолго подсвечивается пульсацией. Tapping a chip opens that node's details.
+Каждая нода, передающая своё местоположение, отображается в виде **маркера-бирки** с коротким именем ноды. Цвет бирки определяется собственным цветом идентификации ноды (постоянным цветом, получаемым из её номера) — тем же самым, что используется в списке нод, поэтому нода везде выглядит одинаково. Цвет маркера **не** отображает статус в сети/не в сети. Когда местоположение ноды обновляется в реальном времени, её маркер ненадолго подсвечивается пульсацией. Нажатие на микросхему открывает детали этой ноды.
 
 Nodes within 5 m of each other, which is common when they share a reduced position precision or sit at one site, are drawn as one chip with a count on its corner, showing a favorite or your own node when one is there. Tapping it lists every node at that spot, favorites first. Близко расположенные маркеры группируются в кластеры при уменьшении масштаба. Tapping a cluster zooms in to fit its nodes, and a cluster whose nodes all share one spot lists them instead. With **Show Precision Circles** on, each spot's circle stays visible inside a cluster too.
 
@@ -37,22 +37,22 @@ Nodes within 5 m of each other, which is common when they share a reduced positi
 
 - **Масштаб** — используйте щипок или кнопки +/-
 - **Перемещение** — перетаскивайте карту для исследования
-- **Center** — tap the location button to follow your position
+- \*\*Центр \*\* — нажми кнопку определения местоположения, чтобы следить за своим местоположением
 - **Нажатие на ноду** — коснитесь маркера ноды для просмотра подробностей
 
 The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. Tap the compass to reorient north-up, or tap the location button to follow your current position. While the map follows you, the compass instead turns heading lock on and off, so the map rotates with the phone. On **Google Play** builds a refresh button joins them while a network layer is showing; on **F-Droid** and **Desktop**, refresh a network layer from its own row in the layers sheet instead.
 
 ![Map floating toolbar with compass, filter, refresh, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
-### Filtering the Map
+### Фильтрация карты
 
 Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Signed only**, **Encrypted only**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown** — the same rules as the node list's [filter toggles](nodes).
 
 A dot on the filter button means at least one filter is hiding nodes — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
-## AR mesh view
+## AR-вид сети
 
-The mesh view draws nodes and waypoints over the phone's camera, each in the direction and at the height where it stands, with its distance and the age of its position. It needs a back camera and an orientation sensor, so it appears only on Android phones that have both, on Google Play and F-Droid builds alike. It isn't available on Desktop. On opening, it asks for camera access and then location.
+The mesh view draws nodes and waypoints over the phone's camera, each in the direction and at the height where it stands, with its distance and the age of its position. It needs a back camera and an orientation sensor, so it appears only on Android phones that have both, on Google Play and F-Droid builds alike. Он недоступен на компьютере. При открытии он запрашивает доступ к камере, а затем местонахождение.
 
 Tap the mesh view button (**Open mesh view**) in the map's top bar to see the whole mesh, filtered by the same **Filter map** settings as the map. The node list's touch & hold menu, a node's detail page, its compass sheet, its position log, and a traceroute map open the view too. Opened from a node, it shows only that node, plus the track or route you came from.
 
@@ -68,7 +68,7 @@ When your phone's position has no altitude, targets sit level with you and the v
 
 On an Android XR headset, the Google Play build adds a **Full Space** button. Full Space is the headset mode in which the app shares the room with 3D content. There the app stays as its own panel and gains **Home Space** and **3D map** buttons. F-Droid builds run on a headset as the flat app only.
 
-**3D map** stands a terrain table beside the app, built from the positions your nodes have shared and anchored on your connected node. The table shows:
+**3D map** stands a terrain table beside the app, built from the positions your nodes have shared and anchored on your connected node. Таблица показывает:
 
 - the terrain in relief, with any of the 2D map's raster base maps draped over it, satellite first, or in elevation colors when you pick **Elevation**
 - elevation contours when you turn on **Contours**, in meters or feet by your [units setting](units-and-locale)

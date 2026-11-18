@@ -2,7 +2,7 @@
 title: Виджет на главный экран
 nav_order: 20
 last_updated: 2026-11-15
-description: Add Meshtastic home screen widgets to glance at your connected node's local stats, keep an eye on one node you pick, or read one node's sensors, without opening the app.
+description: Добавь виджеты главного экрана Meshtastic, чтобы просматривать локальную статистику подключенной ноды, следить за выбранной тобой нодой или считывать показания датчиков одной ноды, не открывая приложение.
 aliases:
   - widget
   - home-screen-widget
@@ -13,13 +13,13 @@ aliases:
 
 # Виджет на главный экран
 
-On Android, Meshtastic provides three home screen **widgets**:
+На Android, Meshtastic предоставляет три **виджета** домашнего экрана:
 
 - **Meshtastic** показывает в реальном времени локальную статистику с подключенной ноды.
 - **Трекер нод** отслеживает выбранную тобой нооду: уровень заряда, сигнал, время последнего приема, количество хопов и расстояние до подключенной ноды.
-- **Telemetry** shows one node's environment, air quality and power readings as tiles.
+- **Телеметрия** отображает окружающую среду одной ноды, качество воздуха и показатели мощности как плитки.
 
-Ты можешь разместить столько каждого, сколько захочешь. Each Node Tracker and Telemetry widget remembers its own node.
+Ты можешь разместить столько каждого, сколько захочешь. Каждая нода трекера и виджет Telemetry запоминают свою собственную ноду.
 
 ## Локальная статистика
 
@@ -27,7 +27,7 @@ On Android, Meshtastic provides three home screen **widgets**:
 
 - **Чип ноды**, содержащий краткое название ноды, выделенное его собственными цветами, с указанием уровня заряда **батареи** рядом с ним или _включено_ при работе от внешнего источника питания
 - **ChUtil** — использование канала (насколько занят канал LoRa, в процентах)
-- **AirUtil** — the percentage of airtime this node used transmitting in the last hour
+- **AirUtil** — процент времени, в течение которого нода использовала передачу за последний час
 - **Ноды** — сколько нод из общего количества известных в сети
 - **Uptime** — время работы ноды с момента её последней перезагрузки
 - **Отправлено** и **Получено** — счетчики пакетов ноды
@@ -43,14 +43,14 @@ The widget shows as many of those as its size holds, in that order, so a small w
 
 Нажми на виджет, чтобы открыть приложение, или используй его кнопку обновления для запроса свежей статистики.
 
-> ℹ️ **Note:** The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
+> ℹ️ **Примечание:** Значения соответствуют подключенной ноде. If the node disconnects, the widget replaces the stats with a status line: **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## Трекер нод
 
 The **Node Tracker** widget shows one node from your node list:
 
-- The node's **chip** and **long name**
-- **Battery**: the node's last reported battery level, or _Powered_ on external power
+- **Микросхема** ноды и **Длинное имя**
+- **Батарея**: последний уровень батареи ноды или _включено_ при внешнем питании
 - **Last heard**: the time your connected node last heard it, or the date if it was more than a day ago
 
 From two rows tall it adds, in this order, as many as fit (a wide widget under two rows tall shows Hops Away beside the name):

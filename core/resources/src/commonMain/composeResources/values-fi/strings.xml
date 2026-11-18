@@ -131,7 +131,6 @@
     <string name="bandwidth_unsupported_summary">Tätä kaistanleveyttä ei tueta yhdistetyssä radiossa valitulla alueella. Valitse tuettu arvo ennen tallentamista.</string>
     <string name="baro_pressure">Barometri</string>
     <string name="battery">Akku</string>
-    <string name="battery_ina_2xx_i2c_address">INA_2XX-akun valvontapiirin I2C-osoite</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="ble_scan_needs_location_services">Bluetooth-laitteiden haku edellyttää tässä Android-versiossa myös sijaintipalvelujen käyttöä. Sijaintiasi ei käytetä.</string>
     <!-- BLUETOOTH -->
@@ -812,7 +811,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP-osoite:</string>
     <string name="ip_port">Portti:</string>
-    <string name="json_output_enabled">JSON ulostulo käytössä</string>
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
@@ -1085,7 +1083,6 @@
     <string name="metric_channel_label">%1$s%2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimi</string>
-    <string name="minimum_wake_time_seconds">Vähimmäisherätyksen kesto</string>
     <!-- MIRROR -->
     <string name="mirror_back">Edellinen</string>
     <string name="mirror_key_ok">OK</string>
@@ -1269,7 +1266,6 @@
     <string name="options">Valinnat</string>
     <string name="orient_north">Aseta kompassi pohjoiseen</string>
     <string name="overflow_menu">Lisävalikko</string>
-    <string name="override_console_serial_port">Korvaa konsolin sarjaportti</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Pakettien aitous</string>
     <string name="packet_authenticity_balanced">Tasapainoinen – Suosi todennettuja paketteja</string>
@@ -1448,6 +1444,7 @@
     <string name="restore_keys">Palauta avaimet</string>
     <string name="restore_keys_confirmation">Palauttaa tähän radioon varmuuskopioidut julkiset ja yksityiset avaimet.</string>
     <string name="retry">Yritä uudelleen</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Soittoääni</string>
     <string name="ringtone_file_empty">Tiedosto on tyhjä</string>
     <string name="ringtone_import_error">Virhe tuotaessa: %1$s</string>
@@ -1612,7 +1609,6 @@
     <string name="store_forward">Varastoi &amp; välitä</string>
     <string name="store_forward_config">Varastoi &amp; välitä asetukset</string>
     <string name="success">Valmis</string>
-    <string name="super_deep_sleep_duration_seconds">Super-syväunen kesto</string>
     <string name="supported">Tuettu</string>
     <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
     <string name="swipe_action_delete">Poista</string>

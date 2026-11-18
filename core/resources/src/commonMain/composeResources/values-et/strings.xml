@@ -131,7 +131,6 @@
     <string name="bandwidth_unsupported_summary">Ühendatud raadio ei toeta valitud piirkonna ribalaiust. Enne salvestamist vali toetatud väärtus.</string>
     <string name="baro_pressure">Õhurõhk</string>
     <string name="battery">Aku</string>
-    <string name="battery_ina_2xx_i2c_address">Aku INA_2XX I2C aadress</string>
     <string name="ble_devices">Sinihamba seade</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Sinihammas</string>
@@ -797,7 +796,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
-    <string name="json_output_enabled">JSON väljund lubatud</string>
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
@@ -1054,7 +1052,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
-    <string name="minimum_wake_time_seconds">Minimaalne ärkveloleku aeg</string>
     <!-- MIRROR -->
     <string name="mirror_back">Tagasi</string>
     <string name="mirror_key_ok">Olgu</string>
@@ -1233,7 +1230,6 @@
     <string name="options">Valikud</string>
     <string name="orient_north">Põhja suund</string>
     <string name="overflow_menu">Lisa valikud</string>
-    <string name="override_console_serial_port">Konsooli jadapordi alistamine</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Paketi autentsus</string>
     <string name="packet_authenticity_balanced">Tasakaalustatud — eelista autentitud</string>
@@ -1404,6 +1400,7 @@
     <string name="restore_keys">Taasta võtmed</string>
     <string name="restore_keys_confirmation">Taastab selle sõlme varundatud avalikud ja privaatvõtmed.</string>
     <string name="retry">Proovi uuesti</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Helin</string>
     <string name="ringtone_file_empty">Fail on tühi</string>
     <string name="ringtone_import_error">Viga importimisel: %1$s</string>
@@ -1567,7 +1564,6 @@
     <string name="store_forward">Salvesa &amp; edasta</string>
     <string name="store_forward_config">Salvesta &amp; edasta sätted</string>
     <string name="success">Edukas</string>
-    <string name="super_deep_sleep_duration_seconds">Super sügava une kestus</string>
     <string name="supported">Toetatud</string>
     <string name="supported_by_community">Toetatud Meshtastic kommuuni poolt</string>
     <string name="swipe_action_delete">Eemalda</string>

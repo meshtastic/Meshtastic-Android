@@ -2,7 +2,7 @@
 title: Уведомления
 nav_order: 18
 last_updated: 2026-11-04
-description: What each Meshtastic notification is for, how to silence one kind without the others, and what you can do from a message notification or a watch.
+description: Для чего предназначено каждое уведомление Meshtastic, как отключить одно из них не затрагивая других и что ты можешь сделать с помощью уведомления о сообщении или часов.
 aliases:
   - notifications
   - notification-channels
@@ -14,24 +14,24 @@ aliases:
 
 Meshtastic posts a notification when something on the mesh needs you while the app is out of sight: a message, a new node, a low battery, or a notice from your node. Each kind is its own Android notification category, so you can silence one and keep the rest.
 
-## Notification categories
+## Категории уведомлений
 
 To see the categories, tap **App Notifications** in the **Information** section of **Settings**. It opens Android's notification settings for Meshtastic, where the categories sit in three groups.
 
-| Group      | Category                                                                | Posted for                                                                      | Tapping it opens                |
-| ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| Сообщения  | Уведомления о личных сообщениях                                         | A message sent directly to you                                                  | The conversation                |
-| Сообщения  | Уведомления о сообщениях в общем чате                                   | A message on one of your channels                                               | The channel                     |
-| Сообщения  | Reaction notifications                                                  | An emoji reaction to a message in one of your conversations                     | The conversation                |
-| Сообщения  | Уведомления о путевых точках                                            | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Сообщения  | Служебные уведомления                                                   | A critical alert from a node                                                    | The conversation                |
-| Меш        | Уведомления о новых нодах                                               | A node heard for the first time                                                 | The node's details              |
-| Меш        | Уведомления о приглашениях в сеть                                       | An invitation to join a nearby mesh                                             | Локальное обнаружение сети      |
-| Меш        | Уведомления о низком заряде батареи (избранные ноды) | A favorite node's battery running low                                           | The node's details              |
-| Устройство | Служебные уведомления                                                   | The connection to your node while the app runs in the background                | The app                         |
-| Устройство | Уведомление о низком уровне заряда                                      | Your node's battery running low                                                 | The node's details              |
-| Устройство | Radio notifications                                                     | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Устройство | Update and connection notifications                                     | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Группа     | Категория                                                               | Отправлено на                                                                   | Нажми для открытия                 |
+| ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------- |
+| Сообщения  | Уведомления о личных сообщениях                                         | Сообщение, отправленное напрямую                                                | Обсуждение                         |
+| Сообщения  | Уведомления о сообщениях в общем чате                                   | Сообщение в одном из каналов                                                    | Канал                              |
+| Сообщения  | Уведомления о реакции                                                   | An emoji reaction to a message in one of your conversations                     | Обсуждение                         |
+| Сообщения  | Уведомления о путевых точках                                            | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map            |
+| Сообщения  | Служебные уведомления                                                   | A critical alert from a node                                                    | Обсуждение                         |
+| Меш        | Уведомления о новых нодах                                               | A node heard for the first time                                                 | The node's details                 |
+| Меш        | Уведомления о приглашениях в сеть                                       | An invitation to join a nearby mesh                                             | Локальное обнаружение сети         |
+| Меш        | Уведомления о низком заряде батареи (избранные ноды) | A favorite node's battery running low                                           | The node's details                 |
+| Устройство | Служебные уведомления                                                   | The connection to your node while the app runs in the background                | Приложение                         |
+| Устройство | Уведомление о низком уровне заряда                                      | Your node's battery running low                                                 | The node's details                 |
+| Устройство | Уведомления радио                                                       | Notices from your node, such as key verification requests and security warnings | Приложение                         |
+| Устройство | Update and connection notifications                                     | A firmware update for your node, or a problem reconnecting to it                | Обновление прошивки или Соединения |
 
 By default, direct messages, alerts and notices from your node pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 
@@ -39,7 +39,7 @@ Alert notifications play an alarm sound. To let them through Do Not Disturb as w
 
 The service notification stays in the shade while Meshtastic is connected in the background. It shows the connection state, and also shows progress while a firmware update or a preset scan runs. On Android 16 and newer you can turn it into a [Live Update](connections#live-update) that shows your mesh or one node in the status bar and in this notification, with a **Stop Live Update** action to end it.
 
-> ℹ️ **Note:** The Desktop app has no notification categories. It switches notifications from its own settings instead, described in [Notification Preferences](desktop#notification-preferences).
+> ℹ️ **Примечание:** В десктопном приложении нет категорий уведомлений. It switches notifications from its own settings instead, described in [Notification Preferences](desktop#notification-preferences).
 
 ## When a message notifies you
 

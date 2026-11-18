@@ -242,6 +242,7 @@
     <string name="resend">Siųsti iš naujo</string>
     <string name="reset">Nustatyti iš naujo</string>
     <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>

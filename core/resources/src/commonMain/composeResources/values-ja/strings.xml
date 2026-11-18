@@ -125,7 +125,6 @@
     <string name="bad">不良</string>
     <string name="baro_pressure">気圧</string>
     <string name="battery">バッテリー</string>
-    <string name="battery_ina_2xx_i2c_address">バッテリー INA_2XX I2C アドレス</string>
     <string name="ble_devices">Bluetooth デバイス</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -732,7 +731,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IPアドレス：</string>
     <string name="ip_port">ポート：</string>
-    <string name="json_output_enabled">JSON出力の有効化</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">鍵のバックアップを削除しました</string>
@@ -942,7 +940,6 @@
     <string name="messages">メッセージ</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
-    <string name="minimum_wake_time_seconds">最小起動時間</string>
     <!-- MIRROR -->
     <string name="mirror_back">戻る</string>
     <string name="mirror_key_ok">OK</string>
@@ -1113,7 +1110,6 @@
     <string name="options">オプション</string>
     <string name="orient_north">北を上に向ける</string>
     <string name="overflow_menu">オーバーフローメニュー</string>
-    <string name="override_console_serial_port">コンソールのシリアルポートを上書き</string>
     <!-- PACKET -->
     <string name="packet_authenticity">パケットの真正性</string>
     <string name="packet_authenticity_balanced">バランス：認証済みを優先</string>
@@ -1265,6 +1261,7 @@
     <string name="restore_keys">鍵を復元</string>
     <string name="restore_keys_confirmation">バックアップした公開鍵と秘密鍵をこのノードに復元します。</string>
     <string name="retry">再試行</string>
+    <!-- RINGTONE -->
     <string name="ringtone">着信音</string>
     <string name="ringtone_file_empty">ファイルが空です</string>
     <string name="ringtone_import_error">インポートエラー：%1$s</string>
@@ -1417,7 +1414,6 @@
     <string name="store_forward">ストアアンドフォワード</string>
     <string name="store_forward_config">ストアアンドフォワード設定</string>
     <string name="success">成功</string>
-    <string name="super_deep_sleep_duration_seconds">スーパーディープスリープの時間</string>
     <string name="supported">対応済み</string>
     <string name="supported_by_community">Meshtastic コミュニティによるサポート</string>
     <string name="swipe_action_delete">削除</string>

@@ -243,6 +243,7 @@
     <string name="resend">Ponovno pošlji</string>
     <string name="reset">Ponastavi</string>
     <string name="reset_to_defaults">Ponastavi na osnovno</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Prejeta negativna potrditev</string>

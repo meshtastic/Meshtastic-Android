@@ -65,7 +65,6 @@
     <string name="available_pins">Pines disponibles</string>
     <string name="bad">Mal</string>
     <string name="battery">Batería</string>
-    <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Configuración Bluetooth</string>
@@ -320,7 +319,6 @@ Rango de Valores 0 - 500.</string>
     <string name="ip">IP</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="ip_port">Puerto:</string>
-    <string name="json_output_enabled">Salida JSON activada</string>
     <!-- KEY -->
     <string name="last_heard_filter_label">Filtrar por tiempo de la última escucha: %1$s</string>
     <string name="last_position_update">Última actualización</string>
@@ -514,7 +512,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="open_settings">Abrir ajustes</string>
     <string name="options">Opciones</string>
     <string name="orient_north">Orientación norte</string>
-    <string name="override_console_serial_port">Sobreescribir el puerto serie de la consola</string>
     <!-- PACKET -->
     <string name="password">Contraseña</string>
     <!-- PAX -->
@@ -609,6 +606,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="reset">Reiniciar</string>
     <string name="reset_to_defaults">Restablecer los valores predeterminados</string>
     <string name="retry">Volver a intentar</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Tono de notificación</string>
     <!-- ROLE -->
     <string name="role">Rol del dispositivo</string>
@@ -687,7 +685,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="snr_definition">SNR: Ratio de señal a ruido, una medida utilizada en las comunicaciones para cuantificar el nivel de una señal deseada respecto al nivel del ruido de fondo. En Meshtastic y otros sistemas inalámbricos, un mayor SNR indica una señal más clara que puede mejorar la fiabilidad y la calidad de la transmisión de datos.</string>
     <string name="speed">Velocidad</string>
     <string name="stay_connected_anywhere">Manténgase conectado en cualquier lugar</string>
-    <string name="super_deep_sleep_duration_seconds">Duración del sueño súper profundo</string>
     <string name="supported">Soportado nativamente</string>
     <string name="supported_by_community">Apoyado por la comunidad Meshtastic</string>
     <string name="swipe_action_delete">Eliminar</string>

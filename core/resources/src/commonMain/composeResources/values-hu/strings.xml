@@ -68,7 +68,6 @@
     <string name="available_pins">Elérhető pinek</string>
     <string name="bad">Rossz</string>
     <string name="battery">Akkumulátor</string>
-    <string name="battery_ina_2xx_i2c_address">Akkumulátor INA_2XX I2C-cím</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Bluetooth beállítások</string>
@@ -304,7 +303,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP cím:</string>
     <string name="ip_port">Port:</string>
-    <string name="json_output_enabled">JSON kimenet engedélyezve</string>
     <!-- KEY -->
     <string name="last_heard_filter_label">Szűrés az utolsó észlelés ideje szerint: %1$s</string>
     <string name="last_position_update">Utolsó pozíciófrissítés</string>
@@ -409,7 +407,6 @@
     <string name="message_status_queued">Elküldésre vár</string>
     <string name="message_status_unknown">Ismeretlen</string>
     <string name="messages">Üzenetek</string>
-    <string name="minimum_wake_time_seconds">Minimális ébrenléti idő</string>
     <!-- MIRROR -->
     <string name="mirror_key_ok">OK</string>
     <string name="modem_preset">Előbeállítások</string>
@@ -503,7 +500,6 @@
     <string name="options">Beállítások</string>
     <string name="orient_north">Északra tájolás</string>
     <string name="overflow_menu">További menü</string>
-    <string name="override_console_serial_port">Konzol soros port felülbírálása</string>
     <!-- PACKET -->
     <string name="password">Jelszó</string>
     <!-- PAX -->
@@ -597,6 +593,7 @@
     <string name="resend">Újraküldés</string>
     <string name="reset">Újraindítás</string>
     <string name="reset_to_defaults">Alapértelmezett beállítások visszaállítása</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Csengőhang</string>
     <!-- ROLE -->
     <string name="role">Eszköz szerepköre</string>
@@ -680,7 +677,6 @@
     <string name="snr_definition">Jel–zaj arány (SNR): a kommunikációban a kívánt jel szintjének és a háttérzaj szintjének aránya. A Meshtastic és más vezeték nélküli rendszerek esetében a magasabb SNR tisztább jelet jelent, ami javítja az adatátvitel megbízhatóságát és minőségét.</string>
     <string name="speed">Sebesség</string>
     <string name="stay_connected_anywhere">Maradj kapcsolatban bárhol</string>
-    <string name="super_deep_sleep_duration_seconds">Szuper mélyalvás időtartama</string>
     <string name="supported">Támogatott</string>
     <string name="supported_by_community">Meshtastic közösség által támogatott</string>
     <string name="swipe_action_delete">Törlés</string>

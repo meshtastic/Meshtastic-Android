@@ -209,6 +209,7 @@
     <string name="resend">Reenviar</string>
     <string name="reset">Restablecer</string>
     <string name="reset_to_defaults">Restablecer a por defecto</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <string name="role_client">Cliente</string>
     <!-- ROUTING -->

@@ -125,7 +125,6 @@
     <string name="bad">差</string>
     <string name="baro_pressure">气压计</string>
     <string name="battery">电池</string>
-    <string name="battery_ina_2xx_i2c_address">电池INA_2XX I2C 地址</string>
     <string name="ble_devices">蓝牙设备</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">蓝牙</string>
@@ -740,7 +739,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">端口：</string>
-    <string name="json_output_enabled">启用JSON输出</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">密钥备份已删除</string>
@@ -954,7 +952,6 @@
     <string name="messages">消息</string>
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
-    <string name="minimum_wake_time_seconds">最小唤醒时间</string>
     <!-- MIRROR -->
     <string name="mirror_back">后退</string>
     <string name="mirror_key_down">下</string>
@@ -1129,7 +1126,6 @@
     <string name="options">选项</string>
     <string name="orient_north">朝北</string>
     <string name="overflow_menu">溢出菜单</string>
-    <string name="override_console_serial_port">覆盖控制台串口端口</string>
     <!-- PACKET -->
     <string name="packet_authenticity">数据包身份验证</string>
     <string name="packet_authenticity_balanced">平衡模式 —优先验证身份</string>
@@ -1280,6 +1276,7 @@
     <string name="restore_keys">恢复密钥</string>
     <string name="restore_keys_confirmation">将备份的公钥和私钥恢复到当前节点。</string>
     <string name="retry">重试</string>
+    <!-- RINGTONE -->
     <string name="ringtone">铃声</string>
     <string name="ringtone_file_empty">文件为空</string>
     <string name="ringtone_import_error">导入错误: %1$s</string>
@@ -1432,7 +1429,6 @@
     <string name="store_forward">存储 &amp; 转发</string>
     <string name="store_forward_config">存储 &amp; 转发配置</string>
     <string name="success">成功</string>
-    <string name="super_deep_sleep_duration_seconds">深度睡眠时间</string>
     <string name="supported">已支持</string>
     <string name="supported_by_community">由 Meshtastic 社区支持</string>
     <string name="swipe_action_delete">删除</string>

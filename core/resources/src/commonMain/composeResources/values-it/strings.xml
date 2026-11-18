@@ -122,7 +122,6 @@
     <string name="bad">Scarso</string>
     <string name="baro_pressure">Pressione atmosferica</string>
     <string name="battery">Batteria</string>
-    <string name="battery_ina_2xx_i2c_address">Indirizzo INA_2XX I2C della batteria</string>
     <string name="ble_devices">Dispositivi Bluetooth</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -730,7 +729,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="ip_port">Porta:</string>
-    <string name="json_output_enabled">Output JSON abilitato</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Backup delle chiavi eliminato</string>
@@ -945,7 +943,6 @@
     <string name="messages">Messaggi</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
-    <string name="minimum_wake_time_seconds">Tempo minimo di risveglio</string>
     <!-- MIRROR -->
     <string name="mirror_back">Indietro</string>
     <string name="mirror_key_ok">Ok</string>
@@ -1113,7 +1110,6 @@
     <string name="options">Opzioni</string>
     <string name="orient_north">Orientamento nord</string>
     <string name="overflow_menu">Menu di overflow</string>
-    <string name="override_console_serial_port">Sovrascrivi porta seriale della console</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Autenticità dei pacchetti</string>
     <string name="packet_authenticity_balanced">Bilanciato — Preferisci autenticati</string>
@@ -1267,6 +1263,7 @@
     <string name="restore_keys">Ripristina Chiavi</string>
     <string name="restore_keys_confirmation">Ripristina su questo nodo le chiavi pubblica e privata salvate nel backup.</string>
     <string name="retry">Riprova</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Suoneria</string>
     <string name="ringtone_file_empty">Il file è vuoto</string>
     <string name="ringtone_import_error">Errore durante l'importazione: %1$s</string>
@@ -1418,7 +1415,6 @@
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Configurazione Store &amp; Forward</string>
     <string name="success">Operazione riuscita</string>
-    <string name="super_deep_sleep_duration_seconds">Durata super deep sleep</string>
     <string name="supported">Supportato</string>
     <string name="supported_by_community">Supportato dalla comunità Meshtastic</string>
     <string name="swipe_action_delete">Elimina</string>
