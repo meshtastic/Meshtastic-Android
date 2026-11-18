@@ -23,6 +23,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.util.normalizeWebSocketUrl
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -92,13 +93,16 @@ abstract class BaseRadioTransportFactory(
                     )
                 }
 
-                // Common to every platform: the transport brings its own Ktor CIO client.
-                address.startsWith(InterfaceId.WEBSOCKET.id) ->
+                // Common to every platform: the transport brings its own Ktor CIO client. Normalizing here also gives a
+                // saved or linked bare `ws://host` firmware's path.
+                address.startsWith(InterfaceId.WEBSOCKET.id) -> {
+                    val url = address.removePrefix(InterfaceId.WEBSOCKET.id.toString())
                     WebSocketRadioTransport(
                         callback = service,
                         scope = service.serviceScope,
-                        url = address.removePrefix(InterfaceId.WEBSOCKET.id.toString()),
+                        url = normalizeWebSocketUrl(url) ?: url,
                     )
+                }
 
                 else -> createPlatformTransport(address, service)
             }

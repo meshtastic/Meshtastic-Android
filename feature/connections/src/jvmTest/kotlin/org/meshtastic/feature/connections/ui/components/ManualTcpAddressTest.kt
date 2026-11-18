@@ -18,7 +18,9 @@ package org.meshtastic.feature.connections.ui.components
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ManualTcpAddressTest {
 
@@ -66,8 +68,22 @@ class ManualTcpAddressTest {
     }
 
     @Test
+    fun aWebSocketUrlWithoutAPathGetsTheFirmwareEndpoint() {
+        assertEquals("wws://[fe80::1]:80/api/v1/ws", manualAddress("ws://[fe80::1]:80", "4403"))
+    }
+
+    @Test
+    fun anUppercaseSchemeIsAWebSocketUrlNotAnInvalidHost() {
+        assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("WS://192.168.1.20", "4403"))
+        assertTrue(isWebSocketEntry(" WSS://host"))
+        assertFalse(isWebSocketEntry("192.168.1.20"))
+    }
+
+    @Test
     fun aMalformedWebSocketUrlIsRejected() {
         assertNull(manualAddress("ws://", "4403"))
         assertNull(manualAddress("wss://host with space/api/v1/ws", "4403"))
+        assertNull(manualAddress("ws://host:70000/api/v1/ws", "4403"))
+        assertNull(manualAddress("ws://user@host/api/v1/ws", "4403"))
     }
 }

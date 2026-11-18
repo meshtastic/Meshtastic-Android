@@ -42,17 +42,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.isValidAddress
+import org.meshtastic.core.model.util.normalizeWebSocketUrl
 import org.meshtastic.core.network.repository.NetworkConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.ip_port
+import org.meshtastic.core.resources.websocket_port_in_url
 import org.meshtastic.feature.connections.TCP_DEVICE_PREFIX
 import org.meshtastic.feature.connections.WEBSOCKET_DEVICE_PREFIX
-import org.meshtastic.feature.connections.isWebSocketUrl
 
-/** Sheet for manually adding a TCP device by IP address and port. */
+/**
+ * Sheet for manually adding a network device: a host and port for TCP, or a `ws://` / `wss://` URL in the address field
+ * for firmware's WebSocket phone API, which disables the port field.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AddDeviceDialog(
@@ -73,7 +77,14 @@ internal fun AddDeviceDialog(
 internal fun AddDeviceForm(onCancel: () -> Unit, onClickAdd: (address: String, fullAddress: String) -> Unit) {
     val addressState = rememberTextFieldState("")
     val portState = rememberTextFieldState(NetworkConstants.SERVICE_PORT.toString())
-    val portOutOfRange = portState.text.toString().toIntOrNull()?.let { it !in VALID_PORTS } ?: false
+    val webSocket = isWebSocketEntry(addressState.text.toString())
+    val portOutOfRange = !webSocket && portState.text.toString().toIntOrNull()?.let { it !in VALID_PORTS } ?: false
+    val portHint: (@Composable () -> Unit)? =
+        if (webSocket) {
+            { Text(stringResource(Res.string.websocket_port_in_url)) }
+        } else {
+            null
+        }
 
     // Scrolls so a short window (landscape, large font) can still reach the actions.
     Column(
@@ -96,6 +107,8 @@ internal fun AddDeviceForm(onCancel: () -> Unit, onClickAdd: (address: String, f
             lineLimits = TextFieldLineLimits.SingleLine,
             label = { Text(stringResource(Res.string.ip_port)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+            enabled = !webSocket,
+            supportingText = portHint,
             isError = portOutOfRange,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -123,15 +136,18 @@ private val VALID_PORTS = 1..65535
 
 /**
  * The full address a manual entry adds, prefix included, or null when it can't be connected to. A `ws://` or `wss://`
- * URL in the address field is a WebSocket phone link, firmware's `/api/v1/ws`, taken as written with the port field
+ * URL in the address field is a WebSocket phone link, normalized by [normalizeWebSocketUrl] with the port field
  * ignored; anything else is a TCP host checked by [manualTcpAddress].
  */
 internal fun manualAddress(address: String, portText: String): String? {
-    val trimmed = address.trim()
-    if (trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true)) {
-        return trimmed.takeIf(::isWebSocketUrl)?.let { WEBSOCKET_DEVICE_PREFIX + it }
-    }
+    if (isWebSocketEntry(address)) return normalizeWebSocketUrl(address)?.let { WEBSOCKET_DEVICE_PREFIX + it }
     return manualTcpAddress(address, portText)?.let { TCP_DEVICE_PREFIX + it }
+}
+
+/** Whether the address field holds a `ws://` or `wss://` URL, which carries its own port. */
+internal fun isWebSocketEntry(address: String): Boolean {
+    val trimmed = address.trim()
+    return trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true)
 }
 
 /**
