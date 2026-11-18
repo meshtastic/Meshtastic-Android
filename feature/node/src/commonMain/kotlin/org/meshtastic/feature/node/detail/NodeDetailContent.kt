@@ -130,6 +130,7 @@ fun NodeDetailList(
                 ourNode = ourNode,
                 lastTracerouteTime = uiState.lastTracerouteTime,
                 lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
+                canRequestNeighborInfo = uiState.metricsState.canRequestNeighborInfo,
                 availableLogs = uiState.availableLogs,
                 onAction = onAction,
                 displayUnits = uiState.metricsState.displayUnits,

@@ -31,6 +31,11 @@ import org.meshtastic.proto.Telemetry
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
+    /**
+     * Whether the connected radio has the neighbor-info module enabled. Firmware drops every neighbor-info packet on a
+     * node with it off, including the reply to its own request, so the request is offered only when it is on.
+     */
+    val canRequestNeighborInfo: Boolean = false,
     val isFahrenheit: Boolean = false,
     val displayUnits: MeasurementSystem = MeasurementSystem.METRIC,
     val node: Node? = null,
@@ -72,7 +77,7 @@ data class MetricsState(
     fun hasTracerouteLogs() =
         tracerouteRequests.isNotEmpty() || tracerouteObserved.isNotEmpty() || tracerouteTracedBy.isNotEmpty()
 
-    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
+    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty() || neighborInfoResults.isNotEmpty()
 
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 
@@ -103,3 +108,47 @@ data class MetricsState(
         val Empty = MetricsState()
     }
 }
+
+/**
+ * Every request with the reply that answered it, plus neighbor info the node sent on its own - a broadcast, or the
+ * connected radio's periodic report to the app - newest first.
+ */
+fun MetricsState.neighborInfoEntries(): List<NeighborInfoEntry> {
+    val requested = neighborInfoRequests.map { request ->
+        val id = request.fromRadio.packet?.id
+        NeighborInfoEntry.Requested(
+            log = request,
+            reply = neighborInfoResults.find { it.fromRadio.packet?.decoded?.request_id == id },
+        )
+    }
+    // Only the report each request took is excluded, so a second copy answering the same request still shows.
+    val pairedReplies = requested.mapNotNull { it.reply?.uuid }.toSet()
+    val received = neighborInfoResults.filter { it.uuid !in pairedReplies }.map { NeighborInfoEntry.Received(it) }
+    return (requested + received).sortedByDescending { it.timeSeconds }
+}
+
+/** One row of the neighbor-info log. */
+sealed interface NeighborInfoEntry {
+    val log: MeshLog
+
+    /** The packet carrying the neighbor list, or null for a request nothing answered. */
+    val report: MeshLog?
+
+    /** When the neighbor list arrived, or when the request went out if it never did. */
+    val timeSeconds: Double
+        get() = (report ?: log).received_date / MS_PER_SEC_DOUBLE
+
+    /** A request we sent, with the reply if one came back. */
+    data class Requested(override val log: MeshLog, val reply: MeshLog?) : NeighborInfoEntry {
+        override val report: MeshLog?
+            get() = reply
+    }
+
+    /** Neighbor info that arrived without our asking. */
+    data class Received(override val log: MeshLog) : NeighborInfoEntry {
+        override val report: MeshLog
+            get() = log
+    }
+}
+
+private const val MS_PER_SEC_DOUBLE = 1000.0

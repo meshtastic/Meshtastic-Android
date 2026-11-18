@@ -112,6 +112,7 @@ fun TelemetricActionsSectionPreview() {
                 displayUnits = MeasurementSystem.METRIC,
                 isFahrenheit = false,
                 onAction = {},
+                canRequestNeighborInfo = true,
             )
         }
     }

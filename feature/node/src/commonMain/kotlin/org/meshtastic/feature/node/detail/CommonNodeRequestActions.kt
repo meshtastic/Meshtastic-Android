@@ -41,6 +41,7 @@ import org.meshtastic.core.resources.request_local_stats
 import org.meshtastic.core.resources.request_pax_metrics
 import org.meshtastic.core.resources.request_power_metrics
 import org.meshtastic.core.resources.requesting_from
+import org.meshtastic.core.resources.requesting_neighbor_info_from
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -95,7 +96,7 @@ constructor(
         Logger.i { "Requesting NeighborInfo for '$destNum'" }
         nakWatcher.watch(Res.string.neighbor_info, longName) { id -> radioController.requestNeighborInfo(id, destNum) }
         _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
-        showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
+        showFeedback(UiText.Resource(Res.string.requesting_neighbor_info_from, longName))
     }
 
     override suspend fun requestPosition(destNum: Int, longName: String, position: Position) = runRequest {

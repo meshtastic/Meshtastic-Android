@@ -1497,8 +1497,14 @@
     <string name="nearby_devices_permission">Nearby devices permission</string>
     <string name="need_hardware">Need Hardware?</string>
     <string name="need_hardware_description">Meshtastic requires a compatible device. Our backers and partners offer ready-to-use hardware. Here are some of the most popular options.</string>
+    <!-- NEIGHBOR -->
+    <string name="neighbor_count">Neighbors</string>
+    <string name="neighbor_count_description">How many nodes this node heard directly, as it reported them.</string>
     <string name="neighbor_info">Neighbor Info</string>
     <string name="neighbor_info_config">Neighbor Info Config</string>
+    <string name="neighbor_info_received">Received</string>
+    <string name="neighbor_mean_snr">Mean neighbor SNR</string>
+    <string name="neighbor_mean_snr_description">The average SNR at which this node heard its reported neighbors.</string>
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
@@ -1906,6 +1912,7 @@
     <string name="request_telemetry">Request Telemetry</string>
     <string name="request_user_info">Request User Info</string>
     <string name="requesting_from">Requesting %1$s from %2$s</string>
+    <string name="requesting_neighbor_info_from">Requesting neighbor info from %1$s. It only answers if its Neighbor Info module is enabled.</string>
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>
     <string name="reset_to_defaults">Reset to defaults</string>

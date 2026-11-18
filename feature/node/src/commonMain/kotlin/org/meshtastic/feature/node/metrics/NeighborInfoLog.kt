@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +26,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,9 +40,9 @@ import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
+import org.meshtastic.core.resources.neighbor_info_received
 import org.meshtastic.core.resources.routing_error_no_response
 import org.meshtastic.core.resources.success
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
@@ -56,12 +54,21 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.annotateNeighborInfo
 import org.meshtastic.feature.node.component.CooldownIconButton
+import org.meshtastic.feature.node.model.NeighborInfoEntry
+import org.meshtastic.feature.node.model.neighborInfoEntries
 
+/**
+ * Neighbor-info log with chart and list, built on [BaseMetricScreen]: our requests with their replies, and neighbor
+ * info the node sent on its own, newest first.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod")
 @Composable
-fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
+fun NeighborInfoLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$long_name ($short_name)" }
 
@@ -70,87 +77,100 @@ fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewM
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
     val statusRed = MaterialTheme.colorScheme.StatusRed
     val modemPreset = LocalModemPreset.current
+    val header = stringResource(Res.string.neighbor_info)
 
-    Scaffold(
-        topBar = {
-            val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
-            MainAppBar(
-                title = state.node?.effectiveLongName.orEmpty(),
-                subtitle = stringResource(Res.string.neighbor_info),
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onNavigateUp,
-                actions = {
-                    if (!state.isLocal) {
-                        CooldownIconButton(
-                            onClick = { viewModel.requestNeighborInfo() },
-                            cooldownTimestamp = lastRequestNeighborsTime,
-                        ) {
-                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
-                        }
-                    }
-                },
-                onClickChip = {},
+    val threshold = timeFrame.timeThreshold()
+    val entries =
+        remember(state.neighborInfoRequests, state.neighborInfoResults, threshold) {
+            state.neighborInfoEntries().filter { it.timeSeconds >= threshold }
+        }
+
+    BaseMetricScreen(
+        modifier = modifier,
+        onNavigateUp = onNavigateUp,
+        telemetryType = null,
+        titleRes = Res.string.neighbor_info,
+        nodeName = state.node?.effectiveLongName.orEmpty(),
+        data = entries,
+        timeProvider = { it.timeSeconds },
+        infoData = NEIGHBOR_INFO_INFO_DATA,
+        extraActions = {
+            if (!state.isLocal && state.canRequestNeighborInfo) {
+                CooldownIconButton(
+                    onClick = { viewModel.requestNeighborInfo() },
+                    cooldownTimestamp = lastRequestNeighborsTime,
+                ) {
+                    Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
+                }
+            }
+        },
+        controlPart = {
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
+                onTimeFrameSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-        ) {
-            items(state.neighborInfoRequests, key = { it.uuid }) { log ->
-                val result =
-                    remember(state.neighborInfoResults, log.fromRadio.packet?.id) {
-                        state.neighborInfoResults.find {
-                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
+        chartPart = { chartModifier, selectedX, vicoScrollState, onPointSelected ->
+            NeighborInfoChart(
+                entries = entries,
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onSelectPoint = onPointSelected,
+                modifier = chartModifier,
+            )
+        },
+        listPart = { listModifier, _, lazyListState, onCardClick ->
+            LazyColumn(modifier = listModifier.fillMaxSize(), state = lazyListState) {
+                items(entries, key = { it.log.uuid }) { entry ->
+                    val report = entry.report
+                    val time = DateFormatter.formatDateTime((report ?: entry.log).received_date)
+                    val text =
+                        when {
+                            entry is NeighborInfoEntry.Received -> stringResource(Res.string.neighbor_info_received)
+                            report != null -> stringResource(Res.string.success)
+                            else -> stringResource(Res.string.routing_error_no_response)
                         }
-                    }
+                    var expanded by remember { mutableStateOf(false) }
 
-                val time = DateFormatter.formatDateTime(log.received_date)
-                val text =
-                    if (result != null) {
-                        stringResource(Res.string.success)
-                    } else {
-                        stringResource(Res.string.routing_error_no_response)
-                    }
-                val icon = if (result != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff
-                val header = stringResource(Res.string.neighbor_info)
-                var expanded by remember { mutableStateOf(false) }
-
-                Box {
-                    MetricLogItem(
-                        icon = icon,
-                        text = "$time - $text",
-                        contentDescription = stringResource(Res.string.neighbor_info),
-                        modifier =
-                        Modifier.combinedClickable(onLongClick = { expanded = true }) {
-                            result
-                                ?.fromRadio
-                                ?.packet
-                                ?.getNeighborInfoResponse(::getUsername, header = header)
-                                ?.let {
-                                    val message =
-                                        annotateNeighborInfo(
-                                            it,
-                                            statusGreen = statusGreen,
-                                            statusYellow = statusYellow,
-                                            statusOrange = statusOrange,
-                                            statusRed = statusRed,
-                                            modemPreset = modemPreset,
-                                        )
-                                    viewModel.showLogDetail(Res.string.neighbor_info, message)
-                                }
-                        },
-                    )
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        DeleteItem {
-                            viewModel.deleteLog(log.uuid)
-                            expanded = false
+                    Box {
+                        MetricLogItem(
+                            icon = if (report != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff,
+                            text = "$time - $text",
+                            contentDescription = header,
+                            modifier =
+                            Modifier.combinedClickable(onLongClick = { expanded = true }) {
+                                onCardClick(entry.timeSeconds)
+                                report
+                                    ?.fromRadio
+                                    ?.packet
+                                    ?.getNeighborInfoResponse(::getUsername, header = header)
+                                    ?.let {
+                                        val message =
+                                            annotateNeighborInfo(
+                                                it,
+                                                statusGreen = statusGreen,
+                                                statusYellow = statusYellow,
+                                                statusOrange = statusOrange,
+                                                statusRed = statusRed,
+                                                modemPreset = modemPreset,
+                                            )
+                                        viewModel.showLogDetail(Res.string.neighbor_info, message)
+                                    }
+                            },
+                        )
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DeleteItem {
+                                // A request's reply goes too, or it would reappear as received.
+                                viewModel.deleteLog(entry.log.uuid)
+                                (entry as? NeighborInfoEntry.Requested)?.reply?.uuid?.let(viewModel::deleteLog)
+                                expanded = false
+                            }
                         }
                     }
                 }
             }
-        }
-    }
+        },
+    )
 }
