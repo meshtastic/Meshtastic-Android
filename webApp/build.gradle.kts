@@ -36,9 +36,17 @@ configureWasmToolingDownloads()
 val versionInfo = resolveVersionInfo()
 
 // ── Generate WebBuildConfig — mirrors desktopApp's generateDesktopBuildConfig ──
-@CacheableTask
+// Writing one small file is cheaper than a cache lookup, so the task is not cacheable.
 abstract class GenerateWebBuildConfigTask : DefaultTask() {
-    @get:Input abstract val content: Property<String>
+    @get:Input abstract val versionCode: Property<Int>
+
+    @get:Input abstract val versionName: Property<String>
+
+    @get:Input abstract val debug: Property<Boolean>
+
+    @get:Input abstract val minFwVersion: Property<String>
+
+    @get:Input abstract val absMinFwVersion: Property<String>
 
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
@@ -46,7 +54,27 @@ abstract class GenerateWebBuildConfigTask : DefaultTask() {
     fun generate() {
         val dir = outputDir.get().asFile
         dir.mkdirs()
-        dir.resolve("WebBuildConfig.kt").writeText(content.get())
+        dir.resolve("WebBuildConfig.kt")
+            .writeText(
+                """
+                |package org.meshtastic.web
+                |
+                |/**
+                | * Auto-generated build configuration for Meshtastic Web.
+                | * Do not edit — values are derived from config.properties and git at build time.
+                | */
+                |object WebBuildConfig {
+                |    const val VERSION_CODE: Int = ${versionCode.get()}
+                |    const val VERSION_NAME: String = "${versionName.get()}"
+                |    const val IS_DEBUG: Boolean = ${debug.get()}
+                |    const val APPLICATION_ID: String = "org.meshtastic.MeshtasticWeb"
+                |    const val MIN_FW_VERSION: String = "${minFwVersion.get()}"
+                |    const val ABS_MIN_FW_VERSION: String = "${absMinFwVersion.get()}"
+                |}
+                |
+                """
+                    .trimMargin(),
+            )
     }
 }
 
@@ -54,27 +82,13 @@ val buildConfigOutputDir = layout.buildDirectory.dir("generated/buildconfig")
 
 val generateWebBuildConfig =
     tasks.register<GenerateWebBuildConfigTask>("generateWebBuildConfig") {
-        content.set(
-            """
-            |package org.meshtastic.web
-            |
-            |/**
-            | * Auto-generated build configuration for Meshtastic Web.
-            | * Do not edit — values are derived from config.properties and git at build time.
-            | */
-            |object WebBuildConfig {
-            |    const val VERSION_CODE: Int = ${versionInfo.versionCode}
-            |    const val VERSION_NAME: String = "${versionInfo.versionName}"
-            |    const val IS_DEBUG: Boolean = ${providers.gradleProperty("web.release").map {
-                !it.toBoolean()
-            }.getOrElse(true)}
-            |    const val APPLICATION_ID: String = "org.meshtastic.MeshtasticWeb"
-            |    const val MIN_FW_VERSION: String = "${versionInfo.minFwVersion}"
-            |    const val ABS_MIN_FW_VERSION: String = "${versionInfo.absMinFwVersion}"
-            |}
-            """
-                .trimMargin(),
-        )
+        versionCode.set(versionInfo.versionCode)
+        versionName.set(versionInfo.versionName)
+        // Release unless -Pweb.release=false. The development and production executables link the same compilation,
+        // so a debug build cannot be tied to one distribution; asking for it is explicit.
+        debug.set(providers.gradleProperty("web.release").map { !it.toBoolean() }.orElse(false))
+        minFwVersion.set(versionInfo.minFwVersion)
+        absMinFwVersion.set(versionInfo.absMinFwVersion)
         outputDir.set(buildConfigOutputDir.map { it.dir("org/meshtastic/web") })
     }
 
