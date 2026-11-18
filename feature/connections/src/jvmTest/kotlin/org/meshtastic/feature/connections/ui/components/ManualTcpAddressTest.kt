@@ -80,6 +80,15 @@ class ManualTcpAddressTest {
     }
 
     @Test
+    fun aBareHostIsFirmwaresWebSocketWhereRawTcpCannotReach() {
+        assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("192.168.1.20", "", webSocketScheme = "ws"))
+        assertEquals("wwss://node.local:4404/api/v1/ws", manualAddress("node.local", "4404", webSocketScheme = "wss"))
+        assertEquals("wws://[fe80::1]/api/v1/ws", manualAddress("fe80::1", "", webSocketScheme = "ws"))
+        assertNull(manualAddress("192.168.1.20", "70000", webSocketScheme = "ws"))
+        assertNull(manualAddress("", "", webSocketScheme = "ws"))
+    }
+
+    @Test
     fun aMalformedWebSocketUrlIsRejected() {
         assertNull(manualAddress("ws://", "4403"))
         assertNull(manualAddress("wss://host with space/api/v1/ws", "4403"))
