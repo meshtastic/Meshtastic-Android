@@ -24,13 +24,10 @@ import org.koin.core.annotation.Single
 import org.w3c.dom.events.Event
 
 /**
- * Backed by the real, documented `navigator.onLine` property plus the `window` `online`/`offline` events (MDN:
- * https://developer.mozilla.org/en-US/docs/Web/API/Navigator/onLine) — both provided directly by `kotlinx-browser`,
- * with no custom `external`/`js()` interop needed.
+ * Backed by `navigator.onLine` plus the `window` `online`/`offline` events
+ * (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/onLine), both provided by `kotlinx-browser`.
  *
- * The listeners are stored in `val`s and the same references are passed to both `addEventListener` and
- * `removeEventListener` — the same identity-preserving idiom `WebBluetoothApi.kt`'s `addListener` helper already relies
- * on in this module's `core:ble` dependency.
+ * Each listener is held in a `val` so `removeEventListener` receives the same reference `addEventListener` did.
  */
 @Single(binds = [NetworkMonitor::class])
 class WebNetworkMonitor : NetworkMonitor {

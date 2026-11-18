@@ -22,14 +22,11 @@ import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 
 /**
- * Minimal wasmJs [DatabaseProvider]: exactly one real, persistent, OPFS-backed database — no multi-device switching, no
- * legacy-Android-DB migration, no cross-transport merge. Those are `DatabaseManager`'s job on android/jvm/iOS, and that
- * whole orchestrator is out of scope for a web client (no BLE/USB device-switching story exists there yet); it also
- * can't exist here at all, since it's built on `DataStore<Preferences>`, which has no wasmJs variant.
+ * wasmJs [DatabaseProvider]: one persistent, OPFS-backed database for every device, with no per-device switching,
+ * legacy-database migration or cross-transport merge. `DatabaseManager`, which does those on the other platforms, is
+ * built on `DataStore<Preferences>`, which has no wasmJs variant.
  *
- * The database opens lazily on first access (Koin instantiates this eagerly as a `@Single`, but opening a database is
- * not something a constructor should do) rather than behind any explicit lifecycle — wasmJs has exactly one caller path
- * today and nothing to defer against.
+ * The database opens on first access, not when Koin constructs this `@Single`.
  */
 @Single(binds = [DatabaseProvider::class])
 class SingleDatabaseProvider : DatabaseProvider {

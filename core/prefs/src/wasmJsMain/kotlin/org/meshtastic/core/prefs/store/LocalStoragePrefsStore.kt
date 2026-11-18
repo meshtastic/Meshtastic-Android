@@ -33,9 +33,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * every [edit] — `LocalStorageSnapshot` has no `equals` override, so each freshly-constructed instance is unequal by
  * reference to the last, which is exactly what [MutableStateFlow] needs to avoid conflating the update away.
  *
- * [DEFERRED]: same-tab writes are reflected immediately (every `edit()` publishes a new revision, and every read goes
- * straight to localStorage), but a write from another browser tab is not observed — that would need a
- * `window.onstorage` listener re-publishing a revision when this namespace's keys change, not attempted in this pass.
+ * Same-tab writes are reflected immediately. A write from another browser tab is not observed: [data] does not listen
+ * for `storage` events.
  */
 internal class LocalStoragePrefsStore(private val namespace: String) : PrefsStore {
     private val revision = MutableStateFlow(LocalStorageSnapshot(namespace))
@@ -75,8 +74,7 @@ private fun storageKey(namespace: String, key: PrefsKey<*>): String = "$namespac
 // element containing '|' itself would corrupt round-tripping; no current preference stores one.
 private const val SET_DELIMITER = "|"
 
-// Two returns only (ReturnCount limit 2): a failed numeric parse now flows through as a null `value` rather
-// than an early `return null` per branch — same behavior (T? already permits null), fewer exit points.
+// A value that fails to parse as its key's type reads as absent.
 @Suppress("UNCHECKED_CAST")
 private fun <T> decode(raw: String?, type: PrefsKeyType): T? {
     if (raw == null) return null
