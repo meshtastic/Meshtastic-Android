@@ -1506,6 +1506,7 @@
     <string name="nearby_devices_permission">Разрешение ближайших устройств</string>
     <string name="need_hardware">Нужно оборудование?</string>
     <string name="need_hardware_description">Meshtastic требует совместимое устройство. Наши спонсоры и партнёры предлагают готовое к использованию оборудование. Вот некоторые из самых популярных вариантов тут.</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Информация об окружении</string>
     <string name="neighbor_info_config">Настройки соседей</string>
     <string name="network">Сеть</string>

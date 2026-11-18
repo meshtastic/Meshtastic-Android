@@ -903,6 +903,7 @@
     <string name="name_cannot_be_empty">Le nom ne peut pas être vide.</string>
     <string name="navigate_back">Précédent</string>
     <string name="navigate_into_label">Naviguer vers</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informations sur les voisins</string>
     <string name="neighbor_info_config">Configuration des informations du voisinage</string>
     <string name="network">Réseau</string>

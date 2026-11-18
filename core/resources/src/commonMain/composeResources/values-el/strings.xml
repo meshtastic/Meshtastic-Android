@@ -176,6 +176,7 @@
     <string name="mute_always">Πάντα</string>
     <string name="mute_notifications">Σίγαση ειδοποιήσεων</string>
     <string name="name">Ονομα</string>
+    <!-- NEIGHBOR -->
     <string name="network">Δίκτυο</string>
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
     <!-- NO -->

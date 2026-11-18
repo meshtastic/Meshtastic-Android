@@ -153,6 +153,7 @@
     <string name="mute_always">Sempre</string>
     <string name="mute_notifications">Silenciar notificacions</string>
     <string name="name">Nom</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
     <!-- NO -->
     <!-- NODE -->

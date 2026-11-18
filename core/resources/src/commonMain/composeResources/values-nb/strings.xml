@@ -178,6 +178,7 @@
     <string name="mute_notifications">Demp varsler</string>
     <string name="name">Navn</string>
     <string name="navigate_back">Gå tilbake</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
     <!-- NO -->
     <!-- NODE -->

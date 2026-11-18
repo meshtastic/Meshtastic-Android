@@ -406,6 +406,7 @@
     <string name="name_cannot_be_empty">Nome não pode estar vazio.</string>
     <string name="navigate_back">Voltar</string>
     <string name="navigate_into_label">Navegar Em</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informações do Vizinho</string>
     <string name="neighbor_info_config">Configuração de Inform. do Vizinho</string>
     <string name="network">Rede</string>

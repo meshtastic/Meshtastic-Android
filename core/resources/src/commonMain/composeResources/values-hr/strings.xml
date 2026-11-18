@@ -158,6 +158,7 @@
     <string name="mute_always">Uvijek</string>
     <string name="mute_notifications">Isključi obavijesti</string>
     <string name="name">Ime</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
     <!-- NO -->
     <!-- NODE -->

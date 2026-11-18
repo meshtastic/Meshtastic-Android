@@ -1044,6 +1044,7 @@
     <string name="nearby_devices_permission">Oprávnění k zařízením v okolí</string>
     <string name="need_hardware">Potřebujete zařízení?</string>
     <string name="need_hardware_description">Pro používání Meshtastic potřebujete kompatibilní zařízení. Naši podporovatelé a partneři nabízejí zařízení připravená k použití. Zde jsou některé z nejoblíbenějších možností.</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informace o sousedech</string>
     <string name="neighbor_info_config">Nastavení informace o sousedech</string>
     <string name="network">Síť</string>

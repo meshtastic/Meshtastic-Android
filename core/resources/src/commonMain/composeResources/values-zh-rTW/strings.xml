@@ -851,6 +851,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="name_cannot_be_empty">名稱不得空白。</string>
     <string name="navigate_back">返回上一頁</string>
     <string name="navigate_into_label">導航至</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">相鄰設備資訊</string>
     <string name="neighbor_info_config">鄰居資訊配置</string>
     <string name="network">網路</string>

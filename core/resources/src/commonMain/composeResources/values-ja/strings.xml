@@ -992,6 +992,7 @@
     <string name="name_cannot_be_empty">名前を空にすることはできません。</string>
     <string name="navigate_back">前に戻る</string>
     <string name="navigate_into_label">ナビゲートする</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">隣接ノード情報</string>
     <string name="neighbor_info_config">近隣ノード情報  (Neighbor Info) の設定</string>
     <string name="network">ネットワーク</string>

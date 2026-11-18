@@ -708,6 +708,7 @@
     <string name="mute_notifications">Silenciar notificações</string>
     <string name="name">Nome</string>
     <string name="navigate_back">Retroceder</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informações da vizinhança</string>
     <string name="neighbor_info_config">Configuração de informações dos vizinhos</string>
     <string name="network">Rede</string>

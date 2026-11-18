@@ -276,6 +276,7 @@
     <string name="mute_notifications">Stlmiť notifikácie</string>
     <string name="name">Názov</string>
     <string name="navigate_back">Navigovať späť</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informácia o susedoch</string>
     <string name="network">Sieť</string>
     <string name="new_channel_rcvd">Prijatá nová URL kanálu</string>
