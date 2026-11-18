@@ -1141,6 +1141,7 @@
     <!-- NEIGHBOR -->
     <string name="neighbor_info">Naapuritieto</string>
     <string name="neighbor_info_config">Naapuritietojen asetukset</string>
+    <string name="neighbor_info_received">Vastaanotettu</string>
     <string name="network">Verkko</string>
     <string name="new_channel_rcvd">Uusi kanavan URL-osoite vastaanotettu</string>
     <string name="new_messages_below">Uudet viestit alla</string>

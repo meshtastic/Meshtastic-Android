@@ -854,6 +854,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <!-- NEIGHBOR -->
     <string name="neighbor_info">相鄰設備資訊</string>
     <string name="neighbor_info_config">鄰居資訊配置</string>
+    <string name="neighbor_info_received">已接收</string>
     <string name="network">網路</string>
     <string name="new_channel_rcvd">收到新的頻道 URL</string>
     <string name="new_messages_below">下方有新的訊息</string>
