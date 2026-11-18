@@ -69,10 +69,7 @@ suspend fun writeWebFile(uri: CommonUri, bytes: ByteArray): Boolean = when (val 
         true
     }
 
-    is WebFileTarget.SaveHandle -> {
-        writeToHandle(target.handle, bytes.toInt8Array()).await<JsAny?>()
-        true
-    }
+    is WebFileTarget.SaveHandle -> writeToHandle(target.handle, bytes.toInt8Array()).await<JsBoolean>().toBoolean()
 
     is WebFileTarget.Picked,
     null,
@@ -138,8 +135,9 @@ private fun pickedHandle(result: JsAny): JsAny? = js("result.handle || null")
 
 private fun pickAborted(result: JsAny): Boolean = js("result.aborted === true")
 
-private fun writeToHandle(handle: JsAny, bytes: Int8Array): Promise<JsAny?> =
-    js("handle.createWritable().then((w) => w.write(bytes).then(() => w.close()))")
+/** Resolves true once the file is written and closed, false when the browser refused any step; never rejects. */
+private fun writeToHandle(handle: JsAny, bytes: Int8Array): Promise<JsBoolean> =
+    js("handle.createWritable().then((w) => w.write(bytes).then(() => w.close())).then(() => true, () => false)")
 
 private fun downloadBytes(bytes: Int8Array, name: String, mime: String) {
     js(
