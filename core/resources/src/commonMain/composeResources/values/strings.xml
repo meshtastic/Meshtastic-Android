@@ -2051,6 +2051,7 @@
     <string name="selected">Selected</string>
     <string name="selected_map_type">Selected Map Type</string>
     <string name="send">Send</string>
+    <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Serial Config</string>
     <string name="session_active">Session active</string>
@@ -2368,8 +2369,12 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
+    <!-- WEB -->
+    <string name="web_bluetooth_unsupported">This browser has no Bluetooth access. Bluetooth works in Chrome, Edge and Opera on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on.</string>
     <string name="web_database_busy">Meshtastic is open in another tab. Close that tab and this one continues on its own.</string>
     <string name="web_database_unavailable">This browser does not let Meshtastic store its data here. Private windows often block it; try a regular window.</string>
+    <string name="web_serial_unsupported">This browser has no USB serial access. USB works in Chrome, Edge and Opera on a computer.</string>
+    <string name="web_transports_unsupported">This browser can't connect to a radio. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
     <string name="website">Website</string>
     <string name="weight">Weight</string>
     <string name="what_is_meshtastic">What is Meshtastic?</string>

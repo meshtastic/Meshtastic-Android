@@ -21,16 +21,21 @@ package org.meshtastic.core.ui.util
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.platform.LocalClipboard
+import co.touchlab.kermit.Logger
 import kotlinx.browser.window
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
+import kotlin.js.Promise
 
 // Android system-settings concepts have no browser equivalent, so these mirror the iOS no-ops.
 
@@ -95,7 +100,38 @@ actual val bleScanRequiresLocationServices: Boolean = false
 
 @Composable actual fun isGpsDisabled(): Boolean = false
 
-@Composable actual fun isBluetoothSupported(): Boolean = true
+/** Web Bluetooth where the browser has it and, where it can say, a Bluetooth adapter to use. */
+@Composable
+actual fun isBluetoothSupported(): Boolean {
+    val present = remember { webBluetoothAvailable() }
+    val adapter by produceState(initialValue = present) { value = present && webBluetoothAdapterAvailable() }
+    return adapter
+}
+
+/** Whether this browser has Web Bluetooth at all. Firefox, Safari and Chrome on Linux without its flag do not. */
+fun webBluetoothAvailable(): Boolean = js("typeof navigator !== 'undefined' && !!navigator.bluetooth")
+
+/** Whether this browser has Web Serial: Chrome, Edge and Opera on a computer. */
+fun webSerialAvailable(): Boolean = js("typeof navigator !== 'undefined' && !!navigator.serial")
+
+private fun bluetoothAvailabilityOrNull(): Promise<JsBoolean>? = js(
+    "navigator.bluetooth && typeof navigator.bluetooth.getAvailability === 'function' " +
+        "? navigator.bluetooth.getAvailability() : null",
+)
+
+/** `getAvailability()`, false with no usable adapter; true where the browser cannot tell, as the chooser still can. */
+@Suppress("TooGenericExceptionCaught")
+private suspend fun webBluetoothAdapterAvailable(): Boolean {
+    val availability = bluetoothAvailabilityOrNull() ?: return true
+    return try {
+        availability.await<JsBoolean>().toBoolean()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Throwable) {
+        Logger.d(e) { "Web Bluetooth getAvailability() rejected" }
+        true
+    }
+}
 
 @Composable actual fun isBluetoothDisabled(): Boolean = false
 

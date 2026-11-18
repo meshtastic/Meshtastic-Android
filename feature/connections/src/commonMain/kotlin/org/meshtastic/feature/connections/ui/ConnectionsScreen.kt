@@ -163,6 +163,7 @@ import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
 import org.meshtastic.proto.Config
 
@@ -659,15 +660,17 @@ fun ConnectionsScreen(
 
             // Transport selector sits between the connection card and device list; it controls only the
             // visible discovery pane, not the globally selected/connected device shown above.
-            // With Network as the only pane left, a one-segment control would select nothing.
-            if (scanModel.bluetoothSupported || scanModel.usbSupported) {
+            // With one pane left, a one-segment control would select nothing.
+            if (scanModel.availableTransports.size > 1) {
                 TransportSelector(
                     activeTransport = activeTransport,
                     onSelectTransport = scanModel::selectTransport,
                     showBluetooth = scanModel.bluetoothSupported,
                     showUsb = scanModel.usbSupported,
+                    showNetwork = scanModel.networkSupported,
                 )
             }
+            scanModel.unsupportedTransportNotice?.let { TransportUnsupportedCard(message = stringResource(it)) }
 
             // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
             // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
@@ -864,6 +867,7 @@ fun ConnectionsScreen(
                     } else {
                         null
                     },
+                    showTransportPane = scanModel.availableTransports.isNotEmpty(),
                 )
             }
 

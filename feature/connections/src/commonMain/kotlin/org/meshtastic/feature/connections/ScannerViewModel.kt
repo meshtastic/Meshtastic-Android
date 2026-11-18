@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
@@ -169,9 +170,24 @@ open class ScannerViewModel(
     val bluetoothSupported: Boolean = true,
     /** False on hardware with no USB host: the USB pane is hidden and never selected. */
     val usbSupported: Boolean = true,
+    /** False where the transport factory cannot open TCP: the Network pane is hidden and no address is saved. */
+    val networkSupported: Boolean = true,
     /** Set where a USB device must be requested explicitly, as with Web Serial. */
     private val usbScanner: UsbScanner? = null,
 ) : ViewModel() {
+
+    /** A card naming which transports this platform lacks and where to find them, or null when it needs none. */
+    open val unsupportedTransportNotice: StringResource? = null
+
+    /** The transport panes this platform can use, in selector order. Empty when none can reach a radio. */
+    val availableTransports: List<DeviceType> =
+        DeviceType.entries.filter {
+            when (it) {
+                DeviceType.BLE -> bluetoothSupported
+                DeviceType.TCP -> networkSupported
+                DeviceType.USB -> usbSupported
+            }
+        }
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
 
@@ -385,11 +401,11 @@ open class ScannerViewModel(
 
     /**
      * The currently-selected device address, or `null` when nothing is selected. A BLE address on hardware without
-     * Bluetooth LE, or a serial address on hardware without USB host, reads as `null`: the radio service keeps it saved
-     * but it can never connect.
+     * Bluetooth LE, a serial address on hardware without USB host, or a TCP address where TCP cannot open, reads as
+     * `null`: the radio service keeps it saved but it can never connect.
      */
     val selectedAddressFlow: StateFlow<String?> =
-        if (bluetoothSupported && usbSupported) {
+        if (bluetoothSupported && usbSupported && networkSupported) {
             radioInterfaceService.currentDeviceAddressFlow
         } else {
             // Eager so the auto-scan checks that read `.value` see the masked address without a subscriber.
@@ -404,7 +420,10 @@ open class ScannerViewModel(
         }
 
     private fun isUnsupportedAddress(address: String?): Boolean = (!bluetoothSupported && isBleAddress(address)) ||
-        (!usbSupported && address?.firstOrNull() == InterfaceId.SERIAL.id)
+        (!usbSupported && address?.firstOrNull() == InterfaceId.SERIAL.id) ||
+        (!networkSupported && isTcpAddress(address))
+
+    private fun isTcpAddress(address: String?): Boolean = address?.firstOrNull() == InterfaceId.TCP.id
 
     /** The persisted device name from the last selection, for use as a UI fallback. */
     val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
@@ -438,8 +457,7 @@ open class ScannerViewModel(
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
-        if (type == DeviceType.BLE && !bluetoothSupported) return
-        if (type == DeviceType.USB && !usbSupported) return
+        if (type !in availableTransports) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
@@ -647,7 +665,7 @@ open class ScannerViewModel(
      * cancels any active BLE scan first.
      */
     fun startNetworkScan() {
-        if (_isNetworkScanning.value) return
+        if (_isNetworkScanning.value || !networkSupported) return
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopBleScan()
         _isNetworkScanning.value = true
@@ -725,10 +743,10 @@ open class ScannerViewModel(
 
     /**
      * Persists [address] in the recent-TCP list under [name]. No-op when [address] does not start with
-     * [TCP_DEVICE_PREFIX].
+     * [TCP_DEVICE_PREFIX], or where TCP cannot open.
      */
     fun addRecentAddress(address: String, name: String) {
-        if (!address.startsWith(TCP_DEVICE_PREFIX)) return
+        if (!address.startsWith(TCP_DEVICE_PREFIX) || !networkSupported) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
@@ -743,6 +761,7 @@ open class ScannerViewModel(
      * BLE/network scan for radio resources.
      */
     fun connectToManualAddress(fullAddress: String) {
+        if (!networkSupported) return
         val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
         stopAllScans()
         uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
@@ -755,6 +774,7 @@ open class ScannerViewModel(
      * pairing request with [pin] (see [blePairingPinFor]); every other address connects directly.
      */
     fun connectToLinkedAddress(address: String, pin: String?) {
+        if (!networkSupported && isTcpAddress(address)) return
         val linkPin = blePairingPinFor(address, pin)
         if (linkPin == null) {
             changeDeviceAddress(address)
@@ -773,6 +793,7 @@ open class ScannerViewModel(
      * @return `true` if the connection has been initiated; `false` if bonding/permission is pending.
      */
     fun onSelected(entry: DeviceListEntry): Boolean {
+        if (entry is DeviceListEntry.Tcp && !networkSupported) return false
         // Stop discovery the moment the user picks a device, before any connection setup runs. The connect
         // attempt (BLE GATT or TCP) contends with an active BLE scan for the same radio resources during the
         // handshake; cancelling here keeps the lifecycle ordered: scan → stop → connect.
@@ -902,12 +923,13 @@ open class ScannerViewModel(
     }
 
     private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType {
-        // A persisted pane or a restored address can still name a transport this hardware lacks; Network always works.
+        // A persisted pane or a restored address can still name a transport this platform lacks. Network is the
+        // fallback where it exists; with no transport at all the screen shows no pane, so the value is moot.
         val resolved = preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
         return when {
-            resolved == DeviceType.BLE && !bluetoothSupported -> DeviceType.TCP
-            resolved == DeviceType.USB && !usbSupported -> DeviceType.TCP
-            else -> resolved
+            resolved in availableTransports -> resolved
+            DeviceType.TCP in availableTransports -> DeviceType.TCP
+            else -> availableTransports.firstOrNull() ?: resolved
         }
     }
 

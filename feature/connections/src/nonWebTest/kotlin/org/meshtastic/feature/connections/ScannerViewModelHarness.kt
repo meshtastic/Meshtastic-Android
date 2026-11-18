@@ -47,6 +47,7 @@ import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
 import org.meshtastic.feature.connections.data.RecentAddressesSource
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -145,22 +146,28 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      * Build the platform-neutral [ScannerViewModel]. Call only after `Dispatchers.setMain(testDispatcher)` because the
      * ViewModel's `init` launches work on `viewModelScope` (Main).
      */
-    fun buildBase(bluetoothSupported: Boolean = true, usbSupported: Boolean = true): ScannerViewModel =
-        ScannerViewModel(
-            serviceRepository = serviceRepository,
-            radioController = radioController,
-            radioInterfaceService = radioInterfaceService,
-            radioPrefs = radioPrefs,
-            recentAddressesDataSource = recentAddressesDataSource,
-            getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-            networkRepository = networkRepository,
-            dispatchers = dispatchers,
-            uiPrefs = uiPrefs,
-            firmwareRecoveryDataSource = firmwareRecoveryDataSource,
-            bleScanner = bleScanner,
-            bluetoothSupported = bluetoothSupported,
-            usbSupported = usbSupported,
-        )
+    fun buildBase(
+        bluetoothSupported: Boolean = true,
+        usbSupported: Boolean = true,
+        networkSupported: Boolean = true,
+        usbScanner: UsbScanner? = null,
+    ): ScannerViewModel = ScannerViewModel(
+        serviceRepository = serviceRepository,
+        radioController = radioController,
+        radioInterfaceService = radioInterfaceService,
+        radioPrefs = radioPrefs,
+        recentAddressesDataSource = recentAddressesDataSource,
+        getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+        networkRepository = networkRepository,
+        dispatchers = dispatchers,
+        uiPrefs = uiPrefs,
+        firmwareRecoveryDataSource = firmwareRecoveryDataSource,
+        bleScanner = bleScanner,
+        bluetoothSupported = bluetoothSupported,
+        usbSupported = usbSupported,
+        networkSupported = networkSupported,
+        usbScanner = usbScanner,
+    )
 
     /**
      * Ends [viewModel]'s lifetime. Call from `@AfterTest` **before** `Dispatchers.resetMain()`.

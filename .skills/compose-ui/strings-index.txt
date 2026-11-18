@@ -1497,6 +1497,8 @@ no_network_devices_seen
 no_pax_metrics_logs
 no_public_key
 no_public_key_text
+no_serial_ports_allowed
+no_serial_ports_allowed_hint
 no_usb_devices_found
 no_usb_devices_hint
 no_usb_devices_seen
@@ -1979,8 +1981,12 @@ select_all
 selected
 selected_map_type
 send
+### SERIAL ###
 serial
 serial_config
+serial_port_chip
+serial_port_unknown
+serial_port_usb_ids
 session_active
 session_refresh_required
 set_display_name
@@ -2010,6 +2016,7 @@ shared_contact_no_public_key
 short_name
 ### SHOW ###
 show_all_key_title
+show_all_serial_ports
 show_full_message_timestamps
 show_full_message_timestamps_summary
 show_iaq_legend
@@ -2281,8 +2288,12 @@ waypoint_delete
 waypoint_edit
 waypoint_new
 waypoint_received
+### WEB ###
+web_bluetooth_unsupported
 web_database_busy
 web_database_unavailable
+web_serial_unsupported
+web_transports_unsupported
 website
 weight
 what_is_meshtastic

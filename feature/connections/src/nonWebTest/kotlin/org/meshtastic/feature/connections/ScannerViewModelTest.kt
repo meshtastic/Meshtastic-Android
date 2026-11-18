@@ -1122,6 +1122,61 @@ class ScannerViewModelTest {
         assertEquals("t192.168.1.99", radioController.lastSetDeviceAddress)
     }
 
+    // ── Platforms without TCP (the browser) ──────────────────────────────────────────────────
+
+    @Test
+    fun `without TCP the Network pane is never available or selected`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            assertEquals(listOf(DeviceType.BLE, DeviceType.USB), noNetwork.availableTransports)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+
+            noNetwork.selectTransport(DeviceType.TCP)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `without TCP a manual address is neither saved nor connected`() = runTest {
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            noNetwork.connectToManualAddress("t192.168.1.50")
+            noNetwork.onSelected(DeviceListEntry.Tcp(name = "Node", fullAddress = "t192.168.1.51"))
+            testScheduler.advanceUntilIdle()
+
+            assertNull(radioController.lastSetDeviceAddress)
+            verifySuspend(mode = VerifyMode.exactly(0)) { harness.recentAddressesDataSource.add(any()) }
+            assertEquals(false, noNetwork.isNetworkScanning.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `without TCP a saved TCP address reads as no device`() {
+        harness.currentDeviceAddressFlow.value = "t192.168.1.50"
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            assertNull(noNetwork.selectedAddressFlow.value)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `with no transport at all nothing is available`() {
+        val none = harness.buildBase(bluetoothSupported = false, usbSupported = false, networkSupported = false)
+        try {
+            assertEquals(emptyList(), none.availableTransports)
+        } finally {
+            harness.clearViewModel(none)
+        }
+    }
+
     private fun failingScanFlow() = flow<BleDevice> {
         throw BleScanStartException(
             reason = BleScanStartFailureReason.ApplicationRegistrationFailed,

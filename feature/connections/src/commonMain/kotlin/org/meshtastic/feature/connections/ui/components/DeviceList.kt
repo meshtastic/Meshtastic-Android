@@ -113,6 +113,7 @@ fun DeviceList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: (@Composable () -> Unit)? = null,
     onRequestUsbDevice: (() -> Unit)? = null,
+    showTransportPane: Boolean = true,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -143,38 +144,41 @@ fun DeviceList(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         header?.let { item(key = "header:connection", contentType = "connection") { it() } }
-        when (activeTransport) {
-            DeviceType.BLE ->
-                bluetoothSection(
-                    bleDevices = bleDevices,
-                    connectionState = connectionState,
-                    selectedDevice = selectedDevice,
-                    isBleScanning = isBleScanning,
-                    onSelectDevice = onSelectDevice,
-                    onToggleBleScan = onToggleBleScan,
-                )
+        // With no transport this platform can use, an empty pane would only offer actions that cannot work.
+        if (showTransportPane) {
+            when (activeTransport) {
+                DeviceType.BLE ->
+                    bluetoothSection(
+                        bleDevices = bleDevices,
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        isBleScanning = isBleScanning,
+                        onSelectDevice = onSelectDevice,
+                        onToggleBleScan = onToggleBleScan,
+                    )
 
-            DeviceType.TCP ->
-                networkSection(
-                    discoveredTcpDevices = discoveredTcpDevices,
-                    recentTcpDevices = recentTcpDevices,
-                    connectionState = connectionState,
-                    selectedDevice = selectedDevice,
-                    isNetworkScanning = isNetworkScanning,
-                    onSelectDevice = onSelectDevice,
-                    onToggleNetworkScan = onToggleNetworkScan,
-                    onAddManually = { showAddDialog = true },
-                    onRemoveRecentAddress = onRemoveRecentAddress,
-                )
+                DeviceType.TCP ->
+                    networkSection(
+                        discoveredTcpDevices = discoveredTcpDevices,
+                        recentTcpDevices = recentTcpDevices,
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        isNetworkScanning = isNetworkScanning,
+                        onSelectDevice = onSelectDevice,
+                        onToggleNetworkScan = onToggleNetworkScan,
+                        onAddManually = { showAddDialog = true },
+                        onRemoveRecentAddress = onRemoveRecentAddress,
+                    )
 
-            DeviceType.USB ->
-                usbSection(
-                    usbDevices = usbDevices,
-                    connectionState = connectionState,
-                    selectedDevice = selectedDevice,
-                    onSelectDevice = onSelectDevice,
-                    onRequestUsbDevice = onRequestUsbDevice,
-                )
+                DeviceType.USB ->
+                    usbSection(
+                        usbDevices = usbDevices,
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        onSelectDevice = onSelectDevice,
+                        onRequestUsbDevice = onRequestUsbDevice,
+                    )
+            }
         }
         if (virtualDevices.isNotEmpty()) {
             virtualSection(
