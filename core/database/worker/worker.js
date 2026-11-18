@@ -64,7 +64,8 @@ function poolHas(path) {
 
 /**
  * Moves the database the old `opfs` VFS kept at the OPFS root into the pool, once. A non-empty hot journal beside it
- * means a write was cut off; the legacy files then stay in place so nothing is lost for good.
+ * means a write was cut off and the main file alone is torn; nothing is imported then, and the legacy files stay in
+ * place so nothing is lost for good.
  */
 async function migrateLegacyOpfs(path) {
   if (poolHas(path)) return;
@@ -79,11 +80,6 @@ async function migrateLegacyOpfs(path) {
     if (error.name === "NotFoundError" || error.name === "TypeMismatchError") return;
     throw error;
   }
-  const bytes = new Uint8Array(await (await handle.getFile()).arrayBuffer());
-  if (bytes.byteLength > 0) {
-    pool.importDb(path, bytes);
-    console.info(`Migrated ${bytes.byteLength} bytes of ${path} from the opfs VFS into opfs-sahpool`);
-  }
   let hotJournal = false;
   try {
     const journal = await (await dir.getFileHandle(name + "-journal")).getFile();
@@ -92,8 +88,13 @@ async function migrateLegacyOpfs(path) {
     // No journal.
   }
   if (hotJournal) {
-    console.warn(`Kept the legacy ${path} and its journal: the old VFS left a write unfinished`);
+    console.warn(`Kept the legacy ${path} and its journal unimported: the old VFS left a write unfinished`);
     return;
+  }
+  const bytes = new Uint8Array(await (await handle.getFile()).arrayBuffer());
+  if (bytes.byteLength > 0) {
+    pool.importDb(path, bytes);
+    console.info(`Migrated ${bytes.byteLength} bytes of ${path} from the opfs VFS into opfs-sahpool`);
   }
   for (const legacy of [name, name + "-journal"]) await dir.removeEntry(legacy).catch(() => {});
 }
