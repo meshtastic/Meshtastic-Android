@@ -14,13 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "UnusedParameter")
 
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalClipboard
 import kotlinx.browser.window
 import kotlinx.coroutines.CancellationException
@@ -31,7 +34,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
 import kotlin.js.Promise
 
-// Android system-settings and native-picker concepts have no browser equivalent, so these mirror the iOS no-ops.
+// Android system-settings concepts have no browser equivalent, so these mirror the iOS no-ops.
 
 @Composable actual fun rememberOpenNfcSettings(): () -> Unit = {}
 
@@ -52,13 +55,49 @@ actual fun rememberShareText(): (text: String, subject: String) -> Unit {
 /** Web — opens the URL in a new browser tab via `window.open`, so the running app's own tab/state is left intact. */
 @Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { url -> window.open(url, "_blank", "") }
 
+/** URI scheme of a save target: the web `FileService` turns what is written to it into a download of that name. */
+const val WEB_DOWNLOAD_SCHEME: String = "download"
+
+/** A browser has no save dialog everywhere, so the file goes to the downloads folder under [defaultFilename]. */
 @Composable
 actual fun rememberSaveFileLauncher(
     onUriReceived: (CommonUri) -> Unit,
-): (defaultFilename: String, mimeType: String) -> Unit = { _, _ -> }
+): (defaultFilename: String, mimeType: String) -> Unit {
+    val callback by rememberUpdatedState(onUriReceived)
+    return remember {
+        { fileName, _ -> callback(CommonUri.parse("$WEB_DOWNLOAD_SCHEME:${CommonUri.encode(fileName)}")) }
+    }
+}
 
+/** Opens the browser's file picker and hands back a `blob:` URL for the picked file, or null when cancelled. */
 @Composable
-actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit = { _ -> }
+actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
+    val callback by rememberUpdatedState(onUriReceived)
+    return remember {
+        { mimeType ->
+            // A generic type would hide files the browser cannot type, such as a .db backup.
+            val accept = mimeType.takeUnless { it == GENERIC_MIME_TYPE || it == ANY_MIME_TYPE }.orEmpty()
+            pickFile(accept) { url -> callback(url?.let(CommonUri::parse)) }
+        }
+    }
+}
+
+private const val GENERIC_MIME_TYPE = "application/octet-stream"
+private const val ANY_MIME_TYPE = "*/*"
+
+private fun pickFile(accept: String, onPicked: (String?) -> Unit): Unit = js(
+    """{
+        const input = document.createElement("input");
+        input.type = "file";
+        if (accept) input.accept = accept;
+        input.addEventListener("change", () => {
+            const file = input.files && input.files[0];
+            onPicked(file ? URL.createObjectURL(file) : null);
+        });
+        input.addEventListener("cancel", () => onPicked(null));
+        input.click();
+    }""",
+)
 
 @Composable actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {}
 

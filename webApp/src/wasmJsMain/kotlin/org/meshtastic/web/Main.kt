@@ -17,20 +17,37 @@
 package org.meshtastic.web
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.plugin.module.dsl.startKoin
+import org.meshtastic.core.database.WebDatabaseAccess
+import org.meshtastic.core.database.webDatabaseAccess
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.web_database_busy
+import org.meshtastic.core.resources.web_database_unavailable
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -44,9 +61,36 @@ fun main() {
     Logger.i { "Meshtastic Web — Starting" }
 
     ComposeViewport("webApp") {
-        val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-        MeshServiceLifecycle()
-        ThemeAndContent(uiViewModel)
+        val access by webDatabaseAccess.collectAsState()
+        when (access) {
+            WebDatabaseAccess.Ready -> {
+                val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+                MeshServiceLifecycle()
+                ThemeAndContent(uiViewModel)
+            }
+
+            WebDatabaseAccess.Busy -> DatabaseUnavailable(Res.string.web_database_busy)
+
+            WebDatabaseAccess.Failed -> DatabaseUnavailable(Res.string.web_database_unavailable)
+
+            WebDatabaseAccess.Starting -> Unit
+        }
+    }
+}
+
+/** Shown instead of the app while this tab cannot hold the database; nothing has opened it yet. */
+@Composable
+private fun DatabaseUnavailable(message: StringResource) {
+    AppTheme(darkTheme = isSystemInDarkTheme()) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(message),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
     }
 }
 

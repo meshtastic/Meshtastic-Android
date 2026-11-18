@@ -23,12 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import okio.BufferedSink
-import okio.BufferedSource
-import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.LocaleChangeNotifier
-import org.meshtastic.core.database.DatabaseBackupOperations
-import org.meshtastic.core.database.RestoreStageResult
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
@@ -38,7 +33,6 @@ import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.network.repository.ServiceDiscovery
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
-import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
@@ -231,16 +225,6 @@ class NoopLockdownPassphraseStore : LockdownPassphraseStore {
 
 // endregion
 
-// region File I/O stub: no browser file picker is wired yet
-
-class NoopFileService : FileService {
-    override suspend fun write(uri: CommonUri, block: suspend (BufferedSink) -> Unit): Boolean = false
-
-    override suspend fun read(uri: CommonUri, block: suspend (BufferedSource) -> Unit): Boolean = false
-}
-
-// endregion
-
 // region Local-network-access stub: the Android 17 gate does not apply, so access is granted
 
 class NoopLocalNetworkAccess : LocalNetworkAccess {
@@ -288,16 +272,6 @@ class NoopDeviceAddressChangeHook : DeviceAddressChangeHook {
 /** The browser has no geocoder. */
 class NoopReverseGeocoder : ReverseGeocoder {
     override suspend fun place(latitude: Double, longitude: Double): GeocodedPlace? = null
-}
-
-/** The web database is not a file the browser can back up yet, so there is nothing to export or restore. */
-class NoopDatabaseBackupOperations : DatabaseBackupOperations {
-    override suspend fun backupTargetName(): String? = null
-
-    override suspend fun export(dbName: String, sink: BufferedSink): Long = 0
-
-    override suspend fun stageRestore(dbName: String, source: BufferedSource): RestoreStageResult =
-        RestoreStageResult.Failed(UnsupportedOperationException("database restore is not available on web"))
 }
 
 // endregion

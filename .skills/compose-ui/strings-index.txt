@@ -2263,6 +2263,8 @@ waypoint_delete
 waypoint_edit
 waypoint_new
 waypoint_received
+web_database_busy
+web_database_unavailable
 website
 weight
 what_is_meshtastic

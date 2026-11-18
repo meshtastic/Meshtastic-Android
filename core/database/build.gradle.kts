@@ -64,10 +64,10 @@ kotlin {
         wasmJsMain.dependencies {
             implementation(libs.androidx.sqlite.web)
             implementation(libs.kotlinx.browser)
-            // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS.
+            // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS through the opfs-sahpool VFS.
             implementation(npm("sqlite-wasm-worker", file("worker")))
         }
-        // core:testing has no wasmJs target, and an in-memory Room database has no OPFS equivalent.
+        // core:testing has no wasmJs target.
         getByName("nonWebTest").dependencies {
             implementation(projects.core.testing)
             implementation(libs.androidx.room.testing)

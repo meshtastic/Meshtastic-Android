@@ -20,6 +20,8 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.LocaleChangeNotifier
 import org.meshtastic.core.database.DatabaseBackupOperations
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.WebDatabaseBackupService
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.network.repository.ServiceDiscovery
 import org.meshtastic.core.repository.AppWidgetUpdater
@@ -40,11 +42,10 @@ import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
+import org.meshtastic.web.file.WebFileService
 import org.meshtastic.web.stub.NoopAppWidgetUpdater
 import org.meshtastic.web.stub.NoopCompassHeadingProvider
-import org.meshtastic.web.stub.NoopDatabaseBackupOperations
 import org.meshtastic.web.stub.NoopDeviceAddressChangeHook
-import org.meshtastic.web.stub.NoopFileService
 import org.meshtastic.web.stub.NoopLocalNetworkAccess
 import org.meshtastic.web.stub.NoopLocaleChangeNotifier
 import org.meshtastic.web.stub.NoopLocationRepository
@@ -62,7 +63,7 @@ import org.meshtastic.web.stub.NoopServiceDiscovery
 
 /**
  * Stubs for interfaces whose real implementations need platform APIs a browser lacks or that web has not wired yet:
- * WorkManager, widgets, sensors, mDNS, OS serial hot-plug, keystores and file pickers.
+ * WorkManager, widgets, sensors, mDNS, OS serial hot-plug and keystores.
  */
 @Suppress("TooManyFunctions")
 @Module
@@ -94,7 +95,7 @@ class WebStubsModule {
 
     @Single fun lockdownPassphraseStore(): LockdownPassphraseStore = NoopLockdownPassphraseStore()
 
-    @Single fun fileService(): FileService = NoopFileService()
+    @Single fun fileService(): FileService = WebFileService()
 
     @Single fun localNetworkAccess(): LocalNetworkAccess = NoopLocalNetworkAccess()
 
@@ -107,7 +108,9 @@ class WebStubsModule {
 
     @Single fun reverseGeocoder(): ReverseGeocoder = NoopReverseGeocoder()
 
-    @Single fun databaseBackupOperations(): DatabaseBackupOperations = NoopDatabaseBackupOperations()
+    @Single
+    fun databaseBackupOperations(provider: DatabaseProvider): DatabaseBackupOperations =
+        WebDatabaseBackupService(provider)
 
     @Single fun messageTranslationService(): MessageTranslationService = NoOpMessageTranslator()
 }

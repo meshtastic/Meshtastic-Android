@@ -18,37 +18,39 @@ package org.meshtastic.core.database
 
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import androidx.sqlite.driver.web.WebWorkerSQLiteDriver
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
-import org.w3c.dom.Worker
 
-/** Persists to OPFS through a [WebWorkerSQLiteDriver] running sqlite-wasm in `worker/worker.js`. */
+/** Persists to OPFS through the `opfs-sahpool` VFS, by way of the tab's one sqlite-wasm worker. */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> =
     Room.databaseBuilder<MeshtasticDatabase>(
         name = "$dbName.db",
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
-        .setDriver(BusyTimeoutSQLiteDriver(WebWorkerSQLiteDriver(sqliteWasmWorker())))
+        .setDriver(webSqliteDriver())
 
-/** Every worker connection opens a real OPFS file; there is no in-memory mode to offer. */
+/** The worker opens `:memory:` as a plain in-memory database, outside the pool. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
-    error("getInMemoryDatabaseBuilder() is not supported on wasmJs")
+    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+        .configureCommon()
+        .setDriver(webSqliteDriver())
 
-/** OPFS has no directory to report; only the nonWeb `DatabaseManager` reads this. */
+/** The pool keeps flat absolute names; the root stands in for a directory. */
 actual fun getDatabaseDirectory(): Path = "/".toPath()
 
-/** OPFS paths are private to the worker; only the nonWeb `DatabaseManager` and backup read this. */
+/** The name the worker gives [dbName] inside the pool. */
 actual fun getDatabaseFile(dbName: String): Path = "/$dbName.db".toPath()
 
-/** Only the nonWeb `DatabaseManager` deletes databases. */
-actual fun deleteDatabase(dbName: String): Unit = error("deleteDatabase() is not supported on wasmJs")
+/**
+ * Deletes [dbName] and its journal from the pool once the worker gets to it; the worker refuses while the database is
+ * open. The signature is synchronous, so a failure is only logged.
+ */
+actual fun deleteDatabase(dbName: String) = SqliteWasmWorker.deleteFileDetached(getDatabaseFile(dbName).toString())
 
-/** Okio has no OPFS [FileSystem]; only the nonWeb `DatabaseManager` reads this. */
+/** Okio's FileSystem is synchronous, and the pool answers only asynchronously from its worker. */
 actual fun getFileSystem(): FileSystem = error("getFileSystem() is not supported on wasmJs")
 
-/** Starts the `sqlite-wasm-worker` npm package's worker; webpack resolves the URL. */
-private fun sqliteWasmWorker(): Worker = js("""new Worker(new URL("sqlite-wasm-worker/worker.js", import.meta.url))""")
+internal fun webSqliteDriver(): BusyTimeoutSQLiteDriver = BusyTimeoutSQLiteDriver(SqliteWasmWorker.driver)
