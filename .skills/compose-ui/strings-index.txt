@@ -1705,6 +1705,8 @@ pm2_5
 position
 position_config_set_fixed_from_phone
 position_enabled
+position_location_blocked
+position_location_unavailable
 position_log
 position_packet
 potassium
