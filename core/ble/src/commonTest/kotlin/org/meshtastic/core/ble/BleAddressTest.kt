@@ -45,6 +45,12 @@ class BleAddressTest {
     }
 
     @Test
+    fun `the dev segment matches in any case`() {
+        assertTrue(bleAddressesMatch(objectPath, objectPath.uppercase()))
+        assertTrue(bleAddressesMatch(objectPath.uppercase(), mac))
+    }
+
+    @Test
     fun `a different device never matches`() {
         assertFalse(bleAddressesMatch(mac, "/org/bluez/hci0/dev_34_B7_DA_62_18_C6"))
         assertFalse(bleAddressesMatch(objectPath, "AA:BB:CC:DD:EE:FF"))

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.ble
 
-private val BLUEZ_DEVICE_SEGMENT = Regex("""/dev_([0-9A-Fa-f]{2}(?:_[0-9A-Fa-f]{2}){5})""")
+private val BLUEZ_DEVICE_SEGMENT = Regex("""/dev_([0-9A-Fa-f]{2}(?:_[0-9A-Fa-f]{2}){5})""", RegexOption.IGNORE_CASE)
 
 /**
  * Reduces a BLE address to a comparable form. On Linux, Kable's JVM identifier is the BlueZ D-Bus object path (for
