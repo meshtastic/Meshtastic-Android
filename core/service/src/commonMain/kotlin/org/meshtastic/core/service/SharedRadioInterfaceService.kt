@@ -168,8 +168,10 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
 }
 
 /** The user-facing text for [reason]. Lookup fails only outside a full resource runtime; the name beats silence. */
-internal suspend fun connectionErrorText(reason: TransportDisconnectReason): String =
-    safeCatchingAll { getStringSuspend(reason.toConnectionErrorMessage()) }.getOrDefault(reason.name)
+internal suspend fun connectionErrorText(reason: TransportDisconnectReason): String = safeCatchingAll {
+    getStringSuspend(reason.toConnectionErrorMessage())
+}
+    .getOrDefault(reason.name)
 
 private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
     TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied

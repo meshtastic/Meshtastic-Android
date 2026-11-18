@@ -758,9 +758,9 @@ open class ScannerViewModel(
     }
 
     /**
-     * Connects to a manually-entered TCP or WebSocket address. Wraps the manual-entry flow with the same scan-cancel invariant as
-     * [onSelected]: stops discovery before connection setup so the manual connect does not race an in-progress
-     * BLE/network scan for radio resources.
+     * Connects to a manually-entered TCP or WebSocket address. Wraps the manual-entry flow with the same scan-cancel
+     * invariant as [onSelected]: stops discovery before connection setup so the manual connect does not race an
+     * in-progress BLE/network scan for radio resources.
      */
     fun connectToManualAddress(fullAddress: String) {
         if (!networkSupported) return

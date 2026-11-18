@@ -337,8 +337,7 @@ class WebSocketRadioTransportTest {
                     else -> short
                 }
             val mask = input.readNBytes(4)
-            val payload =
-                input.readNBytes(length).mapIndexed { i, b -> (b.toInt() xor mask[i % 4].toInt()).toByte() }
+            val payload = input.readNBytes(length).mapIndexed { i, b -> (b.toInt() xor mask[i % 4].toInt()).toByte() }
             return Frame(b0 and 0x0F, payload.toByteArray())
         }
 

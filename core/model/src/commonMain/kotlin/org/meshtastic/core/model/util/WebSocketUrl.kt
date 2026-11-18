@@ -24,6 +24,10 @@ private val VALID_PORTS = 1..65535
 // Scheme, then a bracketed IPv6 literal or a host with no userinfo, an optional port and an optional path; no fragment.
 private val WEBSOCKET_URL =
     Regex("""(wss?)://(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]/?#@]+)(?::(\d{1,5}))?(/[^\s#]*)?""", RegexOption.IGNORE_CASE)
+private const val SCHEME_GROUP = 1
+private const val HOST_GROUP = 2
+private const val PORT_GROUP = 3
+private const val PATH_GROUP = 4
 
 /**
  * [url] as a WebSocket phone link connects to it, or null when it is not a `ws://` or `wss://` URL with a host, a port
@@ -31,10 +35,14 @@ private val WEBSOCKET_URL =
  * `ws://192.168.1.20` reaches firmware's endpoint.
  */
 fun normalizeWebSocketUrl(url: String): String? {
-    val match = WEBSOCKET_URL.matchEntire(url.trim()) ?: return null
-    val (scheme, host, port, path) = match.destructured
-    if (port.isNotEmpty() && port.toInt() !in VALID_PORTS) return null
-    val portPart = if (port.isEmpty()) "" else ":$port"
-    val pathPart = path.takeUnless { it.isEmpty() || it == "/" } ?: WEBSOCKET_API_PATH
-    return "${scheme.lowercase()}://$host$portPart$pathPart"
+    val groups = WEBSOCKET_URL.matchEntire(url.trim())?.groupValues ?: return null
+    val scheme = groups[SCHEME_GROUP].lowercase()
+    val host = groups[HOST_GROUP]
+    val port = groups[PORT_GROUP]
+    val path = groups[PATH_GROUP].takeUnless { it.isEmpty() || it == "/" } ?: WEBSOCKET_API_PATH
+    return when {
+        port.isEmpty() -> "$scheme://$host$path"
+        port.toInt() in VALID_PORTS -> "$scheme://$host:$port$path"
+        else -> null
+    }
 }

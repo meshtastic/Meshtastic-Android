@@ -25,7 +25,10 @@ class WebSocketUrlTest {
     @Test
     fun `a URL with a path is kept as written`() {
         assertEquals("ws://192.168.1.20/api/v1/ws", normalizeWebSocketUrl("ws://192.168.1.20/api/v1/ws"))
-        assertEquals("wss://meshtastic.local:9443/proxy/ws", normalizeWebSocketUrl(" wss://meshtastic.local:9443/proxy/ws "))
+        assertEquals(
+            "wss://meshtastic.local:9443/proxy/ws",
+            normalizeWebSocketUrl(" wss://meshtastic.local:9443/proxy/ws "),
+        )
     }
 
     @Test
