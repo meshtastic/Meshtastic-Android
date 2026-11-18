@@ -17,10 +17,15 @@
 package org.meshtastic.core.network.radio
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.node.BytesStore
+import org.meshtastic.node.MeshLogger
+import org.meshtastic.node.android.AndroidBarometer
+import org.meshtastic.node.android.AndroidBatteryPower
 import org.meshtastic.node.android.AndroidBearerFactory
+import org.meshtastic.node.android.AndroidGpsPosition
 import org.meshtastic.node.android.androidHostState
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
@@ -41,6 +46,17 @@ class AndroidNodeBearers(context: Context) : NodeBearers {
     override fun storesDir(): String = nodeDir.path
 
     override fun hostBearerStore(): BytesStore = AtomicFileStore(File(nodeDir, HOST_BEARERS_FILE).path)
+
+    /**
+     * The phone's battery, its barometer where it has one, and its GPS, each living as long as [scope]. The GPS needs
+     * `ACCESS_FINE_LOCATION` held when the node starts: it asks again only on the next start. The node broadcasts the
+     * position only on a channel that names a `position_precision`, which no default does.
+     */
+    override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors = NodeSensors(
+        environment = AndroidBarometer(app, scope).takeIf { it.available },
+        power = AndroidBatteryPower(app),
+        position = AndroidGpsPosition(app, scope).takeIf { it.available },
+    )
 
     private companion object {
         const val NODE_DIR = "node"

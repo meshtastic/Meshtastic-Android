@@ -157,7 +157,8 @@ internal fun embeddedNode(
     extraRadioStore = bearers.extraRadioStore()
     defaults = firstRunDefaults()
     this.logger = logger
-    positionSource = bearers.positionSource
+    positionSource = sensors?.position ?: bearers.positionSource
+    power = sensors?.power
     environment = sensors?.environment
     airQuality = sensors?.airQuality
     powerMetrics = sensors?.powerMetrics

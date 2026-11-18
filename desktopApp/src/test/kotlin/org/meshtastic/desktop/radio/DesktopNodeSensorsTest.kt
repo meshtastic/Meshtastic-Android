@@ -67,4 +67,16 @@ class DesktopNodeSensorsTest {
         assertTrue(failed.reason.isNotBlank())
         scope.cancel()
     }
+
+    @Test
+    fun `the desktop node always has its battery and has a bus only when one is named`() {
+        val scope = CoroutineScope(SupervisorJob())
+        val sensors = DesktopNodeBearers().sensors(scope, MeshLogger.None)
+        assertNotNull(sensors.power)
+        if (System.getenv("MESH_I2C_DEVICE").isNullOrBlank()) {
+            assertNull(sensors.environment)
+            assertNull(sensors.bus)
+        }
+        scope.cancel()
+    }
 }

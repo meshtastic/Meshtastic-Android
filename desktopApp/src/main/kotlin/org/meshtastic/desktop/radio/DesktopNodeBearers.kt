@@ -27,6 +27,7 @@ import org.meshtastic.core.network.radio.NodeSensors
 import org.meshtastic.core.network.radio.PrimaryRadio
 import org.meshtastic.node.BytesStore
 import org.meshtastic.node.MeshLogger
+import org.meshtastic.node.desktop.DesktopBatteryPower
 import org.meshtastic.node.desktop.JvmBearerFactory
 import org.meshtastic.node.desktop.parseExtraLoraRadios
 import org.meshtastic.node.host.BearerFactory
@@ -62,9 +63,20 @@ class DesktopNodeBearers : NodeBearers {
 
     override fun extraRadioStore(): BytesStore = AtomicFileStore(File(nodeDir, EXTRA_RADIOS_FILE).path)
 
-    /** The sensors on the I2C bus `MESH_I2C_DEVICE` names, such as `/dev/i2c-1` on a Raspberry Pi; none when unset. */
-    override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors? =
-        i2cSensors(System.getenv(I2C_DEVICE_VAR), scope, logger)
+    /**
+     * The machine's battery, and the sensors on the I2C bus `MESH_I2C_DEVICE` names, such as `/dev/i2c-1` on a
+     * Raspberry Pi; no bus when unset. A desktop with no battery reports external power.
+     */
+    override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors {
+        val i2c = i2cSensors(System.getenv(I2C_DEVICE_VAR), scope, logger)
+        return NodeSensors(
+            environment = i2c?.environment,
+            airQuality = i2c?.airQuality,
+            powerMetrics = i2c?.powerMetrics,
+            bus = i2c?.bus,
+            power = DesktopBatteryPower(scope),
+        )
+    }
 
     override fun primaryRadio(): PrimaryRadio? =
         primaryRadioFor(System.getenv(LORA_BOARD_VAR), System.getenv(LORA_SPIDEV_VAR))

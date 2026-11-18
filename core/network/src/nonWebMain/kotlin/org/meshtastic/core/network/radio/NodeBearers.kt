@@ -24,6 +24,7 @@ import org.meshtastic.node.EnvironmentSource
 import org.meshtastic.node.MeshLogger
 import org.meshtastic.node.PositionSource
 import org.meshtastic.node.PowerMetricsSource
+import org.meshtastic.node.PowerSource
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.ExtraRadioDevice
 import org.meshtastic.node.host.HostState
@@ -70,12 +71,15 @@ interface NodeBearers {
 data class PrimaryRadio(val device: ExtraRadioDevice, val id: String? = null)
 
 /**
- * A host's sensor readings as the three telemetry sources a node takes; a source the host lacks is null. [bus] is the
- * I2C bus they are read from as the node card shows it, null for a host that reads its sensors some other way.
+ * A host's readings as the sources a node takes; a source the host lacks is null. [power] is its battery, [position]
+ * its GPS, which takes the place of [NodeBearers.positionSource] when set. [bus] is the I2C bus the other sensors are
+ * read from as the node card shows it, null for a host that reads its sensors some other way.
  */
 class NodeSensors(
     val environment: EnvironmentSource? = null,
     val airQuality: AirQualitySource? = null,
     val powerMetrics: PowerMetricsSource? = null,
     val bus: StateFlow<I2cBusState>? = null,
+    val power: PowerSource? = null,
+    val position: PositionSource? = null,
 )
