@@ -77,7 +77,7 @@ data class MetricsState(
     fun hasTracerouteLogs() =
         tracerouteRequests.isNotEmpty() || tracerouteObserved.isNotEmpty() || tracerouteTracedBy.isNotEmpty()
 
-    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
+    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty() || neighborInfoResults.isNotEmpty()
 
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 
@@ -108,3 +108,49 @@ data class MetricsState(
         val Empty = MetricsState()
     }
 }
+
+/**
+ * Every request with the reply that answered it, plus neighbor info the node sent on its own - a broadcast, or the
+ * connected radio's periodic report to the app - newest first.
+ */
+fun MetricsState.neighborInfoEntries(): List<NeighborInfoEntry> {
+    val requestIds = neighborInfoRequests.mapNotNull { it.fromRadio.packet?.id }.toSet()
+    val requested = neighborInfoRequests.map { request ->
+        val id = request.fromRadio.packet?.id
+        NeighborInfoEntry.Requested(
+            log = request,
+            reply = neighborInfoResults.find { it.fromRadio.packet?.decoded?.request_id == id },
+        )
+    }
+    val received =
+        neighborInfoResults
+            .filter { it.fromRadio.packet?.decoded?.request_id !in requestIds }
+            .map { NeighborInfoEntry.Received(it) }
+    return (requested + received).sortedByDescending { it.timeSeconds }
+}
+
+/** One row of the neighbor-info log. */
+sealed interface NeighborInfoEntry {
+    val log: MeshLog
+
+    /** The packet carrying the neighbor list, or null for a request nothing answered. */
+    val report: MeshLog?
+
+    /** When the neighbor list arrived, or when the request went out if it never did. */
+    val timeSeconds: Double
+        get() = (report ?: log).received_date / MS_PER_SEC_DOUBLE
+
+    /** A request we sent, with the reply if one came back. */
+    data class Requested(override val log: MeshLog, val reply: MeshLog?) : NeighborInfoEntry {
+        override val report: MeshLog?
+            get() = reply
+    }
+
+    /** Neighbor info that arrived without our asking. */
+    data class Received(override val log: MeshLog) : NeighborInfoEntry {
+        override val report: MeshLog
+            get() = log
+    }
+}
+
+private const val MS_PER_SEC_DOUBLE = 1000.0

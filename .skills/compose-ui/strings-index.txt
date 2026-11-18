@@ -1446,8 +1446,14 @@ navigate_into_label
 nearby_devices_permission
 need_hardware
 need_hardware_description
+### NEIGHBOR ###
+neighbor_count
+neighbor_count_description
 neighbor_info
 neighbor_info_config
+neighbor_info_received
+neighbor_mean_snr
+neighbor_mean_snr_description
 network
 network_layer_url_hint
 new_channel_rcvd

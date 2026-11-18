@@ -1497,8 +1497,14 @@
     <string name="nearby_devices_permission">Nearby devices permission</string>
     <string name="need_hardware">Need Hardware?</string>
     <string name="need_hardware_description">Meshtastic requires a compatible device. Our backers and partners offer ready-to-use hardware. Here are some of the most popular options.</string>
+    <!-- NEIGHBOR -->
+    <string name="neighbor_count">Neighbors</string>
+    <string name="neighbor_count_description">How many nodes this node heard directly, as it reported them.</string>
     <string name="neighbor_info">Neighbor Info</string>
     <string name="neighbor_info_config">Neighbor Info Config</string>
+    <string name="neighbor_info_received">Received</string>
+    <string name="neighbor_mean_snr">Mean neighbor SNR</string>
+    <string name="neighbor_mean_snr_description">The average SNR at which this node heard its reported neighbors.</string>
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
