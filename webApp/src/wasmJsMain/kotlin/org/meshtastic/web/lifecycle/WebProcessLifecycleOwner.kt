@@ -19,15 +19,27 @@ package org.meshtastic.web.lifecycle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import kotlinx.browser.document
 
-/** A [LifecycleOwner] that stays [Lifecycle.State.RESUMED]: a browser tab has no process lifecycle to observe. */
+/**
+ * The page's process lifecycle, following `document.visibilityState` the way Android's `ProcessLifecycleOwner` follows
+ * the app moving to the background: [Lifecycle.State.RESUMED] while the tab is visible, [Lifecycle.State.CREATED] while
+ * it is hidden (another tab in front, the window minimized, the screen locked). It lives as long as the page.
+ */
 internal class WebProcessLifecycleOwner : LifecycleOwner {
     private val registry = LifecycleRegistry(this)
 
     init {
-        registry.currentState = Lifecycle.State.RESUMED
+        follow()
+        document.addEventListener("visibilitychange", { follow() })
+    }
+
+    private fun follow() {
+        registry.currentState = if (pageHidden()) Lifecycle.State.CREATED else Lifecycle.State.RESUMED
     }
 
     override val lifecycle: Lifecycle
         get() = registry
 }
+
+private fun pageHidden(): Boolean = js("document.hidden")
