@@ -26,12 +26,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.node_extra_radio_not_kept
 import org.meshtastic.core.resources.node_extra_radio_switch_failed
+import org.meshtastic.core.resources.node_status_title
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -61,6 +63,12 @@ class NodeStatusViewModel(
         claimed
             .flatMapLatest { it?.source?.status(it.address) ?: flowOf(null) }
             .stateInWhileSubscribed(initialValue = null)
+
+    /** The card's heading, for the source that claims the current device. */
+    val title: StateFlow<StringResource> =
+        claimed
+            .map { it?.source?.title ?: Res.string.node_status_title }
+            .stateInWhileSubscribed(Res.string.node_status_title)
 
     /** False while the card reads a host that grants its own permissions. */
     val grantsPermissions: StateFlow<Boolean> =

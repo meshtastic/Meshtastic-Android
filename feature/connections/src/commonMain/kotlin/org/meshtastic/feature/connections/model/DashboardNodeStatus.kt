@@ -20,9 +20,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import org.meshtastic.feature.connections.model.host.Bearer
+import org.meshtastic.feature.connections.model.host.ExtraRadio
+import org.meshtastic.feature.connections.model.host.ExtraRadioDevice
 import org.meshtastic.feature.connections.model.host.NodePhase
 import org.meshtastic.feature.connections.model.host.SensorKind
 import org.meshtastic.feature.connections.model.host.SensorUnread
+import org.meshtastic.proto.Config
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
@@ -35,7 +38,8 @@ fun dashboardNodeStatus(status: String, bearers: String?, sensors: String?, nowM
     val head = parse(status)
     val phase = head?.string("phase")?.let { name -> NodePhase.entries.firstOrNull { it.name == name } }
     if (head == null || phase == null) return null
-    val rows = parse(bearers)?.let(::bearerRows).orEmpty()
+    val bearerBody = parse(bearers)
+    val rows = bearerBody?.let(::bearerRows).orEmpty()
     return NodeStatusUi(
         phase = phase,
         nodeId = head.string("id") ?: head.long("num")?.let(::nodeId),
@@ -46,6 +50,8 @@ fun dashboardNodeStatus(status: String, bearers: String?, sensors: String?, nowM
         settingsReset = head.bool("settingsReset") ?: false,
         bearers = rows,
         sensors = parse(sensors)?.let { sensorsUi(it, nowMs) },
+        // Every extra radio is held off until one is switched on; said only where the host has one.
+        extraRadioFailure = bearerBody?.string("extraRadioFailure")?.takeIf { rows.any { row -> row.extra != null } },
     )
 }
 
@@ -65,12 +71,29 @@ private fun bearerRows(body: JsonObject): List<BearerRowUi> {
 private fun extraRows(extras: List<JsonObject>, loraOn: Boolean): List<BearerRowUi> = extras
     .mapNotNull { item ->
         val name = item.string("name") ?: return@mapNotNull null
-        // The dashboard names an extra radio and its switch, not what the radio is.
-        val off = if (item.bool("enabled") == false) setOf(name) else emptySet()
-        val extra = extraRadioUi(name, details = null, off = off, loraOn = loraOn) ?: return@mapNotNull null
+        val off = if (item.bool("switchedOn") == false) setOf(name) else emptySet()
+        val details = (item["radio"] as? JsonObject)?.let(::extraRadio)
+        val extra = extraRadioUi(name, details, off = off, loraOn = loraOn) ?: return@mapNotNull null
         bearerRow(Bearer.LORA, item, extra)
     }
     .sortedBy { it.radio }
+
+/** What the host says an extra radio is, or null for a device kind this app does not know. */
+private fun extraRadio(radio: JsonObject): ExtraRadio? {
+    val device = radio.string("device")?.let { name -> ExtraRadioDevice.entries.firstOrNull { it.name == name } }
+    return device?.let {
+        ExtraRadio(
+            device = it,
+            id = radio.string("id"),
+            preset =
+            radio.string("preset")?.let { name ->
+                Config.LoRaConfig.ModemPreset.entries.firstOrNull { preset -> preset.name == name }
+            },
+            bridge = radio.bool("bridge") ?: false,
+            duplex = radio.bool("duplex") ?: false,
+        )
+    }
+}
 
 /** A requirement outranks the availability: the user can act on it, while availability only reports. */
 private fun bearerRow(bearer: Bearer, item: JsonObject, extra: ExtraRadioUi?): BearerRowUi {

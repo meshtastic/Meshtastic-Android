@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import co.touchlab.kermit.Logger
+import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -39,6 +40,7 @@ import org.meshtastic.core.database.webDatabaseAccess
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.navigation.NotificationDeepLinks
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.network.NodeDashboardClient
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
@@ -49,6 +51,7 @@ import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.web.di.WebKoinApp
 import org.meshtastic.web.lifecycle.TabHandoff
 import org.meshtastic.web.navigation.WebIntroGate
@@ -110,11 +113,13 @@ fun main() {
     val koinApp = startKoin<WebKoinApp> {}
     Logger.i { "Meshtastic Web — Starting" }
 
-    // Served by a node-kmp dashboard: the radio is the node that served the page.
-    servingDashboardAddress()?.let { address ->
-        val current = koinApp.koin.get<UIViewModel>().currentDeviceAddressFlow.value
-        if (current != address) {
-            MainScope().launch { koinApp.koin.get<RadioController>().setDeviceAddress(address) }
+    // Served by a node-kmp host: the radio is the node that served the page.
+    MainScope().launch {
+        val address = servingDashboardAddress(koinApp.koin.get<NodeDashboardClient>()) ?: return@launch
+        // Listed with the network radios, so the Network pane shows the node it is connected to.
+        koinApp.koin.get<RecentAddressesSource>().add(RecentAddress(address, window.location.host))
+        if (koinApp.koin.get<UIViewModel>().currentDeviceAddressFlow.value != address) {
+            koinApp.koin.get<RadioController>().setDeviceAddress(address)
         }
     }
 

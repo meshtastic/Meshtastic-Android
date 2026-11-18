@@ -1623,6 +1623,7 @@ node_status_phase_starting
 node_status_phase_stopped
 node_status_settings_reset
 node_status_title
+node_status_title_remote
 nodedb_reset
 ### NODES ###
 nodes

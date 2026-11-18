@@ -98,10 +98,16 @@ fun NodeStatusCard(
     onRefreshRequirements: (() -> Unit)?,
     onRequestUsbPermission: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    /** The card's heading: this device as the node by default, or the node a remote host runs. */
+    title: String = stringResource(Res.string.node_status_title),
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            NodeStatusHeader(status = status, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            NodeStatusHeader(
+                status = status,
+                title = title,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
             val lastExtra = status.bearers.indexOfLast { it.extra != null }
             status.bearers.forEachIndexed { index, row ->
                 val extra = row.extra
@@ -128,14 +134,14 @@ fun NodeStatusCard(
 }
 
 @Composable
-private fun NodeStatusHeader(status: NodeStatusUi, modifier: Modifier = Modifier) {
+private fun NodeStatusHeader(status: NodeStatusUi, title: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = stringResource(Res.string.node_status_title), style = MaterialTheme.typography.titleMedium)
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
             Text(
                 text = stringResource(status.phase.label()),
                 style = MaterialTheme.typography.labelLarge,

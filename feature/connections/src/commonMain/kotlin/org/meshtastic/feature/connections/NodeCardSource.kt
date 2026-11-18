@@ -17,6 +17,9 @@
 package org.meshtastic.feature.connections
 
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.node_status_title
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.host.Bearer
 
@@ -27,6 +30,10 @@ import org.meshtastic.feature.connections.model.host.Bearer
 interface NodeCardSource {
     /** True when [address], the current device address, reaches a node this source reads. */
     fun claims(address: String): Boolean
+
+    /** The card's heading. */
+    val title: StringResource
+        get() = Res.string.node_status_title
 
     /** False where the host grants its own permissions, on its own device: the card names one without a grant. */
     val grantsPermissions: Boolean

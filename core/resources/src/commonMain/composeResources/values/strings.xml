@@ -1680,6 +1680,7 @@
     <string name="node_status_phase_stopped">Stopped</string>
     <string name="node_status_settings_reset">Stored settings could not be read and were reset</string>
     <string name="node_status_title">This device as a node</string>
+    <string name="node_status_title_remote">Connected node</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <!-- NODES -->
     <string name="nodes">Nodes</string>

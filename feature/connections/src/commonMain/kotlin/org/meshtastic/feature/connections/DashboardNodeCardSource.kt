@@ -22,12 +22,17 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.network.NodeDashboardClient
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.node_status_title_remote
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.dashboardNodeStatus
+import org.meshtastic.feature.connections.model.extraRadioNumber
 import org.meshtastic.feature.connections.model.host.Bearer
 import org.meshtastic.feature.connections.model.parse
 import org.meshtastic.proto.Config.TransportConfig.Transport
@@ -41,6 +46,9 @@ import kotlin.time.Duration.Companion.seconds
 class DashboardNodeCardSource(private val dashboard: NodeDashboardClient) : NodeCardSource {
 
     override fun claims(address: String): Boolean = NodeDashboardClient.baseOf(address) != null
+
+    override val title: StringResource
+        get() = Res.string.node_status_title_remote
 
     // A permission is the host's to grant, on its own device.
     override val grantsPermissions: Boolean
@@ -79,12 +87,27 @@ class DashboardNodeCardSource(private val dashboard: NodeDashboardClient) : Node
         dashboard.put(origin, "config/transport", body)
     }
 
-    /** The dashboard names an extra radio's switch but takes no write for it. */
-    override suspend fun setExtraRadio(address: String, name: String, on: Boolean): ExtraRadioSwitch =
-        ExtraRadioSwitch.FAILED
+    /**
+     * Switch one extra LoRa radio by itself through the host's dashboard. A switch the host made and could not keep is
+     * still made; any other refusal is a failure.
+     */
+    override suspend fun setExtraRadio(address: String, name: String, on: Boolean): ExtraRadioSwitch {
+        val origin = NodeDashboardClient.baseOf(address) ?: return ExtraRadioSwitch.FAILED
+        val reply = dashboard.putForReply(origin, "extra-radios/$name", "{\"on\":$on}")
+        val kept = reply?.takeIf { it.first in HTTP_OK_RANGE }?.let { (_, body) -> parse(body)?.get("kept") }
+        return when {
+            kept == null -> ExtraRadioSwitch.FAILED
+
+            (kept as? JsonPrimitive)?.booleanOrNull == false && extraRadioNumber(name) != null ->
+                ExtraRadioSwitch.NOT_KEPT
+
+            else -> ExtraRadioSwitch.KEPT
+        }
+    }
 
     private companion object {
         val POLL = 2.seconds
+        val HTTP_OK_RANGE = 200..299
     }
 }
 

@@ -274,6 +274,7 @@ fun ConnectionsScreen(
     val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
     val nodeStatus by nodeStatusViewModel.status.collectAsStateWithLifecycle()
     val nodeGrantsPermissions by nodeStatusViewModel.grantsPermissions.collectAsStateWithLifecycle()
+    val nodeCardTitle by nodeStatusViewModel.title.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
@@ -677,6 +678,7 @@ fun ConnectionsScreen(
                     if (nodeGrantsPermissions) nodeStatusViewModel::refreshRequirements else null,
                     onRequestUsbPermission =
                     if (nodeGrantsPermissions) nodeStatusViewModel::requestUsbPermission else null,
+                    title = stringResource(nodeCardTitle),
                 )
             }
 

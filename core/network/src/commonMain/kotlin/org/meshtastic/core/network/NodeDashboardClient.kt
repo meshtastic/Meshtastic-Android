@@ -19,6 +19,7 @@ package org.meshtastic.core.network
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -46,6 +47,39 @@ class NodeDashboardClient {
         throw e
     } catch (e: Exception) {
         Logger.d(e) { "Dashboard GET $path failed" }
+        null
+    }
+
+    /** `POST` [json] to [path] under the API; true when the host took it. */
+    @Suppress("TooGenericExceptionCaught")
+    suspend fun post(base: String, path: String, json: String): Boolean = try {
+        client
+            .post("$base$PREFIX$path") {
+                contentType(ContentType.Application.Json)
+                setBody(json)
+            }
+            .status
+            .isSuccess()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Logger.w(e) { "Dashboard POST $path failed" }
+        false
+    }
+
+    /** `PUT` [json] to [path] under the API: the status code and body, or null when nothing came back. */
+    @Suppress("TooGenericExceptionCaught")
+    suspend fun putForReply(base: String, path: String, json: String): Pair<Int, String>? = try {
+        val response =
+            client.put("$base$PREFIX$path") {
+                contentType(ContentType.Application.Json)
+                setBody(json)
+            }
+        response.status.value to response.bodyAsText()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Logger.w(e) { "Dashboard PUT $path failed" }
         null
     }
 
