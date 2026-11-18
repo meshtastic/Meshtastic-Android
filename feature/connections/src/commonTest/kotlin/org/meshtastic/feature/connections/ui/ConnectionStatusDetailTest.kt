@@ -21,7 +21,10 @@ import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connection_failure_bluetooth_or_location_unavailable
+import org.meshtastic.core.resources.connection_failure_bluetooth_unavailable
 import org.meshtastic.core.resources.connection_failure_connect_failed
+import org.meshtastic.core.resources.connection_failure_connection_rejected
 import org.meshtastic.core.resources.connection_failure_out_of_range
 import org.meshtastic.core.resources.connection_failure_pairing_required
 import org.meshtastic.core.resources.connection_failure_unknown
@@ -53,7 +56,6 @@ class ConnectionStatusDetailTest {
         assertEquals(Res.string.connection_phase_subscribing, detail?.phase)
         assertEquals(Res.string.connection_failure_pairing_required, detail?.failure)
         assertNull(detail?.retry)
-        assertNull(detail?.failureDetail, "a classified failure keeps the raw platform text out of the card")
     }
 
     @Test
@@ -75,7 +77,7 @@ class ConnectionStatusDetailTest {
     }
 
     @Test
-    fun `an unclassified failure shows the platform message as detail`() {
+    fun `an unclassified failure reads as connection failed`() {
         val detail =
             TransportStatus(
                 phase = TransportPhase.WaitingToRetry,
@@ -86,7 +88,28 @@ class ConnectionStatusDetailTest {
                 .toConnectionStatusDetail(nowMillis = 0L)
 
         assertEquals(Res.string.connection_failure_unknown, detail?.failure)
-        assertEquals("Timed out waiting for FROMNUM", detail?.failureDetail)
+    }
+
+    @Test
+    fun `Bluetooth unavailable names location services only where scanning needs them`() {
+        val status =
+            TransportStatus(TransportPhase.Connecting, TransportFailure(TransportFailureKind.BluetoothUnavailable))
+        assertEquals(
+            Res.string.connection_failure_bluetooth_unavailable,
+            status.toConnectionStatusDetail(nowMillis = 0L)?.failure,
+        )
+        assertEquals(
+            Res.string.connection_failure_bluetooth_or_location_unavailable,
+            status.toConnectionStatusDetail(nowMillis = 0L, bluetoothNeedsLocation = true)?.failure,
+        )
+    }
+
+    @Test
+    fun `a rejection the platform does not explain maps to may need pairing`() {
+        val detail =
+            TransportStatus(TransportPhase.Subscribing, TransportFailure(TransportFailureKind.ConnectionRejected))
+                .toConnectionStatusDetail(nowMillis = 0L)
+        assertEquals(Res.string.connection_failure_connection_rejected, detail?.failure)
     }
 
     @Test

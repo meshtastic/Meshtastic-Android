@@ -313,6 +313,7 @@ connected_device
 connected_sleeping
 connecting
 ### CONNECTION ###
+connection_failure_bluetooth_or_location_unavailable
 connection_failure_bluetooth_unavailable
 connection_failure_connect_failed
 connection_failure_connection_rejected

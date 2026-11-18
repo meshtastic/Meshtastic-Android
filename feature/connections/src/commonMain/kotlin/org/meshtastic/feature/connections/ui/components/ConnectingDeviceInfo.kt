@@ -26,12 +26,18 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.TransportPhase
@@ -47,7 +53,9 @@ import org.meshtastic.core.resources.node_restarting
 import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.core.resources.stop_connecting
+import org.meshtastic.core.ui.util.bleScanRequiresLocationServices
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -73,7 +81,7 @@ fun ConnectingDeviceInfo(
                 delay(1.seconds)
             }
         }
-    val detail = transportStatus.toConnectionStatusDetail(now)
+    val detail = transportStatus.toConnectionStatusDetail(now, bleScanRequiresLocationServices)
 
     val statusLabel =
         when (connectionStatus) {
@@ -112,13 +120,18 @@ fun ConnectingDeviceInfo(
                 Text(text = deviceName, style = MaterialTheme.typography.headlineSmall)
                 Text(text = deviceAddress, style = MaterialTheme.typography.bodyLarge)
                 val retry = detail?.retry
-                val phaseLabel = detail?.phase?.let { stringResource(it) }
+                val phaseLabel = rememberSettledPhase(detail?.phase)?.let { stringResource(it) }
                 val primaryLabel =
                     when {
                         retry == null -> phaseLabel ?: statusLabel
 
                         retry.seconds > 0 ->
-                            stringResource(Res.string.connection_retry_in, retry.seconds, retry.attempt)
+                            pluralStringResource(
+                                Res.plurals.connection_retry_in,
+                                retry.seconds,
+                                retry.seconds,
+                                retry.attempt,
+                            )
 
                         else -> stringResource(Res.string.connection_retry_now, retry.attempt)
                     }
@@ -138,16 +151,27 @@ fun ConnectingDeviceInfo(
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
-                detail?.failureDetail?.let { failureDetail ->
-                    Text(
-                        text = failureDetail,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         }
 
         DisconnectButton(onClick = onClickDisconnect, label = disconnectLabel)
     }
+}
+
+/** How long a phase must last before the card names it, so a fast connect does not flicker through every step. */
+private val PHASE_SETTLE_TIME = 400.milliseconds
+
+/**
+ * [phase] once it has held for [PHASE_SETTLE_TIME]; until then the phase shown before it. The first phase and the end
+ * of the phases (null, a retry countdown or a connected link) show at once. Failures are a separate line and are never
+ * held back.
+ */
+@Composable
+private fun rememberSettledPhase(phase: StringResource?): StringResource? {
+    var shown by remember { mutableStateOf(phase) }
+    LaunchedEffect(phase) {
+        if (phase != null && shown != null) delay(PHASE_SETTLE_TIME)
+        shown = phase
+    }
+    return shown
 }

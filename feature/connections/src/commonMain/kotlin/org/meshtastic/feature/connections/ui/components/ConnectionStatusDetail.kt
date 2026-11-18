@@ -21,6 +21,7 @@ import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connection_failure_bluetooth_or_location_unavailable
 import org.meshtastic.core.resources.connection_failure_bluetooth_unavailable
 import org.meshtastic.core.resources.connection_failure_connect_failed
 import org.meshtastic.core.resources.connection_failure_connection_rejected
@@ -42,23 +43,25 @@ import org.meshtastic.core.resources.connection_phase_subscribing
  *
  * @property phase the step in progress, or null while [retry] stands in for it.
  * @property retry the countdown to the next attempt while waiting to retry.
- * @property failure why the last attempt failed, in plain words.
- * @property failureDetail the platform's own message, only when [failure] is the generic one and it adds something.
+ * @property failure why the last attempt failed, in plain words. The platform's own message stays in the log.
  */
-data class ConnectionStatusDetail(
-    val phase: StringResource?,
-    val retry: RetryCountdown?,
-    val failure: StringResource?,
-    val failureDetail: String?,
-)
+data class ConnectionStatusDetail(val phase: StringResource?, val retry: RetryCountdown?, val failure: StringResource?)
 
 /** [seconds] until attempt number [attempt] starts. */
 data class RetryCountdown(val seconds: Int, val attempt: Int)
 
 private const val MILLIS_PER_SECOND = 1_000L
 
-/** Resolves this status at [nowMillis]; null when there is nothing to add, including once the link is up. */
-fun TransportStatus?.toConnectionStatusDetail(nowMillis: Long): ConnectionStatusDetail? {
+/**
+ * Resolves this status at [nowMillis]; null when there is nothing to add, including once the link is up.
+ *
+ * @param bluetoothNeedsLocation whether a Bluetooth scan here also needs location services, so an unavailable adapter
+ *   names both
+ */
+fun TransportStatus?.toConnectionStatusDetail(
+    nowMillis: Long,
+    bluetoothNeedsLocation: Boolean = false,
+): ConnectionStatusDetail? {
     if (this == null || phase == TransportPhase.Connected) return null
     val retry =
         retryAtMillis
@@ -73,8 +76,7 @@ fun TransportStatus?.toConnectionStatusDetail(nowMillis: Long): ConnectionStatus
     return ConnectionStatusDetail(
         phase = phase.label(),
         retry = retry,
-        failure = lastFailure?.kind?.label(),
-        failureDetail = lastFailure?.takeIf { it.kind == TransportFailureKind.Unknown }?.detail,
+        failure = lastFailure?.kind?.label(bluetoothNeedsLocation),
     )
 }
 
@@ -98,13 +100,19 @@ private fun TransportPhase.label(): StringResource? = when (this) {
     -> null
 }
 
-private fun TransportFailureKind.label(): StringResource = when (this) {
+private fun TransportFailureKind.label(bluetoothNeedsLocation: Boolean): StringResource = when (this) {
     TransportFailureKind.OutOfRange -> Res.string.connection_failure_out_of_range
     TransportFailureKind.ConnectFailed -> Res.string.connection_failure_connect_failed
     TransportFailureKind.PairingRequired -> Res.string.connection_failure_pairing_required
     TransportFailureKind.ConnectionRejected -> Res.string.connection_failure_connection_rejected
     TransportFailureKind.PairingFailed -> Res.string.connection_failure_pairing_failed
     TransportFailureKind.LinkLost -> Res.string.connection_failure_link_lost
-    TransportFailureKind.BluetoothUnavailable -> Res.string.connection_failure_bluetooth_unavailable
+    TransportFailureKind.BluetoothUnavailable -> bluetoothUnavailableLabel(bluetoothNeedsLocation)
     TransportFailureKind.Unknown -> Res.string.connection_failure_unknown
+}
+
+private fun bluetoothUnavailableLabel(bluetoothNeedsLocation: Boolean): StringResource = if (bluetoothNeedsLocation) {
+    Res.string.connection_failure_bluetooth_or_location_unavailable
+} else {
+    Res.string.connection_failure_bluetooth_unavailable
 }
