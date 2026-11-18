@@ -41,10 +41,7 @@ data class GrantedSerialPort(val id: String, val vendorId: Int, val productId: I
  *
  * [requestNewPort] shows the browser's device picker and **requires an active user gesture**: it must be reached from a
  * coroutine started directly inside a click (or similar) event handler, with no earlier suspension — Chrome enforces
- * "transient activation" the same way it does for Web Bluetooth's `requestDevice()` (see
- * `WebBleScanner`/`WebBluetoothRepository` in `core:ble` for the equivalent BLE story, including a compiler-crash
- * caveat found there that does not apply here: this class has no relationship to `BluetoothRepository.bondedDevices` or
- * `BleDeviceLocator`, so it is not subject to that bug).
+ * "transient activation" the same way it does for Web Bluetooth's `requestDevice()`.
  */
 @Single
 class WebSerialPortRegistry {

@@ -42,5 +42,6 @@ kotlin {
             api(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
+        wasmJsMain.dependencies { api(libs.kotlinx.browser) }
     }
 }
