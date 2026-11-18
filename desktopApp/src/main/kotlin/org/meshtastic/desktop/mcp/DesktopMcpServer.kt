@@ -235,24 +235,36 @@ class DesktopMcpServer(
             if (serviceRepository.connectionState.value != ConnectionState.Connected) {
                 return@addTool error("not connected")
             }
-            val contactKey = contactKeyFor(request.arguments.string("to"), request.arguments.int("channel") ?: 0)
+            val channel = request.arguments.int("channel") ?: 0
+            // A contact key carries the channel as one digit, so 8 or more would be read as a different channel.
+            if (channel !in 0 until NodeAddress.PKC_CHANNEL_INDEX) {
+                return@addTool error("channel must be 0..${NodeAddress.PKC_CHANNEL_INDEX - 1}")
+            }
+            val contactKey = contactKeyFor(request.arguments.string("to"), channel)
+            val device = radioInterfaceService.getDeviceAddress()
             when (val outcome = sendMessageUseCase(text = text, contactKey = contactKey)) {
                 SendMessageOutcome.Refused -> error("refused for $contactKey")
 
                 is SendMessageOutcome.Queued -> {
                     val wait = (request.arguments.int("wait_seconds") ?: DEFAULT_SEND_WAIT_S).seconds
-                    json(awaitStatus(outcome.packetId, contactKey, wait))
+                    json(awaitStatus(outcome.packetId, contactKey, device, wait))
                 }
             }
         }
     }
 
-    private suspend fun awaitStatus(packetId: Int, contactKey: String, wait: kotlin.time.Duration): JsonObject {
+    private suspend fun awaitStatus(
+        packetId: Int,
+        contactKey: String,
+        device: String?,
+        wait: kotlin.time.Duration,
+    ): JsonObject {
         val started = TimeSource.Monotonic.markNow()
         val seen = mutableListOf<String>()
         var status: MessageStatus? = null
         var lastName: String? = null
-        while (started.elapsedNow() < wait) {
+        // Packet ids are per radio: once another radio is selected, a lookup by id reads that radio's history.
+        while (started.elapsedNow() < wait && radioInterfaceService.getDeviceAddress() == device) {
             status = packetRepository.getPacketByPacketId(packetId)?.status
             val name = status?.name ?: "MISSING"
             if (lastName != name) seen += "$name@${started.elapsedNow().inWholeMilliseconds}ms"
@@ -264,6 +276,7 @@ class DesktopMcpServer(
             put("packet_id", packetId.toUInt().toLong())
             put("contact_key", contactKey)
             put("status", status?.name)
+            put("device_changed", radioInterfaceService.getDeviceAddress() != device)
             put("transitions", buildJsonArray { seen.forEach { add(JsonPrimitive(it)) } })
         }
     }
