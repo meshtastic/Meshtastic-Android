@@ -22,18 +22,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
+import org.koin.core.KoinApplication
 import org.koin.plugin.module.dsl.startKoin
 import org.meshtastic.core.database.WebDatabaseAccess
 import org.meshtastic.core.database.webDatabaseAccess
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.web_database_busy
 import org.meshtastic.core.resources.web_database_unavailable
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.navigation.startDestination
@@ -41,7 +43,10 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.web.di.WebKoinApp
+import org.meshtastic.web.lifecycle.TabHandoff
+import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
+import org.meshtastic.web.ui.MovedToAnotherTab
 import org.meshtastic.web.ui.WebLoading
 import org.meshtastic.web.ui.WebMainScreen
 
@@ -60,8 +65,8 @@ private fun giveDomExceptionsAStack(): Unit = js(
 )
 
 /**
- * Compose resolves resources and [androidx.compose.ui.text.intl.Locale.current] from `navigator.languages`, which a page
- * cannot set. This getter answers with the app's language while one is chosen ([chooseLanguage]) and with the
+ * Compose resolves resources and [androidx.compose.ui.text.intl.Locale.current] from `navigator.languages`, which a
+ * page cannot set. This getter answers with the app's language while one is chosen ([chooseLanguage]) and with the
  * browser's otherwise, the override Compose Multiplatform's resource docs give for web.
  */
 private fun installLanguageOverride(): Unit = js(
@@ -78,7 +83,8 @@ private fun installLanguageOverride(): Unit = js(
 @Suppress("UnusedParameter") // read by name inside the js() body
 private fun chooseLanguage(tag: String): Unit = js("{ globalThis.__meshtasticLanguage = tag || null; }")
 
-private fun removeStaticLoader(): Unit = js("{ const loader = document.getElementById('loading'); if (loader) loader.remove(); }")
+private fun removeStaticLoader(): Unit =
+    js("{ const loader = document.getElementById('loading'); if (loader) loader.remove(); }")
 
 /** The wasmJs entry point. `webApp` is the `<div>` id in `index.html` and the webpack output name. */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -91,24 +97,47 @@ fun main() {
     ComposeViewport("webApp") {
         // Compose has drawn by the time effects run, so index.html's static spinner can go.
         LaunchedEffect(Unit) { removeStaticLoader() }
-        val access by webDatabaseAccess.collectAsState()
-        when (access) {
-            WebDatabaseAccess.Ready -> {
-                val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-                MeshServiceLifecycle()
-                ThemeAndContent(uiViewModel)
-            }
-
-            WebDatabaseAccess.Busy -> DatabaseUnavailable(Res.string.web_database_busy)
-
-            WebDatabaseAccess.Failed -> DatabaseUnavailable(Res.string.web_database_unavailable)
-
-            WebDatabaseAccess.Starting -> WebLoading()
+        // Reading webDatabaseAccess starts the worker that queues for the database, so a tab that just gave the
+        // database away does not read it until the user takes the database back.
+        var waitingForUser by remember { mutableStateOf(TabHandoff.movedAway) }
+        var asked by remember { mutableStateOf(false) }
+        if (waitingForUser) {
+            MovedToAnotherTab(
+                onUseHere = {
+                    waitingForUser = false
+                    asked = true
+                    TabHandoff.requestRelease()
+                },
+            )
+        } else {
+            DatabaseGate(koinApp, askedForDatabase = asked)
         }
     }
 }
 
-/** Starts [MeshServiceOrchestrator] on composition and stops it on disposal — same shape as desktopApp's. */
+@Composable
+private fun DatabaseGate(koinApp: KoinApplication, askedForDatabase: Boolean) {
+    val access by webDatabaseAccess.collectAsState()
+    when (access) {
+        WebDatabaseAccess.Ready -> {
+            DisposableEffect(Unit) {
+                val handoff = TabHandoff.honorReleaseRequests()
+                onDispose { handoff.stop() }
+            }
+            val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+            MeshServiceLifecycle()
+            ThemeAndContent(uiViewModel)
+        }
+
+        WebDatabaseAccess.Busy -> DatabaseBusy(alreadyAsked = askedForDatabase, onUseHere = TabHandoff::requestRelease)
+
+        WebDatabaseAccess.Failed -> DatabaseUnavailable(Res.string.web_database_unavailable)
+
+        WebDatabaseAccess.Starting -> WebLoading()
+    }
+}
+
+/** Starts [MeshServiceOrchestrator] on composition and stops it on disposal, as desktopApp's does. */
 @Composable
 private fun MeshServiceLifecycle() {
     val meshServiceController = koinInject<MeshServiceOrchestrator>()

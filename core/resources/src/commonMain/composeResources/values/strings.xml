@@ -2389,8 +2389,12 @@
     <string name="waypoint_received">Received waypoint: %1$s</string>
     <!-- WEB -->
     <string name="web_bluetooth_unsupported">This browser has no Bluetooth access. Bluetooth works in Chrome, Edge and Opera on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on.</string>
+    <string name="web_database_asking_other_tab">Asking the other tab to let go…</string>
     <string name="web_database_busy">Meshtastic is open in another tab. Close that tab and this one continues on its own.</string>
+    <string name="web_database_moved">Meshtastic is now open in another tab.</string>
+    <string name="web_database_other_tab_silent">The other tab did not answer. Close it, or every other Meshtastic tab, and this one continues on its own.</string>
     <string name="web_database_unavailable">This browser does not let Meshtastic store its data here. Private windows often block it; try a regular window.</string>
+    <string name="web_database_use_here">Use here</string>
     <string name="web_serial_unsupported">This browser has no USB serial access. USB works in Chrome, Edge and Opera on a computer.</string>
     <string name="web_transports_unsupported">This browser can't connect to a radio. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
     <string name="website">Website</string>

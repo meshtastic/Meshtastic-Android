@@ -2299,8 +2299,12 @@ waypoint_new
 waypoint_received
 ### WEB ###
 web_bluetooth_unsupported
+web_database_asking_other_tab
 web_database_busy
+web_database_moved
+web_database_other_tab_silent
 web_database_unavailable
+web_database_use_here
 web_serial_unsupported
 web_transports_unsupported
 website

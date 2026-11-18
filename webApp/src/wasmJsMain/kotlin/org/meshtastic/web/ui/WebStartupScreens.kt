@@ -22,18 +22,35 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.web_database_asking_other_tab
+import org.meshtastic.core.resources.web_database_busy
+import org.meshtastic.core.resources.web_database_moved
+import org.meshtastic.core.resources.web_database_other_tab_silent
+import org.meshtastic.core.resources.web_database_use_here
 import org.meshtastic.core.ui.theme.AppTheme
+import kotlin.time.Duration.Companion.seconds
+
+/** A holder that answers reloads within a second or two; past this the asking tab stops waiting on it. */
+private val HOLDER_ANSWER_TIMEOUT = 6.seconds
 
 /** Shown while the database worker starts, before this tab knows whether it holds the database. */
 @Composable
@@ -45,6 +62,53 @@ internal fun WebLoading() {
 @Composable
 internal fun DatabaseUnavailable(message: StringResource) {
     StartupSurface { StartupMessage(message) }
+}
+
+/**
+ * Another tab holds the database. This tab gets it on its own once that tab closes; "Use here" asks that tab to let go
+ * now, and if it does not answer, says to close it. [alreadyAsked] is true when the user asked from an earlier screen.
+ */
+@Composable
+internal fun DatabaseBusy(alreadyAsked: Boolean, onUseHere: () -> Unit) {
+    var asked by remember { mutableStateOf(alreadyAsked) }
+    var unanswered by remember { mutableStateOf(false) }
+    if (asked) {
+        LaunchedEffect(Unit) {
+            delay(HOLDER_ANSWER_TIMEOUT)
+            unanswered = true
+        }
+    }
+    StartupSurface {
+        when {
+            unanswered -> StartupMessage(Res.string.web_database_other_tab_silent)
+
+            asked -> {
+                CircularProgressIndicator()
+                StartupMessage(Res.string.web_database_asking_other_tab)
+            }
+
+            else -> {
+                StartupMessage(Res.string.web_database_busy)
+                Button(
+                    onClick = {
+                        asked = true
+                        onUseHere()
+                    },
+                ) {
+                    Text(stringResource(Res.string.web_database_use_here))
+                }
+            }
+        }
+    }
+}
+
+/** This tab gave the database to another one; "Use here" takes it back the same way. */
+@Composable
+internal fun MovedToAnotherTab(onUseHere: () -> Unit) {
+    StartupSurface {
+        StartupMessage(Res.string.web_database_moved)
+        Button(onClick = onUseHere) { Text(stringResource(Res.string.web_database_use_here)) }
+    }
 }
 
 @Composable
