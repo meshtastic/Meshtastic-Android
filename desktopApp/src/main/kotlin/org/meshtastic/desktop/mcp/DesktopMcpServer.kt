@@ -237,9 +237,8 @@ class DesktopMcpServer(
             }
             val channel = request.arguments.int("channel") ?: 0
             // A contact key carries the channel as one digit, so 8 or more would be read as a different channel.
-            if (channel !in 0 until NodeAddress.PKC_CHANNEL_INDEX) {
-                return@addTool error("channel must be 0..${NodeAddress.PKC_CHANNEL_INDEX - 1}")
-            }
+            val maxChannel = NodeAddress.PKC_CHANNEL_INDEX - 1
+            if (channel !in 0..maxChannel) return@addTool error("channel must be 0..$maxChannel")
             val contactKey = contactKeyFor(request.arguments.string("to"), channel)
             val device = radioInterfaceService.getDeviceAddress()
             when (val outcome = sendMessageUseCase(text = text, contactKey = contactKey)) {
