@@ -120,7 +120,8 @@ internal fun TelemetryContent(
             page = page(storedPage, tiles.size),
             pageCount = if (layout == TelemetryLayout.GRID) telemetryPageCount(tiles.size) else 1,
             showChip = layout == TelemetryLayout.ROW && !oneRow,
-            showMark = !chipOnTop,
+            // An empty one-row body is StatusBody, which already leads with the mark.
+            showMark = !chipOnTop && !(oneRow && tiles.isEmpty()),
             short = layout == TelemetryLayout.ONE,
         )
     }
