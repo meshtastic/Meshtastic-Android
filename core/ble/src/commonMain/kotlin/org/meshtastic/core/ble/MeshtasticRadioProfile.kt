@@ -49,4 +49,4 @@ interface MeshtasticRadioProfile {
 }
 
 /** Extension to convert a [BleService] to a [MeshtasticRadioProfile]. */
-expect fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile
+fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile = KableMeshtasticRadioProfile(this)

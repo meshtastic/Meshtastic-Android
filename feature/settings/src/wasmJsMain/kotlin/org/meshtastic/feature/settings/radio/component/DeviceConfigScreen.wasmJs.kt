@@ -19,7 +19,7 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 
-// Raw Intl/Date JS interop for this one function, isolated here per core:ble's WebBluetoothApi.kt idiom.
+// Raw Intl/Date JS interop for this one function, isolated here.
 private fun currentTimeZoneOffsetMinutes(): Int = js("new Date().getTimezoneOffset()")
 
 private fun currentTimeZoneAbbreviation(): String = js(

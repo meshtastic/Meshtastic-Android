@@ -17,7 +17,7 @@
 package org.meshtastic.web.di
 
 import org.koin.core.annotation.Module
-import org.meshtastic.core.ble.di.CoreBleWasmJsModule
+import org.meshtastic.core.ble.di.CoreBleModule
 import org.meshtastic.core.common.di.CoreCommonModule
 import org.meshtastic.core.data.di.CoreDataModule
 import org.meshtastic.core.database.di.CoreDatabaseModule
@@ -42,7 +42,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
     [
         org.meshtastic.core.di.di.CoreDiModule::class,
         CoreCommonModule::class,
-        CoreBleWasmJsModule::class,
+        CoreBleModule::class,
         CoreDataModule::class,
         org.meshtastic.core.domain.di.CoreDomainModule::class,
         CoreDatabaseModule::class,

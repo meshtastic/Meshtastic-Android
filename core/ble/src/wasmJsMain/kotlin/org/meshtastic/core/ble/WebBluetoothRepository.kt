@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 
 /**
- * [BluetoothRepository] implementation backed by `navigator.bluetooth.getAvailability()`.
+ * [BluetoothRepository] for Web Bluetooth, reporting whether the browser exposes `navigator.bluetooth` at all.
  *
  * Web Bluetooth has **no OS-level bonding/pairing concept** the page can query, initiate, or remove — every connection
  * is authorized per-request by the user through [WebBleScanner]'s device picker, and there is nothing durable stored on
@@ -40,7 +40,7 @@ class WebBluetoothRepository : BluetoothRepository {
     override val state: StateFlow<BluetoothState> = _state
 
     override fun refreshState() {
-        val available = webBluetoothOrNull() != null
+        val available = isWebBluetoothExposed()
         _state.value = BluetoothState(hasPermissions = available, enabled = available, bondedDevices = emptyList())
     }
 
@@ -51,3 +51,5 @@ class WebBluetoothRepository : BluetoothRepository {
     // The picker is the only pairing step Web Bluetooth has; see the class KDoc.
     override suspend fun bond(device: BleDevice, pin: String?) = Unit
 }
+
+private fun isWebBluetoothExposed(): Boolean = js("typeof navigator !== 'undefined' && !!navigator.bluetooth")

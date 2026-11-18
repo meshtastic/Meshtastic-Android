@@ -55,4 +55,4 @@ interface BleDevice {
 }
 
 /** A device known only by its [address], as a deep link names one before any scan has seen it. */
-expect fun addressOnlyBleDevice(address: String): BleDevice
+fun addressOnlyBleDevice(address: String): BleDevice = MeshtasticBleDevice(address)

@@ -21,7 +21,14 @@ import com.juul.kable.GattStatusException
 import com.juul.kable.NotConnectedException
 import com.juul.kable.UnmetRequirementException
 
-actual fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
+/**
+ * Inspects this [Throwable] and returns a [BleExceptionInfo] if it is a known platform BLE exception, or `null` if it
+ * is unrelated to the BLE layer.
+ *
+ * This keeps platform BLE type knowledge inside `core:ble` so that `core:network` (and other consumers) can classify
+ * BLE exceptions without depending on Kable directly.
+ */
+fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
     is GattStatusException ->
         BleExceptionInfo(
             isPermanent = false,

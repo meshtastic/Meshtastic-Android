@@ -16,4 +16,12 @@
  */
 package org.meshtastic.core.ble
 
-actual fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile = KableMeshtasticRadioProfile(this)
+import com.juul.kable.ExperimentalKableApi
+import com.juul.kable.Peripheral
+
+// Each connect builds its own peripheral here, so release closes it: Kable needs close() to drop Android's broadcast
+// receivers (Kable issue #359).
+internal actual fun Peripheral.release() = close()
+
+@OptIn(ExperimentalKableApi::class)
+internal actual suspend fun Peripheral.connectedRssi(): Int? = rssi()

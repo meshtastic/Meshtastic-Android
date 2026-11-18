@@ -30,8 +30,9 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs { browser() }
 
-    // nonWebMain: Kable has no wasmJs target. A compilation predicate, because withAndroidTarget()/withApple() drop
-    // androidMain under com.android.kotlin.multiplatform.library (KT-80409).
+    // nonWebMain: KableBleScanner. Kable's web Scanner rides requestLEScan, which Chrome ships only behind a flag, so
+    // web discovers through the requestPeripheral picker instead. A compilation predicate, because
+    // withAndroidTarget()/withApple() drop androidMain under com.android.kotlin.multiplatform.library (KT-80409).
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
         common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
@@ -47,20 +48,17 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.model)
 
+            implementation(libs.kable.core)
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
         }
-
-        getByName("nonWebMain").dependencies { implementation(libs.kable.core) }
-
-        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
 
         androidMain.dependencies {
             implementation(libs.androidx.lifecycle.process)
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        // Tests that use Kable or core:testing, neither of which has a wasmJs target.
+        // Tests that use core:testing, which has no wasmJs target.
         getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
     }
 }

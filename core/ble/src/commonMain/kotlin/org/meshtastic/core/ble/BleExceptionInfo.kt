@@ -26,12 +26,3 @@ package org.meshtastic.core.ble
  * @property message a human-readable description of the failure.
  */
 data class BleExceptionInfo(val isPermanent: Boolean, val gattStatus: Int? = null, val message: String)
-
-/**
- * Inspects this [Throwable] and returns a [BleExceptionInfo] if it is a known platform BLE exception, or `null` if it
- * is unrelated to the BLE layer.
- *
- * This keeps platform BLE type knowledge inside `core:ble` so that `core:network` (and other consumers) can classify
- * BLE exceptions without depending on Kable directly.
- */
-expect fun Throwable.classifyBleException(): BleExceptionInfo?

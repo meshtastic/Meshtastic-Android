@@ -19,7 +19,7 @@
 
 package org.meshtastic.core.common.util
 
-// Raw Intl/browser JS interop, isolated to this one file (mirrors core:ble's WebBluetoothApi.kt).
+// Raw Intl/browser JS interop, isolated to this one file.
 internal external interface JsNumberFormat : JsAny {
     fun format(value: Double): String
 }

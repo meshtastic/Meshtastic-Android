@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.ble
 
+import co.touchlab.kermit.Logger
+import com.juul.kable.PeripheralBuilder
 import com.juul.kable.logs.Logging
 
 /**
@@ -78,5 +80,13 @@ internal fun Logging.applyConfig(config: BleLoggingConfig, identifier: String? =
     format = config.format.toKable()
     if (identifier != null) {
         this.identifier = identifier
+    }
+}
+
+/** Logging and observation-failure handling every Meshtastic [PeripheralBuilder] shares, whichever path builds it. */
+internal fun PeripheralBuilder.meshtasticConfig(loggingConfig: BleLoggingConfig, identifier: String?) {
+    logging { applyConfig(loggingConfig, identifier) }
+    observationExceptionHandler { cause ->
+        Logger.w(cause) { "[${identifier.orEmpty()}] Observation failure suppressed" }
     }
 }

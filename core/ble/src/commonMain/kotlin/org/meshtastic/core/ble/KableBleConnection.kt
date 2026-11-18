@@ -132,10 +132,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging { applyConfig(loggingConfig, identifier = device.address.anonymize()) }
-            observationExceptionHandler { cause ->
-                Logger.w(cause) { "[${device.address.anonymize()}] Observation failure suppressed" }
-            }
+            meshtasticConfig(loggingConfig, device.address.anonymize())
             platformConfig(device) { autoConnect }
         }
 
@@ -317,12 +314,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     }
 
     /**
-     * Safely disconnects and closes the current [peripheral], logging any failures.
+     * Safely disconnects and releases the current [peripheral], logging any failures.
      *
-     * Kable requires `close()` to release broadcast receivers on Android (Kable issue #359). Separate try/catch blocks
-     * ensure `close()` always runs even if `disconnect()` throws.
+     * [release] closes the peripheral everywhere but web (see its actuals). Separate try/catch blocks ensure it always
+     * runs even if `disconnect()` throws.
      */
-    // Teardown under NonCancellable: close() must run whatever disconnect() throws, cancellation included.
+    // Teardown under NonCancellable: release() must run whatever disconnect() throws, cancellation included.
     @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun safeClosePeripheral(tag: String) {
         try {
@@ -334,9 +331,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
         }
         try {
-            peripheral?.close()
+            peripheral?.release()
         } catch (e: Exception) {
-            Logger.w(e) { "[$tag] Failed to close peripheral" }
+            Logger.w(e) { "[$tag] Failed to release peripheral" }
         }
     }
 }
