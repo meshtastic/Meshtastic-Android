@@ -61,6 +61,19 @@ class MetricsStateTest {
     }
 
     @Test
+    fun aSecondReportAnsweringTheSameRequestIsStillListed() {
+        val request = neighborLog(uuid = "request", packetId = 10, receivedDate = 1_000)
+        val first = neighborLog(uuid = "first", packetId = 11, requestId = 10, receivedDate = 2_000)
+        val second = neighborLog(uuid = "second", packetId = 12, requestId = 10, receivedDate = 3_000)
+        val state = MetricsState(neighborInfoRequests = listOf(request), neighborInfoResults = listOf(first, second))
+
+        assertEquals(
+            listOf(NeighborInfoEntry.Received(second), NeighborInfoEntry.Requested(request, first)),
+            state.neighborInfoEntries(),
+        )
+    }
+
+    @Test
     fun neighborInfoLogsExistWithOnlyUnaskedNeighborInfo() {
         val state = MetricsState(neighborInfoResults = listOf(neighborLog(uuid = "b", packetId = 1, receivedDate = 1)))
 

@@ -114,7 +114,6 @@ data class MetricsState(
  * connected radio's periodic report to the app - newest first.
  */
 fun MetricsState.neighborInfoEntries(): List<NeighborInfoEntry> {
-    val requestIds = neighborInfoRequests.mapNotNull { it.fromRadio.packet?.id }.toSet()
     val requested = neighborInfoRequests.map { request ->
         val id = request.fromRadio.packet?.id
         NeighborInfoEntry.Requested(
@@ -122,10 +121,9 @@ fun MetricsState.neighborInfoEntries(): List<NeighborInfoEntry> {
             reply = neighborInfoResults.find { it.fromRadio.packet?.decoded?.request_id == id },
         )
     }
-    val received =
-        neighborInfoResults
-            .filter { it.fromRadio.packet?.decoded?.request_id !in requestIds }
-            .map { NeighborInfoEntry.Received(it) }
+    // Only the report each request took is excluded, so a second copy answering the same request still shows.
+    val pairedReplies = requested.mapNotNull { it.reply?.uuid }.toSet()
+    val received = neighborInfoResults.filter { it.uuid !in pairedReplies }.map { NeighborInfoEntry.Received(it) }
     return (requested + received).sortedByDescending { it.timeSeconds }
 }
 

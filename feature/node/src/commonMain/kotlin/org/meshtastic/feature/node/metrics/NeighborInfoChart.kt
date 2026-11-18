@@ -26,6 +26,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.neighborInfo
 import org.meshtastic.core.resources.Res
@@ -110,7 +111,7 @@ internal fun NeighborInfoChart(
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color) {
                         NEIGHBOR_COUNT_COLOR -> formatString("%.0f", value)
-                        else -> formatString("%.1f dB", value)
+                        else -> MetricFormatter.snr(value.toFloat())
                     }
                 },
             )
