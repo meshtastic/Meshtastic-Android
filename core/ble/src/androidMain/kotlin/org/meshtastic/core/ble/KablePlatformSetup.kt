@@ -23,8 +23,6 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.PooledThreadingStrategy
 import com.juul.kable.ScannerBuilder
 import com.juul.kable.toIdentifier
-import kotlinx.coroutines.CancellationException
-import org.meshtastic.core.model.util.anonymize
 
 // The scan callback never blocks; a capacity of 1 conflates, so a dense BLE environment cannot back
 // advertisements up behind a slow collector.
@@ -61,19 +59,10 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
     // with no upside. If a future hardware revision exposes 2M PHY, override `phy = Phy.Le2M`
     // here after confirming the firmware advertises it.
 
-    onServicesDiscovered {
-        try {
-            // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes.
-            // Requesting the max MTU is critical for preventing dropped packets and stalls.
-            @Suppress("MagicNumber")
-            val negotiatedMtu = requestMtu(512)
-            Logger.i { "[${device.address.anonymize()}] Negotiated MTU: $negotiatedMtu" }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "[${device.address.anonymize()}] Failed to request MTU" }
-        }
-    }
+    // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes, so request the max
+    // to prevent dropped packets and stalls. Kable requests it after connect, before discovery.
+    @Suppress("MagicNumber")
+    mtu = 512
 }
 
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =

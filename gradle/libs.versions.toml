@@ -108,7 +108,7 @@ uri-kmp = "0.0.21"
 spotless = "8.11.0"
 sceneview = "4.69.6"
 vico = "3.4.0-next.1"
-kable = "0.45.0"
+kable = "0.46.0"
 mqttastic = "0.9.1"
 jmdns = "3.6.5"
 # Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
