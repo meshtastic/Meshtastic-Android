@@ -232,6 +232,9 @@ class SharedRadioInterfaceService(
     /** Guarded by [sessionCallbackLock]. New work is rejected immediately when teardown closes this gate. */
     private var sessionAdmissionOpen = false
 
+    /** The generation whose link is up: set by its transport's connect, cleared on any disconnect. Lock-guarded. */
+    private var linkedGeneration: Long? = null
+
     /** Per-generation operation ownership, guarded by [sessionCallbackLock]. */
     private val sessionOperationStates = mutableMapOf<Long, SessionOperationState>()
 
@@ -1244,6 +1247,7 @@ class SharedRadioInterfaceService(
         // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
         // in Connected while the transport was actually disconnected.
         lastDataReceivedMillis = now()
+        linkedGeneration = activeTransportSession?.generation
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
             _connectionState.value = ConnectionState.Connected
@@ -1254,9 +1258,15 @@ class SharedRadioInterfaceService(
         synchronized(sessionCallbackLock) { publishDisconnected(isPermanent, errorMessage, reason) }
     }
 
-    /** Handshake-level phases arrive here directly; they apply only while a transport session is admitted. */
+    /**
+     * Handshake-level phases arrive here directly. They apply only while the admitted session's own link is up, so a
+     * phase a superseded session's handshake reports late never lands on its replacement.
+     */
     override fun onStatus(status: TransportStatus) {
-        synchronized(sessionCallbackLock) { if (activeTransportSession != null) _transportStatus.value = status }
+        synchronized(sessionCallbackLock) {
+            val session = activeTransportSession
+            if (session != null && session.generation == linkedGeneration) _transportStatus.value = status
+        }
     }
 
     /** Applies a callback already admitted under [sessionCallbackLock]. */
@@ -1265,6 +1275,7 @@ class SharedRadioInterfaceService(
         if (resolvedErrorMessage != null) {
             processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(resolvedErrorMessage) }
         }
+        linkedGeneration = null
         // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.
         if (_transportStatus.value?.phase in LINK_UP_PHASES) _transportStatus.value = null
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep

@@ -990,6 +990,50 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
 
     @Test
+    fun `handshake status lands only while the current session link is up`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF", startConnected = false)
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        val handshake = TransportStatus(TransportPhase.HandshakeConfig)
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "a handshake phase before the link is up must be dropped")
+
+            callbacks.last().onConnect()
+            service.onStatus(handshake)
+            assertEquals(handshake, service.transportStatus.value)
+
+            service.setDeviceAddress("x11:22:33:44:55:66")
+            // A linked transport gets a polite disconnect and its drain delay before the switch completes.
+            advanceTimeBy(1_000L)
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(2, callbacks.size, "the switch should start the new device's transport")
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "the old device's handshake must not land on the new device")
+
+            callbacks.first().onConnect()
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "the replaced transport's connect must not open the gate")
+
+            callbacks.last().onConnect()
+            service.onStatus(handshake)
+            assertEquals(handshake, service.transportStatus.value)
+
+            callbacks.last().onDisconnect(isPermanent = false)
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "a dropped link must close the gate")
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
     fun `transport admission is closed after disconnect`() = runTest(testDispatcher) {
         val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
 
