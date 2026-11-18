@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.network.radio
 
+import com.juul.kable.GattStatusException
 import com.juul.kable.NotConnectedException
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
@@ -656,7 +657,8 @@ class BleRadioTransportTest {
         connection.service.observeBeforeSubscriptionExceptionByCharacteristic[FROMNUM_CHARACTERISTIC] =
             NotConnectedException("Connection lost during BLE profile execution")
         connection.lastFailureCause =
-            RuntimeException("Failed to start notification", IllegalStateException("GATT Error Unknown."))
+            // GATT_INSUFFICIENT_ENCRYPTION, the typed refusal; Chrome's message text is classified on web only.
+            RuntimeException("Failed to start notification", GattStatusException(message = "observe", status = 15))
         val radioService = FakeRadioInterfaceService()
         val bleTransport = bleTransportOn(this, radioService)
         bleTransport.start()
@@ -707,7 +709,8 @@ class BleRadioTransportTest {
         bluetoothRepository.bond(device)
         scanner.emitDevice(device)
         connection.failNextN = 1
-        connection.lastFailureCause = IllegalStateException("Bluetooth Device is no longer in range.")
+        // GATT_CONN_TIMEOUT, the typed out-of-range failure.
+        connection.lastFailureCause = GattStatusException(message = "connect", status = 8)
         val radioService = FakeRadioInterfaceService()
         val bleTransport = bleTransportOn(this, radioService)
         bleTransport.start()

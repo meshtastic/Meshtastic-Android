@@ -348,6 +348,7 @@
     <!-- CONNECTION -->
     <string name="connection_failure_bluetooth_unavailable">Bluetooth or location services are off.</string>
     <string name="connection_failure_connect_failed">Could not connect. The radio may be connected to another phone, too far away, or holding an old pairing.</string>
+    <string name="connection_failure_connection_rejected">The radio turned the connection down. It may need pairing: try again and enter the PIN when asked.</string>
     <string name="connection_failure_link_lost">The connection dropped.</string>
     <string name="connection_failure_out_of_range">Radio not found. Make sure it is on and in range.</string>
     <string name="connection_failure_pairing_failed">Pairing failed. The PIN shows on the radio's screen, or is the fixed PIN set in its Bluetooth config.</string>

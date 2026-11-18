@@ -315,6 +315,7 @@ connecting
 ### CONNECTION ###
 connection_failure_bluetooth_unavailable
 connection_failure_connect_failed
+connection_failure_connection_rejected
 connection_failure_link_lost
 connection_failure_out_of_range
 connection_failure_pairing_failed

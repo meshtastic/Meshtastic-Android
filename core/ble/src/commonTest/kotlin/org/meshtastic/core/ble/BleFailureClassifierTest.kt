@@ -25,11 +25,17 @@ import kotlin.test.assertEquals
 /**
  * [classifyBleFailure] against the failures seen on the bench. Web Bluetooth rejections reach common code as
  * `JsException`, which `asException` rethrows as an [IllegalStateException] carrying the browser's message, so the web
- * cases use that shape.
+ * cases use that shape and pass the Web Bluetooth message table the wasmJs hook uses.
  */
 class BleFailureClassifierTest {
 
     private fun webRejection(message: String) = IllegalStateException(message)
+
+    private val webMessages: (Throwable) -> TransportFailureKind? = {
+        it.message?.let(::webBluetoothMessageFailureKind)
+    }
+
+    private fun Throwable.classifyOnWeb(setupHint: Throwable? = null) = classifyBleFailureWith(setupHint, webMessages)
 
     // Kable wraps a rejected startNotifications() in an IOException named after the step; any wrapper type works here.
     private fun refusedSubscription() =
@@ -42,7 +48,7 @@ class BleFailureClassifierTest {
                 "Failed to connect",
                 webRejection("Bluetooth Device is no longer in range."),
             )
-        assertEquals(TransportFailureKind.OutOfRange, failure.classifyBleFailure().kind)
+        assertEquals(TransportFailureKind.OutOfRange, failure.classifyOnWeb().kind)
     }
 
     @Test
@@ -52,31 +58,39 @@ class BleFailureClassifierTest {
                 "Failed to connect",
                 webRejection("Connection Error: Connection attempt failed."),
             )
-        val classified = failure.classifyBleFailure()
+        val classified = failure.classifyOnWeb()
         assertEquals(TransportFailureKind.ConnectFailed, classified.kind)
         assertEquals("Connection Error: Connection attempt failed.", classified.detail)
     }
 
     @Test
-    fun `a refused subscription reads as pairing needed`() {
-        assertEquals(TransportFailureKind.PairingRequired, refusedSubscription().classifyBleFailure().kind)
+    fun `a refused subscription reads as rejected rather than definitely needing pairing`() {
+        assertEquals(TransportFailureKind.ConnectionRejected, refusedSubscription().classifyOnWeb().kind)
     }
 
     @Test
-    fun `a link lost during setup after a refused subscription reads as pairing needed`() {
-        val lost = NotConnectedException("Connection lost during BLE profile execution")
+    fun `a web not paired error reads as pairing needed`() {
         assertEquals(
             TransportFailureKind.PairingRequired,
-            lost.classifyBleFailure(setupHint = refusedSubscription()).kind,
+            webRejection("GATT Error: Not paired.").classifyOnWeb().kind,
         )
     }
 
     @Test
-    fun `a subscription timeout after a refused subscription reads as pairing needed`() {
+    fun `a link lost during setup after a refused subscription reads as rejected`() {
+        val lost = NotConnectedException("Connection lost during BLE profile execution")
+        assertEquals(
+            TransportFailureKind.ConnectionRejected,
+            lost.classifyOnWeb(setupHint = refusedSubscription()).kind,
+        )
+    }
+
+    @Test
+    fun `a subscription timeout after a refused subscription reads as rejected`() {
         val timeout = RuntimeException("Timed out waiting for FROMNUM subscription readiness")
         assertEquals(
-            TransportFailureKind.PairingRequired,
-            timeout.classifyBleFailure(setupHint = refusedSubscription()).kind,
+            TransportFailureKind.ConnectionRejected,
+            timeout.classifyOnWeb(setupHint = refusedSubscription()).kind,
         )
     }
 
@@ -90,7 +104,7 @@ class BleFailureClassifierTest {
     fun `a hint that is not about pairing does not override a lost link`() {
         val lost = NotConnectedException("Connection lost during BLE profile execution")
         val hint = webRejection("GATT Server is disconnected. Cannot perform GATT operations.")
-        assertEquals(TransportFailureKind.LinkLost, lost.classifyBleFailure(setupHint = hint).kind)
+        assertEquals(TransportFailureKind.LinkLost, lost.classifyOnWeb(setupHint = hint).kind)
     }
 
     @Test
@@ -98,7 +112,7 @@ class BleFailureClassifierTest {
         val notFound = BleDeviceNotFoundException("Device not found at address ...")
         assertEquals(
             TransportFailureKind.OutOfRange,
-            notFound.classifyBleFailure(setupHint = refusedSubscription()).kind,
+            notFound.classifyOnWeb(setupHint = refusedSubscription()).kind,
         )
     }
 
@@ -111,7 +125,7 @@ class BleFailureClassifierTest {
     @Test
     fun `a web authentication failure reads as pairing failed`() {
         val failure = BleConnectFailedException("Failed", webRejection("Connection Error: Authentication failed."))
-        assertEquals(TransportFailureKind.PairingFailed, failure.classifyBleFailure().kind)
+        assertEquals(TransportFailureKind.PairingFailed, failure.classifyOnWeb().kind)
     }
 
     @Test
@@ -135,6 +149,17 @@ class BleFailureClassifierTest {
     fun `android supervision timeout reads as out of range`() {
         val failure = GattStatusException(message = "link", status = 8)
         assertEquals(TransportFailureKind.OutOfRange, failure.classifyBleFailure().kind)
+    }
+
+    @Test
+    fun `android link terminations read as link lost`() {
+        listOf(19, 22, 34).forEach { status ->
+            assertEquals(
+                TransportFailureKind.LinkLost,
+                GattStatusException(message = "link", status = status).classifyBleFailure().kind,
+                "status $status",
+            )
+        }
     }
 
     @Test

@@ -49,8 +49,7 @@ enum class TransportPhase {
 /**
  * A classified connection failure.
  *
- * @property detail the platform's own message, for logs and as a secondary line when [kind] is
- *   [TransportFailureKind.Unknown]; never the primary text shown to a user.
+ * @property detail the platform's own message, for logs; never shown to a user.
  */
 data class TransportFailure(val kind: TransportFailureKind, val detail: String? = null)
 
@@ -59,11 +58,14 @@ enum class TransportFailureKind {
     /** The radio was not found nearby, or the platform says it went out of range. */
     OutOfRange,
 
-    /** The link could not be opened: the radio is busy with another phone, too far, or holds a stale pairing. */
+    /** The link could not be opened: the radio is in use elsewhere, too far, or holds a stale pairing. */
     ConnectFailed,
 
     /** The radio requires an encrypted link and this device is not paired with it. */
     PairingRequired,
+
+    /** The radio refused an operation for a reason the platform does not name; a missing pairing is the usual one. */
+    ConnectionRejected,
 
     /** Pairing was attempted and failed, was rejected or timed out. */
     PairingFailed,

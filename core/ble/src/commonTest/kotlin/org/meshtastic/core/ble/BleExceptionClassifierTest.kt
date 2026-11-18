@@ -83,8 +83,10 @@ class BleExceptionClassifierTest {
     fun `isSessionFatalBleException returns true for peer-disconnect and establishment-failure codes`() {
         // 19 = GATT_CONN_TERMINATE_PEER_USER — firmware reboot / peer-initiated disconnect
         assertTrue(GattStatusException(status = 19, message = "peer disconnect").isSessionFatalBleException())
-        // 22 = GATT_CONN_LMP_TIMEOUT — link manager protocol timeout
-        assertTrue(GattStatusException(status = 22, message = "lmp timeout").isSessionFatalBleException())
+        // 22 = GATT_CONN_TERMINATE_LOCAL_HOST — this side's stack ended the link
+        assertTrue(GattStatusException(status = 22, message = "local host").isSessionFatalBleException())
+        // 34 = GATT_CONN_LMP_TIMEOUT — link manager protocol timeout
+        assertTrue(GattStatusException(status = 34, message = "lmp timeout").isSessionFatalBleException())
         // 62 = GATT_CONN_FAIL_ESTABLISH — connection establishment failed
         assertTrue(GattStatusException(status = 62, message = "establish failed").isSessionFatalBleException())
     }
@@ -92,6 +94,13 @@ class BleExceptionClassifierTest {
     @Test
     fun `isSessionFatalBleException returns false for transient GATT status`() {
         assertFalse(GattStatusException(status = 6, message = "busy").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `a pairing status leaves the session up`() {
+        listOf(5, 15, 137).forEach { status ->
+            assertFalse(GattStatusException(status = status, message = "auth").isSessionFatalBleException())
+        }
     }
 
     @Test

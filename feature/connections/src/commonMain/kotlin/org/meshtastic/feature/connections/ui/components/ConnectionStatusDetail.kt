@@ -23,6 +23,7 @@ import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connection_failure_bluetooth_unavailable
 import org.meshtastic.core.resources.connection_failure_connect_failed
+import org.meshtastic.core.resources.connection_failure_connection_rejected
 import org.meshtastic.core.resources.connection_failure_link_lost
 import org.meshtastic.core.resources.connection_failure_out_of_range
 import org.meshtastic.core.resources.connection_failure_pairing_failed
@@ -101,6 +102,7 @@ private fun TransportFailureKind.label(): StringResource = when (this) {
     TransportFailureKind.OutOfRange -> Res.string.connection_failure_out_of_range
     TransportFailureKind.ConnectFailed -> Res.string.connection_failure_connect_failed
     TransportFailureKind.PairingRequired -> Res.string.connection_failure_pairing_required
+    TransportFailureKind.ConnectionRejected -> Res.string.connection_failure_connection_rejected
     TransportFailureKind.PairingFailed -> Res.string.connection_failure_pairing_failed
     TransportFailureKind.LinkLost -> Res.string.connection_failure_link_lost
     TransportFailureKind.BluetoothUnavailable -> Res.string.connection_failure_bluetooth_unavailable

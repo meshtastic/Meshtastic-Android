@@ -63,9 +63,23 @@ fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
  * @param setupHint a failure the platform reported out of band during this attempt (a suppressed notification
  *   subscription), consulted only when [this] alone says no more than that the link dropped
  */
-fun Throwable.classifyBleFailure(setupHint: Throwable? = null): TransportFailure {
-    val own = mostSpecificFailure()
-    val hinted = setupHint?.mostSpecificFailure()?.takeIf { it.first in PAIRING_KINDS }
+fun Throwable.classifyBleFailure(setupHint: Throwable? = null): TransportFailure =
+    classifyBleFailureWith(setupHint) { it.platformMessageFailureKind() }
+
+/**
+ * Kind for a failure the platform reports only as message text. Web Bluetooth rejects with a DOMException that
+ * Kotlin/Wasm surfaces as a `JsException` common code cannot name, so only the wasmJs actual reads the message; every
+ * other platform classifies by type alone and returns null.
+ */
+internal expect fun Throwable.platformMessageFailureKind(): TransportFailureKind?
+
+/** [classifyBleFailure] with the message hook passed in, so the Web Bluetooth table can be tested off the browser. */
+internal fun Throwable.classifyBleFailureWith(
+    setupHint: Throwable?,
+    messageKind: (Throwable) -> TransportFailureKind?,
+): TransportFailure {
+    val own = mostSpecificFailure(messageKind)
+    val hinted = setupHint?.mostSpecificFailure(messageKind)?.takeIf { it.first in PAIRING_KINDS }
     val (kind, source) =
         when {
             hinted != null && (own == null || own.first == TransportFailureKind.LinkLost) -> hinted
@@ -80,26 +94,31 @@ private val FAILURE_KIND_PRIORITY =
     listOf(
         TransportFailureKind.PairingFailed,
         TransportFailureKind.PairingRequired,
+        TransportFailureKind.ConnectionRejected,
         TransportFailureKind.BluetoothUnavailable,
         TransportFailureKind.OutOfRange,
         TransportFailureKind.ConnectFailed,
         TransportFailureKind.LinkLost,
     )
 
-private val PAIRING_KINDS = setOf(TransportFailureKind.PairingFailed, TransportFailureKind.PairingRequired)
+private val PAIRING_KINDS =
+    setOf(
+        TransportFailureKind.PairingFailed,
+        TransportFailureKind.PairingRequired,
+        TransportFailureKind.ConnectionRejected,
+    )
 
 private const val MAX_CAUSE_DEPTH = 10
 
 // Deepest link first, so a tie keeps the platform's own message rather than a wrapper's.
-private fun Throwable.mostSpecificFailure(): Pair<TransportFailureKind, Throwable>? =
-    generateSequence(this) { it.cause }
-        .take(MAX_CAUSE_DEPTH)
-        .toList()
-        .asReversed()
-        .mapNotNull { link -> link.ownFailureKind()?.let { it to link } }
-        .minByOrNull { (kind, _) -> FAILURE_KIND_PRIORITY.indexOf(kind) }
-
-private fun Throwable.ownFailureKind(): TransportFailureKind? = typedFailureKind() ?: webBluetoothFailureKind()
+private fun Throwable.mostSpecificFailure(
+    messageKind: (Throwable) -> TransportFailureKind?,
+): Pair<TransportFailureKind, Throwable>? = generateSequence(this) { it.cause }
+    .take(MAX_CAUSE_DEPTH)
+    .toList()
+    .asReversed()
+    .mapNotNull { link -> (link.typedFailureKind() ?: messageKind(link))?.let { it to link } }
+    .minByOrNull { (kind, _) -> FAILURE_KIND_PRIORITY.indexOf(kind) }
 
 private fun Throwable.typedFailureKind(): TransportFailureKind? = when (this) {
     is BlePairingFailedException -> TransportFailureKind.PairingFailed
@@ -112,43 +131,52 @@ private fun Throwable.typedFailureKind(): TransportFailureKind? = when (this) {
     is BluetoothUnsupportedException,
     -> TransportFailureKind.BluetoothUnavailable
 
-    is GattStatusException -> gattStatusFailureKind(status)
+    is GattStatusException -> GATT_STATUSES[status]?.kind
 
     is NotConnectedException -> TransportFailureKind.LinkLost
 
     else -> null
 }
 
+/**
+ * A Bluetooth GATT status code the stack acts on: what it tells the user, and whether it means the BLE session is
+ * irrecoverably broken (see [isSessionFatalBleException]).
+ */
+private class GattStatus(val code: Int, val kind: TransportFailureKind?, val sessionFatal: Boolean)
+
+/** Every GATT status classified anywhere in the BLE stack, so the card and the session teardown never disagree. */
 @Suppress("MagicNumber")
-private fun gattStatusFailureKind(status: Int): TransportFailureKind? = when (status) {
-    // GATT_INSUFFICIENT_AUTHENTICATION, GATT_INSUFFICIENT_ENCRYPTION: the characteristic needs a bonded link
-    5,
-    15,
-    -> TransportFailureKind.PairingRequired
-
-    // GATT_AUTH_FAIL
-    137 -> TransportFailureKind.PairingFailed
-
-    // GATT_CONN_TIMEOUT: link supervision timeout, the peer went out of range
-    8 -> TransportFailureKind.OutOfRange
-
-    // GATT_CONN_TERMINATE_PEER_USER, GATT_CONN_LMP_TIMEOUT
-    19,
-    22,
-    -> TransportFailureKind.LinkLost
-
-    // GATT_CONN_FAIL_ESTABLISH, GATT_ERROR (the infamous 133), GATT_CONNECTION_TIMEOUT
-    62,
-    133,
-    147,
-    -> TransportFailureKind.ConnectFailed
-
-    else -> null
-}
+private val GATT_STATUSES: Map<Int, GattStatus> =
+    listOf(
+        // 0x05 GATT_INSUFFICIENT_AUTHENTICATION: the characteristic needs a bonded link
+        GattStatus(5, TransportFailureKind.PairingRequired, sessionFatal = false),
+        // 0x08 GATT_CONN_TIMEOUT: link supervision timeout, the peer went out of range or asleep
+        GattStatus(8, TransportFailureKind.OutOfRange, sessionFatal = true),
+        // 0x0F GATT_INSUFFICIENT_ENCRYPTION: the characteristic needs an encrypted link
+        GattStatus(15, TransportFailureKind.PairingRequired, sessionFatal = false),
+        // 0x13 GATT_CONN_TERMINATE_PEER_USER: the radio ended the link (reboot, power-cycle, nRF52 link drop).
+        // The most common Meshtastic disconnect; without it fromRadio would spin-retry a dead link.
+        GattStatus(19, TransportFailureKind.LinkLost, sessionFatal = true),
+        // 0x16 GATT_CONN_TERMINATE_LOCAL_HOST: this side's stack ended the link
+        GattStatus(22, TransportFailureKind.LinkLost, sessionFatal = true),
+        // 0x22 GATT_CONN_LMP_TIMEOUT: link manager protocol timeout, a hung radio firmware or controller
+        GattStatus(34, TransportFailureKind.LinkLost, sessionFatal = true),
+        // 0x3E GATT_CONN_FAIL_ESTABLISH: the connection was never established
+        GattStatus(62, TransportFailureKind.ConnectFailed, sessionFatal = true),
+        // 0x81 GATT_INTERNAL_ERROR: unrecoverable stack failure
+        GattStatus(129, null, sessionFatal = true),
+        // 0x85 GATT_ERROR, the infamous 133: generic connection failure, also raised against a stale GATT handle
+        GattStatus(133, TransportFailureKind.ConnectFailed, sessionFatal = true),
+        // 0x89 GATT_AUTH_FAIL: pairing was attempted and failed
+        GattStatus(137, TransportFailureKind.PairingFailed, sessionFatal = false),
+        // 0x93 GATT_CONNECTION_TIMEOUT: the connect request timed out
+        GattStatus(147, TransportFailureKind.ConnectFailed, sessionFatal = false),
+    )
+        .associateBy { it.code }
 
 /**
- * Web Bluetooth rejects with a DOMException that Kotlin/Wasm surfaces as `JsException`, a type common code cannot name,
- * so these match Chrome's own message text. Every other platform is classified by type above.
+ * Chrome's Web Bluetooth rejection messages, matched by the wasmJs [platformMessageFailureKind] only. Chrome words them
+ * in English whatever the browser language.
  */
 private val WEB_BLUETOOTH_MESSAGES =
     listOf(
@@ -161,41 +189,18 @@ private val WEB_BLUETOOTH_MESSAGES =
         "Authentication rejected" to TransportFailureKind.PairingFailed,
         "Authentication canceled" to TransportFailureKind.PairingFailed,
         "Authentication timeout" to TransportFailureKind.PairingFailed,
-        // startNotifications() or readValue() on a node that needs an encrypted link: "GATT Error Unknown."
-        "GATT Error Unknown" to TransportFailureKind.PairingRequired,
         // "GATT Error: Not paired."
         "Not paired" to TransportFailureKind.PairingRequired,
+        // Chrome's catch-all for a GATT status it does not map, "GATT Error Unknown.". A node that needs an encrypted
+        // link answers startNotifications() with it, but so do other refusals, so it only suggests pairing.
+        "GATT Error Unknown" to TransportFailureKind.ConnectionRejected,
         // Any call on a dropped link: "GATT Server is disconnected. Cannot perform GATT operations. ..."
         "GATT Server is disconnected" to TransportFailureKind.LinkLost,
     )
 
-private fun Throwable.webBluetoothFailureKind(): TransportFailureKind? {
-    val text = message ?: return null
-    return WEB_BLUETOOTH_MESSAGES.firstOrNull { (fragment, _) -> fragment in text }?.second
-}
-
-/**
- * GATT status codes that indicate the BLE session is irrecoverably broken.
- *
- * Used by [isSessionFatalBleException] and shared across the BLE stack so classification stays in one place.
- */
-@Suppress("MagicNumber")
-private val FATAL_GATT_STATUSES =
-    setOf(
-        // 0x08 — link-layer supervision timeout (peer out of range or asleep)
-        8, // GATT_CONN_TIMEOUT
-        // 0x13 — peer-initiated disconnect (firmware reboot, user power-cycle, nRF52 link drop).
-        // The most common Meshtastic disconnect signal; without it fromRadio would spin-retry a dead link.
-        19, // GATT_CONN_TERMINATE_PEER_USER
-        // 0x16 — link manager protocol timeout (radio firmware/hardware hang)
-        22, // GATT_CONN_LMP_TIMEOUT
-        // 0x3E — connection establishment failed (discovered during connect handshake)
-        62, // GATT_CONN_FAIL_ESTABLISH
-        // 0x85 — generic connection failure; commonly fires at runtime against a stale GATT handle
-        133, // GATT_ERROR
-        // 0x81 — unrecoverable operation failure
-        129, // GATT_FAILURE
-    )
+/** The kind Chrome's Web Bluetooth [message] names, or null when it is not one of [WEB_BLUETOOTH_MESSAGES]. */
+internal fun webBluetoothMessageFailureKind(message: String): TransportFailureKind? =
+    WEB_BLUETOOTH_MESSAGES.firstOrNull { (fragment, _) -> fragment in message }?.second
 
 /**
  * Returns `true` if this throwable indicates the BLE session is irrecoverably broken and should be torn down
@@ -212,7 +217,8 @@ private fun Throwable.isSessionFatalBleExceptionInternal(maxDepth: Int): Boolean
         is NotConnectedException -> true
 
         is GattStatusException ->
-            status in FATAL_GATT_STATUSES || cause?.isSessionFatalBleExceptionInternal(maxDepth - 1) ?: false
+            GATT_STATUSES[status]?.sessionFatal == true ||
+                cause?.isSessionFatalBleExceptionInternal(maxDepth - 1) ?: false
 
         else -> cause?.isSessionFatalBleExceptionInternal(maxDepth - 1) ?: false
     }
