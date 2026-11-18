@@ -28,14 +28,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.KoinApplication
 import org.koin.plugin.module.dsl.startKoin
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.WebDatabaseAccess
 import org.meshtastic.core.database.webDatabaseAccess
+import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.navigation.NotificationDeepLinks
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.web_database_unavailable
@@ -52,6 +56,7 @@ import org.meshtastic.web.navigation.isWebDeepLink
 import org.meshtastic.web.platform.NotificationClicks
 import org.meshtastic.web.platform.cacheLoadedResources
 import org.meshtastic.web.platform.requestPersistentStorage
+import org.meshtastic.web.radio.servingDashboardAddress
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
@@ -104,6 +109,14 @@ fun main() {
     NotificationClicks.start()
     val koinApp = startKoin<WebKoinApp> {}
     Logger.i { "Meshtastic Web — Starting" }
+
+    // Served by a node-kmp dashboard: the radio is the node that served the page.
+    servingDashboardAddress()?.let { address ->
+        val current = koinApp.koin.get<UIViewModel>().currentDeviceAddressFlow.value
+        if (current != address) {
+            MainScope().launch { koinApp.koin.get<RadioController>().setDeviceAddress(address) }
+        }
+    }
 
     ComposeViewport("webApp") {
         // Compose has drawn by the time effects run, so index.html's static spinner can go.
