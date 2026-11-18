@@ -35,16 +35,16 @@ import java.util.concurrent.TimeoutException
 import kotlin.test.Test
 import kotlin.test.assertNull
 
-private const val ROUNDS = 5_000
+private const val RUN_SECONDS = 10L
 private const val BACKGROUND_READERS = 4
 private const val STALL_SECONDS = 5L
 private const val DRAIN_SECONDS = 10L
 
 /**
- * `stringResource` blocks the main thread on the Compose Resources cache lock, which is handed to waiters in order. A
- * suspending lookup that waits for that lock on the main dispatcher can never run while the main thread is blocked
- * behind it. Here one thread plays the main thread: it runs a coroutine that calls [getStringSuspend] and, between that
- * coroutine's turns, blocks in [getString] the way a composition does.
+ * A suspending lookup on the main dispatcher must never stall a blocking lookup on the main thread, the way
+ * `stringResource` blocks a composition. Here one thread plays the main thread: it runs a coroutine that calls
+ * [getStringSuspend] and, between that coroutine's turns, blocks in [getString]. The run is bounded by time, not
+ * rounds, because a lookup's cost depends on the host: on Linux each one reads the system theme over D-Bus.
  */
 class StringLookupMainThreadTest {
 
@@ -70,16 +70,20 @@ class StringLookupMainThreadTest {
                     yield()
                 }
             }
-            for (round in 0 until ROUNDS) {
-                val blockingLookup = mainExecutor.submit { getString(strings[round % strings.size]) }
+            val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(RUN_SECONDS)
+            var round = 0
+            while (System.nanoTime() < deadline) {
+                val string = strings[round % strings.size]
+                val blockingLookup = mainExecutor.submit { getString(string) }
                 try {
                     blockingLookup.get(STALL_SECONDS, TimeUnit.SECONDS)
                 } catch (_: TimeoutException) {
                     stalledAtRound = round
-                    // Interrupting frees the thread so the queued lookup can run and give the lock back.
+                    // Interrupting frees the thread so the executor can drain.
                     blockingLookup.cancel(true)
                     break
                 }
+                round++
             }
         } finally {
             scope.cancel()
