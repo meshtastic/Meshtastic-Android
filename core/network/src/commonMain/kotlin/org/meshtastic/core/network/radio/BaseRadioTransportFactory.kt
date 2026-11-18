@@ -92,7 +92,7 @@ abstract class BaseRadioTransportFactory(
                     )
                 }
 
-                // Common to every platform: Ktor finds the engine each one ships.
+                // Common to every platform: the transport brings its own Ktor CIO client.
                 address.startsWith(InterfaceId.WEBSOCKET.id) ->
                     WebSocketRadioTransport(
                         callback = service,

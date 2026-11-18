@@ -57,6 +57,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import okio.ByteString.Companion.toByteString
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
@@ -65,6 +66,7 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceAddress
@@ -85,12 +87,17 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.usb_permission_denied
+import org.meshtastic.core.resources.websocket_connect_failed
+import org.meshtastic.core.resources.websocket_handshake_rejected
+import org.meshtastic.core.resources.websocket_message_too_big
+import org.meshtastic.core.resources.websocket_replaced_by_another_client
+import org.meshtastic.core.resources.websocket_slot_contested
+import org.meshtastic.core.resources.websocket_tls_failed
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
-
-private const val USB_PERMISSION_DENIED_ERROR = "USB permission denied. Reconnect the device to try again."
-private const val REPLACED_BY_ANOTHER_CLIENT_ERROR =
-    "Another app took this radio's WebSocket connection. Connect again to take it back."
 
 /**
  * Immutable per-start transport identity. [generation] is bumped on every transport start (including same-address
@@ -160,9 +167,18 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
     }
 }
 
-private fun TransportDisconnectReason.toConnectionErrorMessage(): String = when (this) {
-    TransportDisconnectReason.UsbPermissionDenied -> USB_PERMISSION_DENIED_ERROR
-    TransportDisconnectReason.ReplacedByAnotherClient -> REPLACED_BY_ANOTHER_CLIENT_ERROR
+/** The user-facing text for [reason]. Lookup fails only outside a full resource runtime; the name beats silence. */
+internal suspend fun connectionErrorText(reason: TransportDisconnectReason): String =
+    safeCatchingAll { getStringSuspend(reason.toConnectionErrorMessage()) }.getOrDefault(reason.name)
+
+private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
+    TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied
+    TransportDisconnectReason.ReplacedByAnotherClient -> Res.string.websocket_replaced_by_another_client
+    TransportDisconnectReason.WebSocketConnectFailed -> Res.string.websocket_connect_failed
+    TransportDisconnectReason.WebSocketHandshakeRejected -> Res.string.websocket_handshake_rejected
+    TransportDisconnectReason.WebSocketTlsFailed -> Res.string.websocket_tls_failed
+    TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
+    TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
 }
 
 private val LINK_UP_PHASES =
@@ -1274,9 +1290,11 @@ class SharedRadioInterfaceService(
 
     /** Applies a callback already admitted under [sessionCallbackLock]. */
     private fun publishDisconnected(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-        val resolvedErrorMessage = errorMessage ?: reason?.toConnectionErrorMessage()
-        if (resolvedErrorMessage != null) {
-            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(resolvedErrorMessage) }
+        if (errorMessage != null || reason != null) {
+            processLifecycle.coroutineScope.launch(dispatchers.default) {
+                val message = errorMessage ?: reason?.let { connectionErrorText(it) }
+                if (message != null) _connectionError.emit(message)
+            }
         }
         linkedGeneration = null
         // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.

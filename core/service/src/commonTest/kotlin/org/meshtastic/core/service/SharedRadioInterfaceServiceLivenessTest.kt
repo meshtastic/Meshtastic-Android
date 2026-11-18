@@ -1346,23 +1346,19 @@ class SharedRadioInterfaceServiceLivenessTest {
         clock = 0L
         val service = createConnectedService("s/dev/bus/usb/001/002")
         try {
-            val errors = mutableListOf<String>()
-            val collectJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
+            // The text comes from resources, which may resolve off the test dispatcher, so await it.
+            val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
 
             service.onDisconnect(
                 isPermanent = true,
                 errorMessage = null,
                 reason = TransportDisconnectReason.UsbPermissionDenied,
             )
-            testDispatcher.scheduler.runCurrent()
-            advanceTimeBy(1_000L)
-
-            collectJob.cancel()
 
             assertEquals(ConnectionState.Disconnected, service.connectionState.value)
             assertEquals(
-                listOf("USB permission denied. Reconnect the device to try again."),
-                errors,
+                connectionErrorText(TransportDisconnectReason.UsbPermissionDenied),
+                error.await(),
                 "USB permission denial must surface a specific error message.",
             )
         } finally {

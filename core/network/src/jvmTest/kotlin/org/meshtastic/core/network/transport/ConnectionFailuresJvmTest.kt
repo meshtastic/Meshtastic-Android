@@ -17,10 +17,13 @@
 package org.meshtastic.core.network.transport
 
 import java.io.EOFException
+import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
 import java.net.UnknownHostException
 import java.nio.channels.UnresolvedAddressException
+import java.security.cert.CertificateException
+import javax.net.ssl.SSLHandshakeException
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -40,6 +43,17 @@ class ConnectionFailuresJvmTest {
         assertTrue(UnknownHostException("no.such.host").isExpectedConnectionFailure())
         assertTrue(SocketException("Connection reset").isExpectedConnectionFailure())
         assertTrue(EOFException("Not enough data available").isExpectedConnectionFailure())
+    }
+
+    @Test
+    fun `an untrusted certificate is a TLS failure even when wrapped`() {
+        assertTrue(CertificateException("self-signed").isTlsFailure())
+        assertTrue(IOException("connect failed", SSLHandshakeException("handshake")).isTlsFailure())
+    }
+
+    @Test
+    fun `a refused connection is not a TLS failure`() {
+        assertFalse(ConnectException("Connection refused").isTlsFailure())
     }
 
     @Test

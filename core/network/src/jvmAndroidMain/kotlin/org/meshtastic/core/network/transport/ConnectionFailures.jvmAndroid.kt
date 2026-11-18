@@ -17,6 +17,8 @@
 package org.meshtastic.core.network.transport
 
 import java.nio.channels.UnresolvedAddressException
+import java.security.cert.CertificateException
+import javax.net.ssl.SSLException
 
 /**
  * On JVM/Android nearly every socket failure already extends `java.io.IOException`, which the common predicate covers —
@@ -27,3 +29,9 @@ import java.nio.channels.UnresolvedAddressException
  * generic handler that reports errors.
  */
 internal actual fun Throwable.isPlatformConnectionFailure(): Boolean = this is UnresolvedAddressException
+
+/** Ktor's CIO TLS throws `SSLException` subclasses; the platform trust manager throws `CertificateException`. */
+internal actual fun Throwable.isTlsFailure(): Boolean =
+    generateSequence(this) { it.cause }.take(MAX_CAUSE_DEPTH).any { it is SSLException || it is CertificateException }
+
+private const val MAX_CAUSE_DEPTH = 8

@@ -2315,6 +2315,14 @@ web_database_use_here
 web_serial_unsupported
 web_transports_unsupported
 website
+### WEBSOCKET ###
+websocket_connect_failed
+websocket_handshake_rejected
+websocket_message_too_big
+websocket_port_in_url
+websocket_replaced_by_another_client
+websocket_slot_contested
+websocket_tls_failed
 weight
 what_is_meshtastic
 what_is_meshtastic_description

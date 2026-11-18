@@ -35,3 +35,9 @@ internal fun Throwable.isExpectedConnectionFailure(): Boolean = this is IOExcept
  * Kept separate so the common predicate above covers the (large) [IOException] family once, on every target.
  */
 internal expect fun Throwable.isPlatformConnectionFailure(): Boolean
+
+/**
+ * Whether this throwable, or one it wraps, is a failed TLS handshake: an untrusted or mismatched certificate, or no
+ * protocol both ends speak. Retrying cannot fix one, so a `wss://` link reports it rather than looking unreachable.
+ */
+internal expect fun Throwable.isTlsFailure(): Boolean
