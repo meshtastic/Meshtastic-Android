@@ -121,7 +121,6 @@
     <string name="bad">Schlecht</string>
     <string name="baro_pressure">Luftdruck</string>
     <string name="battery">Akku</string>
-    <string name="battery_ina_2xx_i2c_address">Akku INA_2XX I2C Adresse</string>
     <string name="ble_devices">Bluetooth Geräte</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -662,7 +661,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP-Adresse:</string>
     <string name="ip_port">Port:</string>
-    <string name="json_output_enabled">JSON-Ausgabe aktiviert</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Schlüssel Backup gelöscht</string>
@@ -854,7 +852,6 @@
     <string name="messages">Nachrichten</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimum</string>
-    <string name="minimum_wake_time_seconds">Minimale Aufwachzeit</string>
     <!-- MIRROR -->
     <string name="mirror_back">Zurück</string>
     <string name="mirror_key_down">Runter</string>
@@ -1030,7 +1027,6 @@
     <string name="options">Optionen</string>
     <string name="orient_north">Ausrichtung Nord</string>
     <string name="overflow_menu">Überlaufmenü</string>
-    <string name="override_console_serial_port">Seriellen Anschluss der Konsole überschreiben</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Paket Authentizität</string>
     <string name="packet_authenticity_level">Schutzstufe</string>
@@ -1178,6 +1174,7 @@
     <string name="reset_to_defaults">Auf Standardeinstellungen zurücksetzen</string>
     <string name="restore_keys">Schlüssel wiederherstellen</string>
     <string name="retry">Erneut versuchen</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Klingelton</string>
     <string name="ringtone_file_empty">Datei ist leer</string>
     <string name="ringtone_import_error">Fehler beim Importieren: %1$s</string>
@@ -1316,7 +1313,6 @@
     <string name="store_forward">Speichern &amp; Weiterleiten</string>
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="success">Erfolgreich</string>
-    <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
     <string name="swipe_action_delete">Löschen</string>

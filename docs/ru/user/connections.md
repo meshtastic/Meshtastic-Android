@@ -28,7 +28,7 @@ Bluetooth Low Energy является наиболее распростране�
 
 ![Сканирование Bluetooth-устройств с обнаружением нод в списке](../../assets/screenshots/connections_bluetooth_scan.png)
 
-### Connecting from a QR code or NFC tag
+### Подключение из QR-кода или NFC тега
 
 Some nodes come with a connect code, printed on a label or shown on the node's screen. Scan it with your phone's camera, or open the floating button on the **Connect** tab, tap **Scan Connect Code QR Code** and point it at the code. The same button takes the link pasted as a URL. A code can also come from an NFC tag: hold the phone to a tag holding the `meshtastic://meshtastic/connections` form of the link, or pick **Scan Connect Code NFC** from the button first. The app asks whether to connect and shows the node's address, plus its pairing PIN when the code has one. Tap **Connect** and the app copies the PIN and pairs. Up to Android 16 the app enters the PIN for you, and if Android refuses that, the pairing dialog asks instead; on Android 17 the pairing dialog asks, and you paste it.
 

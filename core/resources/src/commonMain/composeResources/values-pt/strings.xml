@@ -132,7 +132,6 @@
     <string name="bandwidth_unsupported">Não suportado (%1$s)</string>
     <string name="bandwidth_unsupported_summary">Esta largura de banda não é suportada pelo rádio ligado na região selecionada. Escolha um valor suportado antes de guardar.</string>
     <string name="battery">Bateria</string>
-    <string name="battery_ina_2xx_i2c_address">Endereço I2C da bateria INA_2XX</string>
     <string name="ble_devices">Dispositivos Bluetooth</string>
     <string name="ble_scan_needs_location_services">Nesta versão do Android, a pesquisa de dispositivos Bluetooth também requer que os serviços de localização estejam ativados. A sua localização não é utilizada.</string>
     <!-- BLUETOOTH -->
@@ -626,7 +625,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
-    <string name="json_output_enabled">Saída JSON ativada</string>
     <!-- KEY -->
     <string name="latitude">Latitude</string>
     <!-- LAYER -->
@@ -753,7 +751,6 @@
     <string name="one_day">24 Horas</string>
     <string name="one_week">1sem</string>
     <!-- OPEN -->
-    <string name="override_console_serial_port">Substituir porta série do console</string>
     <!-- PACKET -->
     <string name="password">Palavra-passe</string>
     <!-- PAX -->
@@ -813,6 +810,7 @@
     <string name="resend">Reenviar</string>
     <string name="reset">Redefinir</string>
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Toque</string>
     <!-- ROLE -->
     <string name="role_client">Cliente</string>

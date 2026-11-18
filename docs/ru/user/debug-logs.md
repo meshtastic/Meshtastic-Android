@@ -12,7 +12,7 @@ aliases:
 
 # Отладочные журналы
 
-Когда что-то работает неправильно, отладочные журналы приложения — это самое полезное, что вы можете приложить к отчёту об ошибке. Meshtastic can capture them **for you, from inside the app** — you don't need `adb` or any desktop tooling to collect them.
+Когда что-то работает неправильно, отладочные журналы приложения — это самое полезное, что вы можете приложить к отчёту об ошибке. Meshtastic может захватить их **для тебя, внутри приложения** — тебе не нужно `adb` или каких-либо десктопных инструментов, чтобы собрать их.
 
 Откройте **Панель отладки** через **Настройки → Дополнительно → Панель отладки**.
 
@@ -20,15 +20,15 @@ If you're filing an issue, export your logs (see [Exporting](#exporting)) and at
 
 ## Две вкладки
 
-The Debug Panel has three tabs:
+Панель отладки имеет три вкладки:
 
-- **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). Полезно для диагностики поведения mesh-сети и маршрутизации.
+- **Пакеты** — декодированный сетевой трафик, который твоя нода отправила и получила (сообщения уровня протокола). Полезно для диагностики поведения mesh-сети и маршрутизации.
 - **Журналы приложения** — собственный диагностический журнал приложения (Android _logcat_), включая предупреждения, ошибки и трассировки стека самого приложения. Обычно именно это требуется для отчёта об ошибке.
-- **Mirror** — a live view of the connected node's screen with remote controls; see [Mirror](#mirror).
+- **Зеркало** — живой вид экрана подключенной ноды с пультом дистанционного управления; см. [Mirror]#mirror).
 
 The **Packets** and **App logs** tabs each have their own **export** button and produce their own file, so you can grab whichever is relevant — or both.
 
-## Viewing packets
+## Просмотр пакетов
 
 The **Packets** tab lists each logged packet; tap one to expand it, including its decoded payload where there is one.
 

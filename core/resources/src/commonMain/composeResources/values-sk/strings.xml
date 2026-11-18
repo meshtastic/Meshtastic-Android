@@ -371,6 +371,7 @@
     <string name="resend">Znovu poslať</string>
     <string name="reset">Obnoviť</string>
     <string name="reset_to_defaults">Obnoviť na predvolené nastavenia</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Zvonenie</string>
     <!-- ROLE -->
     <string name="role_client">Klient</string>

@@ -107,7 +107,6 @@
     <string name="bandwidth_unsupported_summary">Тази честотна лента не се поддържа от свързаното радио в избрания регион. Изберете поддържана стойност, преди да запазите.</string>
     <string name="baro_pressure">Баро</string>
     <string name="battery">Батерия</string>
-    <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="ble_devices">Bluetooth устройства</string>
     <string name="ble_scan_needs_location_services">За тази версия на Android сканирането чрез Bluetooth също изисква включени услуги за местоположение. Вашето местоположение не се използва.</string>
     <!-- BLUETOOTH -->
@@ -791,7 +790,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
-    <string name="minimum_wake_time_seconds">Минимално време за събуждане</string>
     <!-- MIRROR -->
     <string name="mirror_back">Назад</string>
     <string name="mirror_key_ok">Добре</string>
@@ -1094,6 +1092,7 @@
     <string name="reset">Нулиране</string>
     <string name="reset_to_defaults">Възстановяване на настройките по подразбиране</string>
     <string name="retry">Опитайте отново</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Тон на звънене</string>
     <string name="ringtone_file_empty">Файлът е празен</string>
     <string name="ringtone_import_error">Грешка при импортиране: %1$s</string>
@@ -1211,7 +1210,6 @@
     <string name="speed_mph">%1$d mph</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
     <string name="success">Успех</string>
-    <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
     <string name="supported">Поддържан</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
     <string name="swipe_action_delete">Изтриване</string>

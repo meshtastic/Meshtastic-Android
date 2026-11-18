@@ -97,7 +97,6 @@
     <string name="bad">Dålig</string>
     <string name="baro_pressure">Tryck</string>
     <string name="battery">Batteri</string>
-    <string name="battery_ina_2xx_i2c_address">Batteriets INA_2XX I2C-adress</string>
     <string name="ble_devices">Blåtandsenheter</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -524,7 +523,6 @@
     <string name="ip">Ip-adress</string>
     <string name="ip_address">IP-adress:</string>
     <string name="ip_port">Port:</string>
-    <string name="json_output_enabled">JSON-utdata aktiverad</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="last_heard_filter_label">Filtrera på senaste kontakt: %1$s</string>
@@ -943,6 +941,7 @@
     <string name="reset_to_defaults">Återställ till standardinställningar</string>
     <string name="restore_keys">Återställ nycklar</string>
     <string name="retry">Försök igen</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Ringsignal</string>
     <string name="ringtone_file_empty">Filen är tom</string>
     <string name="ringtone_import_error">Fel vid import: %1$s</string>
@@ -1077,7 +1076,6 @@
     <string name="store_forward">Lagra &amp; Vidarebefordra</string>
     <string name="store_forward_config">Lagra &amp; Vidarebefordra konfiguration</string>
     <string name="success">Lyckades</string>
-    <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="supported">Stöds</string>
     <string name="supported_by_community">Stöds av Meshtastic Community</string>
     <string name="swipe_action_delete">Radera</string>

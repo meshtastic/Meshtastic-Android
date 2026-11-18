@@ -237,6 +237,7 @@
     <string name="resend">Αποστολή ξανά</string>
     <string name="reset">Επαναφορά</string>
     <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <string name="role_client_base">Πελάτης Βάση</string>
     <!-- ROUTING -->

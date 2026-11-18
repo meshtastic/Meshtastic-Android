@@ -383,6 +383,7 @@
     <string name="resend">Поново пошаљи</string>
     <string name="reset">Поново покрени</string>
     <string name="reset_to_defaults">Врати на подразумевана подешавања</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Мелодија звона</string>
     <!-- ROLE -->
     <string name="role">Улога уређаја</string>

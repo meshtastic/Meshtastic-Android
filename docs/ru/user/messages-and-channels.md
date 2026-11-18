@@ -20,18 +20,18 @@ Meshtastic поддерживает два режима связи: **вещан
 
 ### Канал по умолчанию
 
-Every Meshtastic node comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
+Каждая нода Meshtastic поставляется с каналом **LongFast** по умолчанию. Он зашифрован с помощью хорошо известного ключа по умолчанию, поэтому любой, кто запускает Meshtastic на том же пресете, может его прочитать.
 
 ### Безопасность канала
 
-Each channel carries a lock icon that shows how well it is protected. Tap the icon to see the same explanation inside the app.
+На каждом канале есть значок блокировки, который показывает, насколько хорошо он защищен. Нажми на значок, чтобы увидеть то же объяснение внутри приложения.
 
-| Иконка                             | Что это значит                                                                                                                                        |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Green closed lock                  | The channel is securely encrypted, with either a 128-bit or a 256-bit AES key.                                                        |
-| Yellow open lock                   | The channel is not securely encrypted — it uses no key at all, or a well-known one-byte key — and it does not carry precise location. |
-| Red open lock                      | Not securely encrypted, and the channel carries precise location data.                                                                |
-| Red open lock with a warning badge | Not securely encrypted, carrying precise location data, and uplinking that data to the internet over MQTT.                            |
+| Иконка                                           | Что это значит                                                                                                                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Зелёный закрытый замок                           | Канал надежно зашифрован с помощью 128-битного или 256-битного ключа AES.                                                                           |
+| Жёлтый открытый замок                            | Канал небезопасно зашифрован — в нем вообще не используется ключ или хорошо известный однобайтовый ключ - и в нем не указано точное местоположение. |
+| Красный открытый замок                           | Канал не зашифрован надежно, и по нему передаются точные данные о местоположении.                                                                   |
+| Красный открытый замок с предупреждающим значком | Небезопасно зашифрованный, содержащий точные данные о местоположении и передающий эти данные в Интернет через MQTT.                                 |
 
 Key length alone does not change the icon: a 128-bit key and a 256-bit key both show the green lock.
 
@@ -39,12 +39,12 @@ Key length alone does not change the icon: a 128-bit key and a 256-bit key both 
 
 ### Добавление канала
 
-1. Connect to your node. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
+1. Подключиться к своей ноде. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
 2. Go to **Settings**, then tap **Channels** under **Configuration**.
-3. Tap the **+** button to add a channel. The editor opens on the new entry.
+3. Нажми кнопку **+** чтобы добавить канал. Редактор открывает новую запись.
 4. Set the channel name and the **PSK**, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside **PSK** generates another one.
-5. Tap **Save** to close the editor. The change is still only on your phone.
-6. Tap **Send** at the bottom of the channel list to write the changes to the node. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
+5. Нажми **Сохранить** для закрытия редактора. Изменения все еще только на твоём телефоне.
+6. Нажми **Отправить** внизу списка каналов, чтобы записать изменения в ноду. **Отменить** или покинуть экран, не касаясь **Отправить**, отбрасывает их.
 7. Optional: share the channels with the people who need access — see [Sharing and importing channels](#sharing-and-importing-channels).
 
 Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. On a channel that is not securely encrypted, **Precise location** is disabled and the precision slider stops at 15 bits. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.

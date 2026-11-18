@@ -90,7 +90,6 @@
     <string name="bad">Поганий</string>
     <string name="baro_pressure">Бар</string>
     <string name="battery">Батарея</string>
-    <string name="battery_ina_2xx_i2c_address">I2C адреса INA_2XX батареї</string>
     <string name="ble_devices">Bluetooth пристрої</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -481,7 +480,6 @@
     <string name="ip">IP-адреса</string>
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
-    <string name="json_output_enabled">Вивід JSON увімкнено</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Перевірку ключа завершено</string>
@@ -624,7 +622,6 @@
     <string name="messages">Повідомлення</string>
     <string name="micrograms_per_cubic_meter">мкг/м³</string>
     <string name="min">Мінімум</string>
-    <string name="minimum_wake_time_seconds">Мінімальний час в робочому режимі</string>
     <!-- MIRROR -->
     <string name="mirror_back">Назад</string>
     <string name="mirror_key_ok">Гаразд</string>
@@ -767,7 +764,6 @@
     <string name="options">Налаштування</string>
     <string name="orient_north">Орієнтація північ</string>
     <string name="overflow_menu">Додаткове меню</string>
-    <string name="override_console_serial_port">Перевизначити послідовний порт</string>
     <!-- PACKET -->
     <string name="password">Пароль</string>
     <!-- PAX -->
@@ -909,6 +905,7 @@
     <string name="reset">Скинути</string>
     <string name="reset_to_defaults">Відновити налаштування за замовчуванням</string>
     <string name="retry">Повторити</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Мелодія</string>
     <string name="ringtone_file_empty">Файл порожній</string>
     <string name="ringtone_import_error">Помилка імпорту: %1$s</string>
@@ -1016,7 +1013,6 @@
     <string name="speed_kmh">%1$d км/год</string>
     <string name="status_message">Статус повідомлення</string>
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>
-    <string name="super_deep_sleep_duration_seconds">Тривалість глибокого сну</string>
     <string name="supported">Підтримується</string>
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>
     <string name="swipe_action_delete">Видалити</string>

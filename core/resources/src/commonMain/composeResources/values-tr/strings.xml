@@ -55,7 +55,6 @@
     <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
     <string name="battery">Pil</string>
-    <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Bluetooth Ayarı</string>
@@ -224,7 +223,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
-    <string name="json_output_enabled">JSON çıktısı etkin</string>
     <!-- KEY -->
     <string name="latitude">Enlem</string>
     <!-- LAYER -->
@@ -357,7 +355,6 @@
     <string name="one_week">1H</string>
     <string name="only_favorites">Sadece Favoriler</string>
     <!-- OPEN -->
-    <string name="override_console_serial_port">Konsol seri portunu geçersiz kıl</string>
     <!-- PACKET -->
     <string name="password">Şifre</string>
     <!-- PAX -->
@@ -418,6 +415,7 @@
     <string name="resend">Tekrar gönder</string>
     <string name="reset">Sıfırla</string>
     <string name="reset_to_defaults">Varsayılana dön</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Zil tipi</string>
     <!-- ROLE -->
     <!-- ROUTING -->

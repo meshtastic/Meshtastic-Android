@@ -240,6 +240,7 @@
     <string name="resend">Përsëri dërguar</string>
     <string name="reset">Rivendos</string>
     <string name="reset_to_defaults">Rivendos në parazgjedhje</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Marrë një njohje negative</string>

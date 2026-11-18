@@ -35,20 +35,20 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 ### Включение MQTT
 
 1. Navigate to **Settings → Module configuration → MQTT**.
-2. Turn on **MQTT Enabled**.
+2. Включи **MQTT включен**.
 3. Настройте подключение к брокеру:
 
-| Настройка               | Описание                                                                                                                                                    | По умолчанию                                                                                           |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Address**             | MQTT broker hostname. Empty means the public broker                                                                                         | mqtt.meshtastic.org                                                    |
-| **Username**            | Аутентификация брокера                                                                                                                                      | meshdev                                                                                                |
-| **Password**            | Аутентификация брокера                                                                                                                                      | large4cats                                                                                             |
-| **Encryption Enabled**  | Publish packets still encrypted with the channel key                                                                                                        | Включено                                                                                               |
-| **JSON output enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | Отключено                                                                                              |
-| **TLS Enabled**         | Безопасное подключение к брокеру                                                                                                                            | Отключено                                                                                              |
-| **Root Topic**          | Base topic for messages. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
-| **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | Отключено                                                                                              |
-| **Map Reporting**       | Сообщать о местоположении на публичную карту                                                                                                                | Включено                                                                                               |
+| Настройка               | Описание                                                                                                                                                        | По умолчанию                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Адрес**               | Имя хоста брокера MQTT. Пусто означает публичный брокер                                                                                         | mqtt.meshtastic.org                                                    |
+| **Имя пользователя**    | Аутентификация брокера                                                                                                                                          | meshdev                                                                                                |
+| **Пароль**              | Аутентификация брокера                                                                                                                                          | large4cats                                                                                             |
+| **Включить шифрование** | Публичные пакеты все еще зашифрованы ключом канала                                                                                                              | Включено                                                                                               |
+| **Включить вывод JSON** | Shown only for a node on firmware older than 2.8, or while the setting is still on. Смотри [Формат сообщений](#message-formats) | Отключено                                                                                              |
+| **Включить TLS**        | Безопасное подключение к брокеру                                                                                                                                | Отключено                                                                                              |
+| **Корневая тема**       | Основная тема для сообщений. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
+| **MQTT прокси клиента** | Relay MQTT through the connected app                                                                                                                            | Отключено                                                                                              |
+| **Отчет карты**         | Сообщать о местоположении на публичную карту                                                                                                                    | Включено                                                                                               |
 
 A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
@@ -90,7 +90,7 @@ The finder only subscribes and publishes nothing. Picking a topic fills in the r
 and nothing reaches the node until you save. It needs the LoRa region to be set. Without a
 location, or on desktop, it still lists the region and every root it hears.
 
-### MQTT Proxy in This App
+### MQTT-прокси в этом приложении
 
 If your node has no internet access of its own, it can use the app as its MQTT gateway. Turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config. The app then relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
 

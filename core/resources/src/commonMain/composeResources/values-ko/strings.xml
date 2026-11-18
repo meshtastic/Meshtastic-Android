@@ -208,7 +208,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP 주소:</string>
     <string name="ip_port">포트:</string>
-    <string name="json_output_enabled">JSON 사용</string>
     <!-- KEY -->
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
@@ -407,6 +406,7 @@
     <string name="resend">재전송</string>
     <string name="reset">초기화</string>
     <string name="reset_to_defaults">기본값으로 재설정</string>
+    <!-- RINGTONE -->
     <string name="ringtone">벨소리</string>
     <!-- ROLE -->
     <!-- ROUTING -->

@@ -97,7 +97,6 @@
     <string name="bad">不良</string>
     <string name="baro_pressure">氣壓</string>
     <string name="battery">電池</string>
-    <string name="battery_ina_2xx_i2c_address">電池 INA_2XX I2C 地址</string>
     <string name="ble_devices">藍牙裝置</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">藍牙</string>
@@ -594,7 +593,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="ip">IP</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">IP連接埠：</string>
-    <string name="json_output_enabled">JSON輸出已啟用</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">金鑰驗證已完成</string>
@@ -804,7 +802,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="message_status_unknown">不明</string>
     <string name="messages">訊息</string>
     <string name="min">最小</string>
-    <string name="minimum_wake_time_seconds">最小喚醒時間</string>
     <!-- MIRROR -->
     <string name="mirror_back">返回</string>
     <string name="mirror_key_ok">好的</string>
@@ -962,7 +959,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="options">選項</string>
     <string name="orient_north">定位朝北</string>
     <string name="overflow_menu">溢出選單</string>
-    <string name="override_console_serial_port">覆蓋控制台序列埠</string>
     <!-- PACKET -->
     <string name="password">密碼</string>
     <!-- PAX -->
@@ -1097,6 +1093,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="reset">重設</string>
     <string name="reset_to_defaults">恢復預設設置</string>
     <string name="retry">重試</string>
+    <!-- RINGTONE -->
     <string name="ringtone">鈴聲</string>
     <string name="ringtone_file_empty">檔案為空</string>
     <string name="ringtone_import_error">匯入錯誤：%1$s</string>
@@ -1206,7 +1203,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="store_forward">儲存 &amp; 轉發</string>
     <string name="store_forward_config">儲存 &amp; 轉發設定</string>
     <string name="success">成功</string>
-    <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>
     <string name="supported_by_community">由 Meshtastic 社群協作</string>
     <string name="swipe_action_delete">刪除</string>

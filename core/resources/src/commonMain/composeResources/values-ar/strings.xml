@@ -217,6 +217,7 @@
     <string name="resend">إعادة الإرسال</string>
     <string name="reset">إعادة التشغيل</string>
     <string name="reset_to_defaults">العودة إلى الإعدادات الأصلية</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">لم يستلم</string>

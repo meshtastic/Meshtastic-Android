@@ -245,6 +245,7 @@
     <!-- REQUEST -->
     <string name="reset">Скінуць</string>
     <string name="retry">Паспрабаваць яшчэ раз</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <string name="role_client">CLIENT</string>
     <string name="role_client_hidden">CLIENT HIDDEN</string>

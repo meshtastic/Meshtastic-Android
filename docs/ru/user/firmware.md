@@ -2,7 +2,7 @@
 title: Обновления прошивки
 nav_order: 13
 last_updated: 2026-11-15
-description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
+description: Обновление встроенного ПО вашей ноды через Bluetooth, Wi-Fi или USB — процесс OTA, каналы обновления версий, предполетную проверку и восстановление.
 aliases:
   - firmware
   - update
@@ -12,15 +12,15 @@ aliases:
 
 # Обновления прошивки
 
-Keep your Meshtastic node up to date with the latest firmware for new features, bug fixes, and security improvements.
+Поддерживай свою ноду Meshtastic с помощью последней версии встроенного ПО для получения новых функций, исправлений ошибок и улучшений безопасности.
 
 ## Проверка обновлений
 
-1. Open **Settings** for the connected node and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable nodes.
+1. Открой **Настройки** для подключенной ноды и в разделе **Дополнительно** нажми **Обновление прошивки**. Этот пункт появляется только для нод, поддерживающих OTA.
 2. Приложение проверяет доступные версии прошивки.
-3. Available updates show the version number and release notes.
+3. Доступные обновления показывают номер версии и примечания к выпуску.
 
-The app also tells you when the connected node is behind the latest stable release. The **Connect** tab shows a **Firmware update available** card naming the installed and the stable version, and a notification says the same once per node and release. Its button reads **Open Firmware Updates** when the app can update the node over the current connection, or **Open Meshtastic Flasher** when it can't.
+Приложение также сообщает, когда подключенная нода находится за последним стабильным выпуском. The **Connect** tab shows a **Firmware update available** card naming the installed and the stable version, and a notification says the same once per node and release. Its button reads **Open Firmware Updates** when the app can update the node over the current connection, or **Open Meshtastic Flasher** when it can't.
 
 ## Методы обновления
 
@@ -43,7 +43,7 @@ Where the table has no method, the screen says firmware updates are not supporte
 1. Ensure your node is connected via Bluetooth.
 2. Перейдите на экран "Обновление прошивки".
 3. Выберите нужную версию прошивки.
-4. Tap **Update via BLE OTA**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
+4. Нажми **Обновление через BLE OTA**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Wait for the update to complete. Do not disconnect during the update.
 
 While the update downloads, processes, uploads or verifies, the screen stays on. The system back button or gesture during an update, including the bootloader review, asks **Stop update?** with **Stop** and **Keep going**. The arrow in the top bar leaves without asking. A node that is mid-update stays in update mode until you finish or recover it. You can also tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
@@ -56,20 +56,20 @@ Some boards ship with a bootloader that cannot take a Bluetooth update. For thes
 
 Where the app offers it, an **Erase device during update** switch appears above the update button. It is a per-update opt-in and is never remembered.
 
-| Method          | What erasing does                                                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
-| USB             | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                             |
+| Метод           | Что делает стирание                                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BLE / Wi-Fi OTA | После подтверждения обновления устройство сбрасывается к заводским настройкам. Все настройки и Bluetooth-соединение удалены. |
+| USB             | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                                                   |
 
-It is not offered for a local firmware file, during a recovery update, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Over USB it is offered for nRF52 and RP2040 nodes only, and when the app can't erase one safely, the switch is shown disabled with the reason. Afterwards the device needs setting up — and pairing — again.
+It is not offered for a local firmware file, during a recovery update, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Over USB it is offered for nRF52 and RP2040 nodes only, and when the app can't erase one safely, the switch is shown disabled with the reason. После этого устройство необходимо снова настроить и выполнить сопряжение.
 
-### OTA via Wi-Fi (network-connected ESP32)
+### OTA через Wi-Fi (подключенный к сети ESP32)
 
-When an ESP32 node is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
+Когда нода ESP32 подключена по сети, а не по Bluetooth, приложение предлагает \*\* Wi-Fi OTA\*\*, которая отправляет то же обновление по протоколу TCP:
 
-1. Connect to the node over the network (see [Connections](connections)).
-2. Open the Firmware Update screen and pick a version.
-3. Tap **Update via Wi-Fi OTA**. Keep the node and phone on the same network for the whole transfer.
+1. Подключиться к ноде по сети (см. [Подключения](connections)).
+2. Открой экран "Обновление прошивки" и выбери версию.
+3. Нажми **Обновление через Wi-Fi OTA**. Держи ноду и телефон в одной сети в течение всего процесса передачи данных.
 
 Wi-Fi OTA installs the ESP32 app image, a `.bin` file, rather than the `.uf2` a USB update uses. The app selects the right file from the release for you.
 

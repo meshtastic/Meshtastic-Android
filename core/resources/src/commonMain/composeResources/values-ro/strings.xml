@@ -74,7 +74,6 @@
     <string name="bad">Slab</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Baterie</string>
-    <string name="battery_ina_2xx_i2c_address">Adresa baterie INA_2XX I2C</string>
     <string name="ble_devices">Dispozitive Bluetooth</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -424,7 +423,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Adresa IP:</string>
     <string name="ip_port">Port:</string>
-    <string name="json_output_enabled">Ieșire JSON activată</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Verificare cheie finalizată</string>
@@ -562,7 +560,6 @@
     <string name="message_status_sfpp_routing">Rutare prin lanțul SF++…</string>
     <string name="message_status_unknown">Necunoscut</string>
     <string name="messages">Mesaje</string>
-    <string name="minimum_wake_time_seconds">Durata minimă a trezirii</string>
     <!-- MIRROR -->
     <string name="mirror_back">Înapoi</string>
     <string name="mirror_key_ok">Ok</string>
@@ -674,7 +671,6 @@
     <string name="options">Opțiuni</string>
     <string name="orient_north">Orientare spre nord</string>
     <string name="overflow_menu">Meniu de Overflow</string>
-    <string name="override_console_serial_port">Suprascrie portul serial al consolei</string>
     <!-- PACKET -->
     <string name="password">Parolă</string>
     <!-- PAX -->
@@ -794,6 +790,7 @@
     <string name="reset">Resetare</string>
     <string name="reset_to_defaults">Reinițializare la valorile implicite</string>
     <string name="retry">Reîncercați</string>
+    <!-- RINGTONE -->
     <string name="ringtone">Sonerie</string>
     <!-- ROLE -->
     <string name="role">Rolul dispozitivului</string>
@@ -890,7 +887,6 @@
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="status_message">Mesaj de stare:</string>
     <string name="stay_connected_anywhere">Rămâneţi conectat oriunde</string>
-    <string name="super_deep_sleep_duration_seconds">Durată maximă de somn</string>
     <string name="supported">Suportate</string>
     <string name="supported_by_community">Sprijinită de comunitatea Meshtastic</string>
     <string name="swipe_action_delete">Șterge</string>

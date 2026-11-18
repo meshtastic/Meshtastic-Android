@@ -233,6 +233,7 @@
     <string name="resend">Reenvwaye</string>
     <string name="reset">Reyajiste</string>
     <string name="reset_to_defaults">Reyajiste nan paramèt default yo</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rekòmanse avèk yon refi negatif</string>

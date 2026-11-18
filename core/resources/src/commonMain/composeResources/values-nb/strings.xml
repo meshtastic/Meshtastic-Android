@@ -241,6 +241,7 @@
     <string name="resend">Send på nytt</string>
     <string name="reset">Nullstill</string>
     <string name="reset_to_defaults">Tilbakestill til standard</string>
+    <!-- RINGTONE -->
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Mottok negativ bekreftelse</string>

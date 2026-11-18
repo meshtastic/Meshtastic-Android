@@ -14,9 +14,9 @@ aliases:
 
 # Ноды
 
-The Nodes screen lists every node visible on your mesh.
+На экране "Ноды" отображаются все ноды, видимые в сети.
 
-## Node list
+## Список нод
 
 The node list shows every node your node has heard, including:
 
@@ -27,7 +27,7 @@ The node list shows every node your node has heard, including:
 - **Расстояние** — предполагаемое расстояние (если позиции общие)
 - **Батарея** — уровень заряда батареи удалённой ноды (если включена телеметрия)
 
-### Choosing what the list shows
+### Выбери, что покажет список
 
 The list has two densities, set at **Settings → Node Layout**. **Complete** shows every field a node has reported and hides the ones it hasn't. **Compact** fits more nodes on screen and lets you pick the fields yourself — **Power**, **Last Heard Time**, **Relative Last Heard Time**, **Distance and Bearing**, **Hops Away**, **Signal (Direct Only)**, **Channel**, and **Device & Role**. The **Environment Metrics** toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.
 
