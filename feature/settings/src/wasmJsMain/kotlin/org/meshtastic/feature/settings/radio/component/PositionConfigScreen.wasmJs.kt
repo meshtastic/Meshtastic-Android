@@ -16,17 +16,43 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.position_config_set_fixed_from_phone
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
+/** Fills the fixed position from the browser's Geolocation API; the browser asks for permission on this click. */
 @Composable
 actual fun DeviceLocationButton(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     onLocationReceived: (Position) -> Unit,
 ) {
-    // No-op for web, same as jvm ("no phone GPS") and iOS ("for now") -- this "use my location" convenience button
-    // is already deferred on every non-Android platform, not just this one; a real implementation would use the
-    // browser's Geolocation API, but there's no established precedent yet for that on any other platform to match.
+    val coroutineScope = rememberCoroutineScope()
+
+    TextButton(
+        enabled = enabled,
+        onClick = {
+            coroutineScope.launch {
+                val phoneLoc = viewModel.getCurrentLocation()
+                if (phoneLoc != null) {
+                    onLocationReceived(
+                        Position(
+                            latitude = phoneLoc.latitude,
+                            longitude = phoneLoc.longitude,
+                            altitude = (phoneLoc.mslAltitudeMeters ?: phoneLoc.altitudeMeters ?: 0.0).toInt(),
+                        ),
+                    )
+                }
+            }
+        },
+    ) {
+        Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
+    }
 }

@@ -26,9 +26,13 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.HttpClientDefaults
@@ -41,6 +45,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NeighborInfoResponseProvider
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
@@ -48,9 +53,9 @@ import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.web.WebBuildConfig
+import org.meshtastic.web.platform.WebMeshNotificationManager
+import org.meshtastic.web.platform.WebNotificationManager
 import org.meshtastic.web.radio.WebMessageQueue
-import org.meshtastic.web.stub.NoopMeshNotificationManager
-import org.meshtastic.web.stub.NoopNotificationManager
 
 /** Web runtime wiring mirroring `DesktopRuntimeModule`: the service repository, notifications, queue and HTTP. */
 @Module
@@ -68,9 +73,15 @@ class WebRuntimeModule {
     )
     fun serviceRepository(): ServiceRepository = ServiceRepositoryImpl()
 
-    @Single fun notificationManager(): NotificationManager = NoopNotificationManager()
+    @Single
+    fun notificationManager(
+        prefs: NotificationPrefs,
+        @Named(PROCESS_LIFECYCLE) processLifecycle: Lifecycle,
+    ): NotificationManager = WebNotificationManager(prefs, processLifecycle.coroutineScope)
 
-    @Single fun meshNotificationManager(): MeshNotificationManager = NoopMeshNotificationManager()
+    @Single
+    fun meshNotificationManager(notificationManager: NotificationManager): MeshNotificationManager =
+        WebMeshNotificationManager(notificationManager)
 
     @Single
     fun messageQueue(

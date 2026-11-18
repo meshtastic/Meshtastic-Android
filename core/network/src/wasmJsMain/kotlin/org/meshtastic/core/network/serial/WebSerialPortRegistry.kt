@@ -72,6 +72,17 @@ class WebSerialPortRegistry {
      */
     internal fun get(id: String): JsSerialPort? = portsById[id]
 
+    /** Every id minted this session, with the port it currently stands for. */
+    internal fun knownPorts(): Map<String, JsSerialPort> = portsById.toMap()
+
+    /**
+     * Points [id] at [port]. A replugged USB device comes back from Web Serial as a new object, so this keeps the
+     * address the transport was started with valid for it.
+     */
+    internal fun rebind(id: String, port: JsSerialPort) {
+        portsById[id] = port
+    }
+
     /** Ports already granted to this page, gesture-free. Empty if Web Serial is unavailable in this browser/context. */
     suspend fun refreshGrantedPorts(): List<GrantedSerialPort> {
         val serial = webSerialOrNull() ?: return emptyList()

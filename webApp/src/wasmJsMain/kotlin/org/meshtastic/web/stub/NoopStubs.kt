@@ -19,34 +19,18 @@
 package org.meshtastic.web.stub
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.common.util.LocaleChangeNotifier
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.FirmwareUpdateNotice
-import org.meshtastic.core.model.MeshBeaconOffer
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
-import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.network.repository.ServiceDiscovery
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.GeocodedPlace
-import org.meshtastic.core.repository.Location
-import org.meshtastic.core.repository.LocationRepository
-import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MagneticFieldProvider
-import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PersistedPacketId
-import org.meshtastic.core.repository.PhoneLocationProvider
-import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.ReverseGeocoder
 import org.meshtastic.core.repository.SecurityKeyBackupStore
@@ -56,85 +40,11 @@ import org.meshtastic.core.service.DeviceAddressChangeHook
 import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.HeadingState
-import org.meshtastic.proto.ClientNotification
-import org.meshtastic.proto.Telemetry
 
-/** No-op implementations for platform interfaces a browser has no counterpart for yet, shaped like desktop's stubs. */
+/** No-op implementations for platform interfaces a browser has no counterpart for, shaped like desktop's stubs. */
 private const val TAG = "WebNoopStub"
 
-// region Notification stubs: the browser Notification API is not wired yet
-
-class NoopNotificationManager : NotificationManager {
-    override suspend fun dispatch(notification: Notification): Boolean = false
-
-    override fun cancel(id: Int) {}
-
-    override fun cancelAll() {}
-}
-
-class NoopMeshNotificationManager : MeshNotificationManager {
-    override fun clearNotifications() {}
-
-    override fun initChannels() {}
-
-    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {}
-
-    override suspend fun updateMessageNotification(
-        contactKey: String,
-        name: String,
-        message: String,
-        isBroadcast: Boolean,
-        channelName: String?,
-        isSilent: Boolean,
-    ) {}
-
-    override suspend fun updateWaypointNotification(
-        contactKey: String,
-        name: String,
-        message: String,
-        waypointId: Int,
-        isSilent: Boolean,
-    ) {}
-
-    override suspend fun updateReactionNotification(
-        contactKey: String,
-        name: String,
-        emoji: String,
-        isBroadcast: Boolean,
-        channelName: String?,
-        isSilent: Boolean,
-    ) {}
-
-    override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) {}
-
-    override suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer) {}
-
-    override suspend fun showNewNodeSeenNotification(node: Node, title: String) {}
-
-    override fun cancelNewNodeNotification(nodeNum: Int) {}
-
-    override suspend fun notifyLowBattery(node: Node, isRemote: Boolean) {}
-
-    override fun cancelLowBatteryNotification(nodeNum: Int) {}
-
-    override suspend fun showClientNotification(
-        clientNotification: ClientNotification,
-        title: String,
-        severity: Notification.Type,
-    ) {}
-
-    override fun clearClientNotification(clientNotification: ClientNotification) {}
-
-    override suspend fun showFirmwareUpdateNotification(notice: FirmwareUpdateNotice): Boolean = false
-
-    override suspend fun showReconnectBlockedNotification(title: String, message: String): Boolean = false
-
-    override suspend fun cancelMessageNotification(contactKey: String) {}
-}
-
-// endregion
-
-// region Platform / widget / worker stubs (Android-only concepts)
+// region Platform / widget / worker stubs: no analytics SDK runs on web, and a tab has no widgets or WorkManager
 
 class NoopPlatformAnalytics : PlatformAnalytics {
     override fun track(event: String, vararg properties: DataPair) {}
@@ -154,27 +64,6 @@ class NoopMeshWorkerManager : MeshWorkerManager {
 
 // endregion
 
-// region Location stubs: navigator.geolocation is not wired yet
-
-class NoopMeshLocationManager : MeshLocationManager {
-    override fun start(
-        scope: kotlinx.coroutines.CoroutineScope,
-        sendPositionFn: suspend (org.meshtastic.proto.Position) -> Unit,
-    ) {}
-
-    override fun restart() {}
-
-    override fun stop() {}
-}
-
-class NoopLocationRepository : LocationRepository {
-    override val receivingLocationUpdates = MutableStateFlow(false)
-
-    override fun getLocations(): Flow<Location> = emptyFlow()
-}
-
-// endregion
-
 // region Service discovery stub: mDNS needs raw sockets, which a browser cannot open
 
 class NoopServiceDiscovery : ServiceDiscovery {
@@ -183,15 +72,7 @@ class NoopServiceDiscovery : ServiceDiscovery {
 
 // endregion
 
-// region Serial device presence stub: Web Serial hot-plug is not wired yet
-
-class NoopSerialDevicePresence : SerialDevicePresence {
-    override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow(emptySet())
-}
-
-// endregion
-
-// region Secure-storage stubs: no browser keystore is wired yet
+// region Secure-storage stubs: origin storage is readable by any script on the page, so keys and passphrases stay out
 
 class NoopSecurityKeyBackupStore : SecurityKeyBackupStore {
     override fun get(nodeNum: Int): StoredSecurityKeys? = null
@@ -233,14 +114,6 @@ class NoopLocalNetworkAccess : LocalNetworkAccess {
 
 // endregion
 
-// region Location-service stub: navigator.geolocation is not wired yet
-
-class NoopLocationService : LocationService {
-    override suspend fun getCurrentLocation(): Location? = null
-}
-
-// endregion
-
 // region Locale-change stub: a reload already re-reads navigator.language
 
 class NoopLocaleChangeNotifier : LocaleChangeNotifier {
@@ -249,15 +122,10 @@ class NoopLocaleChangeNotifier : LocaleChangeNotifier {
 
 // endregion
 
-// region Compass/GPS stubs: no sensor API is wired, as on desktop
+// region Compass stubs: only Android Chrome has an absolute-orientation event, and declination needs a WMM model
 
 class NoopCompassHeadingProvider : CompassHeadingProvider {
     override fun headingUpdates(): Flow<HeadingState> = flowOf(HeadingState(hasSensor = false))
-}
-
-class NoopPhoneLocationProvider : PhoneLocationProvider {
-    override fun locationUpdates(): Flow<PhoneLocationState> =
-        flowOf(PhoneLocationState(permissionGranted = false, providerEnabled = false))
 }
 
 class NoopMagneticFieldProvider : MagneticFieldProvider {

@@ -14,25 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("TooManyFunctions", "UnusedParameter")
+@file:Suppress("TooManyFunctions")
 
 package org.meshtastic.core.ui.util
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.platform.LocalClipboard
 import kotlinx.browser.window
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.await
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import kotlin.js.Promise
 
 // Android system-settings concepts have no browser equivalent, so these mirror the iOS no-ops.
 
@@ -55,76 +53,35 @@ actual fun rememberShareText(): (text: String, subject: String) -> Unit {
 /** Web — opens the URL in a new browser tab via `window.open`, so the running app's own tab/state is left intact. */
 @Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { url -> window.open(url, "_blank", "") }
 
-/** URI scheme of a save target: the web `FileService` turns what is written to it into a download of that name. */
-const val WEB_DOWNLOAD_SCHEME: String = "download"
-
-/** A browser has no save dialog everywhere, so the file goes to the downloads folder under [defaultFilename]. */
+/** Chromium's save picker where it exists, otherwise the write becomes a browser download. See [launchSaveFile]. */
 @Composable
 actual fun rememberSaveFileLauncher(
     onUriReceived: (CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit {
-    val callback by rememberUpdatedState(onUriReceived)
-    return remember {
-        { fileName, _ -> callback(CommonUri.parse("$WEB_DOWNLOAD_SCHEME:${CommonUri.encode(fileName)}")) }
+    val scope = rememberCoroutineScope()
+    val currentOnUriReceived by rememberUpdatedState(onUriReceived)
+    return remember(scope) {
+        { fileName, mimeType -> launchSaveFile(scope, fileName, mimeType) { currentOnUriReceived(it) } }
     }
 }
 
-/** Opens the browser's file picker and hands back a `blob:` URL for the picked file, or null when cancelled. */
+/** The browser's `<input type=file>` chooser. See [launchOpenFile]. */
 @Composable
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
-    val callback by rememberUpdatedState(onUriReceived)
-    return remember {
-        { mimeType ->
-            // A generic type would hide files the browser cannot type, such as a .db backup.
-            val accept = mimeType.takeUnless { it == GENERIC_MIME_TYPE || it == ANY_MIME_TYPE }.orEmpty()
-            pickFile(accept) { url -> callback(url?.let(CommonUri::parse)) }
-        }
-    }
+    val currentOnUriReceived by rememberUpdatedState(onUriReceived)
+    return remember { { mimeType -> launchOpenFile(mimeType) { currentOnUriReceived(it) } } }
 }
 
-private const val GENERIC_MIME_TYPE = "application/octet-stream"
-private const val ANY_MIME_TYPE = "*/*"
-
-private fun pickFile(accept: String, onPicked: (String?) -> Unit): Unit = js(
-    """{
-        const input = document.createElement("input");
-        input.type = "file";
-        if (accept) input.accept = accept;
-        input.addEventListener("change", () => {
-            const file = input.files && input.files[0];
-            onPicked(file ? URL.createObjectURL(file) : null);
-        });
-        input.addEventListener("cancel", () => onPicked(null));
-        input.click();
-    }""",
-)
-
+/** Only Chromium can pick a directory, and the UF2 volume flow it serves needs USB mass storage a page cannot reach. */
 @Composable actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {}
 
 /**
- * Holds a Screen Wake Lock while [enabled]. A rejected request (unsupported browser, insecure origin, hidden tab) is a
- * silent no-op, and the browser drops the lock when the tab is hidden without this re-requesting it.
+ * Compose's own [keepScreenOn] holds the Screen Wake Lock for the window and takes it back when the tab is shown again.
+ * It is a modifier, so this places a zero-size node in the caller's layout while [enabled].
  */
-@Suppress("TooGenericExceptionCaught")
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
-    LaunchedEffect(enabled) {
-        if (!enabled) return@LaunchedEffect
-        // Request and release share one coroutine, so a fast dispose cannot race an in-flight request and leak it.
-        val sentinel =
-            try {
-                navigator.wakeLock?.request("screen")?.await()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                null
-            }
-        try {
-            awaitCancellation()
-        } finally {
-            sentinel?.release()
-        }
-    }
+    if (enabled) Spacer(Modifier.keepScreenOn())
 }
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
@@ -145,29 +102,25 @@ actual val bleScanRequiresLocationServices: Boolean = false
 
 @Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
 
-@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+@Composable
+actual fun rememberLocationPermissionState(): PermissionUiState =
+    rememberBrowserPermissionState("geolocation", "prompt") { requestGeolocationPermission(it) }
 
-@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+/** A browser grants location without an approximate tier, so precise is the same grant. */
+@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = rememberLocationPermissionState()
 
 @Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
 
-@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()
+/** Without the Notifications API (iOS Safari outside a home-screen app) nothing can be shown, so nothing is asked. */
+@Composable
+actual fun rememberNotificationPermissionState(): PermissionUiState = if (notificationsSupported()) {
+    rememberBrowserPermissionState("notifications", notificationPermission()) {
+        requestNotificationPermission(it)
+    }
+} else {
+    PermissionUiState(status = PermissionStatus.PERMANENTLY_DENIED, request = {}, openAppSettings = {})
+}
 
 @Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 @Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
-
-private external interface JsWakeLockSentinel : JsAny {
-    fun release(): Promise<JsAny?>
-}
-
-private external interface JsWakeLock : JsAny {
-    fun request(type: String): Promise<JsWakeLockSentinel>
-}
-
-private external interface JsNavigatorWakeLock : JsAny {
-    val wakeLock: JsWakeLock?
-}
-
-/** Access to `navigator.wakeLock`, isolated here — see the `KeepScreenOn` kdoc above. */
-private external val navigator: JsNavigatorWakeLock

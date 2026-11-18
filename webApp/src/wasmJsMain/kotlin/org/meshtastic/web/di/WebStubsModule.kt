@@ -16,14 +16,20 @@
  */
 package org.meshtastic.web.di
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.util.LocaleChangeNotifier
 import org.meshtastic.core.database.DatabaseBackupOperations
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.WebDatabaseBackupService
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.network.repository.ServiceDiscovery
+import org.meshtastic.core.network.repository.WebSerialDevicePresence
+import org.meshtastic.core.network.serial.WebSerialPortRegistry
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.LocationRepository
@@ -42,28 +48,27 @@ import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
-import org.meshtastic.web.file.WebFileService
 import org.meshtastic.web.stub.NoopAppWidgetUpdater
 import org.meshtastic.web.stub.NoopCompassHeadingProvider
 import org.meshtastic.web.stub.NoopDeviceAddressChangeHook
 import org.meshtastic.web.stub.NoopLocalNetworkAccess
 import org.meshtastic.web.stub.NoopLocaleChangeNotifier
-import org.meshtastic.web.stub.NoopLocationRepository
-import org.meshtastic.web.stub.NoopLocationService
 import org.meshtastic.web.stub.NoopLockdownPassphraseStore
 import org.meshtastic.web.stub.NoopMagneticFieldProvider
-import org.meshtastic.web.stub.NoopMeshLocationManager
 import org.meshtastic.web.stub.NoopMeshWorkerManager
-import org.meshtastic.web.stub.NoopPhoneLocationProvider
 import org.meshtastic.web.stub.NoopPlatformAnalytics
 import org.meshtastic.web.stub.NoopReverseGeocoder
 import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
-import org.meshtastic.web.stub.NoopSerialDevicePresence
 import org.meshtastic.web.stub.NoopServiceDiscovery
+import org.meshtastic.web.platform.WebFileService
+import org.meshtastic.web.platform.WebLocationRepository
+import org.meshtastic.web.platform.WebLocationService
+import org.meshtastic.web.platform.WebMeshLocationManager
+import org.meshtastic.web.platform.WebPhoneLocationProvider
 
 /**
- * Stubs for interfaces whose real implementations need platform APIs a browser lacks or that web has not wired yet:
- * WorkManager, widgets, sensors, mDNS, OS serial hot-plug and keystores.
+ * Platform bindings: browser-backed ones (Geolocation, file pickers, Web Serial hot-plug, database backup) and stubs
+ * for what a browser lacks: WorkManager, widgets, the compass sensor, mDNS and keystores.
  */
 @Suppress("TooManyFunctions")
 @Module
@@ -75,21 +80,27 @@ class WebStubsModule {
 
     @Single fun meshWorkerManager(): MeshWorkerManager = NoopMeshWorkerManager()
 
-    @Single fun meshLocationManager(): MeshLocationManager = NoopMeshLocationManager()
+    @Single
+    fun meshLocationManager(locationRepository: LocationRepository): MeshLocationManager =
+        WebMeshLocationManager(locationRepository)
 
-    @Single fun locationRepository(): LocationRepository = NoopLocationRepository()
+    @Single fun locationRepository(): LocationRepository = WebLocationRepository()
 
-    @Single fun locationService(): LocationService = NoopLocationService()
+    @Single fun locationService(): LocationService = WebLocationService()
 
     @Single fun compassHeadingProvider(): CompassHeadingProvider = NoopCompassHeadingProvider()
 
-    @Single fun phoneLocationProvider(): PhoneLocationProvider = NoopPhoneLocationProvider()
+    @Single fun phoneLocationProvider(): PhoneLocationProvider = WebPhoneLocationProvider()
 
     @Single fun magneticFieldProvider(): MagneticFieldProvider = NoopMagneticFieldProvider()
 
     @Single fun serviceDiscovery(): ServiceDiscovery = NoopServiceDiscovery()
 
-    @Single fun serialDevicePresence(): SerialDevicePresence = NoopSerialDevicePresence()
+    @Single
+    fun serialDevicePresence(
+        registry: WebSerialPortRegistry,
+        @Named(PROCESS_LIFECYCLE) processLifecycle: Lifecycle,
+    ): SerialDevicePresence = WebSerialDevicePresence(registry, processLifecycle.coroutineScope)
 
     @Single fun securityKeyBackupStore(): SecurityKeyBackupStore = NoopSecurityKeyBackupStore()
 
