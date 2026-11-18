@@ -488,6 +488,8 @@ open class ScannerViewModel(
                             if (device.address !in discoveryOrder.value) {
                                 discoveryOrder.update { it + device.address }
                             }
+                            // A chooser pick is the selection: connect now, while the browser still has the device.
+                            if (bleScanner.picksDevice) onSelected(DeviceListEntry.Ble(device = device, bonded = false))
                         }
                 } catch (ex: BleScanStartException) {
                     handleBleScanStartFailure(ex, generation)

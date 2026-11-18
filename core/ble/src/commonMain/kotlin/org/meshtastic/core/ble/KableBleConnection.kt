@@ -66,8 +66,9 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
     override fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid), onSubscription)
 
-    override suspend fun read(characteristic: BleCharacteristic): ByteArray =
+    override suspend fun read(characteristic: BleCharacteristic): ByteArray = asException {
         peripheral.read(characteristicOf(serviceUuid, characteristic.uuid))
+    }
 
     override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType {
         val service = peripheral.services.value?.find { it.serviceUuid == serviceUuid }
@@ -79,16 +80,30 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
         }
     }
 
-    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
-        peripheral.write(
-            characteristicOf(serviceUuid, characteristic.uuid),
-            data,
-            when (writeType) {
-                BleWriteType.WITH_RESPONSE -> WriteType.WithResponse
-                BleWriteType.WITHOUT_RESPONSE -> WriteType.WithoutResponse
-            },
-        )
-    }
+    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) =
+        asException {
+            peripheral.write(
+                characteristicOf(serviceUuid, characteristic.uuid),
+                data,
+                when (writeType) {
+                    BleWriteType.WITH_RESPONSE -> WriteType.WithResponse
+                    BleWriteType.WITHOUT_RESPONSE -> WriteType.WithoutResponse
+                },
+            )
+        }
+}
+
+/**
+ * Runs a Kable call, rethrowing a failure that is neither an [Exception] nor an [Error] as one. Kotlin/Wasm surfaces a
+ * rejected Web Bluetooth promise as `JsException`, a bare [Throwable] that every `catch (e: Exception)` on the connect,
+ * read and write paths would miss, so it would escape the reconnect loop and end it.
+ */
+// "Neither Exception nor Error" has no catch clause of its own; separate clauses would only rethrow.
+@Suppress("TooGenericExceptionCaught", "InstanceOfCheckForException")
+internal inline fun <T> asException(block: () -> T): T = try {
+    block()
+} catch (t: Throwable) {
+    throw if (t is Exception || t is Error) t else IllegalStateException(t.message, t)
 }
 
 /**
@@ -187,7 +202,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                         }
                         oldScope.coroutineContext.job.cancel()
                     }
-                    connectionScope = p.connect()
+                    connectionScope = asException { p.connect() }
                     false
                 } catch (e: CancellationException) {
                     throw e

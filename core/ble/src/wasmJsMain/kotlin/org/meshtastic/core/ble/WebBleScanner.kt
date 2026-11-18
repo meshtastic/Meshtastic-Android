@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("UnusedParameter")
+
 package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
@@ -22,10 +24,12 @@ import com.juul.kable.Options
 import com.juul.kable.Peripheral
 import com.juul.kable.requestPeripheral
 import com.juul.kable.toIdentifier
+import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.util.anonymize
+import kotlin.js.Promise
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -39,10 +43,15 @@ import kotlin.uuid.Uuid
  *
  * A scan for an [address] never opens the chooser, since reconnects run without a gesture. It emits the peripheral the
  * page was already granted, from [WebBluetoothGrants] or `getDevices()` where the browser has it, and otherwise
- * completes empty. [timeout] is not applied: the chooser cannot be closed from script.
+ * completes empty. Like a scan on the other platforms it first looks for the device advertising: Chrome drops a picked
+ * device from its adapter once the chooser's scan ends, and `gatt.connect()` then fails at once with "Bluetooth Device
+ * is no longer in range", so the scan watches the device's advertisements, which puts it back. [timeout] is not
+ * applied: the chooser cannot be closed from script.
  */
 @Single(binds = [BleScanner::class])
 class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
+    override val picksDevice: Boolean = true
+
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
         val peripheral = if (address != null) granted(address) else pick(serviceUuid)
         if (peripheral != null) emit(peripheral.toBleDevice())
@@ -65,8 +74,15 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
         }
     }
 
-    private suspend fun granted(address: String): Peripheral? =
-        WebBluetoothGrants.find(address) ?: restoreGrant(address)?.let(WebBluetoothGrants::remember)
+    private suspend fun granted(address: String): Peripheral? {
+        val peripheral = WebBluetoothGrants.find(address) ?: restoreGrant(address)?.let(WebBluetoothGrants::remember)
+        if (peripheral != null) {
+            // Without the new permissions backend there is no watchAdvertisements; the connect then tries as it is.
+            runCatching { watchAdvertisementsOf(address, ADVERTISEMENT_WAIT_MS, WATCH_WINDOW_MS).await<JsAny?>() }
+                .onFailure { Logger.d { "[${address.anonymize()}] watchAdvertisements unavailable: ${it.message}" } }
+        }
+        return peripheral
+    }
 
     private suspend fun restoreGrant(address: String): Peripheral? {
         if (!hasGetDevices()) return null
@@ -82,6 +98,30 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
 @OptIn(ExperimentalKableApi::class)
 private fun Peripheral.toBleDevice(): BleDevice =
     MeshtasticBleDevice(address = identifier, name = name, isBonded = false)
+
+private const val ADVERTISEMENT_WAIT_MS = 3_000
+private const val WATCH_WINDOW_MS = 10_000
+
+/**
+ * Watches the granted device [id]'s advertisements for [windowMs], resolving on the first one or after [waitMs],
+ * whichever comes first. A device that is not granted or a browser without the API resolves at once.
+ */
+private fun watchAdvertisementsOf(id: String, waitMs: Int, windowMs: Int): Promise<JsAny?> = js(
+    """(async () => {
+        if (!navigator.bluetooth || typeof navigator.bluetooth.getDevices !== 'function') return null;
+        const device = (await navigator.bluetooth.getDevices()).find((d) => d.id === id);
+        if (!device || typeof device.watchAdvertisements !== 'function') return null;
+        const abort = new AbortController();
+        const seen = new Promise((resolve) => {
+            device.addEventListener('advertisementreceived', () => resolve(null), { once: true, signal: abort.signal });
+            setTimeout(() => resolve(null), waitMs);
+        });
+        await device.watchAdvertisements({ signal: abort.signal });
+        setTimeout(() => abort.abort(), windowMs);
+        await seen;
+        return null;
+    })()""",
+)
 
 // Kable turns a missing getDevices() into an InternalError; Chrome exposes it only with its new permissions backend.
 private fun hasGetDevices(): Boolean = js(
