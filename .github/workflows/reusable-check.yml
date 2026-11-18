@@ -626,6 +626,8 @@ jobs:
         # proguardReleaseJars is included because it is otherwise only exercised by the
         # release workflow: jlink tolerates a jmods-less JDK (JEP 493) but ProGuard does
         # not, so a broken packaging JDK would surface at release time instead of here.
+        # Pull requests run it on ubuntu-24.04 only (it took 381 s on macOS); main runs it on
+        # every OS, so a per-OS packaging JDK break surfaces there before a release.
         # packageDistributionForCurrentOS (debug build type, no ProGuard) produces real
         # installers (dmg/msi+exe/deb+rpm+AppImage-dir) so the snapshot release below can
         # ship something testers can actually install, not just an unpacked app dir.
@@ -646,7 +648,8 @@ jobs:
         # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
         # The daemon flag is quoted because PowerShell splits an unquoted -P argument at its first dot.
         run: >
-          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
+          ./gradlew :desktopApp:packageDistributionForCurrentOS -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
+          ${{ (github.event_name != 'pull_request' || matrix.os == 'ubuntu-24.04') && ':desktopApp:proguardReleaseJars' || '' }}
           ${{ runner.os == 'Windows' && '--no-isolated-projects' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
