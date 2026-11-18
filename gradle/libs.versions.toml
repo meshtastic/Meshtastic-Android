@@ -22,6 +22,8 @@ navigation3 = "1.2.0"
 # publish every AndroidX version, so they are not always equal.
 navigation3-runtime = "1.2.1"
 navigationevent = "1.1.0"
+# Browser Back for Navigation 3 on web until CMP ships it (CMP-8924); MIT.
+navigation3-browser = "1.1.0"
 paging = "3.5.3"
 room = "3.1.0-alpha03"
 koin = "4.2.2"
@@ -164,6 +166,7 @@ jetbrains-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.l
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3-runtime" }
 jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
+navigation3-browser = { module = "com.github.terrakok:navigation3-browser", version.ref = "navigation3-browser" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room" }

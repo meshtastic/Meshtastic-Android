@@ -22,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import com.github.terrakok.navigation3.browser.HierarchicalBrowserNavigation
+import com.github.terrakok.navigation3.browser.buildBrowserHistoryFragment
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
@@ -38,6 +41,8 @@ import org.meshtastic.web.navigation.webVisibleDestinations
 fun WebMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modifier: Modifier = Modifier) {
     val backStack = multiBackstack.activeBackStack
     val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
+
+    BrowserBack(multiBackstack)
 
     Surface(modifier = modifier.fillMaxSize()) {
         MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = uiViewModel) {
@@ -63,5 +68,22 @@ fun WebMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modi
                 )
             }
         }
+    }
+}
+
+/**
+ * Browser Back pops the active tab's stack and the address bar names the screen on top, through navigation3-browser
+ * until Compose Multiplatform wires browser history itself (CMP-8924). Hierarchical, not chronological: Back follows
+ * the in-app stack, and at a tab's root it leaves the page as it would leave any site. Forward has nothing to replay.
+ */
+@Composable
+private fun BrowserBack(multiBackstack: MultiBackstack) {
+    if (LocalNavigationEventDispatcherOwner.current == null) return
+    HierarchicalBrowserNavigation {
+        // A tab's root keeps the bare address, which is also what the page loads with.
+        multiBackstack.activeBackStack
+            .takeIf { it.size > 1 }
+            ?.lastOrNull()
+            ?.let { key -> key::class.simpleName?.let { buildBrowserHistoryFragment(it) } }
     }
 }

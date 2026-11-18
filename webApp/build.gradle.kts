@@ -145,6 +145,8 @@ kotlin {
 
             // Navigation 3 (JetBrains fork — multiplatform)
             implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.navigation3.browser)
+            implementation(libs.jetbrains.navigationevent.compose)
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.jetbrains.lifecycle.runtime.compose)
 
