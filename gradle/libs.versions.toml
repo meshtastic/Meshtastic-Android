@@ -48,7 +48,7 @@ compose-screenshot = "0.0.1-alpha16"
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
 # Gradle plugin (same coordinates/version). The stable 1.4.x line predates AGP 9 support.
-benchmark = "1.6.0-alpha01"
+benchmark = "1.6.0-alpha02"
 profileinstaller = "1.4.1"
 androidx-uiautomator = "2.4.1"
 
