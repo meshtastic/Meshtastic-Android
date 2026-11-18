@@ -24,10 +24,11 @@ import com.juul.kable.Options
 import com.juul.kable.Peripheral
 import com.juul.kable.requestPeripheral
 import com.juul.kable.toIdentifier
-import kotlinx.coroutines.await
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.awaitOrThrowException
 import org.meshtastic.core.model.util.anonymize
 import kotlin.js.Promise
 import kotlin.time.Duration
@@ -64,8 +65,17 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
             return null
         }
         val options = Options { filters { match { services = listOf(serviceUuid) } } }
+        // The handler fires only after a connection subscribes, long after the pick has named the device.
+        var picked: String? = null
         return try {
-            requestPeripheral(options) { meshtasticConfig(loggingConfig, identifier = null) }
+            asException {
+                requestPeripheral(options) {
+                    meshtasticConfig(loggingConfig, identifier = null) { cause ->
+                        picked?.let { WebBluetoothGrants.recordObservationFailure(it, cause) }
+                    }
+                }
+            }
+                ?.also { picked = it.identifier }
                 ?.let(WebBluetoothGrants::remember)
         } catch (e: IllegalStateException) {
             // No Web Bluetooth here, or no user gesture / insecure context: Kable says which in the message.
@@ -78,8 +88,13 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
         val peripheral = WebBluetoothGrants.find(address) ?: restoreGrant(address)?.let(WebBluetoothGrants::remember)
         if (peripheral != null) {
             // Without the new permissions backend there is no watchAdvertisements; the connect then tries as it is.
-            runCatching { watchAdvertisementsOf(address, ADVERTISEMENT_WAIT_MS, WATCH_WINDOW_MS).await<JsAny?>() }
-                .onFailure { Logger.d { "[${address.anonymize()}] watchAdvertisements unavailable: ${it.message}" } }
+            try {
+                watchAdvertisementsOf(address, ADVERTISEMENT_WAIT_MS, WATCH_WINDOW_MS).awaitOrThrowException()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.d { "[${address.anonymize()}] watchAdvertisements unavailable: ${e.message}" }
+            }
         }
         return peripheral
     }
@@ -87,7 +102,13 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     private suspend fun restoreGrant(address: String): Peripheral? {
         if (!hasGetDevices()) return null
         return try {
-            Peripheral(address.toIdentifier()) { meshtasticConfig(loggingConfig, address.anonymize()) }
+            asException {
+                Peripheral(address.toIdentifier()) {
+                    meshtasticConfig(loggingConfig, address.anonymize()) { cause ->
+                        WebBluetoothGrants.recordObservationFailure(address, cause)
+                    }
+                }
+            }
         } catch (e: IllegalStateException) {
             Logger.w(e) { "[${address.anonymize()}] Web Bluetooth getDevices() refused" }
             null

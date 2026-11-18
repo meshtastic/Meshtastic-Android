@@ -64,3 +64,12 @@ internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
  * `false`.
  */
 internal expect fun Peripheral.refreshGattCache(): Boolean
+
+/**
+ * The observation failure Kable suppressed on this peripheral through a handler the connection did not install, or
+ * `null`. Only web peripherals carry one: the browser's picker builds them before any connection exists.
+ */
+internal expect fun Peripheral.preinstalledObservationFailure(): Throwable?
+
+/** Forgets [preinstalledObservationFailure] so a new connect starts clean. */
+internal expect fun Peripheral.clearPreinstalledObservationFailure()

@@ -127,8 +127,10 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var connectFailure: Throwable? = null
 
+    @Volatile private var observationFailure: Throwable? = null
+
     override val lastFailureCause: Throwable?
-        get() = connectFailure ?: BleObservationFailures.latest
+        get() = connectFailure ?: observationFailure ?: peripheral?.preinstalledObservationFailure()
 
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
@@ -150,11 +152,11 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
         var autoConnect = meshtasticDevice.advertisement == null
         connectFailure = null
-        BleObservationFailures.latest = null
+        observationFailure = null
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            meshtasticConfig(loggingConfig, device.address.anonymize())
+            meshtasticConfig(loggingConfig, device.address.anonymize()) { observationFailure = it }
             platformConfig(device) { autoConnect }
         }
 
@@ -165,6 +167,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             } catch (ex: IllegalStateException) {
                 throw ex.asBluetoothUnsupportedExceptionOrNull() ?: ex
             }
+        p.clearPreinstalledObservationFailure()
 
         // Install ownership of the new peripheral atomically. Cancellation between
         // peripheral construction and field assignment would strand `p` (Kable allocates

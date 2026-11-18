@@ -46,3 +46,10 @@ internal actual fun Peripheral.release() = Unit
 // Kable's web rssi() needs watchAdvertisements(), which Chrome ships behind a flag and which waits on advertisements a
 // connected radio may never send.
 internal actual suspend fun Peripheral.connectedRssi(): Int? = null
+
+// The picker or getDevices() built the peripheral and its observation handler, which records into the grant table.
+internal actual fun Peripheral.preinstalledObservationFailure(): Throwable? =
+    WebBluetoothGrants.observationFailure(identifier)
+
+internal actual fun Peripheral.clearPreinstalledObservationFailure() =
+    WebBluetoothGrants.clearObservationFailure(identifier)

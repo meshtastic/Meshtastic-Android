@@ -25,3 +25,8 @@ internal actual fun Peripheral.release() = close()
 
 @OptIn(ExperimentalKableApi::class)
 internal actual suspend fun Peripheral.connectedRssi(): Int? = rssi()
+
+// Each connect builds its peripheral, and the observation handler with it, inside KableBleConnection.
+internal actual fun Peripheral.preinstalledObservationFailure(): Throwable? = null
+
+internal actual fun Peripheral.clearPreinstalledObservationFailure() = Unit

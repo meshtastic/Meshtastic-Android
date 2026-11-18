@@ -51,4 +51,17 @@ internal object WebBluetoothGrants {
 
     fun find(address: String): Peripheral? =
         peripherals.entries.firstOrNull { it.key.equals(address, ignoreCase = true) }?.value
+
+    private val observationFailures = mutableMapOf<String, Throwable>()
+
+    /** Records a notification-subscription failure Kable suppressed on the granted device [address]. */
+    fun recordObservationFailure(address: String, cause: Throwable) {
+        observationFailures[address.lowercase()] = cause
+    }
+
+    fun observationFailure(address: String): Throwable? = observationFailures[address.lowercase()]
+
+    fun clearObservationFailure(address: String) {
+        observationFailures.remove(address.lowercase())
+    }
 }
