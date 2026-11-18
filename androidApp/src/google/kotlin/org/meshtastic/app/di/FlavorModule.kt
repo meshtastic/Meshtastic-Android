@@ -25,7 +25,9 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.app.map.hud.GoogleFusedOrientationSource
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
+import org.meshtastic.app.node.PlayLocationFeed
 import org.meshtastic.app.theme.GoogleFontsEventFontResolver
+import org.meshtastic.core.network.radio.NodeLocationFeed
 import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.map.hud.FusedOrientationSource
 
@@ -38,6 +40,10 @@ class FlavorModule {
      * Play services' fused orientation for the camera mesh view, which falls back to the rotation vector without it.
      */
     @Single fun fusedOrientationSource(context: Context): FusedOrientationSource = GoogleFusedOrientationSource(context)
+
+    /** The in-process node's GPS takes Play services' fused provider where the phone has it, else the platform GPS. */
+    @Single
+    fun nodeLocationFeed(context: Context): NodeLocationFeed = NodeLocationFeed { PlayLocationFeed.orNull(context) }
 
     /**
      * Datadog network instrumentation for the shared Ktor `HttpClient`. The interceptor emits RUM Resource spans with

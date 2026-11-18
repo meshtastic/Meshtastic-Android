@@ -34,7 +34,7 @@ import java.io.File
 
 /** The Android half of the in-process node: Context-bound bearers, and the node's files under no-backup storage. */
 @Single(binds = [NodeBearers::class])
-class AndroidNodeBearers(context: Context) : NodeBearers {
+class AndroidNodeBearers(context: Context, private val locationFeed: NodeLocationFeed) : NodeBearers {
     private val app: Context = context.applicationContext
     private val nodeDir: File
         get() = File(app.noBackupFilesDir, NODE_DIR)
@@ -48,14 +48,14 @@ class AndroidNodeBearers(context: Context) : NodeBearers {
     override fun hostBearerStore(): BytesStore = AtomicFileStore(File(nodeDir, HOST_BEARERS_FILE).path)
 
     /**
-     * The phone's battery, its barometer where it has one, and its GPS, each living as long as [scope]. The GPS needs
-     * `ACCESS_FINE_LOCATION` held when the node starts: it asks again only on the next start. The node broadcasts the
-     * position only on a channel that names a `position_precision`, which no default does.
+     * The phone's battery, its barometer where it has one, and its GPS over the flavor's [locationFeed], each living as
+     * long as [scope]. The GPS waits for precise location and the location switch and picks either up when given. The
+     * node broadcasts the position only on a channel that names a `position_precision`, which no default does.
      */
     override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors = NodeSensors(
         environment = AndroidBarometer(app, scope).takeIf { it.available },
         power = AndroidBatteryPower(app),
-        position = AndroidGpsPosition(app, scope).takeIf { it.available },
+        position = AndroidGpsPosition(app, scope, locationFeed.feed()).takeIf { it.available },
     )
 
     private companion object {

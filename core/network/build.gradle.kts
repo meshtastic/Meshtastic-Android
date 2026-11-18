@@ -81,7 +81,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.usb.serial.android)
-            implementation(libs.meshtastic.node.android)
+            api(libs.meshtastic.node.android) // NodeLocationFeed names its LocationFeed, which each flavor binds
         }
 
         meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
