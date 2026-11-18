@@ -88,6 +88,7 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.rememberDatabaseBackupActions
+import org.meshtastic.feature.settings.radio.rememberDeviceProfileTransfer
 import org.meshtastic.feature.settings.search.SettingsSearchBar
 import org.meshtastic.feature.settings.search.SettingsSearchViewModel
 
@@ -107,6 +108,7 @@ fun DesktopSettingsScreen(
 ) {
     val state by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val databaseBackup = rememberDatabaseBackupActions()
+    val profileTransfer = rememberDeviceProfileTransfer(radioConfigViewModel)
     val destNode by radioConfigViewModel.destNode.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val homoglyphEnabled by radioConfigViewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
@@ -180,12 +182,8 @@ fun DesktopSettingsScreen(
                 onBackupDatabase = databaseBackup.onBackup,
                 onRestoreDatabase = databaseBackup.onRestore,
                 onNavigate = onNavigate,
-                onImport = {
-                    // Profile import not yet supported on Desktop
-                },
-                onExport = {
-                    // Profile export not yet supported on Desktop
-                },
+                onImport = profileTransfer.onImport,
+                onExport = profileTransfer.onExport,
             )
 
             // App-local settings are only relevant when configuring the local node
@@ -227,11 +225,13 @@ fun DesktopSettingsScreen(
                         onToggle = { radioConfigViewModel.toggleHomoglyphCharactersEncodingEnabled() },
                     )
 
-                    CacheLimitPreference(
-                        cacheLimit = cacheLimit,
-                        onCheckEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
-                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                    )
+                    if (settingsPlatform.databasePerDevice) {
+                        CacheLimitPreference(
+                            cacheLimit = cacheLimit,
+                            onCheckEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
+                            onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                        )
+                    }
                 }
 
                 ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
