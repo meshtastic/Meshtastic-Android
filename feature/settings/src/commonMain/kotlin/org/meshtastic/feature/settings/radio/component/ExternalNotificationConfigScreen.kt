@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.external_notification
@@ -103,6 +104,8 @@ fun ExternalNotificationConfigScreenCommon(
     val extNotificationConfig =
         state.moduleConfig.external_notification ?: ModuleConfig.ExternalNotificationConfig.Builder().build()
     val ringtone = state.ringtone
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
@@ -359,23 +362,25 @@ fun ExternalNotificationConfigScreenCommon(
                         )
                     },
                 )
-                // The node plays the ringtone it has saved, so an unsaved edit would play the old one.
-                val ringtoneSaved = ringtoneInput == ringtone
-                RegularPreference(
-                    title = stringResource(Res.string.ringtone_play_on_node),
-                    subtitle = "",
-                    summary =
-                    stringResource(
-                        if (ringtoneSaved) {
-                            Res.string.ringtone_play_on_node_summary
-                        } else {
-                            Res.string.ringtone_play_on_node_unsaved
-                        },
-                    ),
-                    onClick = viewModel::playRingtone,
-                    enabled = state.connected && ringtoneSaved && ringtone.isNotBlank(),
-                    trailingIcon = MeshtasticIcons.VolumeUp,
-                )
+                if (capabilities.canPlayRingtone) {
+                    // The node plays the ringtone it has saved, so an unsaved edit would play the old one.
+                    val ringtoneSaved = ringtoneInput == ringtone
+                    RegularPreference(
+                        title = stringResource(Res.string.ringtone_play_on_node),
+                        subtitle = "",
+                        summary =
+                        stringResource(
+                            if (ringtoneSaved) {
+                                Res.string.ringtone_play_on_node_summary
+                            } else {
+                                Res.string.ringtone_play_on_node_unsaved
+                            },
+                        ),
+                        onClick = viewModel::playRingtone,
+                        enabled = state.connected && ringtoneSaved && ringtone.isNotBlank(),
+                        trailingIcon = MeshtasticIcons.VolumeUp,
+                    )
+                }
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_use_i2s_as_buzzer),
