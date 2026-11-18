@@ -293,6 +293,7 @@
     <string name="mute_notifications">Утишај нотификације</string>
     <string name="name">Назив</string>
     <string name="navigate_back">Иди назад</string>
+    <!-- NEIGHBOR -->
     <string name="network">Мрежа</string>
     <string name="new_channel_rcvd">Primljen novi link kanala</string>
     <!-- NO -->

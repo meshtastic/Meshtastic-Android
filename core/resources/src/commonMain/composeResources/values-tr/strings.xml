@@ -312,6 +312,7 @@
     <string name="mute_notifications">Bildirimleri sessize al</string>
     <string name="name">İsmi</string>
     <string name="navigate_back">Geri Dön</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Komşu Bilgisi</string>
     <string name="neighbor_info_config">Komşu Bilgisi Ayarı</string>
     <string name="network">Ağ</string>

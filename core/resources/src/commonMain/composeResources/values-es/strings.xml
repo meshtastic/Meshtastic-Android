@@ -447,6 +447,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="name_cannot_be_empty">Nombre no puede estar vacío.</string>
     <string name="navigate_back">Ir atrás</string>
     <string name="navigate_into_label">Navegar hacia</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Información de Vecinos</string>
     <string name="neighbor_info_config">Configuración de Información de Vecinos</string>
     <string name="network">Conexión Red</string>

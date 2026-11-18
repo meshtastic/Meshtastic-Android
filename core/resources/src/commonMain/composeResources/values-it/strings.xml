@@ -992,6 +992,7 @@
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="navigate_back">Torna Indietro</string>
     <string name="navigate_into_label">Guidami Verso</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informazioni Vicinato</string>
     <string name="neighbor_info_config">Configurazione Info Nodi Vicini</string>
     <string name="network">Rete</string>

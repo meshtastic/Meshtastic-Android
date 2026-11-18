@@ -177,6 +177,7 @@
     <string name="mute_notifications">Nutildyti pranešimus</string>
     <string name="name">Pavadinimas</string>
     <string name="navigate_back">Grįžti atgal</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
     <!-- NO -->
     <!-- NODE -->

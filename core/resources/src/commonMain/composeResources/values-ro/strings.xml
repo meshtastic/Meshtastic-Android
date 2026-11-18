@@ -591,6 +591,7 @@
     <string name="name_cannot_be_empty">Numele nu poate fi gol</string>
     <string name="navigate_back">Navigați înapoi</string>
     <string name="navigate_into_label">Navigați în</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Informații vecin</string>
     <string name="neighbor_info_config">Configurare informații vecin</string>
     <string name="network">Rețea</string>

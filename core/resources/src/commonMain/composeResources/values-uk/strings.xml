@@ -668,6 +668,7 @@
     <string name="name_cannot_be_empty">Назва не може бути порожньою.</string>
     <string name="navigate_back">Перейти назад</string>
     <string name="navigate_into_label">Навігаційна інформація</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Інформація про сусідів</string>
     <string name="neighbor_info_config">Налаштування інформації про сусідів</string>
     <string name="network">Мережа</string>

@@ -1138,6 +1138,7 @@
     <string name="nearby_devices_permission">Lähistön laitteet -käyttöoikeus</string>
     <string name="need_hardware">Tarvitsetko laitteiston?</string>
     <string name="need_hardware_description">Meshtastic vaatii yhteensopivan laitteen. Tukijamme ja yhteistyökumppanimme tarjoavat käyttövalmiita laitteita. Tässä on muutamia suosituimmista vaihtoehdoista.</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Naapuritieto</string>
     <string name="neighbor_info_config">Naapuritietojen asetukset</string>
     <string name="network">Verkko</string>

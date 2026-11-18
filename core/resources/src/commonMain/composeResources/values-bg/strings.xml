@@ -837,6 +837,7 @@
     <string name="name">Име</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
     <string name="need_hardware">Нуждаете се от хардуер?</string>
+    <!-- NEIGHBOR -->
     <string name="network">Мрежа</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>

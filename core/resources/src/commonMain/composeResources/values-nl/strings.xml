@@ -255,6 +255,7 @@
     <string name="mute_notifications">Meldingen dempen</string>
     <string name="name">Naam</string>
     <string name="navigate_back">Ga terug</string>
+    <!-- NEIGHBOR -->
     <string name="network">Netwerk</string>
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <!-- NO -->

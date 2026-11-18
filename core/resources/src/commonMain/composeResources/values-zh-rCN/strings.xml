@@ -1008,6 +1008,7 @@
     <string name="name_cannot_be_empty">名称不能为空。</string>
     <string name="navigate_back">回溯导航</string>
     <string name="navigate_into_label">导航到</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">邻居信息</string>
     <string name="neighbor_info_config">邻居信息设置</string>
     <string name="network">网络</string>

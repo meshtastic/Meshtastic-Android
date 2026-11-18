@@ -300,6 +300,7 @@
     <string name="mute_notifications">알림 끄기</string>
     <string name="name">이름</string>
     <string name="navigate_back">뒤로 가기</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">이웃 정보</string>
     <string name="neighbor_info_config">이웃 정보 설정</string>
     <string name="network">네트워크</string>

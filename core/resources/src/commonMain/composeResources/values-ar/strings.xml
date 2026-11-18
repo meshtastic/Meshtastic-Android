@@ -167,6 +167,7 @@
     <string name="mute_notifications">كتم الإشهارات</string>
     <string name="name">الاسم</string>
     <string name="navigate_back">العودة إلى الخلف</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>
     <!-- NO -->
     <!-- NODE -->

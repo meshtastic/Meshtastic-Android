@@ -152,6 +152,7 @@
     <string name="mute_always">Sempre</string>
     <string name="mute_notifications">Silenciar notificacións</string>
     <string name="name">Nome</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
     <!-- NO -->
     <!-- NODE -->

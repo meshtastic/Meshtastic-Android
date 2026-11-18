@@ -147,6 +147,7 @@
     <string name="must_update">נדרש להתקין עדכון לאפליקציה זו דרך חנות האפליקציות (או Github). גרסת האפליקציה ישנה מדי בכדי לתקשר עם מכשיר זה. בבקשה קרא <a href="https://meshtastic.org/docs/software/android/installation">מסמכי עזרה</a> בנושא זה.</string>
     <!-- MUTE -->
     <string name="name">שם</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
     <!-- NO -->
     <!-- NODE -->

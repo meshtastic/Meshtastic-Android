@@ -434,6 +434,7 @@
     <string name="name_cannot_be_empty">A név nem lehet üres.</string>
     <string name="navigate_back">Vissza</string>
     <string name="navigate_into_label">Belépés</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Szomszéd-információ</string>
     <string name="neighbor_info_config">Szomszéd-információ beállításai</string>
     <string name="network">Hálózat</string>

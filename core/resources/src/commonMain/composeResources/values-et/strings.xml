@@ -1107,6 +1107,7 @@
     <string name="nearby_devices_permission">Lähedal olevate seadmete load</string>
     <string name="need_hardware">Vajad raudvara?</string>
     <string name="need_hardware_description">Meshtastic vajab ühilduvat seadet. Meie toetajad ja partnerid pakuvad kasutusvalmis riistvara. Siin on mõned populaarseimad valikud.</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Naabruse teave</string>
     <string name="neighbor_info_config">Naabruskonna teabe sätted</string>
     <string name="network">Võrk</string>

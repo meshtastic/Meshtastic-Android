@@ -704,6 +704,7 @@
     <string name="name_cannot_be_empty">Namn kan inte vara tomt.</string>
     <string name="navigate_back">Tillbaka</string>
     <string name="navigate_into_label">Navigera till</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Granninformation</string>
     <string name="neighbor_info_config">Konfiguration av grannskapsinformation</string>
     <string name="network">Nätverk</string>

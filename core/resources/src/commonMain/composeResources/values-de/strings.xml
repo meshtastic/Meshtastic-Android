@@ -909,6 +909,7 @@
     <string name="navigate_back">Zurück navigieren</string>
     <string name="navigate_into_label">Navigieren zu</string>
     <string name="need_hardware">Benötigen Sie Hardware?</string>
+    <!-- NEIGHBOR -->
     <string name="neighbor_info">Nachbarinformation</string>
     <string name="neighbor_info_config">Einstellungen Nachbarinformation</string>
     <string name="network">Netzwerk</string>

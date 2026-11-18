@@ -180,6 +180,7 @@
     <string name="mute_notifications">Utišaj obvestila</string>
     <string name="name">Ime</string>
     <string name="navigate_back">Pojdi nazaj</string>
+    <!-- NEIGHBOR -->
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
     <!-- NO -->
     <!-- NODE -->
