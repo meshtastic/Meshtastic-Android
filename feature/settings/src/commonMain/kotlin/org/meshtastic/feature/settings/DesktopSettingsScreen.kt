@@ -242,12 +242,14 @@ fun DesktopSettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
-                    ListItem(
-                        text = stringResource(Res.string.discovery_local_mesh),
-                        leadingIcon = MeshtasticIcons.PermScanWifi,
-                    ) {
-                        onNavigate(DiscoveryRoute.DiscoveryGraph)
+                if (settingsPlatform.localMeshDiscovery) {
+                    ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                        ListItem(
+                            text = stringResource(Res.string.discovery_local_mesh),
+                            leadingIcon = MeshtasticIcons.PermScanWifi,
+                        ) {
+                            onNavigate(DiscoveryRoute.DiscoveryGraph)
+                        }
                     }
                 }
 
@@ -257,9 +259,11 @@ fun DesktopSettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
-                        onNavigate(WifiProvisionRoute.WifiProvision())
+                if (settingsPlatform.wifiProvisioning) {
+                    ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                        ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
+                            onNavigate(WifiProvisionRoute.WifiProvision())
+                        }
                     }
                 }
 
@@ -276,12 +280,14 @@ fun DesktopSettingsScreen(
                     onToggleNewWaypoints = { settingsViewModel.setNewWaypointsEnabled(it) },
                 )
 
-                ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
-                    ListItem(
-                        text = stringResource(Res.string.help_and_documentation),
-                        leadingIcon = MeshtasticIcons.HelpOutline,
-                    ) {
-                        onNavigate(SettingsRoute.HelpDocs)
+                if (settingsPlatform.helpDocs) {
+                    ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
+                        ListItem(
+                            text = stringResource(Res.string.help_and_documentation),
+                            leadingIcon = MeshtasticIcons.HelpOutline,
+                        ) {
+                            onNavigate(SettingsRoute.HelpDocs)
+                        }
                     }
                 }
 

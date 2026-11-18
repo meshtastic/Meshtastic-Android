@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.settingsPlatform
 
 /**
  * One thing the user can search for: a settings screen, or a single control on one.
@@ -210,8 +211,9 @@ object SettingsSearchCatalog {
         schemaEntries().groupBy({ it.route }, { it.fieldKey }).mapValues { (_, keys) -> keys.filterNotNull().toSet() }
     }
 
-    /** Everything searchable, screens before the controls on them. */
-    fun entries(): List<SettingsSearchEntry> = screenEntries() + appEntries() + schemaEntries()
+    /** Everything searchable on this platform, screens before the controls on them. */
+    fun entries(): List<SettingsSearchEntry> =
+        (screenEntries() + appEntries() + schemaEntries()).filter { settingsPlatform.supports(it.route) }
 
     /** Exposed for the test that pins the mapping against the generated file. */
     internal fun declaredMessagePrefixes(): Set<String> = schemaPrefixes.values.flatten().toSet()

@@ -14,6 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.tak
+package org.meshtastic.feature.settings
 
-actual val isTakSupportedOnPlatform: Boolean = false
+actual val settingsPlatform: SettingsPlatform =
+    SettingsPlatform(
+        localMeshDiscovery = true,
+        wifiProvisioning = true,
+        helpDocs = true,
+        firmware = true,
+        tak = true,
+        databasePerDevice = true,
+        reloadApp = null,
+    )

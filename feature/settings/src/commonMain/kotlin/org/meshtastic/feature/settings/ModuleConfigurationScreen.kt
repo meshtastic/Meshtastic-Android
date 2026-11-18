@@ -38,7 +38,6 @@ import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.tak.isTakSupportedOnPlatform
 
 @Composable
 fun ModuleConfigurationScreen(
@@ -55,7 +54,7 @@ fun ModuleConfigurationScreen(
         remember(state.metadata, deviceRole, hiddenFeaturesUnlocked) {
             if (hiddenFeaturesUnlocked) {
                 // Unlocking bypasses the device's gate, not the platform's: web has no TAK destination.
-                ModuleRoute.entries.filter { it != ModuleRoute.TAK || isTakSupportedOnPlatform }
+                ModuleRoute.entries.filter { it != ModuleRoute.TAK || settingsPlatform.tak }
             } else {
                 ModuleRoute.filterExcludedFrom(state.metadata, deviceRole)
             }

@@ -28,6 +28,7 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
+import org.meshtastic.web.navigation.unknownWebDestination
 import org.meshtastic.web.navigation.webNavGraph
 import org.meshtastic.web.navigation.webVisibleDestinations
 
@@ -47,7 +48,7 @@ fun WebMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modi
                 visibleDestinations = webVisibleDestinations,
             ) {
                 val provider =
-                    entryProvider<NavKey> {
+                    entryProvider<NavKey>(fallback = { key -> unknownWebDestination(key, backStack) }) {
                         webNavGraph(
                             backStack = backStack,
                             uiViewModel = uiViewModel,

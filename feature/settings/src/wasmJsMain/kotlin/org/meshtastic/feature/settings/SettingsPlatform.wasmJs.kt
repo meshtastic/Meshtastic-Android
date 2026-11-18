@@ -14,7 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.tak
+package org.meshtastic.feature.settings
 
-/** Whether the TAK module screen and local TAK server exist here; false on web, where a page cannot run a server. */
-expect val isTakSupportedOnPlatform: Boolean
+// webApp registers no discovery, Wi-Fi provisioning, docs or firmware graph; those modules have no wasmJs target.
+actual val settingsPlatform: SettingsPlatform =
+    SettingsPlatform(
+        localMeshDiscovery = false,
+        wifiProvisioning = false,
+        helpDocs = false,
+        firmware = false,
+        tak = false,
+        databasePerDevice = false,
+        reloadApp = ::reloadPage,
+    )
+
+private fun reloadPage(): Unit = js("window.location.reload()")

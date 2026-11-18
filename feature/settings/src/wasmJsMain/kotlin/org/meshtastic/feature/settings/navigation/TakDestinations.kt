@@ -23,7 +23,7 @@ import androidx.navigation3.runtime.NavKey
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 // TAK/ATAK requires an inbound TLS listener core:takserver can never provide on wasmJs; both destinations are
-// already hidden from normal navigation via isTakSupportedOnPlatform (see ModuleRoute.kt / RadioConfig.kt).
+// already hidden from normal navigation via settingsPlatform.tak (see ModuleRoute.kt / RadioConfig.kt).
 
 @Composable actual fun TakModuleConfigContent(viewModel: RadioConfigViewModel, onBack: () -> Unit) = Unit
 

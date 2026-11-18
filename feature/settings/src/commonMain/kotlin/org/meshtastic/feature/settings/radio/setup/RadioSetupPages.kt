@@ -115,6 +115,7 @@ import org.meshtastic.feature.settings.radio.component.buildRegionItems
 import org.meshtastic.feature.settings.radio.component.presetLabels
 import org.meshtastic.feature.settings.radio.component.regionLabels
 import org.meshtastic.feature.settings.radio.component.rememberStatusMessageFocus
+import org.meshtastic.feature.settings.settingsPlatform
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -378,12 +379,14 @@ internal fun BeaconsPage(
             )
         }
         Card(modifier = Modifier.fillMaxWidth()) {
-            ListItem(
-                text = stringResource(Res.string.discovery_start_scan),
-                leadingIcon = MeshtasticIcons.Search,
-                onClick = { onNavigate(DiscoveryRoute.DiscoveryScan) },
-            )
-            HorizontalDivider()
+            if (settingsPlatform.localMeshDiscovery) {
+                ListItem(
+                    text = stringResource(Res.string.discovery_start_scan),
+                    leadingIcon = MeshtasticIcons.Search,
+                    onClick = { onNavigate(DiscoveryRoute.DiscoveryScan) },
+                )
+                HorizontalDivider()
+            }
             ListItem(
                 text = stringResource(Res.string.radio_setup_beacons_settings),
                 leadingIcon = MeshtasticIcons.Settings,

@@ -84,7 +84,7 @@ import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.tak.isTakSupportedOnPlatform
+import org.meshtastic.feature.settings.settingsPlatform
 
 @Composable
 fun RadioConfigItemList(
@@ -270,7 +270,7 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             ManagedMessage()
         }
 
-        if (isOtaCapable) {
+        if (isOtaCapable && settingsPlatform.firmware) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
                 leadingIcon = MeshtasticIcons.SystemUpdate,
@@ -286,7 +286,7 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
         )
 
-        if (isTakSupportedOnPlatform) {
+        if (settingsPlatform.tak) {
             ListItem(
                 text = stringResource(Res.string.tak_server),
                 leadingIcon = MeshtasticIcons.Settings,
@@ -295,12 +295,14 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             )
         }
 
-        ListItem(
-            text = stringResource(Res.string.discovery_local_mesh),
-            leadingIcon = MeshtasticIcons.PermScanWifi,
-            enabled = enabled,
-            onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
-        )
+        if (settingsPlatform.localMeshDiscovery) {
+            ListItem(
+                text = stringResource(Res.string.discovery_local_mesh),
+                leadingIcon = MeshtasticIcons.PermScanWifi,
+                enabled = enabled,
+                onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
+            )
+        }
 
         // Always enabled so logs stay reachable with no radio attached. Anything on this route that
         // is NOT read-only must gate itself: it does not inherit `enabled` (see DisplayMirrorViewModel).

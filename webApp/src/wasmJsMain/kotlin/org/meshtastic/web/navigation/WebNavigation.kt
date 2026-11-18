@@ -17,9 +17,12 @@
 package org.meshtastic.web.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import co.touchlab.kermit.Logger
 import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
@@ -56,6 +59,18 @@ fun EntryProviderScope<NavKey>.webNavGraph(
 
     // A "map" deep link still routes here, so the destination exists and renders nothing.
     entry<MapRoute.Map> {}
+}
+
+/**
+ * The entry for a key no web graph registers, which a deep link or a shared screen can still push. Navigation 3's
+ * default throws there, and the exception leaves every later click dead until a reload; this logs the key and steps
+ * back instead.
+ */
+fun unknownWebDestination(key: NavKey, backStack: NavBackStack<NavKey>): NavEntry<NavKey> = NavEntry(key) {
+    LaunchedEffect(key) {
+        Logger.w { "No web destination for ${key::class.simpleName}; going back" }
+        if (backStack.size > 1) backStack.remove(key)
+    }
 }
 
 /** Every [TopLevelDestination] except Map, which has no entries on web. */
