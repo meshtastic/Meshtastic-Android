@@ -84,7 +84,6 @@ import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.desktopDataDir
-import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -101,7 +100,9 @@ import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.MeshLogCleanup
 import org.meshtastic.core.service.MeshServiceOrchestrator
+import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
@@ -269,14 +270,7 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
     val localePref by uiPrefs.locale.collectAsState(initial = "")
     Locale.setDefault(resolveLocale(localePref, systemLocale))
 
-    val isDarkTheme =
-        when (themePref) {
-            1 -> false
-            2 -> true
-            else -> isSystemInDarkTheme()
-        }
-
-    MeshtasticDesktopApp(uiViewModel, isDarkTheme)
+    MeshtasticDesktopApp(uiViewModel, isDarkTheme(themePref))
 }
 
 // ----- Application chrome (tray, window, navigation) -----
@@ -448,15 +442,7 @@ private fun ApplicationScope.MeshtasticWindow(
     visible: Boolean,
     onCloseRequest: () -> Unit,
 ) {
-    val multiBackstack =
-        rememberMultiBackstack(
-            // Land on Connections for first-run / no-device-selected; otherwise on Nodes.
-            if (DeviceAddress.parse(uiViewModel.currentDeviceAddressFlow.value) == null) {
-                TopLevelDestination.Connect.route
-            } else {
-                TopLevelDestination.Nodes.route
-            },
-        )
+    val multiBackstack = rememberMultiBackstack(startDestination(uiViewModel.currentDeviceAddressFlow.value))
 
     Window(
         onCloseRequest = onCloseRequest,

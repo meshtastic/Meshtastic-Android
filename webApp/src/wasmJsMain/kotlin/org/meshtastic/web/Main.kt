@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
-import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -42,14 +41,15 @@ import org.koin.compose.koinInject
 import org.koin.plugin.module.dsl.startKoin
 import org.meshtastic.core.database.WebDatabaseAccess
 import org.meshtastic.core.database.webDatabaseAccess
-import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.web_database_busy
 import org.meshtastic.core.resources.web_database_unavailable
 import org.meshtastic.core.service.MeshServiceOrchestrator
+import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.web.di.WebKoinApp
 import org.meshtastic.web.ui.WebMainScreen
@@ -125,24 +125,8 @@ private fun MeshServiceLifecycle() {
 private fun ThemeAndContent(uiViewModel: UIViewModel) {
     val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
-    val isDarkTheme =
-        when (themePref) {
-            1 -> false
-            2 -> true
-            else -> isSystemInDarkTheme()
-        }
 
-    val multiBackstack = rememberMultiBackstack(defaultStartDestination(uiViewModel))
+    val multiBackstack = rememberMultiBackstack(startDestination(uiViewModel.currentDeviceAddressFlow.value))
 
-    AppTheme(darkTheme = isDarkTheme) { WebMainScreen(uiViewModel, multiBackstack) }
-}
-
-/** Lands on Connections for first-run / no-device-selected; otherwise on Nodes — same rule desktopApp uses. */
-private fun defaultStartDestination(uiViewModel: UIViewModel): NavKey {
-    val address = uiViewModel.currentDeviceAddressFlow.value
-    return if (address.isNullOrBlank() || address == "n") {
-        TopLevelDestination.Connect.route
-    } else {
-        TopLevelDestination.Nodes.route
-    }
+    AppTheme(darkTheme = isDarkTheme(themePref)) { WebMainScreen(uiViewModel, multiBackstack) }
 }
