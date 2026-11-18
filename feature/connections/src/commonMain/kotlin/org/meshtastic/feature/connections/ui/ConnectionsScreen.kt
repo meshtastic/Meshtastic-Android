@@ -863,7 +863,7 @@ fun ConnectionsScreen(
                     onRemoveRecentAddress = { scanModel.removeRecentAddress(it.fullAddress) },
                     onRequestUsbDevice =
                     if (scanModel.usbNeedsExplicitDeviceRequest) {
-                        { scanModel.requestUsbDevice() }
+                        { showAll -> scanModel.requestUsbDevice(showAll) }
                     } else {
                         null
                     },

@@ -31,10 +31,11 @@ interface UsbScanner {
     fun needsExplicitDeviceRequest(): Boolean = false
 
     /**
-     * Triggers the platform's explicit device-request flow (a no-op where [needsExplicitDeviceRequest] is `false`). On
-     * web this shows the browser's serial-port picker, so it must be called from a coroutine started directly inside a
+     * Triggers the platform's explicit device-request flow (a no-op where [needsExplicitDeviceRequest] is `false`) and
+     * returns the device picked, or null when none was. On web this shows the browser's serial-port picker, limited to
+     * known Meshtastic USB IDs unless [showAll], so it must be called from a coroutine started directly inside a
      * user-gesture event handler (e.g. a button's onClick) with no earlier suspension — the same "transient activation"
      * constraint Web Bluetooth's device picker has.
      */
-    suspend fun requestNewDevice() {}
+    suspend fun requestNewDevice(showAll: Boolean = false): DeviceListEntry.Usb? = null
 }

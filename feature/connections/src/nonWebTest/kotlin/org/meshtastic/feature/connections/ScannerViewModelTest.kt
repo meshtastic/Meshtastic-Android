@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.bluetooth_scan_too_frequent
 import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import kotlin.test.AfterTest
@@ -1174,6 +1175,40 @@ class ScannerViewModelTest {
             assertEquals(emptyList(), none.availableTransports)
         } finally {
             harness.clearViewModel(none)
+        }
+    }
+
+    @Test
+    fun `a serial port picked in the browser chooser connects at once`() = runTest {
+        val picked =
+            DeviceListEntry.Usb(
+                usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
+                name = "RAK4631",
+                fullAddress = "swebserial-0",
+                bonded = true,
+            )
+        val requests = mutableListOf<Boolean>()
+        val chooser =
+            object : UsbScanner {
+                override fun scanUsbDevices(): Flow<List<DeviceListEntry.Usb>> = emptyFlow()
+
+                override fun needsExplicitDeviceRequest() = true
+
+                override suspend fun requestNewDevice(showAll: Boolean): DeviceListEntry.Usb {
+                    requests += showAll
+                    return picked
+                }
+            }
+        val web = harness.buildBase(usbScanner = chooser)
+        try {
+            web.requestUsbDevice(showAll = true)
+            testScheduler.advanceUntilIdle()
+
+            assertEquals(listOf(true), requests)
+            assertEquals("swebserial-0", radioController.lastSetDeviceAddress)
+            assertEquals(DeviceType.USB, web.activeTransport.value)
+        } finally {
+            harness.clearViewModel(web)
         }
     }
 

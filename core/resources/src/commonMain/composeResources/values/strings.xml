@@ -1548,6 +1548,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>
     <string name="no_public_key_text">This node has not shared a public key, so encrypted interactions with it are not possible. Request User Info to ask for one.</string>
+    <string name="no_serial_ports_allowed">No serial devices added</string>
+    <string name="no_serial_ports_allowed_hint">The browser lists only ports you have allowed. Plug in the radio, then choose it with Add serial device.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
@@ -2054,6 +2056,9 @@
     <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Serial Config</string>
+    <string name="serial_port_chip">%1$s USB serial</string>
+    <string name="serial_port_unknown">Serial device</string>
+    <string name="serial_port_usb_ids">USB serial device %1$s</string>
     <string name="session_active">Session active</string>
     <string name="session_refresh_required">Refresh required</string>
     <string name="set_display_name">Set display name</string>
@@ -2083,6 +2088,7 @@
     <string name="short_name">Short Name</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_all_serial_ports">Show all serial ports…</string>
     <string name="show_full_message_timestamps">Show full message timestamps</string>
     <string name="show_full_message_timestamps_summary">Always show the date and time in conversation headers and message actions</string>
     <string name="show_iaq_legend">Show air quality legend</string>

@@ -533,13 +533,14 @@ open class ScannerViewModel(
         get() = usbScanner?.needsExplicitDeviceRequest() == true
 
     /**
-     * Triggers the platform's explicit USB/serial device-request flow. No-op where [usbNeedsExplicitDeviceRequest] is
+     * Triggers the platform's explicit USB/serial device-request flow, listing every serial port when [showAll], and
+     * connects to the port picked, as a Bluetooth chooser pick does. No-op where [usbNeedsExplicitDeviceRequest] is
      * false. Must be called from the same event-handler chain as a user gesture (e.g. a button's onClick) — see
      * [UsbScanner.requestNewDevice]'s KDoc.
      */
-    fun requestUsbDevice() {
+    fun requestUsbDevice(showAll: Boolean = false) {
         if (usbScanner?.needsExplicitDeviceRequest() != true) return
-        safeLaunch(tag = "requestUsbDevice") { usbScanner.requestNewDevice() }
+        safeLaunch(tag = "requestUsbDevice") { usbScanner.requestNewDevice(showAll)?.let(::onSelected) }
     }
 
     /**
