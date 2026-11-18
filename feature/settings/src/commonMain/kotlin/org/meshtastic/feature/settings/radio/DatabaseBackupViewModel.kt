@@ -36,18 +36,23 @@ import org.meshtastic.core.resources.app_database_backup_disconnect_confirmation
 import org.meshtastic.core.resources.app_database_backup_failed
 import org.meshtastic.core.resources.app_database_backup_saved
 import org.meshtastic.core.resources.app_database_restore_confirmation
+import org.meshtastic.core.resources.app_database_restore_confirmation_all_radios
 import org.meshtastic.core.resources.app_database_restore_corrupt
 import org.meshtastic.core.resources.app_database_restore_failed
 import org.meshtastic.core.resources.app_database_restore_not_backup
 import org.meshtastic.core.resources.app_database_restore_staged
+import org.meshtastic.core.resources.app_database_restore_staged_reload
 import org.meshtastic.core.resources.app_database_restore_wrong_version
 import org.meshtastic.core.resources.are_you_sure
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.reload
 import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.settings.settingsPlatform
 
 /** Backs up the app database for the connected device, and stages a restore that applies on the next launch. */
 @KoinViewModel
@@ -125,7 +130,14 @@ class DatabaseBackupViewModel(
         safeLaunch(tag = "databaseRestoreConfirm") {
             alertManager.showAlert(
                 titleRes = Res.string.are_you_sure,
-                message = getStringSuspend(Res.string.app_database_restore_confirmation),
+                message =
+                getStringSuspend(
+                    if (settingsPlatform.databasePerDevice) {
+                        Res.string.app_database_restore_confirmation
+                    } else {
+                        Res.string.app_database_restore_confirmation_all_radios
+                    },
+                ),
                 confirmTextRes = Res.string.restore_app_database,
                 onConfirm = onConfirmed,
             )
@@ -137,7 +149,19 @@ class DatabaseBackupViewModel(
         safeLaunch(tag = "databaseRestore") {
             var result: RestoreStageResult = RestoreStageResult.Failed(IllegalStateException("file not readable"))
             fileService.read(uri) { source -> result = backupService.stageRestore(dbName, source) }
-            alertManager.showAlert(message = restoreMessage(result))
+            val reloadApp = settingsPlatform.reloadApp
+            if (result == RestoreStageResult.Staged && reloadApp != null) {
+                // Nothing applies the restore until the app restarts, so offer that restart instead of describing it.
+                alertManager.showAlert(
+                    message = getStringSuspend(Res.string.app_database_restore_staged_reload),
+                    confirmTextRes = Res.string.reload,
+                    onConfirm = reloadApp,
+                    dismissTextRes = Res.string.cancel,
+                    onDismiss = {},
+                )
+            } else {
+                alertManager.showAlert(message = restoreMessage(result))
+            }
         }
     }
 
