@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-@file:Suppress("UnusedParameter")
+@file:Suppress(
+    // The browser surface this file wraps takes one small interop function per JS call.
+    "TooManyFunctions",
+    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
+    "UnusedParameter",
+)
 
 package org.meshtastic.web.platform
 
@@ -25,17 +29,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.core.repository.Location
 import kotlin.coroutines.resume
-
-/** One answer from the Geolocation API. */
-internal sealed interface GeoReading {
-    data class Fix(val location: Location, val verticalAccuracyM: Float?) : GeoReading
-
-    /** The user or the browser refused location to this page. */
-    data object Denied : GeoReading
-
-    /** No fix could be had, or the browser has no Geolocation API. */
-    data object Unavailable : GeoReading
-}
 
 /** `navigator.geolocation.watchPosition` for as long as the flow is collected. */
 internal fun watchGeolocation(): Flow<GeoReading> = callbackFlow {
@@ -61,6 +54,17 @@ internal suspend fun currentGeolocation(): GeoReading = suspendCancellableCorout
 internal fun geolocationPermission(): Flow<String> = callbackFlow {
     val watch = watchGeolocationPermission { trySend(it) }
     awaitClose { stopWatching(watch) }
+}
+
+/** One answer from the Geolocation API. */
+internal sealed interface GeoReading {
+    data class Fix(val location: Location, val verticalAccuracyM: Float?) : GeoReading
+
+    /** The user or the browser refused location to this page. */
+    data object Denied : GeoReading
+
+    /** No fix could be had, or the browser has no Geolocation API. */
+    data object Unavailable : GeoReading
 }
 
 private const val CURRENT_POSITION_TIMEOUT_MS = 30_000

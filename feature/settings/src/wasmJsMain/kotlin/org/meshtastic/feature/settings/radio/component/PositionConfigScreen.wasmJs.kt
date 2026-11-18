@@ -29,6 +29,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Fills the fixed position from the browser's Geolocation API; the browser asks for permission on this click. */
 @Composable
+@Suppress("ModifierMissing") // the expect signature has no modifier to take
 actual fun DeviceLocationButton(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,

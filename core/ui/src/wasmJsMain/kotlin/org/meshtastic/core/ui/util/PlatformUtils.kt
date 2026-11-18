@@ -80,6 +80,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
  * It is a modifier, so this places a zero-size node in the caller's layout while [enabled].
  */
 @Composable
+@Suppress("ModifierMissing") // the expect signature has no modifier to take
 actual fun KeepScreenOn(enabled: Boolean) {
     if (enabled) Spacer(Modifier.keepScreenOn())
 }

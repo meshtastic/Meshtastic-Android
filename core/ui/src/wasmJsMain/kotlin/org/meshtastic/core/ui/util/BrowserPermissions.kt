@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-@file:Suppress("UnusedParameter")
+@file:Suppress(
+    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
+    "UnusedParameter",
+)
 
 package org.meshtastic.core.ui.util
 

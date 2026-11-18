@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-@file:Suppress("UnusedParameter")
+@file:Suppress(
+    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
+    "UnusedParameter",
+)
 
 package org.meshtastic.core.network.repository
 
@@ -50,7 +52,8 @@ class WebSerialDevicePresence(private val registry: WebSerialPortRegistry, scope
     private val keys = MutableStateFlow<Set<String>>(emptySet())
     override val deviceKeys: StateFlow<Set<String>> = keys.asStateFlow()
 
-    private val refreshes = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val refreshes =
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     init {
         val serial = webSerialOrNull()
@@ -81,10 +84,9 @@ class WebSerialDevicePresence(private val registry: WebSerialPortRegistry, scope
         val known = registry.knownPorts()
         if (known.values.any { it === port } || port.vendorId() == 0) return
         val present = keys.value
-        val candidates =
-            known.filter { (id, old) ->
-                id !in present && old.vendorId() == port.vendorId() && old.productId() == port.productId()
-            }
+        val candidates = known.filter { (id, old) ->
+            id !in present && old.vendorId() == port.vendorId() && old.productId() == port.productId()
+        }
         candidates.keys.singleOrNull()?.let { id -> registry.rebind(id, port) }
     }
 }

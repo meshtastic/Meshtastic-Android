@@ -48,6 +48,11 @@ import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
+import org.meshtastic.web.platform.WebFileService
+import org.meshtastic.web.platform.WebLocationRepository
+import org.meshtastic.web.platform.WebLocationService
+import org.meshtastic.web.platform.WebMeshLocationManager
+import org.meshtastic.web.platform.WebPhoneLocationProvider
 import org.meshtastic.web.stub.NoopAppWidgetUpdater
 import org.meshtastic.web.stub.NoopCompassHeadingProvider
 import org.meshtastic.web.stub.NoopDeviceAddressChangeHook
@@ -60,11 +65,6 @@ import org.meshtastic.web.stub.NoopPlatformAnalytics
 import org.meshtastic.web.stub.NoopReverseGeocoder
 import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
 import org.meshtastic.web.stub.NoopServiceDiscovery
-import org.meshtastic.web.platform.WebFileService
-import org.meshtastic.web.platform.WebLocationRepository
-import org.meshtastic.web.platform.WebLocationService
-import org.meshtastic.web.platform.WebMeshLocationManager
-import org.meshtastic.web.platform.WebPhoneLocationProvider
 
 /**
  * Platform bindings: browser-backed ones (Geolocation, file pickers, Web Serial hot-plug, database backup) and stubs

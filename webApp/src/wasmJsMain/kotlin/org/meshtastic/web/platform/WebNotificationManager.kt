@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-@file:Suppress("UnusedParameter")
+@file:Suppress(
+    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
+    "UnusedParameter",
+)
 
 package org.meshtastic.web.platform
 
@@ -49,21 +51,24 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
         askWhenSwitchedOn(prefs.newWaypointsEnabled, scope)
     }
 
-    override suspend fun dispatch(notification: Notification): Boolean {
-        val enabled =
-            when (notification.category) {
-                Notification.Category.Message -> prefs.messagesEnabled.value
-                Notification.Category.Reaction -> prefs.loadReactionsEnabled()
-                Notification.Category.Waypoint -> prefs.loadNewWaypointsEnabled()
-                Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
-                Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
-                Notification.Category.Battery -> prefs.lowBatteryEnabled.value
-                Notification.Category.Alert -> true
-                Notification.Category.Client -> true
-                Notification.Category.Service -> true
-            }
-        if (!enabled || !notificationsSupported() || notificationPermission() != "granted") return false
+    override suspend fun dispatch(notification: Notification): Boolean = isEnabled(notification.category) &&
+        notificationsSupported() &&
+        notificationPermission() == "granted" &&
+        show(notification)
 
+    private suspend fun isEnabled(category: Notification.Category): Boolean = when (category) {
+        Notification.Category.Message -> prefs.messagesEnabled.value
+        Notification.Category.Reaction -> prefs.loadReactionsEnabled()
+        Notification.Category.Waypoint -> prefs.loadNewWaypointsEnabled()
+        Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
+        Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
+        Notification.Category.Battery -> prefs.lowBatteryEnabled.value
+        Notification.Category.Alert -> true
+        Notification.Category.Client -> true
+        Notification.Category.Service -> true
+    }
+
+    private fun show(notification: Notification): Boolean {
         val key = notification.id?.let(::keyFor) ?: "untagged-${untaggedCount++}"
         var handle: JsAny? = null
         handle =
@@ -74,13 +79,9 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
                 silent = notification.isSilent,
                 onClose = { if (shown[key] === handle) shown.remove(key) },
             )
-        if (handle == null) {
-            // Android Chrome only shows notifications from a service worker, which the web app does not register.
-            Logger.d { "Browser refused notification: ${notification.category}" }
-            return false
-        }
-        shown[key] = handle
-        return true
+        // Null on Android Chrome, which only shows notifications from a service worker the web app does not register.
+        handle?.let { shown[key] = it } ?: Logger.d { "Browser refused notification: ${notification.category}" }
+        return handle != null
     }
 
     override fun cancel(id: Int) {

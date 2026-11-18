@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
-@file:Suppress("UnusedParameter")
+@file:Suppress(
+    // The browser surface this file wraps takes one small interop function per JS call.
+    "TooManyFunctions",
+    // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
+    "UnusedParameter",
+)
 
 package org.meshtastic.core.ui.util
 
@@ -102,8 +106,10 @@ internal fun launchSaveFile(
         val handle = pickedHandle(result)
         when {
             handle != null -> onUriReceived(register(WebFileTarget.SaveHandle(handle), fileName))
+
             // The user closed the picker: nothing to save, as when a native save dialog is cancelled.
             pickAborted(result) -> Unit
+
             // Refused for another reason (no activation, a cross-origin frame): fall back to a download.
             else -> onUriReceived(register(WebFileTarget.Download(fileName, mimeType), fileName))
         }

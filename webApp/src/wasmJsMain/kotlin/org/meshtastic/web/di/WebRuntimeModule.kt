@@ -16,6 +16,8 @@
  */
 package org.meshtastic.web.di
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.DefaultRequest
@@ -26,8 +28,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.coroutineScope
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
