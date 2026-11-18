@@ -229,6 +229,21 @@ class TelemetryWidgetContentTest {
     }
 
     @Test
+    fun `every breakpoint carries the mark once`() {
+        listOf(
+            WidgetSizes.TELEMETRY_ONE,
+            WidgetSizes.TELEMETRY_ONE_TALL,
+            WidgetSizes.TELEMETRY_ROW,
+            WidgetSizes.TELEMETRY_ROW_TALL,
+            WidgetSizes.TELEMETRY_WIDE_ROW,
+            WidgetSizes.TELEMETRY_WIDE_ROW_TALL,
+            WidgetSizes.TELEMETRY_GRID,
+            WidgetSizes.TELEMETRY_WIDE_GRID,
+        )
+            .forEach { size -> render(size) { onAllNodes(hasTestTag(WIDGET_MARK_TEST_TAG)).assertCountEquals(1) } }
+    }
+
+    @Test
     fun `a humidity tile with no temperature has no dew point line`() {
         val node = telemetryNode(environment = environment { relative_humidity = 50f })
         val state = telemetryWidgetState(node.num, emptySet(), emptySet(), inputsOf(node), emptyList(), now = NOW)
