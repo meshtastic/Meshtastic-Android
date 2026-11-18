@@ -31,7 +31,7 @@ class LocalConfigDataSourceTest {
     private class InMemoryLocalConfigStore : CoreLocalConfigDataStore {
         override val data = MutableStateFlow(LocalConfig.Builder().build())
 
-        override suspend fun updateData(transform: suspend (t: LocalConfig) -> LocalConfig) =
+        override suspend fun updateData(transform: (LocalConfig) -> LocalConfig) =
             transform(data.value).also { data.value = it }
     }
 

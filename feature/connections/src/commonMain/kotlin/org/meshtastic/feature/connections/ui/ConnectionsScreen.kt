@@ -687,6 +687,7 @@ fun ConnectionsScreen(
                     showBluetooth = scanModel.bluetoothSupported,
                     showUsb = scanModel.usbSupported,
                     showNetwork = scanModel.networkSupported,
+                    showNode = scanModel.nodeSupported,
                 )
             }
             scanModel.unsupportedTransportNotice?.let { TransportUnsupportedCard(message = stringResource(it)) }

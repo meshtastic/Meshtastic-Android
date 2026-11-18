@@ -45,12 +45,6 @@ kotlin {
             api(project.dependencies.platform(libs.meshtastic.mqtt.client.bom))
             api(libs.meshtastic.mqtt.client.core)
             api(libs.meshtastic.mqtt.client.transport.ws)
-            // The in-process mesh node (NodeRadioTransport): node-host is the facade every platform embeds,
-            // its platform factory comes from androidMain (node-android) or the desktop app (JvmBearerFactory).
-            api(project.dependencies.platform(libs.meshtastic.node.bom))
-            api(libs.meshtastic.node.host)
-            implementation(libs.meshtastic.node.store.file) // nodeFileStores and AtomicFileStore
-            api(libs.meshtastic.node.sensors) // I2cBusState, a host's sensor bus as the node card shows it
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)
@@ -68,6 +62,13 @@ kotlin {
             api(libs.meshtastic.mqtt.client.transport.tcp)
             // The WebSocket phone link pins CIO: OkHttp would apply the app's cleartext policy to a LAN ws:// radio.
             implementation(libs.ktor.client.cio)
+            // The in-process mesh node (NodeRadioTransport): node-host is the facade every platform embeds,
+            // its platform factory comes from androidMain (node-android) or the desktop app (JvmBearerFactory).
+            // node-kmp publishes no wasmJs, so the node and everything that names it stays nonWeb.
+            api(project.dependencies.platform(libs.meshtastic.node.bom))
+            api(libs.meshtastic.node.host)
+            implementation(libs.meshtastic.node.store.file) // nodeFileStores and AtomicFileStore
+            api(libs.meshtastic.node.sensors) // I2cBusState, a host's sensor bus as the node card shows it
         }
 
         getByName("jvmMain") {
@@ -87,13 +88,16 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            // FakeTransport for NodeRadioTransport tests. node-testing carries kotlin-test's JUnit 4 flavor
-            // transitively; this module tests on JUnit 5, and both claim the same capability.
+            implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
+            implementation(libs.ktor.client.mock)
+        }
+
+        getByName("nonWebTest").dependencies {
+            // FakeTransport for NodeRadioTransport tests; node-kmp publishes no wasmJs. node-testing carries
+            // kotlin-test's JUnit 4 flavor transitively; this module tests on JUnit 5, and both claim one capability.
             implementation(libs.meshtastic.node.testing.get().toString()) {
                 exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit")
             }
-            implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
-            implementation(libs.ktor.client.mock)
         }
     }
 }

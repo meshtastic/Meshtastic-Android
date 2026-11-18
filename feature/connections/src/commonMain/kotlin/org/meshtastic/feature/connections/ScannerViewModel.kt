@@ -172,6 +172,8 @@ open class ScannerViewModel(
     val usbSupported: Boolean = true,
     /** False where the transport factory cannot open TCP: the Network pane is hidden and no address is saved. */
     val networkSupported: Boolean = true,
+    /** False where the in-process node cannot run, as on web: the This device pane is hidden and never selected. */
+    val nodeSupported: Boolean = true,
     /** Set where a USB device must be requested explicitly, as with Web Serial. */
     private val usbScanner: UsbScanner? = null,
 ) : ViewModel() {
@@ -186,7 +188,7 @@ open class ScannerViewModel(
                 DeviceType.BLE -> bluetoothSupported
                 DeviceType.TCP -> networkSupported
                 DeviceType.USB -> usbSupported
-                DeviceType.NODE -> true
+                DeviceType.NODE -> nodeSupported
             }
         }
 

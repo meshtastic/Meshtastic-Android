@@ -71,7 +71,7 @@ abstract class BaseRadioTransportFactory(
             -> mockTransportEnabled.value
 
             // This device as the node needs no radio and no permission to start; its bearers degrade on their own.
-            InterfaceId.NODE.id -> true
+            InterfaceId.NODE.id -> isNodeSupported
 
             else -> isPlatformAddressValid(address)
         }
@@ -79,6 +79,9 @@ abstract class BaseRadioTransportFactory(
 
     /** Whether this hardware can host a USB serial radio. */
     protected open val isSerialSupported: Boolean = true
+
+    /** Whether this platform can run the in-process node. */
+    protected open val isNodeSupported: Boolean = true
 
     protected open fun isPlatformAddressValid(address: String): Boolean = false
 

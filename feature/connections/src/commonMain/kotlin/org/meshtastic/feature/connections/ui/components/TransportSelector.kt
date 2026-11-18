@@ -61,6 +61,7 @@ import org.meshtastic.core.ui.icon.Wifi
  * @param showBluetooth false on hardware with no Bluetooth LE, where the BLE segment could never find anything.
  * @param showUsb false on hardware with no USB host, unless Demo Mode needs the USB pane.
  * @param showNetwork false where the transport factory cannot open TCP, as in a browser.
+ * @param showNode false where the in-process node cannot run, as on web.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +72,7 @@ fun TransportSelector(
     showBluetooth: Boolean = true,
     showUsb: Boolean = true,
     showNetwork: Boolean = true,
+    showNode: Boolean = true,
 ) {
     val transports =
         DeviceType.entries.filter {
@@ -78,6 +80,7 @@ fun TransportSelector(
                 DeviceType.BLE -> showBluetooth
                 DeviceType.TCP -> showNetwork
                 DeviceType.USB -> showUsb
+                DeviceType.NODE -> showNode
             }
         }
     val labels = transports.map { stringResource(it.label) }

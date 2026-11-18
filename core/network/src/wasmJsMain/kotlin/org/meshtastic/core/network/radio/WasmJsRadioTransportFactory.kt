@@ -60,6 +60,9 @@ class WasmJsRadioTransportFactory(
     // No bundled capture asset ships on web (no context.assets equivalent).
     override val isReplayTransportAvailable: Boolean = false
 
+    // node-kmp publishes no wasmJs, so the in-process node does not run in a browser.
+    override val isNodeSupported: Boolean = false
+
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
         val rest = address.substring(1)
@@ -86,6 +89,8 @@ class WasmJsRadioTransportFactory(
                     scope = service.serviceScope,
                 )
 
+            // A stored in-process node address is refused by isAddressValid before it reaches here.
+            InterfaceId.NODE,
             InterfaceId.NOP,
             null,
             -> NopRadioTransport(rest)

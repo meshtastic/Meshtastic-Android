@@ -181,3 +181,6 @@ actual fun rememberCameraPermissionState(): PermissionUiState = if (cameraSuppor
 } else {
     PermissionUiState(status = PermissionStatus.PERMANENTLY_DENIED, request = {}, openAppSettings = {})
 }
+
+// The in-process node's card, the only caller, has no web build.
+@Composable actual fun rememberPermissionState(permission: String): PermissionUiState = grantedPermissionUiState()

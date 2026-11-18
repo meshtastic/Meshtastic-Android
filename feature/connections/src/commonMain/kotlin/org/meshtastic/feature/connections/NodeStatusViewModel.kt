@@ -17,12 +17,17 @@
 package org.meshtastic.feature.connections
 
 import androidx.lifecycle.ViewModel
-import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CancellationException
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.network.radio.NodeStatusRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.node_extra_radio_not_kept
@@ -33,27 +38,28 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.extraRadioNumber
 import org.meshtastic.feature.connections.model.host.Bearer
-import org.meshtastic.feature.connections.model.toNode
-import org.meshtastic.feature.connections.model.toSensorsUi
-import org.meshtastic.feature.connections.model.toUi
 
-/** The node status card's state: null while this device is not running as the node. */
+/** The node status card's state: null while the current device is no node any [NodeCardSource] reads. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
 class NodeStatusViewModel(
-    private val repository: NodeStatusRepository,
+    radioInterfaceService: RadioInterfaceService,
+    private val sources: List<NodeCardSource>,
     private val snackbarManager: SnackbarManager,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : ViewModel() {
 
+    private data class Claimed(val source: NodeCardSource, val address: String)
+
+    private val claimed: StateFlow<Claimed?> =
+        radioInterfaceService.currentDeviceAddressFlow
+            .map { address -> address?.let(::claim) }
+            .distinctUntilChanged()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val status: StateFlow<NodeStatusUi?> =
-        combine(repository.status, repository.sensors, repository.extraRadiosOff, repository.primaryRadio) {
-                status,
-                bus,
-                extraRadiosOff,
-                primary,
-            ->
-            status?.toUi(extraRadiosOff, primary)?.copy(sensors = bus?.toSensorsUi())
-        }
+        claimed
+            .flatMapLatest { it?.source?.status(it.address) ?: flowOf(null) }
             .stateInWhileSubscribed(initialValue = null)
 
     /**
@@ -62,41 +68,47 @@ class NodeStatusViewModel(
      */
     fun setBearer(bearer: Bearer, on: Boolean) {
         if (!bearer.switchable) return
-        safeLaunch(tag = "setBearer") { repository.setHostBearer(bearer.toNode(), on) }
+        val current = claimed.value ?: return
+        safeLaunch(tag = "setBearer") { current.source.setBearer(current.address, bearer, on) }
     }
 
     /**
      * Switch one extra LoRa radio by itself. A switch the node made and could not keep is still made, so the user is
-     * told only that a restart will forget it; a name the host does not have is told as a failure.
+     * told only that a restart will forget it; a switch not made is told as a failure.
      */
     fun setExtraRadio(name: String, on: Boolean) {
+        val current = claimed.value ?: return
         safeLaunch(tag = "setExtraRadio") {
-            try {
-                repository.setExtraRadio(name, on)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: IllegalStateException) {
-                Logger.w(e) { "Extra radio $name switched, choice not kept" }
-                val radio = extraRadioNumber(name)
-                showMessage(
-                    if (radio != null) {
-                        UiText.Resource(Res.string.node_extra_radio_not_kept, radio)
-                    } else {
-                        UiText.Resource(Res.string.node_extra_radio_switch_failed)
-                    },
-                )
-            } catch (e: IllegalArgumentException) {
-                Logger.w(e) { "No extra radio $name to switch" }
-                showMessage(UiText.Resource(Res.string.node_extra_radio_switch_failed))
+            val radio = extraRadioNumber(name)
+            when (current.source.setExtraRadio(current.address, name, on)) {
+                ExtraRadioSwitch.KEPT -> Unit
+
+                ExtraRadioSwitch.NOT_KEPT ->
+                    showMessage(
+                        if (radio != null) {
+                            UiText.Resource(Res.string.node_extra_radio_not_kept, radio)
+                        } else {
+                            UiText.Resource(Res.string.node_extra_radio_switch_failed)
+                        },
+                    )
+
+                ExtraRadioSwitch.FAILED -> showMessage(UiText.Resource(Res.string.node_extra_radio_switch_failed))
             }
         }
     }
+
+    private fun claim(address: String): Claimed? =
+        sources.firstOrNull { it.claims(address) }?.let { source -> Claimed(source, address) }
 
     private suspend fun showMessage(text: UiText) {
         snackbarManager.showSnackbar(message = resolveUiText(text))
     }
 
-    fun refreshRequirements() = repository.refreshRequirements()
+    fun refreshRequirements() {
+        claimed.value?.source?.refreshRequirements()
+    }
 
-    fun requestUsbPermission() = repository.requestUsbPermission()
+    fun requestUsbPermission() {
+        claimed.value?.source?.requestUsbPermission()
+    }
 }

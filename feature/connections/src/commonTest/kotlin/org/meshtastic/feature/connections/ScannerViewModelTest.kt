@@ -1159,7 +1159,7 @@ class ScannerViewModelTest {
         harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
         val noNetwork = harness.buildBase(networkSupported = false)
         try {
-            assertEquals(listOf(DeviceType.BLE, DeviceType.USB), noNetwork.availableTransports)
+            assertEquals(listOf(DeviceType.BLE, DeviceType.USB, DeviceType.NODE), noNetwork.availableTransports)
             assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
 
             noNetwork.selectTransport(DeviceType.TCP)
@@ -1199,7 +1199,13 @@ class ScannerViewModelTest {
 
     @Test
     fun `with no transport at all nothing is available`() {
-        val none = harness.buildBase(bluetoothSupported = false, usbSupported = false, networkSupported = false)
+        val none =
+            harness.buildBase(
+                bluetoothSupported = false,
+                usbSupported = false,
+                networkSupported = false,
+                nodeSupported = false,
+            )
         try {
             assertEquals(emptyList(), none.availableTransports)
         } finally {

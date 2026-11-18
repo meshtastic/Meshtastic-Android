@@ -150,6 +150,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         bluetoothSupported: Boolean = true,
         usbSupported: Boolean = true,
         networkSupported: Boolean = true,
+        nodeSupported: Boolean = true,
         usbScanner: UsbScanner? = null,
     ): ScannerViewModel = ScannerViewModel(
         serviceRepository = serviceRepository,
@@ -166,6 +167,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         bluetoothSupported = bluetoothSupported,
         usbSupported = usbSupported,
         networkSupported = networkSupported,
+        nodeSupported = nodeSupported,
         usbScanner = usbScanner,
     )
 

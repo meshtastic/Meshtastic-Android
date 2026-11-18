@@ -35,6 +35,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.node_extra_radio_not_kept
 import org.meshtastic.core.resources.node_extra_radio_switch_failed
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.connections.model.SensorsUi
 import org.meshtastic.node.MeshLogger
@@ -124,10 +125,13 @@ class NodeStatusViewModelTest {
     private val snackbars = RecordingSnackbarManager()
     private val resolved = mutableListOf<UiText>()
 
-    private fun viewModel() = NodeStatusViewModel(repository, snackbars) { text ->
-        resolved += text
-        RESOLVED
-    }
+    private val radio by lazy { FakeRadioInterfaceService().apply { setDeviceAddress(IN_PROCESS) } }
+
+    private fun viewModel() =
+        NodeStatusViewModel(radio, listOf(InProcessNodeCardSource(repository)), snackbars) { text ->
+            resolved += text
+            RESOLVED
+        }
 
     @BeforeTest
     fun setUp() {
@@ -167,6 +171,19 @@ class NodeStatusViewModelTest {
         } finally {
             nodeScope.cancel()
         }
+    }
+
+    @Test
+    fun `a device the in-process source does not claim shows no card and switches nothing`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+        radio.setDeviceAddress("t192.168.1.20")
+        viewModel.status.test {
+            assertNull(awaitItem())
+            repository.extraRadiosOff.value = setOf("lora-2")
+            expectNoEvents()
+        }
+        viewModel.setBearer(CardBearer.AUDIO, true)
+        assertTrue(repository.hostBearerWrites.isEmpty())
     }
 
     @Test
@@ -227,6 +244,9 @@ class NodeStatusViewModelTest {
 
     private companion object {
         const val RESOLVED = "resolved"
+
+        /** This device as the node. */
+        const val IN_PROCESS = "p"
 
         /** `!` and eight hex digits, firmware's node id. */
         const val NODE_ID_LENGTH = 9
