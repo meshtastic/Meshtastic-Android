@@ -81,6 +81,10 @@ kotlin {
             }
         }
 
+        // PacketRepository returns PagingData, which core:repository takes as implementation. A mock of it needs the
+        // type on the test classpath, and on wasmJs nothing else puts it there.
+        commonTest.dependencies { implementation(libs.androidx.paging.common) }
+
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
         // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.
         jvmTest.dependencies {

@@ -199,7 +199,6 @@ class MeshServiceOrchestratorTest {
                     started = true
                     lifecycleEvents += "start"
                 }
-                Unit
             }
         every { takServerIntegration.stop() } calls
             {
@@ -207,7 +206,6 @@ class MeshServiceOrchestratorTest {
                     started = false
                     lifecycleEvents += "stop"
                 }
-                Unit
             }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
 
@@ -237,7 +235,6 @@ class MeshServiceOrchestratorTest {
                     started = true
                     lifecycleEvents += "start"
                 }
-                Unit
             }
         every { takServerIntegration.stop() } calls
             {
@@ -245,7 +242,6 @@ class MeshServiceOrchestratorTest {
                     started = false
                     lifecycleEvents += "stop"
                 }
-                Unit
             }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
 

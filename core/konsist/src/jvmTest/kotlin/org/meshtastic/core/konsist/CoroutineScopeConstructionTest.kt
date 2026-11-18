@@ -37,7 +37,7 @@ class CoroutineScopeConstructionTest {
             "androidApp/main/MeshUtilApplication.kt",
             "core/data/commonMain/FromRadioPacketHandlerImpl.kt",
             "core/data/commonMain/SingleFlightRefresher.kt",
-            "core/database/commonMain/DatabaseManager.kt",
+            "core/database/nonWebMain/DatabaseManager.kt",
             "core/datastore/commonMain/CoreDatastoreModule.kt",
             "core/network/androidMain/SerialRadioTransport.kt",
             "core/network/commonMain/BleRadioTransport.kt",
@@ -87,6 +87,7 @@ class CoroutineScopeConstructionTest {
             "feature/widget/main/AndroidAppWidgetUpdater.kt",
             "feature/widget/main/LocalStatsWidgetState.kt",
             "feature/wifi-provision/commonMain/NymeaWifiService.kt",
+            "webApp/wasmJsMain/WebMessageQueue.kt",
         )
 
     /** A call to the `CoroutineScope(context)` factory; `rememberCoroutineScope()` has no word break before it. */

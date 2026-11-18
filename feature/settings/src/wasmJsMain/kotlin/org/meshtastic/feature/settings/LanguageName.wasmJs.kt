@@ -19,4 +19,5 @@ package org.meshtastic.feature.settings
 internal actual fun nativeLanguageName(tag: String): String =
     displayName(tag).replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }
 
+@Suppress("UnusedParameter") // read by name inside the js() body
 private fun displayName(tag: String): String = js("new Intl.DisplayNames([tag], { type: 'language' }).of(tag) || tag")

@@ -34,7 +34,7 @@ class ModuleConfigDataSourceCoverageTest {
     private class InMemoryModuleConfigStore : CoreModuleConfigDataStore {
         override val data = MutableStateFlow(LocalModuleConfig.Builder().build())
 
-        override suspend fun updateData(transform: suspend (t: LocalModuleConfig) -> LocalModuleConfig) =
+        override suspend fun updateData(transform: (LocalModuleConfig) -> LocalModuleConfig) =
             transform(data.value).also { data.value = it }
     }
 

@@ -25,7 +25,6 @@ import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.execSQL
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.BootloaderOtaQuirksDao
 import org.meshtastic.core.database.dao.ChannelSetDao
@@ -222,7 +221,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         internal val MIGRATION_52_53: Migration =
             object : Migration(52, 53) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL("INSERT INTO `packet_fts`(`packet_fts`) VALUES('rebuild')")
+                    connection.execStatement("INSERT INTO `packet_fts`(`packet_fts`) VALUES('rebuild')")
                 }
             }
 
@@ -237,7 +236,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         internal val MIGRATION_63_64: Migration =
             object : Migration(63, 64) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.execStatement(
                         "CREATE TABLE IF NOT EXISTS `_new_discovered_node` (" +
                             "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `preset_result_id` INTEGER NOT NULL, " +
                             "`node_num` INTEGER NOT NULL, `short_name` TEXT, `long_name` TEXT, " +
@@ -249,7 +248,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                             "FOREIGN KEY(`preset_result_id`) REFERENCES `discovery_preset_result`(`id`) " +
                             "ON UPDATE NO ACTION ON DELETE CASCADE )",
                     )
-                    connection.execSQL(
+                    connection.execStatement(
                         "INSERT INTO `_new_discovered_node` (`id`,`preset_result_id`,`node_num`,`short_name`," +
                             "`long_name`,`neighbor_type`,`latitude`,`longitude`,`distance_from_user`,`hop_count`," +
                             "`snr`,`rssi`,`message_count`,`sensor_packet_count`,`is_infrastructure`) " +
@@ -257,19 +256,19 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                             "`latitude`,`longitude`,`distance_from_user`,`hop_count`,`snr`,`rssi`,`message_count`," +
                             "`sensor_packet_count`,`is_infrastructure` FROM `discovered_node`",
                     )
-                    connection.execSQL("DROP TABLE `discovered_node`")
-                    connection.execSQL("ALTER TABLE `_new_discovered_node` RENAME TO `discovered_node`")
-                    connection.execSQL(
+                    connection.execStatement("DROP TABLE `discovered_node`")
+                    connection.execStatement("ALTER TABLE `_new_discovered_node` RENAME TO `discovered_node`")
+                    connection.execStatement(
                         "CREATE INDEX IF NOT EXISTS `index_discovered_node_preset_result_id` " +
                             "ON `discovered_node` (`preset_result_id`)",
                     )
-                    connection.execSQL(
+                    connection.execStatement(
                         "CREATE INDEX IF NOT EXISTS `index_discovered_node_node_num` ON `discovered_node` (`node_num`)",
                     )
-                    connection.prepare("PRAGMA foreign_key_check(`discovered_node`)").use { violations ->
-                        check(!violations.step()) { "discovered_node has rows whose preset result does not exist" }
+                    check(!connection.returnsRows("PRAGMA foreign_key_check(`discovered_node`)")) {
+                        "discovered_node has rows whose preset result does not exist"
                     }
-                    connection.execSQL(
+                    connection.execStatement(
                         "CREATE INDEX IF NOT EXISTS `index_log_received_date` ON `log` (`received_date`)",
                     )
                 }
@@ -282,11 +281,11 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         internal val MIGRATION_67_68: Migration =
             object : Migration(67, 68) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.execStatement(
                         "CREATE INDEX IF NOT EXISTS `index_log_from_num_port_num_received_date` " +
                             "ON `log` (`from_num`, `port_num`, `received_date`)",
                     )
-                    connection.execSQL(
+                    connection.execStatement(
                         "CREATE INDEX IF NOT EXISTS `index_log_type_received_date` ON `log` (`type`, `received_date`)",
                     )
                 }

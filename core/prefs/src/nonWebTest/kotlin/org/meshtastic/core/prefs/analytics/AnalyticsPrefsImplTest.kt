@@ -16,10 +16,7 @@
  */
 package org.meshtastic.core.prefs.analytics
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -31,6 +28,8 @@ import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.asAnalyticsDataStore
 import org.meshtastic.core.prefs.di.asAppDataStore
+import org.meshtastic.core.prefs.store.PrefsStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -60,10 +59,13 @@ class AnalyticsPrefsImplTest {
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
-    private fun store(name: String): DataStore<Preferences> =
-        PreferenceDataStoreFactory.createWithPath(scope = testScope, produceFile = { tmpDir / "$name.preferences_pb" })
+    private fun store(name: String): PrefsStore = PreferenceDataStoreFactory.createWithPath(
+        scope = testScope,
+        produceFile = { tmpDir / "$name.preferences_pb" },
+    )
+        .asPrefsStore()
 
-    private fun prefs(analytics: DataStore<Preferences>) =
+    private fun prefs(analytics: PrefsStore) =
         AnalyticsPrefsImpl(analytics.asAnalyticsDataStore(), store("app").asAppDataStore(), dispatchers)
 
     @Test

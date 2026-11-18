@@ -18,6 +18,8 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.feature.node.model.GlbBounds
@@ -33,7 +35,8 @@ internal actual fun DeviceModelScene(
     screen: GlbBounds?,
     screenFrame: MirrorFrame?,
 ) {
-    LaunchedEffect(Unit) { onError() }
+    val currentOnError by rememberUpdatedState(onError)
+    LaunchedEffect(Unit) { currentOnError() }
 }
 
 internal actual val deviceModelDrawsScreen: Boolean = false

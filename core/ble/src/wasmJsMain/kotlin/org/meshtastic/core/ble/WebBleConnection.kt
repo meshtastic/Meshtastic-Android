@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -73,7 +74,7 @@ class WebBleConnection(private val scope: CoroutineScope) : BleConnection {
                     val failure = BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed)
                     _connectionState.value = failure
                     webDevice.updateState(failure)
-                    error("Device '${webDevice.address}' does not expose a GATT server")
+                    error("Device '${webDevice.address.anonymize()}' does not expose a GATT server")
                 }
 
         val server =

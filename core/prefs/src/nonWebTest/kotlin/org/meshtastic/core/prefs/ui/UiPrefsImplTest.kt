@@ -163,7 +163,7 @@ class UiPrefsImplTest {
         prefs.recordChirpyHopScore(12)
         prefs.recordChirpyHopScore(7)
 
-        val stored = dataStore.data.first()
+        val stored = dataStore.asPrefsStore().data.first()
         assertEquals(12, stored[UiPrefsImpl.KEY_CHIRPY_HOP_BEST_SCORE])
         assertEquals(12, prefs.chirpyHopBestScore.value)
     }

@@ -134,13 +134,19 @@ fun createPreferencesDataStore(
     dispatchers: CoroutineDispatchers,
     legacyName: String,
     fileName: String,
-): PrefsStore {
-    val dataStore: DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-            migrations = listOf(SharedPreferencesMigration(context, legacyName)),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile(fileName) },
-        )
-    return dataStore.asPrefsStore()
-}
+): PrefsStore = createRawPreferencesDataStore(context, dispatchers, legacyName, fileName).asPrefsStore()
+
+/**
+ * The `DataStore<Preferences>` [createPreferencesDataStore] adapts, for an Android-only store that reads it directly.
+ */
+fun createRawPreferencesDataStore(
+    context: Context,
+    dispatchers: CoroutineDispatchers,
+    legacyName: String,
+    fileName: String,
+): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+    corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+    migrations = listOf(SharedPreferencesMigration(context, legacyName)),
+    scope = CoroutineScope(dispatchers.io + SupervisorJob()),
+    produceFile = { context.preferencesDataStoreFile(fileName) },
+)

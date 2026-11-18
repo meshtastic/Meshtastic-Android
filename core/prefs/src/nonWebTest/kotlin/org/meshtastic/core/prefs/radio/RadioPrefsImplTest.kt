@@ -16,10 +16,7 @@
  */
 package org.meshtastic.core.prefs.radio
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -29,6 +26,8 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.asRadioDataStore
+import org.meshtastic.core.prefs.store.PrefsStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -58,8 +57,11 @@ class RadioPrefsImplTest {
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
-    private fun store(): DataStore<Preferences> =
-        PreferenceDataStoreFactory.createWithPath(scope = testScope, produceFile = { tmpDir / "radio.preferences_pb" })
+    private fun store(): PrefsStore = PreferenceDataStoreFactory.createWithPath(
+        scope = testScope,
+        produceFile = { tmpDir / "radio.preferences_pb" },
+    )
+        .asPrefsStore()
 
     @Test
     fun `awaitDevAddr is null when no address was ever saved`() = testScope.runTest {

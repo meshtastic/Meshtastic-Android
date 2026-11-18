@@ -18,4 +18,5 @@ package org.meshtastic.core.network.mqtt
 
 internal actual fun composeCanonical(text: String): String = normalizeNfc(text)
 
+@Suppress("UnusedParameter") // read by name inside the js() body
 private fun normalizeNfc(text: String): String = js("text.normalize('NFC')")

@@ -37,6 +37,8 @@ import org.meshtastic.core.prefs.di.asAppDataStore
 import org.meshtastic.core.prefs.di.asHomoglyphEncodingDataStore
 import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefsImpl
+import org.meshtastic.core.prefs.store.PrefsStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import org.meshtastic.core.prefs.ui.UiPrefsImpl
 import org.meshtastic.core.repository.AppFunctionsPrefs
 import org.meshtastic.core.repository.AppFunctionsSetting
@@ -68,8 +70,10 @@ class PrefsToggleTest {
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
-    private fun store(name: String): DataStore<Preferences> =
+    private fun rawStore(name: String): DataStore<Preferences> =
         PreferenceDataStoreFactory.createWithPath(scope = testScope, produceFile = { tmpDir / "$name.preferences_pb" })
+
+    private fun store(name: String): PrefsStore = rawStore(name).asPrefsStore()
 
     @Test
     fun `quick chat toggle turns the default off state on`() = testScope.runTest {
@@ -157,8 +161,8 @@ class PrefsToggleTest {
     @Test
     fun `two rapid app functions toggles both flip and land back on enabled`() = testScope.runTest {
         AppFunctionsSetting.entries.forEach { setting ->
-            val dataStore = store("appfn-${setting.name}")
-            val prefs = AppFunctionsPrefsImpl(dataStore.asAppDataStore(), dispatchers)
+            val dataStore = rawStore("appfn-${setting.name}")
+            val prefs = AppFunctionsPrefsImpl(dataStore.asPrefsStore().asAppDataStore(), dispatchers)
 
             prefs.toggle(setting)
             prefs.toggle(setting)

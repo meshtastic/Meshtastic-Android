@@ -27,6 +27,7 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.prefs.di.asUiDataStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.repository.LiveUpdatePrefs
 import kotlin.test.AfterTest
@@ -53,7 +54,7 @@ class LiveUpdatePrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         val appScope = object : ApplicationCoroutineScope, CoroutineScope by CoroutineScope(testDispatcher) {}
-        prefs = LiveUpdatePrefsImpl(dataStore.asUiDataStore(), appScope)
+        prefs = LiveUpdatePrefsImpl(dataStore.asPrefsStore().asUiDataStore(), appScope)
     }
 
     @AfterTest
