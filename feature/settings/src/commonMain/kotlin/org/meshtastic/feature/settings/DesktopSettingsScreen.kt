@@ -72,6 +72,7 @@ import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.util.rememberNotificationPermissionState
 import org.meshtastic.feature.settings.component.AppVersionRows
 import org.meshtastic.feature.settings.component.CacheLimitPreference
 import org.meshtastic.feature.settings.component.ExpressiveSection
@@ -278,6 +279,7 @@ fun DesktopSettingsScreen(
                     onToggleReactions = { settingsViewModel.setReactionsEnabled(it) },
                     newWaypointsEnabled = settingsViewModel.newWaypointsEnabled.collectAsStateWithLifecycle().value,
                     onToggleNewWaypoints = { settingsViewModel.setNewWaypointsEnabled(it) },
+                    permission = rememberNotificationPermissionState(),
                 )
 
                 if (settingsPlatform.helpDocs) {

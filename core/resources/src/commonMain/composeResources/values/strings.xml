@@ -1646,11 +1646,14 @@
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <string name="notification_reaction_to">%1$s to “%2$s”</string>
     <!-- NOTIFICATIONS -->
+    <string name="notifications_blocked_by_browser">The browser is blocking notifications from Meshtastic. Allow them in the browser's site settings.</string>
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
     <string name="notifications_for_low_battery_alerts">Notifications for low battery alerts for the connected device.</string>
     <string name="notifications_for_newly_discovered_nodes">Notifications for newly discovered nodes.</string>
     <string name="notifications_on_alert_bell_receipt">Notifications on alert/bell receipt</string>
     <string name="notifications_on_message_receipt">Notifications on message receipt</string>
+    <string name="notifications_turn_on">Turn on notifications</string>
+    <string name="notifications_turn_on_summary">The browser asks once. Without it, nothing below can alert you.</string>
     <string name="now">Now</string>
     <!-- OFFLINE -->
     <string name="offline_maps">Offline maps</string>

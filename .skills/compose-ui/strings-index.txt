@@ -1592,11 +1592,14 @@ notification_permission_rationale
 notification_permissions_description
 notification_reaction_to
 ### NOTIFICATIONS ###
+notifications_blocked_by_browser
 notifications_for_channel_and_direct_messages
 notifications_for_low_battery_alerts
 notifications_for_newly_discovered_nodes
 notifications_on_alert_bell_receipt
 notifications_on_message_receipt
+notifications_turn_on
+notifications_turn_on_summary
 now
 ### OFFLINE ###
 offline_maps
