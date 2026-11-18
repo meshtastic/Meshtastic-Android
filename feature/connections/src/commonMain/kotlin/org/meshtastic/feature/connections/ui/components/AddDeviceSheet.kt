@@ -159,15 +159,22 @@ internal fun isWebSocketEntry(address: String): Boolean {
     return trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true)
 }
 
-/** A bare host where raw TCP cannot reach: firmware's WebSocket phone API at it, on [portText] or the scheme's port. */
+/**
+ * A bare host where raw TCP cannot reach: firmware's WebSocket phone API at it, on [portText] or the scheme's port.
+ * Firmware's TLS ports, meshtasticd's 9443 and an ESP32's 443, take `wss` even from a plain page, which may open
+ * either.
+ */
 private fun bareHostWebSocket(host: String, portText: String, scheme: String): String? {
     val portField = portText.trim()
     val port = portField.toIntOrNull()
     val portOk = portField.isEmpty() || (port != null && port in VALID_PORTS)
     val hostPart = if (':' in host && !host.startsWith("[")) "[$host]" else host
-    val url = "$scheme://$hostPart${port?.let { ":$it" }.orEmpty()}"
+    val secure = if (port in FIRMWARE_TLS_PORTS) "wss" else scheme
+    val url = "$secure://$hostPart${port?.let { ":$it" }.orEmpty()}"
     return normalizeWebSocketUrl(url)?.takeIf { portOk && host.isValidAddress() }?.let { WEBSOCKET_DEVICE_PREFIX + it }
 }
+
+private val FIRMWARE_TLS_PORTS = setOf(443, 9443)
 
 /**
  * The address a manual entry adds, or null when it can't be connected to: an invalid host, or a numeric port outside

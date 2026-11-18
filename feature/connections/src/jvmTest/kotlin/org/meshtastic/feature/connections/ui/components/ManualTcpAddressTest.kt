@@ -89,6 +89,13 @@ class ManualTcpAddressTest {
     }
 
     @Test
+    fun firmwaresTlsPortsTakeWssFromAPlainPage() {
+        assertEquals("wwss://localhost:9443/api/v1/ws", manualAddress("localhost", "9443", webSocketScheme = "ws"))
+        assertEquals("wwss://192.168.1.20:443/api/v1/ws", manualAddress("192.168.1.20", "443", webSocketScheme = "ws"))
+        assertEquals("wws://192.168.1.20:80/api/v1/ws", manualAddress("192.168.1.20", "80", webSocketScheme = "ws"))
+    }
+
+    @Test
     fun aMalformedWebSocketUrlIsRejected() {
         assertNull(manualAddress("ws://", "4403"))
         assertNull(manualAddress("wss://host with space/api/v1/ws", "4403"))
