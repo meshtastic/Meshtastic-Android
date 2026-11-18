@@ -54,9 +54,24 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.web.di.WebKoinApp
 import org.meshtastic.web.ui.WebMainScreen
 
+/**
+ * A DOMException the browser rejects a promise with from its own callback, as Web Bluetooth's `gatt.connect()` does,
+ * has no `stack`. Kotlin/Wasm's `JsException.jsStack` reads it as non-null, so printing such an exception throws a
+ * NullPointerException inside kotlinx.coroutines and wedges the coroutine that failed. An empty stack on the prototype
+ * fills the gap; an exception's own stack still wins.
+ */
+private fun giveDomExceptionsAStack(): Unit = js(
+    """{
+        if (typeof DOMException !== 'undefined' && !Object.getOwnPropertyDescriptor(DOMException.prototype, 'stack')) {
+            Object.defineProperty(DOMException.prototype, 'stack', { get() { return ''; }, configurable: true });
+        }
+    }""",
+)
+
 /** The wasmJs entry point. `webApp` is the `<div>` id in `index.html` and the webpack output name. */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    giveDomExceptionsAStack()
     val koinApp = startKoin<WebKoinApp> {}
     Logger.i { "Meshtastic Web — Starting" }
 
