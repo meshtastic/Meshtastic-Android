@@ -102,7 +102,7 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
                     // NymeaWifiService take the first emission without their own address check, so an unsupported
                     // native address filter must never widen the scan to other devices.
                     advertisements(nativeFilter)
-                        .filter { address == null || it.identifier.equals(address, ignoreCase = true) }
+                        .filter { address == null || bleAddressesMatch(it.identifier, address) }
                         .collect { advertisement ->
                             send(
                                 MeshtasticBleDevice(
