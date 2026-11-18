@@ -62,6 +62,10 @@ class NodeStatusViewModel(
             .flatMapLatest { it?.source?.status(it.address) ?: flowOf(null) }
             .stateInWhileSubscribed(initialValue = null)
 
+    /** False while the card reads a host that grants its own permissions. */
+    val grantsPermissions: StateFlow<Boolean> =
+        claimed.map { it?.source?.grantsPermissions ?: true }.stateInWhileSubscribed(initialValue = true)
+
     /**
      * Every bearer but MQTT is one entry in the node's stored transport section, which the node writes itself. MQTT
      * follows its module config and has no entry to write.

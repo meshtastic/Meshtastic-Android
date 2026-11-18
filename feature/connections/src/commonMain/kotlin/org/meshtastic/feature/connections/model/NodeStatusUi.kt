@@ -171,4 +171,4 @@ internal fun nodeStatusUi(
 private const val NODE_ID_DIGITS = 8
 private const val HEX = 16
 
-private fun nodeId(nodeNum: Long): String = "!" + nodeNum.toString(HEX).padStart(NODE_ID_DIGITS, '0')
+internal fun nodeId(nodeNum: Long): String = "!" + nodeNum.toString(HEX).padStart(NODE_ID_DIGITS, '0')

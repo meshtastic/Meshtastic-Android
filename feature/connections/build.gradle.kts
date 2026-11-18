@@ -35,15 +35,13 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.ble)
             implementation(projects.core.network)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
         meshtasticWeb.wasmJsMain {
-            dependencies {
-                implementation(libs.kotlinx.browser)
-                implementation(libs.kotlinx.serialization.json) // WebRecentAddressesSource keeps its list as JSON
-            }
+            dependencies { implementation(libs.kotlinx.browser) }
         }
 
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the

@@ -273,6 +273,7 @@ fun ConnectionsScreen(
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
     val nodeStatus by nodeStatusViewModel.status.collectAsStateWithLifecycle()
+    val nodeGrantsPermissions by nodeStatusViewModel.grantsPermissions.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
@@ -664,16 +665,18 @@ fun ConnectionsScreen(
 
             LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)
 
-            // The node card exists only while this device runs as the node; the connection card above it
-            // still speaks for the mesh node the app talks to, which is the same node.
+            // The node card exists only while the app talks to a node-kmp node, this device or a host reached
+            // through its dashboard; the connection card above it still speaks for the same mesh node.
             nodeStatus?.let { status ->
                 Spacer(modifier = Modifier.height(8.dp))
                 NodeStatusCard(
                     status = status,
                     onSetBearer = nodeStatusViewModel::setBearer,
                     onSetExtraRadio = nodeStatusViewModel::setExtraRadio,
-                    onRefreshRequirements = nodeStatusViewModel::refreshRequirements,
-                    onRequestUsbPermission = nodeStatusViewModel::requestUsbPermission,
+                    onRefreshRequirements =
+                    if (nodeGrantsPermissions) nodeStatusViewModel::refreshRequirements else null,
+                    onRequestUsbPermission =
+                    if (nodeGrantsPermissions) nodeStatusViewModel::requestUsbPermission else null,
                 )
             }
 

@@ -28,6 +28,10 @@ interface NodeCardSource {
     /** True when [address], the current device address, reaches a node this source reads. */
     fun claims(address: String): Boolean
 
+    /** False where the host grants its own permissions, on its own device: the card names one without a grant. */
+    val grantsPermissions: Boolean
+        get() = true
+
     /** The card for the node at [address]; null while there is none to show. */
     fun status(address: String): Flow<NodeStatusUi?>
 

@@ -86,16 +86,17 @@ import org.meshtastic.feature.connections.model.host.NodePhase
 
 /**
  * This device as the node: its phase, identity and one row per bearer. Every bearer but LoRa carries a switch; one
- * driven by the Network settings writes them, so both places agree. A bearer waiting on a permission offers the grant.
- * A host's extra LoRa radios each get a row and a switch of their own under LoRa's.
+ * driven by the Network settings writes them, so both places agree. A bearer waiting on a permission offers the grant,
+ * or only says which where the grant actions are null: a remote host grants its own. A host's extra LoRa radios each
+ * get a row and a switch of their own under LoRa's.
  */
 @Composable
 fun NodeStatusCard(
     status: NodeStatusUi,
     onSetBearer: (Bearer, Boolean) -> Unit,
     onSetExtraRadio: (String, Boolean) -> Unit,
-    onRefreshRequirements: () -> Unit,
-    onRequestUsbPermission: () -> Unit,
+    onRefreshRequirements: (() -> Unit)?,
+    onRequestUsbPermission: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
@@ -170,8 +171,8 @@ private fun NodeStatusHeader(status: NodeStatusUi, modifier: Modifier = Modifier
 private fun BearerRow(
     row: BearerRowUi,
     onSetBearer: (Bearer, Boolean) -> Unit,
-    onRefreshRequirements: () -> Unit,
-    onRequestUsbPermission: () -> Unit,
+    onRefreshRequirements: (() -> Unit)?,
+    onRequestUsbPermission: (() -> Unit)?,
 ) {
     val state = row.state
     val primary = row.primary
@@ -188,17 +189,19 @@ private fun BearerRow(
         leadingIcon = row.bearer.icon(),
         trailingContent =
         when {
-            state is BearerRowState.NeedsPermission -> {
-                { GrantPermissionButton(permission = state.permission, onGrant = onRefreshRequirements) }
-            }
+            state is BearerRowState.NeedsPermission ->
+                onRefreshRequirements?.let { onGrant ->
+                    { GrantPermissionButton(permission = state.permission, onGrant = onGrant) }
+                }
 
-            state is BearerRowState.NeedsUsbPermission -> {
-                {
-                    TextButton(onClick = onRequestUsbPermission) {
-                        Text(stringResource(Res.string.grant_permission))
+            state is BearerRowState.NeedsUsbPermission ->
+                onRequestUsbPermission?.let { onRequest ->
+                    {
+                        TextButton(onClick = onRequest) {
+                            Text(stringResource(Res.string.grant_permission))
+                        }
                     }
                 }
-            }
 
             row.switchable -> {
                 { Switch(checked = row.enabled, onCheckedChange = null) }
