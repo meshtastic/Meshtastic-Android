@@ -29,8 +29,6 @@ import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MagneticFieldProvider
-import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.ReverseGeocoder
 import org.meshtastic.core.repository.SecurityKeyBackupStore
@@ -41,10 +39,9 @@ import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.HeadingState
 
-/** No-op implementations for platform interfaces a browser has no counterpart for, shaped like desktop's stubs. */
-private const val TAG = "WebNoopStub"
+// No-op implementations for platform interfaces a browser has no counterpart for, shaped like desktop's stubs.
 
-// region Platform / widget / worker stubs: no analytics SDK runs on web, and a tab has no widgets or WorkManager
+// region Platform / widget stubs: no analytics SDK runs on web, and a tab has no widgets
 
 class NoopPlatformAnalytics : PlatformAnalytics {
     override fun track(event: String, vararg properties: DataPair) {}
@@ -56,10 +53,6 @@ class NoopPlatformAnalytics : PlatformAnalytics {
 
 class NoopAppWidgetUpdater : AppWidgetUpdater {
     override suspend fun updateAll() {}
-}
-
-class NoopMeshWorkerManager : MeshWorkerManager {
-    override fun enqueueSendMessage(persistedId: PersistedPacketId) {}
 }
 
 // endregion

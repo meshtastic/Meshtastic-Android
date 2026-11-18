@@ -42,6 +42,7 @@ import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NeighborInfoResponseProvider
 import org.meshtastic.core.repository.NotificationManager
@@ -51,11 +52,11 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
+import org.meshtastic.core.service.InProcessMessageQueue
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.web.WebBuildConfig
 import org.meshtastic.web.platform.WebMeshNotificationManager
 import org.meshtastic.web.platform.WebNotificationManager
-import org.meshtastic.web.radio.WebMessageQueue
 
 /** Web runtime wiring mirroring `DesktopRuntimeModule`: the service repository, notifications, queue and HTTP. */
 @Module
@@ -83,12 +84,12 @@ class WebRuntimeModule {
     fun meshNotificationManager(notificationManager: NotificationManager): MeshNotificationManager =
         WebMeshNotificationManager(notificationManager)
 
-    @Single
+    @Single(binds = [MessageQueue::class, MeshWorkerManager::class])
     fun messageQueue(
         packetRepository: PacketRepository,
         radioController: RadioController,
         dispatchers: CoroutineDispatchers,
-    ): MessageQueue = WebMessageQueue(
+    ): InProcessMessageQueue = InProcessMessageQueue(
         packetRepository = packetRepository,
         radioController = radioController,
         dispatchers = dispatchers,

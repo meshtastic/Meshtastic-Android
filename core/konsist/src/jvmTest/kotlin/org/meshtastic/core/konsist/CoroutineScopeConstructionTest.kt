@@ -66,12 +66,12 @@ class CoroutineScopeConstructionTest {
             "core/service/androidMain/ConversationActionService.kt",
             "core/service/androidMain/MeshService.kt",
             "core/service/commonMain/CoreServiceModule.kt",
+            "core/service/commonMain/InProcessMessageQueue.kt",
             "core/service/commonMain/MeshServiceOrchestrator.kt",
             "core/service/commonMain/MeshServiceOrchestrator.kt",
             "core/service/commonMain/SharedRadioInterfaceService.kt",
             "core/service/commonMain/SharedRadioInterfaceService.kt",
             "core/takserver/jvmAndroidMain/TAKClientConnection.kt",
-            "desktopApp/main/DesktopMessageQueue.kt",
             "desktopApp/main/DesktopPreferencesDataSource.kt",
             "desktopApp/main/NoopStubs.kt",
             "feature/coverage/commonMain/MapterhornElevation.kt",
@@ -87,7 +87,6 @@ class CoroutineScopeConstructionTest {
             "feature/widget/main/AndroidAppWidgetUpdater.kt",
             "feature/widget/main/LocalStatsWidgetState.kt",
             "feature/wifi-provision/commonMain/NymeaWifiService.kt",
-            "webApp/wasmJsMain/WebMessageQueue.kt",
         )
 
     /** A call to the `CoroutineScope(context)` factory; `rememberCoroutineScope()` has no word break before it. */

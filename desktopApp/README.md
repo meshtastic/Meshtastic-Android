@@ -70,7 +70,6 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 | `ui/DesktopMainScreen.kt` | Navigation 3 shell: shared app shell, navigation suite and `MeshtasticNavDisplay` |
 | `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB (jSerialComm) and BLE (Kable) transports |
-| `radio/DesktopMessageQueue.kt` | Sends queued outbound messages straight through the active radio controller (no WorkManager) |
 | `notification/DesktopMeshNotificationManager.kt` | Desktop `MeshNotificationManager`; converts mesh events into `Notification`s and dispatches them |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |

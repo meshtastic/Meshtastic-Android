@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.desktop.radio
+package org.meshtastic.core.service
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
@@ -45,7 +45,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DesktopMessageQueueTest {
+class InProcessMessageQueueTest {
 
     @Test
     fun `concurrent enqueue sends only the caller that owns the queued claim`() = runTest {
@@ -119,8 +119,61 @@ class DesktopMessageQueueTest {
         verifySuspend(mode = VerifyMode.exactly(0)) { repository.rollbackEnroutePacket(any()) }
     }
 
+    @Test
+    fun `a re-enqueue during the handshake sends once the radio is connected`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val repository = mock<PacketRepository>(MockMode.autofill)
+        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting) }
+        val id = PersistedPacketId(myNodeNum = 42, uuid = 99L)
+        val packet = queuedPacket()
+        everySuspend { repository.claimQueuedPacket(id) } returns PersistedPacket(id, packet)
+
+        queue(repository, radio, dispatcher).enqueueSendMessage(id)
+        advanceUntilIdle()
+        assertEquals(emptyList(), radio.sentPackets)
+        verifySuspend(mode = VerifyMode.exactly(0)) { repository.claimQueuedPacket(any()) }
+
+        radio.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        assertEquals(listOf(packet), radio.sentPackets)
+        verifySuspend(mode = VerifyMode.exactly(1)) { repository.claimQueuedPacket(id) }
+    }
+
+    @Test
+    fun `a handshake that fails leaves the packet queued`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val repository = mock<PacketRepository>(MockMode.autofill)
+        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting) }
+        val id = PersistedPacketId(myNodeNum = 42, uuid = 99L)
+
+        queue(repository, radio, dispatcher).enqueueSendMessage(id)
+        advanceUntilIdle()
+        radio.setConnectionState(ConnectionState.Disconnected)
+        advanceUntilIdle()
+        radio.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        assertEquals(emptyList(), radio.sentPackets)
+        verifySuspend(mode = VerifyMode.exactly(0)) { repository.claimQueuedPacket(any()) }
+    }
+
+    @Test
+    fun `enqueue while disconnected neither claims nor sends`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val repository = mock<PacketRepository>(MockMode.autofill)
+        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Disconnected) }
+        val id = PersistedPacketId(myNodeNum = 42, uuid = 99L)
+
+        queue(repository, radio, dispatcher).enqueue(id)
+        advanceUntilIdle()
+
+        assertEquals(emptyList(), radio.sentPackets)
+        verifySuspend(mode = VerifyMode.exactly(0)) { repository.claimQueuedPacket(any()) }
+    }
+
     private fun queue(repository: PacketRepository, radio: FakeRadioController, dispatcher: TestDispatcher) =
-        DesktopMessageQueue(
+        InProcessMessageQueue(
             packetRepository = repository,
             radioController = radio,
             dispatchers = CoroutineDispatchers(main = dispatcher, io = dispatcher, default = dispatcher),

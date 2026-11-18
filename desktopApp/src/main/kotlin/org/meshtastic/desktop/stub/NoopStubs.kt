@@ -37,8 +37,6 @@ import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
@@ -151,10 +149,6 @@ class NoopAppWidgetUpdater : AppWidgetUpdater {
 // endregion
 
 // region WorkManager / Location Stubs (Android-only)
-
-class NoopMeshWorkerManager : MeshWorkerManager {
-    override fun enqueueSendMessage(persistedId: PersistedPacketId) {}
-}
 
 class NoopMeshLocationManager : MeshLocationManager {
     override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {}

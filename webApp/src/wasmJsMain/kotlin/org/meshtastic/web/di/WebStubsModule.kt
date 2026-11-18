@@ -37,7 +37,6 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.ReverseGeocoder
@@ -60,7 +59,6 @@ import org.meshtastic.web.stub.NoopLocalNetworkAccess
 import org.meshtastic.web.stub.NoopLocaleChangeNotifier
 import org.meshtastic.web.stub.NoopLockdownPassphraseStore
 import org.meshtastic.web.stub.NoopMagneticFieldProvider
-import org.meshtastic.web.stub.NoopMeshWorkerManager
 import org.meshtastic.web.stub.NoopPlatformAnalytics
 import org.meshtastic.web.stub.NoopReverseGeocoder
 import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
@@ -77,8 +75,6 @@ class WebStubsModule {
     @Single fun platformAnalytics(): PlatformAnalytics = NoopPlatformAnalytics()
 
     @Single fun appWidgetUpdater(): AppWidgetUpdater = NoopAppWidgetUpdater()
-
-    @Single fun meshWorkerManager(): MeshWorkerManager = NoopMeshWorkerManager()
 
     @Single
     fun meshLocationManager(locationRepository: LocationRepository): MeshLocationManager =
