@@ -68,6 +68,24 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan by MAC matches a BlueZ object path identifier`() = runTest {
+        val advertisement: Advertisement = mock(MockMode.autofill)
+        val objectPath = "/org/bluez/hci0/dev_34_B7_DA_62_18_C5"
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult("/org/bluez/hci0/dev_AA_BB_CC_DD_EE_FF", "Other", advertisement),
+                    KableScanResult(objectPath, "Heltec", advertisement),
+                ),
+            )
+
+        val result = scanner.scan(timeout = 1.seconds, address = "34:B7:DA:62:18:C5").first()
+
+        assertEquals(objectPath, result.address)
+    }
+
+    @Test
     fun `scan reserves one platform start before collecting advertisements`() = runTest {
         val reservationEvent = "scan-start-reserved"
         val collectionEvent = "advertisements-collected"
