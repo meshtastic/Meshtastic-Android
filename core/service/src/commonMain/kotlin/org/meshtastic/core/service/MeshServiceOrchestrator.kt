@@ -35,7 +35,6 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceAddress
-import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -112,9 +111,7 @@ class MeshServiceOrchestrator(
         // later successful manual connect with no recovery layer for the life of the process. The OS enforces the
         // permission at the socket, so a genuinely local connect fails exactly as it would have; the difference is
         // the user now has an explanation and the fix in hand.
-        val networked =
-            DeviceAddress.parse(address)?.interfaceId.let { it == InterfaceId.TCP || it == InterfaceId.WEBSOCKET }
-        if (networked && !localNetworkAccess.isGranted()) {
+        if (DeviceAddress.parse(address)?.interfaceId?.isNetwork == true && !localNetworkAccess.isGranted()) {
             Logger.w { "Local network access not granted; the persisted TCP reconnect may time out" }
             serviceStateWriter.setErrorMessage(
                 // Same shape as ScannerViewModel's scan-failure messages: resource lookup can fail outside a

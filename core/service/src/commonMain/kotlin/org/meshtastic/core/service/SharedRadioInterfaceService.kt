@@ -638,9 +638,7 @@ class SharedRadioInterfaceService(
                                 if (connectionRequested && !radioOperationLock.suppressesTransport) {
                                     startTransportLocked()
                                 }
-                            } else if (
-                                runningTransportId == InterfaceId.TCP || runningTransportId == InterfaceId.WEBSOCKET
-                            ) {
+                            } else if (runningTransportId?.isNetwork == true) {
                                 stopTransportLocked()
                             }
                         }

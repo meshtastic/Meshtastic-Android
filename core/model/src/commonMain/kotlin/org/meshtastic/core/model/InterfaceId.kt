@@ -35,6 +35,10 @@ enum class InterfaceId(val id: Char) {
     val isVirtual: Boolean
         get() = this == MOCK || this == REPLAY
 
+    /** True for the transports that reach a radio over the network, which local network access gates. */
+    val isNetwork: Boolean
+        get() = this == TCP || this == WEBSOCKET
+
     companion object {
         fun forIdChar(id: Char): InterfaceId? = entries.firstOrNull { it.id == id }
     }
