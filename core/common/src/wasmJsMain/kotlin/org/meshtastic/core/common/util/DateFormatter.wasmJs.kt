@@ -65,6 +65,18 @@ actual object DateFormatter {
         dateTimeFormatter(browserLanguage(), "short", "medium").format(timestampMillis.toDouble())
 }
 
+/** A short time within the last day, otherwise a short date and time; `core:model`'s `getShortDateTime` on web. */
+fun formatShortTimeOrDateTime(timestampMillis: Long): String {
+    val locale = browserLanguage()
+    val formatter =
+        if (nowMillis - timestampMillis <= DAY_MILLIS) {
+            timeOnlyFormatter(locale, "short")
+        } else {
+            dateTimeFormatter(locale, "short", "short")
+        }
+    return formatter.format(timestampMillis.toDouble())
+}
+
 private const val MINUTE_MILLIS = 60_000L
 private const val HOUR_MILLIS = 3_600_000L
 private const val DAY_MILLIS = 86_400_000L

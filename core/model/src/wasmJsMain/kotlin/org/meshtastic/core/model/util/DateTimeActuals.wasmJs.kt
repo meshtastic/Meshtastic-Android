@@ -16,29 +16,6 @@
  */
 package org.meshtastic.core.model.util
 
-import org.meshtastic.core.common.util.nowInstant
-import org.meshtastic.core.common.util.toInstant
-import kotlin.time.Duration.Companion.hours
+import org.meshtastic.core.common.util.formatShortTimeOrDateTime
 
-private val DAY_DURATION = 24.hours
-
-actual fun getShortDateTime(time: Long): String {
-    val instant = time.toInstant()
-    val isWithin24Hours = (nowInstant - instant) <= DAY_DURATION
-    val millis = time.toDouble()
-
-    return if (isWithin24Hours) {
-        timeOnlyFormatter().format(millis)
-    } else {
-        dateTimeFormatter().format(millis)
-    }
-}
-
-private external interface JsDateTimeFormat : JsAny {
-    fun format(value: Double): String
-}
-
-private fun timeOnlyFormatter(): JsDateTimeFormat = js("new Intl.DateTimeFormat(undefined, { timeStyle: 'short' })")
-
-private fun dateTimeFormatter(): JsDateTimeFormat =
-    js("new Intl.DateTimeFormat(undefined, { dateStyle: 'short', timeStyle: 'short' })")
+actual fun getShortDateTime(time: Long): String = formatShortTimeOrDateTime(time)
