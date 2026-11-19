@@ -55,6 +55,7 @@ import org.meshtastic.web.platform.requestPersistentStorage
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
+import org.meshtastic.web.ui.PreloadEmojiFont
 import org.meshtastic.web.ui.WebLoading
 import org.meshtastic.web.ui.WebMainScreen
 
@@ -192,6 +193,8 @@ private fun ThemeAndContent(uiViewModel: UIViewModel) {
     chooseLanguage(languagePref)
 
     val multiBackstack = rememberMultiBackstack(startDestination(uiViewModel.currentDeviceAddressFlow.value))
+
+    PreloadEmojiFont()
 
     // Compose reads the language when it resolves a resource, not as state, so a new language recomposes from here.
     // The back stack is kept above it.
