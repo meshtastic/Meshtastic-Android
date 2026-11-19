@@ -267,9 +267,10 @@ private fun NodeBatteryPositionRow(
                     tint = contentColor,
                 )
             }
-            thatNode.validPosition?.let { position ->
+            // An unset altitude is no reading, not sea level.
+            thatNode.validPosition?.altitude?.let { altitude ->
                 ElevationInfo(
-                    altitude = position.altitude ?: 0,
+                    altitude = altitude,
                     system = system,
                     suffix = stringResource(Res.string.elevation_suffix),
                     contentColor = contentColor,
