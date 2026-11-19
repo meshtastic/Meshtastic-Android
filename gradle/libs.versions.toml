@@ -14,7 +14,7 @@ glance = "1.2.0"
 # xr-compose 1.0.0-beta02 pins scenecore/runtime 1.0.0-rc01; these lift them to the 1.0.0 finals.
 xr = "1.0.0"
 xr-compose = "1.0.0-rc01"
-lifecycle = "2.11.0"
+lifecycle = "2.11.1"
 jetbrains-lifecycle = "2.11.0"
 navigation3 = "1.2.0"
 # navigation3-runtime is AndroidX's own KMP artifact, separate from the JetBrains
