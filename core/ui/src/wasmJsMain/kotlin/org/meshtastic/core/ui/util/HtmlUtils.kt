@@ -19,12 +19,5 @@ package org.meshtastic.core.ui.util
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
 
-// androidMain's actual (`AnnotatedString.fromHtml`) is a genuinely Android-specific real HTML renderer — it isn't a
-// common Compose Multiplatform API, so it isn't available here. The desktop JVM actual, despite running on a full
-// desktop JVM with far more capability than a browser sandbox, *also* takes the plain-text shortcut below rather than
-// pulling in an HTML parser — that's the established bar for "good enough" fidelity on every non-Android platform in
-// this codebase today, so wasmJs matches it rather than reaching for `org.jetbrains:markdown`-style HTML parsing
-// (this module already depends on that library for actual Markdown, but it doesn't parse HTML) or hand-rolling a
-// `dangerouslySetInnerHTML`-style DOM injection, which would also sidestep Compose's own text layout/selection.
-/** Web stub — returns the raw HTML as plain text (no HTML rendering), matching the JVM/Desktop and iOS actuals. */
-actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): AnnotatedString = AnnotatedString(html)
+actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): AnnotatedString =
+    annotatedStringFromSimpleHtml(html, linkStyles)
