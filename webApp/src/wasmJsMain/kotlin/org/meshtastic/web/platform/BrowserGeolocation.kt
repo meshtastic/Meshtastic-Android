@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.core.repository.Location
+import org.meshtastic.core.ui.util.browserPermissionState
 import kotlin.coroutines.resume
 
 /** `navigator.geolocation.watchPosition` for as long as the flow is collected. */
@@ -51,10 +52,7 @@ internal suspend fun currentGeolocation(): GeoReading = suspendCancellableCorout
  * The page's geolocation permission as the Permissions API reports it (`granted`, `prompt`, `denied`), followed for
  * changes. A browser without the Permissions API reports `granted`, so callers try and learn from the error instead.
  */
-internal fun geolocationPermission(): Flow<String> = callbackFlow {
-    val watch = watchGeolocationPermission { trySend(it) }
-    awaitClose { stopWatching(watch) }
-}
+internal fun geolocationPermission(): Flow<String> = browserPermissionState("geolocation", unanswered = "granted")
 
 /** One answer from the Geolocation API. */
 internal sealed interface GeoReading {
@@ -113,31 +111,6 @@ private fun getCurrentPosition(onFix: (JsAny) -> Unit, onError: (Int) -> Unit, t
             { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: maxAgeMs });
     }""",
     )
-}
-
-private fun watchGeolocationPermission(onState: (String) -> Unit): JsAny = js(
-    """{
-    let status = null;
-    let stopped = false;
-    const fire = () => { if (!stopped && status) onState(status.state); };
-    if (navigator.permissions && navigator.permissions.query) {
-        navigator.permissions.query({ name: 'geolocation' }).then((s) => {
-            status = s;
-            s.addEventListener('change', fire);
-            fire();
-        }, () => onState('granted'));
-    } else {
-        onState('granted');
-    }
-    return () => {
-        stopped = true;
-        if (status) status.removeEventListener('change', fire);
-    };
-}""",
-)
-
-private fun stopWatching(watch: JsAny) {
-    js("watch()")
 }
 
 private fun latitude(p: JsAny): Double = js("p.coords.latitude")
