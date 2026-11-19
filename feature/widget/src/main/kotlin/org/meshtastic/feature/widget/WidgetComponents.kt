@@ -39,6 +39,7 @@ import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
+import androidx.glance.semantics.testTag
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
@@ -50,10 +51,12 @@ internal fun WidgetMark(size: Dp) {
     Image(
         provider = ImageProvider(R.drawable.widget_app_icon),
         contentDescription = null,
-        modifier = GlanceModifier.size(size),
+        modifier = GlanceModifier.size(size).semantics { testTag = WIDGET_MARK_TEST_TAG },
         colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
     )
 }
+
+internal const val WIDGET_MARK_TEST_TAG = "widget_mark"
 
 /**
  * The brand header both widgets carry from two cells tall up: the mark and the widget's name, with an optional trailing

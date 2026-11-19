@@ -79,10 +79,16 @@ internal fun TelemetryContent(
     val tiles = state.readings.map { it to telemetryTile(it, state) }
     // Four from four cells wide; below that, four tiles in a row show only their icons.
     val rowTiles = if (size.width >= WidgetSizes.TELEMETRY_WIDE_ROW.width) TELEMETRY_PAGE_SIZE else 2
+    // The mark ends whichever row carries the chip: this top row, or else the footer.
+    val chipOnTop = layout == TelemetryLayout.GRID || (layout == TelemetryLayout.ONE && !oneRow)
     // The body sits directly in this column, weighted: Glance's unit-test harness caps nesting at ten levels.
     Column(modifier = modifier) {
-        if (layout == TelemetryLayout.GRID || (layout == TelemetryLayout.ONE && !oneRow)) {
-            WidgetNodeChip(shortName = state.shortName, colors = state.colors)
+        if (chipOnTop) {
+            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                WidgetNodeChip(shortName = state.shortName, colors = state.colors)
+                Spacer(GlanceModifier.defaultWeight())
+                WidgetMark(16.dp)
+            }
             Spacer(GlanceModifier.height(6.dp))
         }
         val body = GlanceModifier.fillMaxWidth().defaultWeight()
@@ -114,6 +120,8 @@ internal fun TelemetryContent(
             page = page(storedPage, tiles.size),
             pageCount = if (layout == TelemetryLayout.GRID) telemetryPageCount(tiles.size) else 1,
             showChip = layout == TelemetryLayout.ROW && !oneRow,
+            // An empty one-row body is StatusBody, which already leads with the mark.
+            showMark = !chipOnTop && !(oneRow && tiles.isEmpty()),
             short = layout == TelemetryLayout.ONE,
         )
     }
@@ -243,7 +251,14 @@ private fun TileValue(value: String, fontSize: TextUnit) {
  * [STALE_AFTER] old the line says so in the error color; the tiles stay at full strength (meshtastic/design#179).
  */
 @Composable
-private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: Int, showChip: Boolean, short: Boolean) {
+private fun Footer(
+    state: TelemetryWidgetState.Showing,
+    page: Int,
+    pageCount: Int,
+    showChip: Boolean,
+    showMark: Boolean,
+    short: Boolean,
+) {
     val age =
         when {
             state.isStale -> stringResource(Res.string.widget_telemetry_stale)
@@ -255,7 +270,7 @@ private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: In
 
             else -> null
         }
-    if (age == null && pageCount <= 1 && !showChip) return
+    if (age == null && pageCount <= 1 && !showChip && !showMark) return
     Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         if (showChip) {
             WidgetNodeChip(shortName = state.shortName, colors = state.colors)
@@ -276,6 +291,10 @@ private fun Footer(state: TelemetryWidgetState.Showing, page: Int, pageCount: In
             },
         )
         if (pageCount > 1) PageButton(page, pageCount)
+        if (showMark) {
+            Spacer(GlanceModifier.width(6.dp))
+            WidgetMark(12.dp)
+        }
     }
 }
 
