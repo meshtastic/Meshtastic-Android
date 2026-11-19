@@ -16,8 +16,13 @@
  */
 package org.meshtastic.feature.settings.search
 
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -28,19 +33,36 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsFieldFocusTest {
 
     private val focus = SettingsFieldFocus()
+    private val viewModels = ViewModelStore()
+    private val sentinels = mutableListOf<Job>()
 
     @BeforeTest fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
 
-    @AfterTest fun tearDown() = Dispatchers.resetMain()
+    /**
+     * The search ViewModel resolves its catalog on `Dispatchers.Default` from `init`. Its scope must end before
+     * `resetMain()`, or the next lookup resumes onto an unset Main and fails whichever `runTest` starts next.
+     */
+    @AfterTest
+    fun tearDown() {
+        viewModels.clear()
+        Dispatchers.resetMain()
+        assertTrue(sentinels.all { it.isCancelled }, "a SettingsSearchViewModel outlived its test")
+    }
+
+    private fun searchViewModel(): SettingsSearchViewModel = SettingsSearchViewModel(focus).also {
+        viewModels.put("search${sentinels.size}", it)
+        sentinels += it.viewModelScope.launch { awaitCancellation() }
+    }
 
     @Test
     fun choosingAResultLeavesItsFieldPendingForTheScreen() {
-        val viewModel = SettingsSearchViewModel(focus)
+        val viewModel = searchViewModel()
         val entry =
             ResolvedSettingsEntry(
                 id = "hop",
