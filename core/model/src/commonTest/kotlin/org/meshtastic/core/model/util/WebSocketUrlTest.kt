@@ -38,6 +38,13 @@ class WebSocketUrlTest {
     }
 
     @Test
+    fun `a query follows the path and does not stop the root path defaulting`() {
+        assertEquals("ws://host/api/v1/ws?token=abc", normalizeWebSocketUrl("ws://host/?token=abc"))
+        assertEquals("ws://host/api/v1/ws?token=abc", normalizeWebSocketUrl("ws://host?token=abc"))
+        assertEquals("ws://host:8080/proxy/ws?token=abc", normalizeWebSocketUrl("ws://host:8080/proxy/ws?token=abc"))
+    }
+
+    @Test
     fun `the scheme matches in any case and is lowercased`() {
         assertEquals("wss://host/api/v1/ws", normalizeWebSocketUrl("WSS://host/api/v1/ws"))
         assertEquals("ws://Host:8080/api/v1/ws", normalizeWebSocketUrl("Ws://Host:8080"))
