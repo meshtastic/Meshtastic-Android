@@ -18,10 +18,17 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import kotlinx.coroutines.await
+import kotlin.js.Promise
 
 // Compose writes this through the Async Clipboard API; the browser has no label or sensitive flag, so both are ignored.
 @OptIn(ExperimentalComposeUiApi::class)
 actual fun createClipEntry(text: String, label: String, sensitive: Boolean): ClipEntry = ClipEntry.withPlainText(text)
 
-/** A browser clipboard read is asynchronous, so no plain text is available synchronously. */
-actual fun ClipEntry.plainText(): String? = null
+// Reads navigator.clipboard directly. A denied permission, an unfocused page or an insecure context resolve to null.
+actual suspend fun Clipboard.readPlainText(): String? = readClipboardText().await<JsString?>()?.toString()
+
+// Inside then(), a missing navigator.clipboard (insecure context) rejects like a denied read instead of throwing.
+private fun readClipboardText(): Promise<JsString?> =
+    js("Promise.resolve().then(() => navigator.clipboard.readText()).catch(() => null)")

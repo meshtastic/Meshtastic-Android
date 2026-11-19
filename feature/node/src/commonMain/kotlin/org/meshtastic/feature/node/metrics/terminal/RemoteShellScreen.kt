@@ -113,7 +113,7 @@ import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.input.RemoteKey
 import org.meshtastic.core.ui.input.RemoteKeyHandler
 import org.meshtastic.core.ui.input.RemoteKeyboardSink
-import org.meshtastic.core.ui.util.plainText
+import org.meshtastic.core.ui.util.readPlainText
 import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.InputMode
 import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.SessionState
 
@@ -423,7 +423,7 @@ private fun ShellMenu(
                 text = { Text(stringResource(Res.string.remote_shell_menu_paste)) },
                 onClick = {
                     expanded = false
-                    scope.launch { clipboard.getClipEntry()?.plainText()?.let(onPaste) }
+                    scope.launch { clipboard.readPlainText()?.let(onPaste) }
                 },
             )
             DropdownMenuItem(

@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
 import java.awt.datatransfer.Transferable
@@ -27,7 +28,7 @@ actual fun createClipEntry(text: String, label: String, sensitive: Boolean): Cli
     ClipEntry(StringSelection(text))
 
 @OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
-actual fun ClipEntry.plainText(): String? = (nativeClipEntry as? Transferable)
+actual suspend fun Clipboard.readPlainText(): String? = (getClipEntry()?.nativeClipEntry as? Transferable)
     ?.takeIf { it.isDataFlavorSupported(DataFlavor.stringFlavor) }
     // Another application can change or release the clipboard between the check and the read.
     ?.let { runCatching { it.getTransferData(DataFlavor.stringFlavor) as? String }.getOrNull() }
