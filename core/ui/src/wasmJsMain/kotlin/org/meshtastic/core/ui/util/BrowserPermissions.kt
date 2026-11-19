@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress(
+    // The browser surface this file wraps takes one small interop function per JS call.
+    "TooManyFunctions",
     // Every js("...") snippet references its Kotlin parameters inside the JS source, which detekt cannot see.
     "UnusedParameter",
 )
@@ -94,6 +96,27 @@ internal fun requestGeolocationPermission(onResult: (String) -> Unit) {
  * The Permissions API state of permission [name] (`granted`, `prompt`, `denied`), followed for changes while collected.
  * Where the browser cannot answer for [name] the flow emits [unanswered], or nothing when that is null.
  */
+internal fun cameraSupported(): Boolean =
+    js("typeof navigator !== 'undefined' && !!navigator.mediaDevices && !!navigator.mediaDevices.getUserMedia")
+
+// The browser prompts on the first getUserMedia call; the stream is closed at once, as only the answer is wanted. A
+// refusal re-reads the permission, because dismissing the prompt also rejects but leaves it askable. A failure other
+// than a refusal (no camera, camera busy) says nothing about the permission.
+internal fun requestCameraPermission(onResult: (String) -> Unit) {
+    js(
+        """navigator.mediaDevices.getUserMedia({ video: true }).then(
+            (s) => { s.getTracks().forEach((t) => t.stop()); onResult('granted'); },
+            (e) => {
+                if (!e || e.name !== 'NotAllowedError') return;
+                if (navigator.permissions && navigator.permissions.query) {
+                    navigator.permissions.query({ name: 'camera' }).then((p) => onResult(p.state), () => onResult('denied'));
+                } else {
+                    onResult('denied');
+                }
+            })""",
+    )
+}
+
 fun browserPermissionState(name: String, unanswered: String? = null): Flow<String> = callbackFlow {
     val watch = watchPermission(name, unanswered) { trySend(it) }
     awaitClose { stopWatching(watch) }

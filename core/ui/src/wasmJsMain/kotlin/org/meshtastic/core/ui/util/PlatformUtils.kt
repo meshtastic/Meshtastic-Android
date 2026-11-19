@@ -174,4 +174,10 @@ actual fun rememberNotificationPermissionState(): PermissionUiState = if (notifi
 
 @Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
 
-@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
+// Firefox answers no Permissions API query for the camera, so there the state stays unasked until a request answers.
+@Composable
+actual fun rememberCameraPermissionState(): PermissionUiState = if (cameraSupported()) {
+    rememberBrowserPermissionState("camera", "prompt") { requestCameraPermission(it) }
+} else {
+    PermissionUiState(status = PermissionStatus.PERMANENTLY_DENIED, request = {}, openAppSettings = {})
+}
