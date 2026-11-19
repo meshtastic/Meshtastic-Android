@@ -756,7 +756,13 @@ class SharedRadioInterfaceService(
                 // Mark the connection lifecycle as active BEFORE starting so concurrent
                 // hardware/network listeners observe the gate as open.
                 connectionRequested = true
-                awaitingUserConnect = false
+                // A link that stopped for good still holds its transport, which would make the start below a no-op.
+                if (awaitingUserConnect) {
+                    awaitingUserConnect = false
+                    ignoreExceptionSuspend {
+                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                    }
+                }
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.

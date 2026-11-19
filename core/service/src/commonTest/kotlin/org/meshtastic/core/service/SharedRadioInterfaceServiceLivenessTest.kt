@@ -1571,6 +1571,35 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    /** The link that stopped for good still holds its transport; the user's connect must replace it, not no-op. */
+    @Test
+    fun `connect redials straight after the radio gave the slot to another client`() = runTest(testDispatcher) {
+        clock = 0L
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createConnectedService("wws://192.168.1.100/api/v1/ws", startConnected = false)
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            callbacks
+                .last()
+                .onDisconnect(isPermanent = true, reason = TransportDisconnectReason.ReplacedByAnotherClient)
+            testDispatcher.scheduler.runCurrent()
+
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(2, createdTransports.size, "an explicit connect after a 4001 close dials a new transport")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
     // ─── connectionRequested gate: setDeviceAddress(null)/("n") deselect ────────────────────
 
     /**
