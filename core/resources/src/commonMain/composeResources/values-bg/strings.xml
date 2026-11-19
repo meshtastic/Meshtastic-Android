@@ -329,6 +329,7 @@
     <string name="discovery_delete_session">Изтриване на сесията</string>
     <string name="discovery_dwell_minutes">%1$d мин</string>
     <string name="discovery_keep_screen_awake">Поддържане на екрана активен</string>
+    <string name="discovery_not_connected">Не е свързано</string>
     <string name="discovery_not_connected_description">Свързване с устройство Meshtastic, за започване на сканирането.</string>
     <string name="discovery_scan_complete">Сесията е завършена</string>
     <string name="discovery_scan_failed">Сканирането не е успешно: %1$s</string>
@@ -384,6 +385,7 @@
     <string name="doc_title_debug_logs">Журнали за отстраняване на грешки</string>
     <string name="doc_title_desktop">Настолно приложение</string>
     <string name="doc_title_firmware">Актуализации на фърмуера</string>
+    <string name="doc_title_help">Помощ &amp; документация в приложението</string>
     <string name="doc_title_map">Карта &amp; Пътни точки</string>
     <string name="doc_title_measurement">Измерване &amp; Форматиране</string>
     <string name="doc_title_messages">Съобщения &amp; Канали</string>
@@ -489,6 +491,7 @@
     <string name="firmware_update_bootloader_installed">Буутлоудър: %1$s</string>
     <string name="firmware_update_bootloader_installing">Инсталиране на буутлоудъра. Това отнема няколко минути.</string>
     <string name="firmware_update_bootloader_latest">Най-нов буутлоудър: %1$s</string>
+    <string name="firmware_update_bootloader_uploading">Качване на буутлоудъра, стъпка 1 от 2...</string>
     <string name="firmware_update_checking">Проверка за актуализации...</string>
     <string name="firmware_update_connecting_attempt">Свързване с устройството (опит %1$d/%2$d)...</string>
     <string name="firmware_update_copying">High-five! Чакай, копирам фърмуера...</string>
@@ -592,6 +595,7 @@
     <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
+    <string name="iaq_level_excellent">Отлично</string>
     <string name="iaq_level_good">Добър</string>
     <string name="iaq_value">IAQ %1$d</string>
     <string name="ignore">Игнорирай</string>
@@ -777,10 +781,19 @@
     <string name="mesh_beacon_target_channel_index">Канал</string>
     <string name="mesh_beacon_target_default">По подразбиране</string>
     <string name="mesh_beacon_target_remove">Премахване на целта</string>
+    <string name="mesh_hud_cardinal_east">И</string>
+    <string name="mesh_hud_cardinal_north">С</string>
+    <string name="mesh_hud_cardinal_south">Ю</string>
+    <string name="mesh_hud_cardinal_west">З</string>
+    <string name="mesh_hud_coach_point">Дръжте телефона високо и го насочете към хоризонта.</string>
     <string name="mesh_hud_joined">%1$s · %2$s</string>
     <string name="mesh_hud_no_nodes">Няма възли с позиция</string>
     <string name="mesh_hud_radar_description">%1$s, %2$s</string>
     <string name="mesh_hud_snr">%1$s dB</string>
+    <plurals name="mesh_hud_track_points">
+        <item quantity="one">%1$d точка</item>
+        <item quantity="other">%1$d точки</item>
+    </plurals>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
     <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <!-- MESHTASTIC -->
@@ -869,6 +882,7 @@
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
     <string name="need_hardware">Нуждаете се от хардуер?</string>
     <!-- NEIGHBOR -->
+    <string name="neighbor_count">Съседи</string>
     <string name="network">Мрежа</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>
@@ -1043,6 +1057,7 @@
     <string name="powered">Външно захранване</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Точно местоположение</string>
+    <string name="precise_location_insecure_channel">Не е налично в канал, който не е сигурно криптиран</string>
     <string name="preferences_language">Език</string>
     <string name="preferences_system_default">По подразбиране на системата</string>
     <string name="press_and_drag">Натиснете и плъзнете, за да пренаредите</string>
@@ -1145,6 +1160,8 @@
     <string name="role_tak">TAK</string>
     <string name="role_tracker">Тракер</string>
     <!-- ROUTING -->
+    <string name="routing_error_admin_bad_session_key">Администраторската сесия е изтекла</string>
+    <string name="routing_error_admin_public_key_unauthorized">Администраторският ключ не е оторизиран</string>
     <string name="routing_error_bad_request">Невалидна заявка</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
     <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
@@ -1227,12 +1244,18 @@
     <string name="site_planner_antenna_height_meters">Височина на антената (м)</string>
     <string name="site_planner_color_scale">Цветова палитра</string>
     <string name="site_planner_frequency_mhz">Честота (MHz)</string>
+    <string name="site_planner_invalid_frequency">Въведете от 30 до 6000 MHz</string>
+    <string name="site_planner_invalid_latitude">Въведете от −90 до 90</string>
+    <string name="site_planner_invalid_longitude">Въведете от -180 до 180</string>
+    <string name="site_planner_invalid_max_range">Въведете от 1 до 150 км</string>
     <string name="site_planner_invalid_positive">Трябва да е по-голямо от 0</string>
+    <string name="site_planner_invalid_rx_sensitivity">Въведете от −150 до −30 dBm</string>
     <string name="site_planner_max_range_km">Максимален обхват (km)</string>
     <string name="site_planner_rx_height_meters">Височина на приемника (m)</string>
     <string name="site_planner_rx_sensitivity_dbm">Чувствителност на приемника (dBm)</string>
     <string name="site_planner_section_display">Дисплей</string>
     <string name="site_planner_section_receiver">Приемник</string>
+    <string name="site_planner_terrain_credit">Данни за терена © Mapterhorn</string>
     <string name="site_planner_tx_power_watts">Мощност на предавателя (W)</string>
     <string name="site_planner_use_current_location">Използване на текущото местоположение</string>
     <string name="site_planner_use_map_center">Използване на центъра на картата</string>
@@ -1398,6 +1421,7 @@
     <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
     <string name="wifi_provision_success_username">Потребителско име</string>
     <string name="wifi_provisioning">Осигуряване на Wi-Fi за mPWRD-OS</string>
+    <string name="wifi_qr_code_scan">Сканирайте Wi-Fi QR код</string>
     <!-- WIND -->
     <string name="wind">Вятър</string>
     <string name="wind_direction">Посока на вятъра</string>
@@ -1406,6 +1430,8 @@
     <!-- WRITE -->
     <!-- XR -->
     <string name="xr_terrain_layer_elevation">Височина</string>
+    <string name="xr_terrain_map">3D карта</string>
+    <string name="xr_terrain_unavailable">Теренът не можа да бъде зареден. Проверете връзката и опитайте отново.</string>
     <string name="you">Вие</string>
     <string name="zoom_in">Увеличаване</string>
     <string name="zoom_out">Намаляване</string>
