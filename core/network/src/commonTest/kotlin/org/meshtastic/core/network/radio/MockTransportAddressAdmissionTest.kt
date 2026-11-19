@@ -55,7 +55,7 @@ class MockTransportAddressAdmissionTest {
                     default = Dispatchers.Unconfined,
                 ),
             ) {
-            override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE)
+            override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP)
 
             override val mockTransportEnabled: StateFlow<Boolean> = gate
 
