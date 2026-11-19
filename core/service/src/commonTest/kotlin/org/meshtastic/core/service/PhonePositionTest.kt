@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.service
 
+import org.meshtastic.core.repository.GnssFix
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -28,6 +29,7 @@ class PhonePositionTest {
         haeAltitudeMeters: Double? = null,
         speedMetersPerSecond: Float? = null,
         bearingDegrees: Float? = null,
+        gnss: GnssFix? = null,
     ) = phonePosition(
         latitude = 1.5,
         longitude = -2.25,
@@ -36,6 +38,7 @@ class PhonePositionTest {
         haeAltitudeMeters = haeAltitudeMeters,
         speedMetersPerSecond = speedMetersPerSecond,
         bearingDegrees = bearingDegrees,
+        gnss = gnss,
     )
 
     @Test
@@ -87,5 +90,27 @@ class PhonePositionTest {
         assertEquals(-22_500_000, position.longitude_i)
         assertEquals(1_700_000_000, position.time)
         assertEquals(ProtoPosition.LocSource.LOC_EXTERNAL, position.location_source)
+    }
+
+    @Test
+    fun `the receiver's satellites and dilution of precision go out as firmware's GPS sends them`() {
+        val position =
+            fix(gnss = GnssFix(satellitesUsed = 9, hdop = 80, pdop = 150, vdop = 120, fixQuality = 1, fixType = 3))
+
+        assertEquals(9, position.sats_in_view)
+        assertEquals(80, position.HDOP)
+        assertEquals(150, position.PDOP)
+        assertEquals(120, position.VDOP)
+        assertEquals(1, position.fix_quality)
+        assertEquals(3, position.fix_type)
+    }
+
+    @Test
+    fun `without NMEA they are not reported and never estimated`() {
+        val position = fix()
+
+        assertEquals(0, position.sats_in_view)
+        assertEquals(0, position.HDOP)
+        assertEquals(0, position.fix_type)
     }
 }

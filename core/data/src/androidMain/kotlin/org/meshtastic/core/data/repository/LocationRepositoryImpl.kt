@@ -18,9 +18,14 @@ package org.meshtastic.core.data.repository
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.annotation.SuppressLint
 import android.app.Application
 import android.location.LocationManager
+import android.location.OnNmeaMessageListener
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import androidx.annotation.RequiresPermission
 import androidx.core.location.LocationCompat
 import androidx.core.location.LocationListenerCompat
@@ -36,6 +41,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.GnssFix
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -53,6 +59,10 @@ class LocationRepositoryImpl(
         private const val DEFAULT_INTERVAL_MS = 30_000L
         private const val MIN_DISTANCE_METERS = 0f
         private const val API_LEVEL_31 = 31
+        private const val API_LEVEL_30 = 30
+
+        /** NMEA older than this no longer describes the fix it would sit beside. */
+        private const val NMEA_FRESH_MS = 5_000L
     }
 
     /** Status of whether the app is actively subscribed to location changes. */
@@ -68,6 +78,11 @@ class LocationRepositoryImpl(
                 .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
                 .build()
 
+        // Satellites and dilution of precision exist only in the receiver's NMEA, which needs a precise grant.
+        val nmea = NmeaTracker(SystemClock::elapsedRealtime)
+        val nmeaListener = OnNmeaMessageListener { message, _ -> nmea.accept(message) }
+        val nmeaListening = addNmea(nmeaListener)
+
         val locationListener = LocationListenerCompat { location ->
             if (location.hasAltitude() && !LocationCompat.hasMslAltitude(location)) {
                 @Suppress("TooGenericExceptionCaught")
@@ -77,7 +92,7 @@ class LocationRepositoryImpl(
                     Logger.e(e) { "addMslAltitudeToLocation() failed" }
                 }
             }
-            trySend(location.toLocation())
+            trySend(location.toLocation(nmea.fresh(NMEA_FRESH_MS)))
         }
 
         val providerList = buildList {
@@ -118,7 +133,22 @@ class LocationRepositoryImpl(
             analytics.track("location_stop")
 
             LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
+            if (nmeaListening) removeNmeaListener(nmeaListener)
         }
+    }
+
+    /** Listen to the receiver's NMEA; false when the platform refuses it, as without a precise location grant. */
+    @SuppressLint("MissingPermission")
+    private fun LocationManager.addNmea(listener: OnNmeaMessageListener): Boolean = try {
+        if (Build.VERSION.SDK_INT >= API_LEVEL_30) {
+            addNmeaListener(dispatchers.io.asExecutor(), listener)
+        } else {
+            @Suppress("DEPRECATION")
+            addNmeaListener(listener, Handler(Looper.getMainLooper()))
+        }
+    } catch (e: SecurityException) {
+        Logger.i { "No NMEA without a precise location grant: ${e.message}" }
+        false
     }
 
     /** Observable flow for location updates */
@@ -126,7 +156,7 @@ class LocationRepositoryImpl(
     override fun getLocations(): Flow<Location> = locationManager.value.requestLocationUpdates()
 }
 
-internal fun AndroidLocation.toLocation(): Location = Location(
+internal fun AndroidLocation.toLocation(gnss: GnssFix? = null): Location = Location(
     latitude = latitude,
     longitude = longitude,
     altitudeMeters = if (hasAltitude()) altitude else null,
@@ -136,4 +166,5 @@ internal fun AndroidLocation.toLocation(): Location = Location(
     speedMetersPerSecond = if (hasSpeed()) speed else null,
     bearingDegrees = if (hasBearing()) bearing else null,
     timeMillis = time,
+    gnss = gnss,
 )
