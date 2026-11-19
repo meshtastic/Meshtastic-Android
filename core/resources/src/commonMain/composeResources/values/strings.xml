@@ -1443,6 +1443,7 @@
     <string name="mqtt_error_credentials_rejected">MQTT: connection rejected (check credentials)</string>
     <string name="mqtt_error_proxy_failed">MQTT proxy failed: %1$s</string>
     <string name="mqtt_error_rejected">MQTT: connection rejected: %1$s</string>
+    <string name="mqtt_needs_websocket_url">A browser reaches MQTT only over WebSocket. Set the broker address to its wss:// URL.</string>
     <string name="mqtt_probe_dns_failure">Host not found</string>
     <string name="mqtt_probe_other_failure">Connection failed</string>
     <string name="mqtt_probe_rejected">Broker rejected: %1$s</string>

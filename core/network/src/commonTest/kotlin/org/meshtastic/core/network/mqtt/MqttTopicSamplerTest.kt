@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.io.IOException
 import org.meshtastic.core.network.mqtt.MqttTopicSampler.Failure
 import org.meshtastic.core.network.mqtt.MqttTopicSampler.Phase
+import org.meshtastic.core.network.repository.MqttEndpointUnsupportedException
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.proto.ModuleConfig
 import kotlin.test.Test
@@ -138,6 +139,17 @@ class MqttTopicSamplerTest {
             sampler.run(ModuleConfig.MQTTConfig.Builder().also { it.address = address }.build(), "msh/US")
             assertEquals(Phase.Failed(Failure.CONNECT), sampler.state.value.phase, address)
         }
+    }
+
+    @Test
+    fun aBrokerThisPlatformCannotOpenFailsTheSampleNamingTheFix() = runTest {
+        val sampler =
+            MqttTopicSampler(
+                clientFactory = { throw MqttEndpointUnsupportedException() },
+                timeSource = testScheduler.timeSource,
+            )
+        sampler.run(null, "msh/US")
+        assertEquals(Phase.Failed(Failure.NEEDS_WEBSOCKET_URL), sampler.state.value.phase)
     }
 
     @Test

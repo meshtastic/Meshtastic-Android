@@ -63,6 +63,7 @@ import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.mqtt_config
+import org.meshtastic.core.resources.mqtt_needs_websocket_url
 import org.meshtastic.core.resources.mqtt_probe_dns_failure
 import org.meshtastic.core.resources.mqtt_probe_other_failure
 import org.meshtastic.core.resources.mqtt_probe_rejected
@@ -578,6 +579,9 @@ private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
 
     is MqttProbeStatus.Timeout ->
         stringResource(Res.string.mqtt_probe_timeout, timeoutMs.toInt()) to MaterialTheme.colorScheme.error
+
+    MqttProbeStatus.NeedsWebSocketUrl ->
+        stringResource(Res.string.mqtt_needs_websocket_url) to MaterialTheme.colorScheme.error
 
     is MqttProbeStatus.Other ->
         stringResource(Res.string.mqtt_probe_other_failure) to MaterialTheme.colorScheme.error

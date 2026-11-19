@@ -47,6 +47,9 @@ sealed class MqttProbeStatus {
     /** Probe exceeded its timeout. */
     data class Timeout(val timeoutMs: Long) : MqttProbeStatus()
 
+    /** The address resolves to a transport this platform lacks: a browser reaches only a `ws://` or `wss://` broker. */
+    data object NeedsWebSocketUrl : MqttProbeStatus()
+
     /** Any other / unclassified failure. */
     data class Other(val message: String?) : MqttProbeStatus()
 }
