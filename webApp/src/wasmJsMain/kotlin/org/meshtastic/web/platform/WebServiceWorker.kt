@@ -71,7 +71,7 @@ internal fun cacheLoadedResources(): Unit = js(
             const urls = performance.getEntriesByType('resource')
                 .map((entry) => entry.name)
                 .filter((name) => name.startsWith(location.origin));
-            urls.push(new URL('icon-512.png', location.href).href, new URL('icon-114.png', location.href).href);
+            urls.push(new URL('icon-512.png', location.href).href, new URL('favicon.svg', location.href).href);
             if (registration.active) registration.active.postMessage({ type: 'cache-loaded', urls });
         }).catch(() => {});
     }""",
