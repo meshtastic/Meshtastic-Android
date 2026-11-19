@@ -25,6 +25,9 @@ const OPEN_PARAM = "open";
 
 // webpack names the Kotlin/Wasm modules by content hash, so a cached copy is valid forever.
 const HASHED = /\/[0-9a-f]{20}\.(wasm|js|mjs)$/;
+// Scripts webpack does not hash keep their names across deploys, so they come from the network first, as the page
+// does: a cached webApp.js would load the previous build's modules once more after every deploy.
+const SCRIPT = /\.(js|mjs)$/;
 const SHELL = /\.(wasm|js|mjs|css|png|svg|ico|webmanifest|json|cvr|xml|ttf|otf|woff2?)$/;
 
 self.addEventListener("install", (event) => {
@@ -68,18 +71,25 @@ self.addEventListener("fetch", (event) => {
         return;
     }
     if (!cacheable(url)) return;
-    event.respondWith(HASHED.test(url.pathname) ? cacheFirst(request) : staleWhileRevalidate(event, request));
+    if (HASHED.test(url.pathname)) event.respondWith(cacheFirst(request));
+    else if (SCRIPT.test(url.pathname)) event.respondWith(networkFirst(request, request));
+    else event.respondWith(staleWhileRevalidate(event, request));
 });
 
 /** The page itself: the network's copy when there is one, so a deploy shows on the next load. */
-async function networkFirstIndex(request) {
+function networkFirstIndex(request) {
+    return networkFirst(request, INDEX);
+}
+
+/** The network's copy, kept under [key]; the cached one only when the network fails, as offline. */
+async function networkFirst(request, key) {
     const cache = await caches.open(CACHE);
     try {
         const response = await fetch(request);
-        if (response.ok) await cache.put(INDEX, response.clone());
+        if (response.ok) await cache.put(key, response.clone());
         return response;
     } catch (e) {
-        return (await cache.match(INDEX)) || Response.error();
+        return (await cache.match(key, { ignoreSearch: true })) || Response.error();
     }
 }
 
