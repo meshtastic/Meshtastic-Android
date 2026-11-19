@@ -30,6 +30,7 @@ import org.meshtastic.core.service.di.CoreServiceModule
 import org.meshtastic.core.ui.di.CoreUiModule
 import org.meshtastic.feature.connections.di.FeatureConnectionsModule
 import org.meshtastic.feature.docs.di.FeatureDocsModule
+import org.meshtastic.feature.firmware.di.FeatureFirmwareModule
 import org.meshtastic.feature.intro.di.FeatureIntroModule
 import org.meshtastic.feature.messaging.di.FeatureMessagingModule
 import org.meshtastic.feature.node.di.FeatureNodeModule
@@ -63,6 +64,7 @@ import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
         FeatureIntroModule::class,
         FeatureDocsModule::class,
         FeatureWifiProvisionModule::class,
+        FeatureFirmwareModule::class,
         FeatureSettingsModule::class,
         WebDiModule::class,
         WebPlatformModule::class,

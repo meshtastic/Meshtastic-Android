@@ -213,7 +213,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
     companion object {
         const val DEFAULT_PORT = 3232
-        const val RECOMMENDED_CHUNK_SIZE = 1024 // Larger than BLE
+        const val RECOMMENDED_CHUNK_SIZE = WIFI_OTA_CHUNK_SIZE
 
         // Timeouts
         private const val CONNECTION_TIMEOUT_MS = 5_000L

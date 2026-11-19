@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
     // Shares the bounded zip extraction (ZipExtraction.kt) between the Android and desktop JVM file handlers, which
     // previously carried two independent copies of the same logic.
     alias(libs.plugins.meshtastic.kmp.jvm.android)
@@ -42,10 +43,15 @@ kotlin {
 
             implementation(libs.coil)
             implementation(libs.ktor.client.core)
-            implementation(libs.ktor.network)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
         }
+
+        // WebZipArchive inflates through DecompressionStream, which org.khronos.webgl's typed arrays carry.
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
+
+        // Wi-Fi OTA opens a TCP socket and listens for a UDP broadcast, which a browser cannot.
+        getByName("nonWebMain").dependencies { implementation(libs.ktor.network) }
 
         androidMain.dependencies {
             implementation(libs.markdown.renderer.android)
@@ -64,3 +70,15 @@ kotlin {
         }
     }
 }
+
+// BLE update paths, which the browser gates off (bluetoothFirmwareUpdateSupported): a BLE radio gets no update method.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*FirmwareUpdateViewModelTest.startUpdate reports a firmware_update_start action with the release version",
+    "*FirmwareUpdateViewModelTest.an error that wrote nothing retires the recovery record",
+    "*FirmwareUpdateViewModelTest.cancelling during the download retires the recovery record",
+    "*FirmwareUpdateViewModelTest.a cancelled run that unwinds late leaves the replacement run alone",
+    "*FirmwareUpdateViewModelTest.a Secure DFU refusal retires the recovery record",
+    "*FirmwareUpdateViewModelTest.an unreadable package retires the recovery record",
+    "*FirmwareUpdateViewModelTest.update method is BLE for BLE-prefixed address",
+    "*FirmwareUpdateViewModelTest.the BLE bootloader upgrade action hands the offered package to the manager",
+)

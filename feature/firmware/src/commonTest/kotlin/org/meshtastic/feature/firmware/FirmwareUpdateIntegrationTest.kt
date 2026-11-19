@@ -34,8 +34,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MaintenanceUf2Manifest
@@ -72,8 +70,8 @@ class FirmwareUpdateIntegrationTest {
     private val nodeRepository = FakeNodeRepository()
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
-    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
+    private val bootloaderWarningDataSource: BootloaderWarningSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoverySource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)

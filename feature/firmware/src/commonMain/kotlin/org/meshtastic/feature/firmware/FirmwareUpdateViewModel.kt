@@ -49,8 +49,6 @@ import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceAddress
@@ -130,8 +128,8 @@ class FirmwareUpdateViewModel(
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
-    private val bootloaderWarningDataSource: BootloaderWarningDataSource,
-    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
+    private val bootloaderWarningDataSource: BootloaderWarningSource,
+    private val firmwareRecoveryDataSource: FirmwareRecoverySource,
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
@@ -374,7 +372,7 @@ class FirmwareUpdateViewModel(
 
                             // A saved BLE address restored onto hardware with no Bluetooth LE has no BLE path.
                             radioPrefs.isBle() -> {
-                                if (bluetoothRepository.isSupported) {
+                                if (bluetoothRepository.isSupported && bluetoothFirmwareUpdateSupported) {
                                     FirmwareUpdateMethod.Ble
                                 } else {
                                     FirmwareUpdateMethod.Unknown

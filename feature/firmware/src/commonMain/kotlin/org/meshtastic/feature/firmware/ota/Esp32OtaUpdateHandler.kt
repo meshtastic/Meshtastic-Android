@@ -124,9 +124,9 @@ class DefaultEsp32OtaUpdateEnvironment : Esp32OtaUpdateEnvironment {
         dispatcher: CoroutineDispatcher,
     ): UnifiedOtaProtocol = BleOtaTransport(bleScanner, bleConnectionFactory, address, dispatcher)
 
-    override fun createWifiTransport(deviceIp: String): UnifiedOtaProtocol = WifiOtaTransport(deviceIp)
+    override fun createWifiTransport(deviceIp: String): UnifiedOtaProtocol = createWifiOtaTransport(deviceIp)
 
-    override suspend fun discoverWifiOtaDevice(): String? = WifiOtaDiscovery.discoverOtaDevice()
+    override suspend fun discoverWifiOtaDevice(): String? = discoverWifiOtaDeviceOnLan()
 }
 
 internal fun isBleMacAddress(target: String): Boolean = MAC_ADDRESS_REGEX.matches(target)
@@ -534,7 +534,7 @@ class Esp32OtaUpdateHandler(
             if (rebootMode == REBOOT_MODE_BLE) {
                 BleOtaTransport.RECOMMENDED_CHUNK_SIZE
             } else {
-                WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
+                WIFI_OTA_CHUNK_SIZE
             }
 
         val throughputTracker = ThroughputTracker()

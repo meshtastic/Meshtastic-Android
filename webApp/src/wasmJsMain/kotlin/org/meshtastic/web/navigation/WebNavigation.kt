@@ -30,6 +30,7 @@ import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.docs.navigation.docsEntries
+import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
@@ -55,6 +56,7 @@ fun EntryProviderScope<NavKey>.webNavGraph(
         scrollToTopEvents = uiViewModel.scrollToTopEventFlow,
         onHandleDeepLink = uiViewModel::handleDeepLink,
     )
+    firmwareGraph(backStack)
     settingsGraph(backStack, settingsRadioConfigViewModel)
     docsEntries(backStack)
     channelsGraph(backStack)
