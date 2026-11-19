@@ -77,7 +77,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.browser)
                 // QR decoding where the browser has no BarcodeDetector for QR codes. Apache-2.0, no dependencies.
-                implementation(npm("jsqr", "1.4.0"))
+                implementation(npm("jsqr", libs.versions.jsqr.get()))
             }
         }
 

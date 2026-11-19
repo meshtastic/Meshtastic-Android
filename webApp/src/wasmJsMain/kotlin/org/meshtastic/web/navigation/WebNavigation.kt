@@ -86,11 +86,11 @@ val webVisibleDestinations: List<TopLevelDestination> =
     TopLevelDestination.entries.filter { it != TopLevelDestination.Map }
 
 /**
- * Whether the web registers the screen [deepLink] (a `NotificationDeepLinks` path) opens. The map, discovery and
- * firmware graphs have no wasmJs target, so a notification for one of them opens the app where it was instead.
+ * Whether the web registers the screen [deepLink] (a `NotificationDeepLinks` path) opens. The map has no wasmJs target,
+ * so a waypoint notification opens the app where it was instead.
  */
 fun isWebDeepLink(deepLink: String): Boolean =
     deepLink.substringBefore('?').substringBefore('/').lowercase() in webDeepLinkSegments
 
 private val webDeepLinkSegments =
-    setOf("messages", "share", "quickchat", "nodes", "settings", "channels", "connections")
+    setOf("messages", "share", "quickchat", "nodes", "settings", "channels", "connections", "discovery", "firmware")

@@ -59,9 +59,16 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     }
 
     private suspend fun pick(serviceUuid: Uuid?): Peripheral? {
-        if (serviceUuid == null) {
-            // An unfiltered chooser would list every nearby BLE device and grant access to none of their services.
-            Logger.w { "Web Bluetooth scan needs a service UUID filter; completing empty" }
+        // An unfiltered chooser would list every nearby BLE device and grant access to none of their services, and
+        // Kable dereferences navigator.bluetooth without a check, so a browser without it would throw.
+        if (serviceUuid == null || !hasWebBluetooth()) {
+            Logger.w {
+                if (serviceUuid == null) {
+                    "Web Bluetooth scan needs a service UUID filter; completing empty"
+                } else {
+                    "This browser has no Web Bluetooth; completing empty"
+                }
+            }
             return null
         }
         val options = Options { filters { match { services = listOf(serviceUuid) } } }
@@ -143,6 +150,8 @@ private fun watchAdvertisementsOf(id: String, waitMs: Int, windowMs: Int): Promi
         return null;
     })()""",
 )
+
+private fun hasWebBluetooth(): Boolean = js("typeof navigator !== 'undefined' && !!navigator.bluetooth")
 
 // Kable turns a missing getDevices() into an InternalError; Chrome exposes it only with its new permissions backend.
 private fun hasGetDevices(): Boolean = js(

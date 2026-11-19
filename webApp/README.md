@@ -1,6 +1,6 @@
 # `:webApp` - Meshtastic Web
 
-The Compose Multiplatform browser host, built with Kotlin/Wasm (`wasmJs`). It runs the same `core:*` modules and the `feature:connections`, `feature:messaging`, `feature:node` and `feature:settings` screens as the Android and desktop apps. There is no map: maplibre-compose publishes no wasmJs variant.
+The Compose Multiplatform browser host, built with Kotlin/Wasm (`wasmJs`). It runs the same `core:*` modules and feature screens as the Android and desktop apps: connections, messaging, nodes, settings, onboarding, Help & Documentation, Local Mesh Discovery, mPWRD-OS Wi-Fi provisioning over Web Bluetooth, and firmware updates for nRF52 and RP2040 radios over USB (the `.uf2` is saved with the browser's save picker). Firmware over Bluetooth and ESP32 updates are not offered; ESP32 radios update through flasher.meshtastic.org. There is no map: maplibre-compose publishes no wasmJs variant.
 
 ## The web build is opt-in
 
@@ -38,7 +38,7 @@ The distribution directory is a static site: serve it from any web server.
 
 ## Installed app
 
-The page is an installable PWA: `manifest.webmanifest` takes its icons from the Android launcher art (`copyPwaIcons`), and `sw.js` shows the notifications, which Android Chrome only shows from a service worker. A notification click focuses the app, or opens it at `?open=<path>`, and goes to the screen Android's notification opens (`NotificationDeepLinks`); the map, discovery and firmware screens have no web build, so their notifications open the app where it was. The installed icon carries the unread message count through the Badging API. The page asks for persistent storage once the database opens, and again on the next tap if the browser says no, so the OPFS database is not evicted. The compass reads `deviceorientationabsolute` on Chrome and `webkitCompassHeading` on Safari, which asks for motion access on the next tap; headings are magnetic, since a browser has no declination model.
+The page is an installable PWA: `manifest.webmanifest` takes its icons from the Android launcher art (`copyPwaIcons`), and `sw.js` shows the notifications, which Android Chrome only shows from a service worker. A notification click focuses the app, or opens it at `?open=<path>`, and goes to the screen Android's notification opens (`NotificationDeepLinks`); the map has no web build, so a waypoint notification opens the app where it was. The installed icon carries the unread message count through the Badging API. The page asks for persistent storage once the database opens, and again on the next tap if the browser says no, so the OPFS database is not evicted. The compass reads `deviceorientationabsolute` on Chrome and `webkitCompassHeading` on Safari, which asks for motion access on the next tap; headings are magnetic, since a browser has no declination model.
 
 ## Browser support
 

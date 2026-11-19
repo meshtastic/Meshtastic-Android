@@ -47,11 +47,11 @@ import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.web.di.WebKoinApp
 import org.meshtastic.web.lifecycle.TabHandoff
+import org.meshtastic.web.navigation.WebIntroGate
 import org.meshtastic.web.navigation.isWebDeepLink
 import org.meshtastic.web.platform.NotificationClicks
 import org.meshtastic.web.platform.cacheLoadedResources
 import org.meshtastic.web.platform.requestPersistentStorage
-import org.meshtastic.web.navigation.WebIntroGate
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
