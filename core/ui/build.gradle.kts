@@ -87,8 +87,8 @@ kotlin {
     }
 }
 
-// These fail in headless Chrome. getString() has no wasmJs implementation, so composables that call it throw there;
-// the others find no displayed node or cannot inject input.
+// These fail in headless Chrome. Some compute their expected text with the blocking getString(), which has no wasmJs
+// implementation; the others find no displayed node or cannot inject input.
 meshtasticWeb.browserTestExclusions.addAll(
     "*DropDownPreferenceUiTest.*",
     "*ImportFabUiTest.*",
