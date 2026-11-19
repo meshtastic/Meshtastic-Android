@@ -56,7 +56,7 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 
 **UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop is a thin host shell that delegates almost entirely to the shared KMP UI modules. The tray uses Compose's `Tray` on macOS and Windows, and a StatusNotifierItem over D-Bus on Linux (`tray/SniTray.kt`), since AWT's XEmbed tray loses clicks on GNOME and Plasma.
 
-**Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
+**Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. `core:service`'s `DispatchingMeshNotificationManager`, shared with web, turns mesh events into the `Notification`s it receives. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
 **Localization:** Desktop exposes a language picker that persists the selected BCP-47 tag in `UiPrefs.locale`. `Main.kt` resolves it against the system locale (`resolveLocale`) and applies it as the JVM default `Locale`.
 
@@ -70,7 +70,6 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 | `ui/DesktopMainScreen.kt` | Navigation 3 shell: shared app shell, navigation suite and `MeshtasticNavDisplay` |
 | `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB (jSerialComm) and BLE (Kable) transports |
-| `notification/DesktopMeshNotificationManager.kt` | Desktop `MeshNotificationManager`; converts mesh events into `Notification`s and dispatches them |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |
 | `UpdateChecker.kt` | Compares the running version with GitHub's latest production release |

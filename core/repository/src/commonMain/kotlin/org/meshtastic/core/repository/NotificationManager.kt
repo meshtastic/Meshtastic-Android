@@ -18,8 +18,8 @@ package org.meshtastic.core.repository
 
 /**
  * Dispatch primitive underneath a platform's [MeshNotificationManager]: posts opaque [Notification] records, cancels by
- * id, or wipes all active notifications. Shared code never calls it directly; the desktop implementation composes over
- * it, while Android renders its notifications natively.
+ * slot, or wipes all active notifications. Shared code never calls it directly; the desktop and web implementations
+ * compose over it through `DispatchingMeshNotificationManager`, while Android renders its notifications natively.
  */
 interface NotificationManager {
     /**
@@ -29,7 +29,8 @@ interface NotificationManager {
      */
     suspend fun dispatch(notification: Notification): Boolean
 
-    fun cancel(id: Int)
+    /** Removes the notification in the slot [Notification.tagFor] names. */
+    fun cancel(category: Notification.Category, id: Int)
 
     fun cancelAll()
 }

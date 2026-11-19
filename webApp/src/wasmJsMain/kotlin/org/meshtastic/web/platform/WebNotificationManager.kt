@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.core.repository.allows
 import org.w3c.notifications.NotificationOptions
 import org.w3c.notifications.Notification as BrowserNotification
 
@@ -49,31 +50,19 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
         askWhenSwitchedOn(prefs.newWaypointsEnabled, scope)
     }
 
-    override suspend fun dispatch(notification: Notification): Boolean = isEnabled(notification.category) &&
+    override suspend fun dispatch(notification: Notification): Boolean = prefs.allows(notification.category) &&
         notificationsSupported() &&
         notificationPermission() == "granted" &&
         show(notification)
 
-    private suspend fun isEnabled(category: Notification.Category): Boolean = when (category) {
-        Notification.Category.Message -> prefs.messagesEnabled.value
-        Notification.Category.Reaction -> prefs.loadReactionsEnabled()
-        Notification.Category.Waypoint -> prefs.loadNewWaypointsEnabled()
-        Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
-        Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
-        Notification.Category.Battery -> prefs.lowBatteryEnabled.value
-        Notification.Category.Alert -> true
-        Notification.Category.Client -> true
-        Notification.Category.Service -> true
-    }
-
     private fun show(notification: Notification): Boolean {
-        val key = notification.id?.let(::keyFor) ?: "untagged-${untaggedCount++}"
+        val key = notification.tag ?: "untagged-${untaggedCount++}"
         var handle: BrowserNotification? = null
         handle =
             showNotification(
                 title = notification.title,
                 body = notification.message,
-                tag = notification.id?.toString(),
+                tag = notification.tag,
                 silent = notification.isSilent,
                 onClose = { if (shown[key] === handle) shown.remove(key) },
             )
@@ -82,8 +71,8 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
         return handle != null
     }
 
-    override fun cancel(id: Int) {
-        shown.remove(keyFor(id))?.close()
+    override fun cancel(category: Notification.Category, id: Int) {
+        shown.remove(Notification.tagFor(category, id))?.close()
     }
 
     override fun cancelAll() {
@@ -108,8 +97,6 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
             }
             .launchIn(scope)
     }
-
-    private fun keyFor(id: Int) = "id-$id"
 }
 
 private fun notificationsSupported(): Boolean = js("typeof Notification !== 'undefined'")

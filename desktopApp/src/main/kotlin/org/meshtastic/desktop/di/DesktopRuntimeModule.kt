@@ -53,11 +53,11 @@ import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
+import org.meshtastic.core.service.DispatchingMeshNotificationManager
 import org.meshtastic.core.service.InProcessMessageQueue
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
-import org.meshtastic.desktop.notification.DesktopMeshNotificationManager
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.notification.LinuxNotificationSender
 import org.meshtastic.desktop.notification.MacOSNotificationSender
@@ -117,7 +117,7 @@ class DesktopRuntimeModule {
 
     @Single
     fun meshNotificationManager(notificationManager: NotificationManager): MeshNotificationManager =
-        DesktopMeshNotificationManager(notificationManager = notificationManager)
+        DispatchingMeshNotificationManager(notificationManager = notificationManager)
 
     @Single(binds = [MessageQueue::class, MeshWorkerManager::class])
     fun messageQueue(

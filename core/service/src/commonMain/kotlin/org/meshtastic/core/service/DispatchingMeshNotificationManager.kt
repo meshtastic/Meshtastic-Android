@@ -14,13 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.desktop.notification
+package org.meshtastic.core.service
 
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.navigation.NotificationDeepLinks
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -37,31 +40,31 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /**
- * Desktop implementation of [MeshNotificationManager]: turns each mesh event into a [Notification] record and hands it
- * to [NotificationManager], which gates it on the user's notification preferences and shows it through the OS.
+ * The [MeshNotificationManager] for platforms that show plain notifications through a [NotificationManager] (desktop
+ * and web): turns each mesh event into a [Notification] record in the slot and with the click destination Android uses
+ * for the same event, and leaves the gating on preferences and permission to the [NotificationManager].
  *
- * Android-only concepts (notification channels, the foreground-service notification, updating a posted notification in
- * place) are no-ops here.
- *
- * Registered manually in `DesktopRuntimeModule` -- do **not** add `@Single` to avoid double-registration with the
- * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
+ * Android-only concepts (notification channels, the foreground-service notification, conversation history) are no-ops
+ * here.
  */
 @Suppress("TooManyFunctions")
-class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
+class DispatchingMeshNotificationManager(private val notificationManager: NotificationManager) :
+    MeshNotificationManager {
 
+    private val lock = SynchronizedObject()
     private val lowBatteryEpisodes = mutableMapOf<Int, Any>()
 
     override fun clearNotifications() {
-        synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.clear() }
+        synchronized(lock) { lowBatteryEpisodes.clear() }
         notificationManager.cancelAll()
     }
 
     override fun initChannels() {
-        // No-op: desktop has no Android notification channels.
+        // No-op: only Android has notification channels.
     }
 
     override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
-        // No-op: desktop has no foreground service notification.
+        // No-op: only Android has a foreground-service notification.
     }
 
     override suspend fun updateMessageNotification(
@@ -79,6 +82,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 category = Notification.Category.Message,
                 isSilent = isSilent,
                 id = contactKey.hashCode(),
+                deepLink = NotificationDeepLinks.conversation(contactKey),
             ),
         )
     }
@@ -96,6 +100,8 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 message = message,
                 category = Notification.Category.Waypoint,
                 isSilent = isSilent,
+                id = contactKey.hashCode(),
+                deepLink = NotificationDeepLinks.waypoint(waypointId),
             ),
         )
     }
@@ -109,13 +115,26 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         isSilent: Boolean,
     ) {
         notificationManager.dispatch(
-            Notification(title = name, message = emoji, category = Notification.Category.Reaction, isSilent = isSilent),
+            Notification(
+                title = name,
+                message = emoji,
+                category = Notification.Category.Reaction,
+                isSilent = isSilent,
+                id = contactKey.hashCode(),
+                deepLink = NotificationDeepLinks.conversation(contactKey),
+            ),
         )
     }
 
     override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.dispatch(
-            Notification(title = name, message = alert, category = Notification.Category.Alert),
+            Notification(
+                title = name,
+                message = alert,
+                category = Notification.Category.Alert,
+                id = contactKey.hashCode(),
+                deepLink = NotificationDeepLinks.conversation(contactKey),
+            ),
         )
     }
 
@@ -125,6 +144,8 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 title = getStringSuspend(Res.string.mesh_beacon_notification_title),
                 message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) },
                 category = Notification.Category.MeshBeacon,
+                id = offer.fromNodeNum,
+                deepLink = NotificationDeepLinks.MESH_BEACON,
             ),
         )
     }
@@ -136,19 +157,21 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 message = node.effectiveLongName,
                 category = Notification.Category.NodeEvent,
                 id = node.num,
+                deepLink = NotificationDeepLinks.nodeDetail(node.num),
             ),
         )
     }
 
     override fun cancelNewNodeNotification(nodeNum: Int) {
-        notificationManager.cancel(nodeNum)
+        notificationManager.cancel(Notification.Category.NodeEvent, nodeNum)
     }
 
-    // An OS notification cannot be refreshed in place, and re-posting would alert again, so only an episode's first
-    // reading shows.
+    // Not every platform can refresh a notification in place, and re-posting would alert again, so only an episode's
+    // first reading shows.
     override suspend fun notifyLowBattery(node: Node, isRemote: Boolean) {
         val episode = Any()
-        if (synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.putIfAbsent(node.num, episode) } != null) return
+        val started = synchronized(lock) { lowBatteryEpisodes.getOrPut(node.num) { episode } === episode }
+        if (!started) return
         var shown = false
         try {
             val notification =
@@ -162,19 +185,24 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                     ),
                     category = Notification.Category.Battery,
                     id = node.num,
+                    deepLink = NotificationDeepLinks.nodeDetail(node.num),
                 )
             // Recovery may have ended this episode while its text was resolving.
-            if (synchronized(lowBatteryEpisodes) { lowBatteryEpisodes[node.num] !== episode }) return
+            if (synchronized(lock) { lowBatteryEpisodes[node.num] !== episode }) return
             shown = notificationManager.dispatch(notification)
         } finally {
             // A warning that never showed ends its own episode, so the next low reading tries again.
-            if (!shown) synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.remove(node.num, episode) }
+            if (!shown) {
+                synchronized(lock) {
+                    if (lowBatteryEpisodes[node.num] === episode) lowBatteryEpisodes.remove(node.num)
+                }
+            }
         }
     }
 
     override fun cancelLowBatteryNotification(nodeNum: Int) {
-        synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.remove(nodeNum) }
-        notificationManager.cancel(nodeNum)
+        synchronized(lock) { lowBatteryEpisodes.remove(nodeNum) }
+        notificationManager.cancel(Notification.Category.Battery, nodeNum)
     }
 
     override suspend fun showClientNotification(
@@ -189,12 +217,14 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 type = severity,
                 category = Notification.Category.Client,
                 id = clientNotification.notificationId(),
+                // The firmware repeats this advisory on every position request; only the first should sound.
+                onlyAlertOnce = clientNotification.isProtectedPositionAdvisory(),
             ),
         )
     }
 
     override fun clearClientNotification(clientNotification: ClientNotification) {
-        notificationManager.cancel(clientNotification.notificationId())
+        notificationManager.cancel(Notification.Category.Client, clientNotification.notificationId())
     }
 
     override suspend fun showFirmwareUpdateNotification(notice: FirmwareUpdateNotice): Boolean =
@@ -209,13 +239,16 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 ),
                 category = Notification.Category.Service,
                 id = notice.notificationKey.hashCode(),
+                deepLink = NotificationDeepLinks.FIRMWARE_UPDATE,
             ),
         )
 
-    // The reconnect-blocked notice is about an Android runtime permission; desktop never raises it.
+    // The reconnect-blocked notice is about an Android runtime permission; no other platform raises it.
     override suspend fun showReconnectBlockedNotification(title: String, message: String): Boolean = false
 
     override suspend fun cancelMessageNotification(contactKey: String) {
-        notificationManager.cancel(contactKey.hashCode())
+        val id = contactKey.hashCode()
+        notificationManager.cancel(Notification.Category.Message, id)
+        notificationManager.cancel(Notification.Category.Reaction, id)
     }
 }
