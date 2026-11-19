@@ -16,15 +16,5 @@
  */
 package org.meshtastic.core.ui.component
 
-// jvmAndroidMain's actuals use `java.lang.Class` reflection (`declaringJavaClass.enumConstants`, `getField(...)`) to
-// enumerate an enum's entries and check for `@Deprecated` from just an instance, with no reified type parameter to
-// call `enumValues<T>()`/`enumEntries<T>()` instead. Kotlin/Wasm has no `java.lang.Class`-equivalent reflection
-// surface at all (same gap iOS's Kotlin/Native actual has, which is why it takes the identical fallback below) — and
-// changing `DropDownPreference`'s public signature to take a reified type parameter instead of an instance is a
-// commonMain API change well outside this pass's scope. Matches iOS exactly: `DropDownPreference`'s enum-instance
-// overload renders with no selectable items on this target, same as on iOS today — a pre-existing gap this pass
-// inherits rather than introduces. Callers who need reliable enum options in a dropdown can use the `List<Pair<T,
-// String>>` or `List<DropDownItem<T>>` overloads instead, which don't call through this expect at all.
-internal actual fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T> = emptyList()
-
+// Kotlin/Wasm has no reflection to read an enum entry's @Deprecated annotation, so every entry is offered.
 internal actual fun Enum<*>.isDeprecatedEnumEntry(): Boolean = false

@@ -47,12 +47,45 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.ui.theme.AppTheme
+import kotlin.enums.enumEntries
 import kotlin.jvm.JvmName
 
+// Reified so the entries come from enumEntries, which every target has; reading them off an instance takes JVM
+// reflection, which Kotlin/Wasm and Kotlin/Native lack.
+@Suppress("ParameterNaming") // onItemSelected is the name every call site and the other overloads use
 @Composable
-fun <T : Enum<T>> DropDownPreference(
+inline fun <reified T : Enum<T>> DropDownPreference(
     title: String,
     enabled: Boolean,
+    selectedItem: T,
+    noinline onItemSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    summary: String? = null,
+    noinline itemIcon: @Composable ((T) -> ImageVector)? = null,
+    noinline itemColor: @Composable ((T) -> Color)? = null,
+    noinline itemLabel: @Composable ((T) -> String)? = null,
+) {
+    EnumDropDownPreference(
+        title = title,
+        enabled = enabled,
+        entries = enumEntries<T>(),
+        selectedItem = selectedItem,
+        onItemSelected = onItemSelected,
+        modifier = modifier,
+        summary = summary,
+        itemIcon = itemIcon,
+        itemColor = itemColor,
+        itemLabel = itemLabel,
+    )
+}
+
+@PublishedApi
+@Composable
+@Suppress("LongParameterList")
+internal fun <T : Enum<T>> EnumDropDownPreference(
+    title: String,
+    enabled: Boolean,
+    entries: List<T>,
     selectedItem: T,
     onItemSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
@@ -64,19 +97,18 @@ fun <T : Enum<T>> DropDownPreference(
     // A deprecated value the radio currently holds stays on the list: dropping it leaves the field showing nothing and
     // writes a different value on the next save.
     val enumConstants =
-        remember(selectedItem) {
-            enumEntriesOf(selectedItem).filter {
+        remember(entries, selectedItem) {
+            entries.filter {
                 it.name != "UNRECOGNIZED" && (it == selectedItem || !it.isDeprecatedEnumEntry())
             }
         }
 
-    val items =
-        enumConstants.map {
-            val label = itemLabel?.invoke(it) ?: it.schemaLabel()
-            val icon = itemIcon?.invoke(it)
-            val color = itemColor?.invoke(it)
-            DropDownItem(it, label, icon, color)
-        }
+    val items = enumConstants.map {
+        val label = itemLabel?.invoke(it) ?: it.schemaLabel()
+        val icon = itemIcon?.invoke(it)
+        val color = itemColor?.invoke(it)
+        DropDownItem(it, label, icon, color)
+    }
 
     DropDownPreference(
         title = title,
@@ -219,8 +251,6 @@ fun <T> DropDownPreference(
         }
     }
 }
-
-internal expect fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T>
 
 internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
 

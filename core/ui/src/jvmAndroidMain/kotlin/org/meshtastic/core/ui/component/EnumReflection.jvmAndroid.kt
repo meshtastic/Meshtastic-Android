@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-internal actual fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T> =
-    selectedItem.declaringJavaClass.enumConstants?.toList().orEmpty()
-
 internal actual fun Enum<*>.isDeprecatedEnumEntry(): Boolean = try {
     val field = this::class.java.getField(this.name)
     field.isAnnotationPresent(Deprecated::class.java) || field.isAnnotationPresent(java.lang.Deprecated::class.java)

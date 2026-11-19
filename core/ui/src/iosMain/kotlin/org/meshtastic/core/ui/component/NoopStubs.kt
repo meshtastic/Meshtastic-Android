@@ -16,6 +16,4 @@
  */
 package org.meshtastic.core.ui.component
 
-internal actual fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T> = emptyList()
-
 internal actual fun Enum<*>.isDeprecatedEnumEntry(): Boolean = false
