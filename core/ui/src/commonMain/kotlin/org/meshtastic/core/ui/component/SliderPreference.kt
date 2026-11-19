@@ -22,7 +22,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +58,7 @@ fun <T> SliderPreference(
             label = "sliderSpring",
         )
 
-    ListItem(
+    StaticListItem(
         modifier = modifier,
         headlineContent = {
             Text(

@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -76,6 +75,7 @@ import org.meshtastic.core.resources.widget_node_tracker_choose
 import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.component.MeshtasticSearchBar
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
@@ -216,7 +216,7 @@ internal fun NodeTrackerPicker(nodes: Collection<Node>?, ourNodeNum: Int?, conne
 internal fun ColumnScope.CandidateList(nodes: List<Node>, onPick: (Node) -> Unit) {
     LazyColumn(modifier = Modifier.weight(1f)) {
         items(nodes, key = { it.num }) { node ->
-            ListItem(
+            StaticListItem(
                 modifier = Modifier.clickable { onPick(node) },
                 leadingContent = { NodeChip(node = node) },
                 headlineContent = {

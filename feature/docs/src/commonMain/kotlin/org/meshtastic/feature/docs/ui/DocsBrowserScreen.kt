@@ -30,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
@@ -55,6 +54,7 @@ import org.meshtastic.core.resources.doc_section_developer
 import org.meshtastic.core.resources.doc_section_user
 import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.navigate_back
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
@@ -229,7 +229,7 @@ private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, mo
 @Composable
 private fun DocPageListItem(page: DocPage, onSelectPage: (String) -> Unit, modifier: Modifier = Modifier) {
     val openPageLabel = stringResource(Res.string.doc_open_page, page.title)
-    ListItem(
+    StaticListItem(
         leadingContent = {
             Icon(
                 imageVector = page.resolveIcon(),

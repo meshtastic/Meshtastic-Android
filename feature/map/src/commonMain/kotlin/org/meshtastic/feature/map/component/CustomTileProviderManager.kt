@@ -28,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -60,6 +59,7 @@ import org.meshtastic.core.resources.url_must_contain_placeholders
 import org.meshtastic.core.resources.url_template
 import org.meshtastic.core.resources.url_template_hint
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -112,7 +112,7 @@ fun CustomTileProviderManager(
             }
         } else {
             items(providers, key = { it.id }) { config ->
-                ListItem(
+                StaticListItem(
                     headlineContent = { Text(config.name) },
                     supportingContent = {
                         Text(

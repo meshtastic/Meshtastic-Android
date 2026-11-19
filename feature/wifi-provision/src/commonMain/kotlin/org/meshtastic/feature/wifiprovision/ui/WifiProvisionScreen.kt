@@ -56,7 +56,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -140,6 +139,7 @@ import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.PasswordTextField
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
@@ -690,7 +690,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
 
 @Composable
 private fun ProvisionInfoItem(label: String, value: String, copyEnabled: Boolean = true) {
-    ListItem(
+    StaticListItem(
         overlineContent = { Text(text = label, style = MaterialTheme.typography.labelLarge) },
         headlineContent = { Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized) },
         trailingContent = {
@@ -710,7 +710,7 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         }
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(network.ssid) },
         supportingContent = { Text(stringResource(Res.string.wifi_provision_signal_strength, network.signalStrength)) },
         leadingContent = {

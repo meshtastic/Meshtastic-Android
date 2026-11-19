@@ -27,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
@@ -61,6 +60,7 @@ import org.meshtastic.core.resources.request_telemetry
 import org.meshtastic.core.resources.soil_water_metrics
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.userinfo
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.model.LogsType
@@ -251,7 +251,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
     val requestDescription = description + " " + stringResource(Res.string.request_telemetry)
 
     Column {
-        ListItem(
+        StaticListItem(
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             leadingContent = {
                 Icon(

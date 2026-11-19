@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -62,6 +61,7 @@ import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.BluetoothConnected
@@ -164,7 +164,7 @@ fun DeviceListItem(
             MaterialTheme.colorScheme.onSurfaceVariant
         }
 
-    ListItem(
+    StaticListItem(
         modifier = modifier.fillMaxWidth().then(clickableModifier).padding(vertical = 4.dp),
         headlineContent = { DeviceHeadline(device = device) },
         leadingContent = {

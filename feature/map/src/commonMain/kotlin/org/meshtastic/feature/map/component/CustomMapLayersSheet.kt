@@ -29,7 +29,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -70,6 +69,7 @@ import org.meshtastic.core.resources.url_cannot_be_empty
 import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.resources.url_must_be_http
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Layers
@@ -180,7 +180,7 @@ private fun MapLayerRow(
             },
         )
     Column(modifier = modifier) {
-        ListItem(
+        StaticListItem(
             headlineContent = { Text(layer.name) },
             supportingContent = {
                 Text(
