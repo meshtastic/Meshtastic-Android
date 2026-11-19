@@ -49,7 +49,7 @@ actual fun rememberShareText(): (text: String, subject: String) -> Unit {
 // navigator.share must run inside the click's user activation, so nothing suspends before it. Closing the share sheet
 // rejects with AbortError and ends there; any other refusal, or no Web Share for text, falls back to the clipboard.
 @Suppress("UnusedParameter") // read by name inside the js() body
-private fun shareOrElse(text: String, subject: String, fallback: () -> Unit) {
+internal fun shareOrElse(text: String, subject: String, fallback: () -> Unit) {
     js(
         """{
         const data = { title: subject, text: text };
