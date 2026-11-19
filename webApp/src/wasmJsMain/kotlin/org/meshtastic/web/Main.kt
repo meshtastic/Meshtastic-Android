@@ -50,6 +50,7 @@ import org.meshtastic.web.lifecycle.TabHandoff
 import org.meshtastic.web.navigation.isWebDeepLink
 import org.meshtastic.web.platform.NotificationClicks
 import org.meshtastic.web.platform.cacheLoadedResources
+import org.meshtastic.web.platform.requestPersistentStorage
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
@@ -157,14 +158,15 @@ private fun MeshServiceLifecycle() {
 }
 
 /**
- * The installed-app side of the shell, once the database is open: puts the unread count on the app icon, hands the
- * service worker what this page loaded, and opens notification clicks.
+ * The installed-app side of the shell, once the database is open: keeps the origin's storage from eviction, puts the
+ * unread count on the app icon, hands the service worker what this page loaded, and opens notification clicks.
  */
 @Suppress("ViewModelForwarding")
 @Composable
 private fun AppShellServices(uiViewModel: UIViewModel) {
     val unreadBadgeSync = koinInject<UnreadBadgeSync>()
     LaunchedEffect(Unit) {
+        requestPersistentStorage()
         cacheLoadedResources()
     }
     LaunchedEffect(unreadBadgeSync) { unreadBadgeSync.run() }
