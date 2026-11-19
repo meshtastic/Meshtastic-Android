@@ -29,6 +29,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.discovery.navigation.discoveryGraph
 import org.meshtastic.feature.docs.navigation.docsEntries
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
@@ -61,6 +62,7 @@ fun EntryProviderScope<NavKey>.webNavGraph(
     docsEntries(backStack)
     channelsGraph(backStack)
     connectionsGraph(backStack)
+    discoveryGraph(backStack)
     wifiProvisionGraph(backStack)
 
     // A "map" deep link still routes here, so the destination exists and renders nothing.

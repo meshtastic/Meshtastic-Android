@@ -44,6 +44,8 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.service.DeviceAddressChangeHook
 import org.meshtastic.core.service.LastBleNodeRecorder
 import org.meshtastic.core.service.LocalNetworkAccess
+import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
+import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -129,4 +131,6 @@ class WebStubsModule {
     @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
 
     @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
+
+    @Single fun discoverySummaryAiProvider(fallback: AlgorithmicSummaryProvider): DiscoverySummaryAiProvider = fallback
 }

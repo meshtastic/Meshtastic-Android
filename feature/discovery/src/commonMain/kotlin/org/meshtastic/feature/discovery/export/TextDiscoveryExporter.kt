@@ -16,12 +16,10 @@
  */
 package org.meshtastic.feature.discovery.export
 
-import org.koin.core.annotation.Single
-
 private const val SEPARATOR_LENGTH = 60
 
-@Single
-class TextDiscoveryExporter : DiscoveryExporter {
+/** A plain-text discovery report: desktop's and the browser's exporter, where Android renders a PDF. */
+open class TextDiscoveryExporter : DiscoveryExporter {
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun export(data: DiscoveryExportData): ExportResult = try {

@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.settings
 
-// webApp registers no discovery, Wi-Fi provisioning, docs or firmware graph; those modules have no wasmJs target.
+// webApp registers the discovery, Wi-Fi provisioning, docs and firmware graphs; a page cannot run the TAK server.
 actual val settingsPlatform: SettingsPlatform =
     SettingsPlatform(
-        localMeshDiscovery = false,
+        localMeshDiscovery = true,
         wifiProvisioning = true,
         helpDocs = true,
         firmware = true,
