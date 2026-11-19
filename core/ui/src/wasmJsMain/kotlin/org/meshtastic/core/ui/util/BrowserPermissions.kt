@@ -30,6 +30,8 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import org.w3c.notifications.Notification
+import org.w3c.notifications.NotificationPermission
 
 /**
  * A browser permission as a [PermissionUiState], kept live by the Permissions API's `change` event. [initialState] is
@@ -62,12 +64,22 @@ internal fun browserPermissionStatus(state: String): PermissionStatus = when (st
 
 internal fun notificationsSupported(): Boolean = js("typeof Notification !== 'undefined'")
 
-internal fun notificationPermission(): String = js("Notification.permission")
+internal fun notificationPermission(): String = Notification.permission.asString()
 
 /** Shows the browser's notification prompt; only reaches the user from inside a click. */
 internal fun requestNotificationPermission(onResult: (String) -> Unit) {
-    js("Notification.requestPermission().then((p) => onResult(p), () => {})")
+    Notification.requestPermission()
+        .then(
+            {
+                onResult(it.asString())
+                null
+            },
+            { null },
+        )
 }
+
+/** The Notifications API's permission enum is a JS string. */
+private fun NotificationPermission.asString(): String = unsafeCast<JsString>().toString()
 
 /** Shows the browser's location prompt by asking for one fix and discarding it. */
 internal fun requestGeolocationPermission(onResult: (String) -> Unit) {
