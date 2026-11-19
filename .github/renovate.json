@@ -31,6 +31,13 @@
   },
   "packageRules": [
     {
+      "description": "Skip Temurin respins: setup-java encodes 25.0.5.1+2 as 25.0.5+100000002, which ships for x64 only and breaks the aarch64 Flatpak leg",
+      "matchDatasources": [
+        "java-version"
+      ],
+      "allowedVersions": "!/\\+1\\d{8}/"
+    },
+    {
       "description": "Automerge non-major updates for stable versions",
       "matchUpdateTypes": [
         "minor",
