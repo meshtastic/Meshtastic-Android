@@ -38,6 +38,16 @@
       "allowedVersions": "!/\\+1\\d{8}/"
     },
     {
+      "description": "No JDK majors: the toolchain, JBR and the Flatpak openjdk extension move together, by hand",
+      "matchDatasources": [
+        "java-version"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Automerge non-major updates for stable versions",
       "matchUpdateTypes": [
         "minor",
