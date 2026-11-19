@@ -1507,9 +1507,13 @@
     <string name="need_hardware">Нужно оборудование?</string>
     <string name="need_hardware_description">Meshtastic требует совместимое устройство. Наши спонсоры и партнёры предлагают готовое к использованию оборудование. Вот некоторые из самых популярных вариантов тут.</string>
     <!-- NEIGHBOR -->
+    <string name="neighbor_count">Соседи</string>
+    <string name="neighbor_count_description">Сколько узлов эта нода слышала непосредственно, когда сообщала о них.</string>
     <string name="neighbor_info">Информация об окружении</string>
     <string name="neighbor_info_config">Настройки соседей</string>
     <string name="neighbor_info_received">Получено</string>
+    <string name="neighbor_mean_snr">Среднее значение SNR соседа</string>
+    <string name="neighbor_mean_snr_description">Средний уровень шума, при котором эта нода слышит сообщения своих соседей.</string>
     <string name="network">Сеть</string>
     <string name="new_channel_rcvd">Получен URL нового канала</string>
     <string name="new_messages_below">Новые сообщения ниже</string>
@@ -1927,6 +1931,7 @@
     <string name="request_telemetry">Запрос телеметрии</string>
     <string name="request_user_info">Запросить User Info</string>
     <string name="requesting_from">Запрашиваю %1$s у %2$s</string>
+    <string name="requesting_neighbor_info_from">Запрашивает информацию о соседях %1$s. Та отвечает только в том случае, если включен модуль информации о соседях.</string>
     <string name="resend">Отправить</string>
     <string name="reset">Сброс</string>
     <string name="reset_to_defaults">Сброс значений по умолчанию</string>
@@ -1940,6 +1945,9 @@
     <string name="ringtone_file_empty">Файл пуст</string>
     <string name="ringtone_import_error">Ошибка импорта: %1$s</string>
     <string name="ringtone_imported">Импортировать рингтон</string>
+    <string name="ringtone_play_on_node">Воспроизвести на ноде</string>
+    <string name="ringtone_play_on_node_summary">Воспроизводит сохраненную мелодию звонка на ноде один раз. Требуется звуковой сигнал.</string>
+    <string name="ringtone_play_on_node_unsaved">Сначала сохрани мелодию звонка, чтобы воспроизвести ее на ноде.</string>
     <!-- ROLE -->
     <string name="role">Роль устройства</string>
     <string name="role_client">Client</string>
@@ -2112,6 +2120,12 @@
         <item quantity="other">Услышаны %1$d нод</item>
     </plurals>
     <string name="signal_survey_title">Опрос сигнала</string>
+    <plurals name="signal_survey_unplaced">
+        <item quantity="one">больше %1$d услышал о том, что нет позиции</item>
+        <item quantity="few">больше %1$d услышали о том, что нет позиции</item>
+        <item quantity="many">больше %1$d услышали о том, что нет позиции</item>
+        <item quantity="other">больше %1$d услышали о том, что нет позиции</item>
+    </plurals>
     <!-- SITE -->
     <string name="site_planner">Планировщик места</string>
     <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
