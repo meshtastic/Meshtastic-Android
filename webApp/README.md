@@ -38,7 +38,7 @@ The distribution directory is a static site: serve it from any web server.
 
 ## Installed app
 
-The page is an installable PWA: `manifest.webmanifest` takes its icons from the Android launcher art (`copyPwaIcons`), and `sw.js` shows the notifications, which Android Chrome only shows from a service worker. A notification click focuses the app, or opens it at `?open=<path>`, and goes to the screen Android's notification opens (`NotificationDeepLinks`); the map, discovery and firmware screens have no web build, so their notifications open the app where it was.
+The page is an installable PWA: `manifest.webmanifest` takes its icons from the Android launcher art (`copyPwaIcons`), and `sw.js` shows the notifications, which Android Chrome only shows from a service worker. A notification click focuses the app, or opens it at `?open=<path>`, and goes to the screen Android's notification opens (`NotificationDeepLinks`); the map, discovery and firmware screens have no web build, so their notifications open the app where it was. The installed icon carries the unread message count through the Badging API.
 
 ## Browser support
 

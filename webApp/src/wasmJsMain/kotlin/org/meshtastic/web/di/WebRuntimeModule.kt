@@ -40,6 +40,7 @@ import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
+import org.meshtastic.core.repository.AppIconBadge
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
@@ -55,10 +56,15 @@ import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.service.DispatchingMeshNotificationManager
 import org.meshtastic.core.service.InProcessMessageQueue
 import org.meshtastic.core.service.ServiceRepositoryImpl
+import org.meshtastic.core.service.UnreadBadgeSync
 import org.meshtastic.web.WebBuildConfig
+import org.meshtastic.web.platform.WebAppIconBadge
 import org.meshtastic.web.platform.WebNotificationManager
 
-/** Web runtime wiring mirroring `DesktopRuntimeModule`: the service repository, notifications, queue and HTTP. */
+/**
+ * Web runtime wiring mirroring `DesktopRuntimeModule`: the service repository, notifications and icon badge, queue and
+ * HTTP.
+ */
 @Module
 class WebRuntimeModule {
 
@@ -83,6 +89,12 @@ class WebRuntimeModule {
     @Single
     fun meshNotificationManager(notificationManager: NotificationManager): MeshNotificationManager =
         DispatchingMeshNotificationManager(notificationManager)
+
+    @Single fun appIconBadge(): AppIconBadge = WebAppIconBadge()
+
+    @Single
+    fun unreadBadgeSync(packetRepository: PacketRepository, badge: AppIconBadge): UnreadBadgeSync =
+        UnreadBadgeSync(packetRepository, badge)
 
     @Single(binds = [MessageQueue::class, MeshWorkerManager::class])
     fun messageQueue(

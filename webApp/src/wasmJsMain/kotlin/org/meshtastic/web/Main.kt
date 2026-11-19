@@ -40,6 +40,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.web_database_unavailable
 import org.meshtastic.core.service.MeshServiceOrchestrator
+import org.meshtastic.core.service.UnreadBadgeSync
 import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.isDarkTheme
@@ -156,13 +157,17 @@ private fun MeshServiceLifecycle() {
 }
 
 /**
- * The installed-app side of the shell, once the database is open: hands the service worker what this page loaded, and
- * opens notification clicks.
+ * The installed-app side of the shell, once the database is open: puts the unread count on the app icon, hands the
+ * service worker what this page loaded, and opens notification clicks.
  */
 @Suppress("ViewModelForwarding")
 @Composable
 private fun AppShellServices(uiViewModel: UIViewModel) {
-    LaunchedEffect(Unit) { cacheLoadedResources() }
+    val unreadBadgeSync = koinInject<UnreadBadgeSync>()
+    LaunchedEffect(Unit) {
+        cacheLoadedResources()
+    }
+    LaunchedEffect(unreadBadgeSync) { unreadBadgeSync.run() }
     LaunchedEffect(uiViewModel) {
         NotificationClicks.deepLinks.collect { deepLink ->
             if (isWebDeepLink(deepLink)) {
