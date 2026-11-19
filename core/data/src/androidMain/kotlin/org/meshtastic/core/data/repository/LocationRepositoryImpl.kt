@@ -53,6 +53,7 @@ class LocationRepositoryImpl(
     private val locationManager: Lazy<LocationManager>,
     private val analytics: PlatformAnalytics,
     private val dispatchers: CoroutineDispatchers,
+    private val fused: FusedLocationClient,
 ) : LocationRepository {
 
     companion object {
@@ -83,7 +84,7 @@ class LocationRepositoryImpl(
         val nmeaListener = OnNmeaMessageListener { message, _ -> nmea.accept(message) }
         val nmeaListening = addNmea(nmeaListener)
 
-        val locationListener = LocationListenerCompat { location ->
+        val onFix: (AndroidLocation) -> Unit = { location ->
             if (location.hasAltitude() && !LocationCompat.hasMslAltitude(location)) {
                 @Suppress("TooGenericExceptionCaught")
                 try {
@@ -94,6 +95,7 @@ class LocationRepositoryImpl(
             }
             trySend(location.toLocation(nmea.fresh(NMEA_FRESH_MS)))
         }
+        val locationListener = LocationListenerCompat { onFix(it) }
 
         val providerList = buildList {
             val providers = allProviders
@@ -112,16 +114,22 @@ class LocationRepositoryImpl(
         _receivingLocationUpdates.value = true
         analytics.track("location_start")
 
+        // Play services' fused provider where the flavor has it and the phone runs it, else the platform's.
+        var fusedHandle: AutoCloseable? = null
         @Suppress("TooGenericExceptionCaught")
         try {
-            providerList.forEach { provider ->
-                LocationManagerCompat.requestLocationUpdates(
-                    this@requestLocationUpdates,
-                    provider,
-                    locationRequest,
-                    dispatchers.io.asExecutor(),
-                    locationListener,
-                )
+            fusedHandle = fused.requestLocationUpdates(DEFAULT_INTERVAL_MS, dispatchers.io.asExecutor(), onFix)
+            if (fusedHandle != null) Logger.i { "Location updates from Play services' fused provider" }
+            if (fusedHandle == null) {
+                providerList.forEach { provider ->
+                    LocationManagerCompat.requestLocationUpdates(
+                        this@requestLocationUpdates,
+                        provider,
+                        locationRequest,
+                        dispatchers.io.asExecutor(),
+                        locationListener,
+                    )
+                }
             }
         } catch (e: Exception) {
             close(e)
@@ -132,6 +140,7 @@ class LocationRepositoryImpl(
             _receivingLocationUpdates.value = false
             analytics.track("location_stop")
 
+            fusedHandle?.close()
             LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
             if (nmeaListening) removeNmeaListener(nmeaListener)
         }

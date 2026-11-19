@@ -23,9 +23,11 @@ import com.datadog.android.okhttp.DatadogEventListener
 import com.datadog.android.okhttp.DatadogInterceptor
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.app.location.GoogleFusedLocationClient
 import org.meshtastic.app.map.hud.GoogleFusedOrientationSource
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
 import org.meshtastic.app.theme.GoogleFontsEventFontResolver
+import org.meshtastic.core.data.repository.FusedLocationClient
 import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.map.hud.FusedOrientationSource
 
@@ -38,6 +40,9 @@ class FlavorModule {
      * Play services' fused orientation for the camera mesh view, which falls back to the rotation vector without it.
      */
     @Single fun fusedOrientationSource(context: Context): FusedOrientationSource = GoogleFusedOrientationSource(context)
+
+    /** Play services' fused location for every location consumer, where the phone runs Play services. */
+    @Single fun fusedLocationClient(context: Context): FusedLocationClient = GoogleFusedLocationClient(context)
 
     /**
      * Datadog network instrumentation for the shared Ktor `HttpClient`. The interceptor emits RUM Resource spans with
