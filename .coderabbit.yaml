@@ -8,8 +8,9 @@ reviews:
   profile: chill
   high_level_summary: true
   poem: false
-  # Keep the walkthrough to the summary and the changed files. review_status stays on:
-  # tooling reads the paused, draft and rate-limited notices from it.
+  # Keep the walkthrough to the summary and the changed files. Skipped, rate-limited and
+  # completed reviews still show in the `CodeRabbit` check run.
+  review_status: false
   sequence_diagrams: false
   related_prs: false
   related_issues: false
@@ -367,3 +368,22 @@ knowledge_base:
       - ".skills/**/SKILL.md"
       - ".github/copilot-instructions.md"
       - ".github/instructions/*.instructions.md"
+  # Repos this app has a contract with. Flag only a change here that breaks or ignores one.
+  linked_repositories:
+    - repository: meshtastic/protobufs
+      instructions: >-
+        The .proto wire contract, consumed here as the published org.meshtastic:protobufs artifact
+        pinned in gradle/libs.versions.toml. Flag app code that assumes a field, enum value or oneof
+        member the pinned version lacks, or treats a proto3 zero as absent where the field has no presence.
+    - repository: meshtastic/firmware
+      instructions: >-
+        The device side of the phone API: the want_config handshake, admin messages, ack and routing
+        errors, and module behavior. Flag client code that assumes firmware behavior the firmware source
+        contradicts. Do not suggest firmware changes.
+    - repository: meshtastic/TAKPacket-SDK
+      instructions: >-
+        CoT to TAKPacketV2 conversion, consumed here as a published artifact. Flag misuse of its public API.
+    - repository: meshtastic/api
+      instructions: >-
+        Serves the JSON resources the app fetches (device links, firmware releases, bootloader OTA quirks,
+        maintenance UF2 manifest). Flag parsing that disagrees with the shape the api serves.
