@@ -18,5 +18,5 @@ package org.meshtastic.feature.settings.navigation
 
 import org.meshtastic.core.navigation.SettingsRoute
 
-actual fun getAboutLibrariesJson(): String =
+actual suspend fun getAboutLibrariesJson(): String =
     SettingsRoute::class.java.getResource("/aboutlibraries.json")?.readText() ?: ""

@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.meshtastic.koin)
+    alias(libs.plugins.meshtastic.aboutlibraries)
 }
 
 // ── Version resolution (shared with androidApp/desktopApp via build-logic) ──

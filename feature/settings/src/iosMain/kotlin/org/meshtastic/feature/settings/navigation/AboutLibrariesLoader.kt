@@ -20,7 +20,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import platform.Foundation.NSBundle
 
-actual fun getAboutLibrariesJson(): String {
+actual suspend fun getAboutLibrariesJson(): String {
     val path = NSBundle.mainBundle.pathForResource(name = "aboutlibraries", ofType = "json") ?: return ""
     return try {
         FileSystem.SYSTEM.read(path.toPath()) { readUtf8() }

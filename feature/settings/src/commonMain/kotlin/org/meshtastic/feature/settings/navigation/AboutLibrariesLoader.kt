@@ -16,4 +16,4 @@
  */
 package org.meshtastic.feature.settings.navigation
 
-expect fun getAboutLibrariesJson(): String
+expect suspend fun getAboutLibrariesJson(): String
