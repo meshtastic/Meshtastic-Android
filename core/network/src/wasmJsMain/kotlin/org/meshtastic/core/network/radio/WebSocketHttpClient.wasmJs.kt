@@ -24,5 +24,4 @@ import io.ktor.client.plugins.websocket.WebSockets
 @Suppress("UnusedParameter")
 internal actual fun webSocketHttpClient(maxFrameSize: Long, connectTimeoutMillis: Long): HttpClient = HttpClient {
     install(WebSockets)
-    logPhoneLinkHandshakes()
 }

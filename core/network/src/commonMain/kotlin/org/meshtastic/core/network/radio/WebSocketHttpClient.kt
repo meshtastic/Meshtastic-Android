@@ -17,18 +17,9 @@
 package org.meshtastic.core.network.radio
 
 import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import org.meshtastic.core.network.KermitHttpLogger
 
-/** The WebSocket client for one phone link, on the engine each platform can use. */
+/**
+ * The WebSocket client for one phone link, on the engine each platform can use. It installs no HTTP logging: Ktor logs
+ * the whole request URL, query included, so the transport logs each attempt under its anonymized label instead.
+ */
 internal expect fun webSocketHttpClient(maxFrameSize: Long, connectTimeoutMillis: Long): HttpClient
-
-/** The upgrade request line and response status, without headers, so a session cookie never reaches the log. */
-internal fun HttpClientConfig<*>.logPhoneLinkHandshakes() {
-    install(Logging) {
-        logger = KermitHttpLogger
-        level = LogLevel.INFO
-    }
-}

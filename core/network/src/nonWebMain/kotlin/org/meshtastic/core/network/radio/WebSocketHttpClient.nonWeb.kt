@@ -26,5 +26,4 @@ import io.ktor.client.plugins.websocket.WebSockets
 internal actual fun webSocketHttpClient(maxFrameSize: Long, connectTimeoutMillis: Long): HttpClient = HttpClient(CIO) {
     install(WebSockets) { this.maxFrameSize = maxFrameSize }
     engine { endpoint { connectTimeout = connectTimeoutMillis } }
-    logPhoneLinkHandshakes()
 }
