@@ -1525,6 +1525,52 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    /**
+     * After the radio gives its one WebSocket slot to another client (close 4001), a network recovery must not dial
+     * again and take the slot back; only the user's next connect does.
+     */
+    @Test
+    fun `network recovery does not redial after the radio gave the slot to another client`() = runTest(testDispatcher) {
+        clock = 0L
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val networkAvailability = MutableStateFlow<Boolean>(true)
+        val service =
+            createConnectedService(
+                "wws://192.168.1.100/api/v1/ws",
+                networkAvailability = networkAvailability,
+                startConnected = false,
+            )
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            callbacks
+                .last()
+                .onDisconnect(isPermanent = true, reason = TransportDisconnectReason.ReplacedByAnotherClient)
+            testDispatcher.scheduler.runCurrent()
+
+            networkAvailability.value = false
+            testDispatcher.scheduler.runCurrent()
+            networkAvailability.value = true
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(1, createdTransports.size, "network recovery must not redial after a 4001 close")
+
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(2, createdTransports.size, "an explicit connect dials again")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
     // ─── connectionRequested gate: setDeviceAddress(null)/("n") deselect ────────────────────
 
     /**

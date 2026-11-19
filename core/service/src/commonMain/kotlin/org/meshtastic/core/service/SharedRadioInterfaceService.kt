@@ -186,6 +186,14 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource
 private val LINK_UP_PHASES =
     setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes, TransportPhase.Connected)
 
+/** Permanent closes that only the user's next connect may undo. */
+private val USER_CONNECT_REASONS =
+    setOf(
+        TransportDisconnectReason.ReplacedByAnotherClient,
+        TransportDisconnectReason.WebSocketMessageTooBig,
+        TransportDisconnectReason.WebSocketSlotContested,
+    )
+
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
  *
@@ -508,6 +516,10 @@ class SharedRadioInterfaceService(
      */
     @Volatile private var connectionRequested = false
 
+    // A link that gave the radio's one client slot away, or that the radio refused, stays down until the user connects
+    // again: a recovery restart would take the slot back from the client that now holds it.
+    @Volatile private var awaitingUserConnect = false
+
     private val gattCacheInvalidationRequested = atomic(false)
 
     /** Prevents concurrent liveness-induced transport restarts from stacking. */
@@ -637,7 +649,11 @@ class SharedRadioInterfaceService(
                                 // explicitly disconnected from. stopTransportLocked() below still fires on
                                 // BLE-disabled to tear down a running BLE link, but we deliberately do NOT
                                 // clear connectionRequested here — that is disconnect()'s job.
-                                if (connectionRequested && !radioOperationLock.suppressesTransport) {
+                                if (
+                                    connectionRequested &&
+                                    !awaitingUserConnect &&
+                                    !radioOperationLock.suppressesTransport
+                                ) {
                                     startTransportLocked()
                                 }
                             } else if (runningTransportId == InterfaceId.BLUETOOTH) {
@@ -653,7 +669,11 @@ class SharedRadioInterfaceService(
                         transportMutex.withLock {
                             if (state) {
                                 // Environmental recovery only — see the BLE listener above for rationale.
-                                if (connectionRequested && !radioOperationLock.suppressesTransport) {
+                                if (
+                                    connectionRequested &&
+                                    !awaitingUserConnect &&
+                                    !radioOperationLock.suppressesTransport
+                                ) {
                                     startTransportLocked()
                                 }
                             } else if (runningTransportId?.isNetwork == true) {
@@ -736,6 +756,7 @@ class SharedRadioInterfaceService(
                 // Mark the connection lifecycle as active BEFORE starting so concurrent
                 // hardware/network listeners observe the gate as open.
                 connectionRequested = true
+                awaitingUserConnect = false
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -890,6 +911,7 @@ class SharedRadioInterfaceService(
                 // transport for a device the user explicitly tore down. Only start a fresh
                 // transport when an address was actually selected.
                 connectionRequested = sanitized != null
+                awaitingUserConnect = false
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }
@@ -1298,6 +1320,7 @@ class SharedRadioInterfaceService(
                 if (message != null) _connectionError.emit(message)
             }
         }
+        if (isPermanent && reason in USER_CONNECT_REASONS) awaitingUserConnect = true
         linkedGeneration = null
         // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.
         if (_transportStatus.value?.phase in LINK_UP_PHASES) _transportStatus.value = null
