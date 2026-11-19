@@ -16,15 +16,15 @@
  */
 package org.meshtastic.feature.settings.search
 
-import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.navigation.SettingsRoute
 import kotlin.test.AfterTest
@@ -33,36 +33,37 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsFieldFocusTest {
 
     private val focus = SettingsFieldFocus()
-    private val viewModels = ViewModelStore()
-    private val sentinels = mutableListOf<Job>()
+    private val viewModelJobs = mutableListOf<Job>()
 
     @BeforeTest fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
 
     /**
-     * The search ViewModel resolves its catalog on `Dispatchers.Default` from `init`. Its scope must end before
-     * `resetMain()`, or the next lookup resumes onto an unset Main and fails whichever `runTest` starts next.
+     * The search ViewModel resolves its catalog on `Dispatchers.Default` from `init`, and even a cancelled lookup
+     * resumes through Main. Its scope must be complete, not just cancelled, before `resetMain()`, or that resume hits
+     * an unset Main and fails whichever `runTest` starts next.
      */
     @AfterTest
     fun tearDown() {
-        viewModels.clear()
+        val live = viewModelJobs.count { !it.isCompleted }
         Dispatchers.resetMain()
-        assertTrue(sentinels.all { it.isCancelled }, "a SettingsSearchViewModel outlived its test")
+        assertEquals(0, live, "a SettingsSearchViewModel was still running at resetMain")
     }
 
-    private fun searchViewModel(): SettingsSearchViewModel = SettingsSearchViewModel(focus).also {
-        viewModels.put("search${sentinels.size}", it)
-        sentinels += it.viewModelScope.launch { awaitCancellation() }
+    private fun withSearchViewModel(block: (SettingsSearchViewModel) -> Unit) = runTest {
+        val viewModel = SettingsSearchViewModel(focus)
+        val job = viewModel.viewModelScope.coroutineContext.job
+        viewModelJobs += job
+        block(viewModel)
+        job.cancelAndJoin()
     }
 
     @Test
-    fun choosingAResultLeavesItsFieldPendingForTheScreen() {
-        val viewModel = searchViewModel()
+    fun choosingAResultLeavesItsFieldPendingForTheScreen() = withSearchViewModel { viewModel ->
         val entry =
             ResolvedSettingsEntry(
                 id = "hop",
