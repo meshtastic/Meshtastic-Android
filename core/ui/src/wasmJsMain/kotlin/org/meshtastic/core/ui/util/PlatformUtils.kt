@@ -49,9 +49,9 @@ actual fun rememberShareText(): (text: String, subject: String) -> Unit {
     return { text, _ -> scope.launch { clipboard.setClipEntry(createClipEntry(text, sensitive = true)) } }
 }
 
-@Composable actual fun rememberShowToast(): suspend (String) -> Unit = { _ -> }
+@Composable actual fun rememberShowToast(): suspend (String) -> Unit = rememberSnackbarToast()
 
-@Composable actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> }
+@Composable actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = rememberSnackbarToastResource()
 
 @Composable actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ -> }
 

@@ -23,16 +23,19 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.meshtastic.core.ui.util.LocalSnackbarManager
 import org.meshtastic.core.ui.util.SnackbarManager
 
 /**
  * Shared composable that observes [SnackbarManager.events] and provides a global [SnackbarHostState].
  *
- * It renders a [SnackbarHost] using the provided [hostModifier] over the provided [content].
+ * It renders a [SnackbarHost] using the provided [hostModifier] over the provided [content], and provides
+ * [LocalSnackbarManager] to it.
  */
 @Composable
 fun MeshtasticSnackbarProvider(
@@ -59,7 +62,7 @@ fun MeshtasticSnackbarProvider(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        content()
+        CompositionLocalProvider(LocalSnackbarManager provides snackbarManager, content = content)
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().then(hostModifier),
