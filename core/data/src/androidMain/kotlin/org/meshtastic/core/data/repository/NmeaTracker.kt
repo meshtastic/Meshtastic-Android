@@ -51,8 +51,9 @@ internal class NmeaTracker(private val clock: () -> Long) {
     @Synchronized
     fun fresh(freshMillis: Long): GnssFix? {
         val now = clock()
-        val gga = gga.takeIf { ggaAt?.let { now - it <= freshMillis } == true }
-        val gsa = gsa.takeIf { gsaAt?.let { now - it <= freshMillis } == true }
+        fun isFresh(at: Long?) = at != null && now - at <= freshMillis
+        val gga = gga.takeIf { isFresh(ggaAt) }
+        val gsa = gsa.takeIf { isFresh(gsaAt) }
         return if (gga == null && gsa == null) {
             null
         } else {
