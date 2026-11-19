@@ -31,19 +31,9 @@
   },
   "packageRules": [
     {
-      "description": "Skip Temurin respins: setup-java encodes 25.0.5.1+2 as 25.0.5+100000002, which ships for x64 only and breaks the aarch64 Flatpak leg",
+      "description": "setup-java pins stay at the major (25): setup-java resolves the newest build per arch, and a JDK major moves with the toolchain, JBR and the Flatpak openjdk extension, by hand",
       "matchDatasources": [
         "java-version"
-      ],
-      "allowedVersions": "!/\\+1\\d{8}/"
-    },
-    {
-      "description": "No JDK majors: the toolchain, JBR and the Flatpak openjdk extension move together, by hand",
-      "matchDatasources": [
-        "java-version"
-      ],
-      "matchUpdateTypes": [
-        "major"
       ],
       "enabled": false
     },
