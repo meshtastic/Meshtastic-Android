@@ -1389,6 +1389,7 @@ mqtt_error_connection_lost
 mqtt_error_credentials_rejected
 mqtt_error_proxy_failed
 mqtt_error_rejected
+mqtt_needs_websocket_url
 mqtt_probe_dns_failure
 mqtt_probe_other_failure
 mqtt_probe_rejected

@@ -469,6 +469,21 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
+    fun `a broker the client cannot open ends the proxy without connecting`() = runTest {
+        val harness = createHarness()
+        harness.client.opensEndpoints = false
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(0, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.closeCalls)
+        assertIs<MqttEndpointUnsupportedException>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
     fun `only credential and identity reason codes classify as credential rejections`() {
         val fatal =
             listOf(
@@ -1033,6 +1048,7 @@ class MQTTRepositoryImplTest {
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
         override var negotiatedProtocolVersion: MqttProtocolVersion = MqttProtocolVersion.V5_0
         val connectCalls = mutableListOf<MqttEndpoint>()
+        var opensEndpoints = true
         val subscribeCalls = mutableListOf<List<Subscription>>()
         val publishStarted = mutableListOf<MqttMessage>()
         val publishedMessages = mutableListOf<MqttMessage>()
@@ -1042,6 +1058,8 @@ class MQTTRepositoryImplTest {
         private val connectFailures = ArrayDeque<Throwable>()
         private val subscribeFailures = ArrayDeque<Throwable>()
         private var publishGate: CompletableDeferred<Unit>? = null
+
+        override fun opens(endpoint: MqttEndpoint): Boolean = opensEndpoints
 
         override suspend fun connect(endpoint: MqttEndpoint) {
             connectCalls += endpoint

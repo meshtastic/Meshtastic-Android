@@ -38,8 +38,10 @@ import kotlinx.io.IOException
 import org.meshtastic.core.network.mqtt.MqttTopicDiscovery.Activity
 import org.meshtastic.core.network.repository.KermitMqttLogger
 import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
+import org.meshtastic.core.network.repository.MqttEndpointUnsupportedException
 import org.meshtastic.core.network.repository.effectiveCredentials
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
+import org.meshtastic.core.network.repository.isOpenableHere
 import org.meshtastic.core.network.repository.mqttTlsConfig
 import org.meshtastic.core.network.repository.mqttTransportFactory
 import org.meshtastic.core.network.repository.resolveEndpoint
@@ -83,6 +85,7 @@ class MqttTopicSampler(
 ) {
     enum class Failure {
         CONNECT,
+        NEEDS_WEBSOCKET_URL,
         FILTERS_REFUSED,
         CLOSED,
         ERROR,
@@ -134,6 +137,9 @@ class MqttTopicSampler(
         val client =
             try {
                 clientFactory(config)
+            } catch (_: MqttEndpointUnsupportedException) {
+                _state.value = State(phase = Phase.Failed(Failure.NEEDS_WEBSOCKET_URL))
+                return
             } catch (e: IllegalArgumentException) {
                 Logger.w { "MQTT topic sample: address (${e::class.simpleName})" }
                 _state.value = State(phase = Phase.Failed(Failure.CONNECT))
@@ -288,6 +294,7 @@ private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
 private fun defaultSamplerClient(config: ModuleConfig.MQTTConfig?): TopicSamplerClient {
     val rawAddress = config?.address?.ifEmpty { DEFAULT_SERVER_ADDRESS } ?: DEFAULT_SERVER_ADDRESS
     val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, config?.tls_enabled == true))
+    if (!endpoint.isOpenableHere()) throw MqttEndpointUnsupportedException()
     val client =
         MqttClient("MeshtasticAndroidTopicFinder-${Uuid.random()}") {
             val tls = mqttTlsConfig()

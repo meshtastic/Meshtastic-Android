@@ -155,6 +155,13 @@ class MQTTRepositoryImpl(
                     logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN,
                 ),
             )
+        // Retrying cannot help a broker the client has no transport for, so it ends here, as a rejection does.
+        if (!newClient.opens(endpoint)) {
+            Logger.w { "MQTT broker address needs a ws:// or wss:// URL on this platform, stopping" }
+            newClient.close()
+            close(MqttEndpointUnsupportedException())
+            return@callbackFlow
+        }
         val session = ActiveMqttSession(newClient)
         closeSession(replaceActiveSession(session))
 
@@ -502,6 +509,9 @@ internal interface MqttClientSession {
     /** The version the broker accepted, valid only after [connect] returns. */
     val negotiatedProtocolVersion: MqttProtocolVersion
 
+    /** Whether this client has a transport for [endpoint]; a browser's has none for TCP. */
+    fun opens(endpoint: MqttEndpoint): Boolean = true
+
     suspend fun connect(endpoint: MqttEndpoint)
 
     suspend fun subscribe(subscriptions: List<Subscription>)
@@ -518,6 +528,8 @@ private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttC
     // Read through on every access: the client resets it on connect and preserves it across auto-reconnects.
     override val negotiatedProtocolVersion: MqttProtocolVersion
         get() = delegate.negotiatedProtocolVersion
+
+    override fun opens(endpoint: MqttEndpoint): Boolean = endpoint.isOpenableHere()
 
     override suspend fun connect(endpoint: MqttEndpoint) {
         delegate.connect(endpoint)

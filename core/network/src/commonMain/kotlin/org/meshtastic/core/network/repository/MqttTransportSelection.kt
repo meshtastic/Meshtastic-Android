@@ -17,6 +17,7 @@
 package org.meshtastic.core.network.repository
 
 import io.ktor.network.tls.TLSConfigBuilder
+import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttTransportFactory
 
 /**
@@ -29,3 +30,9 @@ import org.meshtastic.mqtt.MqttTransportFactory
  * probe client and must not duplicate this platform-selection logic itself.
  */
 expect fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory
+
+/** Whether this platform's transport opens [this]: any endpoint, but in a browser only `ws://` and `wss://`. */
+fun MqttEndpoint.isOpenableHere(): Boolean = mqttTransportFactory(null).supports(this)
+
+/** A broker address this platform has no transport for, as a bare host is in a browser. */
+class MqttEndpointUnsupportedException : IllegalArgumentException("No MQTT transport here opens this broker endpoint")

@@ -55,6 +55,7 @@ import org.meshtastic.core.network.mqtt.RankedRoot
 import org.meshtastic.core.network.mqtt.TopicPlan
 import org.meshtastic.core.network.mqtt.TopicSuggestion
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mqtt_needs_websocket_url
 import org.meshtastic.core.resources.mqtt_root_problem_empty
 import org.meshtastic.core.resources.mqtt_root_problem_empty_segment
 import org.meshtastic.core.resources.mqtt_root_problem_ends_with_version
@@ -217,6 +218,7 @@ internal fun TopicSuggestion.Kind.label(): StringResource = when (this) {
 
 internal fun MqttTopicSampler.Failure.message(): StringResource = when (this) {
     MqttTopicSampler.Failure.CONNECT -> Res.string.mqtt_topic_finder_failed_connect
+    MqttTopicSampler.Failure.NEEDS_WEBSOCKET_URL -> Res.string.mqtt_needs_websocket_url
     MqttTopicSampler.Failure.FILTERS_REFUSED -> Res.string.mqtt_topic_finder_failed_filters
     MqttTopicSampler.Failure.CLOSED -> Res.string.mqtt_topic_finder_failed_closed
     MqttTopicSampler.Failure.ERROR -> Res.string.mqtt_topic_finder_failed_error
