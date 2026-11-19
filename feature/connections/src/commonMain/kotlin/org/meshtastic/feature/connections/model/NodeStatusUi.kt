@@ -33,7 +33,17 @@ data class NodeStatusUi(
     val bearers: List<BearerRowUi>,
     val sensors: SensorsUi? = null,
     val extraRadioFailure: String? = null,
+    /** What keeps the node's GPS from running, or null when it runs or the host has none. */
+    val gps: GpsNotice? = null,
 )
+
+/** Why the node's GPS cannot run, each with the thing the user changes. */
+enum class GpsNotice {
+    NO_PERMISSION,
+    APPROXIMATE_ONLY,
+    LOCATION_OFF,
+    NO_GPS,
+}
 
 /**
  * One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). [extra] marks a LoRa

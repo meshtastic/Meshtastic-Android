@@ -1615,6 +1615,10 @@ node_sort_last_heard
 node_sort_title
 node_sort_via_favorite
 node_sort_via_mqtt
+node_status_gps_approximate
+node_status_gps_location_off
+node_status_gps_no_permission
+node_status_gps_none
 node_status_peers
 node_status_phase_failed
 node_status_phase_rebooting

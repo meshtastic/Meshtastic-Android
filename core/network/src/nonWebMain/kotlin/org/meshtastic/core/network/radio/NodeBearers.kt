@@ -82,4 +82,15 @@ class NodeSensors(
     val bus: StateFlow<I2cBusState>? = null,
     val power: PowerSource? = null,
     val position: PositionSource? = null,
+    /** Whether [position]'s GPS can run, and what the user has to change when it cannot; null with no GPS source. */
+    val gps: StateFlow<NodeGpsState>? = null,
 )
+
+/** Whether the node's GPS can be asked for fixes, as node-android's `GpsAccess` reports it. */
+enum class NodeGpsState {
+    READY,
+    NO_PERMISSION,
+    APPROXIMATE_ONLY,
+    LOCATION_OFF,
+    NO_GPS,
+}

@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.network.radio.NodeGpsState
 import org.meshtastic.core.network.radio.NodeStatusRepository
+import org.meshtastic.feature.connections.model.GpsNotice
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.host.Bearer
 import org.meshtastic.feature.connections.model.toNode
@@ -35,15 +37,15 @@ class InProcessNodeCardSource(private val repository: NodeStatusRepository) : No
 
     override fun claims(address: String): Boolean = address.firstOrNull() == InterfaceId.NODE.id
 
-    override fun status(address: String): Flow<NodeStatusUi?> =
-        combine(repository.status, repository.sensors, repository.extraRadiosOff, repository.primaryRadio) {
-                status,
-                bus,
-                extraRadiosOff,
-                primary,
-            ->
-            status?.toUi(extraRadiosOff, primary)?.copy(sensors = bus?.toSensorsUi())
-        }
+    override fun status(address: String): Flow<NodeStatusUi?> = combine(
+        repository.status,
+        repository.sensors,
+        repository.extraRadiosOff,
+        repository.primaryRadio,
+        repository.gps,
+    ) { status, bus, extraRadiosOff, primary, gps ->
+        status?.toUi(extraRadiosOff, primary)?.copy(sensors = bus?.toSensorsUi(), gps = gps?.toNotice())
+    }
 
     override suspend fun setBearer(address: String, bearer: Bearer, on: Boolean) {
         repository.setHostBearer(bearer.toNode(), on)
@@ -65,4 +67,13 @@ class InProcessNodeCardSource(private val repository: NodeStatusRepository) : No
     override fun refreshRequirements() = repository.refreshRequirements()
 
     override fun requestUsbPermission() = repository.requestUsbPermission()
+}
+
+/** The card's notice for the node's GPS: none while it runs. */
+internal fun NodeGpsState.toNotice(): GpsNotice? = when (this) {
+    NodeGpsState.READY -> null
+    NodeGpsState.NO_PERMISSION -> GpsNotice.NO_PERMISSION
+    NodeGpsState.APPROXIMATE_ONLY -> GpsNotice.APPROXIMATE_ONLY
+    NodeGpsState.LOCATION_OFF -> GpsNotice.LOCATION_OFF
+    NodeGpsState.NO_GPS -> GpsNotice.NO_GPS
 }

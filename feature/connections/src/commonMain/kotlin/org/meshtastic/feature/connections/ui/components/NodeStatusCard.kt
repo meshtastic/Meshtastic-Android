@@ -58,6 +58,10 @@ import org.meshtastic.core.resources.node_bearer_unsupported
 import org.meshtastic.core.resources.node_bearer_video
 import org.meshtastic.core.resources.node_bearer_wifi_aware
 import org.meshtastic.core.resources.node_extra_radio_off_with_lora
+import org.meshtastic.core.resources.node_status_gps_approximate
+import org.meshtastic.core.resources.node_status_gps_location_off
+import org.meshtastic.core.resources.node_status_gps_no_permission
+import org.meshtastic.core.resources.node_status_gps_none
 import org.meshtastic.core.resources.node_status_peers
 import org.meshtastic.core.resources.node_status_phase_failed
 import org.meshtastic.core.resources.node_status_phase_rebooting
@@ -80,6 +84,7 @@ import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberPermissionState
 import org.meshtastic.feature.connections.model.BearerRowState
 import org.meshtastic.feature.connections.model.BearerRowUi
+import org.meshtastic.feature.connections.model.GpsNotice
 import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.host.Bearer
 import org.meshtastic.feature.connections.model.host.NodePhase
@@ -170,7 +175,21 @@ private fun NodeStatusHeader(status: NodeStatusUi, title: String, modifier: Modi
                 color = MaterialTheme.colorScheme.error,
             )
         }
+        status.gps?.let {
+            Text(
+                text = stringResource(it.label()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
+}
+
+private fun GpsNotice.label(): StringResource = when (this) {
+    GpsNotice.NO_PERMISSION -> Res.string.node_status_gps_no_permission
+    GpsNotice.APPROXIMATE_ONLY -> Res.string.node_status_gps_approximate
+    GpsNotice.LOCATION_OFF -> Res.string.node_status_gps_location_off
+    GpsNotice.NO_GPS -> Res.string.node_status_gps_none
 }
 
 @Composable

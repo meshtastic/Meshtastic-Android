@@ -18,7 +18,10 @@ package org.meshtastic.core.network.radio
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.node.BytesStore
 import org.meshtastic.node.MeshLogger
@@ -26,6 +29,7 @@ import org.meshtastic.node.android.AndroidBarometer
 import org.meshtastic.node.android.AndroidBatteryPower
 import org.meshtastic.node.android.AndroidBearerFactory
 import org.meshtastic.node.android.AndroidGpsPosition
+import org.meshtastic.node.android.GpsAccess
 import org.meshtastic.node.android.androidHostState
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
@@ -52,11 +56,27 @@ class AndroidNodeBearers(context: Context, private val locationFeed: NodeLocatio
      * long as [scope]. The GPS waits for precise location and the location switch and picks either up when given. The
      * node broadcasts the position only on a channel that names a `position_precision`, which no default does.
      */
-    override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors = NodeSensors(
-        environment = AndroidBarometer(app, scope).takeIf { it.available },
-        power = AndroidBatteryPower(app),
-        position = AndroidGpsPosition(app, scope, locationFeed.feed()).takeIf { it.available },
-    )
+    override fun sensors(scope: CoroutineScope, logger: MeshLogger): NodeSensors {
+        val gps = AndroidGpsPosition(app, scope, locationFeed.feed()).takeIf { it.available }
+        return NodeSensors(
+            environment = AndroidBarometer(app, scope).takeIf { it.available },
+            power = AndroidBatteryPower(app),
+            position = gps,
+            gps =
+            gps?.access?.let { access ->
+                val initial = access.value.toNodeGpsState()
+                access.map { it.toNodeGpsState() }.stateIn(scope, SharingStarted.Eagerly, initial)
+            },
+        )
+    }
+
+    private fun GpsAccess.toNodeGpsState(): NodeGpsState = when (this) {
+        GpsAccess.READY -> NodeGpsState.READY
+        GpsAccess.NO_PERMISSION -> NodeGpsState.NO_PERMISSION
+        GpsAccess.APPROXIMATE_ONLY -> NodeGpsState.APPROXIMATE_ONLY
+        GpsAccess.LOCATION_OFF -> NodeGpsState.LOCATION_OFF
+        GpsAccess.NO_GPS -> NodeGpsState.NO_GPS
+    }
 
     private companion object {
         const val NODE_DIR = "node"

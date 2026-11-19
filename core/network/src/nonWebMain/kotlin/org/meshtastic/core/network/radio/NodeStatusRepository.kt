@@ -44,6 +44,10 @@ interface NodeStatusRepository {
     val primaryRadio: StateFlow<PrimaryRadio?>
         get() = MutableStateFlow(null)
 
+    /** Whether the node's GPS can run: null while no node runs, and on a host with no GPS source. */
+    val gps: StateFlow<NodeGpsState?>
+        get() = MutableStateFlow(null)
+
     /** Switch a host bearer (Wi-Fi Aware, audio, video) on or off; persisted by the node. */
     suspend fun setHostBearer(bearer: Bearer, on: Boolean)
 
@@ -87,6 +91,10 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
 
     override val extraRadiosOff: StateFlow<Set<String>> = extraRadiosOffState.asStateFlow()
 
+    private val gpsState = MutableStateFlow<NodeGpsState?>(null)
+
+    override val gps: StateFlow<NodeGpsState?> = gpsState.asStateFlow()
+
     /**
      * The transport calls this once its node exists; the node's status, and its host's sensor [bus] when it has one,
      * are mirrored until [detach].
@@ -97,6 +105,7 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
         scope: CoroutineScope,
         bus: StateFlow<I2cBusState>?,
         primary: PrimaryRadio? = null,
+        gps: StateFlow<NodeGpsState>? = null,
     ) {
         val next = Live(node, factory)
         live = next
@@ -104,6 +113,7 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
         // A value already in flight when detach runs must not land on an emptied repository.
         next.mirror = scope.launch {
             bus?.let { launch { it.collect { state -> if (live === next) sensorsState.value = state } } }
+            gps?.let { launch { it.collect { state -> if (live === next) gpsState.value = state } } }
             launch {
                 node.hostBearers.extraRadiosOff.collect { off -> if (live === next) extraRadiosOffState.value = off }
             }
@@ -121,6 +131,7 @@ class NodeStatusRepositoryImpl : NodeStatusRepository {
             sensorsState.value = null
             primaryRadioState.value = null
             extraRadiosOffState.value = emptySet()
+            gpsState.value = null
         }
     }
 

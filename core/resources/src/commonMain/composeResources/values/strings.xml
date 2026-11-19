@@ -1669,6 +1669,10 @@
     <string name="node_sort_title">Sort by</string>
     <string name="node_sort_via_favorite">via Favorite</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="node_status_gps_approximate">GPS needs precise location</string>
+    <string name="node_status_gps_location_off">GPS waits for location to be turned on</string>
+    <string name="node_status_gps_no_permission">GPS needs location permission</string>
+    <string name="node_status_gps_none">No GPS on this phone</string>
     <plurals name="node_status_peers">
         <item quantity="one">%1$d node heard</item>
         <item quantity="other">%1$d nodes heard</item>
