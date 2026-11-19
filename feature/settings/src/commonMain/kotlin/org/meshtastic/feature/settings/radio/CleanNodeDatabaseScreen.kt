@@ -49,6 +49,7 @@ import org.meshtastic.core.resources.clean_unknown_nodes
 import org.meshtastic.core.resources.nodes_queued_for_deletion
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.rememberHoistedSliderState
 
 /**
  * Composable screen for cleaning the node database. Allows users to specify criteria for deleting nodes. The list of
@@ -136,11 +137,9 @@ private fun DaysThresholdFilter(olderThanDays: Float, onlyUnknownNodes: Boolean,
             text = stringResource(Res.string.clean_nodes_older_than, olderThanDays.toInt()),
         )
         Slider(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            value = olderThanDays,
+            state = rememberHoistedSliderState(olderThanDays, steps, valueRange),
             onValueChange = onDaysChanged,
-            valueRange = valueRange,
-            steps = steps,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         )
     }
 }

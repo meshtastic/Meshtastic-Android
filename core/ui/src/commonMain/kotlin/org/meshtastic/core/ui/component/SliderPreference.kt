@@ -72,15 +72,13 @@ fun <T> SliderPreference(
             Column {
                 summary?.let { Text(text = it, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) }
                 Slider(
-                    value = animatedValue,
+                    state = rememberHoistedSliderState(animatedValue, steps, valueRange),
                     onValueChange = {
                         val index = it.roundToInt()
                         if (index in items.indices) {
                             onValueChange(items[index].first)
                         }
                     },
-                    valueRange = valueRange,
-                    steps = steps,
                     enabled = enabled,
                 )
             }
