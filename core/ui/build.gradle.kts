@@ -73,7 +73,13 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
-        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                // QR decoding where the browser has no BarcodeDetector for QR codes. Apache-2.0, no dependencies.
+                implementation(npm("jsqr", "1.4.0"))
+            }
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

@@ -122,6 +122,9 @@ internal fun launchOpenFile(mimeType: String, onUriReceived: (CommonUri?) -> Uni
     }
 }
 
+/** Opens the file picker for an image and hands back the picked `File`, or null when the user cancels. */
+internal fun pickImageFile(onPicked: (JsAny?) -> Unit) = openFilePicker("image/*", onPicked)
+
 private fun hasSaveFilePicker(): Boolean = js("typeof window.showSaveFilePicker === 'function'")
 
 /** Resolves to `{ handle }` on a pick, `{ aborted: true }` on cancel, `{}` on any other refusal; never rejects. */

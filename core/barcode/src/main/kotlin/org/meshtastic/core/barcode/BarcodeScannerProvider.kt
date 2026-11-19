@@ -22,20 +22,13 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,20 +39,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.ClipOp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -71,12 +56,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.camera_permission
 import org.meshtastic.core.resources.camera_permission_rationale
 import org.meshtastic.core.resources.camera_unavailable
-import org.meshtastic.core.resources.close
-import org.meshtastic.core.resources.error
-import org.meshtastic.core.resources.retry
+import org.meshtastic.core.ui.component.BarcodeScannerFrame
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
-import org.meshtastic.core.ui.icon.Close
-import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.BarcodeScanner
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberCameraPermissionState
@@ -172,116 +153,28 @@ private fun BarcodeScannerDialog(onResult: (String?) -> Unit) {
         resultGate.tryDeliver(result) { value -> mainExecutor.execute { currentOnResult(value) } }
     }
 
-    Dialog(onDismissRequest = { deliverResult(null) }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            key(scannerAttempt) {
-                ScannerView(
-                    onResult = { deliverResult(it) },
-                    onCameraReady = {
-                        isCameraReady = it
-                        if (it) hasCameraError = false
-                    },
-                    onCameraError = {
-                        isCameraReady = false
-                        hasCameraError = true
-                    },
-                )
-            }
-            if (isCameraReady) {
-                ScannerReticule()
-            }
-            if (hasCameraError) {
-                ScannerErrorContent(
-                    onRetry = {
-                        hasCameraError = false
-                        scannerAttempt++
-                    },
-                    onClose = { deliverResult(null) },
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
-            IconButton(
-                onClick = { deliverResult(null) },
-                modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
-            ) {
-                Icon(
-                    imageVector = MeshtasticIcons.Close,
-                    contentDescription = stringResource(Res.string.close),
-                    tint = Color.White,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ScannerErrorContent(onRetry: () -> Unit, onClose: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.padding(24.dp), shape = MaterialTheme.shapes.large) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = stringResource(Res.string.error),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
+    BarcodeScannerFrame(
+        onClose = { deliverResult(null) },
+        showReticle = isCameraReady,
+        errorMessage = if (hasCameraError) stringResource(Res.string.camera_unavailable) else null,
+        onRetry = {
+            hasCameraError = false
+            scannerAttempt++
+        },
+    ) { _ ->
+        key(scannerAttempt) {
+            ScannerView(
+                onResult = { deliverResult(it) },
+                onCameraReady = {
+                    isCameraReady = it
+                    if (it) hasCameraError = false
+                },
+                onCameraError = {
+                    isCameraReady = false
+                    hasCameraError = true
+                },
             )
-            Text(text = stringResource(Res.string.camera_unavailable), style = MaterialTheme.typography.bodyMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onClose) { Text(text = stringResource(Res.string.close)) }
-                FilledTonalButton(onClick = onRetry) { Text(text = stringResource(Res.string.retry)) }
-            }
         }
-    }
-}
-
-@Suppress("MagicNumber")
-@Composable
-private fun ScannerReticule() {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val width = size.width
-        val height = size.height
-        val reticleSize = width.coerceAtMost(height) * 0.7f
-        val left = (width - reticleSize) / 2
-        val top = (height - reticleSize) / 2
-        val rect = Rect(left, top, left + reticleSize, top + reticleSize)
-
-        // Draw semi-transparent background with a hole
-        clipPath(Path().apply { addRect(rect) }, clipOp = ClipOp.Difference) {
-            drawRect(Color.Black.copy(alpha = 0.6f))
-        }
-
-        // Draw reticle corners
-        val strokeWidth = 3.dp.toPx()
-        val cornerLength = 40.dp.toPx()
-        val color = Color.White
-
-        // Corners
-        val path =
-            Path().apply {
-                // Top Left
-                moveTo(left, top + cornerLength)
-                lineTo(left, top)
-                lineTo(left + cornerLength, top)
-
-                // Top Right
-                moveTo(left + reticleSize - cornerLength, top)
-                lineTo(left + reticleSize, top)
-                lineTo(left + reticleSize, top + cornerLength)
-
-                // Bottom Right
-                moveTo(left + reticleSize, top + reticleSize - cornerLength)
-                lineTo(left + reticleSize, top + reticleSize)
-                lineTo(left + reticleSize - cornerLength, top + reticleSize)
-
-                // Bottom Left
-                moveTo(left + cornerLength, top + reticleSize)
-                lineTo(left, top + reticleSize)
-                lineTo(left, top + reticleSize - cornerLength)
-            }
-
-        drawPath(path, color, style = Stroke(strokeWidth))
     }
 }
 

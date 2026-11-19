@@ -19,15 +19,13 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 
+/** The QR scanner screens start; a host may provide its own, and the default is the platform's built-in one. */
+@Suppress("CompositionLocalAllowlist")
 val LocalBarcodeScannerProvider =
     compositionLocalOf<@Composable (onResult: (String?) -> Unit) -> BarcodeScanner> {
-        {
-            object : BarcodeScanner {
-                override fun startScan() {
-                    // Default NO-OP
-                }
-            }
-        }
+        { onResult -> rememberPlatformBarcodeScanner(onResult) }
     }
 
-val LocalBarcodeScannerSupported = compositionLocalOf { false }
+/** Whether [LocalBarcodeScannerProvider] scans anything, so a screen offers scanning only where it works. */
+@Suppress("CompositionLocalAllowlist")
+val LocalBarcodeScannerSupported = compositionLocalOf { platformBarcodeScannerSupported }
