@@ -34,6 +34,7 @@ import org.meshtastic.feature.intro.di.FeatureIntroModule
 import org.meshtastic.feature.messaging.di.FeatureMessagingModule
 import org.meshtastic.feature.node.di.FeatureNodeModule
 import org.meshtastic.feature.settings.di.FeatureSettingsModule
+import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
 
 /**
  * Aggregate Koin module for the Web target, mirroring `DesktopKoinModule`. TAK, the map and the feature modules with no
@@ -61,6 +62,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
         FeatureConnectionsModule::class,
         FeatureIntroModule::class,
         FeatureDocsModule::class,
+        FeatureWifiProvisionModule::class,
         FeatureSettingsModule::class,
         WebDiModule::class,
         WebPlatformModule::class,

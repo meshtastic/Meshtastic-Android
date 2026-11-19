@@ -20,6 +20,8 @@ import androidx.lifecycle.ViewModelStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -28,6 +30,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeBleConnection
@@ -44,6 +48,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.uuid.Uuid
 
 /**
  * Tests for [WifiProvisionViewModel] covering the full state machine: BLE connect, device found, scan networks,
@@ -119,6 +125,26 @@ class WifiProvisionViewModelTest {
         assertEquals(Phase.DeviceFound, state.phase)
         assertEquals("mpwrd-nm-1234", state.deviceName)
         assertNull(state.error)
+    }
+
+    @Test
+    fun `a dismissed device chooser returns to Idle with no error`() = runTest {
+        val picker =
+            WifiProvisionViewModel(
+                bleScanner = DismissedChooser(),
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
+                dispatchers =
+                CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                applicationScope = FakeApplicationCoroutineScope(testDispatcher),
+            )
+        assertTrue(picker.picksDevice)
+
+        picker.connectToDevice()
+        advanceUntilIdle()
+
+        assertEquals(Phase.Idle, picker.uiState.value.phase)
+        assertNull(picker.uiState.value.error)
+        assertTrue(picker.uiState.value.pickDismissed)
     }
 
     @Test
@@ -382,6 +408,13 @@ class WifiProvisionViewModelTest {
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------
+
+    /** A browser chooser the user closed: it picks devices, and its scan ends with none. */
+    private class DismissedChooser : BleScanner {
+        override val picksDevice: Boolean = true
+
+        override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = emptyFlow()
+    }
 
     /** Hands out a fresh [FakeBleConnection] per [create], so each service's connection can be checked on its own. */
     private class RecordingBleConnectionFactory : BleConnectionFactory {

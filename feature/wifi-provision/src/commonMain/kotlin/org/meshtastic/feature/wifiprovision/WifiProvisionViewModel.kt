@@ -33,6 +33,7 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.feature.wifiprovision.domain.NoDevicePickedException
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
@@ -51,6 +52,8 @@ data class WifiProvisionUiState(
     val ipAddress: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
     val provisionStatus: ProvisionStatus = ProvisionStatus.Idle,
+    /** The browser's device chooser closed without a pick, so the screen offers it again. */
+    val pickDismissed: Boolean = false,
 ) {
     enum class Phase {
         /** No operation running — initial state before BLE connect. */
@@ -118,6 +121,13 @@ class WifiProvisionViewModel(
     private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
+    /**
+     * True where the scan is the browser's device chooser, which opens only from a click: the screen waits for one
+     * instead of connecting on arrival.
+     */
+    val picksDevice: Boolean
+        get() = bleScanner.picksDevice
+
     private val _uiState = MutableStateFlow(WifiProvisionUiState())
     val uiState: StateFlow<WifiProvisionUiState> = _uiState.asStateFlow()
 
@@ -136,7 +146,9 @@ class WifiProvisionViewModel(
      * @param address Optional MAC address to target a specific device.
      */
     fun connectToDevice(address: String? = null) {
-        _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null) }
+        _uiState.update {
+            it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null, pickDismissed = false)
+        }
 
         val previousJob = connectJob
         val previousService = service
@@ -153,6 +165,13 @@ class WifiProvisionViewModel(
                     _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.DeviceFound, deviceName = deviceName) }
                 }
                 .onFailure { e ->
+                    if (e is NoDevicePickedException) {
+                        Logger.i { "$TAG: device chooser dismissed" }
+                        _uiState.update {
+                            it.copy(phase = WifiProvisionUiState.Phase.Idle, error = null, pickDismissed = true)
+                        }
+                        return@onFailure
+                    }
                     Logger.e(e) { "$TAG: BLE connect failed" }
                     _uiState.update {
                         it.copy(

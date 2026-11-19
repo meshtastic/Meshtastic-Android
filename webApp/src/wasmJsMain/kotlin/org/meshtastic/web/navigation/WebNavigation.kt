@@ -35,6 +35,7 @@ import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
+import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
 /** Registers [NavKey] entry providers for the web destinations: the feature graphs with a wasmJs target. */
 fun EntryProviderScope<NavKey>.webNavGraph(
@@ -58,6 +59,7 @@ fun EntryProviderScope<NavKey>.webNavGraph(
     docsEntries(backStack)
     channelsGraph(backStack)
     connectionsGraph(backStack)
+    wifiProvisionGraph(backStack)
 
     // A "map" deep link still routes here, so the destination exists and renders nothing.
     entry<MapRoute.Map> {}

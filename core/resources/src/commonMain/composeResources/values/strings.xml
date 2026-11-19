@@ -2436,6 +2436,8 @@
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Available Networks</string>
+    <string name="wifi_provision_choose_device">Choose device</string>
+    <string name="wifi_provision_choose_device_detail">Your browser lists the nearby devices that offer Wi-Fi setup. Pick yours to continue.</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>

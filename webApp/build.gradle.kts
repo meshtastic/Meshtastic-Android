@@ -127,6 +127,7 @@ kotlin {
             implementation(projects.feature.connections)
             implementation(projects.feature.intro)
             implementation(projects.feature.docs)
+            implementation(projects.feature.wifiProvision)
 
             // Compose Multiplatform
             implementation(libs.compose.multiplatform.runtime)

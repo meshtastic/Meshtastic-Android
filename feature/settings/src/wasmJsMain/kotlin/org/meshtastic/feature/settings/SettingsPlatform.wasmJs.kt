@@ -20,7 +20,7 @@ package org.meshtastic.feature.settings
 actual val settingsPlatform: SettingsPlatform =
     SettingsPlatform(
         localMeshDiscovery = false,
-        wifiProvisioning = false,
+        wifiProvisioning = true,
         helpDocs = true,
         firmware = false,
         tak = false,

@@ -26,6 +26,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
@@ -87,15 +88,20 @@ class NymeaWifiService(
      * Scan for a device advertising the nymea wireless service and connect to it.
      *
      * @param address Optional MAC address filter. If null, the first advertising device is used.
-     * @return The discovered device's advertised name on success.
+     * @return The discovered device's advertised name on success, or a [NoDevicePickedException] failure when the
+     *   scanner is a device chooser the user dismissed.
      * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT].
      */
     suspend fun connect(address: String? = null): Result<String> = safeCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=${address.anonymize()})…" }
 
+        val scan = scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = WIRELESS_SERVICE_UUID, address = address)
         val device =
-            withTimeout(SCAN_TIMEOUT) {
-                scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = WIRELESS_SERVICE_UUID, address = address).first()
+            if (scanner.picksDevice) {
+                // A chooser stays open until the user answers, so no timeout; dismissing it ends the scan empty.
+                scan.firstOrNull() ?: throw NoDevicePickedException()
+            } else {
+                withTimeout(SCAN_TIMEOUT) { scan.first() }
             }
 
         val deviceName = device.name ?: device.address
@@ -266,3 +272,6 @@ class NymeaWifiService(
         private const val TAG = "NymeaWifiService"
     }
 }
+
+/** The device chooser closed without a pick, which is the user backing out rather than a failure. */
+class NoDevicePickedException : IllegalStateException("No device was picked")
