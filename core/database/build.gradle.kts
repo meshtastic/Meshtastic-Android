@@ -15,12 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
@@ -33,16 +30,6 @@ kotlin {
     }
 
     compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: sqlite-bundled and datastore-preferences have no wasmJs variant.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -58,21 +45,22 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
+        // sqlite-bundled and datastore-preferences publish no wasmJs variant.
         getByName("nonWebMain").dependencies {
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.datastore.preferences)
         }
-        wasmJsMain.dependencies {
-            implementation(libs.androidx.sqlite.web)
-            implementation(libs.kotlinx.browser)
-            // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS through the opfs-sahpool VFS.
-            implementation(npm("sqlite-wasm-worker", file("worker")))
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.androidx.sqlite.web)
+                implementation(libs.kotlinx.browser)
+                // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS through the opfs-sahpool VFS.
+                implementation(npm("sqlite-wasm-worker", file("worker")))
+            }
         }
-        // core:testing has no wasmJs target.
-        getByName("nonWebTest").dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.androidx.room.testing)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
+        // room-testing publishes no wasmJs variant.
+        getByName("nonWebTest").dependencies { implementation(libs.androidx.room.testing) }
 
         getByName("androidHostTest") {
             dependencies {
@@ -100,6 +88,7 @@ dependencies {
     "kspJvm"(libs.ksp.symbol.processing.aa.embeddable)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
-    // Without it the klib compiles and fails at runtime with IrLinkageError on the generated constructor actual.
-    "kspWasmJs"(libs.androidx.room.compiler)
 }
+
+// kotlinx-datetime on wasmJs knows no IANA zone names without its zoneinfo artifact.
+meshtasticWeb.browserTestExclusions.add("*DatabaseBackupTest.file name date follows the supplied time zone")

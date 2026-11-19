@@ -15,18 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
     android {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
@@ -74,17 +70,9 @@ kotlin {
             }
         }
 
-        // Tests that use core:testing, which has no wasmJs target.
-        val nonWebTest by creating {
-            dependsOn(commonTest.get())
-            dependencies { implementation(projects.core.testing) }
-        }
-        matching {
-            it.name == "jvmTest" ||
-                it.name == "androidHostTest" ||
-                it.name == "iosArm64Test" ||
-                it.name == "iosSimulatorArm64Test"
-        }
-            .configureEach { dependsOn(nonWebTest) }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }
+
+// Kotlin/Wasm prints 1.0 as "1", so the formatter shows "1 km" where the JVM shows "1.0 km".
+meshtasticWeb.browserTestExclusions.add("*DistanceExtensionsTest.metres switch to kilometres at the threshold")

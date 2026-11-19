@@ -15,31 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: KableBleScanner. Kable's web Scanner rides requestLEScan, which Chrome ships only behind a flag, so
-    // web discovers through the requestPeripheral picker instead. A compilation predicate, because
-    // withAndroidTarget()/withApple() drop androidMain under com.android.kotlin.multiplatform.library (KT-80409).
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-
-    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -58,7 +41,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        // Tests that use core:testing, which has no wasmJs target.
-        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

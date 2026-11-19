@@ -15,26 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
+}
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: the adapters over core:datastore's Preferences-backed data sources, which have no wasmJs target.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-
-    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -52,9 +39,11 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        wasmJsMain.dependencies {
-            implementation(libs.kotlinx.browser)
-            implementation(libs.kotlinx.serialization.json) // WebRecentAddressesSource keeps its list as JSON
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                implementation(libs.kotlinx.serialization.json) // WebRecentAddressesSource keeps its list as JSON
+            }
         }
 
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
@@ -63,8 +52,11 @@ kotlin {
             implementation(libs.compose.multiplatform.ui.test)
             implementation(compose.desktop.currentOs)
         }
-
-        // Tests that use core:testing, which has no wasmJs target; KmpFeatureConventionPlugin wires it here.
-        getByName("nonWebTest") { dependsOn(commonTest.get()) }
     }
 }
+
+// The expected message is a string resource, which the browser loads asynchronously; the assertion runs first.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*ScannerViewModelTest.scan startup failure clears scanning state disables auto-scan and surfaces error",
+    "*ScannerViewModelTest.scan quota failure honors retry-after cooldown",
+)

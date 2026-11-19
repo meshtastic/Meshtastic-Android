@@ -17,20 +17,12 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: the last-BLE-node recorder writes through core:datastore's Preferences-backed data source.
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
 
     sourceSets {
         commonMain.dependencies {
@@ -68,8 +60,16 @@ kotlin {
             }
         }
 
-        // Tests that use core:testing, which has no wasmJs target.
-        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
-        getByName("androidHostTest") { dependsOn(getByName("nonWebTest")) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            // A mock of PacketRepository needs PagingData, which core:repository takes as implementation, on the wasmJs
+            // test classpath; the Kotlin/Wasm IR serializer crashes on the unresolved type rather than reporting it.
+            implementation(libs.androidx.paging.common)
+        }
     }
 }
+
+// The expected message is a string resource, which the browser loads asynchronously; the assertion runs first.
+meshtasticWeb.browserTestExclusions.add(
+    "*MeshServiceOrchestratorTest.tcpReconnectWarnsAndStillConnectsWhenLocalNetworkAccessIsMissing",
+)

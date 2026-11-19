@@ -458,6 +458,8 @@ meshtastic-kover = { id = "meshtastic.kover" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-kmp-feature = { id = "meshtastic.kmp.feature" }
 meshtastic-kmp-jvm-android = { id = "meshtastic.kmp.jvm.android" }
+meshtastic-kmp-web = { id = "meshtastic.kmp.web" }
+meshtastic-web-application = { id = "meshtastic.web.application" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }

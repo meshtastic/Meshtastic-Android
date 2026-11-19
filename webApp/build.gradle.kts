@@ -15,22 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.meshtastic.buildlogic.configureWasmToolingDownloads
-import org.meshtastic.buildlogic.kotlinWarningsAsErrors
 import org.meshtastic.buildlogic.resolveVersionInfo
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.meshtastic.web.application)
+    alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.meshtastic.koin)
-    alias(libs.plugins.meshtastic.detekt)
-    alias(libs.plugins.meshtastic.spotless)
 }
-
-configureWasmToolingDownloads()
 
 // ── Version resolution (shared with androidApp/desktopApp via build-logic) ──
 val versionInfo = resolveVersionInfo()
@@ -93,18 +85,8 @@ val generateWebBuildConfig =
     }
 
 kotlin {
-    compilerOptions { allWarningsAsErrors.set(kotlinWarningsAsErrors) }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        outputModuleName = "webApp"
-        browser { commonWebpackConfig { outputFileName = "webApp.js" } }
-        binaries.executable()
-    }
-
     sourceSets {
         wasmJsMain.get().kotlin.srcDir(generateWebBuildConfig.map { buildConfigOutputDir })
-        wasmJsMain.get().languageSettings.optIn("kotlin.js.ExperimentalWasmJsInterop")
 
         wasmJsMain.dependencies {
             implementation(projects.core.common)

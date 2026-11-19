@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
 @file:Suppress("UnusedParameter", "TooManyFunctions")
 
 package org.meshtastic.core.common.util

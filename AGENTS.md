@@ -28,6 +28,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **Bootstrap First:** Run the mandatory bootstrap steps in `.skills/project-overview/SKILL.md` before any build.
 - **Plans:** Plans for complex refactors go in `.agent_plans/` (git-ignored).
 - **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests`
+- **Web Verification:** The wasmJs target is opt-in. When a change touches `webApp` or a module that applies `meshtastic.kmp.web`, also run `./gradlew wasmJsBrowserTest :webApp:compileProductionExecutableKotlinWasmJs -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false`; the web build needs Isolated Projects off, every other build keeps it on.
 </process_essentials>
 
 <rules>

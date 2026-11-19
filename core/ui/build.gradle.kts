@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
@@ -29,9 +30,6 @@ kotlin {
     // Required for CMP files/ resources (emoji-data.json) to be packaged as Android assets.
     // Without this, Res.readBytes() throws MissingResourceException at runtime.
     android { androidResources.enable = true }
-
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {
@@ -75,26 +73,29 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
-        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
 
-        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
-
-        // Tests that use core:testing, which has no wasmJs target.
-        val nonWebTest by creating {
-            dependsOn(commonTest.get())
-            dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.junit)
-            }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.compose.multiplatform.ui.test)
         }
-        matching {
-            it.name == "jvmTest" ||
-                it.name == "androidHostTest" ||
-                it.name == "iosArm64Test" ||
-                it.name == "iosSimulatorArm64Test"
-        }
-            .configureEach { dependsOn(nonWebTest) }
 
-        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.junit)
+        }
     }
 }
+
+// These fail in headless Chrome. getString() has no wasmJs implementation, so composables that call it throw there;
+// the others find no displayed node or cannot inject input.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*DropDownPreferenceUiTest.*",
+    "*ImportFabUiTest.*",
+    "*IndoorAirQualityLabelTest.*",
+    "*LoraSignalIndicatorUiTest.*",
+    "*NodeItemDistanceUnitsTest.*",
+    "*NodeItemUnheardMarkerTest.*",
+    "*PositionPrecisionPreferenceUiTest.*",
+    "*SignalInfoUiTest.*",
+)

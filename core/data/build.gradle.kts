@@ -15,28 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: sqlite-bundled and core:testing have no wasmJs variant.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -61,6 +48,7 @@ kotlin {
             implementation(libs.androidx.room.paging)
         }
 
+        // sqlite-bundled publishes no wasmJs variant.
         getByName("nonWebMain").dependencies { implementation(libs.androidx.sqlite.bundled) }
 
         androidMain.dependencies {
@@ -68,8 +56,13 @@ kotlin {
             implementation(libs.androidx.core.location.altitude)
         }
 
-        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }
+
+// The sticky error is a string resource, which the browser loads asynchronously; the assertion runs first.
+meshtasticWeb.browserTestExclusions.add(
+    "*MeshConnectionManagerImplTest.Recovery exhaustion after three consecutive failures surfaces sticky error*",
+)

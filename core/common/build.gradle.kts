@@ -15,19 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
 
     compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
@@ -42,6 +38,6 @@ kotlin {
             api(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
-        wasmJsMain.dependencies { api(libs.kotlinx.browser) }
+        meshtasticWeb.wasmJsMain { dependencies { api(libs.kotlinx.browser) } }
     }
 }

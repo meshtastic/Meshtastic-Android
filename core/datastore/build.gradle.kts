@@ -15,31 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest {} }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: androidx.datastore and datastore-preferences have no wasmJs variant, so the serializers and the
-    // Preferences-backed data sources live there; the proto data sources use the Store abstraction.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-
-    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -52,12 +36,14 @@ kotlin {
             api(libs.okio)
         }
 
-        // api, as before: androidApp's google flavor imports androidx.datastore through this module.
+        // No wasmJs variant: the serializers and Preferences-backed data sources live in nonWebMain, and the proto data
+        // sources use the Store abstraction. api, as before: androidApp's google flavor imports androidx.datastore
+        // through this module.
         getByName("nonWebMain").dependencies {
             api(libs.androidx.datastore)
             api(libs.androidx.datastore.preferences)
         }
 
-        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
     }
 }

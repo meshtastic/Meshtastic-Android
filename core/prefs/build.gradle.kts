@@ -15,33 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest {} }
-
-    // Every module reachable from webApp's executable needs browser(), not a bare wasmJs(), or KGP's root npm resolver
-    // fails. Its wasmJsBrowserTest is disabled centrally in KotlinAndroid.kt.
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: androidx.datastore.preferences has no wasmJs variant, so DataStorePrefsStore lives there and every
-    // *PrefsImpl uses the PrefsStore abstraction. A compilation predicate, because withAndroidTarget()/withApple() drop
-    // androidMain under com.android.kotlin.multiplatform.library (KT-80409).
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-
-    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -54,8 +35,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
         }
 
+        // No wasmJs variant, so DataStorePrefsStore lives here and every *PrefsImpl uses the PrefsStore abstraction.
         getByName("nonWebMain").dependencies { implementation(libs.androidx.datastore.preferences) }
 
-        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
     }
 }

@@ -15,38 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: a browser cannot open raw TCP sockets (TcpTransport, mqtt-client-transport-tcp). jvmAndroid nests
-    // inside nonWeb because a project takes one hierarchy template, so meshtastic.kmp.jvm.android is not applied.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common {
-            group("nonWeb") {
-                withCompilations { it.target.targetName != "wasmJs" }
-                group("jvmAndroid") {
-                    withCompilations { it.target.targetName == "android" || it.target.targetName == "jvm" }
-                }
-            }
-        }
-    }
-
-    // The predicate reaches only the iOS leaf compilations, not iosMain itself.
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -79,6 +57,7 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
+        // A browser cannot open raw TCP sockets (TcpTransport, mqtt-client-transport-tcp).
         getByName("nonWebMain").dependencies { api(libs.meshtastic.mqtt.client.transport.tcp) }
 
         getByName("jvmMain") {
@@ -91,14 +70,12 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        wasmJsMain.dependencies { implementation(libs.kotlinx.browser) }
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
 
-        commonTest.dependencies { implementation(libs.ktor.client.mock) }
-
-        // Tests that use Kable or core:testing, neither of which has a wasmJs target.
-        getByName("nonWebTest").dependencies {
+        commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
+            implementation(libs.ktor.client.mock)
         }
     }
 }

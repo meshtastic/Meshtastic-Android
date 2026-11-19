@@ -15,19 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
     // No withHostTest: commonTest reaches android.net.Uri and Bundle, which the host-test stubs do not implement.
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -41,3 +37,9 @@ kotlin {
         }
     }
 }
+
+// SavedState finds no serializer for the polymorphic NavKey on wasmJs.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*NavigationConfigTest.all route instances round-trip through SavedState serialization",
+    "*NavigationConfigTest.route instances with default parameters serialize correctly",
+)

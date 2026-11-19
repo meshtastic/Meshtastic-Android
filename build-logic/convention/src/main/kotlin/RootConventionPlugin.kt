@@ -16,6 +16,7 @@
  */
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.configuration.BuildFeatures
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.register
 import org.meshtastic.buildlogic.configureDokkaAggregation
@@ -23,6 +24,8 @@ import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
 import org.meshtastic.buildlogic.configureKoverAggregation
 import org.meshtastic.buildlogic.configureWasmToolingDownloads
+import org.meshtastic.buildlogic.requireIsolatedProjectsOffForWeb
+import javax.inject.Inject
 
 /**
  * Root convention plugin applied to the top-level project.
@@ -32,10 +35,11 @@ import org.meshtastic.buildlogic.configureWasmToolingDownloads
  * / `allprojects {}` iteration, which performs cross-project configuration access incompatible with Gradle Isolated
  * Projects.
  */
-class RootConventionPlugin : Plugin<Project> {
+abstract class RootConventionPlugin @Inject constructor(private val buildFeatures: BuildFeatures) : Plugin<Project> {
     override fun apply(target: Project) {
         require(target.path == ":")
         with(target) {
+            requireIsolatedProjectsOffForWeb(buildFeatures)
             val modules = allModules()
 
             apply(plugin = "org.jetbrains.dokka")

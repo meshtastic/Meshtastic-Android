@@ -143,7 +143,6 @@ include(
     ":feature:wifi-provision",
     ":desktopApp",
     ":androidApp",
-    ":webApp",
     ":core:barcode",
     ":feature:widget",
     ":feature:xr",
@@ -153,4 +152,7 @@ include(
     ":baselineprofile",
     ":store-screenshots",
 )
+
+// The web app and every module's wasmJs target are opt-in (WEB_TARGET_PROPERTY in build-logic's Web.kt).
+if (providers.gradleProperty("meshtastic.web").map(String::toBoolean).getOrElse(false)) include(":webApp")
 

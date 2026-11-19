@@ -162,19 +162,6 @@ internal fun Project.configureKotlinMultiplatform() {
 
     configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
-    configureWasmToolingDownloads()
-
-    extensions.configure<KotlinMultiplatformExtension> {
-        sourceSets
-            .matching { it.name.startsWith("wasmJs") }
-            .configureEach { languageSettings.optIn("kotlin.js.ExperimentalWasmJsInterop") }
-    }
-
-    // No karma/headless-browser runner is configured for wasmJs tests.
-    tasks.matching { it.name == "wasmJsBrowserTest" }.configureEach { enabled = false }
-
-    // Compose registers this on every wasmJs browser() library and fails it without binaries.executable().
-    tasks.matching { it.name == "checkComposeUiTestConfigurationForWasmJs" }.configureEach { enabled = false }
 }
 
 /** Configure Mokkery for the project */

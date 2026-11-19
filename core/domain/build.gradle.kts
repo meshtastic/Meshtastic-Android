@@ -17,15 +17,13 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {
@@ -41,14 +39,6 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.serialization.json.okio)
         }
-        // Tests that use core:testing, which has no wasmJs target.
-        val nonWebTest by creating {
-            dependsOn(commonTest.get())
-            dependencies { implementation(projects.core.testing) }
-        }
-        getByName("jvmTest") { dependsOn(nonWebTest) }
-        getByName("androidHostTest") { dependsOn(nonWebTest) }
-        matching { it.name == "iosArm64Test" || it.name == "iosSimulatorArm64Test" }
-            .configureEach { dependsOn(nonWebTest) }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

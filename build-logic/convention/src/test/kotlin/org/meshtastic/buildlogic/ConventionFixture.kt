@@ -40,6 +40,12 @@ internal class ConventionFixture(private val projectDir: File, buildScript: Stri
         .withArguments("--quiet", "--stacktrace", *arguments)
         .build()
 
+    fun buildAndFail(vararg arguments: String): BuildResult = GradleRunner.create()
+        .withProjectDir(projectDir)
+        .withPluginClasspath()
+        .withArguments("--quiet", *arguments)
+        .buildAndFail()
+
     /** Runs the fixture's `printFixture` task and returns the `fixture:key=value` lines it printed. */
     fun values(vararg arguments: String): Map<String, String> = build("printFixture", *arguments)
         .output

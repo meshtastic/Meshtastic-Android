@@ -52,6 +52,9 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                 }
                 dependencies { add("kspAndroid", roomCompiler) }
                 dependencies { add("kspJvm", roomCompiler) }
+                // Exists only under the web target. Without it the klib compiles and fails at runtime with
+                // IrLinkageError on the generated constructor actual.
+                configurations.named { it == "kspWasmJs" }.configureEach { dependencies.addLater(roomCompiler) }
             }
 
             pluginManager.withPlugin("com.android.library") {

@@ -15,27 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
-
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-
-    // nonWebMain: sceneview-compose has no wasmJs variant.
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
-    }
-    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -63,6 +50,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
+        // sceneview-compose publishes no wasmJs variant.
         getByName("nonWebMain").dependencies {
             // The desktop renderer's POM drags a mac-only Compose runtime onto every OS's classpath. The
             // string form is the one overload that takes an exclude; the version still comes from the catalog.
@@ -93,3 +81,7 @@ kotlin {
         }
     }
 }
+
+// The test bundle never reports to Karma: headless Chrome stays silent until the 300 s no-activity timeout, with no
+// test started. Its wasmJs tests compile, but nothing runs them until that is diagnosed.
+meshtasticWeb.browserTests = false

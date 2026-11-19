@@ -216,6 +216,16 @@ gradlePlugin {
             implementationClass = "KmpLibraryComposeConventionPlugin"
         }
 
+        register("kmpWeb") {
+            id = "meshtastic.kmp.web"
+            implementationClass = "KmpWebConventionPlugin"
+        }
+
+        register("webApplication") {
+            id = "meshtastic.web.application"
+            implementationClass = "WebApplicationConventionPlugin"
+        }
+
         register("kmpFeature") {
             id = "meshtastic.kmp.feature"
             implementationClass = "KmpFeatureConventionPlugin"
