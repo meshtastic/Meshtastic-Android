@@ -31,8 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -44,6 +42,7 @@ import org.meshtastic.core.resources.lockdown_passphrases_do_not_match
 import org.meshtastic.core.resources.lockdown_session_minutes
 import org.meshtastic.core.resources.lockdown_session_minutes_help
 import org.meshtastic.core.resources.lockdown_show_passphrase
+import org.meshtastic.core.ui.component.PasswordTextField
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
@@ -57,8 +56,6 @@ private const val SPACING_DP = 8
 internal fun isValidLockdownPassphrase(passphrase: String): Boolean =
     passphrase.isNotEmpty() && passphrase.encodeToByteArray().size <= MAX_PASSPHRASE_LEN
 
-private fun fitsPassphraseLimit(text: String): Boolean = text.encodeToByteArray().size <= MAX_PASSPHRASE_LEN
-
 @Composable
 internal fun LockdownPassphraseField(
     value: String,
@@ -68,12 +65,12 @@ internal fun LockdownPassphraseField(
     onToggleVisibility: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
+    PasswordTextField(
         value = value,
-        onValueChange = { if (fitsPassphraseLimit(it)) onValueChange(it) },
+        onValueChange = onValueChange,
+        revealed = passwordVisible,
         label = { Text(label) },
-        singleLine = true,
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        maxBytes = MAX_PASSPHRASE_LEN,
         trailingIcon = {
             IconButton(onClick = onToggleVisibility) {
                 Icon(
@@ -102,12 +99,12 @@ internal fun LockdownConfirmPassphraseField(
     modifier: Modifier = Modifier,
 ) {
     val showMismatch = value.isNotEmpty() && !matches
-    OutlinedTextField(
+    PasswordTextField(
         value = value,
-        onValueChange = { if (fitsPassphraseLimit(it)) onValueChange(it) },
+        onValueChange = onValueChange,
+        revealed = false,
         label = { Text(stringResource(Res.string.lockdown_confirm_passphrase)) },
-        singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
+        maxBytes = MAX_PASSPHRASE_LEN,
         isError = showMismatch,
         supportingText =
         if (showMismatch) {
