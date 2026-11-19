@@ -32,4 +32,22 @@ data class Location(
     val bearingDegrees: Float? = null,
     /** UTC epoch milliseconds. */
     val timeMillis: Long,
+    /** What the receiver's NMEA said beside this fix, or null when it said nothing fresh. */
+    val gnss: GnssFix? = null,
+)
+
+/**
+ * A GNSS receiver's own account of a fix, from its NMEA GGA and GSA sentences, in the units firmware's GPS reports:
+ * dilutions of precision in hundredths. `Location` carries none of it. A field the receiver left blank is null.
+ */
+data class GnssFix(
+    /** Satellites used in the fix, GGA's count, which firmware reports as `sats_in_view`. */
+    val satellitesUsed: Int? = null,
+    val hdop: Int? = null,
+    val pdop: Int? = null,
+    val vdop: Int? = null,
+    /** GGA's fix quality: 0 none, 1 GPS, 2 differential and so on. */
+    val fixQuality: Int? = null,
+    /** GSA's fix type: 1 none, 2 two-dimensional, 3 three-dimensional. */
+    val fixType: Int? = null,
 )

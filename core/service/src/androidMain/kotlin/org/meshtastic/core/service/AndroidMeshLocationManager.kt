@@ -58,6 +58,7 @@ class AndroidMeshLocationManager(private val context: Application, private val l
                                 haeAltitudeMeters = location.altitudeMeters,
                                 speedMetersPerSecond = location.speedMetersPerSecond,
                                 bearingDegrees = location.bearingDegrees,
+                                gnss = location.gnss,
                             ),
                         )
                     }
