@@ -16,12 +16,17 @@
  */
 package org.meshtastic.core.resources
 
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.ResourceEnvironment
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getPluralString as composeGetPluralString
 import org.jetbrains.compose.resources.getString as composeGetString
+
+/**
+ * The system [ResourceEnvironment] the lookups without an explicit one use. Off the web it is rebuilt only when the
+ * default locale changes: building one reads the system theme, which on Linux is a blocking D-Bus portal call.
+ */
+internal expect fun systemResourceEnvironment(): ResourceEnvironment
 
 /**
  * Retrieves a string from the [StringResource], blocking the calling thread on the resource loader. Only for callbacks
@@ -34,15 +39,17 @@ expect fun getString(stringResource: StringResource): String
 expect fun getString(stringResource: StringResource, vararg formatArgs: Any): String
 
 /** Retrieves a string from the [StringResource] in a suspending manner. */
-suspend fun getStringSuspend(stringResource: StringResource): String = composeGetString(stringResource)
+suspend fun getStringSuspend(stringResource: StringResource): String =
+    composeGetString(systemResourceEnvironment(), stringResource)
 
 /** Retrieves a formatted string from the [StringResource] in a suspending manner. */
 suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: Any): String {
+    val environment = systemResourceEnvironment()
     val resolvedArgs =
         formatArgs
             .map { arg ->
                 if (arg is StringResource) {
-                    composeGetString(arg)
+                    composeGetString(environment, arg)
                 } else {
                     arg
                 }
@@ -51,9 +58,9 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
 
     return if (resolvedArgs.isNotEmpty()) {
         @Suppress("SpreadOperator")
-        composeGetString(stringResource, *resolvedArgs)
+        composeGetString(environment, stringResource, *resolvedArgs)
     } else {
-        composeGetString(stringResource)
+        composeGetString(environment, stringResource)
     }
 }
 
@@ -76,7 +83,7 @@ suspend fun getPluralStringSuspend(
     vararg formatArgs: Any,
 ): String = if (formatArgs.isNotEmpty()) {
     @Suppress("SpreadOperator")
-    composeGetPluralString(pluralStringResource, quantity, *formatArgs)
+    composeGetPluralString(systemResourceEnvironment(), pluralStringResource, quantity, *formatArgs)
 } else {
-    composeGetPluralString(pluralStringResource, quantity)
+    composeGetPluralString(systemResourceEnvironment(), pluralStringResource, quantity)
 }

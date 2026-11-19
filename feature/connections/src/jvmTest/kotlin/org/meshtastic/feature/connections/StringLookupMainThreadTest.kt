@@ -44,7 +44,7 @@ private const val DRAIN_SECONDS = 10L
  * A suspending lookup on the main dispatcher must never stall a blocking lookup on the main thread, the way
  * `stringResource` blocks a composition. Here one thread plays the main thread: it runs a coroutine that calls
  * [getStringSuspend] and, between that coroutine's turns, blocks in [getString]. The run is bounded by time, not
- * rounds, because a lookup's cost depends on the host: on Linux each one reads the system theme over D-Bus.
+ * rounds, because a lookup's cost depends on the host.
  */
 class StringLookupMainThreadTest {
 
