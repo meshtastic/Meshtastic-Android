@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.transport
 
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -25,6 +27,8 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -33,6 +37,19 @@ class StreamFrameCodecTest {
 
     private val receivedPackets = mutableListOf<ByteArray>()
     private val codec = StreamFrameCodec(onPacketReceived = { receivedPackets.add(it) }, logTag = "Test")
+    private val severity = Logger.config.minSeverity
+
+    // The codec logs non-protocol bytes as device log lines; random noise would print megabytes, which overflows the
+    // browser test reporter on wasm.
+    @BeforeTest
+    fun quietLogs() {
+        Logger.setMinSeverity(Severity.Assert)
+    }
+
+    @AfterTest
+    fun restoreLogs() {
+        Logger.setMinSeverity(severity)
+    }
 
     @Test
     fun `processInputByte delivers a 1-byte packet`() {
