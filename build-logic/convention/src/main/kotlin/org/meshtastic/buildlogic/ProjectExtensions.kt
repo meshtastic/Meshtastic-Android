@@ -159,6 +159,17 @@ internal fun Project.configureTestOptions() {
 
     // Develocity-native test retry; findByType no-ops if the settings plugin isn't applied.
     tasks.withType<Test>().configureEach {
+        // Only jvmTest on pull requests into main skips tests: its agent kills the forked JVM of Android host
+        // tests and breaks screenshot validation. Release-branch PRs, merge_group, main and local runs execute
+        // every test.
+        if (name == "jvmTest") {
+            extensions.findByType(DevelocityTestConfiguration::class.java)?.predictiveTestSelection {
+                val event = providers.environmentVariable("GITHUB_EVENT_NAME")
+                val baseRef = providers.environmentVariable("GITHUB_BASE_REF")
+                enabled.set(event.zip(baseRef) { e, b -> e == "pull_request" && b == "main" }.orElse(false))
+                fallbackToRegularExecutionOnMissingPrerequisites.set(true)
+            }
+        }
         extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
             maxRetries.set(MAX_TEST_RETRIES)
             maxFailures.set(MAX_TEST_FAILURES)
