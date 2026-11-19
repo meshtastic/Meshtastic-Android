@@ -49,9 +49,8 @@ private val SERIAL_START_JOIN_TIMEOUT = 10.seconds
  * wasmJs [RadioTransport] backed by the Web Serial API (`navigator.serial`).
  *
  * The granted [JsSerialPort] handle is resolved from [registry] by [portId] — this transport never calls
- * `requestPort()` itself, since that requires an active user gesture (see [WebSerialPortRegistry]'s KDoc). If [portId]
- * is unknown to the registry (most commonly after a page reload — Web Serial grants are not restorable via any address
- * string alone, only [WebSerialPortRegistry.refreshGrantedPorts] re-establishes them), [start] reports a disconnect
+ * `requestPort()` itself, since that requires an active user gesture (see [WebSerialPortRegistry]'s KDoc). If no
+ * granted port has [portId] (its grant was revoked, or the radio is unplugged), [start] reports a disconnect
  * immediately rather than silently doing nothing.
  *
  * Mirrors `org.meshtastic.core.network.SerialTransport` (JVM/jSerialComm)'s shape: single connection generation, no
@@ -95,7 +94,7 @@ class WasmJsSerialTransport(
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun connectPort(): Boolean {
-        val candidate = registry.get(portId)
+        val candidate = registry.find(portId)
         if (candidate == null) {
             Logger.w { "[$portId] Serial port not found in this session's granted list" }
             return false

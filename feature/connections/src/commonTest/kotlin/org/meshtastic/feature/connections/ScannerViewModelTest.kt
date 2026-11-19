@@ -1184,7 +1184,7 @@ class ScannerViewModelTest {
             DeviceListEntry.Usb(
                 usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
                 name = "RAK4631",
-                fullAddress = "swebserial-0",
+                fullAddress = "s239a:8029-0",
                 bonded = true,
             )
         val requests = mutableListOf<Boolean>()
@@ -1205,7 +1205,7 @@ class ScannerViewModelTest {
             testScheduler.advanceUntilIdle()
 
             assertEquals(listOf(true), requests)
-            assertEquals("swebserial-0", radioController.lastSetDeviceAddress)
+            assertEquals("s239a:8029-0", radioController.lastSetDeviceAddress)
             assertEquals(DeviceType.USB, web.activeTransport.value)
         } finally {
             harness.clearViewModel(web)

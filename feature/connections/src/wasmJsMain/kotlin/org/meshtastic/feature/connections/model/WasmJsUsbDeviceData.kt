@@ -17,8 +17,7 @@
 package org.meshtastic.feature.connections.model
 
 /**
- * wasmJs [UsbDeviceData]: carries only the synthetic port id a `core:network` `WebSerialPortRegistry` (in
- * `core:network`'s wasmJs source set) minted for this port — Web Serial ports have no persistent identifier string of
- * their own.
+ * wasmJs [UsbDeviceData]: carries only the `<vid>:<pid>-<ordinal>` id `core:network`'s `WebSerialPortRegistry` gives
+ * this port, since Web Serial ports have no identifier string of their own.
  */
 class WasmJsUsbDeviceData(val portId: String) : UsbDeviceData
