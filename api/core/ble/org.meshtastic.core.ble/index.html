@@ -577,7 +577,22 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="523216413%2FFunctions%2F-1628497077" anchor-label="classifyBleException" id="523216413%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+        <div class="table"><a data-name="1592619599%2FFunctions%2F-1628497077" anchor-label="bleAddressesMatch" id="1592619599%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ble-addresses-match.html"><span>ble</span><wbr><span>Addresses</span><wbr><span><span>Match</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1592619599%2FFunctions%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="ble-addresses-match.html"><span class="token function">bleAddressesMatch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">a<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">b<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when <a href="ble-addresses-match.html">a</a> and <a href="ble-addresses-match.html">b</a> name the same peripheral, whether either is a MAC or a BlueZ object path.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="523216413%2FFunctions%2F-1628497077" anchor-label="classifyBleException" id="523216413%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -603,6 +618,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="is-session-fatal-ble-exception.html"><span class="token function">isSessionFatalBleException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns <code class="lang-kotlin">true</code> if this throwable indicates the BLE session is irrecoverably broken and should be torn down (triggering reconnection), as opposed to a transient condition that can be retried.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1152145614%2FFunctions%2F-1628497077" anchor-label="normalizeBleAddress" id="-1152145614%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="normalize-ble-address.html"><span>normalize</span><wbr><span>Ble</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152145614%2FFunctions%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="normalize-ble-address.html"><span class="token function">normalizeBleAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Reduces a BLE address to a comparable form. On Linux, Kable's JVM identifier is the BlueZ D-Bus object path (for example <code class="lang-kotlin">/org/bluez/hci0/dev_34_B7_DA_62_18_C5</code>, possibly wrapped in JSON), not the MAC, so the <code class="lang-kotlin">dev_</code> segment is rewritten to the colon-separated MAC. Every other form (MAC, Apple UUID) is only trimmed and upper-cased.</p></div></div></div>
                 </div>
               </div>
             </div>
