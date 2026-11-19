@@ -36,8 +36,6 @@ import org.meshtastic.core.repository.StoredPassphrase
 import org.meshtastic.core.repository.StoredSecurityKeys
 import org.meshtastic.core.service.DeviceAddressChangeHook
 import org.meshtastic.core.service.LocalNetworkAccess
-import org.meshtastic.feature.node.compass.CompassHeadingProvider
-import org.meshtastic.feature.node.compass.HeadingState
 
 // No-op implementations for platform interfaces a browser has no counterpart for, shaped like desktop's stubs.
 
@@ -115,11 +113,7 @@ class NoopLocaleChangeNotifier : LocaleChangeNotifier {
 
 // endregion
 
-// region Compass stubs: only Android Chrome has an absolute-orientation event, and declination needs a WMM model
-
-class NoopCompassHeadingProvider : CompassHeadingProvider {
-    override fun headingUpdates(): Flow<HeadingState> = flowOf(HeadingState(hasSensor = false))
-}
+// region Declination stub: Android reads it from the platform's World Magnetic Model, which a browser does not have
 
 class NoopMagneticFieldProvider : MagneticFieldProvider {
     override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float = 0f

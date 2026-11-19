@@ -47,13 +47,13 @@ import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
+import org.meshtastic.web.platform.WebCompassHeadingProvider
 import org.meshtastic.web.platform.WebFileService
 import org.meshtastic.web.platform.WebLocationRepository
 import org.meshtastic.web.platform.WebLocationService
 import org.meshtastic.web.platform.WebMeshLocationManager
 import org.meshtastic.web.platform.WebPhoneLocationProvider
 import org.meshtastic.web.stub.NoopAppWidgetUpdater
-import org.meshtastic.web.stub.NoopCompassHeadingProvider
 import org.meshtastic.web.stub.NoopDeviceAddressChangeHook
 import org.meshtastic.web.stub.NoopLocalNetworkAccess
 import org.meshtastic.web.stub.NoopLocaleChangeNotifier
@@ -65,8 +65,8 @@ import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
 import org.meshtastic.web.stub.NoopServiceDiscovery
 
 /**
- * Platform bindings: browser-backed ones (Geolocation, file pickers, Web Serial hot-plug, database backup) and stubs
- * for what a browser lacks: WorkManager, widgets, the compass sensor, mDNS and keystores.
+ * Platform bindings: browser-backed ones (Geolocation, compass, file pickers, Web Serial hot-plug, database backup) and
+ * stubs for what a browser lacks: WorkManager, widgets, declination, mDNS and keystores.
  */
 @Suppress("TooManyFunctions")
 @Module
@@ -84,7 +84,7 @@ class WebStubsModule {
 
     @Single fun locationService(): LocationService = WebLocationService()
 
-    @Single fun compassHeadingProvider(): CompassHeadingProvider = NoopCompassHeadingProvider()
+    @Single fun compassHeadingProvider(): CompassHeadingProvider = WebCompassHeadingProvider()
 
     @Single fun phoneLocationProvider(): PhoneLocationProvider = WebPhoneLocationProvider()
 
