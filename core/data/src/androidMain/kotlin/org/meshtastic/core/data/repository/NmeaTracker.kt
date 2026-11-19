@@ -20,44 +20,66 @@ import org.meshtastic.core.repository.GnssFix
 
 /**
  * Folds a receiver's NMEA sentences into the latest [GnssFix], from GGA and GSA by any talker. A sentence whose
- * checksum fails is dropped. Fed from the platform's NMEA callback and read from the location callback, which may run
- * on different threads, so both sides hold the lock.
+ * checksum fails is dropped. GGA and GSA expire separately, so a fresh GGA never makes an old GSA's fields current. Fed
+ * from the platform's NMEA callback and read from the location callback, which may run on different threads, so both
+ * sides hold the lock.
  */
 internal class NmeaTracker(private val clock: () -> Long) {
-    private var fix = GnssFix()
-    private var updatedAt: Long? = null
+    private var gga = GnssFix()
+    private var ggaAt: Long? = null
+    private var gsa = GnssFix()
+    private var gsaAt: Long? = null
 
     /** One sentence, with or without its line ending. */
     @Synchronized
     fun accept(sentence: String) {
-        val body = nmeaBody(sentence.trim()) ?: return
-        val fields = body.split(',')
-        fix =
-            when (fields[0].takeLast(KIND_LENGTH)) {
-                "GGA" -> gga(fields)
-                "GSA" -> gsa(fields)
-                else -> return
+        val fields = nmeaBody(sentence.trim())?.split(',') ?: return
+        when (fields[0].takeLast(KIND_LENGTH)) {
+            "GGA" -> {
+                gga = gga(fields)
+                ggaAt = clock()
             }
-        updatedAt = clock()
+
+            "GSA" -> {
+                gsa = gsa(fields)
+                gsaAt = clock()
+            }
+        }
     }
 
-    /** The reading, if a sentence arrived within [freshMillis]; a stale one no longer describes the current fix. */
+    /** The fields of each sentence that arrived within [freshMillis], or null when neither did. */
     @Synchronized
-    fun fresh(freshMillis: Long): GnssFix? = updatedAt?.takeIf { clock() - it <= freshMillis }?.let { fix }
+    fun fresh(freshMillis: Long): GnssFix? {
+        val now = clock()
+        val gga = gga.takeIf { ggaAt?.let { now - it <= freshMillis } == true }
+        val gsa = gsa.takeIf { gsaAt?.let { now - it <= freshMillis } == true }
+        return if (gga == null && gsa == null) {
+            null
+        } else {
+            GnssFix(
+                satellitesUsed = gga?.satellitesUsed,
+                hdop = gga?.hdop,
+                fixQuality = gga?.fixQuality,
+                pdop = gsa?.pdop,
+                vdop = gsa?.vdop,
+                fixType = gsa?.fixType,
+            )
+        }
+    }
 
     private fun gga(f: List<String>): GnssFix {
-        // 0 id, 1 time, 2 lat, 3 N/S, 4 lon, 5 E/W, 6 quality, 7 satellites, 8 hdop
+        // 0 id, 1 time, 2 lat, 3 N/S, 4 lon, 5 E/W, 6 quality, 7 satellites, 8 hdop; no fix carries none of them.
         val quality = f.getOrNull(GGA_QUALITY)?.toIntOrNull()
-        if (quality == null || quality == 0) return fix.copy(fixQuality = quality, satellitesUsed = null, hdop = null)
-        return fix.copy(
+        val fixed = quality != null && quality != 0
+        return GnssFix(
             fixQuality = quality,
-            satellitesUsed = f.getOrNull(GGA_SATELLITES)?.toIntOrNull(),
-            hdop = f.getOrNull(GGA_HDOP)?.let(::hundredths),
+            satellitesUsed = f.getOrNull(GGA_SATELLITES)?.toIntOrNull()?.takeIf { fixed },
+            hdop = f.getOrNull(GGA_HDOP)?.let(::hundredths)?.takeIf { fixed },
         )
     }
 
     // 0 id, 1 mode, 2 fix type, 3..14 satellites, 15 pdop, 16 hdop, 17 vdop; NMEA 4.1 adds a system id at 18.
-    private fun gsa(f: List<String>): GnssFix = fix.copy(
+    private fun gsa(f: List<String>): GnssFix = GnssFix(
         fixType = f.getOrNull(GSA_FIX_TYPE)?.toIntOrNull(),
         pdop = f.getOrNull(GSA_PDOP)?.let(::hundredths),
         vdop = f.getOrNull(GSA_VDOP)?.let(::hundredths),

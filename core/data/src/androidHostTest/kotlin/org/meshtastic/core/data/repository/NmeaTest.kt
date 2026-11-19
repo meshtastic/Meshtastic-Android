@@ -67,6 +67,14 @@ class NmeaTest {
     }
 
     @Test
+    fun `a GGA arriving later does not make an old GSA current again`() {
+        tracker.accept(sentence("GPGSA,A,3,01,02,03,,,,,,,,,,1.6,0.9,1.3"))
+        now = 6_000
+        tracker.accept(sentence("GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,"))
+        assertEquals(GnssFix(satellitesUsed = 8, hdop = 90, fixQuality = 1), tracker.fresh(5_000))
+    }
+
+    @Test
     fun `no sentence yet is no reading`() {
         assertNull(tracker.fresh(5_000))
     }
