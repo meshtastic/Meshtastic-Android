@@ -53,6 +53,10 @@
     <string name="schema_cannedmessage_inputeventchar_none">Няма</string>
     <string name="schema_cannedmessage_inputeventchar_select">Изберете</string>
     <string name="schema_clientnotification_notificationtype_low_entropy_key_regenerated_description">Бяха открити и регенерирани компрометирани ключове.</string>
+    <string name="schema_clientnotification_notificationtype_position_sharing_disabled">Споделянето на местоположение е деактивирано</string>
+    <string name="schema_clientnotification_notificationtype_position_sharing_disabled_description">Споделянето на местоположение е деактивирано в този канал.</string>
+    <string name="schema_clientnotification_notificationtype_unset">Известие</string>
+    <string name="schema_clientnotification_notificationtype_unset_description">Известие от устройството.</string>
     <string name="schema_detectionsensor_detection_trigger_type">Тип на тригера</string>
     <string name="schema_detectionsensor_detection_trigger_type_description">Тип на задействащото събитие</string>
     <string name="schema_detectionsensor_name">Име</string>
@@ -121,6 +125,8 @@
     <string name="schema_display_wake_on_tap_or_motion_description">Изисква се да има акселерометър на вашето устройство.</string>
     <string name="schema_externalnotification_active">Активно</string>
     <string name="schema_externalnotification_enabled">Външните известия са активирани</string>
+    <string name="schema_externalnotification_enabled_description">Активиране на външни известия</string>
+    <string name="schema_externalnotification_nag_timeout_description">Колко дълго продължава известието.</string>
     <string name="schema_externalnotification_use_pwm">Използване на PWM зумер</string>
     <string name="schema_lora_bandwidth">Широчина на честотната лента</string>
     <string name="schema_lora_channel_num">Честотен слот</string>
@@ -130,6 +136,7 @@
     <string name="schema_lora_modem_preset">Предварително зададени</string>
     <string name="schema_lora_region">Регион</string>
     <string name="schema_lora_region_description">Регионът, където ще използвате радиостанциите си.</string>
+    <string name="schema_lora_regioncode_anz">Австралия / Бразилия / Нова Зеландия</string>
     <string name="schema_lora_regioncode_anz_433">Австралия / Нова Зеландия 433 MHz</string>
     <string name="schema_lora_regioncode_br_902">Бразилия 902 MHz</string>
     <string name="schema_lora_regioncode_cn">Китай</string>
@@ -188,6 +195,7 @@
     <string name="schema_mqtt_password_description">MQTT парола</string>
     <string name="schema_mqtt_proxy_to_client_enabled">Прокси към клиент е активиран</string>
     <string name="schema_mqtt_tls_enabled">TLS е активиран</string>
+    <string name="schema_mqtt_tls_enabled_description">Свързване с MQTT сървъра чрез TLS.</string>
     <string name="schema_mqtt_username">Потребителско име</string>
     <string name="schema_mqtt_username_description">MQTT потребителско име</string>
     <string name="schema_neighborinfo_transmit_over_lora">Предаване през LoRa</string>
@@ -206,6 +214,7 @@
     <string name="schema_network_ntp_server_description">Адрес на NTP сървър. По подразбиране е meshtastic.pool.ntp.org</string>
     <string name="schema_network_protocolflags_no_broadcast">Няма</string>
     <string name="schema_network_rsyslog_server">rsyslog сървър</string>
+    <string name="schema_network_wifi_enabled">Wi-Fi е активиран</string>
     <string name="schema_network_wifi_enabled_description">Активирането на WiFi ще деактивира Bluetooth връзката с приложението.</string>
     <string name="schema_network_wifi_psk">Парола</string>
     <string name="schema_network_wifi_psk_description">WiFi парола за автентикация</string>
@@ -269,6 +278,7 @@
     <string name="schema_serial_serial_baud_baud_9600">9600 Baud</string>
     <string name="schema_serial_serial_baud_baud_default">По подразбиране</string>
     <string name="schema_serial_serial_mode_default">По подразбиране</string>
+    <string name="schema_serial_serial_mode_textmsg">Текстово съобщение</string>
     <string name="schema_serial_txd">TX</string>
     <string name="schema_storeforward_is_server">Сървър</string>
     <string name="schema_storeforward_records">Брой записи</string>
@@ -292,6 +302,8 @@
     <string name="schema_team_yellow">Жълт</string>
     <string name="schema_telemetry_air_quality_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
     <string name="schema_telemetry_air_quality_interval">Интервал на актуализиране на показателите за качеството на въздуха</string>
+    <string name="schema_telemetry_air_quality_screen_enabled">Показване на качеството на въздуха на екрана на устройството</string>
+    <string name="schema_telemetry_air_quality_screen_enabled_description">Показване на измерванията на качеството на въздуха на устройството</string>
     <string name="schema_telemetry_device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
     <string name="schema_telemetry_device_telemetry_enabled_description">Активиране/деактивиране на модула за телеметрия на устройството за изпращане на показатели към мрежата. Това са номинални стойности. Претоварените мрежи автоматично ще се мащабират до по-дълги интервали въз основа на броя на онлайн възлите.</string>
     <string name="schema_telemetry_device_update_interval">Интервал на актуализиране на показателите на устройството</string>
