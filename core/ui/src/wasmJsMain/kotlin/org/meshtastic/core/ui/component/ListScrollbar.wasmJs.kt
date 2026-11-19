@@ -16,11 +16,21 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+// Skiko's scrollbar, as on desktop. jvmMain and wasmJsMain share no source set below commonMain that has it.
 @Composable
-@Suppress("UNUSED_PARAMETER")
-actual fun BoxScope.ListScrollbar(state: LazyListState, modifier: Modifier) = Unit
+actual fun BoxScope.ListScrollbar(state: LazyListState, modifier: Modifier) {
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(state),
+        modifier = modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+        reverseLayout = state.layoutInfo.reverseLayout,
+    )
+}
