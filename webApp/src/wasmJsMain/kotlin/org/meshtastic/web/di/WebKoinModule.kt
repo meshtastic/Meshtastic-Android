@@ -29,6 +29,7 @@ import org.meshtastic.core.prefs.di.CorePrefsWasmJsModule
 import org.meshtastic.core.service.di.CoreServiceModule
 import org.meshtastic.core.ui.di.CoreUiModule
 import org.meshtastic.feature.connections.di.FeatureConnectionsModule
+import org.meshtastic.feature.docs.di.FeatureDocsModule
 import org.meshtastic.feature.intro.di.FeatureIntroModule
 import org.meshtastic.feature.messaging.di.FeatureMessagingModule
 import org.meshtastic.feature.node.di.FeatureNodeModule
@@ -59,6 +60,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
         FeatureMessagingModule::class,
         FeatureConnectionsModule::class,
         FeatureIntroModule::class,
+        FeatureDocsModule::class,
         FeatureSettingsModule::class,
         WebDiModule::class,
         WebPlatformModule::class,

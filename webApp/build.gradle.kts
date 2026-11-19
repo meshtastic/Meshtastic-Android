@@ -126,6 +126,7 @@ kotlin {
             implementation(projects.feature.messaging)
             implementation(projects.feature.connections)
             implementation(projects.feature.intro)
+            implementation(projects.feature.docs)
 
             // Compose Multiplatform
             implementation(libs.compose.multiplatform.runtime)

@@ -21,7 +21,7 @@ actual val settingsPlatform: SettingsPlatform =
     SettingsPlatform(
         localMeshDiscovery = false,
         wifiProvisioning = false,
-        helpDocs = false,
+        helpDocs = true,
         firmware = false,
         tak = false,
         databasePerDevice = false,

@@ -44,6 +44,10 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.service.DeviceAddressChangeHook
 import org.meshtastic.core.service.LastBleNodeRecorder
 import org.meshtastic.core.service.LocalNetworkAccess
+import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
+import org.meshtastic.feature.docs.translation.DocTranslationService
+import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
@@ -120,4 +124,9 @@ class WebStubsModule {
         WebDatabaseBackupService(provider)
 
     @Single fun messageTranslationService(): MessageTranslationService = NoOpMessageTranslator()
+
+    /** No on-device model in a browser: Chirpy answers from keyword search, and docs show untranslated. */
+    @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
+
+    @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
 }
