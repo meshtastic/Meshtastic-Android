@@ -198,7 +198,6 @@ internal constructor(
             if (attempt.openedAt == null) {
                 attempt.failure = e.toWebSocketFailure()
                 Logger.w { "WebSocket $logLabel connect failed: ${e::class.simpleName} (${attempt.failure})" }
-                Logger.d { "WebSocket $logLabel connect failure detail: ${e.message}" }
             } else {
                 Logger.w { "WebSocket $logLabel session failed: ${e::class.simpleName}" }
             }
@@ -304,12 +303,20 @@ internal constructor(
     }
 }
 
-/** What a failed dial tells the user; Ktor raises [WebSocketException] when the upgrade gets no 101. */
+/**
+ * What a failed dial tells the user. Ktor names a non-101 upgrade only in a [WebSocketException]'s message; its browser
+ * engine raises the same type for any error event, a DNS or certificate failure included, with no status to report.
+ */
 internal fun Throwable.toWebSocketFailure(): TransportDisconnectReason = when {
-    this is WebSocketException -> TransportDisconnectReason.WebSocketHandshakeRejected
+    this is WebSocketException && message.orEmpty().startsWith(UPGRADE_REFUSED_PREFIX) ->
+        TransportDisconnectReason.WebSocketHandshakeRejected
+
     isTlsFailure() -> TransportDisconnectReason.WebSocketTlsFailed
+
     else -> TransportDisconnectReason.WebSocketConnectFailed
 }
+
+private const val UPGRADE_REFUSED_PREFIX = "Handshake exception, expected status code"
 
 /** The URL with a public host anonymized, as [TcpRadioTransport] logs its address. */
 private fun String.toLogLabel(): String {

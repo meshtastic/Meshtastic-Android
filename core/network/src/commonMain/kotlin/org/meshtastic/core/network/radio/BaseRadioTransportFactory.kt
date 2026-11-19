@@ -43,14 +43,17 @@ abstract class BaseRadioTransportFactory(
         if (!bluetoothRepository.isSupported) Logger.w { "No Bluetooth LE on this hardware; BLE addresses are refused" }
     }
 
+    /** Whether a `t` address can open; the Network pane can exist without it, as the WebSocket link does on web. */
+    protected open val isRawTcpSupported: Boolean
+        get() = DeviceType.TCP in supportedDeviceTypes
+
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
         return when (spec) {
-            // A saved TCP address restored where the platform has no TCP transport (the browser) is kept but never
-            // armed.
-            InterfaceId.TCP.id,
-            InterfaceId.WEBSOCKET.id,
-            -> DeviceType.TCP in supportedDeviceTypes
+            // A saved TCP address restored where the platform has no raw TCP (the browser) is kept but never armed.
+            InterfaceId.TCP.id -> isRawTcpSupported
+
+            InterfaceId.WEBSOCKET.id -> DeviceType.TCP in supportedDeviceTypes
 
             // A saved serial address restored onto hardware with no USB host is kept but never armed.
             InterfaceId.SERIAL.id -> isSerialSupported

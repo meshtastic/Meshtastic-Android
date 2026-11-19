@@ -84,6 +84,7 @@ class ManualTcpAddressTest {
         assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("192.168.1.20", "", webSocketScheme = "ws"))
         assertEquals("wwss://node.local:4404/api/v1/ws", manualAddress("node.local", "4404", webSocketScheme = "wss"))
         assertEquals("wws://[fe80::1]/api/v1/ws", manualAddress("fe80::1", "", webSocketScheme = "ws"))
+        assertEquals("wws://[fd00::1]:80/api/v1/ws", manualAddress("[fd00::1]", "80", webSocketScheme = "ws"))
         assertNull(manualAddress("192.168.1.20", "70000", webSocketScheme = "ws"))
         assertNull(manualAddress("", "", webSocketScheme = "ws"))
     }

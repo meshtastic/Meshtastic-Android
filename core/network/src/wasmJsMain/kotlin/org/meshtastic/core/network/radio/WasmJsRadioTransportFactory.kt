@@ -50,6 +50,8 @@ class WasmJsRadioTransportFactory(
     // Network is the WebSocket phone link alone: raw TCP never reaches a browser.
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
+    override val isRawTcpSupported: Boolean = false
+
     // No unlock gesture and no demo entry exist on web yet (mirrors desktop): `connections?address=m` is reachable
     // from any page via the verified app link, so the virtual transports stay inadmissible until a web-specific
     // gesture is deliberately added.

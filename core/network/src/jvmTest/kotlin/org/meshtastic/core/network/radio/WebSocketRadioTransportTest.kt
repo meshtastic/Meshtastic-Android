@@ -273,6 +273,11 @@ class WebSocketRadioTransportTest {
         )
         assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure())
         assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure())
+        // The browser engine's error event: no status, so not a refused upgrade.
+        assertEquals(
+            TransportDisconnectReason.WebSocketConnectFailed,
+            WebSocketException("[object Event]").toWebSocketFailure(),
+        )
     }
 
     private fun transport(timing: WebSocketTiming = FAST): WebSocketRadioTransport =

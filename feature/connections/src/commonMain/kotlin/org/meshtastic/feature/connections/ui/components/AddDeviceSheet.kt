@@ -171,7 +171,9 @@ private fun bareHostWebSocket(host: String, portText: String, scheme: String): S
     val hostPart = if (':' in host && !host.startsWith("[")) "[$host]" else host
     val secure = if (port in FIRMWARE_TLS_PORTS) "wss" else scheme
     val url = "$secure://$hostPart${port?.let { ":$it" }.orEmpty()}"
-    return normalizeWebSocketUrl(url)?.takeIf { portOk && host.isValidAddress() }?.let { WEBSOCKET_DEVICE_PREFIX + it }
+    // An IPv6 literal is validated bare: the brackets belong to the URL, not the address.
+    val hostOk = host.removeSurrounding("[", "]").isValidAddress()
+    return normalizeWebSocketUrl(url)?.takeIf { portOk && hostOk }?.let { WEBSOCKET_DEVICE_PREFIX + it }
 }
 
 private val FIRMWARE_TLS_PORTS = setOf(443, 9443)
