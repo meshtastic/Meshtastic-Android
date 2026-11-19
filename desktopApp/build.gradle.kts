@@ -465,6 +465,12 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
 
+    // Debug-only agent MCP server (mcp/DesktopMcpServer.kt); the SDK ships no Ktor engine. The BOM lifts the
+    // server modules the SDK pins to an older Ktor onto the repo's Ktor.
+    implementation(platform(libs.ktor.bom))
+    implementation(libs.mcp.kotlin.sdk.server)
+    implementation(libs.ktor.server.cio)
+
     implementation(libs.androidx.paging.common)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore)
