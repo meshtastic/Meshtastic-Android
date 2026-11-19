@@ -16,14 +16,12 @@
  */
 package org.meshtastic.feature.intro
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
+import org.meshtastic.core.ui.util.PermissionUiState
 import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
@@ -37,41 +35,49 @@ import org.meshtastic.core.ui.util.rememberNotificationPermissionState
  */
 @Composable
 fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
-    val context = LocalContext.current
+    val platform = rememberIntroPlatform()
+    // A notification state that is not runtime-gated (Android before 13) has nothing to configure, so it stays null
+    // and the flow skips the notification ask.
+    val notificationPermissionState = rememberNotificationPermissionState().takeIf { it.isRuntimeGated }
 
-    // Pre-Android 13 has no runtime notification permission, so there is nothing to configure — keep it null so the
-    // intro flow can skip the notification screen entirely. SDK_INT is constant per process, so the conditional call
-    // is recomposition-safe.
-    val notificationPermissionState =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) rememberNotificationPermissionState() else null
-
-    val locationPermissionState = rememberLocationPermissionState()
-    val bluetoothPermissionState = rememberBluetoothPermissionState()
-    // Pre-Android 12 the BLE scan is gated by ACCESS_FINE_LOCATION, which rememberBluetoothPermissionState already
-    // reflects. The Bluetooth screen needs to know so its copy names the permission the user will actually be shown.
-    val bluetoothRequiresLocation = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-
-    // Deliberately not remembered: rememberRuntimePermissionState returns a fresh PermissionUiState carrying the
-    // current status on every composition, so caching this wrapper would pin the intro screens to a stale status —
-    // exactly the bug that left the primary button inert after a denial.
+    // Deliberately not remembered: rememberXxxPermissionState returns a fresh PermissionUiState carrying the current
+    // status on every composition, so caching this wrapper would pin the intro screens to a stale status.
     val permissions =
-        AndroidIntroPermissions(
-            bluetooth = bluetoothPermissionState,
-            location = locationPermissionState,
+        IntroPermissionStates(
+            bluetooth = rememberBluetoothPermissionState(),
+            location = rememberLocationPermissionState(),
             notification = notificationPermissionState,
-            bluetoothRequiresLocation = bluetoothRequiresLocation,
+            bluetoothRequiresLocation = platform.bluetoothRequiresLocation,
             bluetoothSupported = isBluetoothSupported(),
+            inBrowser = platform.inBrowser,
+            criticalAlertsConfigurable = platform.settingsNavigator != null,
         )
-    val settingsNavigator = remember(context) { AndroidIntroSettingsNavigator(context) }
-    val backStack = rememberNavBackStack(Welcome)
+    val backStack = rememberNavBackStack(IntroSavedStateConfig, Welcome)
 
     CompositionLocalProvider(
         LocalIntroPermissions provides permissions,
-        LocalIntroSettingsNavigator provides settingsNavigator,
+        LocalIntroSettingsNavigator provides (platform.settingsNavigator ?: NoIntroSettingsNavigator),
     ) {
         MeshtasticNavDisplay(
             backStack = backStack,
             entryProvider = entryProvider { introGraph(backStack = backStack, viewModel = viewModel, onDone = onDone) },
         )
     }
+}
+
+/** [IntroPermissions] holding the hoisted states verbatim, so each screen sees the full status it recovers from. */
+internal class IntroPermissionStates(
+    override val bluetooth: PermissionUiState,
+    override val location: PermissionUiState,
+    override val notification: PermissionUiState?,
+    override val bluetoothRequiresLocation: Boolean,
+    override val bluetoothSupported: Boolean,
+    override val inBrowser: Boolean,
+    override val criticalAlertsConfigurable: Boolean,
+) : IntroPermissions
+
+private object NoIntroSettingsNavigator : IntroSettingsNavigator {
+    override fun openAppSettings() = Unit
+
+    override fun openCriticalAlertsSettings() = Unit
 }

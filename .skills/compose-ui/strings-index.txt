@@ -150,6 +150,7 @@ bluetooth_permission_blocked_notice
 bluetooth_permission_blocked_notice_pre31
 bluetooth_permission_blocked_rationale
 bluetooth_permission_blocked_rationale_pre31
+bluetooth_permission_browser
 bluetooth_permission_denied_notice
 bluetooth_permission_denied_notice_pre31
 bluetooth_permission_rationale
@@ -1660,6 +1661,7 @@ paxcounter
 paxcounter_config
 periodic_position_broadcast
 ### PERMISSION ###
+permission_blocked_in_browser_notice
 permission_camera_summary
 permission_local_network_summary
 permission_location_summary

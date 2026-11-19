@@ -171,6 +171,7 @@
     <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>
     <string name="bluetooth_permission_blocked_rationale">Nearby devices access is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
     <string name="bluetooth_permission_blocked_rationale_pre31">Location permission is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
+    <string name="bluetooth_permission_browser">Your browser asks which radio to use each time you connect over Bluetooth or USB, so there is nothing to allow now. Bluetooth works in Chrome, Edge and Opera.</string>
     <string name="bluetooth_permission_denied_notice">Without Nearby devices access, Meshtastic cannot find or connect to your radio over Bluetooth. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_permission_denied_notice_pre31">Without Location permission, Android blocks Bluetooth scanning, so Meshtastic cannot find your radio. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_permission_rationale">Meshtastic needs Nearby devices access to find your radio and connect to it. It is used only to talk to your own devices, never to work out where you are. Without it, Bluetooth is unavailable — Wi-Fi and USB still work.</string>
@@ -1714,6 +1715,7 @@
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <!-- PERMISSION -->
+    <string name="permission_blocked_in_browser_notice">Your browser has blocked this for the site. Allow it in the site settings next to the address bar, then reload the page.</string>
     <string name="permission_camera_summary">Scan channel and contact QR codes</string>
     <string name="permission_local_network_summary">Find radios on your Wi-Fi network</string>
     <string name="permission_location_summary">Show your position on the map and share it with the mesh</string>

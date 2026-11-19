@@ -17,14 +17,26 @@
 package org.meshtastic.feature.intro
 
 import androidx.navigation3.runtime.NavKey
+import androidx.savedstate.serialization.SavedStateConfiguration
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 
-@Serializable data object Welcome : NavKey
+/** The intro flow's screens; sealed so its saved back stack can serialize them on every target. */
+@Serializable sealed interface IntroKey : NavKey
 
-@Serializable data object Bluetooth : NavKey
+@Serializable data object Welcome : IntroKey
 
-@Serializable data object Location : NavKey
+@Serializable data object Bluetooth : IntroKey
 
-@Serializable data object Notifications : NavKey
+@Serializable data object Location : IntroKey
 
-@Serializable data object CriticalAlerts : NavKey
+@Serializable data object Notifications : IntroKey
+
+@Serializable data object CriticalAlerts : IntroKey
+
+@OptIn(ExperimentalSerializationApi::class)
+internal val IntroSavedStateConfig = SavedStateConfiguration {
+    serializersModule = SerializersModule { polymorphic(NavKey::class) { subclassesOfSealed<IntroKey>() } }
+}

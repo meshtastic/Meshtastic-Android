@@ -51,6 +51,7 @@ import org.meshtastic.web.navigation.isWebDeepLink
 import org.meshtastic.web.platform.NotificationClicks
 import org.meshtastic.web.platform.cacheLoadedResources
 import org.meshtastic.web.platform.requestPersistentStorage
+import org.meshtastic.web.navigation.WebIntroGate
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
@@ -194,5 +195,9 @@ private fun ThemeAndContent(uiViewModel: UIViewModel) {
 
     // Compose reads the language when it resolves a resource, not as state, so a new language recomposes from here.
     // The back stack is kept above it.
-    key(languagePref) { AppTheme(darkTheme = isDarkTheme(themePref)) { WebMainScreen(uiViewModel, multiBackstack) } }
+    key(languagePref) {
+        AppTheme(darkTheme = isDarkTheme(themePref)) {
+            WebIntroGate(uiViewModel) { WebMainScreen(uiViewModel, multiBackstack) }
+        }
+    }
 }

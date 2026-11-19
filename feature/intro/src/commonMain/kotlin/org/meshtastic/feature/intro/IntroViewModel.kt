@@ -35,17 +35,20 @@ class IntroViewModel : ViewModel() {
      *   landing on USER_FIXED with no dialog available again. The Bluetooth screen covers both uses on those releases,
      *   so the second ask is dropped rather than duplicated.
      * @param bluetoothSupported false on hardware with no Bluetooth LE, where the Bluetooth screen is skipped.
+     * @param criticalAlertsConfigurable false where no notification channel can override Do Not Disturb, as in a
+     *   browser, where the critical-alerts screen is skipped.
      */
     fun getNextKey(
         currentKey: NavKey,
         allPermissionsGranted: Boolean,
         bluetoothRequiresLocation: Boolean = false,
         bluetoothSupported: Boolean = true,
+        criticalAlertsConfigurable: Boolean = true,
     ): NavKey? = when (currentKey) {
         is Welcome -> if (bluetoothSupported) Bluetooth else Location
         is Bluetooth -> if (bluetoothRequiresLocation) Notifications else Location
         is Location -> Notifications
-        is Notifications -> if (allPermissionsGranted) CriticalAlerts else null
+        is Notifications -> if (allPermissionsGranted && criticalAlertsConfigurable) CriticalAlerts else null
         is CriticalAlerts -> null
         else -> null
     }

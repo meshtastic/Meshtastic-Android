@@ -34,6 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.next
 import org.meshtastic.core.resources.open_settings
+import org.meshtastic.core.resources.permission_blocked_in_browser_notice
 import org.meshtastic.core.resources.skip
 import org.meshtastic.core.ui.component.OnboardingBottomBar
 import org.meshtastic.core.ui.component.OnboardingFeature
@@ -70,6 +71,8 @@ import org.meshtastic.core.ui.util.PermissionStatus
  * @param onSkip Callback for the skip action.
  * @param onPrimaryAction Callback for the primary action; the caller maps [status] to request / settings / advance.
  * @param additionalContent Optional composable lambda for adding custom content below the features.
+ * @param inBrowser the browser owns the permission: a page cannot open its site settings, so a blocked permission names
+ *   where to allow it and the primary action advances.
  */
 @Composable
 internal fun PermissionScreenLayout(
@@ -83,12 +86,13 @@ internal fun PermissionScreenLayout(
     onSkip: () -> Unit,
     onPrimaryAction: () -> Unit,
     additionalContent: (@Composable () -> Unit)? = null,
+    inBrowser: Boolean = false,
 ) {
     val primaryLabelRes =
         when (status) {
             PermissionStatus.GRANTED -> Res.string.next
 
-            PermissionStatus.PERMANENTLY_DENIED -> Res.string.open_settings
+            PermissionStatus.PERMANENTLY_DENIED -> if (inBrowser) Res.string.next else Res.string.open_settings
 
             PermissionStatus.NOT_REQUESTED,
             PermissionStatus.DENIED_CAN_RETRY,
@@ -115,7 +119,11 @@ internal fun PermissionScreenLayout(
             // Directly under the description, above the feature list. Placed last it sat below up to four feature
             // rows in a scrolling column — off-screen on a typical phone, so a user who had just declined saw the
             // button label change and no reason why. It renders only after a denial, so the happy path pays nothing.
-            PermissionNotice(status = status, deniedNoticeRes = deniedNoticeRes, blockedNoticeRes = blockedNoticeRes)
+            PermissionNotice(
+                status = status,
+                deniedNoticeRes = deniedNoticeRes,
+                blockedNoticeRes = if (inBrowser) Res.string.permission_blocked_in_browser_notice else blockedNoticeRes,
+            )
             features.forEach { feature ->
                 OnboardingFeatureRow(feature = feature)
                 Spacer(modifier = Modifier.height(16.dp))

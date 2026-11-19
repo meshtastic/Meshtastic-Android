@@ -47,6 +47,19 @@ interface IntroPermissions {
      * False on hardware with no Bluetooth LE (e.g. Android XR), where there is nothing for the Bluetooth screen to ask.
      */
     val bluetoothSupported: Boolean
+
+    /**
+     * True in a browser, which owns the permissions: Bluetooth and serial radios are picked in its chooser at connect
+     * time, and a blocked permission comes back only through its site settings, which a page cannot open.
+     */
+    val inBrowser: Boolean
+        get() = false
+
+    /**
+     * True where a notification channel can be allowed to override Do Not Disturb, so the critical-alerts step applies.
+     */
+    val criticalAlertsConfigurable: Boolean
+        get() = true
 }
 
 /** Provides platform-specific permission states to the intro nav graph. */
