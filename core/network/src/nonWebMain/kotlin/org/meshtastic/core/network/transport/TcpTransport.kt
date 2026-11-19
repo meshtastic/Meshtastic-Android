@@ -87,11 +87,11 @@ class TcpTransport(
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
 
         /** How long a network radio link may go with nothing inbound before it is treated as dead. */
-        const val INACTIVITY_TIMEOUT_MS = SOCKET_TIMEOUT_MS * SOCKET_RETRIES
+        const val INACTIVITY_TIMEOUT_MS = NetworkLinkTimeouts.INACTIVITY_TIMEOUT_MS
         const val TIMEOUT_LOG_INTERVAL = 5
 
         /** TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal. */
-        const val CONNECT_TIMEOUT_MS = 30_000L
+        const val CONNECT_TIMEOUT_MS = NetworkLinkTimeouts.CONNECT_TIMEOUT_MS
         private const val READ_BUFFER_SIZE = 1024
     }
 

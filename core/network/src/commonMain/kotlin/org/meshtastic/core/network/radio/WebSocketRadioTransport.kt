@@ -17,12 +17,8 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSocketException
-import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.parseUrl
 import io.ktor.websocket.CloseReason
@@ -40,9 +36,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.model.util.anonymizePublicHost
+import org.meshtastic.core.network.transport.NetworkLinkTimeouts
 import org.meshtastic.core.network.transport.ReconnectBackoff
 import org.meshtastic.core.network.transport.StreamFrameCodec
-import org.meshtastic.core.network.transport.TcpTransport
 import org.meshtastic.core.network.transport.isTlsFailure
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
@@ -56,10 +52,10 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
-/** The knobs tests shrink; production uses the defaults, which follow [TcpTransport] where it has one. */
+/** The knobs tests shrink; production uses the defaults, shared with the TCP link where it has one. */
 internal data class WebSocketTiming(
-    val connectTimeout: Duration = TcpTransport.CONNECT_TIMEOUT_MS.milliseconds,
-    val inactivityTimeout: Duration = TcpTransport.INACTIVITY_TIMEOUT_MS.milliseconds,
+    val connectTimeout: Duration = NetworkLinkTimeouts.CONNECT_TIMEOUT_MS.milliseconds,
+    val inactivityTimeout: Duration = NetworkLinkTimeouts.INACTIVITY_TIMEOUT_MS.milliseconds,
     val tryAgainLaterDelay: Duration = ReconnectBackoff.SHORT_SESSION_THRESHOLD_MS.milliseconds,
     val newBackoff: () -> ReconnectBackoff = { ReconnectBackoff() },
 )
@@ -96,13 +92,7 @@ internal constructor(
     private val lifecycle = TransportLifecycleGate("WebSocket")
     private val logLabel = url.toLogLabel()
 
-    // CIO, not the platform default: Android's OkHttp applies network_security_config's cleartext ban to a LAN ws://
-    // radio, and CIO is what the app's MQTT WebSocket transport already uses.
-    private val client =
-        HttpClient(CIO) {
-            install(WebSockets) { maxFrameSize = MAX_MESSAGE_BYTES.toLong() }
-            engine { endpoint { connectTimeout = timing.connectTimeout.inWholeMilliseconds } }
-        }
+    private val client = webSocketHttpClient(MAX_MESSAGE_BYTES.toLong(), timing.connectTimeout.inWholeMilliseconds)
 
     /** The open session's outbound queue, or null while no session is open. */
     @Volatile private var outbox: Channel<ByteArray>? = null
@@ -208,6 +198,7 @@ internal constructor(
             if (attempt.openedAt == null) {
                 attempt.failure = e.toWebSocketFailure()
                 Logger.w { "WebSocket $logLabel connect failed: ${e::class.simpleName} (${attempt.failure})" }
+                Logger.d { "WebSocket $logLabel connect failure detail: ${e.message}" }
             } else {
                 Logger.w { "WebSocket $logLabel session failed: ${e::class.simpleName}" }
             }
