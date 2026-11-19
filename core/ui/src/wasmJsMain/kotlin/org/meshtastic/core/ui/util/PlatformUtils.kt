@@ -27,12 +27,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.keepScreenOn
-import androidx.compose.ui.platform.LocalClipboard
 import co.touchlab.kermit.Logger
 import kotlinx.browser.window
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
 import kotlin.js.Promise
@@ -41,12 +39,27 @@ import kotlin.js.Promise
 
 @Composable actual fun rememberOpenNfcSettings(): () -> Unit = {}
 
-/** A browser tab has no share sheet everywhere; the clipboard is the honest equivalent, as on desktop. */
+/** The Web Share API's share sheet where the browser has one for text, otherwise the clipboard as on desktop. */
 @Composable
 actual fun rememberShareText(): (text: String, subject: String) -> Unit {
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
-    return { text, _ -> scope.launch { clipboard.setClipEntry(createClipEntry(text, sensitive = true)) } }
+    val copy = rememberClipboardShare()
+    return remember(copy) { { text, subject -> shareOrElse(text, subject) { copy(text) } } }
+}
+
+// navigator.share must run inside the click's user activation, so nothing suspends before it. Closing the share sheet
+// rejects with AbortError and ends there; any other refusal, or no Web Share for text, falls back to the clipboard.
+@Suppress("UnusedParameter") // read by name inside the js() body
+private fun shareOrElse(text: String, subject: String, fallback: () -> Unit) {
+    js(
+        """{
+        const data = { title: subject, text: text };
+        if (typeof navigator.share === 'function' && (typeof navigator.canShare !== 'function' || navigator.canShare(data))) {
+            navigator.share(data).catch((e) => { if (!e || e.name !== 'AbortError') fallback(); });
+        } else {
+            fallback();
+        }
+    }""",
+    )
 }
 
 @Composable actual fun rememberShowToast(): suspend (String) -> Unit = rememberSnackbarToast()
