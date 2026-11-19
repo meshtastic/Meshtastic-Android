@@ -34,10 +34,8 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -47,6 +45,7 @@ import org.meshtastic.core.resources.must_update
 import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
+import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.discovery.navigation.discoveryGraph
@@ -65,7 +64,7 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
     // Land on Connections for first-run / no-device-selected; otherwise on Nodes (seeded from prefs).
-    val initialTab = remember { initialRoute(viewModel.currentDeviceAddressFlow.value) }
+    val initialTab = remember { startDestination(viewModel.currentDeviceAddressFlow.value) }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
     val scrollToTopEvents = viewModel.scrollToTopEventFlow
@@ -122,9 +121,6 @@ fun MainScreen() {
         }
     }
 }
-
-private fun initialRoute(deviceAddress: String?): NavKey =
-    if (DeviceAddress.parse(deviceAddress) == null) TopLevelDestination.Connect.route else NodesRoute.Nodes
 
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")

@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -35,6 +36,7 @@ kotlin {
             implementation(libs.kermit)
             implementation(libs.androidx.paging.common)
         }
+
         commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

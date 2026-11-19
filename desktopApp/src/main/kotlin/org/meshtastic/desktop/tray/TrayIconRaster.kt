@@ -83,12 +83,11 @@ internal fun rasterizeSvgForTray(svg: ByteArray, size: Int): TrayIconRaster {
     val surface = Surface.makeRasterN32Premul(size, size)
     val bitmap = Bitmap()
     try {
-        // The tray glyphs declare absolute width/height and carry no viewBox, so Skia has no mapping from the
-        // art's coordinate space onto a smaller container: setContainerSize alone renders them at 512px and a
-        // 22px surface captures only their transparent top-left corner, i.e. a blank tray icon. Installing a
-        // viewBox after parsing does not help either — measured, still fully transparent. Rendering at the
-        // intrinsic size and scaling the canvas is what fits the art to the icon, and it stays correct for an
-        // SVG that does carry a viewBox, because the container then matches the size it maps onto.
+        // An SVG with absolute width/height and no viewBox gives Skia no mapping from the art's coordinate space
+        // onto a smaller container: setContainerSize alone renders it at full size and a 22px surface captures
+        // only its transparent top-left corner, i.e. a blank tray icon. Rendering at the intrinsic size and
+        // scaling the canvas fits the art to the icon with or without a viewBox, since the container then matches
+        // the size the viewBox maps onto.
         val root = dom.root
         val intrinsicWidth = root?.width?.value ?: 0f
         val intrinsicHeight = root?.height?.value ?: 0f

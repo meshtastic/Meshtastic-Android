@@ -53,7 +53,8 @@ fun ModuleConfigurationScreen(
     val modules =
         remember(state.metadata, deviceRole, hiddenFeaturesUnlocked) {
             if (hiddenFeaturesUnlocked) {
-                ModuleRoute.entries
+                // Unlocking bypasses the device's gate, not the platform's: web has no TAK destination.
+                ModuleRoute.entries.filter { it != ModuleRoute.TAK || settingsPlatform.tak }
             } else {
                 ModuleRoute.filterExcludedFrom(state.metadata, deviceRole)
             }

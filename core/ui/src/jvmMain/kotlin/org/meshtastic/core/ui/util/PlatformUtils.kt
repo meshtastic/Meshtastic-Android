@@ -19,10 +19,8 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.runtime.remember
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
 import java.awt.Desktop
@@ -32,30 +30,23 @@ import java.io.File
 import java.net.URI
 import javax.swing.JFileChooser
 
-/** JVM stub — NFC settings are not available on Desktop. */
 @Composable
 actual fun rememberShareText(): (text: String, subject: String) -> Unit {
-    // Desktop has no share sheet. The clipboard is the honest equivalent, and the caller's UI says so.
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
-    return { text, _ -> scope.launch { clipboard.setClipEntry(createClipEntry(text, sensitive = true)) } }
+    // Desktop has no share sheet.
+    val copy = rememberClipboardShare()
+    return remember(copy) { { text, _ -> copy(text) } }
 }
 
+/** JVM stub — NFC settings are not available on Desktop. */
 @Composable
 actual fun rememberOpenNfcSettings(): () -> Unit = { Logger.w { "NFC settings not available on JVM/Desktop" } }
 
-/** JVM stub — toast messages are logged instead. */
-@Composable actual fun rememberShowToast(): suspend (String) -> Unit = { message -> Logger.i { "Toast: $message" } }
+@Composable actual fun rememberShowToast(): suspend (String) -> Unit = rememberSnackbarToast()
 
-/** JVM stub — toast messages are logged instead. */
-@Composable
-actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> Logger.i { "Toast (resource)" } }
+@Composable actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = rememberSnackbarToastResource()
 
-/** JVM stub — map opening is not available on Desktop. */
 @Composable
-actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ ->
-    Logger.i { "Open map requested; not available on Desktop" }
-}
+actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = rememberOpenMapInBrowser()
 
 /** JVM stub — URL opening via Desktop browse API. */
 @Composable

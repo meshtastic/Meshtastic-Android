@@ -42,15 +42,20 @@ class SettingsFieldAnchorCoverageTest {
             "schema_position_tx_gpio" to "anchored through the GPIO rows' data, not a literal",
         )
 
-    private val sourceDir = File("src/commonMain/kotlin/org/meshtastic/feature/settings/radio/component")
+    // nonWebMain holds the screens the web target leaves out, such as TAK.
+    private val sourceDirs =
+        listOf("commonMain", "nonWebMain").map {
+            File("src/$it/kotlin/org/meshtastic/feature/settings/radio/component")
+        }
 
     private val anchorCall = Regex("""settingsField\(([^)]*)\)""")
     private val schemaKey = Regex("""schema_[a-z0-9_]+""")
 
     private fun anchoredKeys(): Set<String> {
-        assertTrue(sourceDir.isDirectory, "run from the module directory: ${sourceDir.absolutePath}")
-        return sourceDir
-            .walk()
+        sourceDirs.forEach { assertTrue(it.isDirectory, "run from the module directory: ${it.absolutePath}") }
+        return sourceDirs
+            .asSequence()
+            .flatMap { it.walk() }
             .filter { it.extension == "kt" }
             .flatMap { file -> anchorCall.findAll(file.readText()).map { it.groupValues[1] } }
             .flatMap { args -> schemaKey.findAll(args).map { it.value } }

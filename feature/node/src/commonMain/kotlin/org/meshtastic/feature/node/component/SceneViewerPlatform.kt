@@ -18,12 +18,6 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.romainguy.kotlin.math.Float3
-import io.github.sceneview.compose.EnvironmentSource
-import io.github.sceneview.compose.Lighting
-import io.github.sceneview.compose.ModelSource
-import io.github.sceneview.compose.SceneViewer
-import io.github.sceneview.compose.rememberCameraState
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.feature.node.model.GlbBounds
 import kotlin.math.PI
@@ -34,10 +28,9 @@ import kotlin.math.sin
 internal const val STUDIO_LIGHT_PROBE =
     "composeResources/org.meshtastic.core.resources/files/environments/studio_small_09.hdr"
 
-private const val CAMERA_DISTANCE_PER_EXTENT = 2.2f
-private const val CAMERA_AZIMUTH_DEGREES = 30f
-private const val CAMERA_ELEVATION_DEGREES = 20f
-private const val SUN_LUX = 40_000f
+internal const val CAMERA_DISTANCE_PER_EXTENT = 2.2f
+internal const val CAMERA_AZIMUTH_DEGREES = 30f
+internal const val CAMERA_ELEVATION_DEGREES = 20f
 private const val DEGREES_TO_RADIANS = (PI / 180.0).toFloat()
 
 /** The camera's offset from the model's center: the same three-quarter view on every platform. */
@@ -66,32 +59,3 @@ internal expect fun DeviceModelScene(
     screen: GlbBounds? = null,
     screenFrame: MirrorFrame? = null,
 )
-
-/**
- * The multiplatform SceneViewer, which places the model at its authored coordinates on desktop: the orbit target is the
- * bounds center and the distance a multiple of the longest side.
- */
-@Composable
-internal fun SceneViewerModelScene(
-    glb: ByteArray,
-    bounds: GlbBounds,
-    onError: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val center = bounds.center
-    val camera =
-        rememberCameraState(
-            target = Float3(center[0], center[1], center[2]),
-            distance = bounds.extent * CAMERA_DISTANCE_PER_EXTENT,
-            azimuth = CAMERA_AZIMUTH_DEGREES,
-            elevation = CAMERA_ELEVATION_DEGREES,
-        )
-    SceneViewer(
-        model = ModelSource.Bytes(glb),
-        modifier = modifier,
-        camera = camera,
-        lighting = Lighting(intensity = SUN_LUX),
-        environment = EnvironmentSource.Hdr(STUDIO_LIGHT_PROBE, showSkybox = false),
-        onError = { onError() },
-    )
-}

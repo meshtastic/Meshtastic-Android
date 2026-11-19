@@ -67,6 +67,27 @@ dependencyResolutionManagement {
             }
         }
         maven { url = uri("./offline-repository") }
+
+        // Kotlin/Wasm tooling; WasmTooling.kt stops KGP declaring these per project.
+        ivy {
+            url = uri("https://nodejs.org/dist")
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("org.nodejs", "node") }
+        }
+        ivy {
+            url = uri("https://github.com/yarnpkg/yarn/releases/download")
+            patternLayout { artifact("v[revision]/yarn-v[revision].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.yarnpkg", "yarn") }
+        }
+        // Binaryen release tags are "version_<n>"; KGP's coordinate uses the bare number as [revision].
+        ivy {
+            url = uri("https://github.com/WebAssembly/binaryen/releases/download")
+            patternLayout { artifact("version_[revision]/binaryen-version_[revision]-[classifier].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
@@ -131,4 +152,7 @@ include(
     ":baselineprofile",
     ":store-screenshots",
 )
+
+// The web app and every module's wasmJs target are opt-in (WEB_TARGET_PROPERTY in build-logic's Web.kt).
+if (providers.gradleProperty("meshtastic.web").map(String::toBoolean).getOrElse(false)) include(":webApp")
 

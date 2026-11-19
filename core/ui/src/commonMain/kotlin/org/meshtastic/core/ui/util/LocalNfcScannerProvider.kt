@@ -19,14 +19,22 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 
+/** Reads NFC tags while composed; a host may provide its own, and the default is the platform's built-in reader. */
+@Suppress("CompositionLocalAllowlist")
 val LocalNfcScannerProvider =
-    compositionLocalOf<@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }
+    compositionLocalOf<@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> {
+        { onResult, onNfcDisabled -> PlatformNfcScannerEffect(onResult, onNfcDisabled) }
+    }
 
-val LocalNfcScannerSupported = compositionLocalOf { false }
+/** Whether NFC tags can be read and written here, so screens offer NFC only where it works. */
+@Suppress("CompositionLocalAllowlist")
+val LocalNfcScannerSupported = compositionLocalOf { platformNfcSupported }
 
+/** Writes a URL to the next tag while composed; the default is the platform's built-in writer. */
+@Suppress("CompositionLocalAllowlist")
 val LocalNfcWriterProvider =
     compositionLocalOf<@Composable (url: String, onResult: (Boolean) -> Unit, onNfcDisabled: () -> Unit) -> Unit> {
-        { _, _, _ -> }
+        { url, onResult, onNfcDisabled -> PlatformNfcWriterEffect(url, onResult, onNfcDisabled) }
     }
 
 /** Offers a share URL to NFC readers for as long as the composable stays composed. */

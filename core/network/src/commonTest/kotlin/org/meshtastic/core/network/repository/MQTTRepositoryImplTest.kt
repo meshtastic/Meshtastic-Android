@@ -998,8 +998,9 @@ class MQTTRepositoryImplTest {
         return RepositoryHarness(repository = repository, client = client, setups = setups)
     }
 
-    private fun TestScope.startProxyCollection(repository: MQTTRepositoryImpl): Job =
-        backgroundScope.launch { repository.proxyMessageFlow.collect {} }
+    private fun TestScope.startProxyCollection(repository: MQTTRepositoryImpl): Job = backgroundScope.launch {
+        repository.proxyMessageFlow.collect {}
+    }
 
     private fun defaultRadioConfigRepository(): FakeRadioConfigRepository = FakeRadioConfigRepository().apply {
         setChannelSet(

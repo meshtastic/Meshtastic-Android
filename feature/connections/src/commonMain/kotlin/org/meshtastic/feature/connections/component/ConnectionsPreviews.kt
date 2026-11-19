@@ -34,6 +34,10 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
@@ -92,6 +96,26 @@ fun ConnectingDeviceInfoPreview() {
             deviceAddress = "AA:BB:CC:DD:EE:FF",
             connectionStatus = ConnectionStatus.CONNECTING,
             connectionProgress = "Discovering services...",
+            transportStatus = null,
+            onClickDisconnect = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ConnectingDeviceInfoPairingNeededPreview() {
+    AppTheme {
+        ConnectingDeviceInfo(
+            deviceName = "Meshtastic_abcd",
+            deviceAddress = "AA:BB:CC:DD:EE:FF",
+            connectionStatus = ConnectionStatus.NOT_CONNECTED,
+            connectionProgress = null,
+            transportStatus =
+            TransportStatus(
+                phase = TransportPhase.Subscribing,
+                lastFailure = TransportFailure(TransportFailureKind.PairingRequired),
+            ),
             onClickDisconnect = {},
         )
     }

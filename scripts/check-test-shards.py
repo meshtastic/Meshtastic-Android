@@ -19,6 +19,7 @@ COVERED_ELSEWHERE = {
     ':docs-screenshots',   # doc-screenshot generation (screenshot tooling)
     ':baselineprofile',    # benchmark module, instrumented-only
     ':store-screenshots',  # store-listing screenshots from the real app, instrumented-only
+    ':webApp',             # web-check job; included only with -Pmeshtastic.web=true
 }
 # Modules with no unit-test sources yet. One of these gaining test
 # sources fails the guard: move it into a shard in reusable-check.yml

@@ -26,6 +26,7 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.core.repository.allows
 import org.meshtastic.desktop.notification.NativeNotificationSender
 import androidx.compose.ui.window.Notification as ComposeNotification
 
@@ -61,18 +62,7 @@ class DesktopNotificationManager(
 
     @Suppress("InjectDispatcher", "TooGenericExceptionCaught")
     override suspend fun dispatch(notification: Notification): Boolean {
-        val enabled =
-            when (notification.category) {
-                Notification.Category.Message -> prefs.messagesEnabled.value
-                Notification.Category.Reaction -> prefs.loadReactionsEnabled()
-                Notification.Category.Waypoint -> prefs.loadNewWaypointsEnabled()
-                Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
-                Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
-                Notification.Category.Battery -> prefs.lowBatteryEnabled.value
-                Notification.Category.Alert -> true
-                Notification.Category.Client -> true
-                Notification.Category.Service -> true
-            }
+        val enabled = prefs.allows(notification.category)
 
         Logger.d { "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled" }
         if (!enabled) return false
@@ -112,9 +102,9 @@ class DesktopNotificationManager(
         )
     }
 
-    override fun cancel(id: Int) {
+    override fun cancel(category: Notification.Category, id: Int) {
         // Native OS notifications are fire-and-forget; cancel is best-effort.
-        Logger.d { "cancel($id) — not supported by current native senders" }
+        Logger.d { "cancel(${Notification.tagFor(category, id)}) — not supported by current native senders" }
     }
 
     override fun cancelAll() {

@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
+}
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
@@ -36,6 +39,13 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                implementation(libs.kotlinx.serialization.json) // WebRecentAddressesSource keeps its list as JSON
+            }
+        }
+
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
         // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.
         jvmTest.dependencies {
@@ -44,3 +54,9 @@ kotlin {
         }
     }
 }
+
+// The expected message is a string resource, which the browser loads asynchronously; the assertion runs first.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*ScannerViewModelTest.scan startup failure clears scanning state disables auto-scan and surfaces error",
+    "*ScannerViewModelTest.scan quota failure honors retry-after cooldown",
+)

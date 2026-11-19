@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
 import org.jetbrains.compose.resources.StringResource
@@ -27,7 +28,7 @@ import org.meshtastic.core.common.util.CommonUri
 actual fun createClipEntry(text: String, label: String, sensitive: Boolean): ClipEntry =
     throw UnsupportedOperationException("ClipEntry instantiation not supported on iOS stub")
 
-actual fun ClipEntry.plainText(): String? = null
+actual suspend fun Clipboard.readPlainText(): String? = null
 
 actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): AnnotatedString = AnnotatedString(html)
 

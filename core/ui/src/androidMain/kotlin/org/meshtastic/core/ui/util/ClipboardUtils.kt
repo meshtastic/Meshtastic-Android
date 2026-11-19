@@ -21,6 +21,7 @@ import android.content.ClipDescription
 import android.os.Build
 import android.os.PersistableBundle
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 
 actual fun createClipEntry(text: String, label: String, sensitive: Boolean): ClipEntry {
     val clip = ClipData.newPlainText(label, text)
@@ -31,4 +32,5 @@ actual fun createClipEntry(text: String, label: String, sensitive: Boolean): Cli
     return ClipEntry(clip)
 }
 
-actual fun ClipEntry.plainText(): String? = clipData.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
+actual suspend fun Clipboard.readPlainText(): String? =
+    getClipEntry()?.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()

@@ -36,6 +36,7 @@ import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
 import org.meshtastic.core.ui.util.rememberShowToastResource
+import org.meshtastic.feature.settings.settingsPlatform
 import kotlin.time.Duration.Companion.seconds
 
 private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
@@ -96,7 +97,7 @@ internal fun AppVersionRows(
         appVersionName = appVersionName,
         onUnlockHiddenFeatures = onUnlockHiddenFeatures,
     )
-    if (hiddenFeaturesUnlocked) {
+    if (hiddenFeaturesUnlocked && settingsPlatform.firmware) {
         ListItem(
             text = stringResource(Res.string.chirpy_hop),
             leadingIcon = MeshtasticIcons.PlayArrow,

@@ -26,11 +26,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -41,7 +41,7 @@ import kotlin.test.assertTrue
 class CommonGetDiscoveredDevicesUseCaseTest {
     private lateinit var useCase: CommonGetDiscoveredDevicesUseCase
     private lateinit var nodeRepository: FakeNodeRepository
-    private lateinit var recentAddressesDataSource: RecentAddressesDataSource
+    private lateinit var recentAddressesDataSource: RecentAddressesSource
     private lateinit var databaseManager: DatabaseManager
     private val recentAddressesFlow = MutableStateFlow<List<RecentAddress>>(emptyList())
     private val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())

@@ -49,6 +49,10 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
@@ -941,6 +945,91 @@ class SharedRadioInterfaceServiceLivenessTest {
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `transport status clears on explicit disconnect and on a device switch and ignores a stale transport`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF", startConnected = false)
+            every { transportFactory.createTransport(any(), any()) } calls
+                {
+                    callbacks += it.args[1] as RadioInterfaceService
+                    FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+                }
+            val failing =
+                TransportStatus(
+                    phase = TransportPhase.WaitingToRetry,
+                    lastFailure = TransportFailure(TransportFailureKind.PairingRequired),
+                    nextAttempt = 2,
+                    retryAtMillis = 1_000L,
+                )
+            try {
+                service.connect()
+                testDispatcher.scheduler.runCurrent()
+                callbacks.last().onStatus(failing)
+                assertEquals(failing, service.transportStatus.value)
+
+                service.setDeviceAddress("x11:22:33:44:55:66")
+                testDispatcher.scheduler.runCurrent()
+                assertNull(service.transportStatus.value, "a device switch must drop the old device's status")
+
+                callbacks.first().onStatus(failing)
+                assertNull(service.transportStatus.value, "the replaced transport's status must be dropped")
+
+                callbacks.last().onStatus(failing)
+                assertEquals(failing, service.transportStatus.value)
+
+                service.disconnect()
+                testDispatcher.scheduler.runCurrent()
+                assertNull(service.transportStatus.value, "an explicit disconnect must clear the status")
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    @Test
+    fun `handshake status lands only while the current session link is up`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF", startConnected = false)
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        val handshake = TransportStatus(TransportPhase.HandshakeConfig)
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "a handshake phase before the link is up must be dropped")
+
+            callbacks.last().onConnect()
+            service.onStatus(handshake)
+            assertEquals(handshake, service.transportStatus.value)
+
+            service.setDeviceAddress("x11:22:33:44:55:66")
+            // A linked transport gets a polite disconnect and its drain delay before the switch completes.
+            advanceTimeBy(1_000L)
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(2, callbacks.size, "the switch should start the new device's transport")
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "the old device's handshake must not land on the new device")
+
+            callbacks.first().onConnect()
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "the replaced transport's connect must not open the gate")
+
+            callbacks.last().onConnect()
+            service.onStatus(handshake)
+            assertEquals(handshake, service.transportStatus.value)
+
+            callbacks.last().onDisconnect(isPermanent = false)
+            service.onStatus(handshake)
+            assertNull(service.transportStatus.value, "a dropped link must close the gate")
+        } finally {
+            service.disconnect()
         }
     }
 

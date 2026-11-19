@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
@@ -32,8 +33,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.androidx.sqlite.bundled)
-            implementation(libs.androidx.datastore.preferences)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
@@ -42,13 +41,26 @@ kotlin {
             api(projects.core.model)
             implementation(libs.meshtastic.protobufs)
             implementation(libs.androidx.room.paging)
+            implementation(libs.androidx.sqlite.async)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.androidx.room.testing)
+        // sqlite-bundled and datastore-preferences publish no wasmJs variant.
+        getByName("nonWebMain").dependencies {
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.androidx.datastore.preferences)
         }
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.androidx.sqlite.web)
+                implementation(libs.kotlinx.browser)
+                // The WebWorkerSQLiteDriver worker: sqlite-wasm over OPFS through the opfs-sahpool VFS.
+                implementation(npm("sqlite-wasm-worker", file("worker")))
+            }
+        }
+        commonTest.dependencies { implementation(projects.core.testing) }
+        // room-testing publishes no wasmJs variant.
+        getByName("nonWebTest").dependencies { implementation(libs.androidx.room.testing) }
 
         getByName("androidHostTest") {
             dependencies {
@@ -77,3 +89,6 @@ dependencies {
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }
+
+// kotlinx-datetime on wasmJs knows no IANA zone names without its zoneinfo artifact.
+meshtasticWeb.browserTestExclusions.add("*DatabaseBackupTest.file name date follows the supplied time zone")

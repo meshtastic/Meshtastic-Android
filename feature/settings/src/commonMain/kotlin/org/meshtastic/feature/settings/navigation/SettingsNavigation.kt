@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
@@ -80,8 +82,6 @@ import org.meshtastic.feature.settings.radio.component.RemoteHardwareConfigScree
 import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
-import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
-import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import org.meshtastic.feature.settings.radio.setup.RadioSetupScreen
@@ -413,7 +413,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
                     PaxcounterConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
                 ModuleRoute.TAK ->
-                    TAKConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    TakModuleConfigContent(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
                 ModuleRoute.MESH_BEACON ->
                     MeshBeaconConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -421,7 +421,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         }
     }
 
-    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = dropUnlessResumed { backStack.removeLastOrNull() }) }
+    registerTakServerDestination(backStack)
 
     entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()
@@ -478,6 +478,15 @@ expect fun SettingsMainScreen(
     onNavigate: (Route) -> Unit,
     onBack: (() -> Unit)? = null,
 )
+
+/** The [ModuleRoute.TAK] screen; empty on web, which hides the entry but can still be deep linked here. */
+@Composable expect fun TakModuleConfigContent(viewModel: RadioConfigViewModel, onBack: () -> Unit)
+
+/**
+ * Registers [SettingsRoute.TakServer]; nothing on web, where a page cannot accept the TLS connections the TAK server
+ * needs. Takes [backStack] because `dropUnlessResumed` must run inside the entry's composable content.
+ */
+expect fun EntryProviderScope<NavKey>.registerTakServerDestination(backStack: NavBackStack<NavKey>)
 
 /** Expect declarations for platform-specific config screens. */
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(

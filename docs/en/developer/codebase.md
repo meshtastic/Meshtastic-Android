@@ -23,6 +23,7 @@ Meshtastic-Android/
 │   ├── src/google/         # Google Play flavor (proprietary Google integrations — Gemini, Maps, Play services)
 │   └── src/fdroid/         # F-Droid flavor (FOSS-only)
 ├── desktopApp/             # Desktop JVM application
+├── webApp/                 # Kotlin/Wasm browser application, opt-in (webApp/README.md)
 ├── feature/                # Feature modules (KMP, except widget and xr)
 │   ├── intro/
 │   ├── messaging/

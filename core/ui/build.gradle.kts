@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
@@ -72,12 +73,35 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                // QR decoding where the browser has no BarcodeDetector for QR codes. Apache-2.0, no dependencies.
+                implementation(npm("jsqr", libs.versions.jsqr.get()))
+            }
+        }
+
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.junit)
             implementation(libs.compose.multiplatform.ui.test)
         }
 
-        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.junit)
+        }
     }
 }
+
+// These fail in headless Chrome. Some compute their expected text with the blocking getString(), which has no wasmJs
+// implementation; the others find no displayed node or cannot inject input.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*DropDownPreferenceUiTest.*",
+    "*ImportFabUiTest.*",
+    "*IndoorAirQualityLabelTest.*",
+    "*LoraSignalIndicatorUiTest.*",
+    "*NodeItemDistanceUnitsTest.*",
+    "*NodeItemUnheardMarkerTest.*",
+    "*PositionPrecisionPreferenceUiTest.*",
+    "*SignalInfoUiTest.*",
+)

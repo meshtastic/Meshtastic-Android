@@ -19,6 +19,7 @@ import org.meshtastic.buildlogic.GenerateSupportedLocalesTask
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.library.compose)
 }
 
@@ -43,6 +44,8 @@ kotlin {
             kotlin.srcDir(generateSupportedLocales.flatMap { it.outputDir })
             dependencies { implementation(projects.core.common) }
         }
+        // runBlocking has no wasmJs implementation, so the blocking getString() overloads live in nonWebMain.
+        getByName("nonWebMain").dependencies { implementation(libs.kotlinx.coroutines.core) }
     }
 }
 

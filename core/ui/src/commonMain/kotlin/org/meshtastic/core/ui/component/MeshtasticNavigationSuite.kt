@@ -78,6 +78,8 @@ fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
     modifier: Modifier = Modifier,
+    // A host hides a tab it registers no entries for, as the web host does Map.
+    visibleDestinations: List<TopLevelDestination> = TopLevelDestination.entries,
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
@@ -98,7 +100,7 @@ fun MeshtasticNavigationSuite(
         modifier = modifier,
         layoutType = layoutType,
         navigationSuiteItems = {
-            TopLevelDestination.entries.forEach { destination ->
+            visibleDestinations.forEach { destination ->
                 val isSelected = destination == topLevelDestination
                 item(
                     selected = isSelected,

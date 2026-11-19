@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.serial
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.telemetry
+import org.meshtastic.feature.settings.settingsPlatform
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -145,7 +146,7 @@ enum class ModuleRoute(
         SettingsRoute.TAK,
         Res.drawable.ic_group,
         AdminMessage.ModuleConfigType.TAK_CONFIG.value,
-        isSupported = { it.supportsTakConfig },
+        isSupported = { it.supportsTakConfig && settingsPlatform.tak },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
     ),
 

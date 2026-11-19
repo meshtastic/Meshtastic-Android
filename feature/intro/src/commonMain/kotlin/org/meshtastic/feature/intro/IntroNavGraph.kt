@@ -29,13 +29,15 @@ internal fun EntryProviderScope<NavKey>.introGraph(
     viewModel: IntroViewModel,
     onDone: () -> Unit,
 ) {
-    fun navigateToNext(
-        current: NavKey,
-        permissionsGranted: Boolean = true,
-        bluetoothRequiresLocation: Boolean = false,
-        bluetoothSupported: Boolean = true,
-    ) {
-        val next = viewModel.getNextKey(current, permissionsGranted, bluetoothRequiresLocation, bluetoothSupported)
+    fun navigateToNext(current: NavKey, permissions: IntroPermissions, permissionsGranted: Boolean = true) {
+        val next =
+            viewModel.getNextKey(
+                currentKey = current,
+                allPermissionsGranted = permissionsGranted,
+                bluetoothRequiresLocation = permissions.bluetoothRequiresLocation,
+                bluetoothSupported = permissions.bluetoothSupported,
+                criticalAlertsConfigurable = permissions.criticalAlertsConfigurable,
+            )
         if (next != null) {
             backStack.add(next)
         } else {
@@ -44,12 +46,13 @@ internal fun EntryProviderScope<NavKey>.introGraph(
     }
 
     /** The one action behind every permission screen's primary button, resolved by [introPermissionAction]. */
-    fun onPrimaryAction(state: PermissionUiState, current: NavKey, bluetoothRequiresLocation: Boolean = false) {
+    fun onPrimaryAction(state: PermissionUiState, current: NavKey, permissions: IntroPermissions) {
         when (introPermissionAction(state.status)) {
-            IntroPermissionAction.ADVANCE ->
-                navigateToNext(current, bluetoothRequiresLocation = bluetoothRequiresLocation)
+            IntroPermissionAction.ADVANCE -> navigateToNext(current, permissions)
 
-            IntroPermissionAction.OPEN_SETTINGS -> state.openAppSettings()
+            // A page cannot open the browser's site settings; the notice says where to go, and the flow moves on.
+            IntroPermissionAction.OPEN_SETTINGS ->
+                if (permissions.inBrowser) navigateToNext(current, permissions) else state.openAppSettings()
 
             IntroPermissionAction.REQUEST -> state.request()
         }
@@ -57,7 +60,7 @@ internal fun EntryProviderScope<NavKey>.introGraph(
 
     entry<Welcome> {
         val permissions = LocalIntroPermissions.current
-        WelcomeScreen(onGetStarted = { navigateToNext(Welcome, bluetoothSupported = permissions.bluetoothSupported) })
+        WelcomeScreen(onGetStarted = { navigateToNext(Welcome, permissions) })
     }
 
     entry<Bluetooth> {
@@ -65,14 +68,9 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         BluetoothScreen(
             status = permissions.bluetooth.status,
             requiresLocation = permissions.bluetoothRequiresLocation,
-            onSkip = { navigateToNext(Bluetooth, bluetoothRequiresLocation = permissions.bluetoothRequiresLocation) },
-            onPrimaryAction = {
-                onPrimaryAction(
-                    state = permissions.bluetooth,
-                    current = Bluetooth,
-                    bluetoothRequiresLocation = permissions.bluetoothRequiresLocation,
-                )
-            },
+            inBrowser = permissions.inBrowser,
+            onSkip = { navigateToNext(Bluetooth, permissions) },
+            onPrimaryAction = { onPrimaryAction(permissions.bluetooth, Bluetooth, permissions) },
         )
     }
 
@@ -80,8 +78,9 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         val permissions = LocalIntroPermissions.current
         LocationScreen(
             status = permissions.location.status,
-            onSkip = { navigateToNext(Location) },
-            onPrimaryAction = { onPrimaryAction(permissions.location, Location) },
+            inBrowser = permissions.inBrowser,
+            onSkip = { navigateToNext(Location, permissions) },
+            onPrimaryAction = { onPrimaryAction(permissions.location, Location, permissions) },
         )
     }
 
@@ -92,12 +91,13 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         val status = notificationPermission?.status ?: PermissionStatus.GRANTED
         NotificationsScreen(
             status = status,
+            inBrowser = permissions.inBrowser,
             onSkip = onDone,
             onPrimaryAction = {
                 if (notificationPermission == null) {
-                    navigateToNext(Notifications, permissionsGranted = true)
+                    navigateToNext(Notifications, permissions, permissionsGranted = true)
                 } else {
-                    onPrimaryAction(notificationPermission, Notifications)
+                    onPrimaryAction(notificationPermission, Notifications, permissions)
                 }
             },
         )

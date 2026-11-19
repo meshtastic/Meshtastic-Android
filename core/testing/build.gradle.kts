@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.library) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
+}
 
 kotlin {
     android { withHostTest {} }
@@ -38,9 +41,11 @@ kotlin {
             api(kotlin("test"))
             api(libs.kotlinx.coroutines.test)
             api(libs.turbine)
-            api(libs.junit)
         }
+        // junit publishes no wasmJs or native variant.
+        jvmMain.dependencies { api(libs.junit) }
         androidMain.dependencies {
+            api(libs.junit)
             api(libs.androidx.test.core)
             api(libs.robolectric)
         }

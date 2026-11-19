@@ -66,8 +66,9 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
     override fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid), onSubscription)
 
-    override suspend fun read(characteristic: BleCharacteristic): ByteArray =
+    override suspend fun read(characteristic: BleCharacteristic): ByteArray = asException {
         peripheral.read(characteristicOf(serviceUuid, characteristic.uuid))
+    }
 
     override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType {
         val service = peripheral.services.value?.find { it.serviceUuid == serviceUuid }
@@ -79,16 +80,30 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
         }
     }
 
-    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
-        peripheral.write(
-            characteristicOf(serviceUuid, characteristic.uuid),
-            data,
-            when (writeType) {
-                BleWriteType.WITH_RESPONSE -> WriteType.WithResponse
-                BleWriteType.WITHOUT_RESPONSE -> WriteType.WithoutResponse
-            },
-        )
-    }
+    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) =
+        asException {
+            peripheral.write(
+                characteristicOf(serviceUuid, characteristic.uuid),
+                data,
+                when (writeType) {
+                    BleWriteType.WITH_RESPONSE -> WriteType.WithResponse
+                    BleWriteType.WITHOUT_RESPONSE -> WriteType.WithoutResponse
+                },
+            )
+        }
+}
+
+/**
+ * Runs a Kable call, rethrowing a failure that is neither an [Exception] nor an [Error] as one. Kotlin/Wasm surfaces a
+ * rejected Web Bluetooth promise as `JsException`, a bare [Throwable] that every `catch (e: Exception)` on the connect,
+ * read and write paths would miss, so it would escape the reconnect loop and end it.
+ */
+// "Neither Exception nor Error" has no catch clause of its own; separate clauses would only rethrow.
+@Suppress("TooGenericExceptionCaught", "InstanceOfCheckForException")
+internal inline fun <T> asException(block: () -> T): T = try {
+    block()
+} catch (t: Throwable) {
+    throw if (t is Exception || t is Error) t else IllegalStateException(t.message, t)
 }
 
 /**
@@ -110,6 +125,13 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var connectionScope: CoroutineScope? = null
 
+    @Volatile private var connectFailure: Throwable? = null
+
+    @Volatile private var observationFailure: Throwable? = null
+
+    override val lastFailureCause: Throwable?
+        get() = connectFailure ?: observationFailure ?: peripheral?.preinstalledObservationFailure()
+
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
         private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
@@ -129,13 +151,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     override suspend fun connect(device: BleDevice) {
         val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
         var autoConnect = meshtasticDevice.advertisement == null
+        connectFailure = null
+        observationFailure = null
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging { applyConfig(loggingConfig, identifier = device.address.anonymize()) }
-            observationExceptionHandler { cause ->
-                Logger.w(cause) { "[${device.address.anonymize()}] Observation failure suppressed" }
-            }
+            meshtasticConfig(loggingConfig, device.address.anonymize()) { observationFailure = it }
             platformConfig(device) { autoConnect }
         }
 
@@ -146,6 +167,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             } catch (ex: IllegalStateException) {
                 throw ex.asBluetoothUnsupportedExceptionOrNull() ?: ex
             }
+        p.clearPreinstalledObservationFailure()
 
         // Install ownership of the new peripheral atomically. Cancellation between
         // peripheral construction and field assignment would strand `p` (Kable allocates
@@ -190,11 +212,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                         }
                         oldScope.coroutineContext.job.cancel()
                     }
-                    connectionScope = p.connect()
+                    connectionScope = asException { p.connect() }
                     false
                 } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                    connectFailure = e
                     if (autoConnect) {
                         // Already on the autoConnect path and still failing: surface a clear Disconnected
                         // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
@@ -233,7 +256,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     } catch (e: CancellationException) {
         // External cancellation (scope closed) — must propagate.
         throw e
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        connectFailure = e
         BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed)
     }
 
@@ -317,12 +341,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     }
 
     /**
-     * Safely disconnects and closes the current [peripheral], logging any failures.
+     * Safely disconnects and releases the current [peripheral], logging any failures.
      *
-     * Kable requires `close()` to release broadcast receivers on Android (Kable issue #359). Separate try/catch blocks
-     * ensure `close()` always runs even if `disconnect()` throws.
+     * [release] closes the peripheral everywhere but web (see its actuals). Separate try/catch blocks ensure it always
+     * runs even if `disconnect()` throws.
      */
-    // Teardown under NonCancellable: close() must run whatever disconnect() throws, cancellation included.
+    // Teardown under NonCancellable: release() must run whatever disconnect() throws, cancellation included.
     @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun safeClosePeripheral(tag: String) {
         try {
@@ -334,9 +358,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
         }
         try {
-            peripheral?.close()
+            peripheral?.release()
         } catch (e: Exception) {
-            Logger.w(e) { "[$tag] Failed to close peripheral" }
+            Logger.w(e) { "[$tag] Failed to release peripheral" }
         }
     }
 }

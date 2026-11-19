@@ -41,6 +41,7 @@ import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
 import org.meshtastic.core.network.repository.effectiveCredentials
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.network.repository.mqttTlsConfig
+import org.meshtastic.core.network.repository.mqttTransportFactory
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
@@ -48,9 +49,6 @@ import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.packet.Subscription
-import org.meshtastic.mqtt.plus
-import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
-import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -293,7 +291,7 @@ private fun defaultSamplerClient(config: ModuleConfig.MQTTConfig?): TopicSampler
     val client =
         MqttClient("MeshtasticAndroidTopicFinder-${Uuid.random()}") {
             val tls = mqttTlsConfig()
-            transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+            transportFactory = mqttTransportFactory(tls)
             keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
             autoReconnect = false
             val (user, pass) = effectiveCredentials(config)

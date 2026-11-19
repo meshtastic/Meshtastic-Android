@@ -24,6 +24,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.TransportStatus
 
 /** A lifecycle lease held by one already-admitted operation for [session]. */
 interface RadioSessionLease {
@@ -247,6 +248,13 @@ interface RadioInterfaceService :
 
     /** Flow of user-facing connection error messages (e.g. permission failures). */
     val connectionError: Flow<String>
+
+    /**
+     * What the selected device's connection is doing and why it last failed, as reported through
+     * [RadioTransportCallback.onStatus]. Null when nothing has been reported since the last explicit disconnect or
+     * device switch.
+     */
+    val transportStatus: StateFlow<TransportStatus?>
 
     /** The scope in which interface-related coroutines should run. */
     val serviceScope: CoroutineScope

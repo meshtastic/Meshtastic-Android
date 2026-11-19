@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.map
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +26,7 @@ import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MapTileProviderDataStore
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.MapTileProviderPrefs
 
 @Single
@@ -69,7 +68,7 @@ class MapTileProviderPrefsImpl(private val dataStore: MapTileProviderDataStore, 
     companion object {
         const val KEY_CUSTOM_PROVIDERS = "custom_tile_providers"
         const val KEY_SELECTED_CUSTOM_PROVIDER_ID = "selected_custom_tile_provider_id"
-        val KEY_CUSTOM_PROVIDERS_PREF = stringPreferencesKey(KEY_CUSTOM_PROVIDERS)
-        val KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF = stringPreferencesKey(KEY_SELECTED_CUSTOM_PROVIDER_ID)
+        val KEY_CUSTOM_PROVIDERS_PREF = stringPrefsKey(KEY_CUSTOM_PROVIDERS)
+        val KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF = stringPrefsKey(KEY_SELECTED_CUSTOM_PROVIDER_ID)
     }
 }

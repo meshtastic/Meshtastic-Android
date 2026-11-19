@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.database
 
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.database.entity.MyNodeEntity
 
 /** Ingestion hex-encodes the 16-byte `device_id`; require that shape so lossy legacy values can't be compared. */
@@ -32,26 +29,6 @@ private val HEX_DEVICE_ID = Regex("[0-9a-fA-F]{16,64}")
  * by all hardware (e.g. classic ESP32) and deliberately zeroed for unauthenticated clients in lockdown mode, so callers
  * must always tolerate null.
  */
-internal fun validDeviceIdOrNull(id: String?): String? =
-    id?.takeIf { it != MyNodeEntity.DEVICE_ID_UNKNOWN && it.matches(HEX_DEVICE_ID) }
-
-/** Datastore key mapping a node number to its canonical DB. Legacy: node numbers renumber under firmware 2.8. */
-internal fun nodeDbPrefKey(nodeNum: Int): Preferences.Key<String> =
-    stringPreferencesKey("${DatabaseConstants.NODE_DB_FOR_PREFIX}$nodeNum")
-
-/**
- * Datastore key mapping a factory-burned device id to its canonical DB. The id is hex-encoded: it originates as raw
- * hardware bytes decoded lossily into a string, so normalize to printable key material.
- */
-internal fun deviceDbPrefKey(deviceId: String): Preferences.Key<String> =
-    stringPreferencesKey("${DatabaseConstants.DEVICE_DB_FOR_PREFIX}${deviceId.encodeUtf8().hex()}")
-
-/**
- * Resolves which canonical DB the connected device already claimed: the hardware-stable device-id claim wins, the
- * node-number claim is the fallback for hardware without a device id and for claims written by older app versions.
- */
-internal fun resolveDbClaim(
-    prefs: Preferences,
-    deviceKey: Preferences.Key<String>?,
-    nodeKey: Preferences.Key<String>,
-): String? = deviceKey?.let { prefs[it] } ?: prefs[nodeKey]
+internal fun validDeviceIdOrNull(id: String?): String? = id?.takeIf {
+    it != MyNodeEntity.DEVICE_ID_UNKNOWN && it.matches(HEX_DEVICE_ID)
+}

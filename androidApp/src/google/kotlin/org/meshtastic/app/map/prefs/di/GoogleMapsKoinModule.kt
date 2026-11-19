@@ -22,7 +22,7 @@ import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.createPreferencesDataStore
+import org.meshtastic.core.prefs.di.createRawPreferencesDataStore
 
 @Module
 @Configuration
@@ -31,6 +31,11 @@ class GoogleMapsKoinModule {
 
     @Single
     fun provideGoogleMapsDataStore(context: Context, dispatchers: CoroutineDispatchers): GoogleMapsDataStore =
-        createPreferencesDataStore(context, dispatchers, legacyName = "google_maps_prefs", fileName = "google_maps_ds")
+        createRawPreferencesDataStore(
+            context,
+            dispatchers,
+            legacyName = "google_maps_prefs",
+            fileName = "google_maps_ds",
+        )
             .asGoogleMapsDataStore()
 }

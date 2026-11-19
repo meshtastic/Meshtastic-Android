@@ -74,10 +74,11 @@ internal val Project.compileSdkMinorLevel: Int
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
     // Only JUnit Platform test tasks need the launcher. Instrumented test APKs run under AndroidJUnitRunner, and a KMP
-    // device-test APK fails to dex and package the JUnit Platform jars.
+    // device-test APK fails to dex and package the JUnit Platform jars. The launcher publishes no wasmJs variant.
     configurations
         .matching {
             it.name.endsWith("TestRuntimeClasspath") &&
+                !it.name.startsWith("wasmJs") &&
                 !it.name.contains("DeviceTest") &&
                 !it.name.contains("AndroidTest")
         }

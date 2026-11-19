@@ -17,7 +17,6 @@
 package org.meshtastic.core.resources
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.ResourceEnvironment
@@ -27,30 +26,13 @@ import org.jetbrains.compose.resources.getString as composeGetString
 
 /**
  * Retrieves a string from the [StringResource], blocking the calling thread on the resource loader. Only for callbacks
- * that cannot suspend, such as a Glance `onCompositionError`; everything else uses [getStringSuspend].
+ * that cannot suspend, such as a Glance `onCompositionError`; everything else uses [getStringSuspend]. A browser cannot
+ * block its event loop, so the web actual throws.
  */
-fun getString(stringResource: StringResource): String = runBlocking { composeGetString(stringResource) }
+expect fun getString(stringResource: StringResource): String
 
 /** Retrieves a formatted string from the [StringResource], blocking. Same restriction as the overload above. */
-fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    val resolvedArgs =
-        formatArgs
-            .map { arg ->
-                if (arg is StringResource) {
-                    composeGetString(arg)
-                } else {
-                    arg
-                }
-            }
-            .toTypedArray()
-
-    if (resolvedArgs.isNotEmpty()) {
-        @Suppress("SpreadOperator")
-        composeGetString(stringResource, *resolvedArgs)
-    } else {
-        composeGetString(stringResource)
-    }
-}
+expect fun getString(stringResource: StringResource, vararg formatArgs: Any): String
 
 /**
  * Runs a string lookup unconfined. The Compose Resources cache hands its lock straight to the next waiter, and

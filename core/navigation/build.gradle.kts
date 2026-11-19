@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
@@ -36,3 +37,9 @@ kotlin {
         }
     }
 }
+
+// SavedState finds no serializer for the polymorphic NavKey on wasmJs.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*NavigationConfigTest.all route instances round-trip through SavedState serialization",
+    "*NavigationConfigTest.route instances with default parameters serialize correctly",
+)

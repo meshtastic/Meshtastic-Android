@@ -29,9 +29,11 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.store.PrefsStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 
 /**
- * Koin module providing Android [DataStore] instances for each preference domain.
+ * Koin module providing Android [PrefsStore] instances (each backed by a real [DataStore]) for each preference domain.
  *
  * Each DataStore is a singleton backed by its own [CoroutineScope] using the injected [CoroutineDispatchers.io]
  * dispatcher, and includes a [SharedPreferencesMigration] to migrate legacy SharedPreferences data on first access.
@@ -123,8 +125,21 @@ class CorePrefsAndroidModule {
 /**
  * [legacyName] is the SharedPreferences file this domain migrates from, [fileName] the DataStore file it lives in now.
  * Both are on-disk identities — changing either orphans existing user data.
+ *
+ * Returns [PrefsStore] (not the underlying `DataStore<Preferences>` directly) so every `provideXDataStore()` call site
+ * above can keep calling `.asXDataStore()` unchanged — `asPrefsStore()` is the one line doing the adaptation.
  */
 fun createPreferencesDataStore(
+    context: Context,
+    dispatchers: CoroutineDispatchers,
+    legacyName: String,
+    fileName: String,
+): PrefsStore = createRawPreferencesDataStore(context, dispatchers, legacyName, fileName).asPrefsStore()
+
+/**
+ * The `DataStore<Preferences>` [createPreferencesDataStore] adapts, for an Android-only store that reads it directly.
+ */
+fun createRawPreferencesDataStore(
     context: Context,
     dispatchers: CoroutineDispatchers,
     legacyName: String,

@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.koin)
 }
@@ -37,5 +38,6 @@ kotlin {
             api(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
+        meshtasticWeb.wasmJsMain { dependencies { api(libs.kotlinx.browser) } }
     }
 }

@@ -26,6 +26,7 @@ jobs:
       android: ${{ steps.filter.outputs.android }}
       screenshots: ${{ steps.filter.outputs.screenshots }}
       desktop: ${{ steps.filter.outputs.desktop }}
+      web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
@@ -80,6 +81,31 @@ jobs:
               - 'gradlew.bat'
               - '.github/workflows/reusable-check.yml'
               - '.github/actions/gradle-setup/**'
+            # The modules with a wasmJs target (meshtastic.kmp.web) and what shapes their web build. Only a PR
+            # builds the web target; the merge queue and main never do. check-changes-filter.py fails the PR
+            # when a module applying meshtastic.kmp.web is missing here.
+            web:
+              - 'webApp/**'
+              - 'core/**'
+              - 'feature/connections/**'
+              - 'feature/discovery/**'
+              - 'feature/docs/**'
+              - 'feature/firmware/**'
+              - 'feature/intro/**'
+              - 'feature/messaging/**'
+              - 'feature/node/**'
+              - 'feature/settings/**'
+              - 'feature/wifi-provision/**'
+              - 'kotlin-js-store/**'
+              - 'config/karma/**'
+              - 'build-logic/**'
+              - 'gradle/wrapper/**'
+              - 'gradle/libs.versions.toml'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - '.github/workflows/pull-request.yml'
+              - '.github/actions/gradle-setup/**'
             android:
               # CI/workflow implementation
               - '.github/workflows/**'
@@ -88,6 +114,7 @@ jobs:
               - 'androidApp/**'
               - 'baselineprofile/**'
               - 'desktopApp/**'
+              - 'webApp/**'
               - 'core/**'
               - 'feature/**'
               - 'screenshot-tests/**'
@@ -240,6 +267,40 @@ jobs:
       upload_artifacts: true
     secrets: inherit
 
+  # 2b. WEB: the wasmJs target is opt-in (-Pmeshtastic.web=true), so no other job compiles it. One job: the
+  # production executable link, where Kotlin/Wasm IR failures surface, and the wasmJs tests in headless Chrome
+  # (Karma finds the runner image's google-chrome).
+  # It never runs wasm-opt (wasmJsBrowserDistribution), which alone takes 40+ minutes.
+  web-check:
+    name: Web Check
+    needs: check-changes
+    if: needs.check-changes.outputs.web == 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write # Gradle job summary as a PR comment on failure
+    env:
+      VERSION_CODE: 30000000 # pinned for cache stability, as in reusable-check.yml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          job_summary_pr_comment: on-failure
+          cache_read_only: 'true'
+
+      - name: Web compile and wasmJs tests
+        # -Dorg.gradle.isolated-projects=false: KGP's wasm npm resolver configures the root project from each
+        # wasmJs project, which Isolated Projects rejects.
+        run: ./gradlew wasmJsBrowserTest :webApp:compileProductionExecutableKotlinWasmJs -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false -Pkotlin.incremental.wasm=false -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
+
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
   # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
   # check, so it runs on a hosted Ubuntu label that shares the org's pool with the build jobs,
@@ -249,7 +310,7 @@ jobs:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions: {}
-    needs: [check-changes, check-metadata, validate-and-build]
+    needs: [check-changes, check-metadata, validate-and-build, web-check]
     if: always()
     steps:
       - name: Check Workflow Status
@@ -271,5 +332,11 @@ jobs:
             exit 1
           fi
           
+          # skipped means the web filter did not match
+          if [[ "${{ needs.web-check.result }}" == "failure" || "${{ needs.web-check.result }}" == "cancelled" ]]; then
+            echo "::error::Web Check failed"
+            exit 1
+          fi
+
           # If no changes were detected, this still succeeds to satisfy required status check
           echo "Workflow status satisfied."

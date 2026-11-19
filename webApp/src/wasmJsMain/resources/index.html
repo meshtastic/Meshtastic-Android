@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Meshtastic</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <meta name="theme-color" content="#F5F6FA" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1A1B26" media="(prefers-color-scheme: dark)">
+    <!-- No <script src="skiko.js">: redundant for Kotlin/Wasm targets since Compose Multiplatform 1.7 (skiko's
+         web runtime ships as an ES module bundled directly into webApp.js). -->
+    <style>
+        /* The app theme's surface and text colors (core/ui Color.kt), so nothing flashes before Compose draws. */
+        :root {
+            --surface: #F5F6FA;
+            --on-surface: #2C2D3C;
+            --primary: #2D8F52;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface: #1A1B26;
+                --on-surface: #ECEDF3;
+                --primary: #67EA94;
+            }
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        #webApp {
+            width: 100%;
+            height: 100%;
+        }
+
+        #loading, #unsupported {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 24px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        #loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid color-mix(in srgb, var(--primary) 25%, transparent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #loading .spinner { animation-duration: 3s; }
+        }
+
+        #unsupported h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        #unsupported p {
+            margin: 0;
+            max-width: 480px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<div id="webApp"></div>
+<!-- Removed by the app once Compose draws its first frame. -->
+<div id="loading" role="progressbar" aria-label="Loading Meshtastic"><div class="spinner"></div></div>
+<div id="unsupported" hidden>
+    <h1>Meshtastic Web can't run here</h1>
+    <p id="unsupported-reason"></p>
+</div>
+<noscript>
+    <p style="text-align: center; padding: 24px;">Meshtastic Web needs JavaScript. Turn it on for this site and reload.</p>
+</noscript>
+<script>
+    (function () {
+        // Validates only on engines with WebAssembly GC, typed function references and legacy exception handling,
+        // the features Kotlin/Wasm output needs (the module Kotlin's own web template probes with).
+        var probe = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 8, 2, 95, 1, 120, 0, 96, 0, 0, 3, 3, 2, 1, 1, 10,
+            14, 2, 6, 0, 6, 64, 25, 11, 11, 5, 0, 208, 112, 26, 11]);
+        var wasmOk = false;
+        try {
+            wasmOk = typeof WebAssembly === "object" && WebAssembly.validate(probe);
+        } catch (e) {
+            wasmOk = false;
+        }
+        var reason = null;
+        if (!window.isSecureContext) {
+            reason = "It needs a secure connection. Open it over https.";
+        } else if (!wasmOk) {
+            reason = "This browser is missing WebAssembly features the app is built on. Use a current version of Chrome or Edge.";
+        }
+        if (reason) {
+            document.getElementById("loading").hidden = true;
+            document.getElementById("unsupported-reason").textContent = reason;
+            document.getElementById("unsupported").hidden = false;
+            return;
+        }
+        // sw.js shows notifications (Android Chrome shows none without one) and keeps the app shell for offline reloads.
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js").catch(function (e) {
+                console.warn("Service worker registration failed", e);
+            });
+        }
+        var script = document.createElement("script");
+        script.src = "webApp.js";
+        document.body.appendChild(script);
+    })();
+</script>
+</body>
+</html>

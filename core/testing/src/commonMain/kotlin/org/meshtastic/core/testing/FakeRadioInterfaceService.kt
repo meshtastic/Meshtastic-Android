@@ -39,6 +39,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
@@ -131,6 +132,12 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     private val _connectionError = MutableSharedFlow<String>()
     override val connectionError: Flow<String> = _connectionError.asFlow()
+
+    private val _transportStatus = MutableStateFlow<TransportStatus?>(null)
+    override val transportStatus: StateFlow<TransportStatus?> = _transportStatus
+
+    /** Every status reported through [onStatus], in order. */
+    val reportedStatuses = mutableListOf<TransportStatus>()
 
     private val _sentToRadio = mutableListOf<ByteArray>()
 
@@ -275,6 +282,11 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
         _connectionState.value = ConnectionState.Disconnected
+    }
+
+    override fun onStatus(status: TransportStatus) {
+        synchronized(sessionAdmissionLock) { reportedStatuses += status }
+        _transportStatus.value = status
     }
 
     override fun handleFromRadio(bytes: ByteArray) {

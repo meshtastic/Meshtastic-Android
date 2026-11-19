@@ -36,6 +36,7 @@ import org.meshtastic.core.data.di.CoreDataAndroidModule
 import org.meshtastic.core.data.di.CoreDataModule
 import org.meshtastic.core.database.di.CoreDatabaseAndroidModule
 import org.meshtastic.core.database.di.CoreDatabaseModule
+import org.meshtastic.core.database.di.CoreDatabaseNonWebModule
 import org.meshtastic.core.datastore.di.CoreDatastoreAndroidModule
 import org.meshtastic.core.datastore.di.CoreDatastoreModule
 import org.meshtastic.core.network.di.CoreNetworkAndroidModule
@@ -71,6 +72,7 @@ import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
         CoreDataAndroidModule::class,
         org.meshtastic.core.domain.di.CoreDomainModule::class,
         CoreDatabaseModule::class,
+        CoreDatabaseNonWebModule::class,
         CoreDatabaseAndroidModule::class,
         org.meshtastic.core.repository.di.CoreRepositoryModule::class,
         CoreDatastoreModule::class,

@@ -16,7 +16,13 @@
  */
 package org.meshtastic.core.repository
 
-/** A notification as the desktop dispatch primitive ([NotificationManager]) sees it. */
+/**
+ * A notification as the dispatch primitive ([NotificationManager]) sees it.
+ *
+ * @property deepLink the path under `DEEP_LINK_BASE_URI` that a click opens, from `NotificationDeepLinks`; null opens
+ *   the app where it was.
+ * @property onlyAlertOnce replacing a showing notification of the same [tag] updates it without alerting again.
+ */
 data class Notification(
     val title: String,
     val message: String,
@@ -24,7 +30,16 @@ data class Notification(
     val category: Category = Category.Message,
     val isSilent: Boolean = false,
     val id: Int? = null,
+    val deepLink: String? = null,
+    val onlyAlertOnce: Boolean = false,
 ) {
+    /**
+     * One slot per category and [id], the way Android keys each notification by a tag and id: a newer notification
+     * replaces the one in its slot, and a new-node notice never replaces a low-battery one for the same node.
+     */
+    val tag: String?
+        get() = id?.let { tagFor(category, it) }
+
     enum class Type {
         None,
         Info,
@@ -50,5 +65,9 @@ data class Notification(
 
         /** Notices from the radio's firmware (ClientNotification). */
         Client,
+    }
+
+    companion object {
+        fun tagFor(category: Category, id: Int): String = "${category.name}-$id"
     }
 }

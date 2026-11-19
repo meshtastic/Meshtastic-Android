@@ -105,7 +105,10 @@ import org.meshtastic.core.resources.mpwrd_os
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.retry
 import org.meshtastic.core.resources.show_password
+import org.meshtastic.core.resources.web_bluetooth_unsupported
 import org.meshtastic.core.resources.wifi_provision_available_networks
+import org.meshtastic.core.resources.wifi_provision_choose_device
+import org.meshtastic.core.resources.wifi_provision_choose_device_detail
 import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
@@ -149,6 +152,7 @@ import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
@@ -183,7 +187,12 @@ fun WifiProvisionScreen(
         }
 
     LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
-    LaunchedEffect(viewModel, address) { viewModel.connectToDevice(address) }
+    // A device chooser opens only from a click, so the browser waits for the pick button; a known address reconnects
+    // to its grant, and falls back to the button when the browser no longer holds one.
+    val waitForPick = viewModel.picksDevice && (address == null || uiState.pickDismissed)
+    LaunchedEffect(viewModel, address) {
+        if (!viewModel.picksDevice || address != null) viewModel.connectToDevice(address)
+    }
 
     Scaffold(
         topBar = {
@@ -208,8 +217,10 @@ fun WifiProvisionScreen(
 
             MpwrdDisclaimerBanner()
 
-            Crossfade(targetState = screenKey(uiState), label = "wifi_provision") { key ->
+            Crossfade(targetState = screenKey(uiState, waitForPick), label = "wifi_provision") { key ->
                 when (key) {
+                    ScreenKey.PickDevice -> PickDeviceContent(onPick = { viewModel.connectToDevice(address) })
+
                     ScreenKey.ConnectingBle ->
                         ScanningBleContent(
                             error = uiState.error as? WifiProvisionError.ConnectFailed,
@@ -250,16 +261,18 @@ fun WifiProvisionScreen(
 // ---------------------------------------------------------------------------
 
 private enum class ScreenKey {
+    PickDevice,
     ConnectingBle,
     DeviceFound,
     LoadingNetworks,
     Connected,
 }
 
-private fun screenKey(state: WifiProvisionUiState): ScreenKey = when (state.phase) {
-    Phase.Idle,
-    Phase.ConnectingBle,
-    -> ScreenKey.ConnectingBle
+private fun screenKey(state: WifiProvisionUiState, waitForPick: Boolean): ScreenKey = when (state.phase) {
+    // A failed connect returns to Idle with its error, which ScanningBleContent shows with a retry.
+    Phase.Idle -> if (waitForPick && state.error == null) ScreenKey.PickDevice else ScreenKey.ConnectingBle
+
+    Phase.ConnectingBle -> ScreenKey.ConnectingBle
 
     Phase.DeviceFound -> ScreenKey.DeviceFound
 
@@ -301,6 +314,38 @@ internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null,
             LoadingIndicator(modifier = Modifier.size(48.dp))
             Spacer(Modifier.height(24.dp))
             Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+}
+
+/**
+ * The browser's device chooser needs a click to open, so this asks for one before anything connects. A browser with no
+ * Web Bluetooth gets the reason instead of a button that could only fail.
+ */
+@Composable
+internal fun PickDeviceContent(onPick: () -> Unit, bluetoothSupported: Boolean = isBluetoothSupported()) {
+    CenteredStatusContent {
+        Icon(
+            MeshtasticIcons.Bluetooth,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            stringResource(
+                if (bluetoothSupported) {
+                    Res.string.wifi_provision_choose_device_detail
+                } else {
+                    Res.string.web_bluetooth_unsupported
+                },
+            ),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+        if (bluetoothSupported) {
+            Spacer(Modifier.height(32.dp))
+            Button(onClick = onPick) { Text(stringResource(Res.string.wifi_provision_choose_device)) }
         }
     }
 }

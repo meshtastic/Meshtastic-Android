@@ -21,6 +21,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.allStringResources
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.settingsPlatform
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -122,7 +123,8 @@ class SettingsSearchCatalogTest {
     @Test
     fun everyConfigurationScreenIsReachableFromSearch() {
         val routes = SettingsSearchCatalog.entries().map { it.route }.toSet()
-        val missing = (ConfigRoute.entries.map { it.route } + ModuleRoute.entries.map { it.route }) - routes
+        val screens = ConfigRoute.entries.map { it.route } + ModuleRoute.entries.map { it.route }
+        val missing = screens.filter { settingsPlatform.supports(it) } - routes
 
         assertEquals(emptyList(), missing, "these settings screens cannot be found by searching for their own name")
     }

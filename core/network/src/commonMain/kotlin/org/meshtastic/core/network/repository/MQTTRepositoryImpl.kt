@@ -63,9 +63,6 @@ import org.meshtastic.mqtt.MqttProtocolVersion
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
-import org.meshtastic.mqtt.plus
-import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
-import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
@@ -542,10 +539,10 @@ private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttC
 private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession = DefaultMqttClientSession(
     MqttClient(setup.ownerId) {
         // mqtt-client 0.4.0 makes transport a required SPI: the client throws at connect if unset.
-        // Register TCP/TLS (the default) + WebSocket (for user-entered ws://-/wss:// brokers).
-        // Both get the same private-CA trust hook so the grant stays scoped to this socket — see [mqttTlsConfig].
+        // TCP/TLS (the default) + WebSocket off web, WebSocket only on web; all get the same private-CA trust
+        // hook so the grant stays scoped to this socket — see [mqttTlsConfig].
         val tls = mqttTlsConfig()
-        transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+        transportFactory = mqttTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         // Some brokers send topic aliases even when the client allows none, a protocol error that drops the
         // connection; accepting a few keeps them working. A 3.1.1 fallback drops the offer.

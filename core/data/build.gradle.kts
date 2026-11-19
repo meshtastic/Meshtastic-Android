@@ -17,8 +17,8 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -46,8 +46,10 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.room.paging)
-            implementation(libs.androidx.sqlite.bundled)
         }
+
+        // sqlite-bundled publishes no wasmJs variant.
+        getByName("nonWebMain").dependencies { implementation(libs.androidx.sqlite.bundled) }
 
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
@@ -59,3 +61,8 @@ kotlin {
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }
+
+// The sticky error is a string resource, which the browser loads asynchronously; the assertion runs first.
+meshtasticWeb.browserTestExclusions.add(
+    "*MeshConnectionManagerImplTest.Recovery exhaustion after three consecutive failures surfaces sticky error*",
+)

@@ -30,13 +30,15 @@ import org.meshtastic.core.resources.theme_light
 import org.meshtastic.core.resources.theme_system
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.theme.MODE_DARK
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.theme.MODE_LIGHT
 
 /** Theme modes that match AppCompatDelegate constants for cross-platform use. */
 enum class ThemeOption(val label: StringResource, val mode: Int) {
     DYNAMIC(label = Res.string.dynamic, mode = MODE_DYNAMIC),
-    LIGHT(label = Res.string.theme_light, mode = 1), // AppCompatDelegate.MODE_NIGHT_NO
-    DARK(label = Res.string.theme_dark, mode = 2), // AppCompatDelegate.MODE_NIGHT_YES
+    LIGHT(label = Res.string.theme_light, mode = MODE_LIGHT),
+    DARK(label = Res.string.theme_dark, mode = MODE_DARK),
     SYSTEM(label = Res.string.theme_system, mode = -1), // AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 }
 

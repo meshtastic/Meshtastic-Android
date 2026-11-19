@@ -58,9 +58,8 @@ class TrayIconRasterTest {
 
     @Test
     fun `rasterizes the real tray glyphs to something visible`() {
-        // The blank-tray regression: the glyphs declare absolute width/height and no viewBox, so a render
-        // that does not scale them captures only their transparent top-left corner and every alpha byte
-        // comes back zero. The host accepts that pixmap happily and draws nothing.
+        // A render that does not scale the 512px glyphs down captures only their transparent top-left corner and
+        // every alpha byte comes back zero. The host accepts that pixmap happily and draws nothing.
         listOf(TRAY_ICON_DARK, TRAY_ICON_LIGHT).forEach { resource ->
             val rasters = loadTrayIconRasters(resource)
             assertEquals(TRAY_ICON_SIZES.size, rasters.size, "$resource produced no rasters")

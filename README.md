@@ -124,6 +124,7 @@ Most modules have their own README with details on their responsibilities, API s
 |---|---|
 | [androidApp](androidApp/README.md) | Android application host — activity, manifest, flavors, root Koin graph |
 | [desktopApp](desktopApp/README.md) | Compose Desktop host — window, transports, packaging |
+| [webApp](webApp/README.md) | Kotlin/Wasm browser host, opt-in with `-Pmeshtastic.web=true`: building, running and hosting it |
 | [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
 | [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
 | [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |

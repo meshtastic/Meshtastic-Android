@@ -17,7 +17,6 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
-import com.juul.kable.ExperimentalKableApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,29 +35,27 @@ import kotlinx.coroutines.flow.asStateFlow
  * @param address The device's MAC address (or platform identifier string).
  * @param name The device's display name, if known.
  * @param advertisement The Kable [Advertisement] from a live scan, or `null` for bonded-only devices.
+ * @param isBonded Whether the OS holds a bond for this device; Web Bluetooth has no bonds to report.
  */
 class MeshtasticBleDevice(
     override val address: String,
     override val name: String? = null,
     val advertisement: Advertisement? = null,
+    override val isBonded: Boolean = true,
 ) : BleDevice {
 
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
-
-    // Bonding is handled by the OS pairing dialog on Android; on desktop Kable connects directly.
-    override val isBonded: Boolean = true
 
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.active?.address == address
 
     override val rssi: Int? = advertisement?.rssi
 
-    @OptIn(ExperimentalKableApi::class)
     override suspend fun readRssi(): Int? {
         val active = ActiveBleConnection.active
         return if (active != null && active.address == address) {
-            active.peripheral.rssi()
+            active.peripheral.connectedRssi()
         } else {
             advertisement?.rssi
         }

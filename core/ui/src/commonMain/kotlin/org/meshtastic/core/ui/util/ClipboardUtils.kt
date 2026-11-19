@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 
 /**
  * Creates a platform-appropriate [ClipEntry] for the given text.
@@ -27,5 +28,8 @@ import androidx.compose.ui.platform.ClipEntry
  */
 expect fun createClipEntry(text: String, label: String = "", sensitive: Boolean = false): ClipEntry
 
-/** The plain text an entry carries, or null when it holds none (an image, a file, an empty clip). */
-expect fun ClipEntry.plainText(): String?
+/**
+ * The clipboard's plain text, or null when it holds none (an image, a file, an empty clip) or the platform refuses the
+ * read.
+ */
+expect suspend fun Clipboard.readPlainText(): String?

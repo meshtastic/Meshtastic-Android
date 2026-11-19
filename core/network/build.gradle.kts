@@ -17,8 +17,9 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -37,23 +38,27 @@ kotlin {
             implementation(libs.okio)
             // mqtt-client 0.4.0 splits into BOM + core + transport modules. `api` (not `implementation`)
             // because :core:data and :desktopApp consume org.meshtastic.mqtt.* types transitively through
-            // this module. Both transports are registered: transport-tcp (tcp://-/ssl://, default) +
-            // transport-ws (user-entered ws://-/wss://), composed with `+` at the client config sites.
+            // this module. transport-ws (user-entered ws://-/wss://) publishes a real wasmJs variant and
+            // works on every target; transport-tcp (tcp://-/ssl://, the nonWeb default) does not -- see
+            // nonWebMain below. mqttTransportFactory() (MqttTransportSelection.kt) composes them per platform.
             // No platform() on the KMP commonMain handler; reach the BOM through project.dependencies.
             api(project.dependencies.platform(libs.meshtastic.mqtt.client.bom))
             api(libs.meshtastic.mqtt.client.core)
-            api(libs.meshtastic.mqtt.client.transport.tcp)
             api(libs.meshtastic.mqtt.client.transport.ws)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)
-            implementation(libs.ktor.network) // raw TCP sockets for TcpTransport (KMP-common)
+            // TLSConfigBuilder (MqttTlsTrust.kt) needs this on every target; raw sockets stay nonWeb only.
+            implementation(libs.ktor.network)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kermit)
             implementation(libs.jetbrains.lifecycle.runtime)
         }
+
+        // A browser cannot open raw TCP sockets (TcpTransport, mqtt-client-transport-tcp).
+        getByName("nonWebMain").dependencies { api(libs.meshtastic.mqtt.client.transport.tcp) }
 
         getByName("jvmMain") {
             dependencies {
@@ -64,6 +69,8 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
+
+        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

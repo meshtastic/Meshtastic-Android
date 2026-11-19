@@ -34,6 +34,8 @@ want real Google Maps tiles (`MAPS_API_KEY=…`). `local.properties` is not read
 ```bash
 ./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests
 ```
+The web target is opt-in: for a change to `webApp` or a module applying `meshtastic.kmp.web`, also run `./gradlew wasmJsBrowserTest :webApp:compileProductionExecutableKotlinWasmJs -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false` (`webApp/README.md`).
+
 Both `test` and `allTests` are required: `allTests` runs each KMP module's `jvmTest` and Android host tests (a KMP module has no `test` task, and naming `:core:data:test` fails as ambiguous), `test` covers pure-Android/JVM modules and skips KMP ones. Add `kmpSmokeCompile` when touching a KMP module. After adding string resources, run `python3 scripts/sort-strings.py`. Change-type matrix and CI architecture: `.skills/testing-ci/SKILL.md`.
 
 **Single test:**

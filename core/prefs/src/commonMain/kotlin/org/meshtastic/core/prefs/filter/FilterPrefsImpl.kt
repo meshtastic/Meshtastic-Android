@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.filter
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +26,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.FilterDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.stringSetPrefsKey
 import org.meshtastic.core.repository.FilterPrefs
 
 @Single
@@ -56,7 +55,7 @@ class FilterPrefsImpl(private val dataStore: FilterDataStore, dispatchers: Corou
         const val KEY_FILTER_WORDS = "filter_words"
         const val FILTER_PREFS_NAME = "filter-prefs"
 
-        val KEY_FILTER_ENABLED_PREF = booleanPreferencesKey(KEY_FILTER_ENABLED)
-        val KEY_FILTER_WORDS_PREF = stringSetPreferencesKey(KEY_FILTER_WORDS)
+        val KEY_FILTER_ENABLED_PREF = booleanPrefsKey(KEY_FILTER_ENABLED)
+        val KEY_FILTER_WORDS_PREF = stringSetPrefsKey(KEY_FILTER_WORDS)
     }
 }

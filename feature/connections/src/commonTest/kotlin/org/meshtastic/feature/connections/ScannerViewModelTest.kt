@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.bluetooth_scan_too_frequent
 import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import kotlin.test.AfterTest
@@ -1120,6 +1121,95 @@ class ScannerViewModelTest {
 
         assertEquals(false, viewModel.isNetworkScanning.value)
         assertEquals("t192.168.1.99", radioController.lastSetDeviceAddress)
+    }
+
+    // ── Platforms without TCP (the browser) ──────────────────────────────────────────────────
+
+    @Test
+    fun `without TCP the Network pane is never available or selected`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            assertEquals(listOf(DeviceType.BLE, DeviceType.USB), noNetwork.availableTransports)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+
+            noNetwork.selectTransport(DeviceType.TCP)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `without TCP a manual address is neither saved nor connected`() = runTest {
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            noNetwork.connectToManualAddress("t192.168.1.50")
+            noNetwork.onSelected(DeviceListEntry.Tcp(name = "Node", fullAddress = "t192.168.1.51"))
+            testScheduler.advanceUntilIdle()
+
+            assertNull(radioController.lastSetDeviceAddress)
+            verifySuspend(mode = VerifyMode.exactly(0)) { harness.recentAddressesDataSource.add(any()) }
+            assertEquals(false, noNetwork.isNetworkScanning.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `without TCP a saved TCP address reads as no device`() {
+        harness.currentDeviceAddressFlow.value = "t192.168.1.50"
+        val noNetwork = harness.buildBase(networkSupported = false)
+        try {
+            assertNull(noNetwork.selectedAddressFlow.value)
+            assertEquals(DeviceType.BLE, noNetwork.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noNetwork)
+        }
+    }
+
+    @Test
+    fun `with no transport at all nothing is available`() {
+        val none = harness.buildBase(bluetoothSupported = false, usbSupported = false, networkSupported = false)
+        try {
+            assertEquals(emptyList(), none.availableTransports)
+        } finally {
+            harness.clearViewModel(none)
+        }
+    }
+
+    @Test
+    fun `a serial port picked in the browser chooser connects at once`() = runTest {
+        val picked =
+            DeviceListEntry.Usb(
+                usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
+                name = "RAK4631",
+                fullAddress = "s239a:8029-0",
+                bonded = true,
+            )
+        val requests = mutableListOf<Boolean>()
+        val chooser =
+            object : UsbScanner {
+                override fun scanUsbDevices(): Flow<List<DeviceListEntry.Usb>> = emptyFlow()
+
+                override fun needsExplicitDeviceRequest() = true
+
+                override suspend fun requestNewDevice(showAll: Boolean): DeviceListEntry.Usb {
+                    requests += showAll
+                    return picked
+                }
+            }
+        val web = harness.buildBase(usbScanner = chooser)
+        try {
+            web.requestUsbDevice(showAll = true)
+            testScheduler.advanceUntilIdle()
+
+            assertEquals(listOf(true), requests)
+            assertEquals("s239a:8029-0", radioController.lastSetDeviceAddress)
+            assertEquals(DeviceType.USB, web.activeTransport.value)
+        } finally {
+            harness.clearViewModel(web)
+        }
     }
 
     private fun failingScanFlow() = flow<BleDevice> {

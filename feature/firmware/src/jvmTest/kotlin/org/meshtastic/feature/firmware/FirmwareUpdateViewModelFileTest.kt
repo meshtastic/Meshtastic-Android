@@ -45,8 +45,6 @@ import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.EraseImageEntry
 import org.meshtastic.core.model.FirmwareRelease
@@ -95,8 +93,8 @@ class FirmwareUpdateViewModelFileTest {
     private val nodeRepository = FakeNodeRepository()
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
-    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
+    private val bootloaderWarningDataSource: BootloaderWarningSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoverySource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)

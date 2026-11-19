@@ -46,9 +46,15 @@ import org.meshtastic.core.ui.util.PermissionStatus
  * @param status Live permission status; drives the primary action and the denied/blocked notice.
  * @param onSkip Callback invoked if the user chooses to skip notification permission setup.
  * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
+ * @param inBrowser the browser owns the permission, so a block is undone in its site settings.
  */
 @Composable
-internal fun NotificationsScreen(status: PermissionStatus, onSkip: () -> Unit, onPrimaryAction: () -> Unit) {
+internal fun NotificationsScreen(
+    status: PermissionStatus,
+    onSkip: () -> Unit,
+    onPrimaryAction: () -> Unit,
+    inBrowser: Boolean = false,
+) {
     val features =
         listOf(
             OnboardingFeature(
@@ -78,6 +84,7 @@ internal fun NotificationsScreen(status: PermissionStatus, onSkip: () -> Unit, o
         configureButtonTextRes = Res.string.configure_notification_permissions,
         onSkip = onSkip,
         onPrimaryAction = onPrimaryAction,
+        inBrowser = inBrowser,
     )
 }
 

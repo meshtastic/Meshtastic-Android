@@ -21,5 +21,5 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-/** Draggable vertical scrollbar pinned to the end edge of the enclosing [BoxScope]; drawn on desktop only. */
+/** Draggable vertical scrollbar pinned to the end edge of the enclosing [BoxScope]; drawn on desktop and web. */
 @Composable expect fun BoxScope.ListScrollbar(state: LazyListState, modifier: Modifier = Modifier)

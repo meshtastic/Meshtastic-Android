@@ -27,6 +27,7 @@ import org.meshtastic.core.resources.bluetooth_feature_discovery_description
 import org.meshtastic.core.resources.bluetooth_permission
 import org.meshtastic.core.resources.bluetooth_permission_blocked_notice
 import org.meshtastic.core.resources.bluetooth_permission_blocked_notice_pre31
+import org.meshtastic.core.resources.bluetooth_permission_browser
 import org.meshtastic.core.resources.bluetooth_permission_denied_notice
 import org.meshtastic.core.resources.bluetooth_permission_denied_notice_pre31
 import org.meshtastic.core.resources.configure_bluetooth_permissions
@@ -54,6 +55,8 @@ import org.meshtastic.core.ui.util.PermissionStatus
  *   devices". The copy follows, because naming a permission the user will never be shown is worse than saying nothing.
  * @param onSkip Callback invoked if the user chooses to skip Bluetooth permission setup.
  * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
+ * @param inBrowser there is no up-front grant: the browser's chooser picks a radio at each connection, so the copy says
+ *   so.
  */
 @Composable
 internal fun BluetoothScreen(
@@ -61,13 +64,18 @@ internal fun BluetoothScreen(
     requiresLocation: Boolean,
     onSkip: () -> Unit,
     onPrimaryAction: () -> Unit,
+    inBrowser: Boolean = false,
 ) {
     val features = bluetoothScreenFeatures(requiresLocation)
 
     PermissionScreenLayout(
         headlineRes = Res.string.bluetooth_permission,
         descriptionRes =
-        if (requiresLocation) Res.string.permission_missing_pre31 else Res.string.permission_missing_31,
+        when {
+            inBrowser -> Res.string.bluetooth_permission_browser
+            requiresLocation -> Res.string.permission_missing_pre31
+            else -> Res.string.permission_missing_31
+        },
         features = features,
         status = status,
         deniedNoticeRes =
@@ -90,6 +98,7 @@ internal fun BluetoothScreen(
         },
         onSkip = onSkip,
         onPrimaryAction = onPrimaryAction,
+        inBrowser = inBrowser,
     )
 }
 

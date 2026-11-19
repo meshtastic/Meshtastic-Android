@@ -18,22 +18,18 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
-import com.juul.kable.ScannerBuilder
-
-/** Platform-specific configuration for the Scanner builder (e.g. Android's `preConflate`). */
-internal expect fun ScannerBuilder.platformScanConfig()
-
-/**
- * Whether Kable honours a scan filter on device address here. Android only: `Filter.Address` throws on Apple/JS, and
- * the JVM/btleplug backend evaluates predicates with a hardcoded null address so it matches nothing.
- */
-internal expect val supportsNativeAddressScanFilter: Boolean
 
 /** Platform-specific configuration for the Peripheral builder based on device type. */
 internal expect fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean)
 
 /** Platform-specific instantiation of a Peripheral by address. */
 internal expect fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral
+
+/** Releases a [Peripheral] after its connection is torn down. */
+internal expect fun Peripheral.release()
+
+/** RSSI of the live connection in dBm, or `null` where the platform cannot read it while connected. */
+internal expect suspend fun Peripheral.connectedRssi(): Int?
 
 /**
  * Returns the negotiated maximum write payload length in bytes (i.e. ATT MTU minus the 3-byte ATT header), or `null` if
@@ -68,3 +64,12 @@ internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
  * `false`.
  */
 internal expect fun Peripheral.refreshGattCache(): Boolean
+
+/**
+ * The observation failure Kable suppressed on this peripheral through a handler the connection did not install, or
+ * `null`. Only web peripherals carry one: the browser's picker builds them before any connection exists.
+ */
+internal expect fun Peripheral.preinstalledObservationFailure(): Throwable?
+
+/** Forgets [preinstalledObservationFailure] so a new connect starts clean. */
+internal expect fun Peripheral.clearPreinstalledObservationFailure()

@@ -35,8 +35,6 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -47,6 +45,9 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
+import org.meshtastic.feature.connections.data.RecentAddressesSource
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -73,8 +74,8 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
 
     val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
-    val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
+    val recentAddressesDataSource: RecentAddressesSource = mock(MockMode.autofill)
+    val firmwareRecoveryDataSource: PendingFirmwareRecoverySource = mock(MockMode.autofill)
     val networkRepository: NetworkRepository = mock(MockMode.autofill)
     val bleScanner: BleScanner = mock(MockMode.autofill)
 
@@ -145,22 +146,28 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      * Build the platform-neutral [ScannerViewModel]. Call only after `Dispatchers.setMain(testDispatcher)` because the
      * ViewModel's `init` launches work on `viewModelScope` (Main).
      */
-    fun buildBase(bluetoothSupported: Boolean = true, usbSupported: Boolean = true): ScannerViewModel =
-        ScannerViewModel(
-            serviceRepository = serviceRepository,
-            radioController = radioController,
-            radioInterfaceService = radioInterfaceService,
-            radioPrefs = radioPrefs,
-            recentAddressesDataSource = recentAddressesDataSource,
-            getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-            networkRepository = networkRepository,
-            dispatchers = dispatchers,
-            uiPrefs = uiPrefs,
-            firmwareRecoveryDataSource = firmwareRecoveryDataSource,
-            bleScanner = bleScanner,
-            bluetoothSupported = bluetoothSupported,
-            usbSupported = usbSupported,
-        )
+    fun buildBase(
+        bluetoothSupported: Boolean = true,
+        usbSupported: Boolean = true,
+        networkSupported: Boolean = true,
+        usbScanner: UsbScanner? = null,
+    ): ScannerViewModel = ScannerViewModel(
+        serviceRepository = serviceRepository,
+        radioController = radioController,
+        radioInterfaceService = radioInterfaceService,
+        radioPrefs = radioPrefs,
+        recentAddressesDataSource = recentAddressesDataSource,
+        getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+        networkRepository = networkRepository,
+        dispatchers = dispatchers,
+        uiPrefs = uiPrefs,
+        firmwareRecoveryDataSource = firmwareRecoveryDataSource,
+        bleScanner = bleScanner,
+        bluetoothSupported = bluetoothSupported,
+        usbSupported = usbSupported,
+        networkSupported = networkSupported,
+        usbScanner = usbScanner,
+    )
 
     /**
      * Ends [viewModel]'s lifetime. Call from `@AfterTest` **before** `Dispatchers.resetMain()`.

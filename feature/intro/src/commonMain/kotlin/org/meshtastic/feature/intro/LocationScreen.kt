@@ -50,9 +50,15 @@ import org.meshtastic.core.ui.util.PermissionStatus
  * @param status Live permission status; drives the primary action and the denied/blocked notice.
  * @param onSkip Callback invoked if the user chooses to skip location permission setup.
  * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
+ * @param inBrowser the browser owns the permission, so a block is undone in its site settings.
  */
 @Composable
-internal fun LocationScreen(status: PermissionStatus, onSkip: () -> Unit, onPrimaryAction: () -> Unit) {
+internal fun LocationScreen(
+    status: PermissionStatus,
+    onSkip: () -> Unit,
+    onPrimaryAction: () -> Unit,
+    inBrowser: Boolean = false,
+) {
     val features =
         listOf(
             OnboardingFeature(
@@ -87,6 +93,7 @@ internal fun LocationScreen(status: PermissionStatus, onSkip: () -> Unit, onPrim
         configureButtonTextRes = Res.string.configure_location_permissions,
         onSkip = onSkip,
         onPrimaryAction = onPrimaryAction,
+        inBrowser = inBrowser,
     )
 }
 

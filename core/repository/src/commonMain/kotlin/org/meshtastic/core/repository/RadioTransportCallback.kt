@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.model.TransportStatus
+
 /**
  * Narrow callback interface for transport → service communication.
  *
@@ -40,4 +42,10 @@ interface RadioTransportCallback {
 
     /** Called when the transport has received raw data from the radio. */
     fun handleFromRadio(bytes: ByteArray)
+
+    /**
+     * Called as a connection attempt moves through its phases, fails or schedules a retry. Transports that have no
+     * phases worth showing never call it.
+     */
+    fun onStatus(status: TransportStatus) = Unit
 }

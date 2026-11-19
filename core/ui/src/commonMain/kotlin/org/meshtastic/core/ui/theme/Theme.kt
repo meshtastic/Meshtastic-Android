@@ -26,6 +26,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -159,3 +160,16 @@ fun AppTheme(
 }
 
 const val MODE_DYNAMIC = 6969420
+
+/** The stored theme preference's light and dark values, which equal AppCompatDelegate's MODE_NIGHT_NO and _YES. */
+const val MODE_LIGHT = 1
+const val MODE_DARK = 2
+
+/** Whether the stored theme preference [themePref] means dark; any other value follows the system. */
+@Composable
+@ReadOnlyComposable
+fun isDarkTheme(themePref: Int): Boolean = when (themePref) {
+    MODE_LIGHT -> false
+    MODE_DARK -> true
+    else -> isSystemInDarkTheme()
+}

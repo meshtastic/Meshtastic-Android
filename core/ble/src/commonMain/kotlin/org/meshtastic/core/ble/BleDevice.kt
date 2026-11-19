@@ -53,3 +53,6 @@ interface BleDevice {
     /** Bond the device. */
     suspend fun bond()
 }
+
+/** A device known only by its [address], as a deep link names one before any scan has seen it. */
+fun addressOnlyBleDevice(address: String): BleDevice = MeshtasticBleDevice(address)

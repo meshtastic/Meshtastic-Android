@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
+}
 
 kotlin {
     // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
@@ -49,3 +52,10 @@ kotlin {
 }
 
 // Gradle's KMP variant resolution follows `available-at` redirects in module
+
+// Compose UI tests that find no displayed node, or cannot inject input, in headless Chrome.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*MessageItemTest.*",
+    "*ContactsSelectionToolbarTest.selectingAPinnedConversationOffersUnpin",
+    "*ContactsSelectionToolbarTest.selectingAnUnmutedConversationOffersMute",
+)

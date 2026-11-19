@@ -12,6 +12,7 @@ Requires JDK 25 and `ANDROID_HOME`. No secrets step: the secrets plugin reads
 ./gradlew :core:data:allTests                                # single KMP module
 ./gradlew :androidApp:testFdroidDebugUnitTest                # single Android-only module
 ./gradlew kmpSmokeCompile                                    # cross-platform compile check, no tests
+./gradlew wasmJsBrowserTest :webApp:compileProductionExecutableKotlinWasmJs -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false   # opt-in web target: wasm tests + executable link
 ```
 > Both `test` AND `allTests` are needed — `allTests` covers KMP modules, `test` covers pure-Android modules.
 

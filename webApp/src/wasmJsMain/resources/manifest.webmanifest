@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Meshtastic",
+  "short_name": "Meshtastic",
+  "description": "Connect to Meshtastic radios over Bluetooth or USB, and message across the mesh.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F6FA",
+  "theme_color": "#F5F6FA",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

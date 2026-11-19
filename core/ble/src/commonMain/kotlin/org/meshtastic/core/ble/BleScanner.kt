@@ -28,4 +28,8 @@ interface BleScanner {
      * @return A [Flow] of discovered [BleDevice]s.
      */
     fun scan(timeout: Duration, serviceUuid: kotlin.uuid.Uuid? = null, address: String? = null): Flow<BleDevice>
+
+    /** True where a scan is a device chooser the user already picked from, so the device it emits is the selection. */
+    val picksDevice: Boolean
+        get() = false
 }

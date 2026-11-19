@@ -46,7 +46,7 @@ class CreatePreferencesDataStoreTest {
 
         val dispatcher = StandardTestDispatcher(testScheduler)
         val store =
-            createPreferencesDataStore(
+            createRawPreferencesDataStore(
                 context,
                 CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
                 legacyName = "corrupt-prefs",

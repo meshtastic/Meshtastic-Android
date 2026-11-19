@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -30,9 +31,9 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.model)
 
+            implementation(libs.kable.core)
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kable.core)
         }
 
         androidMain.dependencies {

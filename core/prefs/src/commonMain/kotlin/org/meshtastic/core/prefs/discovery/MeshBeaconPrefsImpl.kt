@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.discovery
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +30,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.MeshBeaconPrefs
 
 @Single
@@ -63,7 +62,7 @@ class MeshBeaconPrefsImpl(private val dataStore: UiDataStore, dispatchers: Corou
     }
 
     private companion object {
-        val KEY_STORED_BEACONS = stringPreferencesKey("mesh_beacon_stored_offers")
+        val KEY_STORED_BEACONS = stringPrefsKey("mesh_beacon_stored_offers")
 
         // Newline can never appear in a beacon record (fields are numeric + base64), so it is a safe row separator.
         const val RECORD_DELIMITER = "\n"

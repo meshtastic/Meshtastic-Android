@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide one Coroutine-based implementation for Android and Desktop. The iOS target compiles against no-op stubs; `createPeripheral` throws there.
+The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide one Coroutine-based implementation for Android, Desktop and the web (wasmJs, over Web Bluetooth). The iOS target compiles against no-op stubs; `createPeripheral` throws there.
 
 This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`, `BluetoothRepository`, `MeshtasticRadioProfile`), so business logic in `commonMain` stays platform-agnostic and testable.
 
@@ -15,10 +15,10 @@ The connection contract, implemented over Kable's `Peripheral` by `KableBleConne
     - **Connection & Await:** `connect` and `connectAndAwait` connect and wait for a terminal `BleConnectionState`.
     - **Unified Profile Helper:** `profile` runs service discovery and characteristic setup for one service in a single block, with a timeout (30 s by default).
     - **Observability:** Exposes `connectionState` and `deviceFlow` as `StateFlow`s for reactive UI and service updates.
-    - **Platform Setup:** The `expect`/`actual` functions in `KablePlatformSetup.kt` (`platformConfig`, `negotiatedMaxWriteLength`, connection priority, GATT cache refresh) carry the platform differences: on Android, `autoConnect` for bonded devices without a fresh advertisement and a 512-byte MTU request; on Desktop, direct connections.
+    - **Platform Setup:** The `expect`/`actual` functions in `KablePlatformSetup.kt` (`platformConfig`, `negotiatedMaxWriteLength`, connection priority, GATT cache refresh) carry the platform differences: on Android, `autoConnect` for bonded devices without a fresh advertisement and a 512-byte MTU request; on Desktop, direct connections; on the web, the peripheral the page was granted, kept open across reconnects because only the picker can make another.
 
 ### 2. `BluetoothRepository`
-A singleton repository for the global state of Bluetooth on the device, implemented by `AndroidBluetoothRepository` and, on Desktop, `KableBluetoothRepository`.
+A singleton repository for the global state of Bluetooth on the device, implemented by `AndroidBluetoothRepository`, `KableBluetoothRepository` on Desktop and `WebBluetoothRepository` on the web, where there are no bonds.
 
 - **Features:**
     - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded. `isSupported` is false on hardware with no Bluetooth LE.
@@ -26,7 +26,7 @@ A singleton repository for the global state of Bluetooth on the device, implemen
     - **Bonding:** `bond` creates a bond with a peripheral and waits for the result, with a 30 s timeout on Android.
 
 ### 3. `BleScanner`
-`scan(timeout, serviceUuid, address)` returns a `Flow<BleDevice>`, implemented over Kable's `Scanner` by `KableBleScanner`. A scan that cannot start fails with `BleScanStartException`, whose `BleScanStartFailureReason` names the cause.
+`scan(timeout, serviceUuid, address)` returns a `Flow<BleDevice>`, implemented over Kable's `Scanner` by `KableBleScanner`. A scan that cannot start fails with `BleScanStartException`, whose `BleScanStartFailureReason` names the cause. On the web, `WebBleScanner` uses Kable's `requestPeripheral` device chooser instead, since Kable's web `Scanner` needs Chrome's flagged `requestLEScan`: a scan without an address must start from a user gesture and yields the one device picked, and a scan for an address returns a device the page already holds a grant for.
 
 ### 4. `MeshtasticRadioProfile`
 The Meshtastic GATT service as flows: `fromRadio`, `logRadio` and `sendToRadio`, implemented by `KableMeshtasticRadioProfile` (`BleService.toMeshtasticRadioProfile()`). UUIDs live in `MeshtasticBleConstants`.

@@ -19,6 +19,7 @@ import org.meshtastic.buildlogic.untranslatedShare
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.web)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
@@ -109,3 +110,14 @@ val syncDocsToComposeResources =
 
 // Mapping the task provider carries the task dependency into every compose-resources task that reads the directory.
 compose.resources { customDirectory("commonMain", syncDocsToComposeResources.map { docsComposeResources.get() }) }
+
+// Karma serves no compose resources: the bundled pages and core:resources' strings 404 there, so these read nothing.
+// The served app loads both, which the browser check covers.
+meshtasticWeb.browserTestExclusions.addAll(
+    "*DocBundleLoaderTest.*",
+    "*DocImageWiringTest.*",
+    "*KeywordSearchEngineTest.*",
+    "*DocsBrowserScreenTest.*",
+    "*DocsPageRouteScreenTest.*",
+    "*DocsSearchBarTest.*",
+)

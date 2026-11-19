@@ -65,6 +65,7 @@
     <string name="add_network_device">Add</string>
     <string name="add_network_device_manually">Add device manually…</string>
     <string name="add_network_layer">Add Network Layer</string>
+    <string name="add_usb_device">Add serial device…</string>
     <string name="address">Address</string>
     <string name="admin_keys">Admin Keys</string>
     <string name="administration">Administration</string>
@@ -96,10 +97,12 @@
     <string name="app_database_backup_no_device">Connect to a radio first. There is no app data to back up or restore yet.</string>
     <string name="app_database_backup_saved">Backup saved.</string>
     <string name="app_database_restore_confirmation">Restoring replaces this radio's messages and nodes stored in the app with the contents of the backup. The change takes effect after you restart the app and reconnect to this radio.</string>
+    <string name="app_database_restore_confirmation_all_radios">Restoring replaces the messages and nodes of every radio stored in this browser with the contents of the backup. The change takes effect when Meshtastic reloads.</string>
     <string name="app_database_restore_corrupt">That backup is damaged or incomplete.</string>
     <string name="app_database_restore_failed">Could not read the backup.</string>
     <string name="app_database_restore_not_backup">That file is not an app data backup.</string>
     <string name="app_database_restore_staged">Backup accepted. Restart the app and reconnect to this radio to finish restoring.</string>
+    <string name="app_database_restore_staged_reload">Backup accepted. Reload Meshtastic to finish restoring. If it is open in other tabs, close them first.</string>
     <string name="app_database_restore_wrong_version">That backup is from a different app version (database version %1$d, this app uses %2$d).</string>
     <string name="app_functions_get_channel_info">Get channel info</string>
     <string name="app_functions_get_device_status">Get device status</string>
@@ -168,6 +171,7 @@
     <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>
     <string name="bluetooth_permission_blocked_rationale">Nearby devices access is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
     <string name="bluetooth_permission_blocked_rationale_pre31">Location permission is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
+    <string name="bluetooth_permission_browser">Your browser asks which radio to use each time you connect over Bluetooth or USB, so there is nothing to allow now. Bluetooth works in Chrome, Edge and Opera.</string>
     <string name="bluetooth_permission_denied_notice">Without Nearby devices access, Meshtastic cannot find or connect to your radio over Bluetooth. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_permission_denied_notice_pre31">Without Location permission, Android blocks Bluetooth scanning, so Meshtastic cannot find your radio. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_permission_rationale">Meshtastic needs Nearby devices access to find your radio and connect to it. It is used only to talk to your own devices, never to work out where you are. Without it, Bluetooth is unavailable — Wi-Fi and USB still work.</string>
@@ -192,6 +196,7 @@
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
     <string name="call_sign_summary">Your amateur radio call sign, up to 7 characters</string>
+    <string name="camera_blocked_in_browser">Camera access is blocked for this site. Allow it in the browser's site settings, or scan a QR code from an image.</string>
     <string name="camera_permission">Camera permission</string>
     <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
     <string name="camera_unavailable">Camera could not start. Try again, or close the scanner and reopen it.</string>
@@ -344,6 +349,28 @@
     <string name="connected_device">Connected Device</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="connecting">Connecting</string>
+    <!-- CONNECTION -->
+    <string name="connection_failure_bluetooth_or_location_unavailable">Bluetooth or location services are off.</string>
+    <string name="connection_failure_bluetooth_unavailable">Bluetooth is off.</string>
+    <string name="connection_failure_connect_failed">Could not connect. The radio may be in use by another app or device, too far away, or holding an old pairing.</string>
+    <string name="connection_failure_connection_rejected">The radio turned the connection down. It may need pairing: try again and enter the PIN when asked.</string>
+    <string name="connection_failure_link_lost">The connection dropped.</string>
+    <string name="connection_failure_out_of_range">Radio not found. Make sure it is on and in range.</string>
+    <string name="connection_failure_pairing_failed">Pairing failed. The PIN shows on the radio's screen, or is the fixed PIN set in its Bluetooth config.</string>
+    <string name="connection_failure_pairing_required">The radio needs pairing. When the system asks for a PIN, enter the one on the radio's screen, or its fixed PIN if one is set.</string>
+    <string name="connection_failure_unknown">Connection failed.</string>
+    <string name="connection_phase_connecting">Connecting to the radio</string>
+    <string name="connection_phase_discovering_services">Checking the radio</string>
+    <string name="connection_phase_finding_device">Looking for the radio</string>
+    <string name="connection_phase_handshake_config">Loading radio config</string>
+    <string name="connection_phase_handshake_nodes">Loading node list</string>
+    <string name="connection_phase_pairing">Pairing</string>
+    <string name="connection_phase_subscribing">Setting up the connection</string>
+    <plurals name="connection_retry_in">
+        <item quantity="one">Retrying in %1$d second (attempt %2$d)</item>
+        <item quantity="other">Retrying in %1$d seconds (attempt %2$d)</item>
+    </plurals>
+    <string name="connection_retry_now">Retrying now (attempt %1$d)</string>
     <string name="connection_status">Current connections:</string>
     <string name="connections">Connection</string>
     <string name="contact_draft_prefix">Draft: %1$s</string>
@@ -354,6 +381,7 @@
     <string name="contrast_medium">Medium</string>
     <string name="contrast_standard">Standard</string>
     <string name="conversations">Conversations</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="copy">Copy</string>
     <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Create Your Own Networks</string>
@@ -852,6 +880,7 @@
     <string name="firmware_update_unknown_error">Unknown error</string>
     <string name="firmware_update_unknown_hardware">Unknown hardware model: %1$d</string>
     <string name="firmware_update_unknown_release">Unknown remote release</string>
+    <string name="firmware_update_unsupported_in_browser">In the browser, firmware updates run over USB for nRF52 and RP2040 radios. Update over Bluetooth from the Android or desktop app, and flash ESP32 radios over USB at flasher.meshtastic.org.</string>
     <string name="firmware_update_unsupported_transport">Firmware updates are not supported over this connection for this device. Connect a different way (e.g. Bluetooth) to update.</string>
     <string name="firmware_update_unsupported_update_method">Local firmware files are not supported for this update method.</string>
     <string name="firmware_update_uploading">Uploading firmware...</string>
@@ -1529,6 +1558,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>
     <string name="no_public_key_text">This node has not shared a public key, so encrypted interactions with it are not possible. Request User Info to ask for one.</string>
+    <string name="no_serial_ports_allowed">No serial devices added</string>
+    <string name="no_serial_ports_allowed_hint">The browser lists only ports you have allowed. Plug in the radio, then choose it with Add serial device.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
@@ -1621,11 +1652,14 @@
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <string name="notification_reaction_to">%1$s to “%2$s”</string>
     <!-- NOTIFICATIONS -->
+    <string name="notifications_blocked_by_browser">The browser is blocking notifications from Meshtastic. Allow them in the browser's site settings.</string>
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
     <string name="notifications_for_low_battery_alerts">Notifications for low battery alerts for the connected device.</string>
     <string name="notifications_for_newly_discovered_nodes">Notifications for newly discovered nodes.</string>
     <string name="notifications_on_alert_bell_receipt">Notifications on alert/bell receipt</string>
     <string name="notifications_on_message_receipt">Notifications on message receipt</string>
+    <string name="notifications_turn_on">Turn on notifications</string>
+    <string name="notifications_turn_on_summary">The browser asks once. Without it, nothing below can alert you.</string>
     <string name="now">Now</string>
     <!-- OFFLINE -->
     <string name="offline_maps">Offline maps</string>
@@ -1682,6 +1716,7 @@
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <!-- PERMISSION -->
+    <string name="permission_blocked_in_browser_notice">Your browser has blocked this for the site. Allow it in the site settings next to the address bar, then reload the page.</string>
     <string name="permission_camera_summary">Scan channel and contact QR codes</string>
     <string name="permission_local_network_summary">Find radios on your Wi-Fi network</string>
     <string name="permission_location_summary">Show your position on the map and share it with the mesh</string>
@@ -1744,6 +1779,8 @@
     <string name="position">Position</string>
     <string name="position_config_set_fixed_from_phone">Set from current phone location</string>
     <string name="position_enabled">Position enabled</string>
+    <string name="position_location_blocked">Location is blocked for this site. Allow it in the browser's site settings.</string>
+    <string name="position_location_unavailable">The browser could not get a location.</string>
     <string name="position_log">Position</string>
     <string name="position_packet">Position Packet</string>
     <string name="potassium">Potassium</string>
@@ -1783,6 +1820,7 @@
     <string name="public_key">Public Key</string>
     <string name="public_key_changed">Public Key Changed</string>
     <string name="qr_code">QR code</string>
+    <string name="qr_code_not_found">No QR code found in that image.</string>
     <!-- QUICK -->
     <string name="quick_chat">Quick chat options</string>
     <string name="quick_chat_append">Append to message</string>
@@ -1835,6 +1873,7 @@
         <item quantity="one">Heard %1$d relay</item>
         <item quantity="other">Heard %1$d relays</item>
     </plurals>
+    <string name="reload">Reload</string>
     <!-- REMOTE -->
     <string name="remote">Remote</string>
     <string name="remote_admin">Remote Administration</string>
@@ -1984,6 +2023,7 @@
     <string name="scan_network_devices">Scan for network devices</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
+    <string name="scan_qr_from_image">Scan from image</string>
     <string name="scan_shared_contact_nfc">Scan Shared Contact NFC</string>
     <string name="scan_shared_contact_qr">Scan Shared Contact QR Code</string>
     <string name="scanning_bluetooth">Scanning…</string>
@@ -2032,8 +2072,12 @@
     <string name="selected">Selected</string>
     <string name="selected_map_type">Selected Map Type</string>
     <string name="send">Send</string>
+    <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Serial Config</string>
+    <string name="serial_port_chip">%1$s USB serial</string>
+    <string name="serial_port_unknown">Serial device</string>
+    <string name="serial_port_usb_ids">USB serial device %1$s</string>
     <string name="session_active">Session active</string>
     <string name="session_refresh_required">Refresh required</string>
     <string name="set_display_name">Set display name</string>
@@ -2063,6 +2107,7 @@
     <string name="short_name">Short Name</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_all_serial_ports">Show all serial ports…</string>
     <string name="show_full_message_timestamps">Show full message timestamps</string>
     <string name="show_full_message_timestamps_summary">Always show the date and time in conversation headers and message actions</string>
     <string name="show_iaq_legend">Show air quality legend</string>
@@ -2349,6 +2394,16 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
+    <!-- WEB -->
+    <string name="web_bluetooth_unsupported">This browser has no Bluetooth access. Bluetooth works in Chrome, Edge and Opera on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on.</string>
+    <string name="web_database_asking_other_tab">Asking the other tab to let go…</string>
+    <string name="web_database_busy">Meshtastic is open in another tab. Close that tab and this one continues on its own.</string>
+    <string name="web_database_moved">Meshtastic is now open in another tab.</string>
+    <string name="web_database_other_tab_silent">The other tab did not answer. Close it, or every other Meshtastic tab, and this one continues on its own.</string>
+    <string name="web_database_unavailable">This browser does not let Meshtastic store its data here. Private windows often block it; try a regular window.</string>
+    <string name="web_database_use_here">Use here</string>
+    <string name="web_serial_unsupported">This browser has no USB serial access. USB works in Chrome, Edge and Opera on a computer.</string>
+    <string name="web_transports_unsupported">This browser can't connect to a radio. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
     <string name="website">Website</string>
     <string name="weight">Weight</string>
     <string name="what_is_meshtastic">What is Meshtastic?</string>
@@ -2382,6 +2437,8 @@
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Available Networks</string>
+    <string name="wifi_provision_choose_device">Choose device</string>
+    <string name="wifi_provision_choose_device_detail">Your browser lists the nearby devices that offer Wi-Fi setup. Pick yours to continue.</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>

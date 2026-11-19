@@ -21,6 +21,7 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -44,7 +45,9 @@ abstract class BaseRadioTransportFactory(
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
         return when (spec) {
-            InterfaceId.TCP.id -> true
+            // A saved TCP address restored where the platform has no TCP transport (the browser) is kept but never
+            // armed.
+            InterfaceId.TCP.id -> DeviceType.TCP in supportedDeviceTypes
 
             // A saved serial address restored onto hardware with no USB host is kept but never armed.
             InterfaceId.SERIAL.id -> isSerialSupported

@@ -22,4 +22,20 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 /** Platform-specific scanner for USB/Serial devices. */
 interface UsbScanner {
     fun scanUsbDevices(): Flow<List<DeviceListEntry.Usb>>
+
+    /**
+     * Whether discovering a device this scanner hasn't already found requires an explicit, gesture-driven request
+     * action (e.g. Web Serial's `requestPort()` picker) rather than passive/ambient enumeration. `false` on every
+     * platform except web: JVM/Android can already enumerate every attached serial device without prompting.
+     */
+    fun needsExplicitDeviceRequest(): Boolean = false
+
+    /**
+     * Triggers the platform's explicit device-request flow (a no-op where [needsExplicitDeviceRequest] is `false`) and
+     * returns the device picked, or null when none was. On web this shows the browser's serial-port picker, limited to
+     * known Meshtastic USB IDs unless [showAll], so it must be called from a coroutine started directly inside a
+     * user-gesture event handler (e.g. a button's onClick) with no earlier suspension — the same "transient activation"
+     * constraint Web Bluetooth's device picker has.
+     */
+    suspend fun requestNewDevice(showAll: Boolean = false): DeviceListEntry.Usb? = null
 }

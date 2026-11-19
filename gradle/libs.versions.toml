@@ -1,4 +1,6 @@
 [versions]
+# Fallback QR decoder for browsers without BarcodeDetector (npm)
+jsqr = "1.4.0"
 xmlutil = "1.0.2.1"
 
 # Android
@@ -22,6 +24,8 @@ navigation3 = "1.2.0"
 # publish every AndroidX version, so they are not always equal.
 navigation3-runtime = "1.2.2"
 navigationevent = "1.1.0"
+# Browser Back for Navigation 3 on web until CMP ships it (CMP-8924); MIT.
+navigation3-browser = "1.1.0"
 paging = "3.5.3"
 room = "3.1.0-alpha04"
 koin = "4.2.2"
@@ -165,15 +169,20 @@ jetbrains-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.l
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3-runtime" }
 jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
+navigation3-browser = { module = "com.github.terrakok:navigation3-browser", version.ref = "navigation3-browser" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room3:room3-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref = "room" }
+# Suspend SQLiteConnection calls for common code, where androidx.sqlite blocks off web and suspends on web
+androidx-sqlite-async = { module = "androidx.sqlite:sqlite-async", version.ref = "androidx-sqlite-bundled" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite-bundled" }
 # JVM variant provides the host-platform native library for BundledSQLiteDriver in host/Robolectric tests
 androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "androidx-sqlite-bundled" }
+# Web-only WebWorkerSQLiteDriver, on the same release train as sqlite-bundled
+androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite-bundled" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 
@@ -257,6 +266,7 @@ dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versi
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.2" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.33.0" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version = "0.5.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-android" }
@@ -274,6 +284,8 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
+# The Js engine, which also serves wasmJs
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
@@ -452,6 +464,8 @@ meshtastic-kover = { id = "meshtastic.kover" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-kmp-feature = { id = "meshtastic.kmp.feature" }
 meshtastic-kmp-jvm-android = { id = "meshtastic.kmp.jvm.android" }
+meshtastic-kmp-web = { id = "meshtastic.kmp.web" }
+meshtastic-web-application = { id = "meshtastic.web.application" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }

@@ -73,6 +73,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.FirmwareRoute
@@ -162,6 +163,7 @@ import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
 import org.meshtastic.proto.Config
 
@@ -266,6 +268,7 @@ fun ConnectionsScreen(
     onConnectCode: ((String) -> Unit)? = null,
 ) {
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
+    val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
@@ -571,6 +574,7 @@ fun ConnectionsScreen(
                                     virtualDevices = virtualDevices,
                                     connectionStatus = connectionStatus,
                                     connectionProgress = connectionProgress,
+                                    transportStatus = transportStatus,
                                     onClickDisconnect = { scanModel.disconnect() },
                                 )
 
@@ -656,15 +660,17 @@ fun ConnectionsScreen(
 
             // Transport selector sits between the connection card and device list; it controls only the
             // visible discovery pane, not the globally selected/connected device shown above.
-            // With Network as the only pane left, a one-segment control would select nothing.
-            if (scanModel.bluetoothSupported || scanModel.usbSupported) {
+            // With one pane left, a one-segment control would select nothing.
+            if (scanModel.availableTransports.size > 1) {
                 TransportSelector(
                     activeTransport = activeTransport,
                     onSelectTransport = scanModel::selectTransport,
                     showBluetooth = scanModel.bluetoothSupported,
                     showUsb = scanModel.usbSupported,
+                    showNetwork = scanModel.networkSupported,
                 )
             }
+            scanModel.unsupportedTransportNotice?.let { TransportUnsupportedCard(message = stringResource(it)) }
 
             // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
             // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
@@ -855,6 +861,13 @@ fun ConnectionsScreen(
                         gateTcpConnect { scanModel.connectToManualAddress(fullAddress) }
                     },
                     onRemoveRecentAddress = { scanModel.removeRecentAddress(it.fullAddress) },
+                    onRequestUsbDevice =
+                    if (scanModel.usbNeedsExplicitDeviceRequest) {
+                        { showAll -> scanModel.requestUsbDevice(showAll) }
+                    } else {
+                        null
+                    },
+                    showTransportPane = scanModel.availableTransports.isNotEmpty(),
                 )
             }
 
@@ -1004,6 +1017,7 @@ private fun ConnectingDeviceContent(
     virtualDevices: List<DeviceListEntry>,
     connectionStatus: ConnectionStatus,
     connectionProgress: String?,
+    transportStatus: TransportStatus?,
     onClickDisconnect: () -> Unit,
 ) {
     val selectedEntry =
@@ -1023,6 +1037,7 @@ private fun ConnectingDeviceContent(
         deviceAddress = address,
         connectionStatus = connectionStatus,
         connectionProgress = connectionProgress,
+        transportStatus = transportStatus,
         onClickDisconnect = onClickDisconnect,
     )
 }

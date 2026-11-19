@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.map
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import kotlinx.atomicfu.atomic
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +29,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.prefs.di.MapConsentDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
 import org.meshtastic.core.repository.MapConsentPrefs
 
 @Single
@@ -41,11 +40,11 @@ class MapConsentPrefsImpl(private val dataStore: MapConsentDataStore, dispatcher
     private val consentFlows = atomic(persistentMapOf<Int?, Lazy<StateFlow<Boolean>>>())
 
     override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(consentFlows, nodeNum) {
-        val key = booleanPreferencesKey(nodeNum.toString())
+        val key = booleanPrefsKey(nodeNum.toString())
         dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
     }
 
     override fun setShouldReportLocation(nodeNum: Int?, report: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(nodeNum.toString())] = report } }
+        scope.launch { dataStore.edit { prefs -> prefs[booleanPrefsKey(nodeNum.toString())] = report } }
     }
 }
