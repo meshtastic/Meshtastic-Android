@@ -168,6 +168,7 @@ cache_limit_eviction_warning
 calculating
 call_sign
 call_sign_summary
+camera_blocked_in_browser
 camera_permission
 camera_permission_rationale
 camera_unavailable
@@ -343,6 +344,7 @@ contrast_high
 contrast_medium
 contrast_standard
 conversations
+copied_to_clipboard
 copy
 copyright_notice
 create_your_own_networks
@@ -1746,6 +1748,7 @@ pt_BR
 public_key
 public_key_changed
 qr_code
+qr_code_not_found
 ### QUICK ###
 quick_chat
 quick_chat_append
@@ -1942,6 +1945,7 @@ scan_connect_code_qr
 scan_network_devices
 scan_nfc
 scan_nfc_text
+scan_qr_from_image
 scan_shared_contact_nfc
 scan_shared_contact_qr
 scanning_bluetooth

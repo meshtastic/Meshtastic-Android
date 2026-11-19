@@ -195,6 +195,7 @@
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
     <string name="call_sign_summary">Your amateur radio call sign, up to 7 characters</string>
+    <string name="camera_blocked_in_browser">Camera access is blocked for this site. Allow it in the browser's site settings, or scan a QR code from an image.</string>
     <string name="camera_permission">Camera permission</string>
     <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
     <string name="camera_unavailable">Camera could not start. Try again, or close the scanner and reopen it.</string>
@@ -379,6 +380,7 @@
     <string name="contrast_medium">Medium</string>
     <string name="contrast_standard">Standard</string>
     <string name="conversations">Conversations</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="copy">Copy</string>
     <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Create Your Own Networks</string>
@@ -1815,6 +1817,7 @@
     <string name="public_key">Public Key</string>
     <string name="public_key_changed">Public Key Changed</string>
     <string name="qr_code">QR code</string>
+    <string name="qr_code_not_found">No QR code found in that image.</string>
     <!-- QUICK -->
     <string name="quick_chat">Quick chat options</string>
     <string name="quick_chat_append">Append to message</string>
@@ -2017,6 +2020,7 @@
     <string name="scan_network_devices">Scan for network devices</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
+    <string name="scan_qr_from_image">Scan from image</string>
     <string name="scan_shared_contact_nfc">Scan Shared Contact NFC</string>
     <string name="scan_shared_contact_qr">Scan Shared Contact QR Code</string>
     <string name="scanning_bluetooth">Scanning…</string>
