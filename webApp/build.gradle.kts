@@ -85,9 +85,21 @@ val generateWebBuildConfig =
         outputDir.set(buildConfigOutputDir.map { it.dir("org/meshtastic/web") })
     }
 
+// The web app manifest's icons are the Android launcher art, copied into the distribution rather than kept twice.
+val pwaIconsDir = layout.buildDirectory.dir("generated/pwaIcons")
+val launcherArt = layout.projectDirectory.dir("../androidApp/src/main")
+
+val copyPwaIcons =
+    tasks.register<Sync>("copyPwaIcons") {
+        from(launcherArt.file("ic_launcher2-playstore.png")) { rename { "icon-512.png" } }
+        from(launcherArt.file("ic_launcher-114x114.png")) { rename { "icon-114.png" } }
+        into(pwaIconsDir)
+    }
+
 kotlin {
     sourceSets {
         wasmJsMain.get().kotlin.srcDir(generateWebBuildConfig.map { buildConfigOutputDir })
+        wasmJsMain.get().resources.srcDir(copyPwaIcons)
 
         wasmJsMain.dependencies {
             implementation(projects.core.common)

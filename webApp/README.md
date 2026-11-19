@@ -34,6 +34,11 @@ The distribution directory is a static site: serve it from any web server.
 - Serve it from a secure context, https or `localhost`. The database lives in the Origin Private File System, which browsers offer only to secure contexts; Web Bluetooth and Web Serial need one too.
 - One tab at a time holds the database. A second tab waits, and offers to take the database over.
 - Some private windows offer no usable OPFS, and the database cannot open there.
+- Serve `sw.js` from the same directory as `index.html`; its scope is that directory, so the app works at a site root, under a path, or from node-headless's client directory. It caches the app shell for offline reloads (network first for the page, stale-while-revalidate for the scripts, cache first for the content-hashed `.wasm`) and leaves `api/`, `json/` and every other request alone. After a rebuild, the first reload can still run the cached scripts; reload again, or tick "Update on reload" in DevTools while developing.
+
+## Installed app
+
+The page is an installable PWA: `manifest.webmanifest` takes its icons from the Android launcher art (`copyPwaIcons`), and `sw.js` shows the notifications, which Android Chrome only shows from a service worker. A notification click focuses the app, or opens it at `?open=<path>`, and goes to the screen Android's notification opens (`NotificationDeepLinks`); the map, discovery and firmware screens have no web build, so their notifications open the app where it was.
 
 ## Browser support
 
@@ -41,4 +46,4 @@ Radios connect over Web Bluetooth and Web Serial, which only Chromium-based brow
 
 ## Tests
 
-`meshtastic.kmp.web` runs each web module's wasmJs tests in headless Chrome through Karma, until Kotlin 2.5's Playwright test DSL (KT-87082). Node.js cannot run them: nearly every module links Compose through `core:model`, and skiko's wasm loader works only in a browser. Karma finds Chrome on the `PATH` or through `CHROME_BIN`. A module whose tests cannot pass there sets `meshtasticWeb { browserTests = false }`, and its wasmJs tests only compile. Tests that need a type with no browser equivalent live in `nonWebTest`. This module, and the `wasmJsMain` interop with Web Bluetooth, Web Serial, OPFS and the Permissions API, have no automated tests.
+`meshtastic.kmp.web` runs each web module's wasmJs tests in headless Chrome through Karma, until Kotlin 2.5's Playwright test DSL (KT-87082). Node.js cannot run them: nearly every module links Compose through `core:model`, and skiko's wasm loader works only in a browser. Karma finds Chrome on the `PATH` or through `CHROME_BIN`. A module whose tests cannot pass there sets `meshtasticWeb { browserTests = false }`, and its wasmJs tests only compile. Tests that need a type with no browser equivalent live in `nonWebTest`. This module, and the `wasmJsMain` interop with Web Bluetooth, Web Serial, OPFS, the Permissions API, notifications and the service worker, have no automated tests.

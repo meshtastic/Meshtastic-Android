@@ -18,7 +18,9 @@ package org.meshtastic.web.platform
 
 import co.touchlab.kermit.Logger
 import kotlinx.browser.window
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -32,6 +34,11 @@ import org.w3c.notifications.Notification as BrowserNotification
 /**
  * Shows [Notification]s through the browser's Notifications API, gated on the same preferences as desktop. Without the
  * API or the permission a dispatch is a quiet false.
+ *
+ * Notifications go through the service worker registration when one is active, which Android Chrome requires and which
+ * lets a click open the app after its tab is gone; a page-level notification is the fallback. Each lands in its
+ * [Notification.tag] slot, so a newer one for the same conversation or node replaces the last, and a click opens its
+ * [Notification.deepLink] through [NotificationClicks].
  *
  * The page asks for the permission only when the user switches a notification category on in settings, the one
  * notification control the web app has, and only while that click's user activation is live, which is what browsers
@@ -53,31 +60,53 @@ class WebNotificationManager(private val prefs: NotificationPrefs, scope: Corout
     override suspend fun dispatch(notification: Notification): Boolean = prefs.allows(notification.category) &&
         notificationsSupported() &&
         notificationPermission() == "granted" &&
-        show(notification)
+        (showInWorker(notification) || showInPage(notification))
 
-    private fun show(notification: Notification): Boolean {
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun showInWorker(notification: Notification): Boolean = try {
+        showThroughWorker(
+            title = notification.title,
+            body = notification.message,
+            tag = notification.tag,
+            silent = notification.isSilent,
+            renotify = !notification.isSilent && !notification.onlyAlertOnce,
+            deepLink = notification.deepLink,
+        )
+            .await<JsBoolean>()
+            .toBoolean()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (t: Throwable) {
+        Logger.d(t) { "Service worker refused notification: ${notification.category}" }
+        false
+    }
+
+    private fun showInPage(notification: Notification): Boolean {
         val key = notification.tag ?: "untagged-${untaggedCount++}"
         var handle: BrowserNotification? = null
         handle =
-            showNotification(
+            showPageNotification(
                 title = notification.title,
                 body = notification.message,
                 tag = notification.tag,
                 silent = notification.isSilent,
+                onClick = { notification.deepLink?.let(NotificationClicks::open) },
                 onClose = { if (shown[key] === handle) shown.remove(key) },
             )
-        // Null on Android Chrome, which only shows notifications from a service worker the web app does not register.
         handle?.let { shown[key] = it } ?: Logger.d { "Browser refused notification: ${notification.category}" }
         return handle != null
     }
 
     override fun cancel(category: Notification.Category, id: Int) {
-        shown.remove(Notification.tagFor(category, id))?.close()
+        val tag = Notification.tagFor(category, id)
+        shown.remove(tag)?.close()
+        closeWorkerNotifications(tag)
     }
 
     override fun cancelAll() {
         shown.values.toList().forEach(BrowserNotification::close)
         shown.clear()
+        closeWorkerNotifications(null)
     }
 
     private fun askWhenSwitchedOn(category: StateFlow<Boolean>, scope: CoroutineScope) {
@@ -107,22 +136,24 @@ private fun notificationPermission(): String = BrowserNotification.permission.to
 private fun hasUserActivation(): Boolean = js("navigator.userActivation ? navigator.userActivation.isActive : true")
 
 /**
- * Shows a notification that focuses the tab when clicked; null when the browser refuses to construct one. Android
- * Chrome shows notifications only from a service worker, and its constructor throws a raw JS `TypeError` that
+ * Shows a page-level notification that focuses the tab when clicked; null when the browser refuses to construct one.
+ * Android Chrome shows notifications only from a service worker, and its constructor throws a raw JS `TypeError` that
  * Kotlin/Wasm surfaces as a bare [Throwable].
  */
-@Suppress("TooGenericExceptionCaught", "SwallowedException")
-private fun showNotification(
+@Suppress("TooGenericExceptionCaught", "SwallowedException", "LongParameterList")
+private fun showPageNotification(
     title: String,
     body: String,
     tag: String?,
     silent: Boolean,
+    onClick: () -> Unit,
     onClose: () -> Unit,
 ): BrowserNotification? = try {
     BrowserNotification(title, NotificationOptions(body = body, tag = tag.orEmpty(), silent = silent)).apply {
         onclick = {
             window.focus()
             close()
+            onClick()
         }
         addEventListener("close", { onClose() })
     }

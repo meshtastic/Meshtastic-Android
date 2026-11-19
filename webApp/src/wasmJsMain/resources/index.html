@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <title>Meshtastic</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" href="icon-114.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <meta name="theme-color" content="#F5F6FA" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1A1B26" media="(prefers-color-scheme: dark)">
     <!-- No <script src="skiko.js">: redundant for Kotlin/Wasm targets since Compose Multiplatform 1.7 (skiko's
          web runtime ships as an ES module bundled directly into webApp.js). -->
     <style>
@@ -121,6 +126,12 @@
             document.getElementById("unsupported-reason").textContent = reason;
             document.getElementById("unsupported").hidden = false;
             return;
+        }
+        // sw.js shows notifications (Android Chrome shows none without one) and keeps the app shell for offline reloads.
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js").catch(function (e) {
+                console.warn("Service worker registration failed", e);
+            });
         }
         var script = document.createElement("script");
         script.src = "webApp.js";

@@ -76,3 +76,13 @@ fun unknownWebDestination(key: NavKey, backStack: NavBackStack<NavKey>): NavEntr
 /** Every [TopLevelDestination] except Map, which has no entries on web. */
 val webVisibleDestinations: List<TopLevelDestination> =
     TopLevelDestination.entries.filter { it != TopLevelDestination.Map }
+
+/**
+ * Whether the web registers the screen [deepLink] (a `NotificationDeepLinks` path) opens. The map, discovery and
+ * firmware graphs have no wasmJs target, so a notification for one of them opens the app where it was instead.
+ */
+fun isWebDeepLink(deepLink: String): Boolean =
+    deepLink.substringBefore('?').substringBefore('/').lowercase() in webDeepLinkSegments
+
+private val webDeepLinkSegments =
+    setOf("messages", "share", "quickchat", "nodes", "settings", "channels", "connections")

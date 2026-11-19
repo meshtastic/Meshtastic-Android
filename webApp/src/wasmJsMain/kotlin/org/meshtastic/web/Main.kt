@@ -31,8 +31,10 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
 import org.koin.core.KoinApplication
 import org.koin.plugin.module.dsl.startKoin
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.WebDatabaseAccess
 import org.meshtastic.core.database.webDatabaseAccess
+import org.meshtastic.core.navigation.NotificationDeepLinks
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
@@ -44,6 +46,9 @@ import org.meshtastic.core.ui.theme.isDarkTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.web.di.WebKoinApp
 import org.meshtastic.web.lifecycle.TabHandoff
+import org.meshtastic.web.navigation.isWebDeepLink
+import org.meshtastic.web.platform.NotificationClicks
+import org.meshtastic.web.platform.cacheLoadedResources
 import org.meshtastic.web.ui.DatabaseBusy
 import org.meshtastic.web.ui.DatabaseUnavailable
 import org.meshtastic.web.ui.MovedToAnotherTab
@@ -91,6 +96,8 @@ private fun removeStaticLoader(): Unit =
 fun main() {
     giveDomExceptionsAStack()
     installLanguageOverride()
+    // Before Compose: the navigation shell rewrites the address, and a notification may have opened this page.
+    NotificationClicks.start()
     val koinApp = startKoin<WebKoinApp> {}
     Logger.i { "Meshtastic Web — Starting" }
 
@@ -126,6 +133,7 @@ private fun DatabaseGate(koinApp: KoinApplication, askedForDatabase: Boolean) {
             }
             val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
             MeshServiceLifecycle()
+            AppShellServices(uiViewModel)
             ThemeAndContent(uiViewModel)
         }
 
@@ -144,6 +152,25 @@ private fun MeshServiceLifecycle() {
     DisposableEffect(Unit) {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }
+    }
+}
+
+/**
+ * The installed-app side of the shell, once the database is open: hands the service worker what this page loaded, and
+ * opens notification clicks.
+ */
+@Suppress("ViewModelForwarding")
+@Composable
+private fun AppShellServices(uiViewModel: UIViewModel) {
+    LaunchedEffect(Unit) { cacheLoadedResources() }
+    LaunchedEffect(uiViewModel) {
+        NotificationClicks.deepLinks.collect { deepLink ->
+            if (isWebDeepLink(deepLink)) {
+                uiViewModel.handleDeepLink(CommonUri.parse(NotificationDeepLinks.uri(deepLink)))
+            } else {
+                Logger.i { "Notification destination has no web screen: ${deepLink.substringBefore('/')}" }
+            }
+        }
     }
 }
 
