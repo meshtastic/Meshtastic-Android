@@ -6,7 +6,7 @@ nav_order: 0
 
 # Meshtastic Androidi rakenduse dokumentatsioon
 
-User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
+User and developer documentation for the Meshtastic Android, Desktop and web app, built with Kotlin Multiplatform.
 
 Rakenduse funktsioonide vaatamiseks kasuta külgriba navigeerimisriba, et sirvida **kasutusjuhendit** ja projekti panustamiseks **arendaja juhendit**.
 
