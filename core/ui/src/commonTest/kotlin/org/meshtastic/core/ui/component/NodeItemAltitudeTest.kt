@@ -30,20 +30,23 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import kotlin.test.Test
 
-/** `Position.altitude` is optional on the wire: an unset one is no reading, and 0 is sea level. */
+/**
+ * `Position.altitude` is optional on the wire: an unset one is no reading, and 0 is sea level. The tests match the
+ * elevation itself, not the resource suffix, which is empty where resources do not load (wasmJs browser tests).
+ */
 @OptIn(ExperimentalTestApi::class)
 class NodeItemAltitudeTest {
 
     @Test
     fun nodeItem_hidesAbsentAltitude() = runComposeUiTest {
         setNodeItem(altitude = null)
-        onNodeWithText("MSL", substring = true).assertDoesNotExist()
+        onNodeWithText(SEA_LEVEL, substring = true).assertDoesNotExist()
     }
 
     @Test
     fun nodeItem_showsSeaLevelAltitude() = runComposeUiTest {
         setNodeItem(altitude = 0)
-        onNodeWithText("${0.toElevationString(MeasurementSystem.METRIC)} MSL").assertIsDisplayed()
+        onNodeWithText(SEA_LEVEL, substring = true).assertIsDisplayed()
     }
 
     private fun ComposeUiTest.setNodeItem(altitude: Int?) = setContent {
@@ -76,4 +79,8 @@ class NodeItemAltitudeTest {
             }
             .build(),
     )
+
+    private companion object {
+        val SEA_LEVEL = 0.toElevationString(MeasurementSystem.METRIC)
+    }
 }
