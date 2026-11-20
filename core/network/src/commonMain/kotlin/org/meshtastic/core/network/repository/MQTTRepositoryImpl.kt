@@ -51,6 +51,7 @@ import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
+import org.meshtastic.core.network.mqtt.MqttRootTopic
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.mqtt.ConnectionState
@@ -143,6 +144,13 @@ class MQTTRepositoryImpl(
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
+
+        // Every filter under a wildcard root is invalid, so retrying cannot help.
+        if (MqttRootTopic.hasWildcard(rootTopic)) {
+            Logger.w { "MQTT root topic contains a wildcard, stopping" }
+            close(MqttRootWildcardException())
+            return@callbackFlow
+        }
 
         val rawAddress = mqttConfig?.address?.ifEmpty { DEFAULT_SERVER_ADDRESS } ?: DEFAULT_SERVER_ADDRESS
         val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, mqttConfig?.tls_enabled == true))
