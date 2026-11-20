@@ -35,6 +35,7 @@ class GoogleFusedLocationClient(private val context: Context) : FusedLocationCli
         intervalMillis: Long,
         executor: Executor,
         listener: (Location) -> Unit,
+        onFailure: (Exception) -> Unit,
     ): AutoCloseable? {
         val availability = GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(context)
         if (availability != ConnectionResult.SUCCESS) return null
@@ -44,7 +45,7 @@ class GoogleFusedLocationClient(private val context: Context) : FusedLocationCli
                 .setMinUpdateDistanceMeters(0f)
                 .build()
         val callback = LocationListener { listener(it) }
-        client.requestLocationUpdates(request, executor, callback)
+        client.requestLocationUpdates(request, executor, callback).addOnFailureListener(executor, onFailure)
         return AutoCloseable { client.removeLocationUpdates(callback) }
     }
 }

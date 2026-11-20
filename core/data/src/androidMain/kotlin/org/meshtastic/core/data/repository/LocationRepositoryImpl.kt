@@ -114,13 +114,14 @@ class LocationRepositoryImpl(
         _receivingLocationUpdates.value = true
         analytics.track("location_start")
 
-        // Play services' fused provider where the flavor has it and the phone runs it, else the platform's.
-        var fusedHandle: AutoCloseable? = null
+        // A late Play services failure may start the platform providers, so starting and stopping them share a lock.
+        val platformLock = Any()
+        var stopped = false
+
         @Suppress("TooGenericExceptionCaught")
-        try {
-            fusedHandle = fused.requestLocationUpdates(DEFAULT_INTERVAL_MS, dispatchers.io.asExecutor(), onFix)
-            if (fusedHandle != null) Logger.i { "Location updates from Play services' fused provider" }
-            if (fusedHandle == null) {
+        fun requestPlatform() = synchronized(platformLock) {
+            if (stopped) return@synchronized
+            try {
                 providerList.forEach { provider ->
                     LocationManagerCompat.requestLocationUpdates(
                         this@requestLocationUpdates,
@@ -130,6 +131,25 @@ class LocationRepositoryImpl(
                         locationListener,
                     )
                 }
+            } catch (e: Exception) {
+                close(e)
+            }
+        }
+
+        // Play services' fused provider where the flavor has it and the phone runs it, else the platform's.
+        var fusedHandle: AutoCloseable? = null
+        val onFusedFailure: (Exception) -> Unit = { e ->
+            Logger.w(e) { "Play services refused location updates, using the platform providers" }
+            requestPlatform()
+        }
+        @Suppress("TooGenericExceptionCaught")
+        try {
+            fusedHandle =
+                fused.requestLocationUpdates(DEFAULT_INTERVAL_MS, dispatchers.io.asExecutor(), onFix, onFusedFailure)
+            if (fusedHandle != null) {
+                Logger.i { "Location updates from Play services' fused provider" }
+            } else {
+                requestPlatform()
             }
         } catch (e: Exception) {
             close(e)
@@ -141,7 +161,10 @@ class LocationRepositoryImpl(
             analytics.track("location_stop")
 
             fusedHandle?.close()
-            LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
+            synchronized(platformLock) {
+                stopped = true
+                LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
+            }
             if (nmeaListening) removeNmeaListener(nmeaListener)
         }
     }

@@ -55,16 +55,19 @@ class LocationSourceSelectionTest {
     private class FakeFused(val serves: Boolean) : FusedLocationClient {
         var interval: Long? = null
         var listener: ((AndroidLocation) -> Unit)? = null
+        var onFailure: ((Exception) -> Unit)? = null
         var closed = false
 
         override fun requestLocationUpdates(
             intervalMillis: Long,
             executor: Executor,
             listener: (AndroidLocation) -> Unit,
+            onFailure: (Exception) -> Unit,
         ): AutoCloseable? {
             if (!serves) return null
             interval = intervalMillis
             this.listener = listener
+            this.onFailure = onFailure
             return AutoCloseable { closed = true }
         }
     }
@@ -107,6 +110,28 @@ class LocationSourceSelectionTest {
         )
         first.join()
         assertTrue(fused.closed, "the fused request ends with the flow")
+    }
+
+    @Test
+    fun `Play services refusing the request after it returned hands over to the platform providers`() = runBlocking {
+        val fused = FakeFused(serves = true)
+        val collecting = launch(Dispatchers.Unconfined) { repository(fused).getLocations().first() }
+        assertTrue(platformRequests() == 0, "no platform request while the fused registration is pending")
+        fused.onFailure?.invoke(IllegalStateException("registration failed"))
+        assertTrue(platformRequests() > 0, "the platform is asked once Play services refuse")
+        collecting.cancel()
+        collecting.join()
+        assertTrue(platformRequests() == 0, "the platform request ends with the flow")
+    }
+
+    @Test
+    fun `a Play services refusal after the flow ended starts nothing`() = runBlocking {
+        val fused = FakeFused(serves = true)
+        val collecting = launch(Dispatchers.Unconfined) { repository(fused).getLocations().first() }
+        collecting.cancel()
+        collecting.join()
+        fused.onFailure?.invoke(IllegalStateException("registration failed"))
+        assertTrue(platformRequests() == 0, "no platform request outlives the flow")
     }
 
     @Test

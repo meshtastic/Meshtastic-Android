@@ -27,12 +27,18 @@ import java.util.concurrent.Executor
 fun interface FusedLocationClient {
     /**
      * Deliver a fix to [listener] on [executor] about every [intervalMillis] at high accuracy, and return what stops
-     * them, or null when Play services cannot serve. Throws `SecurityException` without a location grant.
+     * them, or null when Play services cannot serve. Registration completes later, so a request Play services refuse
+     * after this returns reaches [onFailure] on [executor]. Throws `SecurityException` without a location grant.
      */
-    fun requestLocationUpdates(intervalMillis: Long, executor: Executor, listener: (Location) -> Unit): AutoCloseable?
+    fun requestLocationUpdates(
+        intervalMillis: Long,
+        executor: Executor,
+        listener: (Location) -> Unit,
+        onFailure: (Exception) -> Unit,
+    ): AutoCloseable?
 
     companion object {
         /** No Play services: the platform's providers serve. */
-        val NONE: FusedLocationClient = FusedLocationClient { _, _, _ -> null }
+        val NONE: FusedLocationClient = FusedLocationClient { _, _, _, _ -> null }
     }
 }
