@@ -116,6 +116,14 @@ acting, not last-device auto-reconnect. Caveats, all observed:
 - No trust dialog blocked the localhost connect in testing (unlike the Android
   build, which pops one for a never-seen device).
 
+### Desktop radio-layer MCP server (debug builds)
+
+A debug desktop build serves a second MCP server, on the radio layer, when
+`MESHTASTIC_MCP_PORT=<port>` (or `-Dmeshtastic.mcp.port=<port>`) is set at launch.
+It listens on `127.0.0.1:<port>/mcp` (streamable HTTP) with `connection_state`,
+`connect`, `nodes` and `send_text`. It is separate from `hotMcpServer`, which
+drives the UI, and a release build ignores the port.
+
 ## Run: Emulator (agent path)
 
 Scripted bring-up only — never hand-walk onboarding or the manual-IP dialog:

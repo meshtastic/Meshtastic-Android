@@ -58,6 +58,8 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 
 **Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. `core:service`'s `DispatchingMeshNotificationManager`, shared with web, turns mesh events into the `Notification`s it receives. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
+**Agent MCP server:** A debug build starts a loopback-only MCP server (`mcp/DesktopMcpServer.kt`, streamable HTTP at `http://127.0.0.1:<port>/mcp`) when `MESHTASTIC_MCP_PORT` or `-Dmeshtastic.mcp.port` names a port. It is wired to the radio layer, not the UI, and offers `connection_state`, `connect`, `nodes` and `send_text`. A release build never starts it.
+
 **Localization:** Desktop exposes a language picker that persists the selected BCP-47 tag in `UiPrefs.locale`. `Main.kt` resolves it against the system locale (`resolveLocale`) and applies it as the JVM default `Locale`.
 
 **Updates:** Release builds outside Flatpak check GitHub's `releases/latest` at startup (`UpdateChecker`) and post a notification when a newer production release exists. Flatpak installs update through Flathub.
@@ -75,6 +77,7 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 | `UpdateChecker.kt` | Compares the running version with GitHub's latest production release |
 | `tray/` | Linux StatusNotifierItem tray and its D-Bus menu |
 | `map/DesktopMapViewProvider.kt` | MapLibre map surfaces, imported map layers and the Site Planner slot |
+| `mcp/DesktopMcpServer.kt` | Debug-only loopback MCP server for agents, started from `Main.kt` by `DesktopMcpLifecycle` |
 | `di/DesktopKoinModule.kt` | Aggregate Koin module that `DesktopKoinApp` points at |
 | `di/DesktopRuntimeModule.kt` | Radio stack, notifications and networking the JVM host owns |
 | `di/DesktopStubsModule.kt` | Bindings for interfaces whose only real implementation needs Android APIs |

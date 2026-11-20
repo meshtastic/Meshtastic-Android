@@ -119,6 +119,8 @@ accepts a manual `workflow_dispatch` with a `tag`, which is the retry path if ei
 
 Desktop native installers are built automatically as part of every `internal` release. There is no separate promotion flow for Desktop — installers are built once during the `internal` release and attached to the GitHub Release alongside Android artifacts; promotions to later channels reuse them.
 
+No release workflow builds, attaches or deploys the web app (`:webApp`). Pull requests compile it and run its tests, and hosting the production build is outside this repository (`webApp/README.md`).
+
 ### Artifacts Produced
 
 | Platform | Format | Runner |

@@ -143,6 +143,8 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | `displaymode` | Enum | Dropdown: `DisplayMode` entries | — |
 | `oled` | Enum | Dropdown: `OledType` entries | — |
 | `compass_orientation` | Enum | Dropdown: `CompassOrientation` entries | — |
+| `use_long_node_name` | Boolean | Toggle | Schema gate: shown when the connected firmware offers the field |
+| `enable_message_bubbles` | Boolean | Toggle | Schema gate: shown when the connected firmware offers the field |
 
 ### LoRa (`Config.LoRaConfig`)
 
@@ -276,6 +278,7 @@ turned off.
 | `environment_display_fahrenheit` | Boolean | Toggle | — |
 | `air_quality_enabled` | Boolean | Toggle | — |
 | `air_quality_interval` | Interval | Dropdown: `BROADCAST_SHORT` intervals | 30 min – 72 hours |
+| `air_quality_screen_enabled` | Boolean | Toggle | Schema gate: shown when the connected firmware offers the field |
 | `power_measurement_enabled` | Boolean | Toggle | — |
 | `power_update_interval` | Interval | Dropdown: `BROADCAST_SHORT` intervals | 30 min – 72 hours |
 | `power_screen_enabled` | Boolean | Toggle | — |

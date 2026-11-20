@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: How typed Navigation 3 routes and DeepLinkRouter work together, the supported deep link URIs, and how to add a new one.
 aliases:
   - deeplinks
@@ -169,7 +169,8 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 ```
 
 The apps call every feature's entries function from one place: the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt`, and `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`.
+`androidApp`'s `Main.kt`, `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, and, for a
+feature with a web target, `webNavGraph` in `webApp`'s `WebNavigation.kt`.
 
 ## Testing
 
