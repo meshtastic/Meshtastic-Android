@@ -7,7 +7,7 @@ has_children: true
 
 # User Guide
 
-Documentation for using the Meshtastic Android and Desktop app.
+Documentation for using the Meshtastic Android, Desktop and web app.
 
 ## What's New in the Docs
 
