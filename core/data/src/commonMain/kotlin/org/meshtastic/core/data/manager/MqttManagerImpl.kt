@@ -36,6 +36,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
 import org.meshtastic.core.network.repository.MqttEndpointUnsupportedException
+import org.meshtastic.core.network.repository.MqttRootWildcardException
 import org.meshtastic.core.network.repository.isCredentialRejection
 import org.meshtastic.core.network.repository.isOpenableHere
 import org.meshtastic.core.network.repository.mqttTlsConfig
@@ -52,6 +53,7 @@ import org.meshtastic.core.resources.mqtt_error_credentials_rejected
 import org.meshtastic.core.resources.mqtt_error_proxy_failed
 import org.meshtastic.core.resources.mqtt_error_rejected
 import org.meshtastic.core.resources.mqtt_needs_websocket_url
+import org.meshtastic.core.resources.mqtt_root_has_wildcard
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
@@ -115,6 +117,9 @@ class MqttManagerImpl(
                             when {
                                 throwable is MqttEndpointUnsupportedException ->
                                     getStringSuspend(Res.string.mqtt_needs_websocket_url)
+
+                                throwable is MqttRootWildcardException ->
+                                    getStringSuspend(Res.string.mqtt_root_has_wildcard)
 
                                 throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
                                     getStringSuspend(Res.string.mqtt_error_credentials_rejected)
