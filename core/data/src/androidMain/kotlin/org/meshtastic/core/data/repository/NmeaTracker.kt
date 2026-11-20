@@ -17,41 +17,42 @@
 package org.meshtastic.core.data.repository
 
 import org.meshtastic.core.repository.GnssFix
+import kotlin.math.abs
 
 /**
  * Folds a receiver's NMEA sentences into the latest [GnssFix], from GGA and GSA by any talker. A sentence whose
- * checksum fails is dropped. GGA and GSA expire separately, so a fresh GGA never makes an old GSA's fields current. Fed
+ * checksum fails is dropped. Each sentence keeps the timestamp the platform gave its message, and GGA and GSA expire
+ * separately against the fix's own time, so neither a late callback nor a fresh GGA makes an old reading current. Fed
  * from the platform's NMEA callback and read from the location callback, which may run on different threads, so both
  * sides hold the lock.
  */
-internal class NmeaTracker(private val clock: () -> Long) {
+internal class NmeaTracker {
     private var gga = GnssFix()
     private var ggaAt: Long? = null
     private var gsa = GnssFix()
     private var gsaAt: Long? = null
 
-    /** One sentence, with or without its line ending. */
+    /** One sentence, with or without its line ending, and its message's timestamp in UTC milliseconds. */
     @Synchronized
-    fun accept(sentence: String) {
+    fun accept(sentence: String, atMillis: Long) {
         val fields = nmeaBody(sentence.trim())?.split(',') ?: return
         when (fields[0].takeLast(KIND_LENGTH)) {
             "GGA" -> {
                 gga = gga(fields)
-                ggaAt = clock()
+                ggaAt = atMillis
             }
 
             "GSA" -> {
                 gsa = gsa(fields)
-                gsaAt = clock()
+                gsaAt = atMillis
             }
         }
     }
 
-    /** The fields of each sentence that arrived within [freshMillis], or null when neither did. */
+    /** The fields of each sentence stamped within [freshMillis] of a fix at [fixMillis] (UTC), or null for none. */
     @Synchronized
-    fun fresh(freshMillis: Long): GnssFix? {
-        val now = clock()
-        fun isFresh(at: Long?) = at != null && now - at <= freshMillis
+    fun fresh(fixMillis: Long, freshMillis: Long): GnssFix? {
+        fun isFresh(at: Long?) = at != null && abs(fixMillis - at) <= freshMillis
         val gga = gga.takeIf { isFresh(ggaAt) }
         val gsa = gsa.takeIf { isFresh(gsaAt) }
         return if (gga == null && gsa == null) {
@@ -108,16 +109,21 @@ internal fun nmeaBody(sentence: String): String? {
 
 /**
  * A decimal as hundredths, truncated toward zero past two places as TinyGPS's `parseDecimal` does, with no floating
- * point to turn 1.15 into 114. Null for a blank or malformed field.
+ * point to turn 1.15 into 114. Null for a blank or malformed field: the whole field must be an optional sign, digits,
+ * and an optional fraction, with at least one digit.
  */
 internal fun hundredths(text: String): Int? {
-    val negative = text.startsWith('-')
-    val digits = text.removePrefix("-")
-    val whole = digits.substringBefore('.').ifEmpty { if (digits.isEmpty()) "" else "0" }.toIntOrNull()
-    val tail = digits.substringAfter('.', "").take(2).padEnd(2, '0').toIntOrNull()
-    val magnitude = if (whole != null && tail != null) whole * HUNDRED + tail else null
-    return magnitude?.let { if (negative) -it else it }
+    val (whole, fraction) = DECIMAL.matchEntire(text)?.destructured ?: return null
+    val magnitude =
+        if (whole.isEmpty() && fraction.isEmpty()) {
+            null
+        } else {
+            whole.ifEmpty { "0" }.toIntOrNull()?.let { it * HUNDRED + fraction.take(2).padEnd(2, '0').toInt() }
+        }
+    return magnitude?.let { if (text.startsWith('-')) -it else it }
 }
+
+private val DECIMAL = Regex("""-?(\d*)(?:\.(\d*))?""")
 
 private const val CHECKSUM_DIGITS = 2
 private const val HEX_RADIX = 16

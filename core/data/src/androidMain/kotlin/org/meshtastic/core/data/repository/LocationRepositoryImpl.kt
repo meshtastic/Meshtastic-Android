@@ -25,7 +25,6 @@ import android.location.OnNmeaMessageListener
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import androidx.annotation.RequiresPermission
 import androidx.core.location.LocationCompat
 import androidx.core.location.LocationListenerCompat
@@ -62,7 +61,7 @@ class LocationRepositoryImpl(
         private const val API_LEVEL_31 = 31
         private const val API_LEVEL_30 = 30
 
-        /** NMEA older than this no longer describes the fix it would sit beside. */
+        /** NMEA stamped further than this from a fix's time does not describe that fix. */
         private const val NMEA_FRESH_MS = 5_000L
     }
 
@@ -80,8 +79,8 @@ class LocationRepositoryImpl(
                 .build()
 
         // Satellites and dilution of precision exist only in the receiver's NMEA, which needs a precise grant.
-        val nmea = NmeaTracker(SystemClock::elapsedRealtime)
-        val nmeaListener = OnNmeaMessageListener { message, _ -> nmea.accept(message) }
+        val nmea = NmeaTracker()
+        val nmeaListener = OnNmeaMessageListener { message, timestamp -> nmea.accept(message, timestamp) }
         val nmeaListening = addNmea(nmeaListener)
 
         val onFix: (AndroidLocation) -> Unit = { location ->
@@ -93,7 +92,7 @@ class LocationRepositoryImpl(
                     Logger.e(e) { "addMslAltitudeToLocation() failed" }
                 }
             }
-            trySend(location.toLocation(nmea.fresh(NMEA_FRESH_MS)))
+            trySend(location.toLocation(nmea.fresh(location.time, NMEA_FRESH_MS)))
         }
         val locationListener = LocationListenerCompat { onFix(it) }
 
