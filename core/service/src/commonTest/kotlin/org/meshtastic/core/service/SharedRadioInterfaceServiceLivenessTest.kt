@@ -1346,23 +1346,19 @@ class SharedRadioInterfaceServiceLivenessTest {
         clock = 0L
         val service = createConnectedService("s/dev/bus/usb/001/002")
         try {
-            val errors = mutableListOf<String>()
-            val collectJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
+            // The text comes from resources, which may resolve off the test dispatcher, so await it.
+            val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
 
             service.onDisconnect(
                 isPermanent = true,
                 errorMessage = null,
                 reason = TransportDisconnectReason.UsbPermissionDenied,
             )
-            testDispatcher.scheduler.runCurrent()
-            advanceTimeBy(1_000L)
-
-            collectJob.cancel()
 
             assertEquals(ConnectionState.Disconnected, service.connectionState.value)
             assertEquals(
-                listOf("USB permission denied. Reconnect the device to try again."),
-                errors,
+                connectionErrorText(TransportDisconnectReason.UsbPermissionDenied),
+                error.await(),
                 "USB permission denial must surface a specific error message.",
             )
         } finally {
@@ -1523,6 +1519,81 @@ class SharedRadioInterfaceServiceLivenessTest {
                 service.connectionState.value == ConnectionState.Connected,
                 "State must remain Disconnected after post-disconnect network recovery emission",
             )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * After the radio gives its one WebSocket slot to another client (close 4001), a network recovery must not dial
+     * again and take the slot back; only the user's next connect does.
+     */
+    @Test
+    fun `network recovery does not redial after the radio gave the slot to another client`() = runTest(testDispatcher) {
+        clock = 0L
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val networkAvailability = MutableStateFlow<Boolean>(true)
+        val service =
+            createConnectedService(
+                "wws://192.168.1.100/api/v1/ws",
+                networkAvailability = networkAvailability,
+                startConnected = false,
+            )
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            callbacks
+                .last()
+                .onDisconnect(isPermanent = true, reason = TransportDisconnectReason.ReplacedByAnotherClient)
+            testDispatcher.scheduler.runCurrent()
+
+            networkAvailability.value = false
+            testDispatcher.scheduler.runCurrent()
+            networkAvailability.value = true
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(1, createdTransports.size, "network recovery must not redial after a 4001 close")
+
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(2, createdTransports.size, "an explicit connect dials again")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /** The link that stopped for good still holds its transport; the user's connect must replace it, not no-op. */
+    @Test
+    fun `connect redials straight after the radio gave the slot to another client`() = runTest(testDispatcher) {
+        clock = 0L
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createConnectedService("wws://192.168.1.100/api/v1/ws", startConnected = false)
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                callbacks += it.args[1] as RadioInterfaceService
+                FakeRadioTransport().also { transport -> createdTransports.add(transport) }
+            }
+        try {
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            callbacks
+                .last()
+                .onDisconnect(isPermanent = true, reason = TransportDisconnectReason.ReplacedByAnotherClient)
+            testDispatcher.scheduler.runCurrent()
+
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(2, createdTransports.size, "an explicit connect after a 4001 close dials a new transport")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

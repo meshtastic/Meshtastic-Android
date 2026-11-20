@@ -21,3 +21,6 @@ package org.meshtastic.core.network.transport
  * POSIX error), which the common predicate already covers. There is no extra non-IOException family to classify here.
  */
 internal actual fun Throwable.isPlatformConnectionFailure(): Boolean = false
+
+/** Kotlin/Native has no TLS exception family to recognize, so a failed handshake reads as a connect failure. */
+internal actual fun Throwable.isTlsFailure(): Boolean = false

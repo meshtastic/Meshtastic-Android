@@ -19,3 +19,6 @@ package org.meshtastic.core.network.transport
 // Ktor's Js engine surfaces WebSocket/fetch failures through the same IOException family the common predicate
 // already covers; there is no extra platform-specific family to classify here.
 internal actual fun Throwable.isPlatformConnectionFailure(): Boolean = false
+
+// The browser's WebSocket error event says nothing about why a wss:// handshake failed, so it reads as unreachable.
+internal actual fun Throwable.isTlsFailure(): Boolean = false

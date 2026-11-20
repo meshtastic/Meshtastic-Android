@@ -35,8 +35,8 @@ import org.meshtastic.core.repository.RadioTransportFactory
  * wasmJs (browser) implementation of [RadioTransportFactory]. BLE is handled entirely by [BaseRadioTransportFactory]
  * via `core:ble`'s Web Bluetooth actuals. Mock/Replay are commonMain-portable and created directly here, same as every
  * other platform. Serial/USB is backed by the Web Serial API via [WasmJsSerialTransport] and [WebSerialPortRegistry].
- * TCP has no browser equivalent at all and fails loudly rather than silently degrading: it is a permanent sandbox
- * impossibility (browsers cannot open raw sockets), unlike Serial/USB which merely needed its own transport written.
+ * Network is firmware's WebSocket phone API, which [BaseRadioTransportFactory] opens. Raw TCP has no browser equivalent
+ * and fails loudly rather than silently degrading: browsers cannot open raw sockets.
  */
 @Single(binds = [RadioTransportFactory::class])
 class WasmJsRadioTransportFactory(
@@ -47,7 +47,10 @@ class WasmJsRadioTransportFactory(
     private val serialPortRegistry: WebSerialPortRegistry,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
-    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.USB)
+    // Network is the WebSocket phone link alone: raw TCP never reaches a browser.
+    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
+
+    override val isRawTcpSupported: Boolean = false
 
     // No unlock gesture and no demo entry exist on web yet (mirrors desktop): `connections?address=m` is reachable
     // from any page via the verified app link, so the virtual transports stay inadmissible until a web-specific
@@ -88,6 +91,8 @@ class WasmJsRadioTransportFactory(
             -> NopRadioTransport(rest)
 
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
+
+            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
         }
     }
 }

@@ -30,6 +30,11 @@ class DeviceTypeTest {
     }
 
     @Test
+    fun fromAddress_lists_a_websocket_with_the_network_radios() {
+        assertEquals(DeviceType.TCP, DeviceType.fromAddress("wws://192.0.2.1/api/v1/ws"))
+    }
+
+    @Test
     fun fromAddress_returns_null_for_non_presented_prefixes() {
         assertNull(DeviceType.fromAddress("m"))
         assertNull(DeviceType.fromAddress("r"))

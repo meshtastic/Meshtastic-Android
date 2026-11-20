@@ -743,27 +743,28 @@ open class ScannerViewModel(
     }
 
     /**
-     * Persists [address] in the recent-TCP list under [name]. No-op when [address] does not start with
-     * [TCP_DEVICE_PREFIX], or where TCP cannot open.
+     * Persists [address] in the recent network list under [name]. No-op when [address] does not start with
+     * [TCP_DEVICE_PREFIX] or [WEBSOCKET_DEVICE_PREFIX], or where no network transport can open.
      */
     fun addRecentAddress(address: String, name: String) {
-        if (!address.startsWith(TCP_DEVICE_PREFIX) || !networkSupported) return
+        if (!networkSupported) return
+        if (!address.startsWith(TCP_DEVICE_PREFIX) && !address.startsWith(WEBSOCKET_DEVICE_PREFIX)) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
-    /** Removes [address] from the recent-TCP list. */
+    /** Removes [address] from the recent network list, which TCP and WebSocket addresses share. */
     fun removeRecentAddress(address: String) {
         safeLaunch(tag = "removeRecentAddress") { recentAddressesDataSource.remove(address) }
     }
 
     /**
-     * Connects to a manually-entered TCP address. Wraps the manual-entry flow with the same scan-cancel invariant as
-     * [onSelected]: stops discovery before connection setup so the manual connect does not race an in-progress
-     * BLE/network scan for radio resources.
+     * Connects to a manually-entered TCP or WebSocket address. Wraps the manual-entry flow with the same scan-cancel
+     * invariant as [onSelected]: stops discovery before connection setup so the manual connect does not race an
+     * in-progress BLE/network scan for radio resources.
      */
     fun connectToManualAddress(fullAddress: String) {
         if (!networkSupported) return
-        val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
+        val displayAddress = fullAddress.drop(1)
         stopAllScans()
         uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
         addRecentAddress(fullAddress, displayAddress)
@@ -778,7 +779,7 @@ open class ScannerViewModel(
         if (!networkSupported && isTcpAddress(address)) return
         val linkPin = blePairingPinFor(address, pin)
         if (linkPin == null) {
-            changeDeviceAddress(address)
+            changeDeviceAddress(canonicalDeviceAddress(address))
             return
         }
         stopAllScans()

@@ -46,16 +46,6 @@ import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 
 /**
- * Decides whether to reset the reconnect backoff based on session data and uptime.
- *
- * Only sessions that lasted at least [thresholdMs] with actual data exchange are considered stable enough to warrant a
- * backoff reset. Short sessions — e.g., an ESP32 dumping config then closing the socket — keep the growing backoff so
- * the radio has time to recover between attempts.
- */
-internal fun shouldResetBackoff(hadData: Boolean, sessionUptimeMs: Long, thresholdMs: Long): Boolean =
-    hadData && sessionUptimeMs >= thresholdMs
-
-/**
  * Shared TCP transport for Meshtastic radios.
  *
  * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff) and uses [StreamFrameCodec] for the
@@ -91,25 +81,18 @@ class TcpTransport(
          * owns the cancellation lifecycle.
          */
         const val MAX_RECONNECT_RETRIES = Int.MAX_VALUE
-        const val MIN_BACKOFF_MILLIS = 1_000L
-        const val MAX_BACKOFF_MILLIS = 5 * 60 * 1_000L
 
         /** Per-read inactivity timeout. Combined with [SOCKET_RETRIES] this gives the 90s idle-disconnect window. */
         const val SOCKET_TIMEOUT_MS = 5_000L
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
+
+        /** How long a network radio link may go with nothing inbound before it is treated as dead. */
+        const val INACTIVITY_TIMEOUT_MS = NetworkLinkTimeouts.INACTIVITY_TIMEOUT_MS
         const val TIMEOUT_LOG_INTERVAL = 5
 
         /** TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal. */
-        const val CONNECT_TIMEOUT_MS = 30_000L
+        const val CONNECT_TIMEOUT_MS = NetworkLinkTimeouts.CONNECT_TIMEOUT_MS
         private const val READ_BUFFER_SIZE = 1024
-
-        /**
-         * Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated
-         * as transient firmware-side disconnects (e.g., ESP32 light sleep closing the TCP PhoneAPI session after a
-         * config dump) and do NOT reset the backoff — the growing delay gives the radio time to recover between
-         * attempts instead of hammering it at 1 Hz.
-         */
-        const val SHORT_SESSION_THRESHOLD_MS = 30_000L
     }
 
     private val codec =
@@ -203,10 +186,9 @@ class TcpTransport(
     // Cancellation tears the socket down before it is rethrown to end the loop.
     @Suppress("NestedBlockDepth", "SuspendFunSwallowedCancellation")
     private suspend fun connectWithRetry(address: String) {
-        var retryCount = 1
-        var backoff = MIN_BACKOFF_MILLIS
+        val backoff = ReconnectBackoff()
 
-        while (retryCount <= MAX_RECONNECT_RETRIES) {
+        while (backoff.attempt <= MAX_RECONNECT_RETRIES) {
             val hadData =
                 try {
                     connectAndRead(address)
@@ -239,26 +221,25 @@ class TcpTransport(
             // not a short config-dump-then-EOF from a sleeping radio. Short sessions keep the backoff
             // growing so the radio has time to recover between reconnect attempts.
             val sessionUptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
-            if (shouldResetBackoff(hadData, sessionUptime, SHORT_SESSION_THRESHOLD_MS)) {
+            if (backoff.onSessionEnded(hadData, sessionUptime)) {
                 Logger.d {
                     "$logTag: [${address.anonymizePublicHost()}] Resetting backoff after successful data exchange " +
                         "(${sessionUptime}ms)"
                 }
-                retryCount = 1
-                backoff = MIN_BACKOFF_MILLIS
             } else if (hadData) {
-                val backoffSec = backoff / TimeConstants.MS_PER_SEC
+                val backoffSec = backoff.currentDelayMillis / TimeConstants.MS_PER_SEC
                 Logger.d {
                     "$logTag: [${address.anonymizePublicHost()}] Short session (${sessionUptime}ms); " +
                         "keeping backoff at ${backoffSec}s"
                 }
             }
 
-            val delaySec = backoff / TimeConstants.MS_PER_SEC
-            Logger.i { "$logTag: [${address.anonymizePublicHost()}] Reconnect #$retryCount in ${delaySec}s" }
-            delay(backoff)
-            retryCount++
-            backoff = minOf(backoff * 2, MAX_BACKOFF_MILLIS)
+            val attempt = backoff.attempt
+            val wait = backoff.nextDelayMillis()
+            Logger.i {
+                "$logTag: [${address.anonymizePublicHost()}] Reconnect #$attempt in ${wait / TimeConstants.MS_PER_SEC}s"
+            }
+            delay(wait)
         }
     }
 

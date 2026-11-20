@@ -17,6 +17,7 @@
 package org.meshtastic.feature.connections
 
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.util.normalizeWebSocketUrl
 
 /**
  * Sentinel value for "no device selected" that mirrors the one-char prefix used by every real
@@ -28,6 +29,9 @@ const val NO_DEVICE_SELECTED: String = "n"
 /** One-char prefix marking a TCP/Network device's `fullAddress`. See [DeviceListEntry.Tcp]. */
 const val TCP_DEVICE_PREFIX: String = "t"
 
+/** One-char prefix marking a WebSocket device's `fullAddress`, listed with the network devices. */
+const val WEBSOCKET_DEVICE_PREFIX: String = "w"
+
 /** One-char prefix marking a BLE device's `fullAddress`. See [DeviceListEntry.Ble]. */
 const val BLE_DEVICE_PREFIX: String = "x"
 
@@ -37,6 +41,15 @@ private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
 // The forms TcpTransport splits: `host`, `host:port`, or a bracketed IPv6 literal with an optional port.
 private val TCP_ADDRESS = Regex("""(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]]+)(:\d{1,5})?""")
+
+/**
+ * [address] in the form the app connects to: a WebSocket address gets its URL normalized by [normalizeWebSocketUrl],
+ * which fills in firmware's `/api/v1/ws` for a bare host; every other address comes back unchanged.
+ */
+fun canonicalDeviceAddress(address: String): String {
+    if (!address.startsWith(WEBSOCKET_DEVICE_PREFIX)) return address
+    return normalizeWebSocketUrl(address.drop(1))?.let { WEBSOCKET_DEVICE_PREFIX + it } ?: address
+}
 
 /**
  * Whether a deep link's [address] names a transport this app knows, in a form it can connect to. A link that fails this
@@ -51,6 +64,8 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
         InterfaceId.NOP -> rest.isEmpty()
 
         InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
+
+        InterfaceId.WEBSOCKET -> normalizeWebSocketUrl(rest) != null
 
         InterfaceId.MOCK,
         InterfaceId.REPLAY,

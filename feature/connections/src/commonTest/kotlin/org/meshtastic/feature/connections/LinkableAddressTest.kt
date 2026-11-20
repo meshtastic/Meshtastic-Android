@@ -17,6 +17,7 @@
 package org.meshtastic.feature.connections
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -40,6 +41,32 @@ class LinkableAddressTest {
         listOf("t", "t ", "t:4403", "t[]:4403", "tfe80::1", "t192.168.1.20:", "thost:port").forEach {
             assertFalse(isLinkableAddress(it), "'$it' should be rejected")
         }
+    }
+
+    @Test
+    fun `a WebSocket address needs a ws or wss URL with a host`() {
+        assertTrue(isLinkableAddress("wws://192.168.1.20/api/v1/ws"))
+        assertTrue(isLinkableAddress("wwss://meshtastic.local:9443/api/v1/ws"))
+        assertTrue(isLinkableAddress("wWS://192.168.1.20/api/v1/ws"))
+        listOf(
+            "w",
+            "w192.168.1.20",
+            "whttp://host/api/v1/ws",
+            "wws://",
+            "wws://:80/api/v1/ws",
+            "wws://a b/",
+            "wws://host:0/api/v1/ws",
+            "wws://user@host/api/v1/ws",
+        )
+            .forEach { assertFalse(isLinkableAddress(it), "'$it' should be rejected") }
+    }
+
+    @Test
+    fun `a pathless WebSocket link connects to the firmware endpoint`() {
+        assertTrue(isLinkableAddress("wws://[fe80::1]:80"))
+        assertEquals("wws://[fe80::1]:80/api/v1/ws", canonicalDeviceAddress("wws://[fe80::1]:80"))
+        assertEquals("wws://host/api/v1/ws", canonicalDeviceAddress("wWS://host"))
+        assertEquals("t192.168.1.20", canonicalDeviceAddress("t192.168.1.20"))
     }
 
     @Test

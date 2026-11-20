@@ -24,11 +24,20 @@ enum class InterfaceId(val id: Char) {
     REPLAY('r'),
     SERIAL('s'),
     TCP('t'),
+
+    /**
+     * The phone API over a WebSocket, firmware's `/api/v1/ws`; the rest of the address is the `ws://` or `wss://` URL.
+     */
+    WEBSOCKET('w'),
     ;
 
     /** True for the Demo Mode transports, which answer locally and reach no radio. */
     val isVirtual: Boolean
         get() = this == MOCK || this == REPLAY
+
+    /** True for the transports that reach a radio over the network, which local network access gates. */
+    val isNetwork: Boolean
+        get() = this == TCP || this == WEBSOCKET
 
     companion object {
         fun forIdChar(id: Char): InterfaceId? = entries.firstOrNull { it.id == id }

@@ -2406,6 +2406,14 @@
     <string name="web_serial_unsupported">This browser has no USB serial access. USB works in Chrome, Edge and Opera on a computer.</string>
     <string name="web_transports_unsupported">This browser can't connect to a radio. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
     <string name="website">Website</string>
+    <!-- WEBSOCKET -->
+    <string name="websocket_connect_failed">Couldn't reach the radio's WebSocket. Check the address and that the radio is on this network.</string>
+    <string name="websocket_handshake_rejected">The radio refused a WebSocket at this address. Check that the path is /api/v1/ws and that its firmware has the WebSocket API.</string>
+    <string name="websocket_message_too_big">The radio closed the WebSocket because a message was too large.</string>
+    <string name="websocket_port_in_url">Not used for a ws:// or wss:// address. Put the port in the URL.</string>
+    <string name="websocket_replaced_by_another_client">Another app took this radio's WebSocket connection. Connect again to take it back.</string>
+    <string name="websocket_slot_contested">The radio keeps dropping this WebSocket connection. Another app may be using it. Connect again to retry.</string>
+    <string name="websocket_tls_failed">Couldn't open a secure connection to the radio. Radios use a self-signed certificate this app doesn't trust, so connect with ws:// instead of wss://.</string>
     <string name="weight">Weight</string>
     <string name="what_is_meshtastic">What is Meshtastic?</string>
     <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>

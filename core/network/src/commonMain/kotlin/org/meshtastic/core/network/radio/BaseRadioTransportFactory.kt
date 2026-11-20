@@ -23,6 +23,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.util.normalizeWebSocketUrl
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -42,12 +43,17 @@ abstract class BaseRadioTransportFactory(
         if (!bluetoothRepository.isSupported) Logger.w { "No Bluetooth LE on this hardware; BLE addresses are refused" }
     }
 
+    /** Whether a `t` address can open; the Network pane can exist without it, as the WebSocket link does on web. */
+    protected open val isRawTcpSupported: Boolean
+        get() = DeviceType.TCP in supportedDeviceTypes
+
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
         return when (spec) {
-            // A saved TCP address restored where the platform has no TCP transport (the browser) is kept but never
-            // armed.
-            InterfaceId.TCP.id -> DeviceType.TCP in supportedDeviceTypes
+            // A saved TCP address restored where the platform has no raw TCP (the browser) is kept but never armed.
+            InterfaceId.TCP.id -> isRawTcpSupported
+
+            InterfaceId.WEBSOCKET.id -> DeviceType.TCP in supportedDeviceTypes
 
             // A saved serial address restored onto hardware with no USB host is kept but never armed.
             InterfaceId.SERIAL.id -> isSerialSupported
@@ -87,6 +93,17 @@ abstract class BaseRadioTransportFactory(
                         connectionFactory = connectionFactory,
                         callback = service,
                         address = bleAddress,
+                    )
+                }
+
+                // Common to every platform: the transport brings its own Ktor CIO client. Normalizing here also gives a
+                // saved or linked bare `ws://host` firmware's path.
+                address.startsWith(InterfaceId.WEBSOCKET.id) -> {
+                    val url = address.removePrefix(InterfaceId.WEBSOCKET.id.toString())
+                    WebSocketRadioTransport(
+                        callback = service,
+                        scope = service.serviceScope,
+                        url = normalizeWebSocketUrl(url) ?: url,
                     )
                 }
 

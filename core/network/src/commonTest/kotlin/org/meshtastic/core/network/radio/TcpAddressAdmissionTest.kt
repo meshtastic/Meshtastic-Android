@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
  */
 class TcpAddressAdmissionTest {
 
-    private fun factory(vararg types: DeviceType) = object :
+    private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) = object :
         BaseRadioTransportFactory(
             scanner = mock<BleScanner>(MockMode.autofill),
             bluetoothRepository = FakeBluetoothRepository(),
@@ -51,6 +51,8 @@ class TcpAddressAdmissionTest {
             ),
         ) {
         override val supportedDeviceTypes: List<DeviceType> = types.toList()
+
+        override val isRawTcpSupported: Boolean = rawTcp
 
         override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
@@ -68,5 +70,12 @@ class TcpAddressAdmissionTest {
     @Test
     fun `tcp addresses are admitted where the platform supports tcp`() {
         assertTrue(factory(DeviceType.BLE, DeviceType.TCP, DeviceType.USB).isAddressValid("t10.0.0.2"))
+    }
+
+    @Test
+    fun `a browser network pane admits a websocket address but not a raw tcp one`() {
+        val browser = factory(DeviceType.BLE, DeviceType.TCP, DeviceType.USB, rawTcp = false)
+        assertTrue(browser.isAddressValid("wws://10.0.0.2/api/v1/ws"))
+        assertFalse(browser.isAddressValid("t10.0.0.2"))
     }
 }

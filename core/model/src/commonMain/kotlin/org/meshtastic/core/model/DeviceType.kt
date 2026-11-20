@@ -24,19 +24,18 @@ enum class DeviceType {
     ;
 
     companion object {
-        fun fromAddress(address: String): DeviceType? =
-            when (InterfaceId.forIdChar(address.firstOrNull() ?: return null)) {
-                InterfaceId.BLUETOOTH -> BLE
+        fun fromAddress(address: String): DeviceType? {
+            val interfaceId = address.firstOrNull()?.let(InterfaceId::forIdChar)
+            return when {
+                interfaceId == InterfaceId.BLUETOOTH -> BLE
 
-                InterfaceId.SERIAL -> USB
+                interfaceId == InterfaceId.SERIAL -> USB
 
-                InterfaceId.TCP -> TCP
+                // A WebSocket is another route to the same device a TCP address reaches.
+                interfaceId?.isNetwork == true -> TCP
 
-                InterfaceId.NOP,
-                InterfaceId.MOCK,
-                InterfaceId.REPLAY,
-                null,
-                -> null
+                else -> null
             }
+        }
     }
 }

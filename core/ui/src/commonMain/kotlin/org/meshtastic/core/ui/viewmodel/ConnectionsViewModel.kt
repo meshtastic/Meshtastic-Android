@@ -354,6 +354,8 @@ private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = 
 
     InterfaceId.TCP -> FirmwareUpdateTransport.Tcp
 
+    // Firmware updates go over the radio's own TCP, BLE or serial path, not the WebSocket.
+    InterfaceId.WEBSOCKET,
     InterfaceId.MOCK,
     InterfaceId.NOP,
     InterfaceId.REPLAY,
