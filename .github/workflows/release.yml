@@ -502,7 +502,8 @@ jobs:
           VERSION_NAME: ${{ inputs.version_name }}
         run: |
           dist=webApp/build/dist/wasmJs/productionExecutable
-          test -f "$dist/index.html" && test -f "$dist/webApp.js"
+          test -f "$dist/index.html"
+          test -f "$dist/webApp.js"
           (cd "$dist" && zip -qr "$GITHUB_WORKSPACE/meshtastic-web-${VERSION_NAME}.zip" .)
           ls -l meshtastic-web-*.zip
 
