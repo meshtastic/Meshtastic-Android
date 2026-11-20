@@ -102,6 +102,7 @@
     <string name="connected">Bağlandı</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
     <string name="connecting">Bağlanıyor</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopyala</string>
     <string name="critical_alert">Kritik Uyarı!</string>
     <string name="critical_alerts">Kritik Uyarılar</string>
@@ -439,6 +440,7 @@
     <string name="security_icon_secure">Güvenlik</string>
     <string name="select_all">Tümünü seç</string>
     <string name="send">Gönder</string>
+    <!-- SERIAL -->
     <string name="serial">Seri</string>
     <string name="serial_config">Seri Ayarı</string>
     <string name="set_your_region">Bölgenizi Seçin</string>
@@ -524,6 +526,7 @@
     <string name="waypoint_edit">Yer işareti düzenle</string>
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Ağırlık</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Kötü</string>

@@ -273,6 +273,7 @@
     <string name="connected">Ligado</string>
     <string name="connected_sleeping">Ligado ao rádio, mas está a dormir</string>
     <string name="connecting">A ligar</string>
+    <!-- CONNECTION -->
     <string name="contact_pinned">Fixado</string>
     <string name="contrast">Contraste</string>
     <string name="contrast_high">Alto</string>
@@ -841,6 +842,7 @@
     <string name="security">Segurança</string>
     <string name="select_all">Selecionar tudo</string>
     <string name="send">Enviar</string>
+    <!-- SERIAL -->
     <string name="serial">Série</string>
     <string name="serial_config">Configuração de Série</string>
     <string name="set_your_region">Definir a sua região</string>
@@ -914,6 +916,7 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_new">Novo ponto de referência</string>
     <string name="waypoint_received">Ponto de passagem recebido %1$s</string>
+    <!-- WEB -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mau</string>

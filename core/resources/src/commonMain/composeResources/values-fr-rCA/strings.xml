@@ -265,6 +265,7 @@
     <string name="connected_device">Périphérique connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="connecting">Connexion en cours</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Connexions actuelles :</string>
     <string name="connections">Connexion</string>
     <string name="contact_muted_snackbar">Muet %1$s</string>
@@ -1096,6 +1097,7 @@
         <item quantity="one">Entendu par %1$d relai</item>
         <item quantity="other">Entendu par %1$d relais</item>
     </plurals>
+    <string name="reload">Recharger</string>
     <!-- REMOTE -->
     <string name="remote">Distant</string>
     <string name="remote_admin">Administration à distance</string>
@@ -1205,6 +1207,7 @@
     <string name="selected">Sélectionné</string>
     <string name="selected_map_type">Type de carte sélectionné</string>
     <string name="send">Envoyer</string>
+    <!-- SERIAL -->
     <string name="serial">Série</string>
     <string name="serial_config">Configuration série</string>
     <string name="session_active">Session active</string>
@@ -1369,6 +1372,7 @@
     <string name="waypoint_edit">Modifier le repère</string>
     <string name="waypoint_new">Nouveau point de repère</string>
     <string name="waypoint_received">Point de passage reçu : %1$s</string>
+    <!-- WEB -->
     <string name="weight">Poids</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mauvais</string>

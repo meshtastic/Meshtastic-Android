@@ -354,6 +354,7 @@
     <string name="connected_device">Подключённые устройства</string>
     <string name="connected_sleeping">Подключен к ноде, но она спит</string>
     <string name="connecting">Подключение</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Текущие подключения:</string>
     <string name="connections">Соединения</string>
     <string name="contact_draft_prefix">Черновик: %1$s</string>
@@ -1852,6 +1853,7 @@
         <item quantity="many">Услышано %1$d ретрансляторами</item>
         <item quantity="other">Услышано %1$d ретрансляторами</item>
     </plurals>
+    <string name="reload">Обновить</string>
     <!-- REMOTE -->
     <string name="remote">Удаленные</string>
     <string name="remote_admin">Удаленное администрирование</string>
@@ -2050,6 +2052,7 @@
     <string name="selected">Выбрано</string>
     <string name="selected_map_type">Выбранный тип карты</string>
     <string name="send">Отправить</string>
+    <!-- SERIAL -->
     <string name="serial">COM-порт</string>
     <string name="serial_config">Настройка COM-порта</string>
     <string name="session_active">Сессия активна</string>
@@ -2376,6 +2379,7 @@
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
+    <!-- WEB -->
     <string name="website">Веб-сайт</string>
     <string name="weight">Вес</string>
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>

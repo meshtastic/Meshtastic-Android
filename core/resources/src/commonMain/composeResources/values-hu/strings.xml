@@ -135,6 +135,7 @@
     <string name="connected_device">Csatlakoztatott eszköz</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="connecting">Csatlakozás…</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Jelenlegi kapcsolatok:</string>
     <string name="connections">Kapcsolat</string>
     <string name="conversations">Beszélgetések</string>
@@ -561,6 +562,7 @@
     <string name="recent_network_devices">Legutóbbi hálózati eszközök</string>
     <string name="regenerate_keys_confirmation">Biztosan újragenerálod a privát kulcsot?\n\nAzoknak a csomópontoknak, amelyek korábban kulcsot cseréltek ezzel a csomóponttal, el kell távolítaniuk a csomópontot és újra kell cserélniük a kulcsokat a biztonságos kommunikáció helyreállításához.</string>
     <string name="regenerate_private_key">Privát kulcs újragenerálása</string>
+    <string name="reload">Újratöltés</string>
     <!-- REMOTE -->
     <string name="remote">Távoli</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
@@ -647,6 +649,7 @@
     <string name="selected">Kijelölve</string>
     <string name="selected_map_type">Kiválasztott térképtípus</string>
     <string name="send">Küldeni</string>
+    <!-- SERIAL -->
     <string name="serial">Soros port</string>
     <string name="serial_config">Soros beállítások</string>
     <string name="set_your_region">Régió beállítása</string>
@@ -761,6 +764,7 @@
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_new">Új útpont</string>
     <string name="waypoint_received">Útvonalpont érkezett: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Súly</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Rossz</string>

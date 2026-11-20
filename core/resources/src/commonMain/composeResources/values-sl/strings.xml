@@ -61,6 +61,7 @@
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio "spi"</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopiraj</string>
     <!-- DEBUG -->
     <string name="debug_panel">Plošča za odpravljanje napak</string>
@@ -259,6 +260,7 @@
     <!-- SECURITY -->
     <string name="select_all">Izberi vse</string>
     <string name="send">Pošlji</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Souporaba</string>
     <string name="share_to">Delite z…</string>
@@ -307,6 +309,7 @@
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_new">Nova točka poti</string>
     <string name="waypoint_received">Prejeta točka poti: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slab</string>
     <!-- WIFI -->

@@ -51,6 +51,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">פאנל דיבאג</string>
     <!-- DEEP -->
@@ -209,6 +210,7 @@
     <!-- SECURITY -->
     <string name="select_all">בחר הכל</string>
     <string name="send">שלח</string>
+    <!-- SERIAL -->
     <string name="settings">הגדרות</string>
     <!-- SHARE -->
     <string name="share">שתף</string>
@@ -238,6 +240,7 @@
     <string name="waypoint_edit">ערוך נקודת ציון</string>
     <string name="waypoint_new">נקודת ציון חדשה</string>
     <string name="waypoint_received">התקבל נקודת ציון: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <!-- WIND -->

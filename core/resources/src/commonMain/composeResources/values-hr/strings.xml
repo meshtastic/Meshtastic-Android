@@ -52,6 +52,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Otklanjanje pogrešaka</string>
     <!-- DEEP -->
@@ -226,6 +227,7 @@
     <!-- SECURITY -->
     <string name="select_all">Označi sve</string>
     <string name="send">Potvrdi</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Podijeli</string>
     <!-- SHOW -->
@@ -257,6 +259,7 @@
     <string name="waypoint_edit">Uredi putnu točku</string>
     <string name="waypoint_new">Nova putna točka</string>
     <string name="waypoint_received">Primljena putna točka: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresa</string>

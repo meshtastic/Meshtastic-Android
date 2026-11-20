@@ -59,6 +59,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Panno Debug</string>
     <!-- DEEP -->
@@ -248,6 +249,7 @@
     <!-- SECURITY -->
     <string name="select_all">Chwazi tout</string>
     <string name="send">Voye</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Pataje</string>
     <!-- SHOW -->
@@ -284,6 +286,7 @@
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_new">Nouvo pwen</string>
     <string name="waypoint_received">Pwen resevwa: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Move</string>
     <!-- WIFI -->

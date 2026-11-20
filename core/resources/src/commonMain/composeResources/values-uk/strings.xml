@@ -180,6 +180,7 @@
     <string name="connected_device">Під'єднаний пристрій</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="connecting">Під’єднання</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Поточні з'єднання:</string>
     <string name="connections">Підключення</string>
     <string name="contrast">Контраст</string>
@@ -868,6 +869,7 @@
         <item quantity="many">Пройшло через %1$d вузлів</item>
         <item quantity="other">Пройшло через %1$d вузли</item>
     </plurals>
+    <string name="reload">Перезавантажити</string>
     <!-- REMOTE -->
     <string name="remote">Віддалений</string>
     <string name="remote_admin">Віддалене керування</string>
@@ -969,6 +971,7 @@
     <string name="select_all">Вибрати все</string>
     <string name="selected">Вибраний</string>
     <string name="send">Надіслати</string>
+    <!-- SERIAL -->
     <string name="serial">Серійний порт</string>
     <string name="serial_config">Налаштування послідовного порту</string>
     <string name="session_active">Сесія активна</string>
@@ -1123,6 +1126,7 @@
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_new">Новий мітка</string>
     <string name="waypoint_received">Отримано точку маршруту: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Вага</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Поганий</string>

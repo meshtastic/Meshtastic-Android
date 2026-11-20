@@ -49,6 +49,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Villuleitarborð</string>
     <!-- DEEP -->
@@ -191,6 +192,7 @@
     <!-- SECURITY -->
     <string name="select_all">Velja allt</string>
     <string name="send">Senda</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Deila</string>
     <!-- SHOW -->
@@ -219,6 +221,7 @@
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_new">Nýr leiðarpunktur</string>
     <string name="waypoint_received">Móttekin leiðarpunktur: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Tala</string>

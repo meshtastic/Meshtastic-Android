@@ -257,6 +257,7 @@
     <string name="connected_device">接続中のデバイス</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="connecting">接続中</string>
+    <!-- CONNECTION -->
     <string name="connection_status">現在の接続：</string>
     <string name="connections">接続</string>
     <string name="contrast">コントラスト</string>
@@ -1218,6 +1219,7 @@
     <plurals name="relays">
         <item quantity="other">%1$d 件のリレーを受信</item>
     </plurals>
+    <string name="reload">再読込</string>
     <!-- REMOTE -->
     <string name="remote">リモート</string>
     <string name="remote_admin">リモート管理</string>
@@ -1344,6 +1346,7 @@
     <string name="selected">選択済み</string>
     <string name="selected_map_type">選択中のマップタイプ</string>
     <string name="send">送信</string>
+    <!-- SERIAL -->
     <string name="serial">シリアル</string>
     <string name="serial_config">シリアル設定</string>
     <string name="session_active">セッション有効</string>
@@ -1556,6 +1559,7 @@
     <string name="waypoint_edit">ウェイポイントを編集</string>
     <string name="waypoint_new">新規ウェイポイント</string>
     <string name="waypoint_received">受信したウェイポイント: %1$s</string>
+    <!-- WEB -->
     <string name="weight">重さ</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">不良</string>

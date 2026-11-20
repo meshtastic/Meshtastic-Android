@@ -60,6 +60,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopijuoti</string>
     <!-- DEBUG -->
     <string name="debug_panel">Derinimo skydelis</string>
@@ -257,6 +258,7 @@
     <!-- SECURITY -->
     <string name="select_all">Pažymėti visus</string>
     <string name="send">Siųsti</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Dalintis</string>
     <string name="share_to">Dalintis su…</string>
@@ -304,6 +306,7 @@
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_new">Naujas orientyras</string>
     <string name="waypoint_received">Gautas orientyras: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Silpnas</string>
     <!-- WIFI -->

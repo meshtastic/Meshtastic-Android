@@ -66,6 +66,7 @@
     <string name="connected">Злучаны</string>
     <string name="connected_sleeping">Злучаныя з радыё, але яно спіць</string>
     <string name="connecting">Злучаемся</string>
+    <!-- CONNECTION -->
     <string name="copy">Копировать</string>
     <string name="current">3</string>
     <string name="currently">Зараз:</string>
@@ -273,6 +274,7 @@
     <string name="security">Бяспека</string>
     <string name="select_all">Вылучыць усе</string>
     <string name="send">Адправіць</string>
+    <!-- SERIAL -->
     <string name="serial">Паслядоўны</string>
     <string name="set_your_region">Выберыце ваш рэгіён</string>
     <string name="settings">налады</string>
@@ -310,6 +312,7 @@
     <!-- USER -->
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_telemetry_title">Тэлеметрыя</string>
     <!-- WIFI -->

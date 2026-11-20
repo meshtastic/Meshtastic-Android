@@ -253,6 +253,7 @@
     <string name="connected_device">Dispositivo connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="connecting">Connessione in corso</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Connessioni attive:</string>
     <string name="connections">Connessione</string>
     <string name="contrast">Contrasto</string>
@@ -1222,6 +1223,7 @@
         <item quantity="one">Sentito %1$d relay</item>
         <item quantity="other">Sentiti %1$d relay</item>
     </plurals>
+    <string name="reload">Ricarica</string>
     <!-- REMOTE -->
     <string name="remote">Controllo remoto</string>
     <string name="remote_admin">Amministrazione Remota</string>
@@ -1346,6 +1348,7 @@
     <string name="selected">Selezionato</string>
     <string name="selected_map_type">Tipo di mappa selezionata</string>
     <string name="send">Invia</string>
+    <!-- SERIAL -->
     <string name="serial">Seriale</string>
     <string name="serial_config">Configurazione Seriale</string>
     <string name="session_active">Sessione attiva</string>
@@ -1562,6 +1565,7 @@
     <string name="waypoint_edit">Modifica waypoint</string>
     <string name="waypoint_new">Nuovo waypoint</string>
     <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Scarso</string>

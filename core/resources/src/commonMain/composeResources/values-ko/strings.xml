@@ -96,6 +96,7 @@
     <string name="connected">연결됨</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>
     <string name="connecting">연결 중</string>
+    <!-- CONNECTION -->
     <string name="connections">연결</string>
     <string name="copy">복사</string>
     <string name="critical_alert">중요 경고!</string>
@@ -428,6 +429,7 @@
     <string name="security_icon_help_dismiss">취소</string>
     <string name="select_all">전부 선택</string>
     <string name="send">보내기</string>
+    <!-- SERIAL -->
     <string name="serial">시리얼</string>
     <string name="serial_config">시리얼 설정</string>
     <string name="set_your_region">지역을 설정하세요</string>
@@ -512,6 +514,7 @@
     <string name="waypoint_edit">웨이포인트 편집</string>
     <string name="waypoint_new">새 웨이포인트</string>
     <string name="waypoint_received">웨이포인트 수신: %1$s</string>
+    <!-- WEB -->
     <string name="weight">무게</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">나쁨</string>

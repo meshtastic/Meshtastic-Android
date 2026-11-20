@@ -66,6 +66,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
+    <!-- CONNECTION -->
     <string name="copy">Αντιγραφή</string>
     <!-- DEBUG -->
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
@@ -251,6 +252,7 @@
     <string name="security">Ασφάλεια</string>
     <string name="select_all">Επιλογή όλων</string>
     <string name="send">Αποστολή</string>
+    <!-- SERIAL -->
     <string name="settings">ρυθμίσεις</string>
     <!-- SHARE -->
     <string name="share">Κοινοποίηση</string>
@@ -290,6 +292,7 @@
     <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>
     <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
     <string name="waypoint_new">Νέο σημείο πορείας</string>
+    <!-- WEB -->
     <string name="weight">Βάρος</string>
     <!-- WIDGET -->
     <string name="widget_telemetry_title">Τηλεμετρία</string>

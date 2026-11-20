@@ -61,6 +61,7 @@
     <!-- CONFIG -->
     <string name="config_device_ledHeartbeatEnabled_summary">Kontrollerer blinking av LED på enheten. For de fleste enheter vil dette kontrollere en av de opp til 4 lysdiodene. Laderen og GPS-lysene er ikke kontrollerbare.</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopier</string>
     <!-- DEBUG -->
     <string name="debug_panel">Feilsøkningspanel</string>
@@ -257,6 +258,7 @@
     <!-- SECURITY -->
     <string name="select_all">Velg alle</string>
     <string name="send">Send</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Del</string>
     <string name="share_to">Del med…</string>
@@ -303,6 +305,7 @@
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_new">Nytt veipunkt</string>
     <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Dårlig</string>
     <!-- WIFI -->

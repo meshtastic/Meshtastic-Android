@@ -99,6 +99,7 @@
     <string name="config_security_private_key">Користи се за креирање заједничког кључа са удаљеним уређајем.</string>
     <string name="connected">Блутут повезан</string>
     <string name="connected_sleeping">Povezan na radio uređaj, ali uređaj je u stanju spavanja</string>
+    <!-- CONNECTION -->
     <string name="contrast_standard">Стандардно</string>
     <string name="copy">Kopiraj</string>
     <string name="copyright_notice">Meshtastic® Ауторска права Meshtastic LLC</string>
@@ -416,6 +417,7 @@
     <string name="select">Изабери</string>
     <string name="select_all">Изабери све</string>
     <string name="send">Pošalji</string>
+    <!-- SERIAL -->
     <string name="serial">Серијска веза</string>
     <string name="serial_config">Подешавања серијске везе</string>
     <string name="settings">подешавања</string>
@@ -489,6 +491,7 @@
     <string name="waypoint_edit">Измените тачку путање</string>
     <string name="waypoint_new">Нова тачка путање</string>
     <string name="waypoint_received">Примљена тачка путање: %1$s</string>
+    <!-- WEB -->
     <string name="website">Вебсајт</string>
     <string name="what_is_meshtastic">Шта је Мештастик?</string>
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>

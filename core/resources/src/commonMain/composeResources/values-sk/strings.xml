@@ -87,6 +87,7 @@
     <string name="connected">Pripojený</string>
     <string name="connected_sleeping">Pripojené k uspanému vysielaču</string>
     <string name="connecting">Prebieha pripájanie</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopírovať</string>
     <string name="critical_alert">Kritická výstraha!</string>
     <string name="current">Prúd</string>
@@ -402,6 +403,7 @@
     <string name="security">Zabezpečenie</string>
     <string name="select_all">Vybrať všetko</string>
     <string name="send">Odoslať</string>
+    <!-- SERIAL -->
     <string name="serial">Sériový</string>
     <string name="settings">nastavenia</string>
     <!-- SHARE -->
@@ -469,6 +471,7 @@
     <string name="waypoint_edit">Editovať cieľový bod</string>
     <string name="waypoint_new">Nový cieľový bod</string>
     <string name="waypoint_received">Prijatý cieľový bod: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Hmotnosť</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Zlý</string>
