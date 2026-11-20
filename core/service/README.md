@@ -41,7 +41,6 @@ graph TB
   :core:service -.-> :core:network
   :core:service -.-> :core:ble
   :core:service -.-> :core:resources
-  :core:service -.-> :core:takserver
   :core:service -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
