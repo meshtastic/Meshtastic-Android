@@ -309,7 +309,11 @@ internal constructor(
  */
 internal fun Throwable.toWebSocketFailure(): TransportDisconnectReason = when {
     this is WebSocketException && message.orEmpty().startsWith(UPGRADE_REFUSED_PREFIX) ->
-        TransportDisconnectReason.WebSocketHandshakeRejected
+        if (message.orEmpty().endsWith(NOT_FOUND_SUFFIX)) {
+            TransportDisconnectReason.WebSocketNotSupported
+        } else {
+            TransportDisconnectReason.WebSocketHandshakeRejected
+        }
 
     isTlsFailure() -> TransportDisconnectReason.WebSocketTlsFailed
 
@@ -317,6 +321,9 @@ internal fun Throwable.toWebSocketFailure(): TransportDisconnectReason = when {
 }
 
 private const val UPGRADE_REFUSED_PREFIX = "Handshake exception, expected status code"
+
+// Ktor ends that message with the status it got: "... expected status code 101 but was 404".
+private const val NOT_FOUND_SUFFIX = " but was 404"
 
 /**
  * The URL's scheme, host and port, a public host anonymized, as [TcpRadioTransport] logs its address. The path, query

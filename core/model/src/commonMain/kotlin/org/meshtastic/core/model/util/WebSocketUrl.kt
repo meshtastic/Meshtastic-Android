@@ -20,6 +20,7 @@ package org.meshtastic.core.model.util
 const val WEBSOCKET_API_PATH = "/api/v1/ws"
 
 private val VALID_PORTS = 1..65535
+private val DEFAULT_PORTS = mapOf("ws" to 80, "wss" to 443)
 
 // Scheme, then a bracketed IPv6 literal or a host with no userinfo, an optional port, an optional path and an optional
 // query; no fragment.
@@ -36,14 +37,15 @@ private const val QUERY_GROUP = 5
 
 /**
  * [url] as a WebSocket phone link connects to it, or null when it is not a `ws://` or `wss://` URL with a host, a port
- * in 1..65535 and no `user@` part. The scheme is lowercased and an empty or `/` path becomes [WEBSOCKET_API_PATH], so
+ * in 1..65535 and no `user@` part. The scheme and host are lowercased and the scheme's default port (80 for `ws`, 443
+ * for `wss`) is dropped, so equal endpoints compare equal. An empty or `/` path becomes [WEBSOCKET_API_PATH], so
  * `ws://192.168.1.20` reaches firmware's endpoint; a query follows the path unchanged.
  */
 fun normalizeWebSocketUrl(url: String): String? {
     val groups = WEBSOCKET_URL.matchEntire(url.trim())?.groupValues ?: return null
     val scheme = groups[SCHEME_GROUP].lowercase()
-    val host = groups[HOST_GROUP]
-    val port = groups[PORT_GROUP]
+    val host = groups[HOST_GROUP].lowercase()
+    val port = groups[PORT_GROUP].takeUnless { it.isNotEmpty() && it.toInt() == DEFAULT_PORTS[scheme] }.orEmpty()
     val path = groups[PATH_GROUP].takeUnless { it.isEmpty() || it == "/" } ?: WEBSOCKET_API_PATH
     val query = groups[QUERY_GROUP]
     return when {

@@ -33,7 +33,7 @@ class WebSocketUrlTest {
 
     @Test
     fun `an empty or root path becomes the firmware endpoint`() {
-        assertEquals("ws://[fe80::1]:80/api/v1/ws", normalizeWebSocketUrl("ws://[fe80::1]:80"))
+        assertEquals("ws://[fe80::1]:8080/api/v1/ws", normalizeWebSocketUrl("ws://[fe80::1]:8080"))
         assertEquals("ws://192.168.1.20/api/v1/ws", normalizeWebSocketUrl("ws://192.168.1.20/"))
     }
 
@@ -47,7 +47,35 @@ class WebSocketUrlTest {
     @Test
     fun `the scheme matches in any case and is lowercased`() {
         assertEquals("wss://host/api/v1/ws", normalizeWebSocketUrl("WSS://host/api/v1/ws"))
-        assertEquals("ws://Host:8080/api/v1/ws", normalizeWebSocketUrl("Ws://Host:8080"))
+        assertEquals("ws://host:8080/api/v1/ws", normalizeWebSocketUrl("Ws://Host:8080"))
+    }
+
+    @Test
+    fun `the host is lowercased including a bracketed IPv6 literal`() {
+        assertEquals("ws://node.local/api/v1/ws", normalizeWebSocketUrl("ws://Node.LOCAL"))
+        assertEquals("ws://[fe80::abcd]:8080/api/v1/ws", normalizeWebSocketUrl("ws://[FE80::ABCD]:8080"))
+    }
+
+    @Test
+    fun `an explicit default port is dropped`() {
+        assertEquals("ws://node.local/api/v1/ws", normalizeWebSocketUrl("ws://node.local:80"))
+        assertEquals("wss://node.local/api/v1/ws", normalizeWebSocketUrl("wss://node.local:443"))
+        assertEquals("ws://[fe80::1]/api/v1/ws", normalizeWebSocketUrl("ws://[fe80::1]:80"))
+        assertEquals("ws://node.local/proxy/ws?a=1", normalizeWebSocketUrl("ws://node.local:80/proxy/ws?a=1"))
+    }
+
+    @Test
+    fun `a port that is not the scheme default is kept`() {
+        assertEquals("ws://node.local:443/api/v1/ws", normalizeWebSocketUrl("ws://node.local:443"))
+        assertEquals("wss://node.local:80/api/v1/ws", normalizeWebSocketUrl("wss://node.local:80"))
+        assertEquals("ws://node.local:8080/api/v1/ws", normalizeWebSocketUrl("ws://node.local:8080"))
+    }
+
+    @Test
+    fun `equal endpoints in different spellings normalize to one string`() {
+        val spellings =
+            listOf("ws://Node.local", "WS://node.local:80", "ws://node.local:80/api/v1/ws", "ws://NODE.local/")
+        assertEquals(1, spellings.map { normalizeWebSocketUrl(it) }.toSet().size)
     }
 
     @Test

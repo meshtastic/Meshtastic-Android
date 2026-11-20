@@ -2412,6 +2412,7 @@
     <string name="websocket_connect_failed">Couldn't reach the radio's WebSocket. Check the address and that the radio is on this network.</string>
     <string name="websocket_handshake_rejected">The radio refused a WebSocket at this address. Check that the path is /api/v1/ws and that its firmware has the WebSocket API.</string>
     <string name="websocket_message_too_big">The radio closed the WebSocket because a message was too large.</string>
+    <string name="websocket_not_supported">This radio's firmware doesn't support WebSocket connections yet. Update the firmware or connect over TCP.</string>
     <string name="websocket_port_in_url">Not used for a ws:// or wss:// address. Put the port in the URL.</string>
     <string name="websocket_replaced_by_another_client">Another app took this radio's WebSocket connection. Connect again to take it back.</string>
     <string name="websocket_slot_contested">The radio keeps dropping this WebSocket connection. Another app may be using it. Connect again to retry.</string>

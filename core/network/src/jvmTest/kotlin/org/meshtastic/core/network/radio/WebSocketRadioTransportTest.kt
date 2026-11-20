@@ -142,10 +142,22 @@ class WebSocketRadioTransportTest {
     }
 
     @Test
-    fun `a 404 for the upgrade says the radio refused the WebSocket`() = runBlocking {
+    fun `a 404 for the upgrade says the radio has no WebSocket route`() = runBlocking {
         transport()
         val peer = accept()
         io { peer.reject("404 Not Found") }
+
+        assertEquals(
+            Event.Disconnected(isPermanent = false, reason = TransportDisconnectReason.WebSocketNotSupported),
+            nextEvent(),
+        )
+    }
+
+    @Test
+    fun `a 403 for the upgrade says the radio refused the WebSocket`() = runBlocking {
+        transport()
+        val peer = accept()
+        io { peer.reject("403 Forbidden") }
 
         assertEquals(
             Event.Disconnected(isPermanent = false, reason = TransportDisconnectReason.WebSocketHandshakeRejected),
@@ -268,8 +280,12 @@ class WebSocketRadioTransportTest {
     @Test
     fun `a failed dial is classified for the user`() {
         assertEquals(
-            TransportDisconnectReason.WebSocketHandshakeRejected,
+            TransportDisconnectReason.WebSocketNotSupported,
             WebSocketException("Handshake exception, expected status code 101 but was 404").toWebSocketFailure(),
+        )
+        assertEquals(
+            TransportDisconnectReason.WebSocketHandshakeRejected,
+            WebSocketException("Handshake exception, expected status code 101 but was 403").toWebSocketFailure(),
         )
         assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure())
         assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure())

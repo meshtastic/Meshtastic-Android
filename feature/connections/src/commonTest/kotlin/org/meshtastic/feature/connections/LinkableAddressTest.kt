@@ -64,7 +64,8 @@ class LinkableAddressTest {
     @Test
     fun `a pathless WebSocket link connects to the firmware endpoint`() {
         assertTrue(isLinkableAddress("wws://[fe80::1]:80"))
-        assertEquals("wws://[fe80::1]:80/api/v1/ws", canonicalDeviceAddress("wws://[fe80::1]:80"))
+        assertEquals("wws://[fe80::1]/api/v1/ws", canonicalDeviceAddress("wws://[fe80::1]:80"))
+        assertEquals("wws://node.local/api/v1/ws", canonicalDeviceAddress("wws://Node.local:80/api/v1/ws"))
         assertEquals("wws://host/api/v1/ws", canonicalDeviceAddress("wWS://host"))
         assertEquals("t192.168.1.20", canonicalDeviceAddress("t192.168.1.20"))
     }
