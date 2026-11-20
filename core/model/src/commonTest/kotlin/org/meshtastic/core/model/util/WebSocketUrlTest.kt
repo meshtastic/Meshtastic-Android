@@ -57,6 +57,12 @@ class WebSocketUrlTest {
     }
 
     @Test
+    fun `an IPv6 zone identifier keeps its case`() {
+        assertEquals("ws://[fe80::abcd%25Wlan0]/api/v1/ws", normalizeWebSocketUrl("ws://[FE80::ABCD%25Wlan0]"))
+        assertEquals("ws://[fe80::1%Eth0]:8080/api/v1/ws", normalizeWebSocketUrl("WS://[FE80::1%Eth0]:8080"))
+    }
+
+    @Test
     fun `an explicit default port is dropped`() {
         assertEquals("ws://node.local/api/v1/ws", normalizeWebSocketUrl("ws://node.local:80"))
         assertEquals("wss://node.local/api/v1/ws", normalizeWebSocketUrl("wss://node.local:443"))
