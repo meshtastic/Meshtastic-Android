@@ -43,7 +43,6 @@ class MqttTopicDiscoveryTest {
         assertEquals(Problem.WHITESPACE, MqttRootTopic.problem("msh/US/\u200Bseattle"))
         assertEquals(Problem.WHITESPACE, MqttRootTopic.problem("msh/US/\u00A0seattle"))
         assertEquals(Problem.WILDCARD, MqttRootTopic.problem("msh/US/+"))
-        assertEquals(Problem.LEADING_SLASH, MqttRootTopic.problem("/msh/US"))
         assertEquals(Problem.TRAILING_SLASH, MqttRootTopic.problem("msh/US/"))
         assertEquals(Problem.EMPTY_SEGMENT, MqttRootTopic.problem("msh//US"))
         assertEquals(Problem.ENDS_WITH_VERSION, MqttRootTopic.problem("msh/US/CA/US/2"))
@@ -59,6 +58,15 @@ class MqttTopicDiscoveryTest {
         // Each of ø, å and æ is two bytes against the firmware's 31.
         assertEquals(Problem.TOO_LONG, MqttRootTopic.problem("msh/EU_868/NO/" + "ø".repeat(9)))
         assertNull(MqttRootTopic.problem("msh/EU_868/NO/" + "ø".repeat(8)))
+    }
+
+    @Test
+    fun aLeadingSlashIsAcceptedAsTyped() {
+        assertNull(MqttRootTopic.problem("/myroottopic"))
+        assertNull(MqttRootTopic.problem("/msh/US"))
+        assertEquals(Problem.EMPTY_SEGMENT, MqttRootTopic.problem("//myroottopic"))
+        assertEquals(Problem.TRAILING_SLASH, MqttRootTopic.problem("/myroottopic/"))
+        assertEquals("/myroottopic", MqttRootTopic.sanitized("/myroottopic"))
     }
 
     @Test
