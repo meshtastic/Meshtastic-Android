@@ -18,6 +18,12 @@
 pluginManagement {
     includeBuild("settings-plugin")
     repositories {
+        // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
         mavenCentral()
         gradlePluginPortal()
         google {
@@ -37,6 +43,12 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
+        // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
         mavenCentral()
         gradlePluginPortal()
         google {

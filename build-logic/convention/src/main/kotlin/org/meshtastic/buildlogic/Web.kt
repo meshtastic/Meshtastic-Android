@@ -56,7 +56,7 @@ const val WEB_TARGET_PROPERTY = "meshtastic.web"
 
 private const val WASM_PARALLEL_LINKS = 2
 
-private val BROWSER_TEST_TIMEOUT: Duration = Duration.ofMinutes(10)
+private val BROWSER_TEST_TIMEOUT: Duration = Duration.ofMinutes(12)
 
 /** Whether this build registers the wasmJs target (`-Pmeshtastic.web=true`). */
 val Project.webTargetEnabled: Boolean
@@ -158,8 +158,8 @@ internal fun Project.configureKmpWebTarget() {
             .configureEach {
                 enabled = browserTests.get()
                 exclusions.get().forEach { filter.excludeTestsMatching(it) }
-                // A Karma run that stops reporting never exits; fail the one task, which still leaves a build scan,
-                // before CI's job limit kills Gradle and keeps nothing. The slowest module takes about two minutes.
+                // Karma stops itself at ten minutes and closes Chrome (config/karma); this backstop fails the task for
+                // a Karma that cannot, before CI's job limit kills Gradle and keeps no build scan.
                 timeout.set(BROWSER_TEST_TIMEOUT)
             }
         configureSkikoForWasmTests(kotlin)

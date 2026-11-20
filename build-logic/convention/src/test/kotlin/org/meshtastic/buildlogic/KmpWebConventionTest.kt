@@ -43,10 +43,10 @@ class KmpWebConventionTest {
     }
 
     @Test
-    fun `a browser test run is limited to ten minutes`(@TempDir projectDir: File) {
+    fun `a browser test run is backstopped at twelve minutes`(@TempDir projectDir: File) {
         val values = fixture(projectDir).values("-Pmeshtastic.web=true")
 
-        assertEquals("PT10M", values["browserTestTimeout"], "values=$values")
+        assertEquals("PT12M", values["browserTestTimeout"], "values=$values")
     }
 
     @Test
