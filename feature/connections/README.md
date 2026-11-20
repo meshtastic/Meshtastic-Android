@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:feature:connections` module provides the **device discovery and connection management screen**. It scans for and connects to Meshtastic nodes over BLE, USB serial, TCP/NSD (network service discovery) and firmware's WebSocket phone API. The `ScannerViewModel` is platform-neutral; `AndroidScannerViewModel` adds Bluetooth bonding and the USB permission dialog, `JvmScannerViewModel` registers the base behavior on Desktop, and `WasmJsScannerViewModel` offers on web only the panes the browser can back, with the Network pane over WebSocket.
+The `:feature:connections` module provides the **device discovery and connection management screen**. It scans for and connects to Meshtastic nodes over BLE, USB serial, TCP/NSD (network service discovery) and firmware's WebSocket phone API. The `ScannerViewModel` is platform-neutral; `AndroidScannerViewModel` adds Bluetooth bonding and the USB permission dialog, `JvmScannerViewModel` registers the base behavior on Desktop, and `WasmJsScannerViewModel` offers on web only the panes the browser can back, with the Network pane over WebSocket and no network scan (`networkScanSupported = false`; a browser has no mDNS).
 
 **Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature` convention plugin)
 
