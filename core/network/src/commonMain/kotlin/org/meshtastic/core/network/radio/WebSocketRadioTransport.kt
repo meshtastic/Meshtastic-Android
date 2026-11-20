@@ -318,9 +318,12 @@ internal fun Throwable.toWebSocketFailure(): TransportDisconnectReason = when {
 
 private const val UPGRADE_REFUSED_PREFIX = "Handshake exception, expected status code"
 
-/** The URL with a public host anonymized, as [TcpRadioTransport] logs its address. */
-private fun String.toLogLabel(): String {
+/**
+ * The URL's scheme, host and port, a public host anonymized, as [TcpRadioTransport] logs its address. The path, query
+ * and credentials stay out: a URL can carry a secret in any of them.
+ */
+internal fun String.toLogLabel(): String {
     val parsed = parseUrl(this) ?: return "<unparseable url>"
     val host = parsed.host.let { if (':' in it && !it.startsWith("[")) "[$it]" else it }
-    return "${parsed.protocol.name}://${"$host:${parsed.port}".anonymizePublicHost()}${parsed.encodedPath}"
+    return "${parsed.protocol.name}://${"$host:${parsed.port}".anonymizePublicHost()}"
 }
