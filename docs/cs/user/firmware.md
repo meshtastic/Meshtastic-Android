@@ -1,7 +1,7 @@
 ---
 title: Aktualizace firmware
 nav_order: 13
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -76,6 +76,8 @@ Wi-Fi OTA installs the ESP32 app image, a `.bin` file, rather than the `.uf2` a 
 ### In-App USB Update
 
 When your nRF52 or RP2040 node is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection. It is not available over Bluetooth, and ESP32 nodes have no USB update path in the app.
+
+The web app runs the same update over Web Serial: it reboots the node into DFU mode and saves the `.uf2` through the browser's save dialog; pick the node's DFU drive there. Where the browser has no save dialog the file arrives as a download instead, and the update finishes only once you copy it to that drive. It is the only update the web app offers; Bluetooth updates and ESP32 nodes need the Android or desktop app, or the [Web Flasher](https://flasher.meshtastic.org). The release list downloads only on sites the firmware host allows, so a self-hosted copy of the web app updates from a local file.
 
 A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) can't be copied to the drive. Use the app's bootloader upgrade, or flash the `.zip` with a serial DFU tool such as `adafruit-nrfutil`. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
 

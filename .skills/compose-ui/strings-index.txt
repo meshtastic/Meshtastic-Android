@@ -2322,6 +2322,7 @@ website
 websocket_connect_failed
 websocket_handshake_rejected
 websocket_message_too_big
+websocket_not_supported
 websocket_port_in_url
 websocket_replaced_by_another_client
 websocket_slot_contested

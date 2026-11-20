@@ -64,12 +64,12 @@ class ManualTcpAddressTest {
             "wwss://meshtastic.local:9443/api/v1/ws",
             manualAddress(" wss://meshtastic.local:9443/api/v1/ws ", ""),
         )
-        assertEquals("wws://[fe80::1]:80/api/v1/ws", manualAddress("ws://[fe80::1]:80/api/v1/ws", "4403"))
+        assertEquals("wws://[fe80::1]/api/v1/ws", manualAddress("ws://[fe80::1]:80/api/v1/ws", "4403"))
     }
 
     @Test
     fun aWebSocketUrlWithoutAPathGetsTheFirmwareEndpoint() {
-        assertEquals("wws://[fe80::1]:80/api/v1/ws", manualAddress("ws://[fe80::1]:80", "4403"))
+        assertEquals("wws://[fe80::1]/api/v1/ws", manualAddress("ws://[fe80::1]:80", "4403"))
     }
 
     @Test
@@ -84,7 +84,7 @@ class ManualTcpAddressTest {
         assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("192.168.1.20", "", webSocketScheme = "ws"))
         assertEquals("wwss://node.local:4404/api/v1/ws", manualAddress("node.local", "4404", webSocketScheme = "wss"))
         assertEquals("wws://[fe80::1]/api/v1/ws", manualAddress("fe80::1", "", webSocketScheme = "ws"))
-        assertEquals("wws://[fd00::1]:80/api/v1/ws", manualAddress("[fd00::1]", "80", webSocketScheme = "ws"))
+        assertEquals("wws://[fd00::1]/api/v1/ws", manualAddress("[fd00::1]", "80", webSocketScheme = "ws"))
         assertNull(manualAddress("192.168.1.20", "70000", webSocketScheme = "ws"))
         assertNull(manualAddress("", "", webSocketScheme = "ws"))
     }
@@ -92,8 +92,8 @@ class ManualTcpAddressTest {
     @Test
     fun firmwaresTlsPortsTakeWssFromAPlainPage() {
         assertEquals("wwss://localhost:9443/api/v1/ws", manualAddress("localhost", "9443", webSocketScheme = "ws"))
-        assertEquals("wwss://192.168.1.20:443/api/v1/ws", manualAddress("192.168.1.20", "443", webSocketScheme = "ws"))
-        assertEquals("wws://192.168.1.20:80/api/v1/ws", manualAddress("192.168.1.20", "80", webSocketScheme = "ws"))
+        assertEquals("wwss://192.168.1.20/api/v1/ws", manualAddress("192.168.1.20", "443", webSocketScheme = "ws"))
+        assertEquals("wws://192.168.1.20/api/v1/ws", manualAddress("192.168.1.20", "80", webSocketScheme = "ws"))
     }
 
     @Test

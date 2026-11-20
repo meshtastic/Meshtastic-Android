@@ -6,7 +6,7 @@ nav_order: 0
 
 # Dokumentace aplikace Meshtastic Android
 
-Uživatelská a vývojářská dokumentace aplikace Meshtastic pro Android a Desktop, vytvořené pomocí Kotlin Multiplatform.
+User and developer documentation for the Meshtastic Android, Desktop and web app, built with Kotlin Multiplatform.
 
 Pomocí navigace v postranním panelu si můžete procházet **Uživatelskou příručku** s funkcemi aplikace a **Vývojářskou příručku** s informacemi o přispívání do projektu.
 

@@ -142,10 +142,22 @@ class WebSocketRadioTransportTest {
     }
 
     @Test
-    fun `a 404 for the upgrade says the radio refused the WebSocket`() = runBlocking {
+    fun `a 404 for the upgrade says the radio has no WebSocket route`() = runBlocking {
         transport()
         val peer = accept()
         io { peer.reject("404 Not Found") }
+
+        assertEquals(
+            Event.Disconnected(isPermanent = false, reason = TransportDisconnectReason.WebSocketNotSupported),
+            nextEvent(),
+        )
+    }
+
+    @Test
+    fun `a 403 for the upgrade says the radio refused the WebSocket`() = runBlocking {
+        transport()
+        val peer = accept()
+        io { peer.reject("403 Forbidden") }
 
         assertEquals(
             Event.Disconnected(isPermanent = false, reason = TransportDisconnectReason.WebSocketHandshakeRejected),
@@ -267,16 +279,31 @@ class WebSocketRadioTransportTest {
 
     @Test
     fun `a failed dial is classified for the user`() {
+        val notFound = WebSocketException("Handshake exception, expected status code 101 but was 404")
+        assertEquals(TransportDisconnectReason.WebSocketNotSupported, notFound.toWebSocketFailure(url))
         assertEquals(
             TransportDisconnectReason.WebSocketHandshakeRejected,
-            WebSocketException("Handshake exception, expected status code 101 but was 404").toWebSocketFailure(),
+            WebSocketException("Handshake exception, expected status code 101 but was 403").toWebSocketFailure(url),
         )
-        assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure())
-        assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure())
+        assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure(url))
+        assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure(url))
         // The browser engine's error event: no status, so not a refused upgrade.
         assertEquals(
             TransportDisconnectReason.WebSocketConnectFailed,
-            WebSocketException("[object Event]").toWebSocketFailure(),
+            WebSocketException("[object Event]").toWebSocketFailure(url),
+        )
+    }
+
+    @Test
+    fun `a 404 at a path other than the API path says to check the path`() {
+        val notFound = WebSocketException("Handshake exception, expected status code 101 but was 404")
+        assertEquals(
+            TransportDisconnectReason.WebSocketHandshakeRejected,
+            notFound.toWebSocketFailure("ws://node.local/api/v1/nope"),
+        )
+        assertEquals(
+            TransportDisconnectReason.WebSocketHandshakeRejected,
+            notFound.toWebSocketFailure("ws://node.local:8080/api/v1/ws/extra"),
         )
     }
 

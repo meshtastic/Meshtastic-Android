@@ -26,6 +26,12 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Ahead of Central, as in dependencyResolutionManagement below.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("./offline-repository") }
@@ -66,7 +72,27 @@ dependencyResolutionManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
-        mavenCentral()
+        // Central rate-limits CI's shared egress (429) and sometimes answers 404 for a module it serves. Gradle stops at
+        // an error and moves on only for a missing module, so Google's mirror of Central goes first and Central serves
+        // only what the mirror has not caught up with yet.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+            // The Ivy repositories below serve the Wasm tooling; a Maven repository's error must not fail it first.
+            content {
+                excludeModule("org.nodejs", "node")
+                excludeModule("com.yarnpkg", "yarn")
+                excludeModule("com.github.webassembly", "binaryen")
+            }
+        }
+        mavenCentral {
+            content {
+                excludeModule("org.nodejs", "node")
+                excludeModule("com.yarnpkg", "yarn")
+                excludeModule("com.github.webassembly", "binaryen")
+            }
+        }
         maven {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
             mavenContent { snapshotsOnly() }
