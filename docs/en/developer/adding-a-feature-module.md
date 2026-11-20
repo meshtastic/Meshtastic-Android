@@ -91,7 +91,7 @@ class FeatureMyFeatureModule
 Add your module to:
 - `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
 - `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`
-- `webApp/src/wasmJsMain/kotlin/org/meshtastic/web/di/WebKoinModule.kt`, only for a module that applies `meshtastic.kmp.web`. Add its directory to the `web` filter in `.github/workflows/pull-request.yml`, which `scripts/check-changes-filter.py` enforces
+- `webApp/src/wasmJsMain/kotlin/org/meshtastic/web/di/WebKoinModule.kt`, only for a module that applies `meshtastic.kmp.web`. Also add the module to `wasmJsMain.dependencies` in `webApp/build.gradle.kts`, or `WebKoinModule.kt` cannot import it, and add its directory to the `web` filter in `.github/workflows/pull-request.yml`, which `scripts/check-changes-filter.py` enforces
 
 ## Add Navigation Routes
 

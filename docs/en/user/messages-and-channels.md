@@ -132,7 +132,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 | Confirmed on SF++ chain | Confirmed delivered via the SF++ chain |
 | Error | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors)) |
 
-Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
+Tap the status under any message you sent to open its delivery details. For a failed message, or a direct message marked **Relayed, not confirmed by recipient**, choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 
 The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded.
 

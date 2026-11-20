@@ -18,7 +18,7 @@ The Compose Desktop host for the shared KMP module graph. It runs the same `core
 ./gradlew :desktopApp:packageDistributionForCurrentOS
 
 # Package native distribution for this OS, release (ProGuard)
-./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
+./gradlew :desktopApp:packageReleaseDistributionForCurrentOS -Pdesktop.release=true
 ```
 
 Packaging builds the formats of the host it runs on: DMG on macOS, MSI and EXE on Windows, DEB, RPM and a jpackage app-image on Linux. CI wraps that app-image into a real `.AppImage` with `scripts/build-appimage.sh`. A release build (`-Pdesktop.release=true`) sets `IS_DEBUG=false`, which turns off debug HTTP logging and turns on the update check.
@@ -58,7 +58,7 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 
 **Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. `core:service`'s `DispatchingMeshNotificationManager`, shared with web, turns mesh events into the `Notification`s it receives. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
-**Agent MCP server:** A debug build starts a loopback-only MCP server (`mcp/DesktopMcpServer.kt`, streamable HTTP at `http://127.0.0.1:<port>/mcp`) when `MESHTASTIC_MCP_PORT` or `-Dmeshtastic.mcp.port` names a port. It is wired to the radio layer, not the UI, and offers `connection_state`, `connect`, `nodes` and `send_text`. A release build never starts it.
+**Agent MCP server:** A debug build starts a loopback-only MCP server (`mcp/DesktopMcpServer.kt`, streamable HTTP at `http://127.0.0.1:<port>/mcp`) when `MESHTASTIC_MCP_PORT` or `-Dmeshtastic.mcp.port` names a port. It is wired to the radio layer, not the UI, and offers `connection_state`, `connect`, `nodes` and `send_text`. It can start in any build without `-Pdesktop.release=true`, the release build type included; the release workflow passes that flag.
 
 **Localization:** Desktop exposes a language picker that persists the selected BCP-47 tag in `UiPrefs.locale`. `Main.kt` resolves it against the system locale (`resolveLocale`) and applies it as the JVM default `Locale`.
 

@@ -19,10 +19,12 @@ Testing strategy and practices for the Meshtastic KMP project.
 ### KMP unit tests (`commonTest`)
 
 Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs.
-In modules that apply `meshtastic.kmp.web`, it also runs in headless Chrome with `-Pmeshtastic.web=true`:
+In modules that apply `meshtastic.kmp.web`, it also runs in headless Chrome, except where a module sets `meshtasticWeb { browserTests = false }` (`feature:node`, `feature:settings`), whose wasmJs tests only compile:
 
 ```shell
 ./gradlew allTests
+# the web target: needs Isolated Projects off
+./gradlew wasmJsBrowserTest -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false
 ```
 
 - Business logic tests
