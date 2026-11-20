@@ -25,8 +25,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Covers the gate behind the node-detail Message button. Both signals have to pass: the node has to accept messages,
- * and we need a public key for it or the sending radio refuses with `PKI_SEND_FAIL_PUBLIC_KEY`.
+ * Covers the gate behind the node-detail Message button. The node has to accept messages, and the radio has to be able
+ * to send: an unlicensed radio needs a public key for the destination or it refuses with `PKI_SEND_FAIL_PUBLIC_KEY`,
+ * while a licensed radio never uses PKC and sends on the channel.
  */
 class CanDirectMessageTest {
 
@@ -36,6 +37,7 @@ class CanDirectMessageTest {
         publicKey: okio.ByteString = okio.ByteString.EMPTY,
         isUnmessagable: Boolean? = null,
         role: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
+        isLicensed: Boolean = false,
     ) = Node(
         num = 1,
         user =
@@ -45,40 +47,80 @@ class CanDirectMessageTest {
                 wb.public_key = publicKey
                 wb.is_unmessagable = isUnmessagable
                 wb.role = role
+                wb.is_licensed = isLicensed
             }
             .build(),
     )
 
     @Test
     fun allowsMessagableNodeWithAKey() {
-        assertTrue(node(publicKey = key).canDirectMessage)
+        assertTrue(node(publicKey = key).canDirectMessage(localIsLicensed = false))
     }
 
     @Test
-    fun blocksNodeWithNoKeyOnFile() {
-        assertFalse(node().canDirectMessage)
+    fun allowsMessagableNodeWithAKeyWhenLocalIsLicensed() {
+        assertTrue(node(publicKey = key).canDirectMessage(localIsLicensed = true))
+    }
+
+    @Test
+    fun blocksNodeWithNoKeyOnFileWhenLocalIsNotLicensed() {
+        assertFalse(node().canDirectMessage(localIsLicensed = false))
+    }
+
+    @Test
+    fun blocksLicensedNodeWithNoKeyWhenLocalIsNotLicensed() {
+        assertFalse(node(isLicensed = true).canDirectMessage(localIsLicensed = false))
+    }
+
+    @Test
+    fun allowsNodeWithNoKeyOnFileWhenLocalIsLicensed() {
+        assertTrue(node().canDirectMessage(localIsLicensed = true))
     }
 
     @Test
     fun blocksUnmessagableNodeEvenWithAKey() {
-        assertFalse(node(publicKey = key, isUnmessagable = true).canDirectMessage)
+        assertFalse(node(publicKey = key, isUnmessagable = true).canDirectMessage(localIsLicensed = false))
     }
 
     @Test
     fun blocksUnmessagableRoleEvenWithAKey() {
-        assertFalse(node(publicKey = key, role = Config.DeviceConfig.Role.REPEATER).canDirectMessage)
+        assertFalse(
+            node(publicKey = key, role = Config.DeviceConfig.Role.REPEATER).canDirectMessage(localIsLicensed = false),
+        )
+    }
+
+    @Test
+    fun blocksUnmessagableNodeEvenWhenLocalIsLicensed() {
+        assertFalse(node(isUnmessagable = true).canDirectMessage(localIsLicensed = true))
+    }
+
+    @Test
+    fun blocksUnmessagableRoleEvenWhenLocalIsLicensed() {
+        assertFalse(node(role = Config.DeviceConfig.Role.REPEATER).canDirectMessage(localIsLicensed = true))
+    }
+
+    @Test
+    fun readsLicensedStateFromOurNode() {
+        assertTrue(node(isLicensed = true).isLicensedLocal)
+        assertFalse(node(isLicensed = false).isLicensedLocal)
+        assertFalse((null as Node?).isLicensedLocal)
     }
 
     @Test
     fun stillOffersTheActionWhenAThreadAlreadyExists() {
         val keyless = node()
 
-        assertFalse(keyless.canDirectMessage)
-        assertTrue(keyless.showsDirectMessageAction(hasConversation = true))
+        assertFalse(keyless.canDirectMessage(localIsLicensed = false))
+        assertTrue(keyless.showsDirectMessageAction(hasConversation = true, localIsLicensed = false))
     }
 
     @Test
     fun hidesTheActionWhenThereIsNoThreadToOpen() {
-        assertFalse(node().showsDirectMessageAction(hasConversation = false))
+        assertFalse(node().showsDirectMessageAction(hasConversation = false, localIsLicensed = false))
+    }
+
+    @Test
+    fun offersTheActionForAKeylessNodeWhenLocalIsLicensedAndNoThreadExists() {
+        assertTrue(node().showsDirectMessageAction(hasConversation = false, localIsLicensed = true))
     }
 }
