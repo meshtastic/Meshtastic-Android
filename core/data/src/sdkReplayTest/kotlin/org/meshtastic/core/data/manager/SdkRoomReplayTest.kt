@@ -276,10 +276,6 @@ class SdkRoomReplayTest {
             every { nodeManager.getMyId() } returns LOCAL_ID
             every { nodeManager.getNodeById(PEER_ID) } returns Node(PEER_NODE, user = peer)
 
-            val packetRepository = PacketRepositoryImpl(db, dispatchers)
-            val logPrefs = mock<MeshLogPrefs>(MockMode.autofill)
-            every { logPrefs.loggingEnabled } returns MutableStateFlow(true)
-            val logs = MeshLogRepositoryImpl(db, dispatchers, logPrefs, SwitchingNodeInfoReadDataSource(db))
             val notificationManager = mock<MeshNotificationManager>(MockMode.autofill)
             everySuspend {
                 notificationManager.updateMessageNotification(any(), any(), any(), any(), any(), any())
@@ -291,52 +287,8 @@ class SdkRoomReplayTest {
                 }
             val config = mock<RadioConfigRepository>(MockMode.autofill)
             every { config.channelSetFlow } returns channelSet
-            val beaconPrefs = mock<MeshBeaconPrefs>(MockMode.autofill)
-            every { beaconPrefs.storedBeacons } returns MutableStateFlow(emptyList())
-            val serviceScope = scope.asServiceScope()
-            val data =
-                MeshDataHandlerImpl(
-                    nodeManager = nodeManager,
-                    packetHandler = mock(MockMode.autofill),
-                    serviceStateWriter = mock(MockMode.autofill),
-                    packetRepository = lazy { packetRepository },
-                    serviceNotifications = notificationManager,
-                    analytics = mock(MockMode.autofill),
-                    dataMapper = MeshDataMapper(nodeManager),
-                    tracerouteHandler = mock(MockMode.autofill),
-                    neighborInfoHandler = mock(MockMode.autofill),
-                    radioConfigRepository = config,
-                    messageFilter = mock(MockMode.autofill),
-                    storeForwardHandler = mock(MockMode.autofill),
-                    telemetryHandler = mock(MockMode.autofill),
-                    adminPacketHandler = mock(MockMode.autofill),
-                    remoteShellHandler = mock(MockMode.autofill),
-                    collectorRegistry = DiscoveryPacketCollectorRegistryImpl(),
-                    geofenceMonitor =
-                    GeofenceMonitor(
-                        packetRepository = lazy { packetRepository },
-                        nodeManager = nodeManager,
-                        serviceNotifications = notificationManager,
-                        crossingStore = GeofenceCrossingStore(),
-                        notificationPrefs = FakeNotificationPrefs(),
-                        radioInterfaceService = radio,
-                        scope = serviceScope,
-                    ),
-                    meshBeaconRepository = MeshBeaconRepository(beaconPrefs, scope),
-                    radioInterfaceService = radio,
-                    activeConversationTracker = ActiveConversationTracker(),
-                    scope = serviceScope,
-                )
             processor =
-                MeshMessageProcessorImpl(
-                    nodeManager,
-                    mock(MockMode.autofill),
-                    lazy { logs },
-                    lazy { data },
-                    mock(MockMode.autofill),
-                    radio,
-                    serviceScope,
-                )
+                createRoomReplayProcessor(scope, dispatchers, db, nodeManager, radio, config, notificationManager)
         }
 
         private fun bindSessionAdmission() {
@@ -430,7 +382,7 @@ class SdkRoomReplayTest {
         override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T = block(currentDb.value)
     }
 
-    private class SdkReplayTransport(scope: CoroutineScope, address: String, asset: ByteArray) : RadioTransport {
+    internal class SdkReplayTransport(scope: CoroutineScope, address: String, asset: ByteArray) : RadioTransport {
         override val identity = TransportIdentity(address)
         override val state = MutableStateFlow<TransportState>(TransportState.Disconnected)
         private val frames = Channel<Frame>(Channel.UNLIMITED)
@@ -508,7 +460,7 @@ class SdkRoomReplayTest {
         }
     }
 
-    private companion object {
+    internal companion object {
         const val LOCAL_NODE = 1
         const val PEER_NODE = 42
         const val BROADCAST = -1
@@ -596,4 +548,64 @@ class SdkRoomReplayTest {
             writeInt(bytes.size).write(bytes)
         }
     }
+}
+
+internal fun createRoomReplayProcessor(
+    scope: CoroutineScope,
+    dispatchers: CoroutineDispatchers,
+    db: DatabaseProvider,
+    nodeManager: NodeManager,
+    radio: RadioInterfaceService,
+    config: RadioConfigRepository,
+    notificationManager: MeshNotificationManager,
+): MeshMessageProcessorImpl {
+    val packetRepository = PacketRepositoryImpl(db, dispatchers)
+    val logPrefs = mock<MeshLogPrefs>(MockMode.autofill)
+    every { logPrefs.loggingEnabled } returns MutableStateFlow(true)
+    val logs = MeshLogRepositoryImpl(db, dispatchers, logPrefs, SwitchingNodeInfoReadDataSource(db))
+    val beaconPrefs = mock<MeshBeaconPrefs>(MockMode.autofill)
+    every { beaconPrefs.storedBeacons } returns MutableStateFlow(emptyList())
+    val serviceScope = scope.asServiceScope()
+    val data =
+        MeshDataHandlerImpl(
+            nodeManager = nodeManager,
+            packetHandler = mock(MockMode.autofill),
+            serviceStateWriter = mock(MockMode.autofill),
+            packetRepository = lazy { packetRepository },
+            serviceNotifications = notificationManager,
+            analytics = mock(MockMode.autofill),
+            dataMapper = MeshDataMapper(nodeManager),
+            tracerouteHandler = mock(MockMode.autofill),
+            neighborInfoHandler = mock(MockMode.autofill),
+            radioConfigRepository = config,
+            messageFilter = mock(MockMode.autofill),
+            storeForwardHandler = mock(MockMode.autofill),
+            telemetryHandler = mock(MockMode.autofill),
+            adminPacketHandler = mock(MockMode.autofill),
+            remoteShellHandler = mock(MockMode.autofill),
+            collectorRegistry = DiscoveryPacketCollectorRegistryImpl(),
+            geofenceMonitor =
+            GeofenceMonitor(
+                packetRepository = lazy { packetRepository },
+                nodeManager = nodeManager,
+                serviceNotifications = notificationManager,
+                crossingStore = GeofenceCrossingStore(),
+                notificationPrefs = FakeNotificationPrefs(),
+                radioInterfaceService = radio,
+                scope = serviceScope,
+            ),
+            meshBeaconRepository = MeshBeaconRepository(beaconPrefs, scope),
+            radioInterfaceService = radio,
+            activeConversationTracker = ActiveConversationTracker(),
+            scope = serviceScope,
+        )
+    return MeshMessageProcessorImpl(
+        nodeManager,
+        mock(MockMode.autofill),
+        lazy { logs },
+        lazy { data },
+        mock(MockMode.autofill),
+        radio,
+        serviceScope,
+    )
 }

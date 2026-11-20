@@ -61,7 +61,17 @@ kotlin {
         providers.gradleProperty("sdkReplayJar").orNull?.let { sdkJar ->
             getByName("jvmTest") {
                 kotlin.srcDir("src/sdkReplayTest/kotlin")
-                dependencies { implementation(files(sdkJar)) }
+                dependencies {
+                    implementation(files(sdkJar))
+                    providers.gradleProperty("sdkTcpJar").orNull?.let { tcpJar ->
+                        kotlin.srcDir("src/sdkTcpTest/kotlin")
+                        implementation(files(tcpJar))
+                        implementation(projects.core.service)
+                        implementation(projects.core.ble)
+                        implementation(libs.ktor.network)
+                        implementation(libs.androidx.datastore.preferences)
+                    }
+                }
             }
         }
 
