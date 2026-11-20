@@ -44,7 +44,7 @@ The app selects the backend for each fresh transport. To return to legacy TCP in
 
 ## Web debug backend
 
-Build with an SDK checkout that combines the pinned session stream above with the Wasm target from SDK PR #258 at `43baf4d`.
+Build with SDK commit `93dfd764f66c9efc9efb3b6ccdfddb545531cd4b` on `feat/session-aware-packet-stream-main`. It combines the ordered session stream with the Wasm target from SDK PR #258.
 
 ```sh
 ./gradlew :webApp:wasmJsBrowserDistribution \
