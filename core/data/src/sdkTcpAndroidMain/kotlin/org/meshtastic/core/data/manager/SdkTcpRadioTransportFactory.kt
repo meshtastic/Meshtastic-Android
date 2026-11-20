@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.sdk.RadioSessionOverflowException
@@ -86,27 +87,38 @@ private class SdkTcpRadioTransport(
     private var run: Job? = null
 
     override fun start() {
-        run =
-            service.serviceScope.launch {
-                try {
-                    service.onStatus(TransportStatus(TransportPhase.Connecting))
-                    runSession()
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (overflow: RadioSessionOverflowException) {
-                    Logger.w(overflow) { "SDK TCP lost receive coverage in app session ${session.generation}" }
-                    service.onDisconnect(isPermanent = true, errorMessage = "SDK TCP receive stream overflowed")
-                } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
-                    Logger.w { "SDK TCP session failed: ${failure::class.simpleName}" }
-                    val status = TransportFailure(TransportFailureKind.ConnectFailed)
-                    service.onStatus(TransportStatus(TransportPhase.Connecting, status))
-                } finally {
-                    withContext(NonCancellable) {
-                        client.disconnect()
-                        service.onDisconnect(isPermanent = true)
-                    }
-                }
-            }
+        run = service.serviceScope.launch { runPhoneApiSession() }
+    }
+
+    private suspend fun runPhoneApiSession() {
+        var recoverable = true
+        var errorMessage: String? = null
+        try {
+            service.onStatus(TransportStatus(TransportPhase.Connecting))
+            runSession()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (overflow: RadioSessionOverflowException) {
+            Logger.w(overflow) { "SDK TCP lost receive coverage in app session ${session.generation}" }
+            recoverable = false
+            errorMessage = "SDK TCP receive stream overflowed"
+        } catch (failure: MeshtasticException.Transport) {
+            reportSessionFailure(failure)
+        } catch (failure: MeshtasticException.HandshakeTimeout) {
+            reportSessionFailure(failure)
+        } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
+            recoverable = false
+            reportSessionFailure(failure)
+        } finally {
+            withContext(NonCancellable) { client.disconnect() }
+        }
+        service.onPhoneApiSessionEnded(recoverable, errorMessage)
+    }
+
+    private fun reportSessionFailure(failure: Exception) {
+        Logger.w { "SDK TCP session failed: ${failure::class.simpleName}" }
+        val status = TransportFailure(TransportFailureKind.ConnectFailed)
+        service.onStatus(TransportStatus(TransportPhase.Connecting, status))
     }
 
     private suspend fun runSession() = coroutineScope {

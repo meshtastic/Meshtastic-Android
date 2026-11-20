@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -524,6 +525,9 @@ class SharedRadioInterfaceService(
     // again: a recovery restart would take the slot back from the client that now holds it.
     @Volatile private var awaitingUserConnect = false
 
+    /** Backoff for consecutive PhoneAPI connection failures. Guarded by [transportMutex]. */
+    private var phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+
     private val gattCacheInvalidationRequested = atomic(false)
 
     /** Prevents concurrent liveness-induced transport restarts from stacking. */
@@ -609,6 +613,8 @@ class SharedRadioInterfaceService(
 
         /** How often [revokeTransportSession] reports a lease drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
+        private const val PHONE_API_INITIAL_RETRY_MS = 1_000L
+        private const val PHONE_API_MAX_RETRY_MS = 30_000L
     }
 
     private val initLock = Mutex()
@@ -767,6 +773,7 @@ class SharedRadioInterfaceService(
                         stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
                     }
                 }
+                phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -781,6 +788,7 @@ class SharedRadioInterfaceService(
             // Tear the gate down BEFORE stopTransportLocked() so a concurrent state-listener
             // emission arriving while we wait for the mutex cannot re-start the transport.
             connectionRequested = false
+            phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
             gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
         }
@@ -866,6 +874,40 @@ class SharedRadioInterfaceService(
         }
     }
 
+    private fun retirePhoneApiSession(session: RadioTransportSession, recoverable: Boolean, errorMessage: String?) {
+        // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
+        processLifecycle.coroutineScope.launch {
+            val retryDelay = transportMutex.withLock {
+                if (radioTransport?.managesPhoneApi != true || !isSessionActive(session.context)) return@launch
+                val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
+                if (linkWasUp) phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+                if (!recoverable) connectionRequested = false
+
+                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+                onDisconnect(isPermanent = true, errorMessage = errorMessage)
+                if (!connectionRequested) return@launch
+
+                phoneApiRetryDelay.also { phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS) }
+            }
+
+            delay(retryDelay)
+            // If the link is offline, the normal network observer will start the next attempt on recovery.
+            if (!networkRepository.networkAvailable.first()) return@launch
+            transportMutex.withLock {
+                if (radioOperationLock.suppressesTransport) return@withLock
+                if (
+                    connectionRequested &&
+                    radioTransport == null &&
+                    sessionGenerationCounter.value == session.generation &&
+                    getDeviceAddress() == session.address
+                ) {
+                    Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }
+                    ignoreExceptionSuspend { startTransportLocked() }
+                }
+            }
+        }
+    }
+
     override fun requestGattCacheInvalidationOnNextConnect() {
         gattCacheInvalidationRequested.value = true
         Logger.d { "GATT cache invalidation requested for next BLE connect" }
@@ -922,6 +964,7 @@ class SharedRadioInterfaceService(
                 // transport when an address was actually selected.
                 connectionRequested = sanitized != null
                 awaitingUserConnect = false
+                phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }
@@ -1344,11 +1387,11 @@ class SharedRadioInterfaceService(
 
     /**
      * Per-transport-session wrapper around this service. Delegates every [RadioInterfaceService] surface (scope,
-     * address, sendToRadio, etc.) to the enclosing service; only the three [RadioTransportCallback] entry points are
-     * gated on the captured [session] still being the [activeTransportSession]. Admission and the synchronous callback
-     * side effect share [sessionCallbackLock] with teardown, eliminating a check-then-use window. Late callbacks from a
-     * torn-down transport are dropped BEFORE bytes enter the shared received-data channel or connection/config state
-     * mutates. Address is logged with [anonymize] and the session generation only — never the raw address bytes.
+     * address, sendToRadio, etc.) to the enclosing service; [RadioTransportCallback] entry points are gated on the
+     * captured [session] still being the [activeTransportSession]. Admission and the synchronous callback side effect
+     * share [sessionCallbackLock] with teardown, eliminating a check-then-use window. Late callbacks from a torn-down
+     * transport are dropped BEFORE bytes enter the shared received-data channel or connection/config state mutates.
+     * Address is logged with [anonymize] and the session generation only — never the raw address bytes.
      */
     private inner class SessionBoundRadioInterfaceService(val session: RadioTransportSession) :
         RadioInterfaceService by this@SharedRadioInterfaceService {
@@ -1365,6 +1408,10 @@ class SharedRadioInterfaceService(
             if (!admitted) {
                 Logger.d { "Dropping stale onDisconnect gen=${session.generation} addr=${session.address.anonymize}" }
             }
+        }
+
+        override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?) {
+            retirePhoneApiSession(session, recoverable, errorMessage)
         }
 
         override fun onStatus(status: TransportStatus) {
