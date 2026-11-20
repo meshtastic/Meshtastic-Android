@@ -22,9 +22,9 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.isEffectivelyUnmessageable
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.Config
 
 @Single

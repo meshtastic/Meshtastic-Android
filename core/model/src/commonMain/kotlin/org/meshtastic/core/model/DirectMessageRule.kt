@@ -14,10 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.model
-
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.isUnmessageableRole
+package org.meshtastic.core.model
 
 val Node.isEffectivelyUnmessageable: Boolean
     get() = user.is_unmessagable ?: user.role.isUnmessageableRole()
@@ -27,15 +24,19 @@ val Node?.isLicensedLocal: Boolean
     get() = this?.user?.is_licensed == true
 
 /**
- * Whether a direct message to this node can actually be delivered by our radio.
- *
- * [isEffectivelyUnmessageable] is the node saying it does not accept messages. Beyond that the radio decides: an
- * unlicensed radio takes the PKC path and refuses with `PKI_SEND_FAIL_PUBLIC_KEY` when it holds no key for the
- * destination, while a licensed radio never uses PKC and sends on the channel, so it needs no key. A node whose
- * NodeInfo has not arrived has no key on file, which is common rather than exceptional.
+ * Whether our radio can address this node at all. An unlicensed radio takes the PKC path and refuses with
+ * `PKI_SEND_FAIL_PUBLIC_KEY` when it holds no key for the destination, while a licensed radio never uses PKC and sends
+ * on the channel, so it needs no key. A node whose NodeInfo has not arrived has no key on file, which is common rather
+ * than exceptional.
+ */
+fun Node.hasDirectMessagePath(localIsLicensed: Boolean): Boolean = hasPKC || localIsLicensed
+
+/**
+ * Whether a direct message to this node can actually be delivered by our radio: the node accepts messages
+ * ([isEffectivelyUnmessageable] is false) and our radio has a [hasDirectMessagePath] to it.
  */
 fun Node.canDirectMessage(localIsLicensed: Boolean): Boolean =
-    !isEffectivelyUnmessageable && (hasPKC || localIsLicensed)
+    !isEffectivelyUnmessageable && hasDirectMessagePath(localIsLicensed)
 
 /**
  * Whether to offer the direct-message action for this node.

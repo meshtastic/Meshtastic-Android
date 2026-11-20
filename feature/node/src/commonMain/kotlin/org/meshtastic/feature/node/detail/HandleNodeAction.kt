@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.node.detail
 
+import org.meshtastic.core.model.canDirectMessage
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.canDirectMessage
-import org.meshtastic.feature.node.model.isLicensedLocal
 
 /**
  * Shared handler for [NodeDetailAction]s that are common across all platforms.
