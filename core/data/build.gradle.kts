@@ -58,6 +58,13 @@ kotlin {
 
         commonTest.dependencies { implementation(projects.core.testing) }
 
+        providers.gradleProperty("sdkReplayJar").orNull?.let { sdkJar ->
+            getByName("jvmTest") {
+                kotlin.srcDir("src/sdkReplayTest/kotlin")
+                dependencies { implementation(files(sdkJar)) }
+            }
+        }
+
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }
