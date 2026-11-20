@@ -59,7 +59,17 @@ kotlin {
             }
         }
         if (providers.gradleProperty("meshtasticSdkCheckout").isPresent) {
-            androidMain { kotlin.srcDir("src/sdkTcpAndroidMain/kotlin") }
+            androidMain {
+                kotlin.srcDir("src/sdkTcpAndroidMain/kotlin")
+                kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
+            }
+            if (providers.gradleProperty("meshtasticSdkWeb").orNull == "true") {
+                getByName("wasmJsMain") {
+                    kotlin.srcDir("src/sdkWebWasmMain/kotlin")
+                    kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
+                    dependencies { implementation("org.meshtastic:sdk-transport-websocket") }
+                }
+            }
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }

@@ -100,11 +100,7 @@ abstract class BaseRadioTransportFactory(
                 // saved or linked bare `ws://host` firmware's path.
                 address.startsWith(InterfaceId.WEBSOCKET.id) -> {
                     val url = address.removePrefix(InterfaceId.WEBSOCKET.id.toString())
-                    WebSocketRadioTransport(
-                        callback = service,
-                        scope = service.serviceScope,
-                        url = normalizeWebSocketUrl(url) ?: url,
-                    )
+                    createWebSocketTransport(normalizeWebSocketUrl(url) ?: url, service)
                 }
 
                 else -> createPlatformTransport(address, service)
@@ -112,6 +108,10 @@ abstract class BaseRadioTransportFactory(
         transport.start()
         return transport
     }
+
+    /** Creates a WebSocket transport for a normalized radio URL. */
+    protected open fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+        WebSocketRadioTransport(callback = service, scope = service.serviceScope, url = url)
 
     /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
     protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport

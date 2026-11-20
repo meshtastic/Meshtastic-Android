@@ -23,6 +23,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -45,6 +46,8 @@ class WasmJsRadioTransportFactory(
     connectionFactory: BleConnectionFactory,
     dispatchers: CoroutineDispatchers,
     private val serialPortRegistry: WebSerialPortRegistry,
+    private val buildConfigProvider: BuildConfigProvider,
+    private val sdkWebSocketFactory: WebSdkWebSocketTransportFactory? = null,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
     // Network is the WebSocket phone link alone: raw TCP never reaches a browser.
@@ -59,6 +62,10 @@ class WasmJsRadioTransportFactory(
 
     // No bundled capture asset ships on web (no context.assets equivalent).
     override val isReplayTransportAvailable: Boolean = false
+
+    override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+        sdkWebSocketFactory?.takeIf { buildConfigProvider.isDebug }?.create(url, service)
+            ?: super.createWebSocketTransport(url, service)
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }

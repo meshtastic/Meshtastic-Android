@@ -41,3 +41,16 @@ adb shell "run-as com.geeksville.mesh.fdroid.debug sh -c 'mkdir -p files && touc
 ```
 
 The app selects the backend for each fresh transport. To return to legacy TCP in the same APK, disconnect, remove the flag with `adb shell run-as com.geeksville.mesh.fdroid.debug rm files/enable-sdk-tcp`, then reconnect. SDK TCP keeps one client per app session and leaves outgoing message state and Room ownership with Android. SDK packet and post-handshake envelope events share the bounded receive queue. A peer socket close or a reboot envelope on an open socket retires the app session and opens a fresh SDK client for the same address. Android drains the old session's leases before publishing a replacement generation and retries with backoff from one to 30 seconds. An explicit disconnect or selection change supersedes the retry. Receive overflow reports the history gap and requires manual reconnection. In-session node-list refresh remains open.
+
+## Web debug backend
+
+Build with an SDK checkout that combines the pinned session stream above with the Wasm target from SDK PR #258 at `43baf4d`.
+
+```sh
+./gradlew :webApp:wasmJsBrowserDistribution \
+  -Pmeshtastic.web=true -Pweb.release=false -PmeshtasticSdkWeb=true \
+  -PmeshtasticSdkCheckout=/absolute/path/to/meshtastic-sdk \
+  -Dorg.gradle.isolated-projects=false --no-configuration-cache
+```
+
+Serve the distribution and open Connections. Use a firmware PhoneAPI WebSocket URL. The debug opt-in uses the same SDK session and snapshot adapter as Android TCP. URLs that the SDK rejects, including URLs with query parameters, use the existing app WebSocket backend. The web app persists received messages through its Room database in OPFS.
