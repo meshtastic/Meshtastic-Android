@@ -48,12 +48,15 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import java.time.Duration
 import javax.inject.Inject
 
 /** The Gradle property that registers the wasmJs target and includes `:webApp`; `settings.gradle.kts` reads it too. */
 const val WEB_TARGET_PROPERTY = "meshtastic.web"
 
 private const val WASM_PARALLEL_LINKS = 2
+
+private val BROWSER_TEST_TIMEOUT: Duration = Duration.ofMinutes(12)
 
 /** Whether this build registers the wasmJs target (`-Pmeshtastic.web=true`). */
 val Project.webTargetEnabled: Boolean
@@ -155,6 +158,9 @@ internal fun Project.configureKmpWebTarget() {
             .configureEach {
                 enabled = browserTests.get()
                 exclusions.get().forEach { filter.excludeTestsMatching(it) }
+                // Karma stops itself at ten minutes and closes Chrome (config/karma); this backstop fails the task for
+                // a Karma that cannot, before CI's job limit kills Gradle and keeps no build scan.
+                timeout.set(BROWSER_TEST_TIMEOUT)
             }
         configureSkikoForWasmTests(kotlin)
 
