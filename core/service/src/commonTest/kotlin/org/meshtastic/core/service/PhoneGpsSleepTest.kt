@@ -16,9 +16,14 @@
  */
 package org.meshtastic.core.service
 
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.Location
@@ -59,6 +64,13 @@ class PhoneGpsSleepTest {
         assertEquals(0, stillnessCellBits(emptyList(), Role.CLIENT))
     }
 
+    @Test
+    fun aPrimaryWithNoModuleSettingsMeansNoSleep() {
+        // Firmware before 2.8 sends such a primary at full precision, so a later channel's cell must not be used.
+        val bare = ChannelSettings.Builder().also { it.psk = ByteArray(32) { 7 }.toByteString() }.build()
+        assertEquals(0, stillnessCellBits(listOf(bare, channel(16)), Role.CLIENT))
+    }
+
     private fun fix(latitude: Double) = Location(latitude = latitude, longitude = -0.12, timeMillis = 0)
 
     private class Feed(private vararg val rounds: List<Location>) {
@@ -76,7 +88,7 @@ class PhoneGpsSleepTest {
         var motions = 0
         feedWhileMoving(
             feed::next,
-            cellBits = { 16 },
+            cellBits = MutableStateFlow(16),
             awaitMotion = {
                 motions++
                 true
@@ -96,7 +108,7 @@ class PhoneGpsSleepTest {
         var motions = 0
         feedWhileMoving(
             feed::next,
-            cellBits = { 16 },
+            cellBits = MutableStateFlow(16),
             awaitMotion = {
                 motions++
                 true
@@ -106,12 +118,49 @@ class PhoneGpsSleepTest {
     }
 
     @Test
+    fun aChangeOfCellStartsTheCountAgain() = runTest {
+        // 51.5 and 51.5008 share a 16-bit cell; the third fix would be the third in a row only if the count survived
+        // the change to 19 bits.
+        val bits = MutableStateFlow(16)
+        var motions = 0
+        feedWhileMoving(
+            fixes = {
+                flow {
+                    emit(fix(51.5))
+                    emit(fix(51.5008))
+                    bits.value = 19
+                    emit(fix(51.5))
+                }
+            },
+            cellBits = bits,
+            awaitMotion = {
+                motions++
+                true
+            },
+        ) {}
+        assertEquals(0, motions)
+    }
+
+    @Test
+    fun aSleepEndsWhenTheCellChangesWithoutMotion() = runTest {
+        val bits = MutableStateFlow(16)
+        val feed = Feed(List(3) { fix(51.5) }, listOf(fix(51.5)))
+        val job = launch { feedWhileMoving(feed::next, cellBits = bits, awaitMotion = { awaitCancellation() }) {} }
+        advanceUntilIdle()
+        assertEquals(1, feed.opened)
+        bits.value = 0
+        advanceUntilIdle()
+        assertEquals(2, feed.opened)
+        job.join()
+    }
+
+    @Test
     fun noCellNeverSleeps() = runTest {
         val feed = Feed(List(6) { fix(51.5) })
         var motions = 0
         feedWhileMoving(
             feed::next,
-            cellBits = { 0 },
+            cellBits = MutableStateFlow(0),
             awaitMotion = {
                 motions++
                 true
@@ -126,7 +175,7 @@ class PhoneGpsSleepTest {
         var motions = 0
         feedWhileMoving(
             feed::next,
-            cellBits = { 16 },
+            cellBits = MutableStateFlow(16),
             awaitMotion = {
                 motions++
                 false

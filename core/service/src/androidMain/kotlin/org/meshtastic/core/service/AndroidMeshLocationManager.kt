@@ -22,6 +22,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
@@ -29,7 +30,6 @@ import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.RadioConfigRepository
-import kotlin.concurrent.Volatile
 import org.meshtastic.proto.Position as ProtoPosition
 
 @Single
@@ -43,7 +43,7 @@ class AndroidMeshLocationManager(
     private var locationFlow: Job? = null
 
     /** The bits of the radio's stillness cell, followed while the flow runs. */
-    @Volatile private var cellBits = 0
+    private val cellBits = MutableStateFlow(0)
 
     @SuppressLint("MissingPermission")
     override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {
@@ -62,11 +62,11 @@ class AndroidMeshLocationManager(
                         ->
                         stillnessCellBits(channels.settings, config.device?.role)
                     }
-                        .collect { cellBits = it }
+                        .collect { cellBits.value = it }
                 }
                 feedWhileMoving(
                     fixes = { locationRepository.getLocations() },
-                    cellBits = { cellBits },
+                    cellBits = cellBits,
                     awaitMotion = { awaitSignificantMotion(context) },
                 ) { location ->
                     sendPositionFn(

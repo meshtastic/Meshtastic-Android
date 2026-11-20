@@ -16,10 +16,15 @@
  */
 package org.meshtastic.core.service
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.selects.select
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onWirePrecisionBits
@@ -37,12 +42,13 @@ private const val ALL_BITS = 0xFFFFFFFFL
 /**
  * The precision, in bits, of the cell the radio judges a still position in (`PositionModule::runOnce`): the first
  * channel that shares a position, at the precision it goes out at, or a tracker's own precision. 0 means there is no
- * cell and the phone never sleeps: a LOST_AND_FOUND node, no channel that shares a position, or full precision.
+ * cell and the phone never sleeps: a LOST_AND_FOUND node, no channel that shares a position, full precision, or a
+ * primary with no module settings, which firmware before 2.8 sends at full precision.
  */
 internal fun stillnessCellBits(channels: List<ChannelSettings>, role: Config.DeviceConfig.Role?): Int {
     val primary = channels.firstOrNull()
     val bits =
-        if (role == Config.DeviceConfig.Role.LOST_AND_FOUND) {
+        if (role == Config.DeviceConfig.Role.LOST_AND_FOUND || primary?.module_settings == null) {
             0
         } else {
             channels.withIndex().firstNotNullOfOrNull { (index, settings) ->
@@ -65,13 +71,13 @@ internal fun sameCell(a: Location, b: Location, bits: Int): Boolean {
 /**
  * Feed the radio the phone's fixes, and let the phone's GPS rest while it is still: once [STILL_FIXES] fixes in a row
  * stay in the radio's stillness cell ([cellBits]), stop collecting, which removes the location request, and wait for
- * [awaitMotion] before collecting again. Firmware keeps broadcasting the last position it was given, so a sleep loses
- * nothing the mesh would see. With no cell, or when [awaitMotion] reports no sensor, it never stops. Returns when
- * [fixes] ends.
+ * [awaitMotion] or a change of cell before collecting again. Firmware keeps broadcasting the last position it was
+ * given, so a sleep loses nothing the mesh would see. With no cell, or when [awaitMotion] reports no sensor, it never
+ * stops. Returns when [fixes] ends.
  */
 internal suspend fun feedWhileMoving(
     fixes: () -> Flow<Location>,
-    cellBits: () -> Int,
+    cellBits: StateFlow<Int>,
     awaitMotion: suspend () -> Boolean,
     send: suspend (Location) -> Unit,
 ) {
@@ -79,11 +85,16 @@ internal suspend fun feedWhileMoving(
     while (true) {
         var anchor: Location? = null
         var still = 0
+        var countedBits = cellBits.value
         var asleep = false
         fixes()
             .onEach(send)
             .takeWhile { fix ->
-                val bits = cellBits()
+                val bits = cellBits.value
+                if (bits != countedBits) {
+                    anchor = null
+                    countedBits = bits
+                }
                 val inCell = bits > 0 && anchor?.let { sameCell(it, fix, bits) } == true
                 still = if (inCell) still + 1 else 1
                 if (!inCell) anchor = fix
@@ -92,6 +103,24 @@ internal suspend fun feedWhileMoving(
             }
             .collect()
         if (!asleep) return
-        canSleep = awaitMotion()
+        canSleep = wakeOnMotionOrNewCell(cellBits, countedBits, awaitMotion)
     }
+}
+
+/** [awaitMotion]'s answer, or true once the cell differs from [sleptAt] so the next round is judged against it. */
+private suspend fun wakeOnMotionOrNewCell(
+    cellBits: StateFlow<Int>,
+    sleptAt: Int,
+    awaitMotion: suspend () -> Boolean,
+): Boolean = coroutineScope {
+    val motion = async { awaitMotion() }
+    val newCell = async { cellBits.first { it != sleptAt } }
+    select {
+        motion.onAwait { it }
+        newCell.onAwait { true }
+    }
+        .also {
+            motion.cancel()
+            newCell.cancel()
+        }
 }
