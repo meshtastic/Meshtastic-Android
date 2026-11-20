@@ -57,7 +57,7 @@ class AdaptiveMetricLayoutTest {
         val expanded = mutableStateOf(false)
         val selected = mutableStateOf(-1)
         val listState = LazyListState()
-        // Density 0.5 keeps the dp sizes inside the pixel window. The split reads this window, not the parent width.
+        // Density 0.5 keeps the dp sizes inside the pixel window. The split needs an expanded window and parent.
         val windowInfo = ResizableWindowInfo(IntSize(180, 400))
         setContent {
             CompositionLocalProvider(LocalDensity provides Density(0.5f), LocalWindowInfo provides windowInfo) {
@@ -121,14 +121,14 @@ class AdaptiveMetricLayoutTest {
             runOnIdle { assertEquals(firstVisible, listState.firstVisibleItemIndex) }
         }
 
-        // An expanded window splits even when the composable itself is still below 840dp.
-        runOnIdle { windowInfo.resize(IntSize(600, 400)) }
+        // A pane narrower than 840dp stacks even when the window around it is expanded.
+        runOnIdle { windowInfo.resize(IntSize(1200, 400)) }
         val parent = onNodeWithTag("parent").fetchSemanticsNode().boundsInRoot
         val chart = onNodeWithTag("chart").fetchSemanticsNode().boundsInRoot
         val list = onNodeWithTag("list").fetchSemanticsNode().boundsInRoot
-        assertEquals(chart.right, list.left)
-        assertEquals(parent.width / 2, chart.width)
-        assertEquals(parent.width / 2, list.width)
+        assertEquals(chart.left, list.left)
+        assertEquals(chart.bottom, list.top)
+        assertEquals(parent.width, list.width)
     }
 }
 

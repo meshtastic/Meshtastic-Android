@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.FadingEdges
@@ -196,8 +199,9 @@ fun MetricChartScaffold(
 
 /**
  * An adaptive layout for metric screens. Splits side-by-side when [calculatePaneScaffoldDirective] allows more than one
- * horizontal partition, and stacks otherwise. When [isChartExpanded] is true, the card list is hidden and the chart
- * fills the available space.
+ * horizontal partition and the layout's own width is in the expanded size class, and stacks otherwise. The second check
+ * matters when the screen is an extra pane: the window is expanded but the pane is not. When [isChartExpanded] is true,
+ * the card list is hidden and the chart fills the available space.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -207,8 +211,29 @@ fun AdaptiveMetricLayout(
     modifier: Modifier = Modifier,
     isChartExpanded: Boolean = false,
 ) {
-    val isExpanded = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions > 1
-    if (isExpanded) {
+    val windowAllowsSplit = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions > 1
+    BoxWithConstraints(modifier = modifier) {
+        val paneIsExpanded =
+            WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(maxWidth.value, maxHeight.value)
+                .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+        MetricPanes(
+            chartPart = chartPart,
+            listPart = listPart,
+            isSplit = windowAllowsSplit && paneIsExpanded,
+            isChartExpanded = isChartExpanded,
+        )
+    }
+}
+
+@Composable
+private fun MetricPanes(
+    chartPart: @Composable (Modifier) -> Unit,
+    listPart: @Composable (Modifier) -> Unit,
+    isSplit: Boolean,
+    isChartExpanded: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    if (isSplit) {
         Row(modifier = modifier.fillMaxSize()) {
             chartPart(Modifier.weight(1f).fillMaxHeight())
             AnimatedVisibility(
