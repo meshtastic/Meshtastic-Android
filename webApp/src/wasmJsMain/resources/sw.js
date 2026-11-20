@@ -55,6 +55,12 @@ function cacheable(url) {
     return SHELL.test(url.pathname);
 }
 
+/** The app's own page: the scope itself or its index.html, whatever the query. */
+function isIndex(url) {
+    return url.origin === SCOPE.origin &&
+        (url.pathname === SCOPE.pathname || url.pathname === SCOPE.pathname + "index.html");
+}
+
 function store(cache, request, response) {
     if (response.ok && response.type === "basic") return cache.put(request, response.clone()).then(() => response);
     return response;
@@ -65,7 +71,8 @@ self.addEventListener("fetch", (event) => {
     if (request.method !== "GET" || request.headers.has("range")) return;
     const url = new URL(request.url);
 
-    if (request.mode === "navigate" && url.href.startsWith(SCOPE.href)) {
+    // Another page on the origin, such as a host's sign-in form, passes by, so it never lands in the cache as the app.
+    if (request.mode === "navigate" && isIndex(url)) {
         event.respondWith(networkFirstIndex(request));
         event.waitUntil(pruneHashed());
         return;
