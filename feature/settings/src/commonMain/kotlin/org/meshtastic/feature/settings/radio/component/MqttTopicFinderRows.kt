@@ -59,7 +59,6 @@ import org.meshtastic.core.resources.mqtt_needs_websocket_url
 import org.meshtastic.core.resources.mqtt_root_problem_empty
 import org.meshtastic.core.resources.mqtt_root_problem_empty_segment
 import org.meshtastic.core.resources.mqtt_root_problem_ends_with_version
-import org.meshtastic.core.resources.mqtt_root_problem_leading_slash
 import org.meshtastic.core.resources.mqtt_root_problem_too_long
 import org.meshtastic.core.resources.mqtt_root_problem_trailing_slash
 import org.meshtastic.core.resources.mqtt_root_problem_whitespace
@@ -228,7 +227,6 @@ internal fun MqttRootTopic.Problem.message(): StringResource = when (this) {
     MqttRootTopic.Problem.EMPTY -> Res.string.mqtt_root_problem_empty
     MqttRootTopic.Problem.WHITESPACE -> Res.string.mqtt_root_problem_whitespace
     MqttRootTopic.Problem.WILDCARD -> Res.string.mqtt_root_problem_wildcard
-    MqttRootTopic.Problem.LEADING_SLASH -> Res.string.mqtt_root_problem_leading_slash
     MqttRootTopic.Problem.TRAILING_SLASH -> Res.string.mqtt_root_problem_trailing_slash
     MqttRootTopic.Problem.EMPTY_SEGMENT -> Res.string.mqtt_root_problem_empty_segment
     MqttRootTopic.Problem.ENDS_WITH_VERSION -> Res.string.mqtt_root_problem_ends_with_version

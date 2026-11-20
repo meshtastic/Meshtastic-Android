@@ -25,7 +25,6 @@ object MqttRootTopic {
         EMPTY,
         WHITESPACE,
         WILDCARD,
-        LEADING_SLASH,
         TRAILING_SLASH,
         EMPTY_SEGMENT,
         ENDS_WITH_VERSION,
@@ -49,7 +48,6 @@ object MqttRootTopic {
             return Problem.WHITESPACE
         }
         if (root.contains('+') || root.contains('#')) return Problem.WILDCARD
-        if (root.startsWith("/")) return Problem.LEADING_SLASH
         if (root.endsWith("/")) return Problem.TRAILING_SLASH
         if (root.contains("//")) return Problem.EMPTY_SEGMENT
         if (root.split('/').last() == "2") return Problem.ENDS_WITH_VERSION
