@@ -20,6 +20,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
+import org.meshtastic.core.data.repository.FusedLocationClient
 import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.map.hud.FusedOrientationSource
 
@@ -35,6 +36,9 @@ class FlavorModule {
 
     /** F-Droid has no Play services orientation fusion, so the camera mesh view uses the platform rotation vector. */
     @Single fun fusedOrientationSource(): FusedOrientationSource = FusedOrientationSource.NONE
+
+    /** No Play services: location comes from the platform's providers. */
+    @Single fun fusedLocationClient(): FusedLocationClient = FusedLocationClient.NONE
 
     /** No analytics on F-Droid — the shared Ktor `HttpClient` gets no Datadog interceptor or event listener. */
     @Single fun okHttpNetworkInstrumentation(): OkHttpNetworkInstrumentation = OkHttpNetworkInstrumentation.NONE
