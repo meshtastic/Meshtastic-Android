@@ -60,6 +60,8 @@ kotlin {
             }
         }
 
+        jvmTest.dependencies { implementation(libs.androidx.datastore.preferences) }
+
         commonTest.dependencies {
             implementation(projects.core.testing)
             // A mock of PacketRepository needs PagingData, which core:repository takes as implementation, on the wasmJs
