@@ -53,7 +53,7 @@ jobs:
 
       - name: Setup Ruby
         if: env.BUILD_SITE == 'true'
-        uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+        uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
         # With ruby-version unset this reads the root .ruby-version; the bundle is docs/Gemfile.
         env:
           BUNDLE_GEMFILE: docs/Gemfile
