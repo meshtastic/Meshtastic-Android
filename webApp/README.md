@@ -28,7 +28,7 @@ The production build runs Binaryen's `wasm-opt`, which takes 40 minutes or more.
 
 ## Hosting
 
-The distribution directory is a static site: serve it from any web server.
+The distribution directory is a static site: serve it from any web server. Each release attaches it as `meshtastic-web-<version>.zip`.
 
 - Serve `.wasm` files as `application/wasm`. Browsers refuse to stream-compile a module sent with any other type.
 - Compress the wasm: the app's module is about 22 MB raw, 5.4 MB gzipped and 3.7 MB as Brotli. The production distribution carries a `<name>.br` beside each content-hashed module (the 20-hex-digit names), for a server that serves precompressed files, such as nginx's `brotli_static` or node-headless. Serve those hashed names with `Cache-Control: immutable`; revalidate everything else.
