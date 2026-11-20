@@ -222,6 +222,7 @@ class MeshConnectionManagerImpl(
                                                     "Location update failed unexpectedly; collector kept alive"
                                                 }
                                         }
+                                        failure == null
                                     }
                                 } else {
                                     locationRejectionLogged.value = false
