@@ -270,7 +270,7 @@ jobs:
   # 2b. WEB: the wasmJs target is opt-in (-Pmeshtastic.web=true), so no other job compiles it. One job: the
   # production executable link, where Kotlin/Wasm IR failures surface, and the wasmJs tests in headless Chrome
   # (Karma finds the runner image's google-chrome).
-  # It never runs wasm-opt (wasmJsBrowserDistribution), which alone takes 40+ minutes.
+  # It never runs wasm-opt (wasmJsBrowserDistribution), which alone takes several minutes.
   web-check:
     name: Web Check
     needs: check-changes

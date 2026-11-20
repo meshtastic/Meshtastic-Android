@@ -22,7 +22,7 @@ WEB="-Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false"
 ./gradlew wasmJsBrowserTest $WEB
 ```
 
-The production build runs Binaryen's `wasm-opt`, which takes 40 minutes or more. To check that the production executable links, which is where Kotlin/Wasm IR failures show up, compile it without optimizing: `./gradlew :webApp:compileProductionExecutableKotlinWasmJs $WEB`.
+The production build runs Binaryen's `wasm-opt`, which takes several minutes. To check that the production executable links, which is where Kotlin/Wasm IR failures show up, compile it without optimizing: `./gradlew :webApp:compileProductionExecutableKotlinWasmJs $WEB`.
 
 `WebBuildConfig.IS_DEBUG` is false unless you pass `-Pweb.release=false`; the development and production executables link the same compilation.
 
@@ -32,6 +32,7 @@ The distribution directory is a static site: serve it from any web server.
 
 - Serve `.wasm` files as `application/wasm`. Browsers refuse to stream-compile a module sent with any other type.
 - Compress the wasm: the app's module is about 22 MB raw, 5.4 MB gzipped and 3.7 MB as Brotli. The production distribution carries a `<name>.br` beside each content-hashed module (the 20-hex-digit names), for a server that serves precompressed files, such as nginx's `brotli_static` or node-headless. Serve those hashed names with `Cache-Control: immutable`; revalidate everything else.
+- A distribution's `index.html` preloads the wasm modules `webApp.js` names, so they download beside the script. Only the development distribution carries JavaScript source maps.
 - Serve it from a secure context, https or `localhost`. The database lives in the Origin Private File System, which browsers offer only to secure contexts; Web Bluetooth and Web Serial need one too.
 - One tab at a time holds the database. A second tab waits, and offers to take the database over.
 - Some private windows offer no usable OPFS, and the database cannot open there.
