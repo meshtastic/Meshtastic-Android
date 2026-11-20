@@ -771,6 +771,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mal</string>

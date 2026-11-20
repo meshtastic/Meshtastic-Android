@@ -300,6 +300,7 @@
     <string name="waypoint_new">Pointe bealach nua</string>
     <string name="waypoint_received">Pointe bealach faighte: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Go dona</string>
     <!-- WIFI -->

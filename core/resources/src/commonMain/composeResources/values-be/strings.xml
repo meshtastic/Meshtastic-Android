@@ -313,6 +313,7 @@
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_telemetry_title">Тэлеметрыя</string>
     <!-- WIFI -->

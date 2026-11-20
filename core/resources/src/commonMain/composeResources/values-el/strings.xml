@@ -293,6 +293,7 @@
     <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
     <string name="waypoint_new">Νέο σημείο πορείας</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Βάρος</string>
     <!-- WIDGET -->
     <string name="widget_telemetry_title">Τηλεμετρία</string>

@@ -1560,6 +1560,7 @@
     <string name="waypoint_new">新規ウェイポイント</string>
     <string name="waypoint_received">受信したウェイポイント: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">重さ</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">不良</string>

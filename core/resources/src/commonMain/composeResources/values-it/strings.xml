@@ -1566,6 +1566,7 @@
     <string name="waypoint_new">Nuovo waypoint</string>
     <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Scarso</string>

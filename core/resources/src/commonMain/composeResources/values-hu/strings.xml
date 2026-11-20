@@ -765,6 +765,7 @@
     <string name="waypoint_new">Új útpont</string>
     <string name="waypoint_received">Útvonalpont érkezett: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Súly</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Rossz</string>

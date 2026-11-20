@@ -2381,6 +2381,7 @@
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
     <!-- WEB -->
     <string name="website">Веб-сайт</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Вес</string>
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>

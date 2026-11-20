@@ -1740,6 +1740,7 @@
     <string name="waypoint_received">Vastuvõetud teekonnapunkt %1$s</string>
     <!-- WEB -->
     <string name="website">Veebisait</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Kaal</string>
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>

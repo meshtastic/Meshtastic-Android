@@ -1392,6 +1392,7 @@
     <string name="waypoint_received">Получена пътна точка: %1$s</string>
     <!-- WEB -->
     <string name="website">Уебсайт</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Тегло</string>
     <string name="what_is_meshtastic">Какво е Meshtastic?</string>
     <string name="what_is_meshtastic_description">Мрежа с отворен код, работеща независимо от централизирана инфраструктура (off-grid), децентрализирана и изградена на принципа на мрежовата топология (mesh), която функционира чрез достъпни радиоустройства с ниска консумация на енергия.</string>

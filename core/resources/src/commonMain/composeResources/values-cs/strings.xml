@@ -1820,6 +1820,7 @@
     <string name="waypoint_received">Přijatý waypoint: %1$s</string>
     <!-- WEB -->
     <string name="website">Webová stránka</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Hmotnost</string>
     <string name="what_is_meshtastic">Co je Meshtastic?</string>
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
