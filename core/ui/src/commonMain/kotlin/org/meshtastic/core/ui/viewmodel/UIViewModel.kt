@@ -401,7 +401,8 @@ internal fun CommonUri.toSanitizedImportSummary(): String {
     val queryParameterCount = if (isOpaque) 0 else getQueryParameterNames().size
     // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
     // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
-    return "rawLength=${toString().length} scheme=$scheme host=$host " +
+    val schemeLength = scheme?.length ?: 0
+    return "rawLength=${toString().length} schemeLength=$schemeLength host=$host " +
         "pathSegmentCount=${pathSegments.size} hasFragment=$hasFragment " +
         "fragmentLength=$fragmentLength queryParameterCount=$queryParameterCount"
 }

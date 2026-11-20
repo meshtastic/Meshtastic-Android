@@ -38,6 +38,7 @@ class UIViewModelImportSummaryTest {
         assertTrue(summary.contains("hasFragment=true"))
         assertTrue(summary.contains("fragmentLength=${fragment.length}"))
         assertTrue(summary.contains("queryParameterCount=2"))
+        assertTrue(summary.contains("schemeLength=5"))
         assertFalse(summary.contains("token"))
         assertFalse(summary.contains("add"))
     }
@@ -54,6 +55,7 @@ class UIViewModelImportSummaryTest {
         val summary = CommonUri.parse("mailto:someone@example.com").toSanitizedImportSummary()
 
         assertTrue(summary.contains("queryParameterCount=0"))
+        assertTrue(summary.contains("schemeLength=6"))
         assertFalse(summary.contains("someone@example.com"))
     }
 
@@ -61,7 +63,7 @@ class UIViewModelImportSummaryTest {
     fun sanitized_import_summary_handles_opaque_scheme_only_uri() {
         val summary = CommonUri.parse("foo:bar").toSanitizedImportSummary()
 
-        assertTrue(summary.contains("scheme=foo"))
+        assertTrue(summary.contains("schemeLength=3"))
         assertTrue(summary.contains("queryParameterCount=0"))
     }
 
