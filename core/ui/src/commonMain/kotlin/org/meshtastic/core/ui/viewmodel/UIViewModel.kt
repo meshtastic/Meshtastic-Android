@@ -397,7 +397,8 @@ class UIViewModel(
 internal fun CommonUri.toSanitizedImportSummary(): String {
     val fragmentLength = fragment?.length ?: 0
     val hasFragment = !fragment.isNullOrBlank()
-    val queryParameterCount = getQueryParameterNames().size
+    // getQueryParameterNames throws on opaque URIs such as mailto:x
+    val queryParameterCount = if (isOpaque) 0 else getQueryParameterNames().size
     // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
     // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
     return "rawLength=${toString().length} scheme=$scheme host=$host " +

@@ -50,6 +50,22 @@ class UIViewModelImportSummaryTest {
     }
 
     @Test
+    fun sanitized_import_summary_handles_opaque_mailto_uri() {
+        val summary = CommonUri.parse("mailto:someone@example.com").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("queryParameterCount=0"))
+        assertFalse(summary.contains("someone@example.com"))
+    }
+
+    @Test
+    fun sanitized_import_summary_handles_opaque_scheme_only_uri() {
+        val summary = CommonUri.parse("foo:bar").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("scheme=foo"))
+        assertTrue(summary.contains("queryParameterCount=0"))
+    }
+
+    @Test
     fun ota_status_notifications_are_suppressed() {
         assertTrue(
             ClientNotification.Builder()
