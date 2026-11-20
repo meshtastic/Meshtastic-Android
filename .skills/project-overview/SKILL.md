@@ -27,7 +27,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
 | `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioTransport`). |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `WebSocketRadioTransport`, `SerialTransport`, `BleRadioTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies. `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
@@ -48,6 +48,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `baselineprofile/` | Macrobenchmark Baseline Profile generation for `:androidApp` (AOT-compiled cold-start journey). Android-only. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
+| `webApp/` | Compose Multiplatform web (Kotlin/Wasm) application, opt-in with `-Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false`. Web Bluetooth, Web Serial and WebSocket transports, OPFS database, PWA service worker (`webApp/README.md`). |
 | `desktopApp/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. |
 
 ## Namespacing

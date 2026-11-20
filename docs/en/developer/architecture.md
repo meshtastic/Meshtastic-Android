@@ -2,8 +2,8 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-10-21
-description: How the Android and Desktop apps split into androidApp/desktopApp, feature modules, and core modules, and how radio control and navigation are layered across them.
+last_updated: 2026-11-20
+description: How the Android, Desktop and web apps split into androidApp/desktopApp/webApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
   - module-architecture
@@ -13,19 +13,19 @@ aliases:
 
 # Architecture
 
-The Meshtastic Android and Desktop apps follow a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries. iOS is a compile-only validation target; no iOS app ships.
+The Meshtastic Android, Desktop and web apps follow a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries. iOS is a compile-only validation target; no iOS app ships.
 
 ## Layer Overview
 
 ```text
 ┌─────────────────────────────────────────────┐
-│          androidApp / desktopApp            │  Platform entry points
+│      androidApp / desktopApp / webApp        │  Platform entry points
 ├─────────────────────────────────────────────┤
 │              feature/* modules               │  UI + Business Logic
 ├─────────────────────────────────────────────┤
 │                core/* modules                │  Shared infrastructure
 ├─────────────────────────────────────────────┤
-│           Platform (Android/JVM/iOS)         │  OS-specific bindings
+│       Platform (Android/JVM/wasm/iOS)        │  OS-specific bindings
 └─────────────────────────────────────────────┘
 ```
 
@@ -47,6 +47,14 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Platform stubs for Android-only capabilities
 - `DesktopRadioTransportFactory`, which wires up the transports. The transports themselves are shared code in `core:network`: BLE built on `core:ble`'s primitives, TCP, and the jSerialComm-based `SerialTransport` in `core:network`'s `jvmMain`
 
+### `webApp/` — Web Application
+
+The browser (Kotlin/Wasm) entry point, opt-in with `-Pmeshtastic.web=true`; see `webApp/README.md`:
+- `ComposeViewport` into `index.html`'s `webApp` element, with a service worker (`sw.js`) for notifications and offline reloads and a PWA manifest
+- Web-specific DI (`WebKoinModule`, whose `includes` mirror `DesktopKoinModule`'s)
+- The Room database on SQLite's OPFS SAH pool, held by one tab at a time
+- `WasmJsRadioTransportFactory` in `core:network`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
+
 ### `feature/*` — Feature Modules
 
 Each `feature/` module owns a vertical slice of functionality:
@@ -55,7 +63,7 @@ Each `feature/` module owns a vertical slice of functionality:
 |--------|---------------|
 | `feature:intro` | Onboarding/welcome flow |
 | `feature:messaging` | Messages, channels, contacts, quick chat |
-| `feature:connections` | Bluetooth/USB/TCP connection management |
+| `feature:connections` | Bluetooth/USB/TCP/WebSocket connection management |
 | `feature:map` | Map display, waypoints — shared state, policy and the waypoint editor |
 | `feature:map-maplibre` | MapLibre map surfaces — used by the `fdroid` flavor and Desktop; the `google` flavor uses Google Maps instead. Tile-source definitions and the custom-source editor are in `feature:map`, so both renderers share them |
 | `feature:map-terrain` | Offline terrain: elevation decode, hillshade shading and contour lines, shared by both map flavors |

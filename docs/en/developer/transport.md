@@ -2,35 +2,36 @@
 title: Transport
 parent: Developer Guide
 nav_order: 5
-last_updated: 2026-10-21
-description: The BLE, USB serial, and TCP transports behind the RadioTransport abstraction — which module owns each, and how to add a new one.
+last_updated: 2026-11-20
+description: The BLE, USB serial, TCP and WebSocket transports behind the RadioTransport abstraction — which module owns each, and how to add a new one.
 aliases:
   - ble
   - serial
   - tcp
+  - websocket
   - radio-transport
 ---
 
 # Transport
 
-The app talks to the node over three transports (BLE, USB serial, and TCP) behind one abstraction.
+The app talks to the node over four transports (BLE, USB serial, TCP and WebSocket) behind one abstraction.
 
 ## Transport Abstraction
 
 The transport layer is abstracted through interfaces defined in `core:repository` (`RadioTransport`,
 `RadioTransportFactory`, `RadioInterfaceService`). Each transport's concrete implementation lives in
-`core:network`: `BleRadioTransport` (BLE), `TcpRadioTransport` (TCP), and `SerialRadioTransport` (Android
-USB serial), alongside `MockRadioTransport` and `ReplayRadioTransport` for development. `core:ble` supplies
+`core:network`: `BleRadioTransport` (BLE), `TcpRadioTransport` (TCP), `WebSocketRadioTransport` (firmware's
+WebSocket phone API, over Ktor), and `SerialRadioTransport` (Android USB serial), alongside `MockRadioTransport` and `ReplayRadioTransport` for development. `core:ble` supplies
 the lower-level BLE connection primitives (scanning, GATT, Kable wiring) that `BleRadioTransport` builds
 on — it does not implement `RadioTransport` itself. This lets the app work identically regardless of the
 underlying connection type.
 
 ```text
-Feature UI → RadioController → RadioInterfaceService → RadioTransport (BLE | Serial | TCP)
+Feature UI → RadioController → RadioInterfaceService → RadioTransport (BLE | Serial | TCP | WebSocket)
 ```
 
 Every transport address starts with a one-character `InterfaceId`: `x` BLE (`!` is accepted too), `s`
-serial, `t` TCP, `m` mock, `r` replay, and `n` for no device selected. `RadioTransportFactory.isAddressValid` checks that prefix
+serial, `t` TCP, `w` WebSocket (a `ws://` or `wss://` URL), `m` mock, `r` replay, and `n` for no device selected. `RadioTransportFactory.isAddressValid` checks that prefix
 before a connection is attempted.
 
 ## Bluetooth Low Energy (BLE)
@@ -107,7 +108,7 @@ to notice. Every consumer must read that one flow — the visibility path and th
 admission path have to agree, or the demo entry appears and then refuses to connect.
 
 `BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it creates
-`BleRadioTransport` for BLE addresses, admits each address type in `isAddressValid`, and hands every other
+`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and hands every other
 address to the platform's `createPlatformTransport`. On hardware without Bluetooth LE it refuses BLE
 addresses, and the Android factory refuses serial addresses on hardware with no USB host, so a saved
 address restored onto such a device is kept but never armed.
@@ -115,11 +116,14 @@ address restored onto such a device is kept but never armed.
 Platform-specific implementations:
 - **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
 - **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and the replay transport isn't wired
+- **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
+
+`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP, and names a failure from the close code: a refused upgrade, a TLS failure (not detectable in a browser), a slot given to another client (4001), a message too big, or a contested slot. The last three hold every automatic redial, network recovery included, until the user connects again.
 
 ## Connection Lifecycle
 
-1. **Discovery** — Find available nodes (BLE scan / USB detect / mDNS or a manually entered TCP address)
+1. **Discovery** — Find available nodes (BLE scan / USB detect / mDNS or a manually entered TCP address or WebSocket URL)
 2. **Connection** — Establish link to selected node
 3. **Handshake** — Exchange node info and configuration
 4. **Active** — Normal message exchange

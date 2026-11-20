@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -68,6 +68,12 @@ broker's access-control list is the usual cause.
 **Test connection** probes the broker before you commit the settings to the node, and
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
 TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
+
+In the web app, the browser reaches a broker only over WebSocket. With a bare broker address,
+the default `mqtt.meshtastic.org` included, the status, **Test connection** and
+**Find topics near you** stop with "A browser reaches MQTT only over WebSocket. Set the broker
+address to its wss:// URL." This covers only what the app itself connects to, the relay and
+these two checks; a node reaching the broker over its own Wi-Fi is unaffected.
 
 ### Find Topics Near You
 

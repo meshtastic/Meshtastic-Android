@@ -34,7 +34,7 @@ The distribution directory is a static site: serve it from any web server.
 - Serve it from a secure context, https or `localhost`. The database lives in the Origin Private File System, which browsers offer only to secure contexts; Web Bluetooth and Web Serial need one too.
 - One tab at a time holds the database. A second tab waits, and offers to take the database over.
 - Some private windows offer no usable OPFS, and the database cannot open there.
-- Serve `sw.js` from the same directory as `index.html`; its scope is that directory, so the app works at a site root, under a path, or from node-headless's client directory. It caches the app shell for offline reloads (network first for the page, stale-while-revalidate for the scripts, cache first for the content-hashed `.wasm`) and leaves `api/`, `json/` and every other request alone. After a rebuild, the first reload can still run the cached scripts; reload again, or tick "Update on reload" in DevTools while developing.
+- Serve `sw.js` from the same directory as `index.html`; its scope is that directory, so the app works at a site root, under a path, or from node-headless's client directory. It caches the app shell for offline reloads: network first for the app's own page and for `webApp.js` and the other unhashed scripts, so a deploy runs on the next reload, cache first for the content-hashed modules, and stale-while-revalidate for the other shell files. Only a navigation to the app's page, the scope root or `index.html`, is answered; any other page on the origin, such as node-headless's `/signin`, passes by uncached, as do `api/`, `json/` and every other request.
 
 ## Installed app
 
@@ -42,7 +42,9 @@ The page is an installable PWA: `manifest.webmanifest` takes its icons from the 
 
 ## Browser support
 
-Radios connect over Web Bluetooth and Web Serial, which only Chromium-based browsers implement: Chrome, Edge and Opera. Bluetooth works there on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on; Web Serial works on desktop. Firefox and Safari implement neither, so they can open the app but not connect to a radio. Discovery goes through the browser's device picker rather than a background scan, because Chrome ships the Web Bluetooth scanning API only behind a flag. TCP radios are not offered: a browser cannot open raw sockets.
+Radios connect over Web Bluetooth and Web Serial, which only Chromium-based browsers implement: Chrome, Edge and Opera. Bluetooth works there on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on; Web Serial works on desktop. Firefox and Safari implement neither. Discovery goes through the browser's device picker rather than a background scan, because Chrome ships the Web Bluetooth scanning API only behind a flag.
+
+Every browser reaches a network radio over firmware's WebSocket phone API (`/api/v1/ws`), the only network transport on web: a browser cannot open raw sockets, so a `tcp` address is refused. A bare host typed in the Network pane connects with `wss` on 443 or 9443, firmware's TLS ports, and elsewhere with the page's own scheme. MQTT through the app, the client proxy, Test connection and Find topics near you, also needs a WebSocket broker: a bare broker address, the default `mqtt.meshtastic.org` included, stops with a message asking for its `wss://` URL.
 
 ## Tests
 

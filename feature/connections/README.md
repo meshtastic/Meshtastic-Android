@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:feature:connections` module provides the **device discovery and connection management screen**. It scans for and connects to Meshtastic nodes over BLE, USB serial, and TCP/NSD (network service discovery). The `ScannerViewModel` is platform-neutral; `AndroidScannerViewModel` adds Bluetooth bonding and the USB permission dialog, and `JvmScannerViewModel` registers the base behavior on Desktop.
+The `:feature:connections` module provides the **device discovery and connection management screen**. It scans for and connects to Meshtastic nodes over BLE, USB serial, TCP/NSD (network service discovery) and firmware's WebSocket phone API. The `ScannerViewModel` is platform-neutral; `AndroidScannerViewModel` adds Bluetooth bonding and the USB permission dialog, `JvmScannerViewModel` registers the base behavior on Desktop, and `WasmJsScannerViewModel` offers on web only the panes the browser can back, with the Network pane over WebSocket.
 
 **Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature` convention plugin)
 
@@ -10,7 +10,7 @@ The `:feature:connections` module provides the **device discovery and connection
 
 - Scan for BLE devices and merge results with previously bonded devices (bonded first, then discovery order)
 - Enumerate USB serial devices, with permission gating on Android (`UsbScanner`; `JvmUsbScanner` on Desktop)
-- Discover TCP/NSD services and manage recent manual TCP addresses
+- Discover TCP/NSD services and manage recent manual TCP addresses and WebSocket URLs; on web a bare host becomes a WebSocket address (`bareHostWebSocketScheme`)
 - Gate a TCP connect on Android's local-network permission without ever blocking it (`localNetworkGateAction`)
 - Surface a single-choice transport selector (BLE / Network / USB) whose active pane persists through `UiPrefs`
 - List the Demo Mode virtual devices (`Mock`, and `Replay` in debug builds) under whichever pane is showing
@@ -81,7 +81,7 @@ sealed class DeviceListEntry(name: String, fullAddress: String, bonded: Boolean,
 }
 ```
 
-The prefix is the `InterfaceId` character: BLE → `x<MAC>`, USB → `s<path>`, TCP → `t<host:port>`, Mock → `m`, Replay → `r`.
+The prefix is the `InterfaceId` character: BLE → `x<MAC>`, USB → `s<path>`, TCP → `t<host:port>`, WebSocket → `w<ws-or-wss-url>`, Mock → `m`, Replay → `r`.
 
 ### `ScannerViewModel`
 

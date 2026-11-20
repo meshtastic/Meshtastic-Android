@@ -155,7 +155,7 @@ Most modules have their own README with details on their responsibilities, API s
 | [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
 | [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
 | [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
-| [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
+| [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP / WebSocket) |
 | [feature/discovery](feature/discovery/README.md) | Mesh network discovery (scanner, AI summaries, Mesh Beacon) |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |

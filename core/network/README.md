@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. It also provides the radio transport layer (`TcpTransport`/`TcpRadioTransport`, `SerialTransport`, `SerialRadioTransport`, `BleRadioTransport`).
+The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. It also provides the radio transport layer (`TcpTransport`/`TcpRadioTransport`, `WebSocketRadioTransport`, `SerialTransport`, `SerialRadioTransport`, `BleRadioTransport`).
 
 ## Key Components
 
@@ -15,6 +15,9 @@ The module uses **Ktor** as its HTTP client. `ApiService` (`service/`) defines t
 
 ### 3. Transports
 - **`TcpTransport`** (`transport/`) + **`TcpRadioTransport`** (`radio/`): Multiplatform TCP transport and its `RadioTransport` adapter.
+- **`WebSocketRadioTransport`** (`radio/`): Firmware's WebSocket phone API (`w` addresses, default path `/api/v1/ws`) over Ktor, CIO off the web and the browser's engine on wasm (`webSocketHttpClient`). It installs no HTTP logging, so phone-link URLs stay out of the logs.
+- **`ReconnectBackoff`** (`transport/`): The reconnect schedule TCP and WebSocket share.
+- **`WasmJsRadioTransportFactory`** (`wasmJsMain`) + **`WasmJsSerialTransport`**: The web factory, over Web Bluetooth, Web Serial and WebSocket; it refuses raw TCP.
 - **`SerialTransport`** (`jvmMain`): Desktop USB/serial transport powered by jSerialComm. Android uses `SerialRadioTransport` over usb-serial-for-android instead.
 - **`BleRadioTransport`** (`radio/`): The `RadioTransport` implementation for Bluetooth devices.
 - **`MockRadioTransport`**, **`ReplayRadioTransport`**, **`NopRadioTransport`**: Demo Mode and no-op transports that reach no node.
