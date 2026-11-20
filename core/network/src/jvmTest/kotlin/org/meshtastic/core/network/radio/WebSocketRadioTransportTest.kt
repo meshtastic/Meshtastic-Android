@@ -279,20 +279,31 @@ class WebSocketRadioTransportTest {
 
     @Test
     fun `a failed dial is classified for the user`() {
-        assertEquals(
-            TransportDisconnectReason.WebSocketNotSupported,
-            WebSocketException("Handshake exception, expected status code 101 but was 404").toWebSocketFailure(),
-        )
+        val notFound = WebSocketException("Handshake exception, expected status code 101 but was 404")
+        assertEquals(TransportDisconnectReason.WebSocketNotSupported, notFound.toWebSocketFailure(url))
         assertEquals(
             TransportDisconnectReason.WebSocketHandshakeRejected,
-            WebSocketException("Handshake exception, expected status code 101 but was 403").toWebSocketFailure(),
+            WebSocketException("Handshake exception, expected status code 101 but was 403").toWebSocketFailure(url),
         )
-        assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure())
-        assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure())
+        assertEquals(TransportDisconnectReason.WebSocketTlsFailed, CertificateException("x").toWebSocketFailure(url))
+        assertEquals(TransportDisconnectReason.WebSocketConnectFailed, ConnectException("x").toWebSocketFailure(url))
         // The browser engine's error event: no status, so not a refused upgrade.
         assertEquals(
             TransportDisconnectReason.WebSocketConnectFailed,
-            WebSocketException("[object Event]").toWebSocketFailure(),
+            WebSocketException("[object Event]").toWebSocketFailure(url),
+        )
+    }
+
+    @Test
+    fun `a 404 at a path other than the API path says to check the path`() {
+        val notFound = WebSocketException("Handshake exception, expected status code 101 but was 404")
+        assertEquals(
+            TransportDisconnectReason.WebSocketHandshakeRejected,
+            notFound.toWebSocketFailure("ws://node.local/api/v1/nope"),
+        )
+        assertEquals(
+            TransportDisconnectReason.WebSocketHandshakeRejected,
+            notFound.toWebSocketFailure("ws://node.local:8080/api/v1/ws/extra"),
         )
     }
 

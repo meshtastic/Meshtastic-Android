@@ -35,6 +35,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.meshtastic.core.model.util.WEBSOCKET_API_PATH
 import org.meshtastic.core.model.util.anonymizePublicHost
 import org.meshtastic.core.network.transport.NetworkLinkTimeouts
 import org.meshtastic.core.network.transport.ReconnectBackoff
@@ -196,7 +197,7 @@ internal constructor(
             throw e
         } catch (e: Exception) {
             if (attempt.openedAt == null) {
-                attempt.failure = e.toWebSocketFailure()
+                attempt.failure = e.toWebSocketFailure(url)
                 Logger.w { "WebSocket $logLabel connect failed: ${e::class.simpleName} (${attempt.failure})" }
             } else {
                 Logger.w { "WebSocket $logLabel session failed: ${e::class.simpleName}" }
@@ -306,10 +307,12 @@ internal constructor(
 /**
  * What a failed dial tells the user. Ktor names a non-101 upgrade only in a [WebSocketException]'s message; its browser
  * engine raises the same type for any error event, a DNS or certificate failure included, with no status to report.
+ * Firmware with the WebSocket API also answers 404 to any other path, so a 404 means no WebSocket route only at
+ * [WEBSOCKET_API_PATH].
  */
-internal fun Throwable.toWebSocketFailure(): TransportDisconnectReason = when {
+internal fun Throwable.toWebSocketFailure(url: String): TransportDisconnectReason = when {
     this is WebSocketException && message.orEmpty().startsWith(UPGRADE_REFUSED_PREFIX) ->
-        if (message.orEmpty().endsWith(NOT_FOUND_SUFFIX)) {
+        if (message.orEmpty().endsWith(NOT_FOUND_SUFFIX) && parseUrl(url)?.encodedPath == WEBSOCKET_API_PATH) {
             TransportDisconnectReason.WebSocketNotSupported
         } else {
             TransportDisconnectReason.WebSocketHandshakeRejected
