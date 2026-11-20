@@ -173,8 +173,8 @@ On **Settings → Device configuration → Display**. These control the **node's
 | Display Mode | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen |
 | Display Units | **Metric** or **Imperial** on the node's screen | Metric |
 | Flip Screen | Flip the display for an inverted mounting | Off |
-| Long Node Names | Show full node names on the node's screen instead of short names. Shown only for a node whose firmware has the setting | Off |
-| Message Bubbles | Draw messages on the node's screen as bubbles. Shown only for a node whose firmware has the setting | On for a color screen 200 pixels or larger, otherwise Off |
+| Long Node Names | Show full node names on the node's screen instead of short names. Shown for firmware 2.7.13 and later | Off |
+| Message Bubbles | Draw messages on the node's screen as bubbles. Shown for firmware 2.7.19 and later | On for a color screen 200 pixels or larger, otherwise Off |
 | OLED Type | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated** | Detect Automatically |
 | Screen on for | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On** | 10 minutes |
 | Wake Screen on tap or motion | Light the screen when the node is tapped or moved. Needs an accelerometer | Off |

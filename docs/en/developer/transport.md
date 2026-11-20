@@ -38,7 +38,7 @@ before a connection is attempted.
 
 **Module:** `core:network` (the `BleRadioTransport` implementation) built on `core:ble` (BLE connection
 primitives)  
-**Platforms:** Android, Desktop (JVM via Kable), Web (Web Bluetooth); code compiles for iOS, but no iOS app ships
+**Platforms:** Android, Desktop (JVM via Kable), Web (Kable over Web Bluetooth); code compiles for iOS, but no iOS app ships
 
 The primary transport for mobile devices and also available on desktop:
 - Service discovery for Meshtastic GATT services
@@ -89,6 +89,8 @@ Network-based transport for Wi-Fi-enabled nodes:
 
 Firmware's WebSocket phone API carries one binary `ToRadio` or `FromRadio` per message at `/api/v1/ws`, for one client at a time. Addresses are `ws://` or `wss://` URLs, and an empty path becomes `/api/v1/ws` (`WebSocketUrl.kt`). Released firmware does not serve it yet. In a browser it is the only network transport.
 
+`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP. A failed dial is named from the upgrade response: a 404 at `/api/v1/ws` (firmware without the WebSocket route), any other refused upgrade, or a TLS failure (not detectable in a browser). A dropped connection is named from its close: a slot given to another client (4001), a message too big (1009), or a contested slot. Those three hold every automatic redial, network recovery included, until the user connects again.
+
 ## Transport Factory
 
 The `RadioTransportFactory` interface abstracts transport creation:
@@ -126,7 +128,6 @@ Platform-specific implementations:
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
 
-`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP, and names each failure. A failed dial is named from the upgrade response: a 404 at `/api/v1/ws` (firmware without the WebSocket route), any other refused upgrade, or a TLS failure (not detectable in a browser). A dropped connection is named from its close: a slot given to another client (4001), a message too big (1009), or a contested slot. Those three hold every automatic redial, network recovery included, until the user connects again.
 
 ## Connection Lifecycle
 

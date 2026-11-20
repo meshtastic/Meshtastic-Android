@@ -18,7 +18,8 @@ Testing strategy and practices for the Meshtastic KMP project.
 
 ### KMP unit tests (`commonTest`)
 
-Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs. In modules that apply `meshtastic.kmp.web`, `commonTest` also runs in headless Chrome with `-Pmeshtastic.web=true`:
+Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs.
+In modules that apply `meshtastic.kmp.web`, it also runs in headless Chrome with `-Pmeshtastic.web=true`:
 
 ```shell
 ./gradlew allTests
@@ -165,12 +166,14 @@ feature/my-feature/src/
 
 Tests run automatically on:
 - Pull requests whose changes match the `android` or `desktop` path filter (`pull-request.yml`)
-- Pull requests whose changes match the `web` path filter, which run `web-check`: `wasmJsBrowserTest` and the production `:webApp` link. The merge queue and `main` never build the web target
 - The merge queue (`merge-queue.yml`)
 - Pushes to `main` (`main-check.yml`)
 
 Each of these calls `reusable-check.yml`. The test shards compile with `-PwarningsAsErrors=true`, so a Kotlin
 warning that passes a local build fails CI unless you pass the same flag.
+
+A pull request whose changes match the `web` path filter also runs `web-check` in `pull-request.yml`:
+`wasmJsBrowserTest` and the production `:webApp` link. The merge queue and `main` never build the web target.
 
 On a pull request into `main`, Develocity Predictive Test Selection runs only the `jvmTest` tests it predicts the
 change can affect. Pull requests into `release/**`, the merge queue, `main` and local runs execute every test. On a

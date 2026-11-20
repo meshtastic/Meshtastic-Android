@@ -15,7 +15,7 @@ Hosts the multi-step onboarding flow and hoists the live permission states. The 
 
 `Welcome` → `Bluetooth` → `Location` → `Notifications` → `CriticalAlerts`
 
-`Bluetooth` is skipped on a device without Bluetooth. `Location` is skipped when the Bluetooth request already covered it, as on Android versions where BLE scanning needs the location permission. `CriticalAlerts` appears only when every permission was granted and the platform has a notification channel that can override Do Not Disturb, so never in a browser.
+`Bluetooth` is skipped on a device without Bluetooth. `Location` is skipped when the Bluetooth request already covered it, as on Android versions where BLE scanning needs the location permission. `CriticalAlerts` appears only when the notification permission was granted and the platform has a notification channel that can override Do Not Disturb, so never in a browser.
 
 ### 2. Permission Screens
 Dedicated screens for explaining and requesting specific permissions:

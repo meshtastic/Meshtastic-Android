@@ -114,7 +114,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms). Protobuf models are consumed from the upstream `org.meshtastic:protobufs` Maven artifact, pinned in `gradle/libs.versions.toml`.
 
 ### Bluetooth Low Energy (BLE)
-The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across Android and Desktop; the web build reaches a radio through Web Bluetooth. This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
+The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication on Android, Desktop and the web build (over Web Bluetooth). See [core/ble/README.md](core/ble/README.md) for details.
 
 ### Module Documentation
 

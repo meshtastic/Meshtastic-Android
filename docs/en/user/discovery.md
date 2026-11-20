@@ -178,7 +178,7 @@ Once enabled and transmitting over LoRa, your node periodically broadcasts its n
 
 #### Viewing neighbor data
 
-- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list, or while the Neighbor Info module is on for your connected node. Its request button asks the node for a fresh list, and appears only while your connected node has the module on, because firmware drops neighbor info on a node that has it off. Its log button opens a chart of how many neighbors the node reported and their mean SNR, with every report listed beneath it.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list, or while the Neighbor Info module is on for your connected node. Its request button asks the node for a fresh list, and appears only while your connected node has the module on, because firmware drops neighbor info on a node that has it off. Its log button opens the node's [Neighbor Info log](node-metrics#neighbor-info).
 - Each neighbor entry shows the node that was directly heard and its signal quality.
 - Combine neighbor data from multiple nodes to understand the full mesh topology.
 

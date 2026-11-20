@@ -118,11 +118,9 @@ acting, not last-device auto-reconnect. Caveats, all observed:
 
 ### Desktop radio-layer MCP server (debug builds)
 
-A debug desktop build serves a second MCP server, on the radio layer, when
-`MESHTASTIC_MCP_PORT=<port>` (or `-Dmeshtastic.mcp.port=<port>`) is set at launch.
-It listens on `127.0.0.1:<port>/mcp` (streamable HTTP) with `connection_state`,
-`connect`, `nodes` and `send_text`. It is separate from `hotMcpServer`, which
-drives the UI, and a release build ignores the port.
+Set `MESHTASTIC_MCP_PORT=<port>` at launch and a debug build also serves an MCP
+server on the radio layer, separate from `hotMcpServer`, which drives the UI.
+Tools and endpoint: `desktopApp/README.md` → Agent MCP server.
 
 ## Run: Emulator (agent path)
 

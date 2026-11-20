@@ -86,7 +86,7 @@ import org.koin.core.annotation.Module
 class FeatureMyFeatureModule
 ```
 
-## Register DI in App/Desktop
+## Register DI in each host
 
 Add your module to:
 - `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
@@ -137,7 +137,8 @@ navigate to the same composable, so the feature is reachable via either a top-le
 push — the same pattern `feature:wifi-provision` and `feature:firmware` use.
 
 Then wire it up: call `myFeatureGraph(backStack)` from the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt` and from `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, alongside the
+`androidApp`'s `Main.kt`, from `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, and, for a module that
+applies `meshtastic.kmp.web`, from `webNavGraph` in `webApp`'s `WebNavigation.kt`, alongside the
 other features' entries functions. See [Navigation Entry Registration](navigation-and-deep-links#navigation-entry-registration).
 
 ## Source Set Guidelines
@@ -166,7 +167,7 @@ Every feature module should have:
 - [ ] Added to a test shard in `.github/workflows/reusable-check.yml` (`shard-feature` for a feature module): its `:feature:my-feature:allTests` task in `tasks` and its `koverXmlReport` in `kover`; `python3 scripts/check-test-shards.py` fails for a module with no test task in any shard, unless the module is listed in the script's `COVERED_ELSEWHERE` or `NO_TESTS_YET` sets
 - [ ] If the module is user-facing, a page under `docs/en/user/` and a `MODULE_TO_DOCS` entry for it in `scripts/check-doc-coverage.js`; the check fails when a listed module's page is missing, and a module with no entry needs no page
 - [ ] DI module created with `@ComponentScan`
-- [ ] DI module registered in app and desktop roots
+- [ ] DI module registered in the app and desktop roots, and the web root for a module with a web target
 - [ ] Routes added to `Routes.kt`, the sealed interface registered in `NavigationConfig.kt`, and an instance of each route in `NavigationConfigTest`
 - [ ] Navigation entries registered
 - [ ] `./gradlew kmpSmokeCompile` passes

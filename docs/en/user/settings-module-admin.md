@@ -147,7 +147,7 @@ battery health often and sensors rarely. The intervals run from 30 minutes to 72
 | Power Measurement Enabled | Report the per-channel voltage and current readings | Off |
 | Power Metrics Interval | How often to report them | — |
 | Power Screen | Also show power readings on the device's display | Off |
-| Show air quality on device screen | Also show air quality readings on the device's display. Shown only for a node whose firmware has the setting | Off |
+| Show air quality on device screen | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later | Off |
 | Show environment on device screen | Also show environment readings on the device's display | Off |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
@@ -345,7 +345,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
-  The phone's GPS rests while the phone is still: after three fixes in a row inside the area your node shares its position at, the app stops asking for location until the phone senses movement, and the node keeps broadcasting the last position it was given. The GPS keeps running when no channel shares a position, when the position is shared at full precision, when the node's role is Lost and Found, or on a phone with no motion sensor.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

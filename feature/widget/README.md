@@ -42,6 +42,7 @@ src/main/kotlin/org/meshtastic/feature/widget/
 ├── TelemetryConfigActivity.kt       ← APPWIDGET_CONFIGURE node and hidden-readings setup
 ├── TelemetryPageAction.kt           ← ActionCallback (page button)
 ├── WidgetNodeChip.kt                ← node chip shared by all three widgets
+├── WidgetValues.kt                  ← stale-value color and battery text
 ├── AndroidAppWidgetUpdater.kt       ← implements AppWidgetUpdater (core:repository)
 ├── RefreshLocalStatsAction.kt       ← ActionCallback (refresh button)
 ├── WidgetResourceEnvironment.kt     ← bridges Compose resources into Glance
