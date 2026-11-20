@@ -17,10 +17,15 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
@@ -31,8 +36,9 @@ import org.meshtastic.proto.User
 import kotlin.test.Test
 
 /**
- * `Position.altitude` is optional on the wire: an unset one is no reading, and 0 is sea level. The tests match the
- * elevation itself, not the resource suffix, which is empty where resources do not load (wasmJs browser tests).
+ * `Position.altitude` is optional on the wire: an unset one is no reading, and 0 is sea level. The elevation is found
+ * by its tag, and its value is matched whole up to the resource suffix, which is empty where resources do not load
+ * (wasmJs browser tests).
  */
 @OptIn(ExperimentalTestApi::class)
 class NodeItemAltitudeTest {
@@ -40,13 +46,21 @@ class NodeItemAltitudeTest {
     @Test
     fun nodeItem_hidesAbsentAltitude() = runComposeUiTest {
         setNodeItem(altitude = null)
-        onNodeWithText(SEA_LEVEL, substring = true).assertDoesNotExist()
+        onNodeWithTag(NODE_ITEM_ELEVATION_TAG, useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test
     fun nodeItem_showsSeaLevelAltitude() = runComposeUiTest {
         setNodeItem(altitude = 0)
-        onNodeWithText(SEA_LEVEL, substring = true).assertIsDisplayed()
+        onNode(hasAnyAncestor(hasTestTag(NODE_ITEM_ELEVATION_TAG)) and hasElevation(SEA_LEVEL), useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    /** Text that is [value] alone or [value] then a space and the suffix, so `10 m` never passes for `0 m`. */
+    private fun hasElevation(value: String) = SemanticsMatcher("elevation $value") { node ->
+        node.config.getOrNull(SemanticsProperties.Text).orEmpty().any {
+            it.text == value || it.text.startsWith("$value ")
+        }
     }
 
     private fun ComposeUiTest.setNodeItem(altitude: Int?) = setContent {
