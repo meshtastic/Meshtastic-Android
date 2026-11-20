@@ -44,7 +44,7 @@ The page is an installable PWA: `manifest.webmanifest` takes its icons from the 
 
 Radios connect over Web Bluetooth and Web Serial, which only Chromium-based browsers implement: Chrome, Edge and Opera. Bluetooth works there on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on; Web Serial works on desktop. Firefox and Safari implement neither. Discovery goes through the browser's device picker rather than a background scan, because Chrome ships the Web Bluetooth scanning API only behind a flag.
 
-Every browser reaches a network radio over firmware's WebSocket phone API (`/api/v1/ws`), the only network transport on web: a browser cannot open raw sockets, so a `tcp` address is refused. A bare host typed in the Network pane connects with `wss` on 443 or 9443, firmware's TLS ports, and elsewhere with the page's own scheme. MQTT through the app, the client proxy, Test connection and Find topics near you, also needs a WebSocket broker: a bare broker address, the default `mqtt.meshtastic.org` included, stops with a message asking for its `wss://` URL.
+Every browser reaches a network radio over firmware's WebSocket phone API (`/api/v1/ws`), which released firmware does not serve yet, the only network transport on web: a browser cannot open raw sockets, so a `tcp` address is refused. A bare host typed in the Network pane connects with `wss` on 443 or 9443, firmware's TLS ports, and elsewhere with the page's own scheme. MQTT through the app, the client proxy, Test connection and Find topics near you, also needs a WebSocket broker: a bare broker address, the default `mqtt.meshtastic.org` included, stops with a message asking for its `wss://` URL.
 
 ## Tests
 

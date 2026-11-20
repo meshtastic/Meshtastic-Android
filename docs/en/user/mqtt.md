@@ -70,10 +70,11 @@ distinguishes the failure modes: the hostname not resolving, the TCP connection 
 TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
 In the web app, the browser reaches a broker only over WebSocket. With a bare broker address,
-the default `mqtt.meshtastic.org` included, the status, **Test connection** and
-**Find topics near you** stop with "A browser reaches MQTT only over WebSocket. Set the broker
-address to its wss:// URL." This covers only what the app itself connects to, the relay and
-these two checks; a node reaching the broker over its own Wi-Fi is unaffected.
+the default `mqtt.meshtastic.org` included, **Test connection** and **Find topics near you** stop
+with "A browser reaches MQTT only over WebSocket. Set the broker address to its wss:// URL.", and
+so does the status once **MQTT Client Proxy** has the app relay; without it the status stays
+**Inactive**. This covers only what the app itself connects to; a node reaching the broker over
+its own Wi-Fi is unaffected.
 
 ### Find Topics Near You
 

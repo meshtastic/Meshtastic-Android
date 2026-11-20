@@ -15,7 +15,7 @@ The module uses **Ktor** as its HTTP client. `ApiService` (`service/`) defines t
 
 ### 3. Transports
 - **`TcpTransport`** (`transport/`) + **`TcpRadioTransport`** (`radio/`): Multiplatform TCP transport and its `RadioTransport` adapter.
-- **`WebSocketRadioTransport`** (`radio/`): Firmware's WebSocket phone API (`w` addresses, default path `/api/v1/ws`) over Ktor, CIO off the web and the browser's engine on wasm (`webSocketHttpClient`). It installs no HTTP logging, so phone-link URLs stay out of the logs.
+- **`WebSocketRadioTransport`** (`radio/`): Firmware's WebSocket phone API (`w` addresses, default path `/api/v1/ws`; released firmware does not serve it yet) over Ktor, CIO off the web and the browser's engine on wasm (`webSocketHttpClient`). No client installs HTTP logging; the transport's own log label carries the scheme, host and port (a public host anonymized) and the path, never the query or credentials.
 - **`ReconnectBackoff`** (`transport/`): The reconnect schedule TCP and WebSocket share.
 - **`WasmJsRadioTransportFactory`** (`wasmJsMain`) + **`WasmJsSerialTransport`**: The web factory, over Web Bluetooth, Web Serial and WebSocket; it refuses raw TCP.
 - **`SerialTransport`** (`jvmMain`): Desktop USB/serial transport powered by jSerialComm. Android uses `SerialRadioTransport` over usb-serial-for-android instead.
