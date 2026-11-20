@@ -2,7 +2,7 @@
 
 This opt-in JVM test runs the same synthetic PhoneAPI asset through the Android replay transport and through an SDK client connected to that transport. Both feed Android's packet processor, data handler, and real Room repositories. The fixture supplies channel state, snapshot installation, the selected database, and session admission. It exercises receipt of a packet during the handshake, notification after the Room install, and the rejection of a delayed packet after a session switch.
 
-Build `:core:jvmJar` at SDK commit `1494611e590c078a626e39e870142b2be513f331`. From the Android checkout, run the test with the resulting JVM jar:
+Build `:core:jvmJar` at SDK commit `69b0265217061097aece04e6638d78e52f918bed`. From the Android checkout, run the test with the resulting JVM jar:
 
 ```sh
 ./gradlew :core:data:jvmTest --tests org.meshtastic.core.data.manager.SdkRoomReplayTest \
@@ -22,3 +22,22 @@ Build `:core:jvmJar :transport-tcp:jvmJar` at the same SDK commit. The TCP test 
 ```
 
 To check a running PhoneAPI server or test radio, set `MESHTASTIC_SDK_TCP_HOST` and optionally `MESHTASTIC_SDK_TCP_PORT` (default 4403). Add `--rerun --no-build-cache` for an endpoint run. This mode checks the installed snapshot and retired session without requiring a particular incoming text. The harness disables clock sync and uses the SDK's in-memory storage. The app's normal backend selection remains outside this test.
+
+## Android debug backend
+
+Build against the SDK checkout containing `sessionReceiveEnvelopes()` and `trySendRaw()`. The SDK composite currently needs Isolated Projects and its configuration cache disabled.
+
+```sh
+./gradlew :androidApp:assembleFdroidDebug \
+  -PmeshtasticSdkCheckout=/absolute/path/to/meshtastic-sdk \
+  -Dorg.gradle.isolated-projects=false --no-configuration-cache
+```
+
+In that debug APK, create the app-private flag before selecting the TCP address in Connections.
+
+```sh
+adb install -r androidApp/build/outputs/apk/fdroid/debug/<apk>
+adb shell "run-as com.geeksville.mesh.fdroid.debug sh -c 'mkdir -p files && touch files/enable-sdk-tcp'"
+```
+
+The app selects the backend for each fresh transport. To return to legacy TCP in the same APK, disconnect, remove the flag with `adb shell run-as com.geeksville.mesh.fdroid.debug rm files/enable-sdk-tcp`, then reconnect. SDK TCP keeps one client per app session and leaves outgoing message state and Room ownership with Android. SDK packet and post-handshake envelope events share the bounded receive queue. The debug backend requires a fresh selection after a dropped socket. Automatic reconnect and in-session node-list refresh remain open.

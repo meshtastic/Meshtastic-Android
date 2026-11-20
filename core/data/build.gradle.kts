@@ -54,6 +54,12 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
+            if (providers.gradleProperty("meshtasticSdkCheckout").isPresent) {
+                implementation("org.meshtastic:sdk-transport-tcp")
+            }
+        }
+        if (providers.gradleProperty("meshtasticSdkCheckout").isPresent) {
+            androidMain { kotlin.srcDir("src/sdkTcpAndroidMain/kotlin") }
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }

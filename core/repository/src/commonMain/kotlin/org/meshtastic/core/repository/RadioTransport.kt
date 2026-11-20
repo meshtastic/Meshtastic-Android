@@ -21,6 +21,10 @@ package org.meshtastic.core.repository
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
 interface RadioTransport {
+    /** True when this transport owns the PhoneAPI handshake, heartbeat and disconnect request. */
+    val managesPhoneApi: Boolean
+        get() = false
+
     /**
      * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required
      * synchronous admission checks and enqueue asynchronous I/O internally.

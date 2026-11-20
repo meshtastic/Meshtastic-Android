@@ -50,6 +50,7 @@ class AndroidRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     connectionFactory: BleConnectionFactory,
     dispatchers: CoroutineDispatchers,
+    private val sdkTcpFactory: AndroidSdkTcpTransportFactory? = null,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
@@ -99,12 +100,15 @@ class AndroidRadioTransportFactory(
             InterfaceId.REPLAY -> createReplayTransport(service, rest)
 
             InterfaceId.TCP ->
-                TcpRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    dispatchers = dispatchers,
-                    address = rest,
-                )
+                sdkTcpFactory
+                    ?.takeIf { buildConfigProvider.isDebug && context.getFileStreamPath(SDK_TCP_FLAG).exists() }
+                    ?.create(rest, service)
+                    ?: TcpRadioTransport(
+                        callback = service,
+                        scope = service.serviceScope,
+                        dispatchers = dispatchers,
+                        address = rest,
+                    )
 
             InterfaceId.SERIAL ->
                 SerialRadioTransport(
@@ -153,5 +157,6 @@ class AndroidRadioTransportFactory(
 
     private companion object {
         const val REPLAY_ASSET_NAME = "burningmesh.fromradio"
+        const val SDK_TCP_FLAG = "enable-sdk-tcp"
     }
 }

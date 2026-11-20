@@ -502,6 +502,10 @@ class SharedRadioInterfaceService(
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
     @Volatile private var radioTransport: RadioTransport? = null
+
+    override val transportManagesPhoneApi: Boolean
+        get() = radioTransport?.managesPhoneApi == true
+
     private var runningTransportId: InterfaceId? = null
     private var isStarted = false
 
@@ -1010,7 +1014,7 @@ class SharedRadioInterfaceService(
         }
         runningTransportId = DeviceAddress.parse(address)?.interfaceId
         isStarted = true
-        startHeartbeat()
+        if (!newTransport.managesPhoneApi) startHeartbeat()
     }
 
     /**
@@ -1047,6 +1051,7 @@ class SharedRadioInterfaceService(
             if (
                 sendPoliteDisconnect &&
                 currentTransport != null &&
+                !currentTransport.managesPhoneApi &&
                 _connectionState.value != ConnectionState.Disconnected
             ) {
                 ignoreExceptionSuspend {

@@ -236,6 +236,8 @@ class SdkRoomReplayTest {
                         processed.complete(Unit)
                     }
 
+                    is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
+
                     is RadioSessionEvent.Ended -> assertEquals(sdkSession, event.sessionId)
                 }
             }

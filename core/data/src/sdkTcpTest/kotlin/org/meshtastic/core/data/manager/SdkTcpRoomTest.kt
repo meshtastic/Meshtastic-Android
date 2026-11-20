@@ -281,6 +281,8 @@ class SdkTcpRoomTest {
                             )
                         }
 
+                        is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
+
                         is RadioSessionEvent.Ended -> sdkSession = null
                     }
                 }

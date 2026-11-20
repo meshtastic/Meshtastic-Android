@@ -243,6 +243,7 @@ class MeshConnectionManagerImpl(
      * transition.
      */
     private suspend fun onRadioConnectionState(newState: ConnectionState) {
+        if (newState == ConnectionState.Connected && radioInterfaceService.transportManagesPhoneApi) return
         val localConfig = radioConfigRepository.localConfigFlow.first()
         val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
         val lsEnabled = localConfig.power?.is_power_saving == true || isRouter

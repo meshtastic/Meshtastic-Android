@@ -42,6 +42,16 @@ plugins {
     id("org.meshtastic.flatpak.sources.settings") version "0.2.2"
 }
 
+// Local Android SDK TCP builds consume the patched SDK as a composite.
+providers.gradleProperty("meshtasticSdkCheckout").orNull?.let { checkout ->
+    includeBuild(checkout) {
+        name = "meshtastic-sdk-checkout"
+        dependencySubstitution {
+            substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
+        }
+    }
+}
+
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
