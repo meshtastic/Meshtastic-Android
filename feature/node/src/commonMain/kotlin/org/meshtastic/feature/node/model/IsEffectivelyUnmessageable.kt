@@ -22,16 +22,20 @@ import org.meshtastic.core.model.isUnmessageableRole
 val Node.isEffectivelyUnmessageable: Boolean
     get() = user.is_unmessagable ?: user.role.isUnmessageableRole()
 
+/** Whether this, our own node, is in licensed (ham) mode. False when our node is not known yet. */
+val Node?.isLicensedLocal: Boolean
+    get() = this?.user?.is_licensed == true
+
 /**
- * Whether a direct message to this node can actually be delivered.
+ * Whether a direct message to this node can actually be delivered by our radio.
  *
- * Two independent signals. [isEffectivelyUnmessageable] is the node saying it does not accept messages. The public key
- * is what the sending radio needs: a direct message takes the PKC path, and a radio holding no key for the destination
- * refuses with `PKI_SEND_FAIL_PUBLIC_KEY` rather than falling back to the channel key. A node whose packets we have
- * heard but whose NodeInfo has not arrived has no key on file, which is common rather than exceptional.
+ * [isEffectivelyUnmessageable] is the node saying it does not accept messages. Beyond that the radio decides: an
+ * unlicensed radio takes the PKC path and refuses with `PKI_SEND_FAIL_PUBLIC_KEY` when it holds no key for the
+ * destination, while a licensed radio never uses PKC and sends on the channel, so it needs no key. A node whose
+ * NodeInfo has not arrived has no key on file, which is common rather than exceptional.
  */
-val Node.canDirectMessage: Boolean
-    get() = !isEffectivelyUnmessageable && hasPKC
+fun Node.canDirectMessage(localIsLicensed: Boolean): Boolean =
+    !isEffectivelyUnmessageable && (hasPKC || localIsLicensed)
 
 /**
  * Whether to offer the direct-message action for this node.
@@ -39,4 +43,5 @@ val Node.canDirectMessage: Boolean
  * [canDirectMessage] with an escape hatch: a node we can no longer send to may still have a thread worth reading, so an
  * existing conversation keeps the action visible.
  */
-fun Node.showsDirectMessageAction(hasConversation: Boolean): Boolean = canDirectMessage || hasConversation
+fun Node.showsDirectMessageAction(hasConversation: Boolean, localIsLicensed: Boolean): Boolean =
+    canDirectMessage(localIsLicensed) || hasConversation
