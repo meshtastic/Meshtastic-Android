@@ -135,6 +135,7 @@
     <string name="connected_device">Dispositivo conectado</string>
     <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
     <string name="connecting">Conectando</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Conexiones actuales:</string>
     <string name="connections">Conexión</string>
     <string name="conversations">Conversaciones</string>
@@ -573,6 +574,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="recent_network_devices">Dispositivos de red recientes</string>
     <string name="regenerate_keys_confirmation">¿Estás seguro de querer regenerar tu clave privada?\n\nLos nodos que hayan intercambiado previamente las claves con este nodo tendrán que quitar ese nodo y volver a intercambiar las claves para poder reanudar la comunicación segura.</string>
     <string name="regenerate_private_key">Regenerar clave privada</string>
+    <string name="reload">Recargar</string>
     <!-- REMOTE -->
     <string name="remote">Remoto</string>
     <string name="remote_admin">Administración remota</string>
@@ -656,6 +658,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="selected">Seleccionados</string>
     <string name="selected_map_type">Tipo de mapa seleccionado</string>
     <string name="send">Enviar</string>
+    <!-- SERIAL -->
     <string name="serial">Conexión Serial</string>
     <string name="serial_config">Configuración serial</string>
     <string name="set_your_region">Introduzca su región</string>
@@ -767,6 +770,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="waypoint_edit">Editar punto de referencia</string>
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mal</string>

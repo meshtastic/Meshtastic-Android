@@ -59,6 +59,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Painéal Laige</string>
     <!-- DEEP -->
@@ -252,6 +253,7 @@
     <!-- SECURITY -->
     <string name="select_all">Roghnaigh go léir</string>
     <string name="send">Seol</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Roinn</string>
     <!-- SHOW -->
@@ -297,6 +299,7 @@
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_new">Pointe bealach nua</string>
     <string name="waypoint_received">Pointe bealach faighte: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Go dona</string>
     <!-- WIFI -->

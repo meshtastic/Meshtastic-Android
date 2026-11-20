@@ -87,6 +87,7 @@
     <string name="connected">Verbonden</string>
     <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
     <string name="connecting">Bezig met verbinden</string>
+    <!-- CONNECTION -->
     <string name="copy">Kopieer</string>
     <string name="critical_alert">Kritieke Waarschuwing!</string>
     <string name="current">Huidige</string>
@@ -362,6 +363,7 @@
     <string name="security">Beveiliging</string>
     <string name="select_all">Selecteer alle</string>
     <string name="send">Verzend</string>
+    <!-- SERIAL -->
     <string name="serial">Serieel</string>
     <string name="serial_config">Seriële Configuratie</string>
     <string name="settings">instellingen</string>
@@ -433,6 +435,7 @@
     <string name="waypoint_edit">Wijzig waypoint</string>
     <string name="waypoint_new">Nieuw waypoint</string>
     <string name="waypoint_received">Ontvangen waypoint: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Gewicht</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slecht</string>

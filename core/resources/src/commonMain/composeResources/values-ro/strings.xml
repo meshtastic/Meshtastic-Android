@@ -161,6 +161,7 @@
     <string name="connected_device">Dispozitive conectate</string>
     <string name="connected_sleeping">Connectat la dispozitivi, dar e în modul de sleep</string>
     <string name="connecting">Conectare</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Conexiuni actuale:</string>
     <string name="connections">Conexiune</string>
     <string name="conversations">Conversații</string>
@@ -853,6 +854,7 @@
     <string name="selected">Selectat</string>
     <string name="selected_map_type">Tipul hărții selectate</string>
     <string name="send">Trimite</string>
+    <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Configurație serial</string>
     <string name="set_your_region">Setează-ți regiunea</string>
@@ -999,6 +1001,7 @@
     <string name="waypoint_edit">Editează waypoint</string>
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Reper recepționat: $1%1$s</string>
+    <!-- WEB -->
     <string name="weight">Greutate</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slab</string>

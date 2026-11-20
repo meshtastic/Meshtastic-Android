@@ -285,6 +285,7 @@
     <string name="connected_device">Yhdistetty laite</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="connecting">Yhdistetään</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Aktiiviset yhteydet:</string>
     <string name="connections">Yhteys</string>
     <string name="contact_draft_prefix">Luonnos: %1$s</string>
@@ -1402,6 +1403,7 @@
         <item quantity="one">Kuultu %1$d radion kautta</item>
         <item quantity="other">Kuultu %1$d radion kautta</item>
     </plurals>
+    <string name="reload">Lataa uudelleen</string>
     <!-- REMOTE -->
     <string name="remote">Etäyhteys</string>
     <string name="remote_admin">Etähallinta</string>
@@ -1537,6 +1539,7 @@
     <string name="selected">Valittu</string>
     <string name="selected_map_type">Valittu karttatyyppi</string>
     <string name="send">Lähetä</string>
+    <!-- SERIAL -->
     <string name="serial">Sarjaliitäntä</string>
     <string name="serial_config">Sarjaportin asetukset</string>
     <string name="session_active">Istunto aktiivinen</string>
@@ -1787,6 +1790,7 @@
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_new">Uusi reittipiste</string>
     <string name="waypoint_received">Vastaanotettu reittipiste: %1$s</string>
+    <!-- WEB -->
     <string name="website">Verkkosivusto</string>
     <string name="weight">Paino</string>
     <string name="what_is_meshtastic">Mikä on Meshtastic?</string>

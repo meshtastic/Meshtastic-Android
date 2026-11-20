@@ -63,6 +63,7 @@
     <string name="compass_no_location_permission">Нужно разрешение на доступ к местоположению, чтобы показывать расстояние и азимут.</string>
     <!-- CONFIG -->
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Paneli i debug-ut</string>
     <!-- DEEP -->
@@ -255,6 +256,7 @@
     <!-- SECURITY -->
     <string name="select_all">Përzgjedh të gjithë</string>
     <string name="send">Dërgo</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Ndaj</string>
     <!-- SHOW -->
@@ -291,6 +293,7 @@
     <string name="waypoint_edit">Redakto pikën e rreshtit</string>
     <string name="waypoint_new">Pikë e re rreshti</string>
     <string name="waypoint_received">Pikë rreshti e marrë: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">I Keq</string>
     <!-- WIFI -->

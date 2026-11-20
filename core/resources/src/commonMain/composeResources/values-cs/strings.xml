@@ -106,6 +106,9 @@
     <string name="aqi">AQI</string>
     <string name="aqi_good">Silný</string>
     <string name="aqi_hazardous">Nebezpečná</string>
+    <string name="aqi_moderate">Mírná</string>
+    <string name="aqi_unhealthy">Nezdravá</string>
+    <string name="aqi_unhealthy_sensitive">Nezdravá pro citlivé skupiny</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="aqi_very_unhealthy">Velice nezdravá</string>
     <string name="archived_channel">Archivovaný kanál</string>
@@ -182,6 +185,14 @@
     <string name="cant_change_no_radio">Kanál nelze změnit, protože rádio ještě není připojeno. Zkuste to znovu.</string>
     <string name="cant_shutdown">Vypnutí není na tomto zařízení podporováno</string>
     <!-- CARDINAL -->
+    <string name="cardinal_e">V</string>
+    <string name="cardinal_n">S</string>
+    <string name="cardinal_ne">SV</string>
+    <string name="cardinal_nw">SZ</string>
+    <string name="cardinal_s">J</string>
+    <string name="cardinal_se">JV</string>
+    <string name="cardinal_sw">JZ</string>
+    <string name="cardinal_w">Z</string>
     <string name="ch_util_definition">Využití aktuálního kanálu, včetně dobře vytvořeného TX, RX a poškozeného RX (tzv. šumu).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -284,6 +295,7 @@
     <string name="connected_device">Připojená zařízení</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="connecting">Připojování</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Aktuální připojení:</string>
     <string name="connections">Připojení</string>
     <string name="contact_muted_snackbar">Ztlumeno %1$s</string>
@@ -380,6 +392,22 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
+    <string name="device_model_ar_camera_unavailable">Fotoaparát používá jiná aplikace. Zavřete ji a zkuste to znovu.</string>
+    <string name="device_model_ar_failed">Nepodařilo se spustit AR</string>
+    <string name="device_model_ar_restart_phone">Restartujte telefon. Snímač pohybu nereaguje a bez něj nelze AR spustit.</string>
+    <string name="device_model_banana_for_scale">Banán pro měřítko</string>
+    <string name="device_model_capture">Vyfotit</string>
+    <string name="device_model_capture_failed">Fotku se nepodařilo uložit</string>
+    <string name="device_model_capture_saved">Uloženo do složky Obrázky</string>
+    <string name="device_model_in_space_hint">Zobrazuje se vedle aplikace ve skutečné velikosti. Přesunete ho dvěma prsty.</string>
+    <string name="device_model_load_failed">3D model se nepodařilo načíst</string>
+    <string name="device_model_rest_face_down">Přední stranou dolů</string>
+    <string name="device_model_rest_face_up">Přední stranou nahoru</string>
+    <string name="device_model_rest_left_side">Levá strana</string>
+    <string name="device_model_rest_right_side">Pravá strana</string>
+    <string name="device_model_rest_upright">Ve svislé poloze</string>
+    <string name="device_model_view">Zobrazit 3D model</string>
+    <string name="device_model_view_in_space">Zobrazit ve vašem prostoru</string>
     <string name="device_sleeping">Zařízení spí</string>
     <string name="device_theme_language">Vzhled: %1$s, Jazyk: %2$s</string>
     <string name="dew_point">Rosný bod</string>
@@ -452,6 +480,12 @@
     <string name="discovery_stop_scan">Zastavit vyhledávání</string>
     <string name="discovery_summary_not_available">Analýza pomocí AI není k dispozici</string>
     <string name="discovery_time_remaining">%1$s zbývá</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="one">%1$d jedinečný uzel</item>
+        <item quantity="few">%1$d jedinečných uzlů</item>
+        <item quantity="many">%1$d jedinečných uzlů</item>
+        <item quantity="other">%1$d jedinečných uzlů</item>
+    </plurals>
     <string name="discovery_view_map">Zobrazit na mapě</string>
     <string name="disk_free_indexed">Volný disk %1$d</string>
     <string name="display">Obrazovka</string>
@@ -511,6 +545,7 @@
     <!-- EMOJI -->
     <string name="emoji_category_activities">Aktivity</string>
     <string name="emoji_category_animals_nature">Zvířata a příroda</string>
+    <string name="emoji_category_flags">Vlajky</string>
     <string name="emoji_category_food_drink">Jídlo a pití</string>
     <string name="emoji_category_objects">Objekty</string>
     <string name="emoji_category_people_body">Lidé a tělo</string>
@@ -703,6 +738,11 @@
     <string name="fixed_position">Pevná poloha</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Tučné</string>
+    <string name="format_code">Kód</string>
+    <string name="format_italic">Kurzíva</string>
+    <string name="format_link">Odkaz</string>
+    <string name="format_strikethrough">Přeškrtnuté</string>
     <string name="free_memory">Volná paměť</string>
     <string name="free_memory_description">Dostupná systémová paměť v bajtech</string>
     <string name="freq">Frekv</string>
@@ -819,10 +859,28 @@
     <string name="licensed_mode_enable_title">Povolit licencovaný režim (Ham)?</string>
     <string name="licensed_mode_enable_warning">Licencovaný režim odstraní šifrovací klíče kanálů a deaktivuje administrátorský kanál, takže veškerý provoz bude odesílán v otevřeném textu, který může kdokoli číst. Tento firmware jej navíc nemůže podepisovat, takže ostatní uzly nemohou ověřit, že pochází od vás. Tento režim není kompatibilní s výchozí sítí Meshtastic a nadále odpovídáte za dodržování podmínek své radioamatérské licence a místních předpisů.</string>
     <string name="licensed_mode_enable_warning_signed">Licencovaný režim odstraní šifrovací klíče kanálů a deaktivuje administrátorský kanál, takže veškerý provoz bude odesílán v otevřeném textu, který může kdokoli číst. Zprávy jsou však digitálně podepisovány, takže ostatní uzly mohou ověřit, že pocházejí od vás. Číslo vašeho uzlu se může jednou změnit tak, aby odpovídalo vašemu identifikačnímu klíči, takže oblíbené položky, historie zpráv, vzdálená správa a ostatní uzly jej mohou zpočátku považovat za nový uzel. Nadále odpovídáte za dodržování podmínek své radioamatérské licence a místních předpisů.</string>
+    <string name="lightning_distance">Vzdálenost bouřky</string>
+    <string name="lightning_strikes_1h">Blesk (1h)</string>
     <!-- LIVE -->
     <string name="live_update_direct">Přímý</string>
+    <string name="live_update_mesh_status">Stav mesh sítě</string>
+    <string name="live_update_mesh_status_shown">Stav mesh sítě ve stavové řádku a panelu oznámení</string>
+    <string name="live_update_mesh_status_shown_shade">Stav mesh sítě v panelu oznámení</string>
+    <string name="live_update_mesh_status_summary">Připojení, počet uzlů online, nepřečtené zprávy a baterie rádia</string>
+    <string name="live_update_no_nodes">Žádné uzly ke sledování</string>
+    <string name="live_update_off_summary">Zobrazit mesh síť nebo jeden uzel ve stavovém řádku a panelu oznámení</string>
+    <string name="live_update_promotion_off">Živé aktualizace Meshtasticj sou vypnuté v nastavení systému</string>
+    <string name="live_update_search_nodes">Vyhledat uzly</string>
+    <string name="live_update_signal">SNR %1$s, RSSI %2$s</string>
+    <string name="live_update_start">Spustit</string>
+    <string name="live_update_stop">Zastavit</string>
+    <string name="live_update_stop_action">Zastavit živé aktualizace</string>
+    <string name="live_update_switch">Přepnout</string>
     <string name="live_update_track_in">Sledovat v živém režimu</string>
     <string name="live_update_track_node">Sledovat uzel</string>
+    <string name="live_update_track_node_summary">Baterie, signál, poslední příjem, skoky a vzdálenost jednoho uzlu</string>
+    <string name="live_update_tracking_shown">Sledování uzlu %1$s ve stavovém řádku a panelu oznámení</string>
+    <string name="live_update_tracking_shown_shade">Sledování uzlu %1$s v panelu oznámení</string>
     <string name="live_update_unread">%1$d nepřečtených</string>
     <!-- LOAD -->
     <string name="load">Zatížení</string>
@@ -1532,6 +1590,7 @@
     <string name="select_all">Vybrat vše</string>
     <string name="selected">Vybrané</string>
     <string name="send">Odeslat</string>
+    <!-- SERIAL -->
     <string name="serial">Sériový</string>
     <string name="serial_config">Konfigurace sériové komunikace</string>
     <string name="session_active">Relace aktivní</string>
@@ -1759,6 +1818,7 @@
     <string name="waypoint_edit">Upravit waypoint</string>
     <string name="waypoint_new">Nový waypoint</string>
     <string name="waypoint_received">Přijatý waypoint: %1$s</string>
+    <!-- WEB -->
     <string name="website">Webová stránka</string>
     <string name="weight">Hmotnost</string>
     <string name="what_is_meshtastic">Co je Meshtastic?</string>

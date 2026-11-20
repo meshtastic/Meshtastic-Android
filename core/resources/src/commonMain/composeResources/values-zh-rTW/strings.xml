@@ -273,6 +273,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="connected_device">連接裝置</string>
     <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
     <string name="connecting">正在連線</string>
+    <!-- CONNECTION -->
     <string name="connection_status">目前連線：</string>
     <string name="connections">連線</string>
     <string name="contrast">對比度</string>
@@ -1054,6 +1055,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <plurals name="relays">
         <item quantity="other">聽到 %1$d 個中繼</item>
     </plurals>
+    <string name="reload">重新載入</string>
     <!-- REMOTE -->
     <string name="remote">遠端</string>
     <string name="remote_admin">遠端管理</string>
@@ -1163,6 +1165,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="selected">已選取</string>
     <string name="selected_map_type">已選擇的地圖類型</string>
     <string name="send">傳送</string>
+    <!-- SERIAL -->
     <string name="serial">序列埠</string>
     <string name="serial_config">序列埠設定</string>
     <string name="session_active">連線階段進行中</string>
@@ -1338,6 +1341,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="waypoint_edit">編輯航點</string>
     <string name="waypoint_new">新建航點</string>
     <string name="waypoint_received">收到編輯航點：%1$s</string>
+    <!-- WEB -->
     <string name="weight">重量</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">不良</string>

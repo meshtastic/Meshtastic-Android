@@ -189,6 +189,7 @@
     <string name="connected_device">Ansluten enhet</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="connecting">Ansluter</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Aktuella anslutningar:</string>
     <string name="connections">Anslutning</string>
     <string name="contrast">Kontrast</string>
@@ -1016,6 +1017,7 @@
     <string name="selected">Vald</string>
     <string name="selected_map_type">Vald karttyp</string>
     <string name="send">Skicka</string>
+    <!-- SERIAL -->
     <string name="serial">Seriell kommunikation</string>
     <string name="serial_config">Seriell konfiguration</string>
     <string name="session_active">Session aktiv</string>
@@ -1195,6 +1197,7 @@
     <string name="waypoint_edit">Redigera vägpunkt</string>
     <string name="waypoint_new">Ny vägpunkt</string>
     <string name="waypoint_received">Mottagen vägpunkt: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Vikt</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Dålig</string>

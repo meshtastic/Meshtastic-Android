@@ -250,6 +250,7 @@
     <string name="connected_device">Verbundene Geräte</string>
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="connecting">Wird verbunden</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Aktuelle Verbindungen:</string>
     <string name="connections">Verbindung</string>
     <string name="contrast">Kontrast</string>
@@ -1133,6 +1134,7 @@
         <item quantity="one">Höre %1$d Relais</item>
         <item quantity="other">Höre %1$d Relais</item>
     </plurals>
+    <string name="reload">Neu laden</string>
     <!-- REMOTE -->
     <string name="remote">Entfernt</string>
     <string name="remote_admin">Ferneinstellung</string>
@@ -1250,6 +1252,7 @@
     <string name="selected">Ausgewählt</string>
     <string name="selected_map_type">Ausgewählter Kartentyp</string>
     <string name="send">Senden</string>
+    <!-- SERIAL -->
     <string name="serial">Seriell</string>
     <string name="serial_config">Einstellungen serielle Schnittstelle</string>
     <string name="session_active">Sitzung aktiv</string>
@@ -1457,6 +1460,7 @@
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_new">Wegpunkt hinzufügen</string>
     <string name="waypoint_received">Wegpunkt %1$s empfangen</string>
+    <!-- WEB -->
     <string name="weight">Gewicht</string>
     <string name="what_is_meshtastic">Was ist Meshtastic?</string>
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>

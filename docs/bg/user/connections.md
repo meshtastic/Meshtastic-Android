@@ -1,8 +1,8 @@
 ---
 title: Връзки
 nav_order: 2
-last_updated: 2026-11-15
-description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
+last_updated: 2026-11-18
+description: Connect your phone, desktop or browser to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -72,6 +72,20 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
 
+Over Bluetooth, the status line names the step in progress: looking for the radio, pairing, connecting to the radio, checking the radio, setting up the connection, then loading its config and node list. A step that finishes in under half a second is skipped rather than flashed. When an attempt fails, a line under it says why, and the status line counts down to the next attempt:
+
+| Съобщение                            | What to do                                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Radio not found                      | Turn the node on and move closer.                                                                                                                      |
+| Could not connect                    | Disconnect the node from any other app or device. Otherwise move closer, or forget the node in your Bluetooth settings and pair again. |
+| The radio needs pairing              | Pair when the system asks, with the PIN on the node's screen, or its fixed PIN if one is set.                                                          |
+| The radio turned the connection down | Usually a missing pairing: try again and enter the PIN when asked.                                                                     |
+| Pairing failed                       | Check the PIN and pair again.                                                                                                                          |
+| The connection dropped               | Move closer. The app keeps retrying.                                                                                                   |
+| Bluetooth is off                     | Turn it on. On Android 11 and older the message also names location services, which scanning needs there.                              |
+
+The platform's own error text goes to the app log, not the card.
+
 Once connected, the connection card shows the node's name and firmware version, its signal strength over Bluetooth, and its LoRa modem preset and region, for example "Long Range - Fast · United States". A node on custom modem settings shows **Custom** in place of the preset. Tap the preset row to open the LoRa screen.
 
 With no node chosen yet, the connection card reads **No device selected**. A pane with nothing to list says so under its header, with a hint:
@@ -80,7 +94,7 @@ With no node chosen yet, the connection card reads **No device selected**. A pan
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Bluetooth | **No Bluetooth devices seen**, and "Ensure you're within range of the device." Start a scan from the header.                                                                                                                                 |
 | Мрежа     | **No network devices seen**, and "Ensure you're connected to the same network as the device." Shown only while nothing has been discovered and **Recent Network Devices** is empty. **Add device manually…** stays below it. |
-| USB       | **No USB devices detected**, and "Connect a device with a USB data cable to use serial."                                                                                                                                                                     |
+| USB       | **No USB devices detected**, and "Connect a device with a USB data cable to use serial." In a browser, **No serial devices added**, pointing at **Add serial device…**.                                                                      |
 
 ### Troubleshooting Bluetooth
 
@@ -201,6 +215,21 @@ On Desktop (Linux/macOS/Windows), the app supports:
 - **TCP/IP** — for network-connected nodes
 
 See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+
+## Web Connections
+
+The web app reaches a radio through the browser's own Bluetooth and serial APIs, so what it offers depends on the browser:
+
+| Транспорт  | Works in                                                                                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bluetooth  | Chrome, Edge and Opera on Windows, macOS, ChromeOS and Android. Chrome on Linux needs `chrome://flags/#enable-experimental-web-platform-features`. |
+| USB serial | Chrome, Edge and Opera on a computer.                                                                                                                              |
+| Мрежа      | Not yet: a browser cannot open the TCP connection a node listens on.                                                                               |
+
+The selector shows only the transports this browser has, and a card names what is missing and which browsers have it. Firefox and Safari have neither, so the **Connect** tab shows only that card.
+
+- **Bluetooth:** **Scan for Bluetooth devices** opens the browser's device chooser. Picking a node there is the selection, and the app connects at once. A node that needs pairing makes the system ask for its PIN, the one on the node's screen or its fixed PIN.
+- **USB serial:** the browser lists only the ports you have allowed this site to use, so a plugged-in node does not appear on its own. **Add serial device…** opens the browser's port chooser, filtered to the USB serial chips and boards Meshtastic nodes use, and connects to the port you pick. **Show all serial ports…** opens it unfiltered. A known board shows by name, such as RAK4631, and other ports by their chip or USB ID.
 
 ## Related Topics
 

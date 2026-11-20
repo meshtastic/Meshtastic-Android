@@ -49,6 +49,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_filter_add">Engadir filtro</string>
     <string name="debug_filter_clear">Limpar todos os filtros</string>
@@ -221,6 +222,7 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar todo</string>
     <string name="send">Enviar</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -253,6 +255,7 @@
     <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_new">Novo punto de ruta</string>
     <string name="waypoint_received">Punto de ruta recibido:%1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Enderezo IP</string>

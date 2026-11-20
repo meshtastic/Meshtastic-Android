@@ -146,6 +146,7 @@
     <string name="connected">Conectado</string>
     <string name="connected_device">Dispositivo Conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
+    <!-- CONNECTION -->
     <string name="connections">Conexão</string>
     <string name="conversations">Conversas</string>
     <string name="copy">Copiar</string>
@@ -572,6 +573,7 @@
     <string name="select_all">Selecionar tudo</string>
     <string name="selected_map_type">Tipo de Mapa Selecionado</string>
     <string name="send">Enviar</string>
+    <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Configuração Serial</string>
     <string name="set_your_region">Defina sua região</string>
@@ -668,6 +670,7 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_new">Novo ponto de referência</string>
     <string name="waypoint_received">Ponto de referência recebido: %1$s</string>
+    <!-- WEB -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Ruim</string>

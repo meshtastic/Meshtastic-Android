@@ -64,6 +64,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
+    <!-- CONNECTION -->
     <string name="copy">نسخ</string>
     <string name="critical_alert">تنبيه حرج!</string>
     <string name="current">الحالي</string>
@@ -232,6 +233,7 @@
     <!-- SECURITY -->
     <string name="security">إعدادات الحماية</string>
     <string name="send">ارسل</string>
+    <!-- SERIAL -->
     <string name="serial">رقم التسلسلي</string>
     <string name="settings">الإعدادات</string>
     <!-- SHARE -->
@@ -266,6 +268,7 @@
     <string name="user">اسم المستخدم</string>
     <string name="via_mqtt">فقط شبكة MQTT</string>
     <string name="voltage">شدة التيار</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">سيئ</string>
     <!-- WIFI -->

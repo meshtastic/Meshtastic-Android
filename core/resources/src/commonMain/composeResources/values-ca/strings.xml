@@ -49,6 +49,7 @@
     <!-- COMPASS -->
     <!-- CONFIG -->
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
+    <!-- CONNECTION -->
     <!-- DEBUG -->
     <string name="debug_panel">Panell de depuració</string>
     <!-- DEEP -->
@@ -229,6 +230,7 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar tot</string>
     <string name="send">Enviar</string>
+    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -262,6 +264,7 @@
     <string name="waypoint_edit">Editar punt de pas</string>
     <string name="waypoint_new">Nou punt de pas</string>
     <string name="waypoint_received">Punt de pas rebut: %1$s</string>
+    <!-- WEB -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adreça IP</string>

@@ -273,6 +273,7 @@
     <string name="connected_device">Ühendatud seadmed</string>
     <string name="connected_sleeping">Ühendatud raadioga, aga see on unerežiimis</string>
     <string name="connecting">Ühendan</string>
+    <!-- CONNECTION -->
     <string name="connection_status">Praegused ühendused:</string>
     <string name="connections">Ühendus</string>
     <string name="contact_draft_prefix">Mustand: %1$s</string>
@@ -1359,6 +1360,7 @@
         <item quantity="one">Kuuldud vahendaja %1$d</item>
         <item quantity="other">Kuuldud %1$d vahendajat</item>
     </plurals>
+    <string name="reload">Lae uuesti</string>
     <!-- REMOTE -->
     <string name="remote">Kaugjuhtimine</string>
     <string name="remote_admin">Kaughaldus</string>
@@ -1493,6 +1495,7 @@
     <string name="selected">Valitud</string>
     <string name="selected_map_type">Vali kaardi tüüp</string>
     <string name="send">Saada</string>
+    <!-- SERIAL -->
     <string name="serial">Jadaport</string>
     <string name="serial_config">Jadapordi sätted</string>
     <string name="session_active">Sessioon aktiivne</string>
@@ -1735,6 +1738,7 @@
     <string name="waypoint_edit">Muuda teekonnapunkti</string>
     <string name="waypoint_new">Uus teekonnapunkti</string>
     <string name="waypoint_received">Vastuvõetud teekonnapunkt %1$s</string>
+    <!-- WEB -->
     <string name="website">Veebisait</string>
     <string name="weight">Kaal</string>
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
