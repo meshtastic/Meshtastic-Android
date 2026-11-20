@@ -70,6 +70,17 @@ kotlin {
                     dependencies { implementation("org.meshtastic:sdk-transport-websocket") }
                 }
             }
+            if (providers.gradleProperty("meshtasticSdkDesktop").orNull == "true") {
+                getByName("jvmMain") {
+                    kotlin.srcDir("src/sdkDesktopJvmMain/kotlin")
+                    kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
+                    dependencies {
+                        implementation("org.meshtastic:sdk-transport-tcp")
+                        implementation("org.meshtastic:sdk-transport-websocket")
+                        implementation("org.meshtastic:sdk-transport-serial")
+                    }
+                }
+            }
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }

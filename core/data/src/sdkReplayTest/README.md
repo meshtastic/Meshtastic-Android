@@ -54,3 +54,16 @@ Build with SDK commit `93dfd764f66c9efc9efb3b6ccdfddb545531cd4b` on `feat/sessio
 ```
 
 Serve the distribution and open Connections. Use a firmware PhoneAPI WebSocket URL. The debug opt-in uses the same SDK session and snapshot adapter as Android TCP. URLs that the SDK rejects, including URLs with query parameters, use the existing app WebSocket backend. The web app persists received messages through its Room database in OPFS.
+
+## Desktop debug backend
+
+Build the desktop application with the same SDK checkout and the desktop opt-in.
+
+```sh
+./gradlew :desktopApp:run \
+  -Pdesktop.release=false -PmeshtasticSdkDesktop=true \
+  -PmeshtasticSdkCheckout=/absolute/path/to/meshtastic-sdk \
+  -Dorg.gradle.isolated-projects=false --no-configuration-cache
+```
+
+Select a TCP, WebSocket, or USB serial connection in Connections. These transports use the SDK PhoneAPI session and the app's shared Room snapshot installer. WebSocket URLs that the SDK rejects use the existing WebSocket transport.

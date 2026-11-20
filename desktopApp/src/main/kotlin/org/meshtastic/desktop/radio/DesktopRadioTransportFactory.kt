@@ -27,6 +27,7 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
+import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
 import org.meshtastic.core.network.radio.MockRadioTransport
 import org.meshtastic.core.network.radio.TcpRadioTransport
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -46,7 +47,10 @@ class DesktopRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     connectionFactory: BleConnectionFactory,
     dispatchers: CoroutineDispatchers,
+    sdkTransportFactory: DesktopSdkTransportFactory? = null,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
+
+    private val sdk = sdkTransportFactory.takeIf { DesktopBuildConfig.IS_DEBUG }
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
@@ -56,6 +60,9 @@ class DesktopRadioTransportFactory(
 
     /** Desktop bundles no capture asset, and [createPlatformTransport] does not wire a replay address. */
     override val isReplayTransportAvailable: Boolean = false
+
+    override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+        sdk?.create(InterfaceId.WEBSOCKET, url, service) ?: super.createWebSocketTransport(url, service)
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
         address.startsWith(InterfaceId.MOCK.id) -> {
@@ -67,21 +74,25 @@ class DesktopRadioTransportFactory(
         }
 
         address.startsWith(InterfaceId.TCP.id) -> {
-            TcpRadioTransport(
-                callback = service,
-                scope = service.serviceScope,
-                dispatchers = dispatchers,
-                address = address.removePrefix(InterfaceId.TCP.id.toString()),
-            )
+            val endpoint = address.removePrefix(InterfaceId.TCP.id.toString())
+            sdk?.create(InterfaceId.TCP, endpoint, service)
+                ?: TcpRadioTransport(
+                    callback = service,
+                    scope = service.serviceScope,
+                    dispatchers = dispatchers,
+                    address = endpoint,
+                )
         }
 
         address.startsWith(InterfaceId.SERIAL.id) -> {
-            SerialTransport.create(
-                portName = address.removePrefix(InterfaceId.SERIAL.id.toString()),
-                callback = service,
-                scope = service.serviceScope,
-                dispatchers = dispatchers,
-            )
+            val endpoint = address.removePrefix(InterfaceId.SERIAL.id.toString())
+            sdk?.create(InterfaceId.SERIAL, endpoint, service)
+                ?: SerialTransport.create(
+                    portName = endpoint,
+                    callback = service,
+                    scope = service.serviceScope,
+                    dispatchers = dispatchers,
+                )
         }
 
         else -> error("Unsupported transport for address: ${address.anonymize()}")

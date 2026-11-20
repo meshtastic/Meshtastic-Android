@@ -55,6 +55,7 @@ providers.gradleProperty("meshtasticSdkCheckout").orNull?.let { checkout ->
         dependencySubstitution {
             substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
             substitute(module("org.meshtastic:sdk-transport-websocket")).using(project(":transport-websocket"))
+            substitute(module("org.meshtastic:sdk-transport-serial")).using(project(":transport-serial"))
         }
     }
 }

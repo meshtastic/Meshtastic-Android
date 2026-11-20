@@ -38,6 +38,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -91,11 +92,13 @@ class DesktopRuntimeModule {
         scanner: BleScanner,
         bluetoothRepository: BluetoothRepository,
         connectionFactory: BleConnectionFactory,
+        sdkTransportFactory: DesktopSdkTransportFactory? = null,
     ): RadioTransportFactory = DesktopRadioTransportFactory(
         dispatchers = dispatchers,
         scanner = scanner,
         bluetoothRepository = bluetoothRepository,
         connectionFactory = connectionFactory,
+        sdkTransportFactory = sdkTransportFactory,
     )
 
     /**
