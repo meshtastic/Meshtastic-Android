@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -46,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -93,8 +95,10 @@ fun MeshtasticNavigationSuite(
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
 
-    val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo).coerceNavigationType()
-    val showLabels = layoutType == NavigationSuiteType.NavigationRail
+    val layoutType = navigationSuiteLayoutType(adaptiveInfo)
+    val showLabels =
+        layoutType == NavigationSuiteType.NavigationRail &&
+            adaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
 
     NavigationSuiteScaffold(
         modifier = modifier,
@@ -132,12 +136,18 @@ fun MeshtasticNavigationSuite(
 }
 
 /**
- * Caps [NavigationSuiteType] so that expanded/extra-large widths still use a NavigationRail instead of promoting to a
- * permanent NavigationDrawer.
+ * A bottom bar on compact widths and in tabletop posture, a rail everywhere else. Unlike
+ * [NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo], a compact height (a phone in landscape) keeps the rail:
+ * a bottom bar there takes height the screen has least of, while the rail takes width it has spare.
  */
-private fun NavigationSuiteType.coerceNavigationType(): NavigationSuiteType = when (this) {
-    NavigationSuiteType.NavigationDrawer -> NavigationSuiteType.NavigationRail
-    else -> this
+internal fun navigationSuiteLayoutType(adaptiveInfo: WindowAdaptiveInfo): NavigationSuiteType {
+    val compactWidth =
+        !adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    return if (compactWidth || adaptiveInfo.windowPosture.isTabletop) {
+        NavigationSuiteType.NavigationBar
+    } else {
+        NavigationSuiteType.NavigationRail
+    }
 }
 
 private fun handleNavigation(
