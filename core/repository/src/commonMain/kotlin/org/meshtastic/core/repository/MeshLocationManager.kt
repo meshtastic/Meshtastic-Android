@@ -21,8 +21,8 @@ import org.meshtastic.proto.Position
 
 /** Interface for managing the local node's location updates and reporting. */
 interface MeshLocationManager {
-    /** Starts location updates and reports them via the given function. */
-    fun start(scope: CoroutineScope, sendPositionFn: suspend (Position) -> Unit)
+    /** Starts location updates and reports them via [sendPositionFn], which answers whether the radio took the fix. */
+    fun start(scope: CoroutineScope, sendPositionFn: suspend (Position) -> Boolean)
 
     /**
      * Retries starting location updates using the previously-provided scope and callback.

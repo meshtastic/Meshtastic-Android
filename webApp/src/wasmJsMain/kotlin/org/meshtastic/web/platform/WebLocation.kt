@@ -71,10 +71,10 @@ class WebLocationService : LocationService {
  */
 class WebMeshLocationManager(private val locationRepository: LocationRepository) : MeshLocationManager {
     private var scope: CoroutineScope? = null
-    private var sendPositionFn: (suspend (ProtoPosition) -> Unit)? = null
+    private var sendPositionFn: (suspend (ProtoPosition) -> Boolean)? = null
     private var locationJob: Job? = null
 
-    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {
+    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Boolean) {
         this.scope = scope
         this.sendPositionFn = sendPositionFn
         if (locationJob?.isActive == true) return

@@ -151,7 +151,7 @@ class NoopAppWidgetUpdater : AppWidgetUpdater {
 // region WorkManager / Location Stubs (Android-only)
 
 class NoopMeshLocationManager : MeshLocationManager {
-    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {}
+    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Boolean) {}
 
     override fun restart() {}
 

@@ -95,6 +95,7 @@ class PhoneGpsSleepTest {
             },
         ) {
             sent += it
+            true
         }
         assertEquals(1, motions)
         assertEquals(2, feed.opened)
@@ -113,7 +114,9 @@ class PhoneGpsSleepTest {
                 motions++
                 true
             },
-        ) {}
+        ) {
+            true
+        }
         assertEquals(0, motions)
     }
 
@@ -137,7 +140,9 @@ class PhoneGpsSleepTest {
                 motions++
                 true
             },
-        ) {}
+        ) {
+            true
+        }
         assertEquals(0, motions)
     }
 
@@ -145,13 +150,36 @@ class PhoneGpsSleepTest {
     fun aSleepEndsWhenTheCellChangesWithoutMotion() = runTest {
         val bits = MutableStateFlow(16)
         val feed = Feed(List(3) { fix(51.5) }, listOf(fix(51.5)))
-        val job = launch { feedWhileMoving(feed::next, cellBits = bits, awaitMotion = { awaitCancellation() }) {} }
+        val job = launch {
+            feedWhileMoving(feed::next, cellBits = bits, awaitMotion = { awaitCancellation() }) { true }
+        }
         advanceUntilIdle()
         assertEquals(1, feed.opened)
         bits.value = 0
         advanceUntilIdle()
         assertEquals(2, feed.opened)
         job.join()
+    }
+
+    @Test
+    fun aFixTheRadioRejectedDoesNotCountTowardSleep() = runTest {
+        // The queue rejects the second and third fix, so three in a row are not yet taken and the feed stays open.
+        val feed = Feed(List(4) { fix(51.5) })
+        var attempt = 0
+        var motions = 0
+        feedWhileMoving(
+            feed::next,
+            cellBits = MutableStateFlow(16),
+            awaitMotion = {
+                motions++
+                true
+            },
+        ) {
+            attempt++
+            attempt != 2 && attempt != 3
+        }
+        assertEquals(0, motions)
+        assertEquals(4, attempt)
     }
 
     @Test
@@ -165,7 +193,9 @@ class PhoneGpsSleepTest {
                 motions++
                 true
             },
-        ) {}
+        ) {
+            true
+        }
         assertEquals(0, motions)
     }
 
@@ -180,7 +210,9 @@ class PhoneGpsSleepTest {
                 motions++
                 false
             },
-        ) {}
+        ) {
+            true
+        }
         assertEquals(1, motions)
         assertEquals(2, feed.opened)
     }

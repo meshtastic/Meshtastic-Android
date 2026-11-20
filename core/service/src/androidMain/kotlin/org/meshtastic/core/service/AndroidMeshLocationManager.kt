@@ -39,14 +39,14 @@ class AndroidMeshLocationManager(
     private val radioConfigRepository: RadioConfigRepository,
 ) : MeshLocationManager {
     private lateinit var scope: CoroutineScope
-    private var sendPositionFn: (suspend (ProtoPosition) -> Unit)? = null
+    private var sendPositionFn: (suspend (ProtoPosition) -> Boolean)? = null
     private var locationFlow: Job? = null
 
     /** The bits of the radio's stillness cell, followed while the flow runs. */
     private val cellBits = MutableStateFlow(0)
 
     @SuppressLint("MissingPermission")
-    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {
+    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Boolean) {
         this.scope = scope
         this.sendPositionFn = sendPositionFn
         if (locationFlow?.isActive == true) return

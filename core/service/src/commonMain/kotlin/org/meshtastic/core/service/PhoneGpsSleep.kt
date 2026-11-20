@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.selects.select
 import org.meshtastic.core.model.Channel
@@ -72,14 +71,15 @@ internal fun sameCell(a: Location, b: Location, bits: Int): Boolean {
  * Feed the radio the phone's fixes, and let the phone's GPS rest while it is still: once [STILL_FIXES] fixes in a row
  * stay in the radio's stillness cell ([cellBits]), stop collecting, which removes the location request, and wait for
  * [awaitMotion] or a change of cell before collecting again. Firmware keeps broadcasting the last position it was
- * given, so a sleep loses nothing the mesh would see. With no cell, or when [awaitMotion] reports no sensor, it never
+ * given, so a sleep loses nothing the mesh would see. Only fixes [send] reports the radio took count toward the
+ * stillness, so a rejected one keeps the feed open. With no cell, or when [awaitMotion] reports no sensor, it never
  * stops. Returns when [fixes] ends.
  */
 internal suspend fun feedWhileMoving(
     fixes: () -> Flow<Location>,
     cellBits: StateFlow<Int>,
     awaitMotion: suspend () -> Boolean,
-    send: suspend (Location) -> Unit,
+    send: suspend (Location) -> Boolean,
 ) {
     var canSleep = true
     while (true) {
@@ -88,8 +88,8 @@ internal suspend fun feedWhileMoving(
         var countedBits = cellBits.value
         var asleep = false
         fixes()
-            .onEach(send)
             .takeWhile { fix ->
+                if (!send(fix)) return@takeWhile true
                 val bits = cellBits.value
                 if (bits != countedBits) {
                     anchor = null
