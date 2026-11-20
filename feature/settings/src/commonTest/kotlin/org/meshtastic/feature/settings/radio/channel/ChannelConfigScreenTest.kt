@@ -16,9 +16,11 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
 import org.meshtastic.feature.settings.radio.channel.component.ChannelPskEditState
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -100,5 +102,27 @@ class ChannelConfigScreenTest {
     @Test
     fun `editing the primary has no other channel to inherit a key from`() {
         assertNull(listOf(publicPrimary, secondary).primaryFor(index = 0))
+    }
+
+    private val shareLocationPrimary =
+        ChannelSettings.Builder()
+            .also { wb ->
+                wb.module_settings = ModuleSettings.Builder().also { mb -> mb.position_precision = 15 }.build()
+            }
+            .build()
+
+    @Test
+    fun `empty channel list has no location sharing channel without secondary channel location support`() {
+        assertEquals(-1, determineLocationSharingChannel(Capabilities("2.6.9"), emptyList()))
+    }
+
+    @Test
+    fun `empty channel list has no location sharing channel with secondary channel location support`() {
+        assertEquals(-1, determineLocationSharingChannel(Capabilities("2.8.0"), emptyList()))
+    }
+
+    @Test
+    fun `primary channel sharing location is selected without secondary channel location support`() {
+        assertEquals(0, determineLocationSharingChannel(Capabilities("2.6.9"), listOf(shareLocationPrimary)))
     }
 }
