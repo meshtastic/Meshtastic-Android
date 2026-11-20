@@ -56,6 +56,14 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        // Central sometimes answers 404 for a module it serves, failing a CI job in its first minutes. Gradle moves to
+        // the next repository only for missing module metadata, so this mirror of Central covers those misses but not
+        // a missing artifact file of a module Central did list.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
         maven {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
             mavenContent { snapshotsOnly() }

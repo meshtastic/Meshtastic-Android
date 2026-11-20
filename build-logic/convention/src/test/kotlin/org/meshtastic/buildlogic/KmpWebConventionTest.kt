@@ -43,6 +43,13 @@ class KmpWebConventionTest {
     }
 
     @Test
+    fun `a browser test run is limited to ten minutes`(@TempDir projectDir: File) {
+        val values = fixture(projectDir).values("-Pmeshtastic.web=true")
+
+        assertEquals("PT10M", values["browserTestTimeout"], "values=$values")
+    }
+
+    @Test
     fun `nests nativeMain and jvmAndroidMain under nonWebMain`(@TempDir projectDir: File) {
         val values = fixture(projectDir, jvmAndroid = true).values()
 
@@ -81,10 +88,12 @@ class KmpWebConventionTest {
                 .mapNotNull { name -> kotlinExtension.sourceSets.findByName(name)?.let { name to it } }
                 .associate { (name, set) -> name to set.dependsOn.map { it.name }.sorted().joinToString(",") }
             val targetNames = kotlinExtension.targets.names.filter { it != "metadata" }.sorted().joinToString(",")
+            val browserTestTimeout = tasks.findByName("wasmJsBrowserTest")?.timeout?.orNull
 
             tasks.register("printFixture") {
                 doLast {
                     println("fixture:targets=" + targetNames)
+                    println("fixture:browserTestTimeout=" + browserTestTimeout)
                     parents.forEach { (name, deps) -> println("fixture:" + name + "=" + deps) }
                 }
             }
