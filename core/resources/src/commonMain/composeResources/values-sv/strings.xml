@@ -1198,6 +1198,7 @@
     <string name="waypoint_new">Ny vägpunkt</string>
     <string name="waypoint_received">Mottagen vägpunkt: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Vikt</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Dålig</string>

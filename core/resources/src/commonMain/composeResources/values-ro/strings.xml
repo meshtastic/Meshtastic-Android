@@ -1002,6 +1002,7 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Reper recepționat: $1%1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Greutate</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slab</string>

@@ -310,6 +310,7 @@
     <string name="waypoint_new">Nova točka poti</string>
     <string name="waypoint_received">Prejeta točka poti: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Slab</string>
     <!-- WIFI -->

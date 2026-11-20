@@ -260,6 +260,7 @@
     <string name="waypoint_new">Nova putna točka</string>
     <string name="waypoint_received">Primljena putna točka: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresa</string>

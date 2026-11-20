@@ -1792,6 +1792,7 @@
     <string name="waypoint_received">Vastaanotettu reittipiste: %1$s</string>
     <!-- WEB -->
     <string name="website">Verkkosivusto</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Paino</string>
     <string name="what_is_meshtastic">Mikä on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avoimen lähdekoodin, internetistä riippumaton ja hajautettu mesh-verkko, joka toimii edullisilla ja vähän virtaa kuluttavilla radioilla.</string>

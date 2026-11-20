@@ -671,6 +671,7 @@
     <string name="waypoint_new">Novo ponto de referência</string>
     <string name="waypoint_received">Ponto de referência recebido: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Peso</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Ruim</string>
