@@ -52,8 +52,8 @@ graph TB
   :feature:settings -.-> :core:resources
   :feature:settings -.-> :core:ui
   :feature:settings -.-> :core:di
-  :feature:settings -.-> :core:takserver
   :feature:settings -.-> :core:testing
+  :feature:settings -.-> :core:takserver
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
