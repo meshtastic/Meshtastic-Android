@@ -92,7 +92,9 @@ class WasmJsRadioTransportFactory(
 
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
 
-            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
+            InterfaceId.WEBSOCKET,
+            InterfaceId.HTTP,
+            -> error("Network addresses should be handled by BaseRadioTransportFactory")
         }
     }
 }

@@ -750,7 +750,7 @@ open class ScannerViewModel(
      */
     fun addRecentAddress(address: String, name: String) {
         if (!networkSupported) return
-        if (!address.startsWith(TCP_DEVICE_PREFIX) && !address.startsWith(WEBSOCKET_DEVICE_PREFIX)) return
+        if (listOf(TCP_DEVICE_PREFIX, WEBSOCKET_DEVICE_PREFIX, HTTP_DEVICE_PREFIX).none(address::startsWith)) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 

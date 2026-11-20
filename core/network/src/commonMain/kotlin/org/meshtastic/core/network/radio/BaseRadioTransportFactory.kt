@@ -53,7 +53,9 @@ abstract class BaseRadioTransportFactory(
             // A saved TCP address restored where the platform has no raw TCP (the browser) is kept but never armed.
             InterfaceId.TCP.id -> isRawTcpSupported
 
-            InterfaceId.WEBSOCKET.id -> DeviceType.TCP in supportedDeviceTypes
+            InterfaceId.WEBSOCKET.id,
+            InterfaceId.HTTP.id,
+            -> DeviceType.TCP in supportedDeviceTypes
 
             // A saved serial address restored onto hardware with no USB host is kept but never armed.
             InterfaceId.SERIAL.id -> isSerialSupported
@@ -106,6 +108,13 @@ abstract class BaseRadioTransportFactory(
                         url = normalizeWebSocketUrl(url) ?: url,
                     )
                 }
+
+                address.startsWith(InterfaceId.HTTP.id) ->
+                    WebApiRadioTransport(
+                        callback = service,
+                        scope = service.serviceScope,
+                        baseUrl = address.removePrefix(InterfaceId.HTTP.id.toString()),
+                    )
 
                 else -> createPlatformTransport(address, service)
             }

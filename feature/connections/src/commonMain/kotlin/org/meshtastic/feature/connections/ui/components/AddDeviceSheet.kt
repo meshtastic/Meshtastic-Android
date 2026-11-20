@@ -51,7 +51,9 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.websocket_port_in_url
 import org.meshtastic.feature.connections.TCP_DEVICE_PREFIX
+import org.meshtastic.feature.connections.HTTP_DEVICE_PREFIX
 import org.meshtastic.feature.connections.WEBSOCKET_DEVICE_PREFIX
+import org.meshtastic.feature.connections.normalizeWebApiUrl
 
 /**
  * Sheet for manually adding a network device: a host and port for TCP, or a `ws://` / `wss://` URL in the address field
@@ -148,6 +150,7 @@ internal fun manualAddress(
     portText: String,
     webSocketScheme: String? = bareHostWebSocketScheme(),
 ): String? = when {
+    isWebApiEntry(address) -> normalizeWebApiUrl(address)?.let { HTTP_DEVICE_PREFIX + it }
     isWebSocketEntry(address) -> normalizeWebSocketUrl(address)?.let { WEBSOCKET_DEVICE_PREFIX + it }
     webSocketScheme != null -> bareHostWebSocket(address.trim(), portText, webSocketScheme)
     else -> manualTcpAddress(address, portText)?.let { TCP_DEVICE_PREFIX + it }
@@ -156,7 +159,14 @@ internal fun manualAddress(
 /** Whether the address field holds a `ws://` or `wss://` URL, which carries its own port. */
 internal fun isWebSocketEntry(address: String): Boolean {
     val trimmed = address.trim()
-    return trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true)
+    return trimmed.startsWith("ws://", ignoreCase = true) || trimmed.startsWith("wss://", ignoreCase = true) ||
+        isWebApiEntry(trimmed)
+}
+
+/** Whether the address field holds an `http://` or `https://` URL, a radio's web phone API with its own port. */
+internal fun isWebApiEntry(address: String): Boolean {
+    val trimmed = address.trim()
+    return trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)
 }
 
 /**

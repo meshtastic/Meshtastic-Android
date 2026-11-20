@@ -32,6 +32,18 @@ const val TCP_DEVICE_PREFIX: String = "t"
 /** One-char prefix marking a WebSocket device's `fullAddress`, listed with the network devices. */
 const val WEBSOCKET_DEVICE_PREFIX: String = "w"
 
+/** One-char prefix marking a radio's web phone API, an `http://` or `https://` base URL. */
+const val HTTP_DEVICE_PREFIX: String = "h"
+
+/** The base URL a web phone API address carries, or null: `http` or `https`, a host, nothing but `/` after it. */
+fun normalizeWebApiUrl(url: String): String? {
+    val trimmed = url.trim().trimEnd('/')
+    val match = WEB_API_URL.matchEntire(trimmed) ?: return null
+    return match.groupValues[1].lowercase() + "://" + match.groupValues[2].lowercase()
+}
+
+private val WEB_API_URL = Regex("""(?i)(https?)://(\[[0-9A-Za-z:.%_]+\](?::\d{1,5})?|[^\s/:\[\]]+(?::\d{1,5})?)""")
+
 /** One-char prefix marking a BLE device's `fullAddress`. See [DeviceListEntry.Ble]. */
 const val BLE_DEVICE_PREFIX: String = "x"
 
@@ -66,6 +78,8 @@ fun isLinkableAddress(address: String, virtualAllowed: Boolean = true): Boolean 
         InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
 
         InterfaceId.WEBSOCKET -> normalizeWebSocketUrl(rest) != null
+
+        InterfaceId.HTTP -> normalizeWebApiUrl(rest) != null
 
         InterfaceId.MOCK,
         InterfaceId.REPLAY,
