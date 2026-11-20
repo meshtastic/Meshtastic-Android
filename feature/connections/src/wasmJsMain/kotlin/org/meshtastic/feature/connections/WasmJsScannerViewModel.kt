@@ -72,6 +72,8 @@ class WasmJsScannerViewModel(
     bluetoothSupported = DeviceType.BLE in radioInterfaceService.supportedDeviceTypes && webBluetoothAvailable(),
     usbSupported = DeviceType.USB in radioInterfaceService.supportedDeviceTypes && webSerialAvailable(),
     networkSupported = DeviceType.TCP in radioInterfaceService.supportedDeviceTypes,
+    // A browser has no mDNS, so a network radio is only ever added by its address.
+    networkScanSupported = false,
     usbScanner = usbScanner,
 ) {
     override val unsupportedTransportNotice: StringResource? =

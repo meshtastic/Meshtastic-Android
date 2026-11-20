@@ -1537,6 +1537,7 @@
     <string name="neighbor_mean_snr_description">The average SNR at which this node heard its reported neighbors.</string>
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
+    <string name="network_scan_unavailable">A browser can't scan the network. Add a radio by its address.</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="new_messages_below">New messages below</string>
     <string name="new_node_seen">New Node Seen: %1$s</string>
@@ -1555,6 +1556,7 @@
     <string name="no_map_layers_loaded">No map layers loaded.</string>
     <string name="no_network_devices_found">No network devices found</string>
     <string name="no_network_devices_hint">Ensure you're connected to the same network as the device.</string>
+    <string name="no_network_devices_saved">No network devices yet</string>
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>

@@ -172,6 +172,8 @@ open class ScannerViewModel(
     val usbSupported: Boolean = true,
     /** False where the transport factory cannot open TCP: the Network pane is hidden and no address is saved. */
     val networkSupported: Boolean = true,
+    /** False where nothing can discover a radio on the network, as in a browser: the Network pane offers no scan. */
+    val networkScanSupported: Boolean = true,
     /** Set where a USB device must be requested explicitly, as with Web Serial. */
     private val usbScanner: UsbScanner? = null,
 ) : ViewModel() {
@@ -666,7 +668,7 @@ open class ScannerViewModel(
      * cancels any active BLE scan first.
      */
     fun startNetworkScan() {
-        if (_isNetworkScanning.value || !networkSupported) return
+        if (_isNetworkScanning.value || !networkSupported || !networkScanSupported) return
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopBleScan()
         _isNetworkScanning.value = true
