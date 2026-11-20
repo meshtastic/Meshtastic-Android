@@ -72,18 +72,22 @@ fun PasswordTextField(
     // Not saveable: the caller's state is the source of truth, and a secret has no business in the saved-state bundle.
     val state = remember { TextFieldState(value) }
     val pendingEchoes = remember { ArrayDeque<String>() }
+    val applied = remember { AppliedValue(value) }
     val latestOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(state) {
         snapshotFlow { state.text.toString() }
             .drop(1)
             .collect { text ->
+                // The caller's own value, written below, is not an edit to hand back or to expect back.
+                val replaced = applied.replacedWith
+                applied.replacedWith = null
+                if (replaced == text) return@collect
                 if (pendingEchoes.size == MAX_PENDING_ECHOES) pendingEchoes.removeFirst()
                 pendingEchoes.addLast(text)
                 latestOnValueChange(text)
             }
     }
-    val applied = remember { AppliedValue(value) }
     SideEffect {
         if (applied.value != value) {
             applied.value = value
@@ -92,6 +96,7 @@ fun PasswordTextField(
                 repeat(echo + 1) { pendingEchoes.removeFirst() }
             } else if (state.text.toString() != value) {
                 pendingEchoes.clear()
+                applied.replacedWith = value
                 state.edit {
                     replace(0, length, value)
                     placeCursorAtEnd()
@@ -147,7 +152,7 @@ internal fun KeyboardActions.toHandler(imeAction: ImeAction): KeyboardActionHand
     }
 }
 
-private class AppliedValue(var value: String)
+private class AppliedValue(var value: String, var replacedWith: String? = null)
 
 private class MaxBytesTransformation(private val maxBytes: Int) : InputTransformation {
     override fun TextFieldBuffer.transformInput() {
