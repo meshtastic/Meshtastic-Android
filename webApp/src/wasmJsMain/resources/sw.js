@@ -71,10 +71,12 @@ self.addEventListener("fetch", (event) => {
     if (request.method !== "GET" || request.headers.has("range")) return;
     const url = new URL(request.url);
 
-    // Another page on the origin, such as a host's sign-in form, passes by, so it never lands in the cache as the app.
-    if (request.mode === "navigate" && isIndex(url)) {
-        event.respondWith(networkFirstIndex(request));
-        event.waitUntil(pruneHashed());
+    // Any other page on the origin, such as a host's sign-in form, passes by and is never cached.
+    if (request.mode === "navigate") {
+        if (isIndex(url)) {
+            event.respondWith(networkFirstIndex(request));
+            event.waitUntil(pruneHashed());
+        }
         return;
     }
     if (!cacheable(url)) return;
