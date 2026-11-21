@@ -35,12 +35,23 @@ internal class SessionAdmin(private val radio: RadioInterfaceService, private va
      *
      * @throws PacketQueueRejectedException when no radio session is active.
      */
-    fun launch(operation: String, command: suspend AdminApi.() -> AdminResult<*>) {
+    fun launch(
+        operation: String,
+        onResult: suspend (AdminResult<*>) -> Unit = {},
+        command: suspend AdminApi.() -> AdminResult<*>,
+    ) {
         val admin = requireAdmin(operation)
         scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
             val result = runCommand(admin, command)
             if (result !is AdminResult.Success) Logger.w { "$operation was not applied: $result" }
+            onResult(result)
         }
+    }
+
+    /** Runs [command] and returns the device's answer, or [AdminResult.NodeUnreachable] without a radio session. */
+    suspend fun <T> run(command: suspend AdminApi.() -> AdminResult<T>): AdminResult<T> {
+        val admin = radio.activeSession.value?.let(radio::adminForSession) ?: return AdminResult.NodeUnreachable
+        return runCommand(admin, command)
     }
 
     /**

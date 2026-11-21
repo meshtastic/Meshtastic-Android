@@ -44,7 +44,7 @@ private suspend fun rebootToUf2Bootloader(
     updateState: (FirmwareUpdateState) -> Unit,
 ) {
     updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))))
-    radioController.rebootToDfu(nodeRepository.myNodeInfo.value?.myNodeNum ?: 0, radioController.generatePacketId())
+    radioController.rebootToDfu(nodeRepository.myNodeInfo.value?.myNodeNum ?: 0)
     delay(USB_REBOOT_DELAY)
 }
 

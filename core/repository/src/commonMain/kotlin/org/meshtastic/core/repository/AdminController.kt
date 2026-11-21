@@ -20,9 +20,14 @@ import kotlinx.coroutines.NonCancellable
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminResult
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Device configuration and control operations.
@@ -69,9 +74,12 @@ interface AdminController {
     fun sendInputEvent(eventCode: Int, kbChar: Int = 0, touchX: Int = 0, touchY: Int = 0)
 
     // ── Remote configuration ────────────────────────────────────────────────
+    //
+    // Operations that return an [AdminResult] run on the active session's SDK admin API, addressed with `forNode`
+    // unless [destNum] is the connected node. With no active session they return [AdminResult.NodeUnreachable].
 
-    /** Updates the owner (user info) on a remote node. */
-    suspend fun setOwner(destNum: Int, user: User, packetId: Int)
+    /** Updates the owner (user info) on a node. */
+    suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit>
 
     /**
      * Enables amateur-radio (ham) mode on a node via `AdminMessage.set_ham_mode`.
@@ -84,16 +92,16 @@ interface AdminController {
      * caller-supplied [HamParameters.tx_power]/[HamParameters.frequency] are ignored. Intentionally absent from
      * [AdminEditScope]: ham enablement is not a batch-edit operation.
      */
-    suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int)
+    suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): AdminResult<Unit>
 
-    /** Updates the general configuration on a remote node. */
-    suspend fun setConfig(destNum: Int, config: Config, packetId: Int)
+    /** Updates the general configuration on a node. */
+    suspend fun setConfig(destNum: Int, config: Config): AdminResult<Unit>
 
-    /** Updates a module configuration on a remote node. */
-    suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int)
+    /** Updates a module configuration on a node. */
+    suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): AdminResult<Unit>
 
-    /** Updates a channel configuration on a remote node. */
-    suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int)
+    /** Updates a channel configuration on a node. */
+    suspend fun setRemoteChannel(destNum: Int, channel: Channel): AdminResult<Unit>
 
     /** Sets a fixed position on a remote node. */
     suspend fun setFixedPosition(destNum: Int, position: Position)
@@ -114,53 +122,58 @@ interface AdminController {
      * Syncs a node's real-time clock to the phone's current time via `AdminMessage.set_time_only`.
      *
      * Mirrors the Python CLI's `Node.setTime`: an accurate epoch-seconds timestamp is sent so a remote node whose RTC
-     * has drifted can be corrected without an on-site visit. Fire-and-forget — the firmware applies the value without
-     * an admin response (the routing ACK confirms delivery).
+     * has drifted can be corrected without an on-site visit. The firmware applies the value without an admin response.
      */
-    suspend fun setTime(destNum: Int, packetId: Int)
+    suspend fun setTime(destNum: Int): AdminResult<Unit>
 
     // ── Remote queries ──────────────────────────────────────────────────────
+    //
+    // A read addressed to another node waits up to [REMOTE_READ_TIMEOUT], so a multi-hop reply that outlives the
+    // caller's own UX deadline still arrives.
 
-    /** Requests the current owner (user info) from a remote node. */
-    suspend fun getOwner(destNum: Int, packetId: Int)
+    /** Reads the device metadata, the remote-admin preflight. */
+    suspend fun getDeviceMetadata(destNum: Int): AdminResult<DeviceMetadata>
 
-    /** Requests a specific configuration section from a remote node. */
-    suspend fun getConfig(destNum: Int, configType: Int, packetId: Int)
+    /** Reads the current owner (user info). */
+    suspend fun getOwner(destNum: Int): AdminResult<User>
 
-    /** Requests a module configuration section from a remote node. */
-    suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int)
+    /** Reads a configuration section; [configType] is an `AdminMessage.ConfigType` value. */
+    suspend fun getConfig(destNum: Int, configType: Int): AdminResult<Config>
 
-    /** Requests a specific channel configuration from a remote node. */
-    suspend fun getChannel(destNum: Int, index: Int, packetId: Int)
+    /** Reads a module configuration section; [moduleConfigType] is an `AdminMessage.ModuleConfigType` value. */
+    suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): AdminResult<ModuleConfig>
 
-    /** Requests the current ringtone from a remote node. */
-    suspend fun getRingtone(destNum: Int, packetId: Int)
+    /** Reads the channel at zero-based [index]. */
+    suspend fun getChannel(destNum: Int, index: Int): AdminResult<Channel>
 
-    /** Requests the current canned messages from a remote node. */
-    suspend fun getCannedMessages(destNum: Int, packetId: Int)
+    /** Reads the current ringtone. */
+    suspend fun getRingtone(destNum: Int): AdminResult<String>
 
-    /** Requests the hardware connection status from a remote node. */
-    suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int)
+    /** Reads the current canned messages. */
+    suspend fun getCannedMessages(destNum: Int): AdminResult<String>
+
+    /** Reads the hardware connection status. */
+    suspend fun getDeviceConnectionStatus(destNum: Int): AdminResult<DeviceConnectionStatus>
 
     // ── Device lifecycle ────────────────────────────────────────────────────
 
     /** Commands a node to reboot. */
-    suspend fun reboot(destNum: Int, packetId: Int)
+    suspend fun reboot(destNum: Int): AdminResult<Unit>
 
-    /** Commands a node to reboot into DFU mode. */
-    suspend fun rebootToDfu(nodeNum: Int, packetId: Int)
+    /** Commands a node to reboot into DFU mode; firmware answers nothing, so success means sent. */
+    suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit>
 
     /** Initiates an OTA reboot request. */
     suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)
 
     /** Commands a node to shut down. */
-    suspend fun shutdown(destNum: Int, packetId: Int)
+    suspend fun shutdown(destNum: Int): AdminResult<Unit>
 
-    /** Performs a factory reset on a node. */
-    suspend fun factoryReset(destNum: Int, packetId: Int)
+    /** Performs a factory reset on a node, BLE bonds included. */
+    suspend fun factoryReset(destNum: Int): AdminResult<Unit>
 
     /** Resets the NodeDB on a node. */
-    suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean)
+    suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean): AdminResult<Unit>
 
     // ── Batch edit ──────────────────────────────────────────────────────────
 
@@ -218,3 +231,6 @@ interface AdminEditScope {
     /** Sets a fixed position on the session's node. */
     suspend fun setFixedPosition(position: Position)
 }
+
+/** How long a read addressed to another node waits: the 30 s UX deadline plus the two-minute late-reply grace. */
+val REMOTE_READ_TIMEOUT: Duration = 150.seconds

@@ -66,6 +66,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
@@ -86,6 +87,7 @@ import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminEdit
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -94,6 +96,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 private val TEST_PUBLIC_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 
@@ -398,8 +401,9 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun localChannelDoesNotPersistWhenQueueRejects() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = 456)
+    fun localChannelDoesNotPersistWithoutARadioSession() = runTest {
+        val controller =
+            editController(backgroundScope, recordingAdmin(), myNodeNum = 456, activeSession = MutableStateFlow(null))
         val channel =
             Channel.Builder()
                 .also { wb ->
@@ -408,12 +412,9 @@ class RadioControllerImplTest {
                     wb.settings = ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build()
                 }
                 .build()
-        val rejection = PacketQueueRejectedException("Admin command")
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws rejection
 
-        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setLocalChannel(channel) }
+        assertFailsWith<PacketQueueRejectedException> { controller.setLocalChannel(channel) }
 
-        assertSame(rejection, failure)
         verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
     }
 
@@ -455,19 +456,44 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun requestConfigOperationsDelegateToCommandSender() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun remoteReadsGoThroughTheSdkWithTheRemoteReadTimeout() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
 
-        controller.getOwner(destNum = 101, packetId = 1)
-        controller.getConfig(destNum = 102, configType = 2, packetId = 3)
-        controller.getModuleConfig(destNum = 103, moduleConfigType = 4, packetId = 5)
-        controller.getChannel(destNum = 104, index = 6, packetId = 7)
-        controller.getRingtone(destNum = 105, packetId = 8)
-        controller.getCannedMessages(destNum = 106, packetId = 9)
-        controller.getDeviceConnectionStatus(destNum = 107, packetId = 10)
+        assertTrue(controller.getOwner(destNum = 101) is AdminResult.Success)
+        controller.getConfig(destNum = 102, configType = 2)
+        controller.getModuleConfig(destNum = 103, moduleConfigType = 4)
+        controller.getChannel(destNum = 104, index = 6)
+        controller.getRingtone(destNum = 105)
+        controller.getCannedMessages(destNum = 106)
+        controller.getDeviceConnectionStatus(destNum = 107)
+        controller.getDeviceMetadata(destNum = 108)
 
-        // All delegate to commandSender.sendAdmin
-        verifySuspend(atLeast(7)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(
+            listOf("owner", "config:2", "module:4", "channel:6", "ringtone", "canned", "connection", "metadata"),
+            admin.commands,
+        )
+        assertEquals((101..108).map(::NodeId), admin.targets)
+        assertEquals(List(8) { REMOTE_READ_TIMEOUT }, admin.rpcTimeouts)
+    }
+
+    @Test
+    fun localReadsUseTheSessionAdminDirectly() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
+
+        controller.getOwner(destNum = 1234)
+
+        assertEquals(listOf("owner"), admin.commands)
+        assertTrue(admin.targets.isEmpty() && admin.rpcTimeouts.isEmpty())
+    }
+
+    @Test
+    fun adminCallsWithoutASessionAreUnreachable() = runTest {
+        val controller = editController(backgroundScope, recordingAdmin(), activeSession = MutableStateFlow(null))
+
+        assertEquals(AdminResult.NodeUnreachable, controller.getOwner(destNum = 101))
+        assertEquals(AdminResult.NodeUnreachable, controller.reboot(destNum = 101))
     }
 
     @Test
@@ -883,58 +909,22 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun rebootSendsAdminMessageWithDelay() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun lifecycleCommandsReachTheTargetNodeWithTheirArguments() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
 
-        controller.reboot(destNum = 101, packetId = 7)
+        controller.reboot(destNum = 101)
+        controller.shutdown(destNum = 101)
+        controller.factoryReset(destNum = 101)
+        controller.nodedbReset(destNum = 101, preserveFavorites = false)
+        controller.setTime(destNum = 101)
+        controller.rebootToDfu(nodeNum = 101)
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun shutdownSendsAdminMessage() = runTest {
-        val controller = createController(scope = backgroundScope)
-
-        controller.shutdown(destNum = 101, packetId = 8)
-
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun factoryResetSendsAdminMessage() = runTest {
-        val controller = createController(scope = backgroundScope)
-
-        controller.factoryReset(destNum = 101, packetId = 9)
-
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun nodedbResetSendsAdminMessage() = runTest {
-        val controller = createController(scope = backgroundScope)
-
-        controller.nodedbReset(destNum = 101, packetId = 10, preserveFavorites = true)
-
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun setTimeSendsAdminMessageWithCurrentEpochSeconds() = runTest {
-        val controller = createController(scope = backgroundScope)
-
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
-
-        controller.setTime(destNum = 101, packetId = 11)
-
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-        // The phone's current time is sent; assert it is populated and a plausible recent epoch (after 2020).
-        val setTime = sentMessage?.set_time_only
-        assertTrue(setTime != null && setTime > 1_577_836_800)
+        assertEquals(
+            listOf("reboot:5s", "shutdown:5s", "factoryReset:false", "nodeDbReset:false", "time", "dfu"),
+            admin.commands,
+        )
+        assertEquals(List(6) { NodeId(101) }, admin.targets)
     }
 
     @Test
@@ -978,9 +968,55 @@ class RadioControllerImplTest {
         var beforeCommit: suspend () -> Unit = {}
 
         val commands = mutableListOf<String>()
+        val rpcTimeouts = mutableListOf<Duration>()
         var contactResult: AdminResult<Unit> = AdminResult.Success(Unit)
+        var sentHam: HamParameters? = null
 
         override fun forNode(dest: NodeId): AdminApi = also { targets += dest }
+
+        override fun withRpcTimeout(timeout: Duration): AdminApi = also { rpcTimeouts += timeout }
+
+        override suspend fun getOwner() = read("owner", User.Builder().build())
+
+        override suspend fun getConfig(type: AdminMessage.ConfigType) =
+            read("config:${type.value}", Config.Builder().build())
+
+        override suspend fun getModuleConfig(type: AdminMessage.ModuleConfigType) =
+            read("module:${type.value}", ModuleConfig.Builder().build())
+
+        override suspend fun getChannel(index: ChannelIndex) = read("channel:${index.raw}", Channel.Builder().build())
+
+        override suspend fun getRingtone() = read("ringtone", "")
+
+        override suspend fun getCannedMessages() = read("canned", "")
+
+        override suspend fun getDeviceConnectionStatus() =
+            read("connection", org.meshtastic.proto.DeviceConnectionStatus.Builder().build())
+
+        override suspend fun getDeviceMetadata() =
+            read("metadata", org.meshtastic.proto.DeviceMetadata.Builder().build())
+
+        override suspend fun setHamMode(params: HamParameters): AdminResult<Unit> {
+            sentHam = params
+            return record("ham")
+        }
+
+        override suspend fun setTime(at: kotlin.time.Instant?) = record("time")
+
+        override suspend fun reboot(after: Duration) = record("reboot:$after")
+
+        override suspend fun shutdown(after: Duration) = record("shutdown:$after")
+
+        override suspend fun factoryReset(preserveBleBonds: Boolean) = record("factoryReset:$preserveBleBonds")
+
+        override suspend fun nodeDbReset(preserveFavorites: Boolean) = record("nodeDbReset:$preserveFavorites")
+
+        override suspend fun enterDfuMode() = record("dfu")
+
+        private fun <T> read(command: String, value: T): AdminResult<T> {
+            commands += command
+            return AdminResult.Success(value)
+        }
 
         override suspend fun setFavorite(node: NodeId, favorite: Boolean) = record("favorite:${node.raw}:$favorite")
 
@@ -1379,7 +1415,8 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeSendsAdminWithEchoedLoraValuesAndUpdatesUser() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = 123)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = 123)
         val existingUser =
             User.Builder()
                 .also { wb ->
@@ -1404,13 +1441,6 @@ class RadioControllerImplTest {
                     .build(),
             )
 
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
-
         controller.setHamMode(
             123,
             HamParameters.Builder()
@@ -1420,10 +1450,9 @@ class RadioControllerImplTest {
                     wb.long_name = "Attic Heltec"
                 }
                 .build(),
-            42,
         )
 
-        val ham = sentMessage?.set_ham_mode
+        val ham = admin.sentHam
         assertEquals("KK7ABC", ham?.call_sign)
         assertEquals("KK7A", ham?.short_name)
         assertEquals("Attic Heltec", ham?.long_name)
@@ -1451,7 +1480,8 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeWithoutALongNameNamesTheNodeAfterTheCallSignAlone() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = 123)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = 123)
         val existingUser =
             User.Builder()
                 .also { wb ->
@@ -1462,8 +1492,6 @@ class RadioControllerImplTest {
                 .build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
-
         controller.setHamMode(
             123,
             HamParameters.Builder()
@@ -1472,7 +1500,6 @@ class RadioControllerImplTest {
                     wb.short_name = "KK7A"
                 }
                 .build(),
-            42,
         )
 
         // long_name is optional: firmware leaves the bare call sign rather than a dangling "//".
@@ -1495,16 +1522,10 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeWithNoCachedLoraConfigSendsProtoDefaults() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = 123)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = 123)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
-
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
 
         controller.setHamMode(
             123,
@@ -1514,10 +1535,9 @@ class RadioControllerImplTest {
                     wb.short_name = "KK7A"
                 }
                 .build(),
-            42,
         )
 
-        val ham = sentMessage?.set_ham_mode
+        val ham = admin.sentHam
         assertEquals(0, ham?.tx_power)
         assertEquals(0f, ham?.frequency)
         // Unknown node: the optimistic update is built on a default User.
@@ -1539,7 +1559,8 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeIgnoresRemoteDestinations() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = 123)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = 123)
 
         controller.setHamMode(
             456,
@@ -1549,10 +1570,9 @@ class RadioControllerImplTest {
                     wb.short_name = "KK7A"
                 }
                 .build(),
-            42,
         )
 
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
     }
 

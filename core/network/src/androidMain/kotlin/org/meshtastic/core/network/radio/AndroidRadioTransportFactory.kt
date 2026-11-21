@@ -98,6 +98,7 @@ class AndroidRadioTransportFactory(
     override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
         sdk.webSocket(url, service)
 
+    @Suppress("ReturnCount")
     private fun createSdkUsbTransport(address: String, service: RadioInterfaceService): RadioTransport {
         val devices = usbRepository.serialDevices.value
         // Old installations persisted a bus path. A missing stable key must not open a different device.

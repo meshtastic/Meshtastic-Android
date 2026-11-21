@@ -31,9 +31,12 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminResult
 
 /**
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.
@@ -327,29 +330,45 @@ class FakeRadioController :
         true
     }
 
-    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
+    override suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit> {
         lastSetOwnerUser = user
         ownerWrites.add(OwnerWrite(destination = destNum.takeUnless { it == 0 }, user = user))
         adminOperations.add("owner")
-        recordAdminRequest("setOwner", destNum, user, packetId)
+        recordAdminRequest("setOwner", destNum, user, packetId = null)
+        return writeResult
     }
 
-    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
-        recordAdminRequest("setHamMode", destNum, hamParameters, packetId)
+    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): AdminResult<Unit> {
+        recordAdminRequest("setHamMode", destNum, hamParameters, packetId = null)
+        return writeResult
     }
 
-    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        recordAdminRequest("setConfig", destNum, config, packetId)
+    override suspend fun setConfig(destNum: Int, config: Config): AdminResult<Unit> {
+        recordAdminRequest("setConfig", destNum, config, packetId = null)
         recordConfigWrite(destNum, config, invokeStandaloneHook = true)
+        return writeResult
     }
 
-    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
-        recordAdminRequest("setModuleConfig", destNum, config, packetId)
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): AdminResult<Unit> {
+        recordAdminRequest("setModuleConfig", destNum, config, packetId = null)
         recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
+        return writeResult
     }
 
     private fun recordAdminRequest(kind: String, destNum: Int, payload: Any?, packetId: Int?) {
         adminRequests.add(AdminRequest(kind, destNum, payload, packetId))
+    }
+
+    /** What every admin write answers. */
+    var writeResult: AdminResult<Unit> = AdminResult.Success(Unit)
+
+    /** Answers for reads, keyed by request kind (`getOwner`, `getConfig`, ...); a read without one times out. */
+    val readResults = mutableMapOf<String, AdminResult<*>>()
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> read(kind: String, destNum: Int, payload: Any?): AdminResult<T> {
+        recordAdminRequest(kind, destNum, payload, packetId = null)
+        return (readResults[kind] ?: AdminResult.Timeout) as AdminResult<T>
     }
 
     private suspend fun recordConfigWrite(destNum: Int, config: Config, invokeStandaloneHook: Boolean) {
@@ -365,12 +384,13 @@ class FakeRadioController :
         if (invokeStandaloneHook) onStandaloneModuleConfig(config)
     }
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel): AdminResult<Unit> {
         failChannelWriteAfter?.let { if (channelWrites.size >= it) error("Fake channel write failure") }
         channelWrites.add(ChannelWrite(destination = destNum.takeUnless { it == 0 }, channel = channel))
         settingsOperations.add(SettingsOperation.SetChannel(channel))
         adminOperations.add("channel:${channel.index}")
-        recordAdminRequest("setRemoteChannel", destNum, channel, packetId)
+        recordAdminRequest("setRemoteChannel", destNum, channel, packetId = null)
+        return writeResult
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
@@ -392,54 +412,48 @@ class FakeRadioController :
         recordAdminRequest("setCannedMessages", destNum, messages, packetId = null)
     }
 
-    override suspend fun setTime(destNum: Int, packetId: Int) {}
+    override suspend fun setTime(destNum: Int): AdminResult<Unit> = writeResult
 
-    override suspend fun getOwner(destNum: Int, packetId: Int) {
-        recordAdminRequest("getOwner", destNum, payload = null, packetId)
-    }
+    override suspend fun getOwner(destNum: Int): AdminResult<User> = read("getOwner", destNum, payload = null)
 
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
-        recordAdminRequest("getConfig", destNum, configType, packetId)
-    }
+    override suspend fun getDeviceMetadata(destNum: Int): AdminResult<DeviceMetadata> =
+        read("getDeviceMetadata", destNum, payload = null)
 
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
-        recordAdminRequest("getModuleConfig", destNum, moduleConfigType, packetId)
-    }
+    override suspend fun getConfig(destNum: Int, configType: Int): AdminResult<Config> =
+        read("getConfig", destNum, configType)
 
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
-        recordAdminRequest("getChannel", destNum, index, packetId)
-    }
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): AdminResult<ModuleConfig> =
+        read("getModuleConfig", destNum, moduleConfigType)
 
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {
-        recordAdminRequest("getRingtone", destNum, payload = null, packetId)
-    }
+    override suspend fun getChannel(destNum: Int, index: Int): AdminResult<Channel> = read("getChannel", destNum, index)
 
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
-        recordAdminRequest("getCannedMessages", destNum, payload = null, packetId)
-    }
+    override suspend fun getRingtone(destNum: Int): AdminResult<String> = read("getRingtone", destNum, payload = null)
 
-    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
-        recordAdminRequest("getDeviceConnectionStatus", destNum, payload = null, packetId)
-    }
+    override suspend fun getCannedMessages(destNum: Int): AdminResult<String> =
+        read("getCannedMessages", destNum, payload = null)
 
-    override suspend fun reboot(destNum: Int, packetId: Int) {}
+    override suspend fun getDeviceConnectionStatus(destNum: Int): AdminResult<DeviceConnectionStatus> =
+        read("getDeviceConnectionStatus", destNum, payload = null)
 
-    override suspend fun rebootToDfu(nodeNum: Int, packetId: Int) {}
+    override suspend fun reboot(destNum: Int): AdminResult<Unit> = writeResult
+
+    override suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit> = writeResult
 
     override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         onRequestRebootOta(requestId, destNum, mode, hash)
     }
 
-    override suspend fun shutdown(destNum: Int, packetId: Int) {}
+    override suspend fun shutdown(destNum: Int): AdminResult<Unit> = writeResult
 
     /** Destination node numbers of [factoryReset] calls, for tests asserting a reset was (or was not) sent. */
     val factoryResetCalls = mutableListOf<Int>()
 
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+    override suspend fun factoryReset(destNum: Int): AdminResult<Unit> {
         factoryResetCalls += destNum
+        return writeResult
     }
 
-    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
+    override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean): AdminResult<Unit> = writeResult
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
@@ -477,8 +491,7 @@ class FakeRadioController :
         adminOperations.add("begin")
         val scope =
             object : AdminEditScope {
-                override suspend fun setOwner(user: User) =
-                    this@FakeRadioController.setOwner(destNum, user, generatePacketId())
+                override suspend fun setOwner(user: User) = this@FakeRadioController.setOwner(destNum, user).let {}
 
                 override suspend fun setConfig(config: Config) =
                     recordConfigWrite(destNum, config, invokeStandaloneHook = false)
@@ -486,8 +499,7 @@ class FakeRadioController :
                 override suspend fun setModuleConfig(config: ModuleConfig) =
                     recordModuleConfigWrite(destNum, config, invokeStandaloneHook = false)
 
-                override suspend fun setChannel(channel: Channel) =
-                    setRemoteChannel(destNum, channel, generatePacketId())
+                override suspend fun setChannel(channel: Channel) = setRemoteChannel(destNum, channel).let {}
 
                 override suspend fun setFixedPosition(position: Position) =
                     this@FakeRadioController.setFixedPosition(destNum, position)

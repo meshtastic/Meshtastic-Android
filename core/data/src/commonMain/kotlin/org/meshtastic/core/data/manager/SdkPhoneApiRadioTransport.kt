@@ -65,7 +65,7 @@ import org.meshtastic.sdk.transport.ble.BleTransport
 import org.meshtastic.sdk.RadioTransport as SdkRadioTransport
 
 /** One SDK client per app transport generation. Room and durable send state belong to the app. */
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 internal class SdkPhoneApiRadioTransport(
     private val openTransport: suspend () -> SdkRadioTransport,
     private val service: RadioInterfaceService,

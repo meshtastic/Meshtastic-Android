@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -43,7 +42,6 @@ import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AnalyticsPrefs
@@ -66,7 +64,6 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Position
 import kotlin.test.AfterTest
@@ -95,7 +92,6 @@ class ProfileRoundTripTest {
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
     private val adminActionsUseCase: AdminActionsUseCase = mock(MockMode.autofill)
-    private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mock(MockMode.autofill)
     private val locationService: LocationService = mock(MockMode.autofill)
     private val mqttManager: MqttManager = mock(MockMode.autofill)
     private lateinit var fileService: InMemoryFileService
@@ -117,7 +113,6 @@ class ProfileRoundTripTest {
         every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(false)
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
 
-        every { serviceRepository.meshPacketFlow } returns MutableSharedFlow<MeshPacket>()
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
         every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(null)
         every { mqttManager.mqttConnectionState } returns
@@ -140,7 +135,6 @@ class ProfileRoundTripTest {
                 installProfileUseCase = installProfileUseCase,
                 radioConfigUseCase = radioConfigUseCase,
                 adminActionsUseCase = adminActionsUseCase,
-                processRadioResponseUseCase = processRadioResponseUseCase,
                 locationService = locationService,
                 fileService = fileService,
                 mqttManager = mqttManager,

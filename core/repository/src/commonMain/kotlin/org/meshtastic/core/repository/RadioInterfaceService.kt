@@ -119,6 +119,7 @@ interface RadioTransportWriter {
  *
  * @see ServiceRepository.connectionState
  */
+@Suppress("TooManyFunctions")
 interface RadioInterfaceService :
     RadioTransportCallback,
     RadioSessionAuthority,

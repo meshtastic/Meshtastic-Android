@@ -54,12 +54,14 @@ abstract class VirtualRadioLink : RadioTransport {
 
     protected suspend fun emitFrame(payload: ByteArray) = inbound.send(virtualPhoneApiFrame(payload))
 
+    @Suppress("ReturnCount")
     final override suspend fun send(frame: Frame) {
         check(state.value == TransportState.Connected) { "Virtual radio is disconnected" }
         val bytes = frame.bytes
         val start = WireFraming.HEADER_SIZE
         if (bytes.size < start || bytes[0] != WireFraming.MAGIC_0 || bytes[1] != WireFraming.MAGIC_1) return
-        val length = ((bytes[2].toInt() and 0xff) shl 8) or (bytes[3].toInt() and 0xff)
+        val length =
+            ((bytes[2].toInt() and BYTE_MASK) shl Byte.SIZE_BITS) or (bytes[LENGTH_LOW_BYTE].toInt() and BYTE_MASK)
         if (length != bytes.size - start) return
         val request = runCatching { ToRadio.ADAPTER.decode(bytes.substring(start)) }.getOrNull() ?: return
         respond(request)
@@ -80,3 +82,8 @@ internal fun virtualPhoneApiFrame(payload: ByteArray): Frame = Frame(
         .write(payload)
         .readByteString(),
 )
+
+private const val BYTE_MASK = 0xff
+
+/** Index of the frame header's low length byte. */
+private const val LENGTH_LOW_BYTE = 3

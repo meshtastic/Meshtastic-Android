@@ -20,6 +20,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.proto.Routing
+import org.meshtastic.sdk.AdminResult
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,15 +41,14 @@ class AdminActionsUseCaseTest {
     }
 
     @Test
-    fun `reboot calls radioController`() = runTest {
-        val packetId = useCase.reboot(1234)
-        assertEquals(1, packetId)
+    fun `reboot reports the radio answer`() = runTest {
+        assertEquals(AdminResult.Success(Unit), useCase.reboot(1234))
     }
 
     @Test
-    fun `shutdown calls radioController`() = runTest {
-        val packetId = useCase.shutdown(1234)
-        assertEquals(1, packetId)
+    fun `shutdown reports the radio answer`() = runTest {
+        radioController.writeResult = AdminResult.Timeout
+        assertEquals(AdminResult.Timeout, useCase.shutdown(1234))
     }
 
     @Test
@@ -55,6 +56,14 @@ class AdminActionsUseCaseTest {
         nodeRepository.upsert(Node(num = 1))
         useCase.factoryReset(1234, isLocal = true)
         assertTrue(nodeRepository.nodeDBbyNum.value.isEmpty())
+    }
+
+    @Test
+    fun `a factory reset the radio does not apply leaves the local NodeDB`() = runTest {
+        nodeRepository.upsert(Node(num = 1))
+        radioController.writeResult = AdminResult.Failed(Routing.Error.NO_ROUTE)
+        useCase.factoryReset(1234, isLocal = true)
+        assertEquals(1, nodeRepository.nodeDBbyNum.value.size)
     }
 
     @Test

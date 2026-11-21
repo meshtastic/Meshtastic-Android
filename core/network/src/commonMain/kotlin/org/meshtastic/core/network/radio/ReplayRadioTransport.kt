@@ -28,6 +28,7 @@ import okio.Buffer
 import okio.ByteString.Companion.toByteString
 import okio.EOFException
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
@@ -146,6 +147,7 @@ class ReplayRadioTransport(
         }
     }
 
+    @Suppress("ReturnCount")
     private fun answerOwnerRequest(packet: MeshPacket) {
         val data = packet.decoded ?: return
         if (data.portnum != PortNum.ADMIN_APP) return
@@ -157,7 +159,7 @@ class ReplayRadioTransport(
                 .asSequence()
                 .mapNotNull { runCatching { FromRadio.ADAPTER.decode(it).node_info }.getOrNull() }
                 .firstOrNull { it.num == packet.to }
-                ?.user ?: User.Builder().also { it.id = "!" + packet.to.toUInt().toString(16).padStart(8, '0') }.build()
+                ?.user ?: User.Builder().also { it.id = NodeAddress.numToDefaultId(packet.to) }.build()
         val response = AdminMessage.Builder().also { it.get_owner_response = owner }.build()
         val reply =
             MeshPacket.Builder()

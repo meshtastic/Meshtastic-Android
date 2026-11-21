@@ -205,8 +205,8 @@ class RepositoryFakesTest {
         val position = ModelPosition(latitude = 1.0, longitude = 2.0, altitude = 3)
 
         controller.setLocalConfig(local)
-        controller.setConfig(destNum = 7, config = admin, packetId = 8)
-        controller.setModuleConfig(destNum = 7, config = module, packetId = 9)
+        controller.setConfig(destNum = 7, config = admin)
+        controller.setModuleConfig(destNum = 7, config = module)
         controller.setFixedPosition(destNum = 7, position = position)
         controller.setConnectionState(ConnectionState.Connected)
 
@@ -258,8 +258,8 @@ class RepositoryFakesTest {
                 .also { wb -> wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build() }
                 .build()
 
-        controller.setConfig(destNum = 0, config = config, packetId = 1)
-        controller.setModuleConfig(destNum = 0, config = moduleConfig, packetId = 2)
+        controller.setConfig(destNum = 0, config = config)
+        controller.setModuleConfig(destNum = 0, config = moduleConfig)
         controller.editLocalSettings {
             setConfig(config)
             setModuleConfig(moduleConfig)
@@ -450,7 +450,6 @@ class RepositoryFakesTest {
         controller.setConfig(
             destNum = 8,
             config = Config.Builder().also { wb -> wb.power = Config.PowerConfig.Builder().build() }.build(),
-            packetId = 1,
         )
         controller.setModuleConfig(
             destNum = 8,
@@ -458,7 +457,6 @@ class RepositoryFakesTest {
             ModuleConfig.Builder()
                 .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
                 .build(),
-            packetId = 2,
         )
         finishTransaction.complete(Unit)
         transaction.await()
@@ -524,8 +522,8 @@ class RepositoryFakesTest {
                 }
                 .build()
 
-        controller.setOwner(destNum = 0, user = localOwner, packetId = 1)
-        controller.setOwner(destNum = 7, user = remoteOwner, packetId = 2)
+        controller.setOwner(destNum = 0, user = localOwner)
+        controller.setOwner(destNum = 7, user = remoteOwner)
 
         assertEquals(
             listOf(

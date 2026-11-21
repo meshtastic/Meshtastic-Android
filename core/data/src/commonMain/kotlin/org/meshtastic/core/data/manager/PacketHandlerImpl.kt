@@ -161,6 +161,7 @@ class PacketHandlerImpl(
         expectedConnectionVersion: Long,
     ): AwaitedSendResult = sendAndAwait(packet, expectedConnectionVersion)
 
+    @Suppress("ReturnCount")
     private fun submit(packet: MeshPacket, expectedVersion: Long?): Submission? {
         if (!scope.isActive) return null
         val session = radioInterfaceService.activeSession.value ?: return null
@@ -177,6 +178,7 @@ class PacketHandlerImpl(
         return Submission(handle, lifecycle.epochs.departures)
     }
 
+    @Suppress("ReturnCount")
     private suspend fun sendAndAwait(packet: MeshPacket, expectedVersion: Long?): AwaitedSendResult {
         if (packet.id == 0) return AwaitedSendResult(AwaitedSendStatus.REJECTED)
         // A strict caller depends on positive routing evidence or a firmware local-loopback receipt.

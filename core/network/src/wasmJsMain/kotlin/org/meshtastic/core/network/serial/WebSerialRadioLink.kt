@@ -45,7 +45,7 @@ class WebSerialRadioLink(private val portId: String, private val registry: WebSe
     private var reader: JsReadableStreamDefaultReader? = null
     private var writer: JsWritableStreamDefaultWriter? = null
 
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     override suspend fun connect() {
         linkState.value = TransportState.Connecting
         try {

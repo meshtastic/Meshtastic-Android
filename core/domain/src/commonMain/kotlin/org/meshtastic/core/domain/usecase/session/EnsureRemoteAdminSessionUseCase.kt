@@ -50,6 +50,7 @@ open class EnsureRemoteAdminSessionUseCase(
     private val inFlightMutex = Mutex()
     private val inFlight = mutableMapOf<Request, Deferred<EnsureSessionResult>>()
 
+    @Suppress("ReturnCount")
     open suspend operator fun invoke(destNum: Int): EnsureSessionResult {
         if (serviceRepository.connectionState.value != ConnectionState.Connected) {
             return EnsureSessionResult.Disconnected
@@ -84,6 +85,7 @@ open class EnsureRemoteAdminSessionUseCase(
         return task
     }
 
+    @Suppress("ReturnCount")
     private suspend fun refresh(request: Request, admin: AdminApi): EnsureSessionResult {
         if (!radio.isSessionActive(request.session)) return EnsureSessionResult.Disconnected
         val result = withTimeoutOrNull(UX_TIMEOUT) { admin.getDeviceMetadata() }

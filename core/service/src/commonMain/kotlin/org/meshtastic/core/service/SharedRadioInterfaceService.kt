@@ -957,7 +957,7 @@ class SharedRadioInterfaceService(
     }
 
     /** Must be called under [transportMutex]. */
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     private suspend fun startTransportLocked() {
         if (radioTransport != null) return
 

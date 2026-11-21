@@ -102,6 +102,7 @@ import org.meshtastic.core.resources.firmware_update_unknown_error
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_unsupported_update_method
 import org.meshtastic.core.resources.unknown
+import org.meshtastic.sdk.AdminResult
 
 // Bench measurement (Wio Tracker L1, 2 MB UF2): consume + reboot can outlast 30 s by a hair.
 private const val DEVICE_DETACH_TIMEOUT = 60_000L
@@ -1445,6 +1446,7 @@ class FirmwareUpdateViewModel(
      *
      * @return true when the reset was actually sent — the Success screen only claims a wipe that happened.
      */
+    @Suppress("ReturnCount")
     private suspend fun sendPostUpdateFactoryReset(): Boolean {
         val nodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
         if (nodeNum == null) {
@@ -1455,7 +1457,11 @@ class FirmwareUpdateViewModel(
             // The reset reboots the device and drops the transport; mark it expected so the UI shows
             // "restarting" instead of a surprise disconnect (same treatment as the settings reset).
             nodeRestartTracker.expectRestart()
-            radioController.factoryReset(nodeNum, radioController.generatePacketId())
+            val result = radioController.factoryReset(nodeNum)
+            if (result !is AdminResult.Success) {
+                Logger.w { "Post-update factory reset was not applied: $result" }
+                return false
+            }
             // The phone-side node DB describes a configuration that no longer exists.
             nodeRepository.clearNodeDB()
             true
