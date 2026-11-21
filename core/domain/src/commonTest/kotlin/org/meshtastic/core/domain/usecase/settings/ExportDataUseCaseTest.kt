@@ -26,6 +26,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
@@ -259,5 +260,108 @@ class ExportDataUseCaseTest {
 
         val rows = buffer.readUtf8().lines().drop(1).filter { it.isNotEmpty() }
         assertEquals(senders.map { it.toString() }, rows.map { it.split("\",\"")[2] })
+    }
+
+    private fun textLog(from: Int, payload: String) = MeshLog(
+        uuid = "1",
+        message_type = "TEXT",
+        received_date = 1000000000L,
+        raw_message = "",
+        fromRadio =
+        FromRadio.Builder()
+            .also { wb ->
+                wb.packet =
+                    MeshPacket.Builder()
+                        .also { pb ->
+                            pb.from = from
+                            pb.rx_snr = 5.0f
+                            pb.decoded =
+                                Data.Builder()
+                                    .also { db ->
+                                        db.portnum = PortNum.TEXT_MESSAGE_APP
+                                        db.payload = payload.encodeUtf8()
+                                    }
+                                    .build()
+                        }
+                        .build()
+            }
+            .build(),
+    )
+
+    private suspend fun exportRow(): String {
+        val buffer = Buffer()
+        useCase(buffer, 1)
+        return buffer.readUtf8().lines().drop(1).first { it.isNotEmpty() }
+    }
+
+    @Test
+    fun `sender name with a quote stays one cell with the quote doubled`() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 1234, user = User.Builder().also { it.long_name = "A\",B" }.build())))
+        meshLogRepository.setLogs(listOf(textLog(1234, "Hello")))
+
+        assertTrue(exportRow().contains(",\"1234\",\"A\"\",B\","))
+    }
+
+    @Test
+    fun `sender name starting with a formula character is prefixed`() = runTest {
+        nodeRepository.setNodes(
+            listOf(Node(num = 1234, user = User.Builder().also { it.long_name = "=SUM(A1)" }.build())),
+        )
+        meshLogRepository.setLogs(listOf(textLog(1234, "Hello")))
+
+        assertTrue(exportRow().contains(",\"1234\",\"'=SUM(A1)\","))
+    }
+
+    @Test
+    fun `payload starting with a formula character is prefixed`() = runTest {
+        listOf("=1+1", "+1", "-1", "@x", "\tx", "\rx").forEach { payload ->
+            meshLogRepository.setLogs(listOf(textLog(1234, payload)))
+            val buffer = Buffer()
+            useCase(buffer, 1)
+            val output = buffer.readUtf8()
+            assertTrue(output.endsWith(",\"'$payload\"\n"), "payload ${payload.encodeUtf8().hex()} not prefixed")
+        }
+    }
+
+    @Test
+    fun `payload with embedded quotes and plain text is only quote doubled`() = runTest {
+        meshLogRepository.setLogs(listOf(textLog(1234, "say \"hi\" - ok")))
+
+        assertTrue(exportRow().endsWith(",\"say \"\"hi\"\" - ok\""))
+    }
+
+    @Test
+    fun `negative coordinates stay unprefixed numeric cells`() = runTest {
+        val nodeInfoLog =
+            MeshLog(
+                uuid = "0",
+                message_type = "NodeInfo",
+                received_date = 1000000000L,
+                raw_message = "",
+                fromRadio =
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.node_info =
+                            NodeInfo.Builder()
+                                .also { nb ->
+                                    nb.num = 1234
+                                    nb.position =
+                                        org.meshtastic.proto.Position.Builder()
+                                            .also {
+                                                it.latitude_i = -123456789
+                                                it.longitude_i = -987654321
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+        meshLogRepository.setLogs(listOf(nodeInfoLog, textLog(1234, "Hello")))
+
+        val row = exportRow()
+        assertTrue(row.contains(",\"-12.34567"), row)
+        assertTrue(row.contains(",\"-98.76543"), row)
+        assertFalse(row.contains("'-"))
     }
 }

@@ -155,7 +155,8 @@ class MeshMessageProcessorImpl(
         }
     }
 
-    private fun logVariant(proto: FromRadio, session: RadioSessionContext) {
+    private fun logVariant(received: FromRadio, session: RadioSessionContext) {
+        val proto = received.redactedForLog()
         val myInfo = proto.my_info
         val nodeInfo = proto.node_info
         val config = proto.config
@@ -277,15 +278,16 @@ class MeshMessageProcessorImpl(
     @Suppress("LongMethod")
     private suspend fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val decoded = packet.decoded ?: return
+        val loggedPacket = packet.redactedForLog()
         val log =
             MeshLog(
                 uuid = Uuid.random().toString(),
                 message_type = "Packet",
                 received_date = nowMillis,
-                raw_message = packet.toString(),
+                raw_message = loggedPacket.toString(),
                 fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
-                fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
+                fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
             )
         val logJob = insertMeshLog(log, session)
 

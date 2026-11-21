@@ -83,6 +83,7 @@ import org.meshtastic.core.common.log.RoomPoolTimeoutLog
 import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
@@ -133,6 +134,7 @@ import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.feature.map.maplibre.MapLibreTracerouteMapSlot
 import java.awt.Desktop
+import java.io.File
 import java.util.Locale
 import kotlin.system.exitProcess
 import coil3.util.Logger as CoilLogger
@@ -168,6 +170,8 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) {
+    // Resolving the data directory first restricts the default location before any store writes into it.
+    desktopDataDir()
     installQuitHandler()
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
@@ -504,6 +508,7 @@ private fun CoilImageLoaderSetup() {
 
     setSingletonImageLoaderFactory { context ->
         val cacheDir = desktopDataDir() + "/image_cache_v3"
+        createOwnerOnlyDirectories(File(cacheDir))
         ImageLoader.Builder(context)
             .components {
                 add(

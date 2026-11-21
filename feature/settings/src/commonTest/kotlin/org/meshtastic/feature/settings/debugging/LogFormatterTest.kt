@@ -16,6 +16,17 @@
  */
 package org.meshtastic.feature.settings.debugging
 
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.BluetoothConnectionStatus
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.KeyVerificationAdmin
+import org.meshtastic.proto.KeyVerificationNumberInform
+import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.ModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -155,5 +166,241 @@ class LogFormatterTest {
         assertTrue(result.contains("session_passkey=<redacted>"))
         assertTrue(result.contains("private_key:<redacted>"))
         assertTrue(result.contains("region=US"))
+    }
+
+    private val privateKeyHex = "0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0"
+    private val adminKeyOneHex = "a1a2a3a4a5a6a7a8a1a2a3a4a5a6a7a8a1a2a3a4a5a6a7a8a1a2a3a4a5a6a7a8"
+    private val adminKeyTwoHex = "b1b2b3b4b5b6b7b8b1b2b3b4b5b6b7b8b1b2b3b4b5b6b7b8b1b2b3b4b5b6b7b8"
+    private val publicKeyHex = "c1c2c3c4c5c6c7c8c1c2c3c4c5c6c7c8c1c2c3c4c5c6c7c8c1c2c3c4c5c6c7c8"
+
+    private fun rendered(message: Any): String = sanitizeForExport(message.toString())
+
+    private fun security(block: (Config.SecurityConfig.Builder) -> Unit): Config =
+        Config.Builder().also { it.security = Config.SecurityConfig.Builder().also(block).build() }.build()
+
+    @Test
+    fun `security config keys are redacted and the public key and neighbors survive`() {
+        val result =
+            rendered(
+                security {
+                    it.public_key = publicKeyHex.decodeHex()
+                    it.private_key = privateKeyHex.decodeHex()
+                    it.admin_key = listOf(adminKeyOneHex.decodeHex(), adminKeyTwoHex.decodeHex())
+                    it.serial_enabled = true
+                },
+            )
+
+        listOf(privateKeyHex, adminKeyOneHex, adminKeyTwoHex).forEach { assertFalse(result.contains(it), it) }
+        assertTrue(result.contains(publicKeyHex), "public keys are not secret")
+        assertTrue(result.contains("serial_enabled=true"), "the field after the redacted list is kept")
+    }
+
+    @Test
+    fun `a string credential in the last field keeps the closing brace`() {
+        // No generated message ends in a string credential, so this is Wire's `name=value` shape written by hand.
+        val result = sanitizeForExport("NetworkConfig{wifi_ssid=home, wifi_psk=last field pw}")
+
+        assertTrue(result.endsWith("wifi_ssid=home, wifi_psk=<redacted>}"), result)
+    }
+
+    @Test
+    fun `a bytes list is redacted whole and the next field survives`() {
+        val result =
+            rendered(security { it.admin_key = listOf(adminKeyOneHex.decodeHex(), adminKeyTwoHex.decodeHex()) })
+
+        assertFalse(result.contains(adminKeyOneHex))
+        assertFalse(result.contains(adminKeyTwoHex))
+        assertTrue(result.contains("admin_key=<redacted>, is_managed=false"), result)
+    }
+
+    @Test
+    fun `wifi password with quotes and commas is redacted whole`() {
+        val config =
+            Config.Builder()
+                .also {
+                    it.network =
+                        Config.NetworkConfig.Builder()
+                            .also { n ->
+                                n.wifi_ssid = "home"
+                                n.wifi_psk = "hunter2 \"x\", y"
+                                n.ntp_server = "pool.example"
+                            }
+                            .build()
+                }
+                .build()
+
+        val result = rendered(config)
+
+        listOf("hunter2", "\\, y").forEach { assertFalse(result.contains(it), it) }
+        assertTrue(result.contains("wifi_ssid=home"))
+        assertTrue(result.contains("ntp_server=pool.example"))
+    }
+
+    @Test
+    fun `bluetooth fixed pin is redacted as the last field`() {
+        val config =
+            Config.Builder()
+                .also {
+                    it.bluetooth =
+                        Config.BluetoothConfig.Builder()
+                            .also { b ->
+                                b.enabled = true
+                                b.mode = Config.BluetoothConfig.PairingMode.FIXED_PIN
+                                b.fixed_pin = 424242
+                            }
+                            .build()
+                }
+                .build()
+
+        val result = rendered(config)
+
+        assertFalse(result.contains("424242"))
+        assertTrue(result.contains("mode=FIXED_PIN"))
+        assertTrue(result.endsWith("fixed_pin=<redacted>}}"), result)
+    }
+
+    @Test
+    fun `mqtt credentials are redacted and neighboring fields survive`() {
+        val moduleConfig =
+            ModuleConfig.Builder()
+                .also {
+                    it.mqtt =
+                        ModuleConfig.MQTTConfig.Builder()
+                            .also { m ->
+                                m.address = "mqtt.example"
+                                m.username = "mesh user"
+                                m.password = "pw 9f3a, tail"
+                                m.root = "msh/US"
+                            }
+                            .build()
+                }
+                .build()
+
+        val result = rendered(moduleConfig)
+
+        listOf("mesh user", "pw 9f3a", "tail").forEach { assertFalse(result.contains(it), it) }
+        assertTrue(result.contains("address=mqtt.example"))
+        assertTrue(result.contains("root=msh/US"))
+    }
+
+    @Test
+    fun `admin message session passkey and lockdown passphrase are redacted`() {
+        val admin =
+            AdminMessage.Builder()
+                .also {
+                    it.session_passkey = "dd8042fa0cfd7d17".decodeHex()
+                    it.lockdown_auth =
+                        LockdownAuth.Builder()
+                            .also { l ->
+                                l.passphrase = "00112233445566778899aabbccddeeff".decodeHex()
+                                l.boots_remaining = 3
+                            }
+                            .build()
+                }
+                .build()
+
+        val result = rendered(admin)
+
+        assertFalse(result.contains("dd8042fa0cfd7d17"))
+        assertFalse(result.contains("00112233445566778899aabbccddeeff"))
+        assertTrue(result.contains("boots_remaining=3"), "fields after a hex rendering are kept")
+    }
+
+    @Test
+    fun `a text passphrase containing a bracket and comma leaves no part of the secret`() {
+        val result =
+            rendered(LockdownAuth.Builder().also { it.passphrase = "prefix], secret-tail".encodeUtf8() }.build())
+
+        listOf("prefix", "secret-tail").forEach { assertFalse(result.contains(it), it) }
+        assertTrue(result.contains("passphrase=<redacted>"))
+    }
+
+    @Test
+    fun `a text passphrase containing a bracket and brace leaves no part of the secret`() {
+        val result =
+            rendered(LockdownAuth.Builder().also { it.passphrase = "prefix]}secret-tail".encodeUtf8() }.build())
+
+        listOf("prefix", "secret-tail").forEach { assertFalse(result.contains(it), it) }
+    }
+
+    @Test
+    fun `a text admin key list containing a bracket leaves no part of the secret`() {
+        val result =
+            rendered(
+                security {
+                    it.admin_key = listOf("first], secret-one".encodeUtf8(), "second]}secret-two".encodeUtf8())
+                },
+            )
+
+        listOf("first", "secret-one", "second", "secret-two").forEach { assertFalse(result.contains(it), it) }
+    }
+
+    @Test
+    fun `device ui pin and key verification numbers are redacted`() {
+        val ui =
+            rendered(
+                DeviceUIConfig.Builder()
+                    .also {
+                        it.pin_code = 135790
+                        it.screen_brightness = 77
+                    }
+                    .build(),
+            )
+        val verify =
+            rendered(
+                KeyVerificationAdmin.Builder()
+                    .also {
+                        it.remote_nodenum = 5
+                        it.security_number = 864209
+                    }
+                    .build(),
+            )
+        val inform =
+            rendered(
+                ClientNotification.Builder()
+                    .also {
+                        it.key_verification_number_inform =
+                            KeyVerificationNumberInform.Builder()
+                                .also { k ->
+                                    k.remote_longname = "Peer"
+                                    k.security_number = 975310
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+
+        assertFalse(ui.contains("135790"))
+        assertTrue(ui.contains("screen_brightness=77"))
+        assertFalse(verify.contains("864209"))
+        assertTrue(verify.contains("remote_nodenum=5"))
+        assertFalse(inform.contains("975310"))
+        assertTrue(inform.contains("remote_longname=Peer"))
+    }
+
+    @Test
+    fun `bluetooth connection pin is redacted but gpio pin fields are not`() {
+        val connection =
+            rendered(
+                BluetoothConnectionStatus.Builder()
+                    .also {
+                        it.pin = 246810
+                        it.rssi = -50
+                    }
+                    .build(),
+            )
+        val gpio =
+            rendered(
+                ModuleConfig.DetectionSensorConfig.Builder()
+                    .also {
+                        it.monitor_pin = 17
+                        it.enabled = true
+                    }
+                    .build(),
+            )
+
+        assertFalse(connection.contains("246810"))
+        assertTrue(connection.contains("rssi=-50"))
+        assertTrue(gpio.contains("monitor_pin=17"), "a field that only ends in pin is not a credential")
     }
 }

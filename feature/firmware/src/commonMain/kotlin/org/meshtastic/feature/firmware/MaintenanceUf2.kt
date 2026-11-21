@@ -72,6 +72,15 @@ internal data class MaintenanceUf2(
  */
 private val SAFE_UF2_FILE_NAME = Regex("""[A-Za-z0-9._-]+\.uf2""")
 
+private val OTAFIX_BASE = Regex("""https://github\.com/meshtastic/nRF52_Bootloader/releases/download/[A-Za-z0-9._-]+""")
+
+/**
+ * True only for a bootloader release download base: `https://github.com/meshtastic/nRF52_Bootloader/releases/download/
+ * <tag>`. Matched against the whole string so a different scheme, host, repository, userinfo or trailing path never
+ * passes; a base that fails resolves no image.
+ */
+internal fun isBootloaderReleaseBase(base: String): Boolean = OTAFIX_BASE.matches(base)
+
 /**
  * Factory-erase images are now vendored and served by `meshtastic/api` (`resource/maintenanceUf2/asset/<fileName>`)
  * rather than a commit-pinned URL into `meshtastic/web-flasher`'s `public/uf2/` — see `data/maintenanceUf2.json` in
@@ -119,7 +128,7 @@ internal fun bootloaderEraseUf2For(manifest: MaintenanceUf2Manifest, volumeFamil
  */
 private fun MaintenanceUf2Manifest.otafixAssetOrNull(otafixBoardSlug: String, sha256: String): MaintenanceUf2? {
     val name = "update-${otafixBoardSlug}_bootloader-${otafixReleaseTag}_nosd.uf2"
-    if (!SAFE_UF2_FILE_NAME.matches(name)) return null
+    if (!isBootloaderReleaseBase(otafixBase) || !SAFE_UF2_FILE_NAME.matches(name)) return null
     return MaintenanceUf2(url = "$otafixBase/$name", fileName = name, sha256 = sha256)
 }
 
@@ -159,6 +168,7 @@ internal fun bootloaderDfuZipFor(
     val softDevice = SoftDeviceVariant.fromWire(row.softDevice) ?: return null
     if (mappedSoftDevice != null && mappedSoftDevice != softDevice) return null
     if (manifest.otafixReleaseTag.isBlank() || row.bleModel.isBlank()) return null
+    if (!isBootloaderReleaseBase(manifest.otafixBase)) return null
     val name = "${row.otafixBoardSlug}_bootloader-${manifest.otafixReleaseTag}_s140_${row.softDevice}.zip"
     if (!SAFE_DFU_ZIP_FILE_NAME.matches(name)) return null
     return BootloaderDfuZip(

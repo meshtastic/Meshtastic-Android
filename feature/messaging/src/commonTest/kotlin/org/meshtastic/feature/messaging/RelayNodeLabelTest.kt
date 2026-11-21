@@ -54,6 +54,22 @@ class RelayNodeLabelTest {
     }
 
     @Test
+    fun aPacketHeardDirectNamesNoRelay() {
+        // Firmware stamps the transmitter's own byte (Router.cpp), so a 0-hop packet carries the sender's.
+        assertNull(receivedRelayNode(0x5A, hopsAway = 0, viaMqtt = false))
+    }
+
+    @Test
+    fun aPacketFromMqttNamesNoRelay() {
+        assertNull(receivedRelayNode(0x5A, hopsAway = 2, viaMqtt = true))
+    }
+
+    @Test
+    fun aRelayedPacketKeepsItsRelay() {
+        assertEquals(0x5A, receivedRelayNode(0x5A, hopsAway = 1, viaMqtt = false))
+    }
+
+    @Test
     fun ourOwnNodeIsNeverTheRelay() {
         assertEquals("0x5A", relayNodeLabel(0x5A, listOf(node(0x5A, "Me")), ourNodeNum = 0x5A))
     }

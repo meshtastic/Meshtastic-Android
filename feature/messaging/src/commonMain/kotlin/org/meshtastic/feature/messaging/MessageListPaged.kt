@@ -170,6 +170,7 @@ internal fun MessageListPaged(
             reactions = reactions,
             myId = state.ourNode?.user?.id,
             reactorNames = reactorNames,
+            resolveRelay = { relay -> relayNodeLabel(relay, state.nodes, state.ourNode?.num) },
             canReact = state.canReact,
             onDismiss = { showReactionDialog = null },
             onResend = { reaction ->
@@ -397,6 +398,8 @@ private fun RenderPagedChatMessageRow(
     // Resolve an @mention token ("!<hex>" = numeric node id) back to its node for live name + tap-to-open.
     val resolveMention: (String) -> Node? =
         remember(nodeMap) { { id -> id.removePrefix("!").toLongOrNull(HEX_RADIX)?.toInt()?.let { nodeMap[it] } } }
+    val resolveRelay: (Int?) -> String? =
+        remember(state.nodes, ourNode.num) { { relay -> relayNodeLabel(relay, state.nodes, ourNode.num) } }
 
     MessageItem(
         modifier = modifier,
@@ -462,6 +465,7 @@ private fun RenderPagedChatMessageRow(
         searchQuery = state.searchQuery,
         translationAvailable = state.translationAvailable,
         isDirectMessage = isDirectMessageConversation,
+        resolveRelay = resolveRelay,
         onTranslate = { handlers.onTranslate(message) },
         onToggleTranslation = { handlers.onToggleTranslation(message) },
     )

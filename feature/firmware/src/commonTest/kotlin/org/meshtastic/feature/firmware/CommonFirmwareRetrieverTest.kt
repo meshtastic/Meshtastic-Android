@@ -26,6 +26,7 @@ import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -62,7 +63,7 @@ abstract class CommonFirmwareRetrieverTest {
                 "files": [
                     {
                         "name": "firmware-heltec-v3-2.7.17.bin",
-                        "md5": "abc123",
+                        "md5": "b2d1236c286a3c0704224fe4105eca49",
                         "bytes": 2097152,
                         "part_name": "app0"
                     },
@@ -92,6 +93,7 @@ abstract class CommonFirmwareRetrieverTest {
 
         // Direct download of the manifest-resolved filename succeeds
         handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.bin")
+        handler.fileBytes["firmware-heltec-v3-2.7.17.bin"] = ByteArray(2097152)
 
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
 
@@ -121,7 +123,7 @@ abstract class CommonFirmwareRetrieverTest {
     }
 
     @Test
-    fun `retrieveEsp32Firmware rejects manifest artifact on md5 mismatch and falls back`() = runTest {
+    fun `retrieveEsp32Firmware fails without fallback on md5 mismatch`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
 
@@ -131,17 +133,21 @@ abstract class CommonFirmwareRetrieverTest {
             """{"files":[{"name":"$name","part_name":"app0","md5":"deadbeef","bytes":4}]}"""
         handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/$name")
         handler.fileBytes[name] = byteArrayOf(0x01, 0x02, 0x03, 0x04)
-        // Heuristic fallback the rejection should land on.
-        handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.bin")
+        // Fallbacks that must stay unreached once the manifest has rejected the image.
+        val fallbackUrl = "$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.bin"
+        handler.existingUrls.add(fallbackUrl)
+        handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17-update.bin")
 
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
 
-        assertNotNull(result)
-        assertEquals("firmware-heltec-v3-2.7.17.bin", result.fileName)
+        assertNull(result)
+        assertEquals(listOf(name), handler.deletedFiles.map { it.fileName })
+        assertFalse(fallbackUrl in handler.downloadedUrls, "a rejected manifest image must not reach a fallback")
+        assertEquals(1, handler.downloadedUrls.size)
     }
 
     @Test
-    fun `retrieveEsp32Firmware rejects manifest artifact on size mismatch and falls back`() = runTest {
+    fun `retrieveEsp32Firmware fails without fallback on size mismatch`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
 
@@ -151,6 +157,23 @@ abstract class CommonFirmwareRetrieverTest {
             """{"files":[{"name":"$name","part_name":"app0","md5":"","bytes":9999}]}"""
         handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/$name")
         handler.fileBytes[name] = ByteArray(10)
+        handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.bin")
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNull(result)
+        assertEquals(listOf(name), handler.deletedFiles.map { it.fileName })
+        assertEquals(1, handler.downloadedUrls.size)
+    }
+
+    @Test
+    fun `retrieveEsp32Firmware falls back when the manifest image cannot be downloaded`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        // The manifest names an image that is not published; nothing was downloaded, so nothing was rejected.
+        handler.textResponses["$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.mt.json"] =
+            """{"files":[{"name":"firmware-heltec-v3-2.7.17-app0.bin","part_name":"app0","md5":"deadbeef","bytes":4}]}"""
         handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17.bin")
 
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}

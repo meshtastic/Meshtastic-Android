@@ -23,6 +23,7 @@ import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.matches
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
@@ -42,6 +43,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionEpochs
@@ -59,6 +62,7 @@ import org.meshtastic.core.repository.PersistedReaction
 import org.meshtastic.core.repository.PersistedReactionId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -1721,4 +1725,38 @@ class PacketHandlerImplTest {
         verifySuspend { packetRepository.timeOutEnroutePacket(firstId, Routing.Error.TIMEOUT.value) }
         verifySuspend { packetRepository.timeOutEnroutePacket(secondId, Routing.Error.TIMEOUT.value) }
     }
+
+    @Test
+    fun `outgoing admin packet is logged with cleared keys while the radio gets the original bytes`() =
+        runTest(testDispatcher) {
+            val secret = ByteArray(32) { 0x7A }.toByteString()
+            val admin = AdminMessage.Builder().also { it.session_passkey = secret }.build()
+            val packet =
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 321
+                        wb.decoded =
+                            Data.Builder()
+                                .also {
+                                    it.portnum = PortNum.ADMIN_APP
+                                    it.payload = AdminMessage.ADAPTER.encodeByteString(admin)
+                                }
+                                .build()
+                    }
+                    .build()
+            val toRadio = ToRadio.Builder().also { wb -> wb.packet = packet }.build()
+
+            handler.sendToRadio(toRadio)
+            testScheduler.runCurrent()
+
+            verifySuspend {
+                meshLogRepository.insert(
+                    matches {
+                        AdminMessage.ADAPTER.decode(it.fromRadio.packet!!.decoded!!.payload).session_passkey ==
+                            ByteString.EMPTY && !it.raw_message.contains(secret.hex())
+                    },
+                )
+            }
+            verify { radioInterfaceService.trySendToRadio(matches { it.contentEquals(toRadio.encode()) }) }
+        }
 }

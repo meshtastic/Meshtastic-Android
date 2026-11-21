@@ -982,7 +982,7 @@ class FirmwareUpdateViewModelTest {
         everySuspend { maintenanceUf2Repository.getSnapshot() } returns
             MaintenanceUf2Manifest(
                 otafixReleaseTag = "2.6.0",
-                otafixBase = "https://example.com",
+                otafixBase = "https://github.com/meshtastic/nRF52_Bootloader/releases/download/2.6.0",
                 otafixBleDfuByTarget =
                 mapOf(
                     "rak4631" to

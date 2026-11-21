@@ -768,11 +768,11 @@ class MQTTRepositoryImplTest {
         val firstCollector = startProxyCollection(repository)
         runCurrent()
 
-        repeat(20) { index -> repository.publish("busy/$index", byteArrayOf(index.toByte()), retained = false) }
+        repeat(20) { index -> repository.publish("msh/busy/$index", byteArrayOf(index.toByte()), retained = false) }
         runCurrent()
         assertEquals(20, firstClient.publishStarted.size)
 
-        repository.publish("queued/after-replacement", byteArrayOf(42), retained = false)
+        repository.publish("msh/queued/after-replacement", byteArrayOf(42), retained = false)
         runCurrent()
         assertEquals(20, firstClient.publishStarted.size, "the target publish must still be waiting for a permit")
 
@@ -781,11 +781,61 @@ class MQTTRepositoryImplTest {
         publishGate.complete(Unit)
         runCurrent()
 
-        assertFalse(firstClient.publishedMessages.any { it.topic == "queued/after-replacement" })
-        assertTrue(replacementClient.publishedMessages.any { it.topic == "queued/after-replacement" })
+        assertFalse(firstClient.publishedMessages.any { it.topic == "msh/queued/after-replacement" })
+        assertTrue(replacementClient.publishedMessages.any { it.topic == "msh/queued/after-replacement" })
 
         firstCollector.cancelAndJoin()
         replacementCollector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `publishes under the root keep the retained flag`() = runTest {
+        val harness = createHarness()
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        harness.repository.publish("msh/2/e/alpha/!12345678", byteArrayOf(1), retained = false)
+        harness.repository.publish("msh/2/map/", byteArrayOf(2), retained = true)
+        runCurrent()
+
+        assertEquals(
+            listOf("msh/2/e/alpha/!12345678" to false, "msh/2/map/" to true),
+            harness.client.publishedMessages.map { it.topic to it.retain },
+        )
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `publishes under a root with a leading slash go out`() = runTest {
+        val harness = createHarness(radioConfigRepository = radioConfigWithRoot("/msh"))
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        harness.repository.publish("/msh/2/e/alpha/!12345678", byteArrayOf(1), retained = false)
+        runCurrent()
+
+        assertEquals(listOf("/msh/2/e/alpha/!12345678"), harness.client.publishedMessages.map { it.topic })
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `publishes outside the root are dropped`() = runTest {
+        val harness = createHarness(radioConfigRepository = radioConfigWithRoot("msh"))
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        listOf("other/2/e/alpha/!12345678", "msh", "msh/", "msh2/2/e/alpha/!12345678", "msh/2/e/+/!12345678", "msh/#")
+            .forEach { harness.repository.publish(it, byteArrayOf(1), retained = true) }
+        runCurrent()
+
+        assertEquals(emptyList(), harness.client.publishedMessages.map { it.topic })
+
+        collector.cancelAndJoin()
         runCurrent()
     }
 

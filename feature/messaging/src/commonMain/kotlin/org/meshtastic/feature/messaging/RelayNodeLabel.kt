@@ -33,3 +33,11 @@ internal fun relayNodeLabel(relayNode: Int?, nodes: List<Node>, ourNodeNum: Int?
     val name = Node.getRelayNode(relay, nodes, ourNodeNum)?.effectiveLongName?.takeIf { it.isNotBlank() }
     return if (name != null) "$name ($hex)" else hex
 }
+
+/**
+ * The relay byte of a received packet, or null when it names no relay: every node stamps its own byte on transmit, so a
+ * packet heard direct carries the sender's, and one from MQTT carries a node on the far side of the bridge.
+ */
+internal fun receivedRelayNode(relayNode: Int?, hopsAway: Int, viaMqtt: Boolean): Int? = relayNode.takeUnless {
+    hopsAway == 0 || viaMqtt
+}

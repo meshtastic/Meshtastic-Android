@@ -24,7 +24,6 @@ import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.configure
@@ -153,10 +152,6 @@ internal fun Project.configureTestOptions() {
         // Show test results in the console
         testLogging { events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED) }
     }
-
-    // Gradle 9+ fails when test sources exist but no test classes are discovered (e.g. all
-    // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
-    tasks.withType<AbstractTestTask>().configureEach { failOnNoDiscoveredTests.set(false) }
 
     // Develocity-native test retry; findByType no-ops if the settings plugin isn't applied.
     tasks.withType<Test>().configureEach {
