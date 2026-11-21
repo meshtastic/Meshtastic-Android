@@ -31,8 +31,6 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.repository.HandshakeConstants
-import org.meshtastic.core.repository.RadioTransportCallback
-import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
@@ -60,16 +58,13 @@ import kotlin.test.assertTrue
  */
 class MockRadioTransportTest {
 
-    private class RecordingCallback : RadioTransportCallback {
+    private class RecordingCallback : VirtualRadioRecorder {
         var connects = 0
         val received = mutableListOf<FromRadio>()
 
         override fun onConnect() {
             connects++
         }
-
-        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) =
-            Unit
 
         override fun handleFromRadio(bytes: ByteArray) {
             received.add(FromRadio.ADAPTER.decode(bytes))
@@ -94,7 +89,7 @@ class MockRadioTransportTest {
      */
     private fun TestScope.transportScope() = CoroutineScope(StandardTestDispatcher(testScheduler))
 
-    private fun TestScope.mockLink(callback: RadioTransportCallback, scope: CoroutineScope, address: String) =
+    private fun TestScope.mockLink(callback: VirtualRadioRecorder, scope: CoroutineScope, address: String) =
         VirtualRadioFixture(this, MockRadioTransport(scope, address), callback, connectOnFirstSend = true)
 
     @Test

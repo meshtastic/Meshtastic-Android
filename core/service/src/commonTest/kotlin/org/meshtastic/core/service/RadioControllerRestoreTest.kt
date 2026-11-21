@@ -40,7 +40,6 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
@@ -75,7 +74,6 @@ class RadioControllerRestoreTest {
         private val analytics: PlatformAnalytics = mock(MockMode.autofill)
         private val uiPrefs: UiPrefs = mock(MockMode.autofill)
         private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
-        private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
         private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
 
         fun create(
@@ -104,7 +102,6 @@ class RadioControllerRestoreTest {
                 uiPrefs = uiPrefs,
                 databaseManager = databaseManager,
                 serviceNotifications = serviceNotifications,
-                messageProcessor = lazy { messageProcessor },
                 meshConfigFlowManager = lazy { mock<MeshConfigFlowManager>(MockMode.autofill) },
                 radioOperationLock = RadioOperationLock(),
                 radioConfigRepository = radioConfigRepository,

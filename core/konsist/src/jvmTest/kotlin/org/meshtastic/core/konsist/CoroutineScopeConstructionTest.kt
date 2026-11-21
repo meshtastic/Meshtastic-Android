@@ -35,7 +35,6 @@ class CoroutineScopeConstructionTest {
             "androidApp/google/AppFunctionStateSync.kt",
             "androidApp/google/GoogleMapsPrefs.kt",
             "androidApp/main/MeshUtilApplication.kt",
-            "core/data/commonMain/FromRadioPacketHandlerImpl.kt",
             "core/data/commonMain/SingleFlightRefresher.kt",
             "core/database/nonWebMain/DatabaseManager.kt",
             "core/datastore/commonMain/CoreDatastoreModule.kt",

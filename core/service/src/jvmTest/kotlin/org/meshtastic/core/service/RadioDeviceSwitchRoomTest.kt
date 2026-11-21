@@ -194,7 +194,6 @@ class RadioDeviceSwitchRoomTest {
             uiPrefs = FakeUiPrefs(),
             databaseManager = databaseManager,
             serviceNotifications = mock(MockMode.autofill),
-            messageProcessor = lazy { mock(MockMode.autofill) },
             meshConfigFlowManager = lazy { mock(MockMode.autofill) },
             radioOperationLock = RadioOperationLock(),
             radioConfigRepository = mock(MockMode.autofill),

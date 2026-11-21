@@ -17,21 +17,11 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.proto.DisplayFrame
-
-private data class RectArea(
-    val x: Int,
-    val y: Int,
-    val width: Int,
-    val height: Int,
-    val panelWidth: Int,
-    val panelHeight: Int,
-)
+import org.meshtastic.sdk.DisplayMirrorFrame
 
 /**
- * Reassembles RGB565 dirty-rect chunks (LVGL-based device UIs) and composites them into a persistent little-endian
- * RGB565 canvas. Rect geometry is latched from the chunk at offset 0 so a later chunk cannot transpose the blit, and
- * every field is validated before anything is allocated — `total_size` is device-controlled.
+ * Composites complete RGB565 dirty rectangles (LVGL-based device UIs) into a persistent little-endian RGB565 canvas.
+ * Every field is validated before anything is allocated, since the geometry is device-controlled.
  */
 internal class MirrorRectCompositor {
 
@@ -42,37 +32,27 @@ internal class MirrorRectCompositor {
         private set
 
     private var canvas: ByteArray? = null
-    private var buffer: ByteArray? = null
-    private var received = 0
-    private var frameId = 0
-    private var area: RectArea? = null
 
-    /** Feeds one chunk; returns true when it completed a rect and the canvas changed. */
-    fun handle(chunk: DisplayFrame): Boolean {
-        val data = chunk.data_.toByteArray()
-        if (!isAcceptable(chunk, data.size)) {
-            buffer = null
-            return false
+    /** Blits one complete rect; returns true when the canvas changed. */
+    fun composite(frame: DisplayMirrorFrame): Boolean {
+        if (!isAcceptable(frame)) return false
+        val target = canvasFor(frame)
+        val rect = frame.data.toByteArray()
+        val rowBytes = rectWidth(frame) * 2
+        for (row in 0 until rectHeight(frame)) {
+            val src = row * rowBytes
+            val dst = ((frame.rectY + row) * width + frame.rectX) * 2
+            rect.copyInto(target, dst, src, src + rowBytes)
         }
-        if (chunk.offset == 0) {
-            buffer = ByteArray(chunk.total_size)
-            frameId = chunk.frame_id
-            received = 0
-            area = RectArea(chunk.rect_x, chunk.rect_y, rectWidth(chunk), rectHeight(chunk), chunk.width, chunk.height)
-        }
-        return accumulate(chunk, data)
+        return true
     }
 
-    private fun accumulate(chunk: DisplayFrame, data: ByteArray): Boolean {
-        val buf = buffer ?: return false
-        data.copyInto(buf, chunk.offset)
-        received += data.size
-        val complete = received >= buf.size
-        if (complete) {
-            composite(buf)
-            buffer = null
-        }
-        return complete
+    private fun canvasFor(frame: DisplayMirrorFrame): ByteArray {
+        val held = canvas
+        if (held != null && width == frame.width && height == frame.height) return held
+        width = frame.width
+        height = frame.height
+        return ByteArray(frame.width * frame.height * 2).also { canvas = it }
     }
 
     /** Snapshot of the composited canvas, or null before the first completed rect. */
@@ -80,70 +60,36 @@ internal class MirrorRectCompositor {
 
     fun reset() {
         canvas = null
-        buffer = null
-        received = 0
-        frameId = 0
         width = 0
         height = 0
-        area = null
     }
 
     /** A rect that omits width or height covers the full panel in that axis. */
-    private fun rectWidth(chunk: DisplayFrame) = if (chunk.rect_width > 0) chunk.rect_width else chunk.width
+    private fun rectWidth(frame: DisplayMirrorFrame) = if (frame.rectWidth > 0) frame.rectWidth else frame.width
 
-    private fun rectHeight(chunk: DisplayFrame) = if (chunk.rect_height > 0) chunk.rect_height else chunk.height
+    private fun rectHeight(frame: DisplayMirrorFrame) = if (frame.rectHeight > 0) frame.rectHeight else frame.height
 
-    private fun isAcceptable(chunk: DisplayFrame, dataSize: Int): Boolean {
-        val expected = if (withinPanel(chunk)) rectWidth(chunk) * rectHeight(chunk) * 2 else -1
-        val sized = expected == chunk.total_size && chunk.total_size in 1..MAX_RECT_BYTES
-        // Continuations must match the buffer and the panel latched at offset 0, not merely their own claim.
-        val latched = area
-        val inSequence =
-            chunk.offset == 0 ||
-                (
-                    buffer?.size == chunk.total_size &&
-                        chunk.frame_id == frameId &&
-                        chunk.offset == received &&
-                        latched != null &&
-                        chunk.width == latched.panelWidth &&
-                        chunk.height == latched.panelHeight
-                    )
-        val acceptable = sized && inSequence && chunk.offset + dataSize <= chunk.total_size
+    private fun isAcceptable(frame: DisplayMirrorFrame): Boolean {
+        val expected = if (withinPanel(frame)) rectWidth(frame) * rectHeight(frame) * 2 else -1
+        val acceptable = expected == frame.data.size && expected in 1..MAX_RECT_BYTES
         if (!acceptable) {
             Logger.w {
-                "DisplayMirror: dropping bad rect ${chunk.rect_width}x${chunk.rect_height} total=${chunk.total_size}"
+                "DisplayMirror: dropping bad rect ${frame.rectWidth}x${frame.rectHeight} size=${frame.data.size}"
             }
         }
         return acceptable
     }
 
-    /** Subtraction form throughout: `rect_x + rect_width` overflows for hostile values. */
-    private fun withinPanel(chunk: DisplayFrame): Boolean {
-        val w = rectWidth(chunk)
-        val h = rectHeight(chunk)
-        return chunk.width in 1..MAX_PANEL_EDGE &&
-            chunk.height in 1..MAX_PANEL_EDGE &&
-            w in 1..chunk.width &&
-            h in 1..chunk.height &&
-            chunk.rect_x in 0..(chunk.width - w) &&
-            chunk.rect_y in 0..(chunk.height - h)
-    }
-
-    /** Uses the panel latched at offset 0, the geometry the rect was validated against. */
-    private fun composite(rect: ByteArray) {
-        val blit = area ?: return
-        if (canvas == null || width != blit.panelWidth || height != blit.panelHeight) {
-            canvas = ByteArray(blit.panelWidth * blit.panelHeight * 2)
-            width = blit.panelWidth
-            height = blit.panelHeight
-        }
-        val target = canvas ?: return
-        val rowBytes = blit.width * 2
-        for (row in 0 until blit.height) {
-            val src = row * rowBytes
-            val dst = ((blit.y + row) * width + blit.x) * 2
-            rect.copyInto(target, dst, src, src + rowBytes)
-        }
+    /** Subtraction form throughout: `rectX + rectWidth` overflows for hostile values. */
+    private fun withinPanel(frame: DisplayMirrorFrame): Boolean {
+        val w = rectWidth(frame)
+        val h = rectHeight(frame)
+        return frame.width in 1..MAX_PANEL_EDGE &&
+            frame.height in 1..MAX_PANEL_EDGE &&
+            w in 1..frame.width &&
+            h in 1..frame.height &&
+            frame.rectX in 0..(frame.width - w) &&
+            frame.rectY in 0..(frame.height - h)
     }
 
     private companion object {

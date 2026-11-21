@@ -149,13 +149,12 @@ class TelemetryPacketHandlerImplTest {
         advanceUntilIdle()
 
         verify { connectionManager.updateTelemetry(any()) }
-        verify { nodeManager.updateNodeForSession(myNodeNum, radioSession, any(), any()) }
     }
 
     // ---------- Device metrics from remote node ----------
 
     @Test
-    fun `remote device metrics updates node but not connectionManager`() = testScope.runTest {
+    fun `remote device metrics leave the node row to the SDK node update`() = testScope.runTest {
         val telemetry =
             Telemetry.Builder()
                 .also { wb ->
@@ -175,7 +174,8 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNodeForSession(remoteNodeNum, radioSession, any(), any()) }
+        verify(VerifyMode.not) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
+        verify(VerifyMode.not) { connectionManager.updateTelemetry(any()) }
     }
 
     // ---------- Environment metrics ----------
@@ -273,7 +273,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNodeForSession(myNodeNum, radioSession, any(), any()) }
+        verify { connectionManager.updateTelemetry(telemetry.newBuilder().also { it.time = 1700000000 }.build()) }
     }
 
     // ---------- Null payload ----------
@@ -354,7 +354,8 @@ class TelemetryPacketHandlerImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.notifyLowBattery(Node(num = myNodeNum), isRemote = false) }
+        val reported = Node(num = myNodeNum, deviceMetrics = checkNotNull(lowBatteryTelemetry().device_metrics))
+        verifySuspend { serviceNotifications.notifyLowBattery(reported, isRemote = false) }
     }
 
     @Test
@@ -447,7 +448,8 @@ class TelemetryPacketHandlerImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.notifyLowBattery(favorite, isRemote = true) }
+        val reported = favorite.copy(deviceMetrics = checkNotNull(lowBatteryTelemetry().device_metrics))
+        verifySuspend { serviceNotifications.notifyLowBattery(reported, isRemote = true) }
     }
 
     private fun lowBatteryTelemetry() = Telemetry.Builder()

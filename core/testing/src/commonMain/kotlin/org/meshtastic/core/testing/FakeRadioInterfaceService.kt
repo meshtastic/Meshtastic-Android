@@ -24,17 +24,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -43,7 +40,6 @@ import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
 
 /**
@@ -121,11 +117,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         label: String,
         block: suspend () -> Unit,
     ): Boolean = sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
-
-    // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
-    // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.
-    private val _receivedData = Channel<ReceivedRadioFrame>(Channel.UNLIMITED)
-    override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
@@ -289,21 +280,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         _transportStatus.value = status
     }
 
-    override fun handleFromRadio(bytes: ByteArray) {
-        val session = _activeSession.value ?: return
-        runIfSessionActive(session) { emitFromRadio(bytes, session) }
-    }
-
-    override fun resetReceivedBuffer() {
-        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
-        while (_receivedData.tryReceive().isSuccess) {}
-    }
-
     // --- Helper methods for testing ---
-
-    fun emitFromRadio(bytes: ByteArray, session: RadioSessionContext) {
-        _receivedData.trySend(ReceivedRadioFrame(bytes.toByteString(), session))
-    }
 
     fun setConnectionState(state: ConnectionState) {
         _connectionState.value = state

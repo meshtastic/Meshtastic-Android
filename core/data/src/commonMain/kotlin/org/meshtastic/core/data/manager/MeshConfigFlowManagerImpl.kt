@@ -45,6 +45,7 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
+import org.meshtastic.sdk.ConfigBundle
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
@@ -129,6 +130,34 @@ class MeshConfigFlowManagerImpl(
         runWhileForSession(session, "SDK NodeDB refresh") {
             val installed = installedSnapshot.value ?: return@runWhileForSession
             if (installed.session == session) installNodeDatabase(session, installed.myNode, nodes, isRefresh = true)
+        }
+    }
+
+    /** Writes the whole SDK config bundle after an acknowledged write or a change from another client. */
+    internal suspend fun installConfigBundle(session: RadioSessionContext, bundle: ConfigBundle) {
+        runWhileForSession(session, "SDK config change") {
+            with(radioConfigRepository) {
+                bundle.configs.forEach { setLocalConfig(it) }
+                bundle.moduleConfigs.forEach { setLocalModuleConfig(it) }
+                bundle.deviceUIConfig?.let { setDeviceUIConfig(it) }
+                bundle.regionPresets?.let { setLoraRegionPresetMap(it) }
+            }
+            val myNodeNum = installedSnapshot.value?.takeIf { it.session == session }?.myNode?.myNodeNum
+            if (myNodeNum != null) {
+                nodeRepository.insertMetadata(myNodeNum, bundle.metadata)
+                bundle.moduleConfigs
+                    .firstNotNullOfOrNull { it.statusmessage }
+                    ?.let { status ->
+                        nodeManager.updateNodeStatusAndPersist(myNodeNum, status.node_status)
+                    }
+            }
+        }
+    }
+
+    /** Writes the whole SDK channel list after an acknowledged channel write or a change from another client. */
+    internal suspend fun installChannels(session: RadioSessionContext, channels: List<Channel>) {
+        runWhileForSession(session, "SDK channel change") {
+            channels.sortedBy { it.index }.forEach { radioConfigRepository.updateChannelSettings(it) }
         }
     }
 

@@ -20,11 +20,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.network.radio.MockRadioTransport
 import org.meshtastic.core.network.radio.ReplayRadioTransport
 import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.sdk.transport.websocket.WebSocketTransport
@@ -32,24 +29,12 @@ import org.meshtastic.sdk.RadioTransport as SdkRadioTransport
 
 @Single(binds = [VirtualRadioSessionFactory::class])
 internal class SdkPhoneApiSessions(
-    private val configManager: Lazy<MeshConfigFlowManagerImpl>,
+    private val projection: Lazy<RadioSessionProjection>,
     private val connectionManager: Lazy<MeshConnectionManager>,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
-    private val nodeManager: Lazy<NodeManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
-    private val adminPacketHandler: Lazy<AdminPacketHandler>,
 ) : VirtualRadioSessionFactory {
     fun open(service: RadioInterfaceService, transport: suspend () -> SdkRadioTransport): RadioTransport =
-        SdkPhoneApiRadioTransport(
-            transport,
-            service,
-            configManager,
-            connectionManager,
-            messageProcessor,
-            nodeManager,
-            lockdownCoordinator,
-            adminPacketHandler,
-        )
+        SdkPhoneApiRadioTransport(transport, service, projection, connectionManager, lockdownCoordinator)
 
     fun webSocket(url: String, service: RadioInterfaceService): RadioTransport =
         open(service) { WebSocketTransport(url) }

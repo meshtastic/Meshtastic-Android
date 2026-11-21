@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
-import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
@@ -80,7 +79,6 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
 
 /**
@@ -124,10 +122,9 @@ class MeshDataHandlerImpl(
         logInsertJob: Job?,
     ) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
-        val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        handleDataPacket(packet, dataPacket, myNodeNum, fromUs, session, logUuid, logInsertJob)
+        handleDataPacket(packet, dataPacket, myNodeNum, session, logUuid, logInsertJob)
 
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
 
@@ -145,7 +142,6 @@ class MeshDataHandlerImpl(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
-        fromUs: Boolean,
         session: RadioSessionContext,
         logUuid: String?,
         logInsertJob: Job?,
@@ -156,8 +152,8 @@ class MeshDataHandlerImpl(
             PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum, session)
             PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum, session = session)
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum, session)
-            PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum, session)
-            PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet, session)
+            PortNum.POSITION_APP -> handlePosition(packet, myNodeNum, session)
+            PortNum.NODEINFO_APP -> Unit
             PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum, session)
             else -> handleSpecializedDataPacket(packet, dataPacket, myNodeNum, session, logUuid, logInsertJob)
         }
@@ -267,16 +263,10 @@ class MeshDataHandlerImpl(
         nodeManager.handleReceivedPaxcounter(packet.from, p, session)
     }
 
-    private fun handlePosition(
-        packet: MeshPacket,
-        dataPacket: DataPacket,
-        myNodeNum: Int,
-        session: RadioSessionContext,
-    ) {
+    private fun handlePosition(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val p = Position.ADAPTER.decodeOrNull(payload, Logger) ?: return
         Logger.d { "Position from ${packet.from}: ${Position.ADAPTER.toOneLiner(p)}" }
-        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time, session)
         geofenceMonitor.onPositionReceived(packet.from, myNodeNum, p, session)
     }
 
@@ -339,27 +329,6 @@ class MeshDataHandlerImpl(
         } else {
             rememberDataPacket(dataPacket, myNodeNum, session = session)
         }
-    }
-
-    private fun handleNodeInfo(packet: MeshPacket, session: RadioSessionContext) {
-        val payload = packet.decoded?.payload ?: return
-        val u =
-            User.ADAPTER.decode(payload)
-                .let {
-                    if (it.is_licensed == true) {
-                        it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
-                    } else {
-                        it
-                    }
-                }
-                .let {
-                    if (packet.via_mqtt == true && !it.long_name.endsWith(" (MQTT)")) {
-                        it.newBuilder().also { wb -> wb.long_name = "${it.long_name} (MQTT)" }.build()
-                    } else {
-                        it
-                    }
-                }
-        nodeManager.handleReceivedUser(packet.from, u, packet.channel, session = session)
     }
 
     private fun handleNodeStatus(

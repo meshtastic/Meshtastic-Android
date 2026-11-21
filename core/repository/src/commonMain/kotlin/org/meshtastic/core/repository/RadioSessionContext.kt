@@ -16,22 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import okio.ByteString
-
-/** Immutable identity of the transport session that admitted an inbound radio frame. */
+/** Immutable identity of one app transport session, which every session-bound write carries. */
 data class RadioSessionContext(val generation: Long, val address: String) {
     /** Prevent accidental disclosure of the real transport address in diagnostic interpolation. */
     override fun toString(): String = "RadioSessionContext(generation=$generation, address=...)"
-}
-
-/**
- * An inbound radio payload bound to the transport session that admitted it.
- *
- * [payload] is an immutable [ByteString], so queued work cannot observe later mutation of a transport-owned byte array.
- * [session] retains the real internal address required for database association; callers must anonymize that address
- * before logging it.
- */
-data class ReceivedRadioFrame(val payload: ByteString, val session: RadioSessionContext) {
-    /** Prevent accidental disclosure of raw radio payloads in diagnostic interpolation. */
-    override fun toString(): String = "ReceivedRadioFrame(payloadSize=${payload.size}, session=$session)"
 }

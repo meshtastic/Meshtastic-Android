@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
@@ -70,21 +69,19 @@ class TelemetryPacketHandlerImpl(
         val isRemote = fromNum != myNodeNum
         if (!isRemote) connectionManager.value.updateTelemetry(telemetry)
 
+        // Device metrics and lastHeard arrive with the SDK's node update that follows this packet.
         val transform: (Node) -> Node = { node ->
             var nextNode = node
-            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
             telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
             telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
             telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
             telemetry.soil_water_metrics?.let { nextNode = nextNode.copy(soilWaterMetrics = it) }
-            val telemetryTime = if (telemetry.time != 0) telemetry.time else nextNode.lastHeard
-            val newLastHeard = clampTimestampToNow(maxOf(nextNode.lastHeard, telemetryTime))
-            nextNode.copy(lastHeard = newLastHeard)
+            nextNode
         }
-        nodeManager.updateNodeForSession(fromNum, session, transform = transform)
+        if (telemetry.hasNodeMetrics()) nodeManager.updateNodeForSession(fromNum, session, transform = transform)
 
         val metrics = telemetry.device_metrics ?: return
-        val updatedNode = nodeManager.nodeDBbyNodeNum[fromNum] ?: return
+        val updatedNode = nodeManager.nodeDBbyNodeNum[fromNum]?.copy(deviceMetrics = metrics) ?: return
         if (fromNum != myNodeNum && !updatedNode.isFavorite) return
 
         // A reading without a level says nothing about the battery, so it neither warns nor clears.
@@ -105,3 +102,6 @@ class TelemetryPacketHandlerImpl(
         private const val BATTERY_PERCENT_LOW_THRESHOLD = 20
     }
 }
+
+private fun Telemetry.hasNodeMetrics(): Boolean =
+    environment_metrics != null || power_metrics != null || air_quality_metrics != null || soil_water_metrics != null

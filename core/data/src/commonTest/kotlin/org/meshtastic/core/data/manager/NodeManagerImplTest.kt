@@ -50,12 +50,9 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
-import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -670,98 +667,6 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `handleReceivedTelemetry updates lastHeard`() {
-        val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
-
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.time = 2000
-                    wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals(2000, result!!.lastHeard)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates device metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.device_metrics =
-                        DeviceMetrics.Builder()
-                            .also { wb ->
-                                wb.battery_level = 75
-                                wb.voltage = 3.8f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result!!.deviceMetrics)
-        assertEquals(75, result.deviceMetrics.battery_level)
-        assertEquals(3.8f, result.deviceMetrics.voltage)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates environment metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.environment_metrics =
-                        EnvironmentMetrics.Builder()
-                            .also { wb ->
-                                wb.temperature = 22.5f
-                                wb.relative_humidity = 45.0f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result!!.environmentMetrics)
-        assertEquals(22.5f, result.environmentMetrics.temperature)
-        assertEquals(45.0f, result.environmentMetrics.relative_humidity)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates soil water metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.soil_water_metrics =
-                        SoilWaterMetrics.Builder()
-                            .also { wb ->
-                                wb.soil_ph = 6.5f
-                                wb.nitrogen = 0f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals(6.5f, result!!.soilWaterMetrics.soil_ph)
-        // A reported 0 mg/kg is a reading, not absence.
-        assertEquals(0f, result.soilWaterMetrics.nitrogen)
-        assertNull(result.soilWaterMetrics.potassium)
-    }
-
-    @Test
     fun `clear resets internal state`() {
         nodeManager.updateNode(1234) {
             it.copy(user = it.user.newBuilder().also { wb -> wb.long_name = "Test" }.build())
@@ -1246,21 +1151,6 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `handleReceivedTelemetry with null metrics does not crash`() {
-        val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
-
-        // Telemetry with no metrics at all
-        val telemetry = Telemetry.Builder().also { wb -> wb.time = 3000 }.build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result)
-        assertEquals(3000, result.lastHeard)
-    }
-
-    @Test
     fun `getMyId returns empty when disconnected`() {
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
@@ -1326,12 +1216,9 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
         enableDbWrites()
 
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build())
+        }
         nodeManager.handleReceivedPosition(
             retiredNum,
             myNodeNum = 9999,
@@ -1515,21 +1402,15 @@ class NodeManagerImplTest {
     fun `clear starts a new session without retired-number suppression`() {
         val retiredNum = validPk.noncanonicalNum(4400)
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 10 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 10 }.build())
+        }
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
 
         nodeManager.clear()
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 90 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 90 }.build())
+        }
 
         assertEquals(90, nodeManager.nodeDBbyNodeNum[retiredNum]?.deviceMetrics?.battery_level)
     }
@@ -3575,4 +3456,35 @@ class NodeManagerImplTest {
             }
             assertTrue(nodeManager.reportsHeardOnCurrentLora.value)
         }
+
+    @Test
+    fun `a live SDK node update strips a licensed operator's key and marks an MQTT-heard name`() {
+        val num = 0x5150
+        val key = ByteArray(Node.PUBLIC_KEY_SIZE) { 0x33 }.toByteString()
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = num
+                    wb.via_mqtt = true
+                    wb.user =
+                        User.Builder()
+                            .also { u ->
+                                u.id = NodeAddress.numToDefaultId(num)
+                                u.long_name = "Ham Shack"
+                                u.short_name = "HAM"
+                                u.hw_model = HardwareModel.TLORA_V2
+                                u.is_licensed = true
+                                u.public_key = key
+                            }
+                            .build()
+                }
+                .build()
+
+        nodeManager.applySessionNode(info, userChanged = true, RadioSessionContext(1L, "tcp:live"))
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(num)
+        assertEquals("Ham Shack (MQTT)", node.user.long_name)
+        assertEquals(ByteString.EMPTY, node.user.public_key)
+        assertEquals(ByteString.EMPTY, node.publicKey)
+    }
 }

@@ -19,27 +19,11 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.proto.Channel
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.DeviceUIConfig
-import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfig
 
-/** A [MeshConfigHandler] that admits every update and holds empty configs. */
+/** A [MeshConfigHandler] that holds empty configs. */
 class FakeMeshConfigHandler : MeshConfigHandler {
     override val localConfig: StateFlow<LocalConfig> = MutableStateFlow(LocalConfig.Builder().build())
     override val moduleConfig: StateFlow<LocalModuleConfig> = MutableStateFlow(LocalModuleConfig.Builder().build())
-
-    override fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean = true
-
-    override fun handleModuleConfig(config: ModuleConfig, session: RadioSessionContext): Boolean = true
-
-    override fun handleChannel(channel: Channel, session: RadioSessionContext): Boolean = true
-
-    override fun handleDeviceUIConfig(config: DeviceUIConfig, session: RadioSessionContext): Boolean = true
-
-    override fun handleRegionPresets(map: LoRaRegionPresetMap, session: RadioSessionContext): Boolean = true
 }

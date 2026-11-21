@@ -53,7 +53,6 @@ import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import kotlinx.coroutines.flow.update as updateStateFlow
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
@@ -375,6 +374,7 @@ class NodeManagerImpl(
     companion object {
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
         private const val GENERATED_NODE_NAME_SUFFIX_LENGTH = 4
+        private const val MQTT_NAME_SUFFIX = " (MQTT)"
 
         /** `precision_bits` value used by firmware for an un-degraded (full 32-bit) coordinate. */
         private const val FULL_POSITION_PRECISION_BITS = 32
@@ -761,20 +761,6 @@ class NodeManagerImpl(
         }
     }
 
-    override fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
-        updateNode(fromNum) { node ->
-            var nextNode = node
-            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
-            telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
-            telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
-            telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
-            telemetry.soil_water_metrics?.let { nextNode = nextNode.copy(soilWaterMetrics = it) }
-            val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
-            val newLastHeard = clampTimestampToNow(maxOf(node.lastHeard, telemetryTime))
-            nextNode.copy(lastHeard = newLastHeard)
-        }
-    }
-
     override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount, session: RadioSessionContext?) {
         updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { it.copy(paxcounter = p) }
     }
@@ -803,10 +789,42 @@ class NodeManagerImpl(
         updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
+    override fun applySessionNode(info: ProtoNodeInfo, userChanged: Boolean, session: RadioSessionContext) {
+        val user = info.user
+        val heldUnknown = nodeState.value.index.byNum[info.num]?.isUnknownUser != false
+        if (user != null && (userChanged || heldUnknown)) {
+            handleReceivedUser(info.num, sanitizeReceivedUser(user, info.via_mqtt), info.channel, session = session)
+        }
         val reportsHeard = reportsHeardOnCurrentLora.value
         cancelLowBatteryIfUnfavorited(info)
-        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
+        updateNodeAndSchedulePersistence(info.num, info.channel, session) { node ->
+            applySessionNodeFields(node, info, reportsHeard)
+        }
+    }
+
+    /**
+     * The SDK reports SNR only for packets it heard and never RSSI or the transport, so the packet projection owns the
+     * link metrics. A live update never clears a heard-on-current-LoRa flag the packets set.
+     */
+    private fun applySessionNodeFields(node: Node, info: ProtoNodeInfo, reportsHeard: Boolean): Node {
+        val position =
+            info.position?.let { incoming ->
+                val timed = incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(incoming.time) }.build()
+                preservingKnownPrecision(timed, node.position)
+            } ?: node.position
+        return node.copy(
+            position = position,
+            heardOnCurrentLora = node.heardOnCurrentLora || !reportsHeard || info.heard_on_current_lora,
+            lastHeard = maxOf(node.lastHeard, clampTimestampToNow(info.last_heard)),
+            deviceMetrics = info.device_metrics ?: node.deviceMetrics,
+            viaMqtt = info.via_mqtt,
+            hopsAway = info.hops_away ?: node.hopsAway,
+            isFavorite = info.is_favorite,
+            isIgnored = info.is_ignored,
+            isMuted = info.is_muted,
+            signsPackets = info.has_xeddsa_signed,
+            manuallyVerified = node.manuallyVerified || info.is_key_manually_verified,
+        )
     }
 
     /** Only favorites are warned about, and one unfavorited from another client arrives here, not via setFavorite. */
@@ -820,16 +838,7 @@ class NodeManagerImpl(
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
-            var newUser = user.let {
-                if (it.is_licensed == true) {
-                    it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
-                } else {
-                    it
-                }
-            }
-            if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
-                newUser = newUser.newBuilder().also { wb -> wb.long_name = "${newUser.long_name} (MQTT)" }.build()
-            }
+            val newUser = sanitizeReceivedUser(user, info.via_mqtt)
             next = next.copy(user = newUser, publicKey = newUser.public_key)
         }
         info.position?.let { position ->
@@ -854,6 +863,24 @@ class NodeManagerImpl(
             signsPackets = info.has_xeddsa_signed,
             manuallyVerified = next.manuallyVerified || info.is_key_manually_verified,
         )
+    }
+
+    /** A licensed (ham) operator may not encrypt, so its key is dropped; an MQTT-heard name is marked as such. */
+    private fun sanitizeReceivedUser(user: User, viaMqtt: Boolean): User {
+        val unlicensedKey =
+            if (user.is_licensed == true) {
+                user.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
+            } else {
+                user
+            }
+        return if (viaMqtt && !unlicensedKey.long_name.endsWith(MQTT_NAME_SUFFIX)) {
+            unlicensedKey
+                .newBuilder()
+                .also { wb -> wb.long_name = "${unlicensedKey.long_name}$MQTT_NAME_SUFFIX" }
+                .build()
+        } else {
+            unlicensedKey
+        }
     }
 
     override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext?) {

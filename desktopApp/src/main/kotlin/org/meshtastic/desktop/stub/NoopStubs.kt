@@ -38,7 +38,6 @@ import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -81,7 +80,6 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override val isReplayTransportAvailable: Boolean = false
 
-    override val receivedData = MutableSharedFlow<ReceivedRadioFrame>()
     override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>()
     override val connectionError: Flow<String> = MutableSharedFlow<String>()
     override val transportStatus: StateFlow<TransportStatus?> = MutableStateFlow(null)
@@ -89,10 +87,6 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun trySendToRadio(bytes: ByteArray): Boolean {
         logWarn("NoopRadioInterfaceService.trySendToRadio(${bytes.size} bytes)")
         return false
-    }
-
-    override fun resetReceivedBuffer() {
-        // No-op: this stub never buffers bytes.
     }
 
     override fun connect() {
@@ -120,8 +114,6 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun onConnect() {}
 
     override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {}
-
-    override fun handleFromRadio(bytes: ByteArray) {}
 
     @Suppress("InjectDispatcher")
     override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

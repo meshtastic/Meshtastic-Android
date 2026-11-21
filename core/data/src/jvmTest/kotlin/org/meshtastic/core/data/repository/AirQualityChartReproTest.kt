@@ -17,11 +17,8 @@
 package org.meshtastic.core.data.repository
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.everySuspend
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -29,27 +26,22 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.data.manager.MeshMessageProcessorImpl
+import org.meshtastic.core.data.manager.radioSessionProjection
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
-import org.meshtastic.core.repository.FromRadioPacketHandler
-import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeMeshLogPrefs
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -66,11 +58,8 @@ import kotlin.test.assertTrue
  * [MeshLog.NODE_NUM_LOCAL] and filters `WHERE from_num = :fromNum`. The Debug screen reads the unfiltered
  * `getAllLogsUnbounded`. So the chart is sensitive to the stored `from_num` column; the Debug log is not.
  *
- * `MeshMessageProcessorImpl.processReceivedMeshPacket` stores `fromNum = if (packet.from == myNodeNum) NODE_NUM_LOCAL
- * else packet.from`, where the insert-time `myNodeNum` is `nodeManager.myNodeNum.value` read at packet arrival
- * (MeshServiceOrchestrator). That StateFlow starts null and is only set once MyNodeInfo is processed, so a local packet
- * that arrives during the null window is stored under its raw `from_num` and orphaned from the chart while still
- * visible in the Debug log.
+ * `RadioSessionProjection` stores `fromNum = if (packet.from == myNodeNum) NODE_NUM_LOCAL else packet.from`, so a local
+ * packet stored under its raw `from_num` would be orphaned from the chart while still visible in the Debug log.
  */
 class AirQualityChartReproTest {
 
@@ -202,71 +191,33 @@ class AirQualityChartReproTest {
     }
 
     /**
-     * Checkpoint 4 (regression test for the fix, end-to-end through the real insert path): a local air-quality packet
-     * received while myNodeNum is still null is BUFFERED (not stored under its raw from_num). Once myNodeNum resolves,
-     * the buffer flushes and the packet is stored under NODE_NUM_LOCAL, so the local node's Air Quality chart sees it.
-     *
-     * Before the fix this packet was stored immediately under its raw from_num and orphaned from the chart.
+     * Checkpoint 4 (end-to-end through the real insert path): the SDK installs the local identity at Ready before it
+     * delivers any packet, so a local air-quality packet is stored under NODE_NUM_LOCAL and the chart sees it.
      */
     @Test
-    fun `checkpoint 4 - local AQ received before myNodeNum resolves is buffered then charted`() =
-        runTest(testDispatcher) {
-            setup(myNodeNum = localNum) // query side: phone is connected to localNum
+    fun `checkpoint 4 - local AQ projected after Ready is charted`() = runTest(testDispatcher) {
+        setup(myNodeNum = localNum)
 
-            val myNodeNumFlow = MutableStateFlow<Int?>(null) // not yet resolved
-            val nodeManager = mock<NodeManager>(MockMode.autofill)
-            val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
-            val session = RadioSessionContext(generation = 1L, address = "test:air-quality")
-            every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
-            every { nodeManager.myNodeNum } returns myNodeNumFlow
-            every { radioInterfaceService.isSessionActive(session) } returns true
-            everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
-                {
-                    @Suppress("UNCHECKED_CAST")
-                    val block = it.args[2] as (suspend () -> Unit)
-                    block()
-                    true
-                }
-            everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
-                {
-                    @Suppress("UNCHECKED_CAST")
-                    val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                    block(
-                        object : RadioSessionLease {
-                            override val session: RadioSessionContext = session
+        val nodeManager = mock<NodeManager>(MockMode.autofill)
+        every { nodeManager.myNodeNum } returns MutableStateFlow(localNum)
+        val radio = FakeRadioInterfaceService(backgroundScope)
+        radio.setDeviceAddress("tcp:air-quality")
+        radio.connect()
+        val session = checkNotNull(radio.activeSession.value)
+        val projection = radioSessionProjection(nodeManager, radio, backgroundScope, meshLogRepository = repository)
 
-                            override fun isCurrent(): Boolean = true
-                        },
-                    )
-                    true
-                }
+        projection.project(
+            RadioSessionEvent.Packet(sessionId = 1, sequence = 1, packet = airQualityPacket()),
+            session,
+        )
+        advanceUntilIdle()
 
-            val processor =
-                MeshMessageProcessorImpl(
-                    nodeManager = nodeManager,
-                    serviceStateWriter = mock<ServiceStateWriter>(MockMode.autofill),
-                    meshLogRepository = lazy { repository },
-                    dataHandler = lazy { mock<MeshDataHandler>(MockMode.autofill) },
-                    fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill),
-                    radioInterfaceService = radioInterfaceService,
-                    scope = backgroundScope.asServiceScope(),
-                )
-
-            // Arrives before MyNodeInfo resolves -> buffered, NOT written to the log table (so not orphaned in the DB).
-            processor.handleReceivedMeshPacket(airQualityPacket(), myNodeNum = null, session = session)
-            advanceUntilIdle()
-            assertEquals(0, repository.getAllLogsUnbounded().first().size, "packet should be buffered, not yet stored")
-
-            // MyNodeInfo resolves -> the buffer flushes and the packet is stored under NODE_NUM_LOCAL.
-            myNodeNumFlow.value = localNum
-            advanceUntilIdle()
-
-            val charted = repository.getTelemetryFrom(localNum).first()
-            assertEquals(1, charted.size, "after myNodeNum resolves, the local AQ packet must reach the chart")
-            assertEquals(
-                2,
-                charted[0].air_quality_metrics?.pm25_standard,
-                "the real reading (pm25_standard=2) survives",
-            )
-        }
+        val charted = repository.getTelemetryFrom(localNum).first()
+        assertEquals(1, charted.size, "the local AQ packet must reach the chart")
+        assertEquals(
+            2,
+            charted[0].air_quality_metrics?.pm25_standard,
+            "the real reading (pm25_standard=2) survives",
+        )
+    }
 }

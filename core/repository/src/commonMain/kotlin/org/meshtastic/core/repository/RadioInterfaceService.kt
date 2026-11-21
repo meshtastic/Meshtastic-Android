@@ -184,25 +184,8 @@ interface RadioInterfaceService :
      */
     val isReplayTransportAvailable: Boolean
 
-    /**
-     * Flow of raw data received from the radio, bound to the transport session that admitted each frame.
-     *
-     * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware
-     * handshake (initial config packet ordering) depends on strict FIFO delivery. Implementations MUST guarantee
-     * ordering; do not swap in a [SharedFlow] without preserving order.
-     */
-    val receivedData: Flow<ReceivedRadioFrame>
-
     /** Flow of radio activity events. */
     val meshActivity: Flow<MeshActivity>
-
-    /**
-     * Drains any bytes currently buffered in [receivedData] without emitting them to collectors.
-     *
-     * Callers invoke this before attaching a fresh collector after a stop/start cycle so stale bytes buffered while no
-     * collector was attached do not get replayed ahead of the next session's handshake.
-     */
-    fun resetReceivedBuffer()
 
     /** Initiates the connection to the radio. */
     fun connect()

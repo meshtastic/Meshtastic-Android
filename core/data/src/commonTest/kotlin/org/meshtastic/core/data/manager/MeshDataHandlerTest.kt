@@ -75,7 +75,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
@@ -218,44 +217,6 @@ class MeshDataHandlerTest {
     }
 
     @Test
-    fun `position from the local node updates our own node`() {
-        val myNodeNum = 123
-        val position =
-            Position.Builder()
-                .also { wb ->
-                    wb.latitude_i = 450000000
-                    wb.longitude_i = 900000000
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = myNodeNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.POSITION_APP
-                                wb.payload = position.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = NodeAddress.numToDefaultId(myNodeNum),
-                to = NodeAddress.ID_BROADCAST,
-                bytes = position.encode().toByteString(),
-                dataType = PortNum.POSITION_APP.value,
-                time = 1000L,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedPosition(myNodeNum, myNodeNum, position, 1000L, session) }
-    }
-
-    @Test
     fun `handleReceivedData tracks analytics`() {
         val packet =
             MeshPacket.Builder()
@@ -276,128 +237,6 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         verify { analytics.track("num_data_receive", any()) }
-    }
-
-    // --- Position handling ---
-
-    @Test
-    fun `position packet delegates to nodeManager`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val position =
-            Position.Builder()
-                .also { wb ->
-                    wb.latitude_i = 450000000
-                    wb.longitude_i = 900000000
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.POSITION_APP
-                                wb.payload = position.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = position.encode().toByteString(),
-                dataType = PortNum.POSITION_APP.value,
-                time = 1000L,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedPosition(remoteNum, myNodeNum, any(), 1000L, session) }
-    }
-
-    // --- NodeInfo handling ---
-
-    @Test
-    fun `nodeinfo packet from remote delegates to handleReceivedUser`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val user =
-            User.Builder()
-                .also { wb ->
-                    wb.id = "!remote"
-                    wb.long_name = "Remote"
-                    wb.short_name = "R"
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.NODEINFO_APP
-                                wb.payload = user.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = user.encode().toByteString(),
-                dataType = PortNum.NODEINFO_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedUser(remoteNum, any(), any(), any(), session) }
-    }
-
-    @Test
-    fun `nodeinfo packet from local node is ignored`() {
-        val myNodeNum = 123
-        val user =
-            User.Builder()
-                .also { wb ->
-                    wb.id = "!local"
-                    wb.long_name = "Local"
-                    wb.short_name = "L"
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = myNodeNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.NODEINFO_APP
-                                wb.payload = user.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!local",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = user.encode().toByteString(),
-                dataType = PortNum.NODEINFO_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify(mode = dev.mokkery.verify.VerifyMode.not) {
-            nodeManager.handleReceivedUser(any(), any(), any(), any(), any())
-        }
     }
 
     // --- Paxcounter handling ---

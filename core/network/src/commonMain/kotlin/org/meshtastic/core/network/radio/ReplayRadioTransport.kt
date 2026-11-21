@@ -46,10 +46,10 @@ import org.meshtastic.sdk.TransportIdentity
  * populated-UI (node list / map / message) tests.
  *
  * ### What it exercises
- * Frames are handed verbatim to [RadioTransportCallback.handleFromRadio] — the *same* ingestion entry a live
- * BLE/TCP/Serial radio uses — so everything downstream (protobuf decode, the want_config state machine, node-DB and
- * packet handling, the UI) runs exactly as in production. The only things it skips are the physical link and the stream
- * framing layer: it deals in already-deframed `FromRadio` payloads.
+ * Frames are handed verbatim to the SDK session as a PhoneAPI link — the *same* ingestion entry a live BLE/TCP/Serial
+ * radio uses — so everything downstream (protobuf decode, the want_config state machine, node-DB and packet handling,
+ * the UI) runs exactly as in production. The only things it skips are the physical link and the stream framing layer:
+ * it deals in already-deframed `FromRadio` payloads.
  *
  * ### Asset format (`*.fromradio`)
  * A flat, three-section container. **Every integer is a big-endian (network-order) unsigned 32-bit value:**

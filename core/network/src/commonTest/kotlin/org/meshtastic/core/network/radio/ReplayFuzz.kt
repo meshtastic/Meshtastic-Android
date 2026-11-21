@@ -28,8 +28,8 @@ import kotlin.random.Random
 
 /**
  * Deterministic fuzz toolkit for the on-device replay ingestion path — the same `FromRadio` entry every BLE / TCP /
- * serial peer feeds (`RadioTransportCallback.handleFromRadio`). It ships with the app's tests (runs under `allTests`),
- * so the parse / decode boundary is continuously fuzzed in CI at zero runtime and zero app-size cost.
+ * serial peer feeds into the SDK session. It ships with the app's tests (runs under `allTests`), so the parse / decode
+ * boundary is continuously fuzzed in CI at zero runtime and zero app-size cost.
  *
  * Untrusted radio input is a real attack surface: a malicious or buggy peer within range controls these bytes. This
  * toolkit drives that surface with three input strategies, each aimed at a different layer:
@@ -52,7 +52,7 @@ import kotlin.random.Random
  *
  * Scope: this is a *library-level* fuzzer (parser, decoder, handshake). End-to-end fuzzing of the live stack —
  * framing + UI + ANR — belongs in the capture tool's live `--fuzz` mode against a device; handler-level fuzzing needs
- * the full `MeshMessageProcessor` graph and is a separate integration harness. The [adversarialFromRadio] corpus here
+ * the full `RadioSessionProjection` graph and is a separate integration harness. The [adversarialFromRadio] corpus here
  * is designed to feed that harness when it lands.
  */
 object ReplayFuzz {

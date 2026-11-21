@@ -21,8 +21,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import org.meshtastic.core.repository.HandshakeConstants
-import org.meshtastic.core.repository.RadioTransportCallback
-import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -58,16 +56,13 @@ class ReplayRadioTransportTest {
                 .build()
         }
 
-    private class RecordingCallback : RadioTransportCallback {
+    private class RecordingCallback : VirtualRadioRecorder {
         var connects = 0
         val received = mutableListOf<FromRadio>()
 
         override fun onConnect() {
             connects++
         }
-
-        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) =
-            Unit
 
         override fun handleFromRadio(bytes: ByteArray) {
             received.add(FromRadio.ADAPTER.decode(bytes))
@@ -96,7 +91,7 @@ class ReplayRadioTransportTest {
     }
 
     private fun TestScope.replayLink(
-        callback: RadioTransportCallback,
+        callback: VirtualRadioRecorder,
         scope: CoroutineScope,
         address: String,
         frames: ByteArray,

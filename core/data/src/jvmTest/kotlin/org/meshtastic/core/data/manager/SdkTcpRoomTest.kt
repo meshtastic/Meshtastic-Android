@@ -45,7 +45,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import okio.ByteString.Companion.toByteString
 import okio.FileSystem
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
@@ -80,7 +79,6 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.StoredPassphrase
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.core.service.SharedRadioInterfaceService
@@ -89,7 +87,6 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
 import org.meshtastic.proto.Data
-import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -367,8 +364,17 @@ class SdkTcpRoomTest {
             }
         }
 
-        private val processor =
-            createRoomReplayProcessor(scope, dispatchers, databases, nodeManager, radio, config, notifications)
+        private val projection =
+            createRoomReplayProjection(
+                scope,
+                dispatchers,
+                databases,
+                nodeManager,
+                radio,
+                config,
+                notifications,
+                configFlowManager = lazy { installer },
+            )
 
         private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
         val appConnection = state.connectionState
@@ -396,12 +402,9 @@ class SdkTcpRoomTest {
         fun createSdkTransport(service: RadioInterfaceService, port: Int): RadioTransport = SdkPhoneApiRadioTransport(
             { TcpTransport("127.0.0.1", port) },
             service,
-            lazy { installer },
+            lazy { projection },
             lazy { connectionManager },
-            lazy { processor },
-            lazy { nodeManager },
             lazy { lockdown },
-            lazy { AdminPacketHandlerImpl(nodeManager, lazy { mock(MockMode.autofill) }) },
         )
 
         init {
@@ -457,18 +460,18 @@ class SdkTcpRoomTest {
                             installed.complete(event)
                         }
 
-                        is RadioSessionEvent.Packet -> {
+                        is RadioSessionEvent.Packet,
+                        is RadioSessionEvent.NodeChanged,
+                        is RadioSessionEvent.ConfigChanged,
+                        is RadioSessionEvent.ChannelsChanged,
+                        -> {
                             assertEquals(sdkSession, event.sessionId)
-                            val payload = FromRadio.Builder().also { it.packet = event.packet }.build().encode()
-                            processor.handleFromRadio(
-                                ReceivedRadioFrame(payload.toByteString(), session),
-                                nodeManager.myNodeNum.value,
-                            )
+                            projection.project(event, session)
                         }
 
-                        is RadioSessionEvent.Lockdown -> Unit
-
-                        is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
+                        is RadioSessionEvent.Lockdown,
+                        is RadioSessionEvent.Event,
+                        -> Unit
 
                         is RadioSessionEvent.NodeDbRefreshed -> {
                             assertEquals(sdkSession, event.sessionId)

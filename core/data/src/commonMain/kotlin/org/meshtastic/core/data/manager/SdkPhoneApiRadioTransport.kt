@@ -27,33 +27,30 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.TransportFailure
 import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.core.repository.ReceivedRadioFrame
-import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
@@ -65,16 +62,13 @@ import org.meshtastic.sdk.transport.ble.BleTransport
 import org.meshtastic.sdk.RadioTransport as SdkRadioTransport
 
 /** One SDK client per app transport generation. Room and durable send state belong to the app. */
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("TooManyFunctions")
 internal class SdkPhoneApiRadioTransport(
     private val openTransport: suspend () -> SdkRadioTransport,
     private val service: RadioInterfaceService,
-    private val configManager: Lazy<MeshConfigFlowManagerImpl>,
+    private val projection: Lazy<RadioSessionProjection>,
     private val connectionManager: Lazy<MeshConnectionManager>,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
-    private val nodeManager: Lazy<NodeManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
-    private val adminPacketHandler: Lazy<AdminPacketHandler>,
 ) : RadioTransport {
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
@@ -116,7 +110,6 @@ internal class SdkPhoneApiRadioTransport(
                     .coroutineContext(service.serviceScope.coroutineContext)
                     .autoSyncTimeOnConnect(false)
                     .sessionReceive()
-                    .sessionReceiveEnvelopes()
                     .build()
             currentClient.value = client
             runSession(client, transport.state)
@@ -156,6 +149,7 @@ internal class SdkPhoneApiRadioTransport(
     private suspend fun runSession(client: RadioClient, transportState: StateFlow<TransportState>) = coroutineScope {
         val linkStatus = launch { reportLinkSetup(transportState) }
         val connected = async { client.connect() }
+        val sideFlows = launch { collectSideFlows(client) }
         var sdkSession: Long? = null
         checkNotNull(client.sessionEvents)
             .takeWhile { it !is RadioSessionEvent.Ended }
@@ -171,42 +165,34 @@ internal class SdkPhoneApiRadioTransport(
                         linkStatus.cancelAndJoin()
                         service.onConnect()
                         service.onStatus(TransportStatus(TransportPhase.HandshakeNodes))
-                        check(install(event)) { "SDK PhoneAPI snapshot session is no longer active" }
+                        check(projection.value.installReady(event, session)) {
+                            "SDK PhoneAPI snapshot session is no longer active"
+                        }
                         sdkSession = event.sessionId
                         service.onStatus(TransportStatus(TransportPhase.Connected))
                         Logger.i { "SDK PhoneAPI snapshot installed for session ${session.generation}" }
                         reportAppReady()
                     }
 
-                    is RadioSessionEvent.Packet -> {
-                        if (event.sessionId == sdkSession) {
-                            if (event.correlatedAdminResponse) {
-                                service.runWithSessionLease(session) {
-                                    nodeManager.value.myNodeNum.value?.let { localNode ->
-                                        adminPacketHandler.value.handleAdminMessage(event.packet, localNode, session)
-                                    }
-                                }
-                            }
-                            val envelope = FromRadio.Builder().also { it.packet = event.packet }.build()
-                            handleEnvelope(envelope)
-                        }
-                    }
-
-                    is RadioSessionEvent.Envelope -> {
-                        if (event.sessionId == sdkSession) handleEnvelope(event.envelope)
-                    }
-
-                    is RadioSessionEvent.NodeDbRefreshed -> {
-                        if (event.sessionId == sdkSession) {
-                            configManager.value.installRefreshedNodes(session, event.nodes.values.toList())
-                        }
-                    }
-
-                    is RadioSessionEvent.Ended -> Unit
+                    else -> if (event.sessionId == sdkSession) projection.value.project(event, session)
                 }
             }
+        sideFlows.cancelAndJoin()
         linkStatus.cancelAndJoin()
         connected.await()
+    }
+
+    /** The SDK's lossy side streams, which carry no session ID and so follow the client's lifetime. */
+    private suspend fun collectSideFlows(client: RadioClient) = coroutineScope {
+        val projection = projection.value
+        launch { client.deviceLogs.collect { projection.onDeviceLog(it, session) } }
+        launch { client.displayFrames.collect { projection.onDisplayFrame(it, session) } }
+        launch { client.displayPalette.filterNotNull().collect { projection.onDisplayPalette(it, session) } }
+        launch {
+            client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collect {
+                projection.refreshLocalNodeLastHeard(session)
+            }
+        }
     }
 
     private suspend fun reportLinkSetup(transportState: StateFlow<TransportState>) {
@@ -228,24 +214,6 @@ internal class SdkPhoneApiRadioTransport(
         }
     }
 
-    private suspend fun install(event: RadioSessionEvent.Ready): Boolean {
-        val config = event.configBundle
-        return configManager.value.installRadioSnapshot(
-            session,
-            RadioHandshakeSnapshot(
-                myInfo = checkNotNull(event.myInfo),
-                metadata = config?.metadata,
-                channels = event.channels.orEmpty(),
-                configs = config?.configs.orEmpty(),
-                moduleConfigs = config?.moduleConfigs.orEmpty(),
-                deviceUiConfig = config?.deviceUIConfig,
-                nodes = event.nodes.values.toList(),
-                files = event.files,
-                regionPresets = event.regionPresets,
-            ),
-        )
-    }
-
     private suspend fun reportAppReady() {
         service.runWithSessionLease(session) {
             safeCatching {
@@ -255,19 +223,6 @@ internal class SdkPhoneApiRadioTransport(
                 .onFailure { failure ->
                     Logger.w { "SDK PhoneAPI app readiness callback failed: ${failure::class.simpleName}" }
                 }
-        }
-    }
-
-    private suspend fun handleEnvelope(envelope: FromRadio) {
-        val nodes = nodeManager.value
-        val node = envelope.node_info
-        if (node == null) {
-            messageProcessor.value.handleFromRadio(
-                ReceivedRadioFrame(envelope.encode().toByteString(), session),
-                nodes.myNodeNum.value,
-            )
-        } else {
-            service.runWithSessionLease(session) { nodes.installNodeInfoAndPersist(node) }
         }
     }
 

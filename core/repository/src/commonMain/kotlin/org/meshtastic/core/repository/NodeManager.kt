@@ -24,7 +24,6 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
@@ -159,9 +158,6 @@ interface NodeManager : NodeIdLookup {
         session: RadioSessionContext? = null,
     )
 
-    /** Processes a received telemetry packet. */
-    fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry)
-
     /** Processes a received paxcounter packet. */
     fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount, session: RadioSessionContext? = null)
 
@@ -193,13 +189,17 @@ interface NodeManager : NodeIdLookup {
     fun applyTrustedIdentityMigrations(removedNums: Collection<Int>)
 
     /**
-     * Installs node information in memory. Callers that require an immediate standalone write use
-     * [installNodeInfoAndPersist]; configuration handshakes batch the resulting snapshot through the repository.
+     * Installs a node from an SDK handshake or NodeDB refresh snapshot in memory. The caller persists the whole
+     * snapshot through [NodeRepository.installConfig].
      */
     fun installNodeInfo(info: ProtoNodeInfo)
 
-    /** Installs node information and awaits any required persistence. */
-    suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo)
+    /**
+     * Applies a node the SDK session added or updated after Ready. [userChanged] routes the node's [User] through
+     * [handleReceivedUser] so identity correlation, retirement and the new-node notification apply; the other fields
+     * merge without touching the app-owned link metrics.
+     */
+    fun applySessionNode(info: ProtoNodeInfo, userChanged: Boolean, session: RadioSessionContext)
 
     /** Inserts hardware metadata for a node. */
     fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext? = null)

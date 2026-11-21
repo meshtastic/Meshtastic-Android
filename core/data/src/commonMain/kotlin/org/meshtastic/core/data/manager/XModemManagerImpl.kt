@@ -52,7 +52,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
 
     // --- mutable state ---
     // Thread-safety contract: [handleIncomingXModem] is called sequentially from
-    // [FromRadioPacketHandlerImpl.handleFromRadio] on a single IO coroutine. The
+    // [RadioSessionEventHandler.handle] on the session's single receive collector. The
     // [setTransferName] and [cancel] calls originate from UI/ViewModel coroutines
     // and are guarded by @Volatile for visibility. Concurrent block processing is
     // not possible because the firmware sends one XModem packet at a time and waits

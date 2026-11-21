@@ -19,7 +19,6 @@ package org.meshtastic.core.network.radio
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.sdk.TransportState
 import org.meshtastic.sdk.WireFraming
 
@@ -27,7 +26,7 @@ import org.meshtastic.sdk.WireFraming
 internal class VirtualRadioFixture(
     private val test: TestScope,
     private val link: VirtualRadioLink,
-    private val recorder: RadioTransportCallback,
+    private val recorder: VirtualRadioRecorder,
     private val connectOnFirstSend: Boolean,
 ) {
     private var collector: Job? = null
@@ -61,4 +60,11 @@ internal class VirtualRadioFixture(
         link.disconnect()
         collector?.cancel()
     }
+}
+
+/** What a [VirtualRadioFixture] reports: the link coming up and each deframed `FromRadio` payload. */
+internal interface VirtualRadioRecorder {
+    fun onConnect()
+
+    fun handleFromRadio(bytes: ByteArray)
 }

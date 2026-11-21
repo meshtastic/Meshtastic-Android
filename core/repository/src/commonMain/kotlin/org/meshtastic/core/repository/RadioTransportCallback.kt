@@ -21,9 +21,9 @@ import org.meshtastic.core.model.TransportStatus
 /**
  * Narrow callback interface for transport → service communication.
  *
- * Transport implementations ([RadioTransport]) use this interface to report lifecycle events and deliver data. This
- * replaces the previous pattern of passing the full [RadioInterfaceService] to transport constructors, decoupling
- * transports from the service layer.
+ * Transport implementations ([RadioTransport]) use this interface to report lifecycle events. This replaces the
+ * previous pattern of passing the full [RadioInterfaceService] to transport constructors, decoupling transports from
+ * the service layer.
  */
 interface RadioTransportCallback {
     /** Called when the transport has successfully established a connection. */
@@ -46,9 +46,6 @@ interface RadioTransportCallback {
      */
     fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String? = null) =
         onDisconnect(isPermanent = !recoverable, errorMessage = errorMessage)
-
-    /** Called when the transport has received raw data from the radio. */
-    fun handleFromRadio(bytes: ByteArray)
 
     /**
      * Called as a connection attempt moves through its phases, fails or schedules a retry. Transports that have no

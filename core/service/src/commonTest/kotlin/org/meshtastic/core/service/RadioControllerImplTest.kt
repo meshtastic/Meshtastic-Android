@@ -58,7 +58,6 @@ import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
@@ -116,7 +115,6 @@ class RadioControllerImplTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
-    private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val meshConfigFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
 
@@ -189,7 +187,6 @@ class RadioControllerImplTest {
             uiPrefs = uiPrefs,
             databaseManager = databaseManager,
             serviceNotifications = serviceNotifications,
-            messageProcessor = lazy { messageProcessor },
             meshConfigFlowManager = lazy { meshConfigFlowManager },
             radioOperationLock = RadioOperationLock(),
             radioConfigRepository = radioConfigRepository,
@@ -545,7 +542,6 @@ class RadioControllerImplTest {
         everySuspend { radioInterfaceService.disconnect() } calls { callOrder += "disconnect" }
         every { nodeManager.setAllowNodeDbWrites(false) } calls { callOrder += "writes-off" }
         every { meshPrefs.setDeviceAddress("tcp:192.168.1.1") } calls { callOrder += "prefs" }
-        everySuspend { messageProcessor.clearEarlyPackets() } calls { callOrder += "buffer" }
         everySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.1") } calls { callOrder += "database" }
         every { radioInterfaceService.setDeviceAddress("tcp:192.168.1.1") } calls
             {
@@ -556,7 +552,7 @@ class RadioControllerImplTest {
         controller.setDeviceAddress("tcp:192.168.1.1")
         advanceUntilIdle()
 
-        assertEquals(listOf("disconnect", "writes-off", "buffer", "database", "prefs", "transport"), callOrder)
+        assertEquals(listOf("disconnect", "writes-off", "database", "prefs", "transport"), callOrder)
     }
 
     @Test
@@ -633,7 +629,7 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope, deviceAddress = selectedAddress)
         everySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.1") } returns Unit
         everySuspend { databaseManager.switchActiveDatabase("old:addr") } returns Unit
-        everySuspend { messageProcessor.clearEarlyPackets() } calls
+        every { nodeManager.setAllowNodeDbWrites(false) } calls
             {
                 throw IllegalStateException("forced initialization failure")
             }

@@ -20,8 +20,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.HandshakeConstants
-import org.meshtastic.core.repository.RadioTransportCallback
-import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -39,19 +37,16 @@ import kotlin.test.assertTrue
  *
  * Layers covered here are the self-contained ones with clean pass/fail oracles: the asset parser, the handshake input,
  * and the protobuf decoder. The post-decode handler chain (the layer that is *not* exception-isolated) needs the full
- * `MeshMessageProcessor` graph and a richer oracle — the [ReplayFuzz.adversarialFromRadio] corpus is built to feed that
- * integration harness when it lands.
+ * `RadioSessionProjection` graph and a richer oracle — the [ReplayFuzz.adversarialFromRadio] corpus is built to feed
+ * that integration harness when it lands.
  */
 class ReplayFuzzTest {
 
     /** Collects relayed frames without decoding, so the oracle is the transport's behaviour, not the callback's. */
-    private class Sink : RadioTransportCallback {
+    private class Sink : VirtualRadioRecorder {
         val frames = mutableListOf<ByteArray>()
 
         override fun onConnect() = Unit
-
-        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) =
-            Unit
 
         override fun handleFromRadio(bytes: ByteArray) {
             frames += bytes
@@ -80,7 +75,7 @@ class ReplayFuzzTest {
      * A corrupt asset must fail fast and *only* as [IllegalArgumentException] — never OOM, hang, or leak okio errors.
      */
     private fun TestScope.replayLink(
-        callback: RadioTransportCallback,
+        callback: VirtualRadioRecorder,
         scope: CoroutineScope,
         address: String,
         frames: ByteArray,

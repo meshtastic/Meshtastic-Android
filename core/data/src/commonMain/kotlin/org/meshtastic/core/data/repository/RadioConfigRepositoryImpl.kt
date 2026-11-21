@@ -141,8 +141,7 @@ open class RadioConfigRepositoryImpl(
         // A real device's manifest is bounded by its flash storage (realistically a handful to a few
         // hundred entries). A rogue/adversarial peer, however, can emit FileInfo packets in a tight loop
         // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
-        // else bounds this accumulator in between. Cap it defensively, same pattern as the early-packet
-        // buffer in MeshMessageProcessorImpl.
+        // else bounds this accumulator in between. Cap it defensively.
         //
         // handleFileInfo dispatches each packet on its own scope.handledLaunch, so addFileInfo calls can
         // run concurrently -- a plain read-then-write would race (lost updates, or two callers both seeing

@@ -17,28 +17,26 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
+import org.meshtastic.sdk.DisplayMirrorFrame
 
 /**
- * Reassembles the chunked [DisplayFrame] stream from the connected device into complete framebuffer snapshots.
- *
- * The device streams its 1bpp framebuffer as `FromRadio.display_frame` chunks while display mirroring is enabled (see
- * `AdminMessage.set_display_mirror`). Chunks of one frame share a `frame_id`; a frame is complete when `offset +
- * data.size == total_size`.
+ * Holds the connected device's mirrored display while mirroring is enabled (see `AdminMessage.set_display_mirror`). The
+ * SDK reassembles the firmware's chunks; this validates each complete frame against its declared geometry and
+ * composites RGB565 partial-update rectangles onto the panel.
  */
 interface DisplayMirrorManager {
-    /** Latest completely reassembled frame, or null before the first one arrives. */
+    /** Latest complete frame, or null before the first one arrives. */
     val frame: StateFlow<MirrorFrame?>
 
-    /** Latest completely reassembled color palette, or null when the device renders monochrome. */
+    /** Latest complete color palette, or null when the device renders monochrome. */
     val palette: StateFlow<MirrorPalette?>
 
-    /** Routes an incoming display frame chunk from the device to the reassembly state machine. */
-    fun handleIncomingFrame(chunk: DisplayFrame)
+    /** Publishes a complete frame from the SDK, or drops it when its bytes do not match its geometry. */
+    fun handleFrame(frame: DisplayMirrorFrame)
 
-    /** Routes an incoming palette chunk from the device to the reassembly state machine. */
-    fun handleIncomingPalette(chunk: DisplayPalette)
+    /** Publishes a complete palette from the SDK. */
+    fun handlePalette(palette: DisplayPalette)
 
     /**
      * Clears all held state — latest frame, latest palette, and partial reassembly buffers. Call when a session ends or

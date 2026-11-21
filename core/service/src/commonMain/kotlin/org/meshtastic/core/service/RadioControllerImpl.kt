@@ -43,7 +43,6 @@ import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessagingController
@@ -123,7 +122,6 @@ class RadioControllerImpl(
     uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshNotificationManager,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
     meshConfigFlowManager: Lazy<MeshConfigFlowManager>,
     radioOperationLock: RadioOperationLock,
     radioConfigRepository: RadioConfigRepository,
@@ -350,7 +348,6 @@ class RadioControllerImpl(
         nodeManager.clearConnectionIdentity()
         nodeManager.setAllowNodeDbWrites(false)
         Logger.d { "[DeviceAssociation] session-cleared before address switch" }
-        messageProcessor.value.clearEarlyPackets()
         databaseManager.switchActiveDatabase(deviceAddr)
         nodeManager.clear()
         serviceNotifications.clearNotifications()
@@ -381,7 +378,6 @@ class RadioControllerImpl(
             attemptRollback("fail-closed node-write disable") { nodeManager.setAllowNodeDbWrites(false) }
             attemptRollback("fail-closed connection-identity clear") { nodeManager.clearConnectionIdentity() }
             attemptRollback("fail-closed node-state clear") { nodeManager.clear() }
-            attemptRollback("fail-closed early-packet clear") { messageProcessor.value.clearEarlyPackets() }
             attemptRollback("fail-closed notification clear") { serviceNotifications.clearNotifications() }
             attemptRollback("fail-closed persisted selection") { meshPrefs.setDeviceAddress(null) }
             attemptRollback("fail-closed transport selection") {
@@ -394,7 +390,6 @@ class RadioControllerImpl(
         attemptRollback("node state") {
             nodeManager.clearConnectionIdentity()
             nodeManager.clear()
-            messageProcessor.value.clearEarlyPackets()
             serviceNotifications.clearNotifications()
             nodeManager.loadCachedNodeDB()
         }

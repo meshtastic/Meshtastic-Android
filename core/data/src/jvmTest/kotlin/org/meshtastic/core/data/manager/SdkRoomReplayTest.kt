@@ -38,7 +38,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoReadDataSource
 import org.meshtastic.core.data.repository.MeshLogRepositoryImpl
@@ -64,7 +63,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -92,7 +90,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.meshtastic.proto.Channel as ProtoChannel
 
-/** Local consumer proof using the real packet processor, repositories, and Room. */
+/** Local consumer proof using the real session projection, repositories, and Room. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SdkRoomReplayTest {
     @Test
@@ -186,15 +184,17 @@ class SdkRoomReplayTest {
                     is RadioSessionEvent.Packet -> {
                         assertEquals(sdkSession, event.sessionId)
                         beforePacket()
-                        ingress.receive(FromRadio.Builder().also { it.packet = event.packet }.build().encode(), session)
+                        ingress.receive(event, session)
                         processed.complete(Unit)
                     }
 
-                    is RadioSessionEvent.Lockdown -> Unit
-
-                    is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
-
-                    is RadioSessionEvent.NodeDbRefreshed -> Unit
+                    is RadioSessionEvent.Lockdown,
+                    is RadioSessionEvent.NodeDbRefreshed,
+                    is RadioSessionEvent.NodeChanged,
+                    is RadioSessionEvent.ConfigChanged,
+                    is RadioSessionEvent.ChannelsChanged,
+                    is RadioSessionEvent.Event,
+                    -> Unit
 
                     is RadioSessionEvent.Ended -> assertEquals(sdkSession, event.sessionId)
                 }
@@ -225,7 +225,7 @@ class SdkRoomReplayTest {
         private val nodeManager = mock<NodeManager>(MockMode.autofill)
         private val notifications = mutableListOf<String>()
         val notified = CompletableDeferred<Unit>()
-        private val processor: MeshMessageProcessorImpl
+        private val projection: RadioSessionProjection
 
         init {
             bindSessionAdmission()
@@ -247,8 +247,8 @@ class SdkRoomReplayTest {
                 }
             val config = mock<RadioConfigRepository>(MockMode.autofill)
             every { config.channelSetFlow } returns channelSet
-            processor =
-                createRoomReplayProcessor(scope, dispatchers, db, nodeManager, radio, config, notificationManager)
+            projection =
+                createRoomReplayProjection(scope, dispatchers, db, nodeManager, radio, config, notificationManager)
         }
 
         private fun bindSessionAdmission() {
@@ -308,8 +308,8 @@ class SdkRoomReplayTest {
             nodeDbReady.value = true
         }
 
-        suspend fun receive(payload: ByteArray, session: RadioSessionContext) {
-            processor.handleFromRadio(ReceivedRadioFrame(payload.toByteString(), session), myNodeNum.value)
+        suspend fun receive(packet: RadioSessionEvent.Packet, session: RadioSessionContext) {
+            projection.project(packet, session)
         }
 
         suspend fun result(): ReplayResult = db.withReadDb { database ->
@@ -372,6 +372,8 @@ class SdkRoomReplayTest {
                                         .build()
                             }
                             .build()
+                    // Firmware opens a nodes-only dump with its own node_info (PhoneAPI STATE_SEND_OWN_NODEINFO).
+                    deliver(FromRadio.Builder().also { it.node_info = nodes.first() }.build().encode())
                     deliver(FromRadio.Builder().also { it.node_info = refreshed }.build().encode())
                     deliver(
                         FromRadio.Builder()
@@ -496,7 +498,8 @@ class SdkRoomReplayTest {
     }
 }
 
-internal fun createRoomReplayProcessor(
+@Suppress("LongParameterList")
+internal fun createRoomReplayProjection(
     scope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
     db: DatabaseProvider,
@@ -504,7 +507,8 @@ internal fun createRoomReplayProcessor(
     radio: RadioInterfaceService,
     config: RadioConfigRepository,
     notificationManager: MeshNotificationManager,
-): MeshMessageProcessorImpl {
+    configFlowManager: Lazy<MeshConfigFlowManagerImpl> = lazy { error("config install is not under test") },
+): RadioSessionProjection {
     val packetRepository = PacketRepositoryImpl(db, dispatchers)
     val logPrefs = mock<MeshLogPrefs>(MockMode.autofill)
     every { logPrefs.loggingEnabled } returns MutableStateFlow(true)
@@ -543,13 +547,13 @@ internal fun createRoomReplayProcessor(
             activeConversationTracker = ActiveConversationTracker(),
             scope = serviceScope,
         )
-    return MeshMessageProcessorImpl(
+    return radioSessionProjection(
         nodeManager,
-        mock(MockMode.autofill),
-        lazy { logs },
-        lazy { data },
-        mock(MockMode.autofill),
         radio,
-        serviceScope,
+        scope,
+        dataHandler = data,
+        meshLogRepository = logs,
+        serviceStateWriter = mock(MockMode.autofill),
+        configFlowManager = configFlowManager,
     )
 }

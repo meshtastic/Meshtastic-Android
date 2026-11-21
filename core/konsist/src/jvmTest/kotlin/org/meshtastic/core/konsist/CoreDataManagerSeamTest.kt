@@ -57,7 +57,7 @@ class CoreDataManagerSeamTest {
         assertTrue(managerFiles.isNotEmpty(), emptyScanMessage("core:data manager scan"))
         assertTrue(storageFiles.isNotEmpty(), emptyScanMessage("core:data repository and datasource scan"))
         assertTrue(
-            managerFiles.any { it.scanPath.endsWith("/core/data/manager/FromRadioPacketHandlerImpl.kt") },
+            managerFiles.any { it.scanPath.endsWith("/core/data/manager/RadioSessionProjection.kt") },
             "expected core/data manager sources in scope; got ${managerFiles.size} files",
         )
         assertTrue(

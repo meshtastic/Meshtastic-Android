@@ -318,24 +318,14 @@ class SharedRadioInterfaceServiceLivenessTest {
                 )
                 assertTrue(createdTransports.isEmpty(), "a failed factory call must not publish a transport")
 
-                val queuedFrame = async(start = CoroutineStart.UNDISPATCHED) { service.receivedData.first() }
-                try {
-                    val revokedCallback = requireNotNull(failedSessionCallback)
-                    revokedCallback.onConnect()
-                    revokedCallback.handleFromRadio(byteArrayOf(1, 2, 3))
-                    testDispatcher.scheduler.runCurrent()
-                    assertEquals(
-                        ConnectionState.Disconnected,
-                        service.connectionState.value,
-                        "callbacks from a revoked factory session must not restore connection state",
-                    )
-                    assertFalse(
-                        queuedFrame.isCompleted,
-                        "callbacks from a revoked factory session must not enqueue data",
-                    )
-                } finally {
-                    queuedFrame.cancel()
-                }
+                val revokedCallback = requireNotNull(failedSessionCallback)
+                revokedCallback.onConnect()
+                testDispatcher.scheduler.runCurrent()
+                assertEquals(
+                    ConnectionState.Disconnected,
+                    service.connectionState.value,
+                    "callbacks from a revoked factory session must not restore connection state",
+                )
 
                 failCreation = false
                 service.connect()
@@ -775,8 +765,6 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     // ─── Non-BLE: Liveness does not mutate state ───────────────────────────────────────────────
-
-    // ─── handleFromRadio resets the liveness timer ──────────────────────────────────────────────
 
     // ─── Session handler timeout: the pipeline must not wedge forever ───────────────────────────
 
