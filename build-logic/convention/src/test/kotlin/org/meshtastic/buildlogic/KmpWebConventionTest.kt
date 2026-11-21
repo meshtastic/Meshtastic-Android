@@ -31,6 +31,10 @@ class KmpWebConventionTest {
         assertTrue("wasmJs" !in values.getValue("targets").split(','), "values=$values")
         assertEquals("commonMain", values["nonWebMain"])
         assertTrue("nonWebMain" in values.getValue("jvmMain").split(','), "values=$values")
+        assertEquals("commonMain", values["nonAndroidMain"])
+        assertTrue("nonAndroidMain" in values.getValue("jvmMain").split(','), "values=$values")
+        // iosMain reaches it through appleMain and nativeMain.
+        values["nativeMain"]?.let { assertTrue("nonAndroidMain" in it.split(','), "values=$values") }
     }
 
     @Test
@@ -40,6 +44,9 @@ class KmpWebConventionTest {
         assertTrue("wasmJs" in values.getValue("targets").split(','), "values=$values")
         assertTrue("nonWebMain" !in values.getValue("wasmJsMain").split(','), "values=$values")
         assertTrue("nonWebMain" in values.getValue("jvmMain").split(','), "values=$values")
+        assertTrue("nonAndroidMain" in values.getValue("wasmJsMain").split(','), "values=$values")
+        assertTrue("nonAndroidMain" in values.getValue("jvmMain").split(','), "values=$values")
+        assertEquals("commonMain", values["nonAndroidMain"])
     }
 
     @Test
@@ -56,6 +63,10 @@ class KmpWebConventionTest {
         assertTrue("nonWebMain" in values.getValue("jvmAndroidMain").split(','), "values=$values")
         // No iOS target, and so no nativeMain, on a host Kotlin/Native does not run on.
         values["nativeMain"]?.let { assertTrue("nonWebMain" in it.split(','), "values=$values") }
+        // jvmAndroidMain holds Android, so it never nests under nonAndroidMain.
+        assertTrue("nonAndroidMain" !in values.getValue("jvmAndroidMain").split(','), "values=$values")
+        assertTrue("nonAndroidMain" in values.getValue("jvmMain").split(','), "values=$values")
+        values["nativeMain"]?.let { assertTrue("nonAndroidMain" in it.split(','), "values=$values") }
     }
 
     @Test
@@ -84,7 +95,7 @@ class KmpWebConventionTest {
 
             val kotlinExtension = extensions.getByType(KotlinMultiplatformExtension::class.java)
             // The closure each shared source set depends on, read at configuration time.
-            val parents = listOf("nonWebMain", "jvmMain", "wasmJsMain", "jvmAndroidMain", "nativeMain")
+            val parents = listOf("nonWebMain", "nonAndroidMain", "jvmMain", "wasmJsMain", "jvmAndroidMain", "nativeMain")
                 .mapNotNull { name -> kotlinExtension.sourceSets.findByName(name)?.let { name to it } }
                 .associate { (name, set) -> name to set.dependsOn.map { it.name }.sorted().joinToString(",") }
             val targetNames = kotlinExtension.targets.names.filter { it != "metadata" }.sorted().joinToString(",")

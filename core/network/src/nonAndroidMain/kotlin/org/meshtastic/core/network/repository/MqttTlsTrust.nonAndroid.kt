@@ -14,16 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ui.util
+package org.meshtastic.core.network.repository
 
-import androidx.compose.runtime.Composable
+import io.ktor.network.tls.TLSConfigBuilder
 
 /**
- * Web no-op — unlike Screen Wake Lock, there is no browser API to read or set the physical display's brightness at all
- * (a page can only fake it by dimming its own content with an overlay, which is a UI concern, not a platform primitive
- * this function should reach for). Matches the JVM/Desktop actual.
+ * Desktop trusts the JDK `cacerts`, Apple's `TLSConfigBuilder` has no `trustManager`, and a browser page cannot
+ * influence TLS trust, so each defers to the platform trust decision.
  */
-@Composable
-actual fun SetScreenBrightness(brightness: Float) {
-    // No-op on Web — no browser API for physical display brightness exists.
-}
+actual fun mqttTlsConfig(): (TLSConfigBuilder.() -> Unit)? = null

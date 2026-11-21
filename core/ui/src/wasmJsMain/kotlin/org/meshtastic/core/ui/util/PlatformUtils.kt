@@ -112,8 +112,6 @@ actual fun KeepScreenOn(enabled: Boolean) {
 
 actual val bleScanRequiresLocationServices: Boolean = false
 
-@Composable actual fun isGpsDisabled(): Boolean = false
-
 /** Web Bluetooth where the browser has it and, where it can say, a Bluetooth adapter to use. */
 @Composable
 actual fun isBluetoothSupported(): Boolean {
@@ -148,8 +146,6 @@ private suspend fun webBluetoothAdapterAvailable(): Boolean {
 }
 
 @Composable actual fun isBluetoothDisabled(): Boolean = false
-
-@Composable actual fun isWifiUnavailable(): Boolean = false
 
 @Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
 

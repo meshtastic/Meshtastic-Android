@@ -20,9 +20,6 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import org.meshtastic.core.model.util.anonymize
 
-// Web Bluetooth has no autoConnect, MTU, connection-priority or GATT-cache API.
-internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) = Unit
-
 /**
  * The granted peripheral for [address]. [builderAction] is not applied: the peripheral was configured when the picker
  * or `getDevices()` produced it, and Kable cannot rebuild it.
@@ -32,12 +29,6 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
         ?: error("No Web Bluetooth grant for ${address.anonymize()}; pick the device again")
 
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
-
-internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
-
-internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
-
-internal actual fun Peripheral.refreshGattCache(): Boolean = false
 
 // close() is terminal and only a new grant can replace the peripheral, so the grant keeps it open; disconnect() has
 // already dropped the GATT link.
