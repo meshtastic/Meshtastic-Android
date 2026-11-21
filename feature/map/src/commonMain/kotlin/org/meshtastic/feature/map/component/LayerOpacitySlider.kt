@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_layer_opacity
+import org.meshtastic.core.ui.component.rememberHoistedSliderState
 import org.meshtastic.feature.map.layers.LAYER_OPACITY_OPAQUE
 import kotlin.math.roundToInt
 
@@ -64,10 +65,9 @@ fun LayerOpacitySlider(
             style = MaterialTheme.typography.labelMedium,
         )
         Slider(
-            value = position,
+            state = rememberHoistedSliderState(position, valueRange = 0f..LAYER_OPACITY_OPAQUE),
             onValueChange = { position = it },
             onValueChangeFinished = { onOpacityChange(layerKey, position) },
-            valueRange = 0f..LAYER_OPACITY_OPAQUE,
             modifier = Modifier.testTag(layerOpacityTestTag(layerKey)),
         )
     }

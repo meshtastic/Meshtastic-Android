@@ -103,11 +103,14 @@ fun PositionPrecisionPreference(
         if (shown in (POSITION_DISABLED + 1) until POSITION_ENABLED) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Slider(
-                    value = shown.toFloat(),
+                    state =
+                    rememberHoistedSliderState(
+                        value = shown.toFloat(),
+                        steps = finest - POSITION_PRECISION_MIN - 1,
+                        valueRange = POSITION_PRECISION_MIN.toFloat()..finest.toFloat(),
+                    ),
                     onValueChange = { onValueChanged(it.roundToInt()) },
                     enabled = enabled,
-                    valueRange = POSITION_PRECISION_MIN.toFloat()..finest.toFloat(),
-                    steps = finest - POSITION_PRECISION_MIN - 1,
                 )
 
                 val precisionMeters = precisionRadiusMetersOrNull(shown)?.toInt()

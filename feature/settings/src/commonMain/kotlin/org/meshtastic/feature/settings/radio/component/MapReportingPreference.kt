@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled
 import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.rememberHoistedSliderState
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -118,12 +119,15 @@ fun MapReportingPreference(
                 )
                 if (shouldReportLocation && mapReportingEnabled) {
                     Slider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        value = positionPrecision.toFloat(),
+                        state =
+                        rememberHoistedSliderState(
+                            value = positionPrecision.toFloat(),
+                            steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
+                            valueRange = POSITION_PRECISION_MIN.toFloat()..POSITION_PRECISION_MAX.toFloat(),
+                        ),
                         onValueChange = { onPositionPrecisionChanged(it.roundToInt()) },
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         enabled = enabled,
-                        valueRange = POSITION_PRECISION_MIN.toFloat()..POSITION_PRECISION_MAX.toFloat(),
-                        steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
                     )
                     val precisionMeters = precisionRadiusMetersOrNull(positionPrecision)?.toInt()
                     val unit =

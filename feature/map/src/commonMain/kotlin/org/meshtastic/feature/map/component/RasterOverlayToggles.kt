@@ -18,11 +18,11 @@ package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 
@@ -48,7 +48,7 @@ fun RasterOverlayToggles(
     Column(modifier = modifier) {
         available.forEach { overlay ->
             val enabled = overlay.id in enabledIds
-            ListItem(
+            StaticListItem(
                 headlineContent = { Text(text = stringResource(overlay.label)) },
                 trailingContent = { Checkbox(checked = enabled, onCheckedChange = { onToggle(overlay.id) }) },
             )

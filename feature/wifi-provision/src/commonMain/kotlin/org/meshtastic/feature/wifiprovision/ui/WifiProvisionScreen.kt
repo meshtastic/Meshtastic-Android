@@ -43,7 +43,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -57,7 +56,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -85,8 +83,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -142,6 +138,8 @@ import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.PasswordTextField
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
@@ -519,12 +517,11 @@ internal fun ConnectedContent(
         )
 
         // Password input
-        OutlinedTextField(
+        PasswordTextField(
             value = password,
             onValueChange = { password = it },
+            revealed = passwordVisible,
             label = { Text(stringResource(Res.string.password)) },
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconToggleButton(checked = passwordVisible, onCheckedChange = { passwordVisible = it }) {
                     Icon(
@@ -539,8 +536,13 @@ internal fun ConnectedContent(
                     )
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onProvision(ssid, password, hiddenNetwork) }),
+            keyboardOptions =
+            KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            onKeyboardAction = { onProvision(ssid, password, hiddenNetwork) },
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -688,7 +690,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
 
 @Composable
 private fun ProvisionInfoItem(label: String, value: String, copyEnabled: Boolean = true) {
-    ListItem(
+    StaticListItem(
         overlineContent = { Text(text = label, style = MaterialTheme.typography.labelLarge) },
         headlineContent = { Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized) },
         trailingContent = {
@@ -708,7 +710,7 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         }
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(network.ssid) },
         supportingContent = { Text(stringResource(Res.string.wifi_provision_signal_strength, network.signalStrength)) },
         leadingContent = {

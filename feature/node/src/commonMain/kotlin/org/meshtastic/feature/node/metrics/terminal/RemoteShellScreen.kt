@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AssistChip
@@ -42,7 +41,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -73,8 +71,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -105,6 +101,7 @@ import org.meshtastic.core.resources.remote_shell_status_not_connected
 import org.meshtastic.core.resources.remote_shell_status_opening
 import org.meshtastic.core.resources.remote_shell_subtitle_round_trip
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.PasswordTextField
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
@@ -357,22 +354,22 @@ private fun CommandComposer(composer: String, history: List<String>, masked: Boo
             modifier = Modifier.fillMaxWidth().padding(horizontal = TERMINAL_PADDING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
+            // One secure field in both modes, so a password prompt arriving mid-session keeps focus and the IME.
+            PasswordTextField(
                 value = composer,
                 onValueChange = actions.onChange,
+                // At a password prompt the answer must not be readable, nor offered to the keyboard's suggestions.
+                revealed = !masked,
                 modifier = Modifier.weight(1f).onPreviewKeyEvent { event -> composerKey(event, actions) },
                 placeholder = { Text(stringResource(Res.string.remote_shell_command_hint)) },
                 textStyle = TextStyle(fontFamily = FontFamily.Monospace),
-                singleLine = true,
-                // At a password prompt the answer must not be readable, nor offered to the keyboard's suggestions.
-                visualTransformation = if (masked) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions =
                 KeyboardOptions(
                     autoCorrectEnabled = false,
                     keyboardType = if (masked) KeyboardType.Password else KeyboardType.Text,
                     imeAction = ImeAction.Send,
                 ),
-                keyboardActions = KeyboardActions(onSend = { actions.onSubmit() }),
+                onKeyboardAction = { actions.onSubmit() },
             )
             IconButton(onClick = actions.onSubmit) {
                 Icon(MeshtasticIcons.Send, contentDescription = stringResource(Res.string.remote_shell_send))

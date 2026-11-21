@@ -131,10 +131,7 @@ fun MeshtasticSearchBar(
         )
     }
 
-    val barModifier =
-        modifier.fillMaxWidth().let { base ->
-            scrollBehavior?.let { behavior -> with(behavior) { base.searchBarScrollBehavior() } } ?: base
-        }
+    val barModifier = modifier.fillMaxWidth().then(scrollBehavior?.searchBarScrollBehaviorModifier ?: Modifier)
     SearchBar(state = searchBarState, inputField = { inputField(inputFieldTag) }, modifier = barModifier)
 
     val expandedTag = inputFieldTag + SEARCH_BAR_EXPANDED_TAG_SUFFIX

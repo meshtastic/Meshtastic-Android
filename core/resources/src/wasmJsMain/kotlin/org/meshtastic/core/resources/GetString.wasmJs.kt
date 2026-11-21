@@ -16,7 +16,9 @@
  */
 package org.meshtastic.core.resources
 
+import org.jetbrains.compose.resources.ResourceEnvironment
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getSystemResourceEnvironment
 
 // No runBlocking on wasmJs: fail loudly rather than return a wrong value.
 actual fun getString(stringResource: StringResource): String =
@@ -24,3 +26,6 @@ actual fun getString(stringResource: StringResource): String =
 
 actual fun getString(stringResource: StringResource, vararg formatArgs: Any): String =
     error("getString() is not supported on web -- use getStringSuspend() instead")
+
+/** Built on every lookup: it reads `navigator.languages`, which follows the app's language, and costs nothing here. */
+internal actual fun systemResourceEnvironment(): ResourceEnvironment = getSystemResourceEnvironment()

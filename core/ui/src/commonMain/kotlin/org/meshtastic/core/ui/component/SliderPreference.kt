@@ -22,7 +22,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +58,7 @@ fun <T> SliderPreference(
             label = "sliderSpring",
         )
 
-    ListItem(
+    StaticListItem(
         modifier = modifier,
         headlineContent = {
             Text(
@@ -73,15 +72,13 @@ fun <T> SliderPreference(
             Column {
                 summary?.let { Text(text = it, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) }
                 Slider(
-                    value = animatedValue,
+                    state = rememberHoistedSliderState(animatedValue, steps, valueRange),
                     onValueChange = {
                         val index = it.roundToInt()
                         if (index in items.indices) {
                             onValueChange(items[index].first)
                         }
                     },
-                    valueRange = valueRange,
-                    steps = steps,
                     enabled = enabled,
                 )
             }

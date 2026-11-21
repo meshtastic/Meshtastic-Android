@@ -39,7 +39,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -220,7 +219,6 @@ fun EditTextPreference(
     // [modifier] lands on the wrapping column, so a caller that needs the text field itself focused passes one here.
     focusRequester: FocusRequester? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
     multiline: Boolean = false,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -251,7 +249,6 @@ fun EditTextPreference(
             label = { Text(title) },
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            visualTransformation = visualTransformation,
             trailingIcon =
             if (trailingIcon != null) {
                 { trailingIcon() }
@@ -285,7 +282,7 @@ fun EditTextPreference(
 
 /** The `n/max` byte budget shown under a size-capped field. */
 @Composable
-private fun ByteCounter(valueBytes: Int, maxSize: Int, isError: Boolean) {
+internal fun ByteCounter(valueBytes: Int, maxSize: Int, isError: Boolean) {
     Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "$valueBytes/$maxSize",
@@ -300,7 +297,7 @@ private fun ByteCounter(valueBytes: Int, maxSize: Int, isError: Boolean) {
  * Whether the byte counter earns its place: within [within] bytes of the limit when a field asks for the message
  * composer's rule, otherwise while the field has focus. A counter reading 0/80 before a character is typed is chrome.
  */
-private fun showByteCounter(valueBytes: Int, maxSize: Int, within: Int?, isFocused: Boolean) = when {
+internal fun showByteCounter(valueBytes: Int, maxSize: Int, within: Int?, isFocused: Boolean) = when {
     maxSize <= 0 -> false
     within == null -> isFocused
     else -> valueBytes >= maxSize - within
