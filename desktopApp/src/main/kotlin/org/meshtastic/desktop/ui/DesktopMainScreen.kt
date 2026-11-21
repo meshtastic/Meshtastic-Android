@@ -22,52 +22,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
+import org.meshtastic.appshell.MeshtasticMainScreen
 import org.meshtastic.core.navigation.MultiBackstack
-import org.meshtastic.core.ui.component.MeshtasticAppShell
-import org.meshtastic.core.ui.component.MeshtasticNavDisplay
-import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.desktop.navigation.desktopNavGraph
-import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 
-/**
- * Desktop main screen — assembles the shared [MeshtasticAppShell], [MeshtasticNavigationSuite], and
- * [MeshtasticNavDisplay] with the desktop-specific [desktopNavGraph] entry provider.
- */
+/** The shared [MeshtasticMainScreen] on a surface, with room under it for the desktop window's bottom edge. */
 @Suppress("ViewModelForwarding")
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modifier: Modifier = Modifier) {
-    val backStack = multiBackstack.activeBackStack
-    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
-
     Surface(modifier = modifier.fillMaxSize()) {
-        MeshtasticAppShell(
-            multiBackstack = multiBackstack,
+        MeshtasticMainScreen(
             uiViewModel = uiViewModel,
+            multiBackstack = multiBackstack,
             hostModifier = Modifier.padding(bottom = 24.dp),
-        ) {
-            MeshtasticNavigationSuite(
-                multiBackstack = multiBackstack,
-                uiViewModel = uiViewModel,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                val provider =
-                    entryProvider<NavKey> {
-                        desktopNavGraph(
-                            backStack = backStack,
-                            uiViewModel = uiViewModel,
-                            multiBackstack = multiBackstack,
-                            settingsRadioConfigViewModel = settingsRadioConfigViewModelProvider,
-                        )
-                    }
-                MeshtasticNavDisplay(
-                    multiBackstack = multiBackstack,
-                    entryProvider = provider,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
+        )
     }
 }

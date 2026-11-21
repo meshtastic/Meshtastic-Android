@@ -167,6 +167,7 @@ include(
     ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",
+    ":appShell",
     ":desktopApp",
     ":androidApp",
     ":core:barcode",

@@ -86,6 +86,7 @@ jobs:
             # when a module applying meshtastic.kmp.web is missing here.
             web:
               - 'webApp/**'
+              - 'appShell/**'
               - 'core/**'
               - 'feature/connections/**'
               - 'feature/discovery/**'
@@ -112,6 +113,7 @@ jobs:
               - '.github/actions/**'
               # Product modules validated by reusable-check
               - 'androidApp/**'
+              - 'appShell/**'
               - 'baselineprofile/**'
               - 'desktopApp/**'
               - 'webApp/**'

@@ -25,6 +25,7 @@ COVERED_ELSEWHERE = {
 # sources fails the guard: move it into a shard in reusable-check.yml
 # and remove it from this list.
 NO_TESTS_YET = {
+    ':appShell',
     ':core:di',
     ':core:nfc',
     ':core:resources',

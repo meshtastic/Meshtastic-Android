@@ -20,54 +20,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import com.github.terrakok.navigation3.browser.HierarchicalBrowserNavigation
 import com.github.terrakok.navigation3.browser.buildBrowserHistoryFragment
+import org.meshtastic.appshell.MeshtasticMainScreen
 import org.meshtastic.core.navigation.MultiBackstack
-import org.meshtastic.core.ui.component.MeshtasticAppShell
-import org.meshtastic.core.ui.component.MeshtasticNavDisplay
-import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 import org.meshtastic.web.navigation.unknownWebDestination
-import org.meshtastic.web.navigation.webNavGraph
 import org.meshtastic.web.navigation.webVisibleDestinations
 
-/** The web shell, assembled like `DesktopMainScreen` from [webNavGraph] and [webVisibleDestinations]. */
+/** The shared [MeshtasticMainScreen] with the browser's Back, without the Map tab, and tolerant of unknown keys. */
 @Suppress("ViewModelForwarding")
 @Composable
 fun WebMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modifier: Modifier = Modifier) {
-    val backStack = multiBackstack.activeBackStack
-    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
-
     BrowserBack(multiBackstack)
 
     Surface(modifier = modifier.fillMaxSize()) {
-        MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = uiViewModel) {
-            MeshtasticNavigationSuite(
-                multiBackstack = multiBackstack,
-                uiViewModel = uiViewModel,
-                modifier = Modifier.fillMaxSize(),
-                visibleDestinations = webVisibleDestinations,
-            ) {
-                val provider =
-                    entryProvider<NavKey>(fallback = { key -> unknownWebDestination(key, backStack) }) {
-                        webNavGraph(
-                            backStack = backStack,
-                            uiViewModel = uiViewModel,
-                            multiBackstack = multiBackstack,
-                            settingsRadioConfigViewModel = settingsRadioConfigViewModelProvider,
-                        )
-                    }
-                MeshtasticNavDisplay(
-                    multiBackstack = multiBackstack,
-                    entryProvider = provider,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
+        MeshtasticMainScreen(
+            uiViewModel = uiViewModel,
+            multiBackstack = multiBackstack,
+            visibleDestinations = webVisibleDestinations,
+            unknownDestination = ::unknownWebDestination,
+        )
     }
 }
 

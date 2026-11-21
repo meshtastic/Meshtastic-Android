@@ -20,7 +20,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,6 +77,7 @@ import org.koin.core.context.stopKoin
 import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
+import org.meshtastic.appshell.MeshServiceLifecycle
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.RoomPoolTimeoutLog
 import org.meshtastic.core.common.state.LaunchOptions
@@ -99,7 +99,6 @@ import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.MeshLogCleanup
-import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.isDarkTheme
@@ -248,16 +247,6 @@ private fun ApplicationScope.DeepLinkHandler(
 }
 
 // ----- Mesh service lifecycle -----
-
-/** Starts [MeshServiceOrchestrator] on composition and stops it on disposal. */
-@Composable
-private fun MeshServiceLifecycle() {
-    val meshServiceController = koinInject<MeshServiceOrchestrator>()
-    DisposableEffect(Unit) {
-        meshServiceController.start()
-        onDispose { meshServiceController.stop() }
-    }
-}
 
 // ----- Theme, locale, and application shell -----
 
