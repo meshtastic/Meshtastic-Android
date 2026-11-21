@@ -20,11 +20,13 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.BluetoothConnectionStatus
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.KeyVerificationAdmin
@@ -416,5 +418,99 @@ class LogRedactionTest {
 
         assertEquals(packet, packet.redactedForLog())
         assertEquals(frame, frame.redactedForLog())
+    }
+
+    @Test
+    fun `admin connection status response is logged without the bluetooth pin and keeps the rest`() {
+        val admin =
+            AdminMessage.Builder()
+                .also {
+                    it.get_device_connection_status_response =
+                        DeviceConnectionStatus.Builder()
+                            .also { c ->
+                                c.bluetooth =
+                                    BluetoothConnectionStatus.Builder()
+                                        .also { b ->
+                                            b.pin = 135791
+                                            b.rssi = -60
+                                        }
+                                        .build()
+                            }
+                            .build()
+                }
+                .build()
+
+        val logged = loggedAdmin(admin).get_device_connection_status_response!!.bluetooth!!
+
+        assertEquals(0, logged.pin)
+        assertEquals(-60, logged.rssi)
+        val original = AdminMessage.ADAPTER.decode(adminPacket(admin).decoded!!.payload)
+        assertEquals(135791, original.get_device_connection_status_response!!.bluetooth!!.pin)
+    }
+
+    @Test
+    fun `device ui inside a config frame has its pin cleared and the original keeps it`() {
+        val config =
+            Config.Builder()
+                .also {
+                    it.device_ui =
+                        DeviceUIConfig.Builder()
+                            .also { u ->
+                                u.pin_code = 246801
+                                u.screen_brightness = 70
+                            }
+                            .build()
+                }
+                .build()
+        val frame = configFrame(config)
+
+        val logged = frame.redactedForLog().config!!.device_ui!!
+
+        assertEquals(0, logged.pin_code)
+        assertEquals(70, logged.screen_brightness)
+        assertEquals(246801, frame.config!!.device_ui!!.pin_code)
+    }
+
+    @Test
+    fun `device ui inside admin set and get config payloads has its pin cleared`() {
+        val config =
+            Config.Builder()
+                .also { it.device_ui = DeviceUIConfig.Builder().also { u -> u.pin_code = 246801 }.build() }
+                .build()
+
+        val set = loggedAdmin(AdminMessage.Builder().also { it.set_config = config }.build())
+        val response = loggedAdmin(AdminMessage.Builder().also { it.get_config_response = config }.build())
+
+        assertEquals(0, set.set_config!!.device_ui!!.pin_code)
+        assertEquals(0, response.get_config_response!!.device_ui!!.pin_code)
+    }
+
+    @Test
+    fun `mesh beacon offer channel psk is cleared while its name stays`() {
+        val moduleConfig =
+            ModuleConfig.Builder()
+                .also { m ->
+                    m.mesh_beacon =
+                        ModuleConfig.MeshBeaconConfig.Builder()
+                            .also { b ->
+                                b.broadcast_message = "hello"
+                                b.broadcast_offer_channel =
+                                    ChannelSettings.Builder()
+                                        .also { s ->
+                                            s.psk = secret
+                                            s.name = "Offer"
+                                        }
+                                        .build()
+                            }
+                            .build()
+                }
+                .build()
+        val frame = FromRadio.Builder().also { it.moduleConfig = moduleConfig }.build()
+
+        val beacon = frame.redactedForLog().moduleConfig!!.mesh_beacon!!
+
+        assertEquals(ByteString.EMPTY, beacon.broadcast_offer_channel!!.psk)
+        assertEquals("Offer", beacon.broadcast_offer_channel!!.name)
+        assertEquals("hello", beacon.broadcast_message)
     }
 }

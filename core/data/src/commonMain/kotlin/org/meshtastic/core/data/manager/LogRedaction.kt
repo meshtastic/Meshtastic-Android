@@ -22,6 +22,7 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
@@ -73,6 +74,7 @@ internal fun AdminMessage.redactedForLog(): AdminMessage = newBuilder()
         get_channel_response?.let { b.get_channel_response = it.redactedForLog() }
         store_ui_config?.let { b.store_ui_config = it.redactedForLog() }
         get_ui_config_response?.let { b.get_ui_config_response = it.redactedForLog() }
+        get_device_connection_status_response?.let { b.get_device_connection_status_response = it.redactedForLog() }
         lockdown_auth?.let { b.lockdown_auth = it.newBuilder().also { l -> l.passphrase = EMPTY }.build() }
         key_verification?.let {
             b.key_verification = it.newBuilder().also { k -> k.security_number = null }.build()
@@ -82,6 +84,7 @@ internal fun AdminMessage.redactedForLog(): AdminMessage = newBuilder()
 
 internal fun Config.redactedForLog(): Config = newBuilder()
     .also { b ->
+        device_ui?.let { b.device_ui = it.redactedForLog() }
         network?.let { b.network = it.newBuilder().also { n -> n.wifi_psk = "" }.build() }
         bluetooth?.let { b.bluetooth = it.newBuilder().also { n -> n.fixed_pin = 0 }.build() }
         security?.let {
@@ -96,8 +99,22 @@ internal fun Config.redactedForLog(): Config = newBuilder()
     }
     .build()
 
+internal fun DeviceConnectionStatus.redactedForLog(): DeviceConnectionStatus =
+    newBuilder().also { b -> bluetooth?.let { b.bluetooth = it.newBuilder().also { s -> s.pin = 0 }.build() } }.build()
+
 internal fun ModuleConfig.redactedForLog(): ModuleConfig = newBuilder()
     .also { b ->
+        mesh_beacon?.let { beacon ->
+            beacon.broadcast_offer_channel?.let { offer ->
+                b.mesh_beacon =
+                    beacon
+                        .newBuilder()
+                        .also {
+                            it.broadcast_offer_channel = offer.newBuilder().also { s -> s.psk = EMPTY }.build()
+                        }
+                        .build()
+            }
+        }
         mqtt?.let {
             b.mqtt =
                 it.newBuilder()

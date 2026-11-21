@@ -285,7 +285,6 @@ class LogFormatterTest {
 
     @Test
     fun `admin message session passkey and lockdown passphrase are redacted`() {
-        // A text passphrase renders as `[text=..]`, which okio leaves unescaped, so a `]` can sit inside it.
         val admin =
             AdminMessage.Builder()
                 .also {
@@ -293,7 +292,7 @@ class LogFormatterTest {
                     it.lockdown_auth =
                         LockdownAuth.Builder()
                             .also { l ->
-                                l.passphrase = "correct horse]battery".encodeUtf8()
+                                l.passphrase = "00112233445566778899aabbccddeeff".decodeHex()
                                 l.boots_remaining = 3
                             }
                             .build()
@@ -303,8 +302,37 @@ class LogFormatterTest {
         val result = rendered(admin)
 
         assertFalse(result.contains("dd8042fa0cfd7d17"))
-        listOf("horse", "battery").forEach { assertFalse(result.contains(it), it) }
-        assertTrue(result.contains("boots_remaining=3"))
+        assertFalse(result.contains("00112233445566778899aabbccddeeff"))
+        assertTrue(result.contains("boots_remaining=3"), "fields after a hex rendering are kept")
+    }
+
+    @Test
+    fun `a text passphrase containing a bracket and comma leaves no part of the secret`() {
+        val result =
+            rendered(LockdownAuth.Builder().also { it.passphrase = "prefix], secret-tail".encodeUtf8() }.build())
+
+        listOf("prefix", "secret-tail").forEach { assertFalse(result.contains(it), it) }
+        assertTrue(result.contains("passphrase=<redacted>"))
+    }
+
+    @Test
+    fun `a text passphrase containing a bracket and brace leaves no part of the secret`() {
+        val result =
+            rendered(LockdownAuth.Builder().also { it.passphrase = "prefix]}secret-tail".encodeUtf8() }.build())
+
+        listOf("prefix", "secret-tail").forEach { assertFalse(result.contains(it), it) }
+    }
+
+    @Test
+    fun `a text admin key list containing a bracket leaves no part of the secret`() {
+        val result =
+            rendered(
+                security {
+                    it.admin_key = listOf("first], secret-one".encodeUtf8(), "second]}secret-two".encodeUtf8())
+                },
+            )
+
+        listOf("first", "secret-one", "second", "secret-two").forEach { assertFalse(result.contains(it), it) }
     }
 
     @Test

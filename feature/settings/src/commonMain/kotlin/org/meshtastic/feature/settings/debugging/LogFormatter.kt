@@ -52,15 +52,16 @@ internal val redactedKeys =
 private const val BARE_PIN = """(?<![A-Za-z0-9_])pin(?=\s*[:=]\s*\d)"""
 
 // Value shapes after `key=` or `key:`, tried in this order:
+// - bytes rendered as text, `[text=..]` or `[size=N text=..…]`: okio does not escape `]` in the text, so the end of the
+//   value is ambiguous and everything to the end of the line is redacted
 // - a list of bytes renderings: `[[hex=..], [hex=..]]`
-// - one bytes rendering: `[hex=..]`, `[size=N hex=..…]`, `[text=..]`; text is not escaped, so it ends at the first `]`
-//   that is followed by `,` `}` or the end of the line
+// - one hex rendering: `[hex=..]`, `[size=N hex=..…]`, which cannot contain `]`
 // - a quoted value that ends the field
 // - anything else up to an unescaped `,` or `}`. Wire writes strings unquoted, with `, [ ] { } \` backslash-escaped and
 //   spaces kept, so a password with spaces is one value and the last field of a message keeps its closing brace.
 private const val FIELD_END = """(?=\s*(?:,|\}|$))"""
 private const val VALUE_SHAPES =
-    """\[(?:\[[^\]]*\](?:,\s*)?)+\]|\[.*?\]$FIELD_END|"(?:[^"\\]|\\.)*"$FIELD_END|(?:[^,}\\]|\\.)+"""
+    """\[\[?(?:size=\d+ )?text=.*|\[(?:\[[^\]]*\](?:,\s*)?)+\]|\[.*?\]$FIELD_END|"(?:[^"\\]|\\.)*"$FIELD_END|(?:[^,}\\]|\\.)+"""
 
 private val REDACT_REGEX = Regex("""(${redactedKeys.joinToString("|")}|$BARE_PIN)\s*([:=])\s*($VALUE_SHAPES)""")
 
