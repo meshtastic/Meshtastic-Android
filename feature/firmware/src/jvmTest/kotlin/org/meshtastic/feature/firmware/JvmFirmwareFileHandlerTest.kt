@@ -19,14 +19,18 @@ package org.meshtastic.feature.firmware
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.request.get
-import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.writeFully
+import io.ktor.utils.io.writer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
@@ -88,40 +92,71 @@ class JvmFirmwareFileHandlerTest {
         assertEquals(1, engine.requestHistory.size)
     }
 
-    /** Streams [body] with no declared length, so only the running byte count can stop it. */
-    private suspend fun download(body: ByteArray, target: File, maxBytes: Long): Result<Unit> {
-        val streaming = HttpClient(MockEngine { respond(ByteReadChannel(body)) })
+    private val chunk = ByteArray(DOWNLOAD_CHUNK) { it.toByte() }
+
+    /**
+     * Downloads a [totalBytes] body with no declared length, produced chunk by chunk on demand. [produced] counts what
+     * the server side actually generated, so a transfer that is not stopped early shows up as the whole body.
+     */
+    private suspend fun download(totalBytes: Int, target: File, maxBytes: Long, produced: AtomicLong): Result<Boolean> {
+        val scope = CoroutineScope(Dispatchers.Default)
+        val streaming =
+            HttpClient(
+                MockEngine {
+                    respond(
+                        scope
+                            .writer(autoFlush = true) {
+                                repeat(totalBytes / chunk.size) {
+                                    channel.writeFully(chunk)
+                                    produced.addAndGet(chunk.size.toLong())
+                                }
+                            }
+                            .channel,
+                    )
+                },
+            )
         return try {
-            val response = streaming.get("https://example.invalid/firmware.bin")
-            runCatching { downloadResponseToFile(response, target, {}, maxBytes) }
+            runCatching { downloadUrlToFile(streaming, "https://example.invalid/firmware.bin", target, {}, maxBytes) }
         } finally {
             streaming.close()
+            scope.cancel()
         }
     }
 
     private fun tempTarget(): File = Files.createTempFile("firmware-download-test", ".bin").toFile().apply { delete() }
 
     @Test
-    fun `a body that outgrows the limit is aborted and its partial file removed`() = runTest {
+    fun `a body that outgrows the limit stops the transfer and removes its partial file`() = runTest {
         val target = tempTarget()
+        val produced = AtomicLong()
+        val cap = 10 * DOWNLOAD_CHUNK.toLong()
+        val total = 8 * 1024 * 1024
 
-        val result = download(ByteArray(20_000), target, maxBytes = 10_000)
+        val result = download(total, target, maxBytes = cap, produced = produced)
 
         assertFailsWith<IOException> { result.getOrThrow() }
         assertFalse(target.exists())
+        assertTrue(
+            produced.get() < total / 4,
+            "transfer ran on to ${produced.get()} of $total bytes instead of stopping near the $cap byte cap",
+        )
     }
 
     @Test
     fun `a body exactly at the limit is written in full`() = runTest {
         val target = tempTarget()
         try {
-            val body = ByteArray(10_000) { it.toByte() }
+            val size = 10 * DOWNLOAD_CHUNK
 
-            download(body, target, maxBytes = 10_000).getOrThrow()
+            assertTrue(download(size, target, maxBytes = size.toLong(), produced = AtomicLong()).getOrThrow())
 
-            assertEquals(body.size.toLong(), target.length())
+            assertEquals(size.toLong(), target.length())
         } finally {
             target.delete()
         }
+    }
+
+    private companion object {
+        const val DOWNLOAD_CHUNK = 8192
     }
 }

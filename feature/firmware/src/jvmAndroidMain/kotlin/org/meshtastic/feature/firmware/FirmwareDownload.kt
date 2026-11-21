@@ -16,10 +16,15 @@
  */
 package org.meshtastic.feature.firmware
 
+import co.touchlab.kermit.Logger
+import io.ktor.client.HttpClient
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.contentLength
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
 import java.io.File
 import java.io.FileOutputStream
@@ -27,6 +32,48 @@ import java.io.IOException
 import kotlin.coroutines.coroutineContext
 
 private const val DOWNLOAD_BUFFER_SIZE = 8192
+
+/**
+ * GETs [url] into [targetFile], streaming the body so [maxBytes] stops the transfer itself rather than only what is
+ * written. The status check and the copy both run inside the response block, because a plain `get` buffers the whole
+ * body before returning.
+ *
+ * @return `false` when the request failed or the server answered with a non-success status; an over-limit or short body
+ *   throws as in [downloadResponseToFile].
+ */
+internal suspend fun downloadUrlToFile(
+    client: HttpClient,
+    url: String,
+    targetFile: File,
+    onProgress: (Float) -> Unit,
+    maxBytes: Long = MAX_FIRMWARE_ZIP_BYTES,
+): Boolean {
+    var copyFailure: Throwable? = null
+    val completed =
+        try {
+            client.prepareGet(url).execute { response ->
+                if (!response.status.isSuccess()) {
+                    Logger.w { "Download failed: ${response.status.value} for $url" }
+                    return@execute false
+                }
+                try {
+                    downloadResponseToFile(response, targetFile, onProgress, maxBytes)
+                    true
+                } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                    // Surfaced after the response closes, so a copy failure is never mistaken for a request failure.
+                    copyFailure = e
+                    false
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "Download failed for $url" }
+            return false
+        }
+    copyFailure?.let { throw it }
+    return completed
+}
 
 /**
  * Streams [response]'s body into [targetFile], reporting fractional progress via [onProgress] as bytes arrive.
