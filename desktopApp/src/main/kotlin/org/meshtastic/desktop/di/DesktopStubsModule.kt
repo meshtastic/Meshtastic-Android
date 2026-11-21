@@ -22,17 +22,23 @@ import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.MeshLocationManager
+import org.meshtastic.core.repository.NoopAppWidgetUpdater
+import org.meshtastic.core.repository.NoopMagneticFieldProvider
+import org.meshtastic.core.repository.NoopPlatformAnalytics
+import org.meshtastic.core.repository.NoopReverseGeocoder
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
+import org.meshtastic.core.repository.ReverseGeocoder
+import org.meshtastic.core.service.DeviceAddressChangeHook
+import org.meshtastic.core.service.LocalNetworkAccess
+import org.meshtastic.core.service.NoopDeviceAddressChangeHook
+import org.meshtastic.core.service.NoopLocalNetworkAccess
 import org.meshtastic.desktop.stub.NoopCameraPoseProvider
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
 import org.meshtastic.desktop.stub.NoopLocationRepository
-import org.meshtastic.desktop.stub.NoopMagneticFieldProvider
 import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPhonePressureProvider
-import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.feature.map.hud.CameraPoseProvider
 import org.meshtastic.feature.map.hud.PhonePressureProvider
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
@@ -41,6 +47,7 @@ import org.meshtastic.feature.node.compass.CompassHeadingProvider
  * Stubs for interfaces whose only real implementation needs Android APIs — WorkManager, widgets, location, sensors and
  * analytics.
  */
+@Suppress("TooManyFunctions")
 @Module
 class DesktopStubsModule {
 
@@ -61,4 +68,10 @@ class DesktopStubsModule {
     @Single fun cameraPoseProvider(): CameraPoseProvider = NoopCameraPoseProvider()
 
     @Single fun phonePressureProvider(): PhonePressureProvider = NoopPhonePressureProvider()
+
+    @Single fun deviceAddressChangeHook(): DeviceAddressChangeHook = NoopDeviceAddressChangeHook()
+
+    @Single fun localNetworkAccess(): LocalNetworkAccess = NoopLocalNetworkAccess()
+
+    @Single fun reverseGeocoder(): ReverseGeocoder = NoopReverseGeocoder()
 }

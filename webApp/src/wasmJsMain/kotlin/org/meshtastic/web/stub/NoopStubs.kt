@@ -24,36 +24,12 @@ import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.common.util.LocaleChangeNotifier
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.ServiceDiscovery
-import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.DataPair
-import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.repository.LockdownPassphraseStore
-import org.meshtastic.core.repository.MagneticFieldProvider
-import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.ReverseGeocoder
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.StoredPassphrase
 import org.meshtastic.core.repository.StoredSecurityKeys
-import org.meshtastic.core.service.DeviceAddressChangeHook
-import org.meshtastic.core.service.LocalNetworkAccess
 
 // No-op implementations for platform interfaces a browser has no counterpart for, shaped like desktop's stubs.
-
-// region Platform / widget stubs: no analytics SDK runs on web, and a tab has no widgets
-
-class NoopPlatformAnalytics : PlatformAnalytics {
-    override fun track(event: String, vararg properties: DataPair) {}
-
-    override fun setDeviceAttributes(firmwareVersion: String, model: String) {}
-
-    override val isPlatformServicesAvailable: Boolean = false
-}
-
-class NoopAppWidgetUpdater : AppWidgetUpdater {
-    override suspend fun updateAll() {}
-}
-
-// endregion
 
 // region Service discovery stub: mDNS needs raw sockets, which a browser cannot open
 
@@ -97,36 +73,10 @@ class NoopLockdownPassphraseStore : LockdownPassphraseStore {
 
 // endregion
 
-// region Local-network-access stub: the Android 17 gate does not apply, so access is granted
-
-class NoopLocalNetworkAccess : LocalNetworkAccess {
-    override fun isGranted(): Boolean = true
-}
-
-// endregion
-
 // region Locale-change stub: a reload already re-reads navigator.language
 
 class NoopLocaleChangeNotifier : LocaleChangeNotifier {
     override val localeChanges: Flow<Unit> = emptyFlow()
-}
-
-// endregion
-
-// region Declination stub: Android reads it from the platform's World Magnetic Model, which a browser does not have
-
-class NoopMagneticFieldProvider : MagneticFieldProvider {
-    override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float = 0f
-}
-
-/** The browser has no mesh service to start on an address change. */
-class NoopDeviceAddressChangeHook : DeviceAddressChangeHook {
-    override fun onDeviceAddressChanged() = Unit
-}
-
-/** The browser has no geocoder. */
-class NoopReverseGeocoder : ReverseGeocoder {
-    override suspend fun place(latitude: Double, longitude: Double): GeocodedPlace? = null
 }
 
 // endregion

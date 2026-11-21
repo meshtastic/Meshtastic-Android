@@ -32,12 +32,9 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.TransportStatus
-import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
@@ -128,22 +125,6 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     @Suppress("InjectDispatcher")
     override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-}
-
-// endregion
-
-// region Notification / Platform Stubs (Android-only)
-
-class NoopPlatformAnalytics : PlatformAnalytics {
-    override fun track(event: String, vararg properties: DataPair) {}
-
-    override fun setDeviceAttributes(firmwareVersion: String, model: String) {}
-
-    override val isPlatformServicesAvailable: Boolean = false
-}
-
-class NoopAppWidgetUpdater : AppWidgetUpdater {
-    override suspend fun updateAll() {}
 }
 
 // endregion

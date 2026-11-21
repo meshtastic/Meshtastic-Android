@@ -16,10 +16,7 @@
  */
 package org.meshtastic.core.service
 
-import org.koin.core.annotation.Single
-
-/** Desktop has no local-network permission model, so a socket to a LAN address is always permitted. */
-@Single
-class DesktopLocalNetworkAccess : LocalNetworkAccess {
+/** [LocalNetworkAccess] for hosts without the Android 17 gate: access is always granted. Bind it per platform. */
+class NoopLocalNetworkAccess : LocalNetworkAccess {
     override fun isGranted(): Boolean = true
 }
