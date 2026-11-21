@@ -23,7 +23,6 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.NonWebRadioTransportFactory
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -51,7 +50,9 @@ class DesktopRadioTransportFactory(
     // the hidden showcase, and offers the demo entry in the picker.
     override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(DesktopBuildConfig.IS_DEBUG)
 
-    /** Desktop bundles no capture asset, and [createReplayTransport] does not wire a replay address. */
+    /**
+     * Desktop bundles no capture asset, so an `r` address opens the plain mock and the picker offers no replay entry.
+     */
     override val isReplayTransportAvailable: Boolean = false
 
     override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
@@ -61,13 +62,4 @@ class DesktopRadioTransportFactory(
             scope = service.serviceScope,
             dispatchers = dispatchers,
         )
-
-    // Desktop wires neither a replay capture nor a NOP fallback: those prefixes and unknown ones are refused.
-    override fun createReplayTransport(address: String, service: RadioInterfaceService): RadioTransport =
-        unsupported(address)
-
-    override fun createNopTransport(address: String): RadioTransport = unsupported(address)
-
-    private fun unsupported(address: String): Nothing =
-        error("Unsupported transport for address: ${address.anonymize()}")
 }

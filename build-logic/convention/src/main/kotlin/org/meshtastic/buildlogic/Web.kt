@@ -100,9 +100,13 @@ abstract class MeshtasticWebExtension(private val kotlin: KotlinMultiplatformExt
 private val KotlinCompilation<*>.isWeb: Boolean
     get() = platformType == KotlinPlatformType.wasm || platformType == KotlinPlatformType.js
 
+private val KotlinCompilation<*>.isAndroid: Boolean
+    get() = platformType == KotlinPlatformType.androidJvm
+
 /**
  * Registers the wasmJs target when [webTargetEnabled], and always builds the `nonWeb` source sets beside it, so code
- * that has no browser equivalent lives in `nonWebMain` whether or not this build compiles for the web.
+ * that has no browser equivalent lives in `nonWebMain` whether or not this build compiles for the web. `nonAndroidMain`
+ * likewise holds `actual`s shared by every target but Android (jvm, native, and wasmJs when present).
  */
 @OptIn(ExperimentalWasmDsl::class, ExperimentalKotlinGradlePluginApi::class)
 internal fun Project.configureKmpWebTarget() {
@@ -136,6 +140,11 @@ internal fun Project.configureKmpWebTarget() {
             common {
                 group("nonWeb") {
                     withCompilations { !it.isWeb }
+                    group("native")
+                }
+                // Targets with no Android implementation: where an `actual` that is the same on each of them lives.
+                group("nonAndroid") {
+                    withCompilations { !it.isAndroid }
                     group("native")
                 }
             }

@@ -25,6 +25,9 @@ actual val settingsPlatform: SettingsPlatform =
         firmware = true,
         tak = false,
         databasePerDevice = false,
+        deviceLocation = true,
+        keyBackup = false,
+        locationFailureHint = true,
         reloadApp = ::reloadPage,
     )
 

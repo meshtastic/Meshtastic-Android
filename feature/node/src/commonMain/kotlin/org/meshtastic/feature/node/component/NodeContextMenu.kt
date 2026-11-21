@@ -36,6 +36,8 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.canDirectMessage
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.edit_name
@@ -69,8 +71,6 @@ import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
-import org.meshtastic.feature.node.model.canDirectMessage
-import org.meshtastic.feature.node.model.isLicensedLocal
 
 /** Mute is `toggle_muted_node` sent to our own node, so our firmware, not the muted node's, must support it. */
 internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true

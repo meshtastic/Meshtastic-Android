@@ -27,18 +27,7 @@ internal actual fun ScannerBuilder.platformScanConfig() {
     // No-op: preConflate is Android-only.
 }
 
-/** No-op stubs for iOS target in core:ble. */
-internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
-    // No-op for stubs
-}
-
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
 
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
-
-internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
-
-internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
-
-internal actual fun Peripheral.refreshGattCache(): Boolean = false
