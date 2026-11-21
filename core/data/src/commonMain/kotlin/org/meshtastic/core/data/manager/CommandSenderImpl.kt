@@ -134,6 +134,10 @@ class CommandSenderImpl(
         }
     }
 
+    private fun adminChannelIndexOrNull(): Int? = channelSet.value.settings
+        .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
+        .takeIf { it >= 0 }
+
     /**
      * Returns the heard-on channel for a non-admin request to [toNum]. Does NOT use PKI — protocol-level requests need
      * clear inner payloads.
@@ -648,7 +652,7 @@ class CommandSenderImpl(
                 }
                 .build(),
         )
-            .also { adminRequestRegistry.register(it.id) }
+            .also { adminRequestRegistry.register(it.id, to, adminChannelIndexOrNull()) }
 
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL

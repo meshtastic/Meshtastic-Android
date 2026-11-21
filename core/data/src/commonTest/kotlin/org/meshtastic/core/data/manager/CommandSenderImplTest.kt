@@ -279,6 +279,18 @@ class CommandSenderImplTest {
     }
 
     @Test
+    fun sendAdmin_bindsTheOutstandingRequestToItsDestination() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
+
+        commandSender.sendAdmin(DEST_NODE, requestId = 0, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
+
+        assertEquals(DEST_NODE, adminRequestRegistry.find(packets.single().id)?.destNum)
+    }
+
+    @Test
     fun sendAdminImmediate_registersTheSentPacketIdAsOutstanding() {
         val packets = mutableListOf<ToRadio>()
         every { packetHandler.sendToRadio(capture(packets)) } returns Unit
