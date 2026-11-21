@@ -111,4 +111,15 @@ class RadioTransportDispatchTest {
 
         assertEquals(listOf("tcp:10.0.0.2:4403", "serial:/dev/ttyACM0"), factory.hooks)
     }
+
+    @Test
+    fun `createTransport opens an inert transport for a no-device or unknown address instead of throwing`() {
+        assertIs<NopRadioTransport>(factory.createTransport("nanything", service))
+        assertIs<NopRadioTransport>(factory.createTransport("q10.0.0.2", service))
+    }
+
+    @Test
+    fun `createTransport opens a mock for a replay address where no capture is bundled`() {
+        assertIs<MockRadioTransport>(factory.createTransport("rcapture", service))
+    }
 }
