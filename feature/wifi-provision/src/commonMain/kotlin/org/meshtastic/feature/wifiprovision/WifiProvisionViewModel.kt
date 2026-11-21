@@ -25,20 +25,17 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.normalizeBleAddress
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.DISCOVERY_WINDOW
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_SERVICE_UUID
+import org.meshtastic.feature.wifiprovision.domain.DeviceDiscovery
 import org.meshtastic.feature.wifiprovision.domain.NoDevicePickedException
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
@@ -63,6 +60,13 @@ data class WifiProvisionUiState(
     val pendingAddress: String? = null,
     /** Name the pending address advertises, once a scan has seen it. */
     val pendingName: String? = null,
+    /**
+     * True where a device's address is a hardware address the user can compare with a label. False where it is an
+     * identifier only this host understands, which the screen does not ask the user to check.
+     */
+    val addressIsHardware: Boolean = true,
+    /** A link named a device by hardware address this platform cannot look up, so the user chooses the device. */
+    val linkAddressIgnored: Boolean = false,
     /** IPv4 address reported by nymea after successful provisioning (if available). */
     val ipAddress: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
@@ -135,9 +139,9 @@ sealed interface WifiProvisionError {
  *
  * Uses [KoinViewModel] so the instance is scoped to the navigation entry's [ViewModelStoreOwner]. A fresh
  * [NymeaWifiService] (and its own [BleConnectionFactory]-backed [org.meshtastic.core.ble.BleConnection]) is created
- * lazily for each provisioning session and cleaned up via [onCleared].
+ * lazily for each provisioning session and cleaned up via [onCleared]. Device discovery and ordering live in
+ * [DeviceDiscovery]; nothing connects until the user taps a listed device or confirms an address.
  */
-@Suppress("TooManyFunctions") // one entry point per user action in the provisioning flow
 @KoinViewModel
 class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
@@ -153,8 +157,11 @@ class WifiProvisionViewModel(
     val picksDevice: Boolean
         get() = bleScanner.picksDevice
 
-    private val _uiState = MutableStateFlow(WifiProvisionUiState())
+    private val initialState = WifiProvisionUiState(addressIsHardware = bleScanner.addressIsHardware)
+    private val _uiState = MutableStateFlow(initialState)
     val uiState: StateFlow<WifiProvisionUiState> = _uiState.asStateFlow()
+
+    private val discovery = DeviceDiscovery(bleScanner)
 
     /** Lazily-created service; replaced by [connectToDevice], closed by [disconnect] and [onCleared]. */
     private var service: NymeaWifiService? = null
@@ -164,68 +171,62 @@ class WifiProvisionViewModel(
     /** The scan feeding the device list, or the name lookup behind the confirmation. */
     private var scanJob: Job? = null
 
-    /** Devices the current scan has seen, so the one the user taps is the one connected. */
-    private val found = mutableMapOf<String, BleDevice>()
-
     // region Public actions (called from UI)
 
     /**
-     * Scan for provisioning devices and list them. Nothing connects until the user taps one ([connectToDiscovered]). A
-     * no-op unless the screen is idle, so a re-run of the screen's effect cannot discard a pending choice.
+     * Start the screen for [address], which a link or caller may supply. Nothing connects here:
+     * - an address this platform can look up waits in [WifiProvisionUiState.Phase.ConfirmDevice] for the user's
+     *   Connect;
+     * - an address it cannot look up (see [BleScanner.addressIsHardware]) is set aside, and the user chooses the
+     *   device;
+     * - where the app scans itself, the user taps a device in the list; where the browser supplies a chooser, the
+     *   screen waits for its button.
+     *
+     * A no-op unless the screen is idle, so a re-run of the screen's effect cannot discard a pending choice.
      */
-    fun startDiscovery() {
+    fun open(address: String?) {
         if (_uiState.value.phase != WifiProvisionUiState.Phase.Idle) return
-        beginDiscovery()
+        val ignored = address != null && !bleScanner.addressIsHardware
+        when {
+            address != null && !ignored -> {
+                _uiState.update {
+                    it.copy(
+                        phase = WifiProvisionUiState.Phase.ConfirmDevice,
+                        pendingAddress = address,
+                        pendingName = null,
+                    )
+                }
+                scanJob = viewModelScope.launch {
+                    safeCatching { discovery.advertisedName(address) }
+                        .onSuccess { name ->
+                            _uiState.update {
+                                if (it.phase == WifiProvisionUiState.Phase.ConfirmDevice && name != null) {
+                                    it.copy(pendingName = name)
+                                } else {
+                                    it
+                                }
+                            }
+                        }
+                        .onFailure { Logger.w(it) { "$TAG: advertised name lookup failed" } }
+                }
+            }
+
+            picksDevice -> _uiState.update { it.copy(linkAddressIgnored = ignored) }
+
+            else -> beginDiscovery(linkIgnored = ignored)
+        }
     }
 
     /** Clear the list and scan again, from the list or after a failed scan or connect. */
     fun rescan() {
-        val phase = _uiState.value.phase
-        if (phase != WifiProvisionUiState.Phase.DeviceList && phase != WifiProvisionUiState.Phase.Idle) return
-        beginDiscovery()
+        val state = _uiState.value
+        if (state.phase != WifiProvisionUiState.Phase.DeviceList && state.phase != WifiProvisionUiState.Phase.Idle) {
+            return
+        }
+        beginDiscovery(linkIgnored = state.linkAddressIgnored)
     }
 
-    /**
-     * Ask the user to confirm [address] before connecting to it; used where the address came from outside the screen.
-     * Only a passive scan runs, to read the name the device advertises. A no-op unless the screen is idle.
-     */
-    fun requestConnect(address: String) {
-        if (_uiState.value.phase != WifiProvisionUiState.Phase.Idle) return
-        found.clear()
-        val previousJob = scanJob
-        _uiState.update {
-            it.copy(
-                phase = WifiProvisionUiState.Phase.ConfirmDevice,
-                error = null,
-                pickDismissed = false,
-                pendingAddress = address,
-                pendingName = null,
-            )
-        }
-        scanJob = viewModelScope.launch {
-            previousJob?.cancelAndJoin()
-            safeCatching {
-                withTimeoutOrNull(DISCOVERY_WINDOW) {
-                    bleScanner.scan(DISCOVERY_WINDOW, WIRELESS_SERVICE_UUID, address).first {
-                        it.address.equals(address, ignoreCase = true)
-                    }
-                }
-            }
-                .onSuccess { device ->
-                    val name = device?.name
-                    _uiState.update {
-                        if (it.phase == WifiProvisionUiState.Phase.ConfirmDevice && name != null) {
-                            it.copy(pendingName = name)
-                        } else {
-                            it
-                        }
-                    }
-                }
-                .onFailure { Logger.w(it) { "$TAG: advertised name lookup failed" } }
-        }
-    }
-
-    /** The user accepted the address held by [requestConnect]. */
+    /** The user accepted the address held in [WifiProvisionUiState.pendingAddress]. */
     fun confirmConnect() {
         val state = _uiState.value
         val address = state.pendingAddress
@@ -233,22 +234,9 @@ class WifiProvisionViewModel(
         connectToDevice(address)
     }
 
-    /** The user declined the address held by [requestConnect]; nothing was connected. */
-    fun cancelPending() {
-        scanJob?.cancel()
-        scanJob = null
-        _uiState.update {
-            if (it.phase == WifiProvisionUiState.Phase.ConfirmDevice) {
-                it.copy(phase = WifiProvisionUiState.Phase.Idle, pendingAddress = null, pendingName = null)
-            } else {
-                it
-            }
-        }
-    }
-
     /** Connect to the listed device with [address], which the user tapped. */
     fun connectToDiscovered(address: String) {
-        val device = found[address] ?: return
+        val device = discovery.deviceFor(address) ?: return
         launchConnect { it.connect(device) }
     }
 
@@ -258,33 +246,28 @@ class WifiProvisionViewModel(
      * goes to whichever device advertises first. Pauses at [WifiProvisionUiState.Phase.DeviceFound] so the user can
      * check the device before proceeding.
      *
-     * @param address MAC address of the device to connect to.
+     * @param address Address of the device to connect to.
      */
     fun connectToDevice(address: String? = null) {
         if (address == null && !picksDevice) {
-            beginDiscovery()
+            beginDiscovery(linkIgnored = _uiState.value.linkAddressIgnored)
             return
         }
         launchConnect { it.connect(address) }
     }
 
-    private fun beginDiscovery() {
+    private fun beginDiscovery(linkIgnored: Boolean) {
         val previousScan = scanJob
         val previousJob = connectJob
         val previousService = service
         service = null
-        found.clear()
-        _uiState.update {
-            WifiProvisionUiState(phase = WifiProvisionUiState.Phase.Discovering)
-        }
+        discovery.clear()
+        _uiState.value =
+            initialState.copy(phase = WifiProvisionUiState.Phase.Discovering, linkAddressIgnored = linkIgnored)
         scanJob = viewModelScope.launch {
             previousScan?.cancelAndJoin()
             release(previousJob, previousService)
-            safeCatching {
-                withTimeoutOrNull(DISCOVERY_WINDOW) {
-                    bleScanner.scan(DISCOVERY_WINDOW, WIRELESS_SERVICE_UUID).collect(::onAdvertiser)
-                }
-            }
+            safeCatching { discovery.scan { devices -> _uiState.update { it.copy(devices = devices) } } }
                 .onSuccess { _uiState.update { state -> state.copy(phase = WifiProvisionUiState.Phase.DeviceList) } }
                 .onFailure { e ->
                     Logger.e(e) { "$TAG: device scan failed" }
@@ -296,11 +279,6 @@ class WifiProvisionViewModel(
                     }
                 }
         }
-    }
-
-    private fun onAdvertiser(device: BleDevice) {
-        found[device.address] = device
-        _uiState.update { it.copy(devices = upsertByStrength(it.devices, device)) }
     }
 
     private fun launchConnect(connect: suspend (NymeaWifiService) -> Result<String>) {
@@ -331,7 +309,7 @@ class WifiProvisionViewModel(
                         it.copy(
                             phase = WifiProvisionUiState.Phase.DeviceFound,
                             deviceName = deviceName,
-                            deviceAddress = nymeaService.deviceAddress,
+                            deviceAddress = nymeaService.deviceAddress?.let(::normalizeBleAddress),
                         )
                     }
                 }
@@ -357,7 +335,26 @@ class WifiProvisionViewModel(
     /** Called when the user confirms they want to scan networks after device discovery. */
     fun scanNetworks() {
         val nymeaService = service ?: return
-        viewModelScope.launch { loadNetworks(nymeaService) }
+        viewModelScope.launch {
+            _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }
+
+            nymeaService
+                .scanNetworks()
+                .onSuccess { networks ->
+                    _uiState.update {
+                        it.copy(phase = WifiProvisionUiState.Phase.Connected, networks = deduplicateBySsid(networks))
+                    }
+                }
+                .onFailure { e ->
+                    Logger.e(e) { "$TAG: scanNetworks failed" }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.Connected,
+                            error = WifiProvisionError.ScanFailed(e.message ?: "Unknown error"),
+                        )
+                    }
+                }
+        }
     }
 
     /**
@@ -406,17 +403,16 @@ class WifiProvisionViewModel(
         }
     }
 
-    /** Disconnect and close any active BLE connection. */
+    /** Cancel any scan or pending confirmation, close any active BLE connection and return to the initial state. */
     fun disconnect() {
         val nymeaService = service
         service = null
         scanJob?.cancel()
         scanJob = null
-        found.clear()
-        viewModelScope.launch {
-            nymeaService?.close()
-            _uiState.value = WifiProvisionUiState()
-        }
+        discovery.clear()
+        // Reset first: a pending confirmation must not stay answerable while the connection closes.
+        _uiState.value = initialState
+        viewModelScope.launch { nymeaService?.close() }
     }
 
     // endregion
@@ -430,72 +426,8 @@ class WifiProvisionViewModel(
         applicationScope.launch { release(job, nymeaService) }
     }
 
-    // region Private helpers
-
-    /**
-     * Waits out [job] so a peripheral it was still installing belongs to [nymeaService] before that closes. Runs
-     * non-cancellable so a caller cancelled mid-release still closes the service.
-     */
-    private suspend fun release(job: Job?, nymeaService: NymeaWifiService?) {
-        withContext(NonCancellable) {
-            job?.cancelAndJoin()
-            nymeaService?.close()
-        }
-    }
-
-    private suspend fun loadNetworks(nymeaService: NymeaWifiService) {
-        _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }
-
-        nymeaService
-            .scanNetworks()
-            .onSuccess { networks ->
-                _uiState.update {
-                    it.copy(phase = WifiProvisionUiState.Phase.Connected, networks = deduplicateBySsid(networks))
-                }
-            }
-            .onFailure { e ->
-                Logger.e(e) { "$TAG: scanNetworks failed" }
-                _uiState.update {
-                    it.copy(
-                        phase = WifiProvisionUiState.Phase.Connected,
-                        error = WifiProvisionError.ScanFailed(e.message ?: "Unknown error"),
-                    )
-                }
-            }
-    }
-
-    // endregion
-
     companion object {
         private const val TAG = "WifiProvisionViewModel"
-
-        /**
-         * Add or refresh [device] in [devices]. A new device goes in ahead of the first weaker one, so the list reads
-         * strongest-first as it fills; a device already listed keeps its row, so rows do not move under a tap as
-         * advertisements repeat. A missing RSSI ranks below every reading, never as 0 dBm.
-         */
-        internal fun upsertByStrength(devices: List<DiscoveredDevice>, device: BleDevice): List<DiscoveredDevice> {
-            val index = devices.indexOfFirst { it.address == device.address }
-            if (index >= 0) {
-                val current = devices[index]
-                val refreshed =
-                    DiscoveredDevice(
-                        name = device.name ?: current.name,
-                        address = device.address,
-                        rssi = device.rssi ?: current.rssi,
-                    )
-                return devices.toMutableList().also { it[index] = refreshed }
-            }
-            val entry = DiscoveredDevice(name = device.name, address = device.address, rssi = device.rssi)
-            val position = devices.indexOfFirst { isStronger(entry.rssi, it.rssi) }
-            return devices.toMutableList().also { it.add(if (position < 0) it.size else position, entry) }
-        }
-
-        private fun isStronger(candidate: Int?, other: Int?): Boolean = when {
-            candidate == null -> false
-            other == null -> true
-            else -> candidate > other
-        }
 
         /**
          * Deduplicate networks by SSID, keeping the entry with the strongest signal for each. Since we only send SSID
@@ -505,5 +437,16 @@ class WifiProvisionViewModel(
             .groupBy { it.ssid }
             .map { (_, entries) -> entries.maxBy { it.signalStrength } }
             .sortedByDescending { it.signalStrength }
+    }
+}
+
+/**
+ * Waits out [job] so a peripheral it was still installing belongs to [nymeaService] before that closes. Runs
+ * non-cancellable so a caller cancelled mid-release still closes the service.
+ */
+private suspend fun release(job: Job?, nymeaService: NymeaWifiService?) {
+    withContext(NonCancellable) {
+        job?.cancelAndJoin()
+        nymeaService?.close()
     }
 }

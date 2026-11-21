@@ -36,6 +36,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.ble.bleAddressesMatch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants
@@ -101,7 +102,6 @@ class NymeaWifiService(
      * @throws IllegalStateException if the device is not found within [SCAN_TIMEOUT].
      */
     suspend fun connect(address: String?): Result<String> = safeCatching {
-        require(address != null || scanner.picksDevice) { "A device must be chosen before connecting" }
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=${address.anonymize()})…" }
 
         val scan = scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = WIRELESS_SERVICE_UUID, address = address)
@@ -110,7 +110,8 @@ class NymeaWifiService(
                 // A chooser stays open until the user answers, so no timeout; dismissing it ends the scan empty.
                 scan.firstOrNull() ?: throw NoDevicePickedException()
             } else {
-                withTimeout(SCAN_TIMEOUT) { scan.first { it.address.equals(address, ignoreCase = true) } }
+                val wanted = requireNotNull(address) { "A device must be chosen before connecting" }
+                withTimeout(SCAN_TIMEOUT) { scan.first { bleAddressesMatch(it.address, wanted) } }
             }
 
         openConnection(device)

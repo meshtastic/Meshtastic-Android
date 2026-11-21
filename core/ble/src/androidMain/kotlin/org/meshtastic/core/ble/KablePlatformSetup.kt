@@ -33,6 +33,8 @@ internal actual fun ScannerBuilder.platformScanConfig() {
 /** Android's scanner filters on address in hardware, so Kable's `Filter.Address` works natively here. */
 internal actual val supportsNativeAddressScanFilter: Boolean = true
 
+internal actual val bleAddressIsHardware: Boolean = true
+
 /**
  * Shared thread pool for Kable BLE connections.
  *

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @file:Suppress("TooManyFunctions", "LongMethod")
 
 package org.meshtastic.feature.wifiprovision.ui
@@ -29,7 +29,10 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +42,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -47,6 +51,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -70,6 +75,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +84,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -85,6 +92,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -96,9 +104,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.ble.normalizeBleAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.action_select_network
+import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
@@ -114,14 +124,16 @@ import org.meshtastic.core.resources.web_bluetooth_unsupported
 import org.meshtastic.core.resources.wifi_provision_available_networks
 import org.meshtastic.core.resources.wifi_provision_choose_device
 import org.meshtastic.core.resources.wifi_provision_choose_device_detail
-import org.meshtastic.core.resources.wifi_provision_confirm_device
-import org.meshtastic.core.resources.wifi_provision_confirm_device_detail
+import org.meshtastic.core.resources.wifi_provision_confirm_compare
+import org.meshtastic.core.resources.wifi_provision_confirm_consequence
+import org.meshtastic.core.resources.wifi_provision_confirm_title
+import org.meshtastic.core.resources.wifi_provision_confirm_title_named
 import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
-import org.meshtastic.core.resources.wifi_provision_device_address
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
 import org.meshtastic.core.resources.wifi_provision_hidden_network
+import org.meshtastic.core.resources.wifi_provision_link_unsupported
 import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
 import org.meshtastic.core.resources.wifi_provision_no_devices
 import org.meshtastic.core.resources.wifi_provision_no_devices_detail
@@ -163,6 +175,7 @@ import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Serial
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
@@ -204,23 +217,87 @@ fun WifiProvisionScreen(
         }
 
     LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
-    // A device chooser opens only from a click, so the browser waits for the pick button, and falls back to it when a
-    // confirmed address has no grant. Nothing connects on arrival: an address waits for the user's Connect, and
-    // otherwise the app lists what it finds and waits for a tap.
-    val waitForPick = viewModel.picksDevice && (address == null || uiState.pickDismissed)
-    LaunchedEffect(viewModel, address) {
-        when {
-            address != null -> viewModel.requestConnect(address)
-            !viewModel.picksDevice -> viewModel.startDiscovery()
-        }
-    }
+    // Nothing connects on arrival: an address waits for the user's Connect, the app lists what it finds and waits for a
+    // tap, and the browser waits for a click on its chooser button.
+    LaunchedEffect(viewModel, address) { viewModel.open(address) }
 
+    WifiProvisionScreenContent(
+        uiState = uiState,
+        picksDevice = viewModel.picksDevice,
+        snackbarHostState = snackbarHostState,
+        actions =
+        WifiProvisionActions(
+            onNavigateUp = onNavigateUp,
+            onCancel = {
+                viewModel.disconnect()
+                onNavigateUp()
+            },
+            onScanNetworks = viewModel::scanNetworks,
+            onProvision = viewModel::provisionWifi,
+            choice =
+            DeviceChoiceActions(
+                onPick = { viewModel.connectToDevice() },
+                onSelect = viewModel::connectToDiscovered,
+                onRescan = viewModel::rescan,
+                onConfirm = viewModel::confirmConnect,
+                onRetry = { if (viewModel.picksDevice) viewModel.connectToDevice() else viewModel.rescan() },
+            ),
+        ),
+    )
+}
+
+/** What choosing a device can ask of its ViewModel: the browser's chooser, a listed row, a rescan, a confirmation. */
+@Immutable
+internal class DeviceChoiceActions(
+    val onPick: () -> Unit,
+    val onSelect: (address: String) -> Unit,
+    val onRescan: () -> Unit,
+    val onConfirm: () -> Unit,
+    val onRetry: () -> Unit,
+) {
+    companion object {
+        val None = DeviceChoiceActions(onPick = {}, onSelect = {}, onRescan = {}, onConfirm = {}, onRetry = {})
+    }
+}
+
+/** What the screen can ask of its ViewModel and host; [None] is for previews and tests that only look. */
+@Immutable
+internal class WifiProvisionActions(
+    val onNavigateUp: () -> Unit,
+    val onCancel: () -> Unit,
+    val onScanNetworks: () -> Unit,
+    val onProvision: (ssid: String, password: String, hidden: Boolean) -> Unit,
+    val choice: DeviceChoiceActions,
+) {
+    companion object {
+        val None =
+            WifiProvisionActions(
+                onNavigateUp = {},
+                onCancel = {},
+                onScanNetworks = {},
+                onProvision = { _, _, _ -> },
+                choice = DeviceChoiceActions.None,
+            )
+    }
+}
+
+/** One width for every state: wider windows get a column, not lines of more than 70 characters. */
+private val ContentMaxWidth = 560.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun WifiProvisionScreenContent(
+    uiState: WifiProvisionUiState,
+    picksDevice: Boolean,
+    snackbarHostState: SnackbarHostState,
+    actions: WifiProvisionActions,
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(Res.string.wifi_provisioning)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
+                    IconButton(onClick = actions.onNavigateUp) {
                         Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
@@ -228,78 +305,101 @@ fun WifiProvisionScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize().animateContentSize()) {
-            // Indeterminate progress bar for active operations
-            if (uiState.phase.isLoading) {
-                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
-            } else {
-                Spacer(Modifier.height(4.dp))
-            }
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            Column(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxSize().animateContentSize()) {
+                ProgressSlot(visible = uiState.phase.isLoading)
 
-            MpwrdDisclaimerBanner()
+                MpwrdDisclaimerBanner()
 
-            Crossfade(targetState = screenKey(uiState, waitForPick), label = "wifi_provision") { key ->
-                when (key) {
-                    ScreenKey.PickDevice -> PickDeviceContent(onPick = { viewModel.connectToDevice(address) })
+                if (uiState.linkAddressIgnored && uiState.phase.isChoosingDevice) {
+                    LinkAddressNotice()
+                }
 
-                    ScreenKey.DeviceList ->
-                        DeviceListContent(
-                            devices = uiState.devices,
-                            isScanning = uiState.phase == Phase.Discovering,
-                            onSelect = viewModel::connectToDiscovered,
-                            onRescan = viewModel::rescan,
-                        )
+                Crossfade(targetState = screenKey(uiState, picksDevice), label = "wifi_provision") { key ->
+                    when (key) {
+                        ScreenKey.PickDevice -> PickDeviceContent(onPick = actions.choice.onPick)
 
-                    ScreenKey.ConfirmDevice ->
-                        ConfirmDeviceContent(
-                            address = uiState.pendingAddress.orEmpty(),
-                            name = uiState.pendingName,
-                            onConnect = viewModel::confirmConnect,
-                            onCancel = {
-                                viewModel.cancelPending()
-                                onNavigateUp()
-                            },
-                        )
+                        ScreenKey.DeviceList ->
+                            DeviceListContent(
+                                devices = uiState.devices,
+                                isScanning = uiState.phase == Phase.Discovering,
+                                showAddress = uiState.addressIsHardware,
+                                onSelect = actions.choice.onSelect,
+                                onRescan = actions.choice.onRescan,
+                            )
 
-                    ScreenKey.ConnectingBle ->
-                        ScanningBleContent(
-                            error = uiState.error as? WifiProvisionError.ConnectFailed,
-                            onRetry = {
-                                if (address != null || viewModel.picksDevice) {
-                                    viewModel.connectToDevice(address)
-                                } else {
-                                    viewModel.rescan()
-                                }
-                            },
-                        )
+                        ScreenKey.ConfirmDevice ->
+                            ConfirmDeviceContent(
+                                address = uiState.pendingAddress.orEmpty(),
+                                name = uiState.pendingName,
+                                onConnect = actions.choice.onConfirm,
+                                onCancel = actions.onCancel,
+                            )
 
-                    ScreenKey.DeviceFound ->
-                        DeviceFoundContent(
-                            deviceName = uiState.deviceName,
-                            deviceAddress = uiState.deviceAddress,
-                            onProceed = viewModel::scanNetworks,
-                            onCancel = onNavigateUp,
-                        )
+                        ScreenKey.ConnectingBle ->
+                            ScanningBleContent(
+                                error = uiState.error as? WifiProvisionError.ConnectFailed,
+                                onRetry = actions.choice.onRetry,
+                            )
 
-                    ScreenKey.LoadingNetworks -> ScanningNetworksContent()
+                        ScreenKey.DeviceFound ->
+                            DeviceFoundContent(
+                                deviceName = uiState.deviceName,
+                                deviceAddress = uiState.deviceAddress.takeIf { uiState.addressIsHardware },
+                                onProceed = actions.onScanNetworks,
+                                onCancel = actions.onCancel,
+                            )
 
-                    ScreenKey.Connected ->
-                        ConnectedContent(
-                            networks = uiState.networks,
-                            provisionStatus = uiState.provisionStatus,
-                            ipAddress = uiState.ipAddress,
-                            isProvisioning = uiState.phase == Phase.Provisioning,
-                            isScanning = uiState.phase == Phase.LoadingNetworks,
-                            onScanNetworks = viewModel::scanNetworks,
-                            onProvision = viewModel::provisionWifi,
-                            onDisconnect = {
-                                viewModel.disconnect()
-                                onNavigateUp()
-                            },
-                        )
+                        ScreenKey.LoadingNetworks -> ScanningNetworksContent()
+
+                        ScreenKey.Connected ->
+                            ConnectedContent(
+                                networks = uiState.networks,
+                                provisionStatus = uiState.provisionStatus,
+                                ipAddress = uiState.ipAddress,
+                                isProvisioning = uiState.phase == Phase.Provisioning,
+                                isScanning = uiState.phase == Phase.LoadingNetworks,
+                                onScanNetworks = actions.onScanNetworks,
+                                onProvision = actions.onProvision,
+                                onDisconnect = actions.onCancel,
+                            )
+                    }
                 }
             }
         }
+    }
+}
+
+/**
+ * Progress for active operations in a slot that is always as tall as the indicator, so the banner below does not move
+ * when it appears. The hidden bar only measures that height.
+ */
+@Composable
+private fun ProgressSlot(visible: Boolean) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        LinearWavyProgressIndicator(
+            progress = { 0f },
+            modifier = Modifier.fillMaxWidth().alpha(0f).clearAndSetSemantics {},
+        )
+        if (visible) {
+            LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
+/** Tells the user why a link did not pick a device, above the list or chooser that replaces it. */
+@Composable
+private fun LinkAddressNotice() {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Text(
+            stringResource(Res.string.wifi_provision_link_unsupported),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(12.dp),
+        )
     }
 }
 
@@ -317,13 +417,14 @@ private enum class ScreenKey {
     Connected,
 }
 
-private fun screenKey(state: WifiProvisionUiState, waitForPick: Boolean): ScreenKey = when (state.phase) {
+private fun screenKey(state: WifiProvisionUiState, picksDevice: Boolean): ScreenKey = when (state.phase) {
     // A failed connect returns to Idle with its error, which ScanningBleContent shows with a retry.
-    Phase.Idle -> if (waitForPick && state.error == null) ScreenKey.PickDevice else ScreenKey.ConnectingBle
+    Phase.Idle -> if (picksDevice && state.error == null) ScreenKey.PickDevice else ScreenKey.ConnectingBle
 
-    Phase.Discovering,
-    Phase.DeviceList,
-    -> ScreenKey.DeviceList
+    // Until a first device appears the search is a status page like every other wait, not an empty list.
+    Phase.Discovering -> if (state.devices.isEmpty()) ScreenKey.ConnectingBle else ScreenKey.DeviceList
+
+    Phase.DeviceList -> ScreenKey.DeviceList
 
     Phase.ConfirmDevice -> ScreenKey.ConfirmDevice
 
@@ -337,6 +438,9 @@ private fun screenKey(state: WifiProvisionUiState, waitForPick: Boolean): Screen
     Phase.Provisioning,
     -> ScreenKey.Connected
 }
+
+private val Phase.isChoosingDevice: Boolean
+    get() = this == Phase.Idle || this == Phase.Discovering || this == Phase.DeviceList
 
 private val Phase.isLoading: Boolean
     get() =
@@ -417,6 +521,7 @@ internal fun PickDeviceContent(onPick: () -> Unit, bluetoothSupported: Boolean =
 internal fun DeviceListContent(
     devices: List<DiscoveredDevice>,
     isScanning: Boolean,
+    showAddress: Boolean,
     onSelect: (address: String) -> Unit,
     onRescan: () -> Unit,
 ) {
@@ -426,9 +531,7 @@ internal fun DeviceListContent(
                 icon = MeshtasticIcons.BluetoothSearching,
                 title = stringResource(Res.string.wifi_provision_no_devices),
                 supportingText = stringResource(Res.string.wifi_provision_no_devices_detail),
-                action = {
-                    FilledTonalButton(onClick = onRescan) { Text(stringResource(Res.string.wifi_provision_rescan)) }
-                },
+                action = { RescanButton(onClick = onRescan) },
             )
         }
         return
@@ -458,38 +561,63 @@ internal fun DeviceListContent(
         ) {
             LazyColumn {
                 items(devices, key = { it.address }) { device ->
-                    DeviceRow(device = device, onClick = { onSelect(device.address) })
+                    DeviceRow(device = device, showAddress = showAddress, onClick = { onSelect(device.address) })
                 }
             }
         }
         if (!isScanning) {
-            OutlinedButton(onClick = onRescan, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(Res.string.wifi_provision_rescan))
-            }
+            RescanButton(onClick = onRescan, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }
 }
 
+/** The same action in the same emphasis wherever the scan can be repeated. */
 @Composable
-internal fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
+private fun RescanButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    FilledTonalButton(onClick = onClick, modifier = modifier) {
+        Icon(MeshtasticIcons.Refresh, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+        Text(stringResource(Res.string.wifi_provision_rescan))
+    }
+}
+
+/**
+ * One listed device. The address is shown only where it is a hardware address the user can check; elsewhere it is an
+ * identifier only this host understands.
+ */
+@Composable
+internal fun DeviceRow(device: DiscoveredDevice, showAddress: Boolean, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(device.name ?: stringResource(Res.string.unknown_device)) },
-        supportingContent = { Text(device.address) },
+        // The address and the signal share one wrapping line, so a large font moves the signal below the address
+        // instead of squeezing the address into a break inside its own characters.
+        supportingContent =
+        if (showAddress || device.rssi != null) {
+            {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (showAddress) Text(normalizeBleAddress(device.address))
+                    device.rssi?.let { rssi ->
+                        val description = stringResource(Res.string.wifi_provision_signal_dbm, rssi)
+                        MaterialBluetoothSignalInfo(
+                            rssi = rssi,
+                            modifier = Modifier.clearAndSetSemantics { contentDescription = description },
+                        )
+                    }
+                }
+            }
+        } else {
+            null
+        },
         leadingContent = {
             Icon(
                 MeshtasticIcons.Bluetooth,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        },
-        trailingContent = {
-            device.rssi?.let { rssi ->
-                val description = stringResource(Res.string.wifi_provision_signal_dbm, rssi)
-                MaterialBluetoothSignalInfo(
-                    rssi = rssi,
-                    modifier = Modifier.clearAndSetSemantics { contentDescription = description },
-                )
-            }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier =
@@ -516,33 +644,61 @@ internal fun ConfirmDeviceContent(address: String, name: String?, onConnect: () 
         )
         Spacer(Modifier.height(24.dp))
         Text(
-            stringResource(Res.string.wifi_provision_confirm_device),
+            if (name != null) {
+                stringResource(Res.string.wifi_provision_confirm_title_named, name)
+            } else {
+                stringResource(Res.string.wifi_provision_confirm_title)
+            },
             style = MaterialTheme.typography.headlineSmallEmphasized,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
+        DeviceAddress(address)
+        Spacer(Modifier.height(16.dp))
         Text(
-            name ?: stringResource(Res.string.unknown_device),
+            stringResource(Res.string.wifi_provision_confirm_consequence),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
-        Text(
-            stringResource(Res.string.wifi_provision_device_address, address),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
         Spacer(Modifier.height(8.dp))
         Text(
-            stringResource(Res.string.wifi_provision_confirm_device_detail),
+            stringResource(Res.string.wifi_provision_confirm_compare),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(32.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
             Button(onClick = onConnect) { Text(stringResource(Res.string.connect)) }
+        }
+    }
+}
+
+/** The identifier the user checks against the device, set larger than the text around it. */
+@Composable
+private fun DeviceAddress(address: String) {
+    Card(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp).semantics(mergeDescendants = true) {},
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                stringResource(Res.string.address),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                normalizeBleAddress(address),
+                style = MaterialTheme.typography.titleLargeEmphasized,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
@@ -581,9 +737,11 @@ internal fun DeviceFoundContent(
             )
         }
         if (deviceAddress != null) {
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(16.dp))
+            DeviceAddress(deviceAddress)
+            Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(Res.string.wifi_provision_device_address, deviceAddress),
+                stringResource(Res.string.wifi_provision_confirm_compare),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -597,7 +755,10 @@ internal fun DeviceFoundContent(
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(32.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
             Button(onClick = onProceed) { Text(stringResource(Res.string.wifi_provision_scan_networks)) }
         }
@@ -985,8 +1146,9 @@ internal fun MpwrdDisclaimerBanner() {
 @Composable
 private fun CenteredStatusContent(content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
+        modifier =
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 32.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         content()

@@ -121,6 +121,19 @@ class NymeaWifiServiceTest {
     }
 
     @Test
+    fun `connect to a MAC reaches a device that reports a BlueZ path`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        val path = "/org/bluez/hci0/dev_AA_BB_CC_DD_EE_FF"
+
+        scanner.emitDevice(FakeBleDevice(path, name = "linux"))
+        val result = service.connect(address)
+
+        assertEquals("linux", result.getOrThrow())
+        assertEquals(path, connection.device?.address)
+    }
+
+    @Test
     fun `connect without an address connects nothing where the app scans itself`() = runTest {
         val connection = FakeBleConnection()
         val (service, scanner) = createService(connection = connection)

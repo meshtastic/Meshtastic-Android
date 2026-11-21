@@ -42,11 +42,11 @@ import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
-import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -368,7 +368,7 @@ class WifiProvisionViewModelTest {
         scanner.emitDevice(strongest)
         scanner.emitDevice(chosen)
 
-        viewModel.startDiscovery()
+        viewModel.open(null)
         runCurrent()
 
         assertEquals(Phase.Discovering, viewModel.uiState.value.phase)
@@ -396,7 +396,7 @@ class WifiProvisionViewModelTest {
     fun `a single advertiser is listed and not connected`() = runTest {
         scanner.emitDevice(strongest)
 
-        viewModel.startDiscovery()
+        viewModel.open(null)
         advanceUntilIdle()
 
         assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
@@ -406,7 +406,7 @@ class WifiProvisionViewModelTest {
 
     @Test
     fun `a scan that finds nothing offers a rescan that lists a device found later`() = runTest {
-        viewModel.startDiscovery()
+        viewModel.open(null)
         advanceUntilIdle()
         assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
         assertTrue(viewModel.uiState.value.devices.isEmpty())
@@ -453,7 +453,7 @@ class WifiProvisionViewModelTest {
         scanner.emitDevice(firstSeen)
         scanner.emitDevice(chosen)
 
-        viewModel.requestConnect(chosen.address)
+        viewModel.open(chosen.address)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -473,9 +473,9 @@ class WifiProvisionViewModelTest {
     fun `cancelling the confirmation leaves the supplied address unconnected`() = runTest {
         scanner.emitDevice(chosen)
 
-        viewModel.requestConnect(chosen.address)
+        viewModel.open(chosen.address)
         advanceUntilIdle()
-        viewModel.cancelPending()
+        viewModel.disconnect()
         viewModel.confirmConnect()
         advanceUntilIdle()
 
@@ -485,46 +485,70 @@ class WifiProvisionViewModelTest {
     }
 
     @Test
+    fun `a link address a platform cannot look up falls back to the list and connects nothing`() = runTest {
+        scanner.addressIsHardware = false
+        val opaque = createViewModel(FakeBleConnectionFactory(connection))
+        scanner.emitDevice(chosen)
+
+        opaque.open(chosen.address)
+        advanceUntilIdle()
+
+        val state = opaque.uiState.value
+        assertEquals(Phase.DeviceList, state.phase)
+        assertTrue(state.linkAddressIgnored)
+        assertFalse(state.addressIsHardware)
+        assertNull(state.pendingAddress)
+        assertEquals(listOf(chosen.address), state.devices.map { it.address })
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a link address a browser chooser cannot look up waits for the pick and connects nothing`() = runTest {
+        val picker =
+            WifiProvisionViewModel(
+                bleScanner = PickingChooser(chosen, addressIsHardware = false),
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
+                dispatchers =
+                CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                applicationScope = FakeApplicationCoroutineScope(testDispatcher),
+            )
+
+        picker.open(chosen.address)
+        advanceUntilIdle()
+
+        assertEquals(Phase.Idle, picker.uiState.value.phase)
+        assertTrue(picker.uiState.value.linkAddressIgnored)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a link MAC reaches a device that reports a BlueZ path and the address shown is the MAC`() = runTest {
+        val linux = FakeBleDevice("/org/bluez/hci0/dev_00_00_00_00_00_0C", name = "linux")
+        scanner.emitDevice(firstSeen)
+        scanner.emitDevice(linux)
+
+        viewModel.open("00:00:00:00:00:0C")
+        advanceUntilIdle()
+        assertEquals("linux", viewModel.uiState.value.pendingName)
+
+        viewModel.confirmConnect()
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+        assertEquals(linux.address, connection.device?.address)
+        assertEquals("00:00:00:00:00:0C", viewModel.uiState.value.deviceAddress)
+    }
+
+    @Test
     fun `starting discovery does not discard a pending confirmation`() = runTest {
         scanner.emitDevice(chosen)
 
-        viewModel.requestConnect(chosen.address)
-        viewModel.startDiscovery()
+        viewModel.open(chosen.address)
+        viewModel.open(null)
         advanceUntilIdle()
 
         assertEquals(Phase.ConfirmDevice, viewModel.uiState.value.phase)
         assertEquals(chosen.address, viewModel.uiState.value.pendingAddress)
-    }
-
-    @Test
-    fun `devices are ordered strongest first with unknown signal last`() {
-        val unknown = FakeBleDevice("00:00:00:00:00:0D", name = "unknown", rssi = null)
-        val zeroDbm = FakeBleDevice("00:00:00:00:00:0E", name = "zero", rssi = 0)
-
-        val listed =
-            listOf(unknown, firstSeen, strongest, zeroDbm, chosen).fold(emptyList<DiscoveredDevice>()) { list, device ->
-                WifiProvisionViewModel.upsertByStrength(list, device)
-            }
-
-        assertEquals(
-            listOf(zeroDbm.address, strongest.address, chosen.address, firstSeen.address, unknown.address),
-            listed.map { it.address },
-        )
-    }
-
-    @Test
-    fun `a repeated advertisement refreshes its row without moving it`() {
-        val listed =
-            listOf(strongest, firstSeen).fold(emptyList<DiscoveredDevice>()) { list, device ->
-                WifiProvisionViewModel.upsertByStrength(list, device)
-            }
-
-        val refreshed =
-            WifiProvisionViewModel.upsertByStrength(listed, FakeBleDevice(firstSeen.address, name = null, rssi = -40))
-
-        assertEquals(listOf(strongest.address, firstSeen.address), refreshed.map { it.address })
-        assertEquals(-40, refreshed[1].rssi)
-        assertEquals("first seen", refreshed[1].name)
     }
 
     // -----------------------------------------------------------------------
@@ -593,7 +617,8 @@ class WifiProvisionViewModelTest {
     }
 
     /** A browser chooser the user answered: it picks devices, and its scan emits the one device picked. */
-    private class PickingChooser(private val picked: BleDevice) : BleScanner {
+    private class PickingChooser(private val picked: BleDevice, override val addressIsHardware: Boolean = true) :
+        BleScanner {
         override val picksDevice: Boolean = true
 
         override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flowOf(picked)

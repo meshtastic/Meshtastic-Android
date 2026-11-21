@@ -78,6 +78,9 @@ class FakeBleScanner :
     var lastScanAddress: String? = null
         private set
 
+    /** Set false to stand in for a platform whose device identifier is not a MAC. */
+    override var addressIsHardware: Boolean = true
+
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         lastScanServiceUuid = serviceUuid
         lastScanAddress = address

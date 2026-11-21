@@ -39,5 +39,12 @@ kotlin {
 
             implementation(libs.kotlinx.serialization.json)
         }
+
+        // Compose UI tests live in jvmTest: in commonTest they would also run as Android host tests, where they NPE on
+        // the host-test stubs' null Build.FINGERPRINT.
+        jvmTest.dependencies {
+            implementation(libs.compose.multiplatform.ui.test)
+            implementation(compose.desktop.currentOs)
+        }
     }
 }

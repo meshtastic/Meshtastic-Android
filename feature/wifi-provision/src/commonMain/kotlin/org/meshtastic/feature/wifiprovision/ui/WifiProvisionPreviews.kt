@@ -22,12 +22,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
+import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
 import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
@@ -75,6 +79,11 @@ private val sampleDevices =
     listOf(
         DiscoveredDevice(name = "mpwrd-nm-A1B2", address = "AA:BB:CC:DD:EE:01", rssi = -52),
         DiscoveredDevice(name = null, address = "AA:BB:CC:DD:EE:02", rssi = -71),
+        DiscoveredDevice(
+            name = "mpwrd-nm-with-a-very-long-name-that-has-to-wrap-A1B2C3D4E5F6",
+            address = "AA:BB:CC:DD:EE:04",
+            rssi = -88,
+        ),
         DiscoveredDevice(name = "mpwrd-nm-C3D4", address = "AA:BB:CC:DD:EE:03", rssi = null),
     )
 
@@ -95,64 +104,81 @@ fun ScanningBlePreview() {
 // Phase 2: Device found confirmation
 // ---------------------------------------------------------------------------
 
+/** The whole screen for [state], so a preview shows the width rule and the banner as well as the step. */
+@Composable
+private fun WifiProvisionScreenPreview(state: WifiProvisionUiState, picksDevice: Boolean = false) {
+    AppTheme {
+        Surface(Modifier.fillMaxSize()) {
+            WifiProvisionScreenContent(
+                uiState = state,
+                picksDevice = picksDevice,
+                snackbarHostState = remember { SnackbarHostState() },
+                actions = WifiProvisionActions.None,
+            )
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 fun DeviceFoundPreview() {
-    AppTheme {
-        Surface(Modifier.fillMaxSize()) {
-            DeviceFoundContent(
-                deviceName = "mpwrd-nm-A1B2",
-                onProceed = noOp,
-                onCancel = noOp,
-                deviceAddress = "AA:BB:CC:DD:EE:01",
-            )
-        }
-    }
+    WifiProvisionScreenPreview(
+        WifiProvisionUiState(
+            phase = Phase.DeviceFound,
+            deviceName = "mpwrd-nm-A1B2",
+            deviceAddress = "AA:BB:CC:DD:EE:01",
+        ),
+    )
 }
 
 @PreviewLightDark
 @Composable
-private fun DeviceListPreview() {
-    AppTheme {
-        Surface(Modifier.fillMaxSize()) {
-            DeviceListContent(devices = sampleDevices, isScanning = false, onSelect = {}, onRescan = noOp)
-        }
-    }
+fun DeviceListPreview() {
+    WifiProvisionScreenPreview(WifiProvisionUiState(phase = Phase.DeviceList, devices = sampleDevices))
 }
 
 @PreviewLightDark
 @Composable
-private fun DeviceListScanningPreview() {
-    AppTheme {
-        Surface(Modifier.fillMaxSize()) {
-            DeviceListContent(devices = sampleDevices.take(1), isScanning = true, onSelect = {}, onRescan = noOp)
-        }
-    }
+fun DeviceListScanningPreview() {
+    WifiProvisionScreenPreview(WifiProvisionUiState(phase = Phase.Discovering, devices = sampleDevices.take(2)))
 }
 
 @PreviewLightDark
 @Composable
-private fun DeviceListEmptyPreview() {
-    AppTheme {
-        Surface(Modifier.fillMaxSize()) {
-            DeviceListContent(devices = emptyList(), isScanning = false, onSelect = {}, onRescan = noOp)
-        }
-    }
+fun DeviceListEmptyPreview() {
+    WifiProvisionScreenPreview(WifiProvisionUiState(phase = Phase.DeviceList))
 }
 
 @PreviewLightDark
 @Composable
-private fun ConfirmDevicePreview() {
-    AppTheme {
-        Surface(Modifier.fillMaxSize()) {
-            ConfirmDeviceContent(
-                address = "AA:BB:CC:DD:EE:01",
-                name = "mpwrd-nm-A1B2",
-                onConnect = noOp,
-                onCancel = noOp,
-            )
-        }
-    }
+fun ConfirmDevicePreview() {
+    WifiProvisionScreenPreview(
+        WifiProvisionUiState(
+            phase = Phase.ConfirmDevice,
+            pendingAddress = "AA:BB:CC:DD:EE:01",
+            pendingName = "mpwrd-nm-A1B2",
+        ),
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun ConfirmDeviceUnnamedPreview() {
+    WifiProvisionScreenPreview(WifiProvisionUiState(phase = Phase.ConfirmDevice, pendingAddress = "AA:BB:CC:DD:EE:01"))
+}
+
+/** A platform whose device identifiers are not MACs: no address to compare, and a link's address is set aside. */
+@PreviewLightDark
+@Composable
+fun DeviceListOpaqueIdentifiersPreview() {
+    WifiProvisionScreenPreview(
+        WifiProvisionUiState(
+            phase = Phase.DeviceList,
+            devices = sampleDevices,
+            addressIsHardware = false,
+            linkAddressIgnored = true,
+        ),
+    )
 }
 
 @PreviewLightDark
