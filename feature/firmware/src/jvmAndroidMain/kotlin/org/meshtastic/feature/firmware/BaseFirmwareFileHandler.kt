@@ -89,24 +89,8 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
                 Logger.w { "Refusing a download name outside the temp directory: $fileName" }
                 return@withContext null
             }
-            val response =
-                try {
-                    client.get(url)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    Logger.w(e) { "Download failed for $url" }
-                    return@withContext null
-                }
-
-            if (!response.status.isSuccess()) {
-                Logger.w { "Download failed: ${response.status.value} for $url" }
-                return@withContext null
-            }
-
             if (!tempDir.exists()) tempDir.mkdirs()
-            downloadResponseToFile(response, targetFile, onProgress)
-            targetFile.toFirmwareArtifact()
+            if (downloadUrlToFile(client, url, targetFile, onProgress)) targetFile.toFirmwareArtifact() else null
         }
 
     override suspend fun extractFirmware(
