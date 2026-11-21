@@ -23,10 +23,6 @@ import org.meshtastic.proto.LockdownAuth
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
 interface RadioTransport {
-    /** True when this transport owns the PhoneAPI handshake, heartbeat and disconnect request. */
-    val managesPhoneApi: Boolean
-        get() = false
-
     /** Queues local lockdown authentication on the current link. */
     fun tryLockdown(auth: LockdownAuth): Boolean = false
 

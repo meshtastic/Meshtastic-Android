@@ -69,7 +69,9 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
@@ -415,6 +417,14 @@ class SdkRoomReplayTest {
         const val PEER_ID = "!0000002a"
         const val TEXT = "Replay during handshake"
         const val CHANNEL_NAME = "Replay channel"
+        val file =
+            FileInfo.Builder()
+                .also {
+                    it.file_name = "replay.txt"
+                    it.size_bytes = 1024
+                }
+                .build()
+        val regionPresets = LoRaRegionPresetMap.Builder().build()
         val myInfo = MyNodeInfo.Builder().also { it.my_node_num = LOCAL_NODE }.build()
         val peer =
             User.Builder()
@@ -466,7 +476,9 @@ class SdkRoomReplayTest {
                 val config = FromRadio.Builder().also { it.my_info = myInfo }.build()
                 val channel = FromRadio.Builder().also { it.channel = primaryChannel }.build()
                 val duringHandshake = FromRadio.Builder().also { it.packet = packet }.build()
-                val configuration = listOf(config, channel, duringHandshake)
+                val manifest = FromRadio.Builder().also { it.fileInfo = file }.build()
+                val presets = FromRadio.Builder().also { it.region_presets = regionPresets }.build()
+                val configuration = listOf(config, manifest, presets, channel, duringHandshake)
                 writeInt(configuration.size)
                 configuration.forEach { envelope -> writeEnvelope(envelope) }
                 writeInt(nodes.size)

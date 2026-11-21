@@ -79,7 +79,7 @@ import org.meshtastic.sdk.TransportIdentity
  * `asset()` encoder in sync with the layout above.**
  *
  * ### Handshake & runtime behaviour
- * Driven by the app's two-phase want_config handshake ([HandshakeConstants]):
+ * Driven by the SDK's two-phase want_config handshake ([HandshakeConstants]):
  * - **Stage 1** ([HandshakeConstants.CONFIG_NONCE]) → emit the config section, then `config_complete_id`.
  * - **Stage 2** ([HandshakeConstants.NODE_INFO_NONCE]) → emit the node section, then `config_complete_id`, then start
  *   streaming the packet section **once** (a re-issued Stage-2 request does not restart it).

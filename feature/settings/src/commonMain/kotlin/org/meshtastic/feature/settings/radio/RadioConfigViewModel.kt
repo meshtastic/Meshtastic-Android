@@ -1247,7 +1247,7 @@ open class RadioConfigViewModel(
         }
     }
 
-    private fun processPacketResponse(packet: MeshPacket) {
+    private suspend fun processPacketResponse(packet: MeshPacket) {
         val destNum = destNum ?: destNode.value?.num ?: return
         val requestId = packet.decoded?.request_id
         val lateRemoteReadRoute = requestId?.let { lateRemoteReads[it]?.route }
@@ -1327,7 +1327,8 @@ open class RadioConfigViewModel(
                     // A session opened on the connected node by number would otherwise keep addressing the old
                     // number (and stop counting as local) once the handshake reports the new one.
                     activeDestNum.value = null
-                    connectionManager.startConfigOnly()
+                    safeCatching { connectionManager.refreshRadioIdentity() }
+                        .onFailure { Logger.w(it) { "Could not refresh the attached radio identity" } }
                     setResponseStateSuccess()
                 }
                 // Otherwise an unaddressed node's ack says nothing about our request: leave it pending, exactly as

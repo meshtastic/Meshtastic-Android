@@ -182,7 +182,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         revokeActiveSession()
     }
 
-    override suspend fun restartTransport() {
+    override suspend fun restartTransport(expectedSession: RadioSessionContext?) {
         restartTransportCalled = true
         if (connectCalled && _activeSession.value != null) {
             revokeActiveSession()

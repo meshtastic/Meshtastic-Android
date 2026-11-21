@@ -142,10 +142,6 @@ interface RadioInterfaceService :
      */
     val connectionState: StateFlow<ConnectionState>
 
-    /** Whether the active transport runs the PhoneAPI handshake and heartbeat itself. */
-    val transportManagesPhoneApi: Boolean
-        get() = false
-
     /** Queues a nodes-only refresh for the admitted SDK session. */
     fun requestNodeDbRefresh(session: RadioSessionContext): Boolean = false
 
@@ -228,7 +224,7 @@ interface RadioInterfaceService :
      *
      * Suspends until the teardown/restart cycle completes.
      */
-    suspend fun restartTransport()
+    suspend fun restartTransport(expectedSession: RadioSessionContext? = null)
 
     /**
      * Requests that the next BLE transport connection invalidates Android's GATT service cache before service

@@ -70,10 +70,6 @@ class FromRadioPacketHandlerImpl(
 
     @Suppress("CyclomaticComplexMethod")
     override fun handleFromRadio(proto: FromRadio, session: RadioSessionContext) {
-        val myInfo = proto.my_info
-        val metadata = proto.metadata
-        val nodeInfo = proto.node_info
-        val configCompleteId = proto.config_complete_id
         val mqttProxyMessage = proto.mqttClientProxyMessage
         val queueStatus = proto.queueStatus
         val config = proto.config
@@ -88,23 +84,7 @@ class FromRadioPacketHandlerImpl(
         val displayPalette = proto.display_palette
 
         when {
-            myInfo != null -> configFlowManager.value.handleMyInfo(myInfo, session)
-
-            // deviceuiConfig arrives immediately after my_info (STATE_SEND_UIDATA). It carries
-            // the device's display, theme, node-filter, and other UI preferences.
             deviceUIConfig != null -> configHandler.value.handleDeviceUIConfig(deviceUIConfig, session)
-
-            metadata != null -> configFlowManager.value.handleLocalMetadata(metadata, session)
-
-            nodeInfo != null -> {
-                if (configFlowManager.value.handleNodeInfo(nodeInfo, session)) {
-                    runIfSessionActive(session, "node-list progress") {
-                        serviceStateWriter.setConnectionProgress("Nodes (${configFlowManager.value.newNodeCount})")
-                    }
-                }
-            }
-
-            configCompleteId != null -> configFlowManager.value.handleConfigComplete(configCompleteId, session)
 
             mqttProxyMessage != null ->
                 runIfSessionActive(session, "MQTT proxy message") {
@@ -134,13 +114,6 @@ class FromRadioPacketHandlerImpl(
             displayPalette != null -> handleDisplayPalette(displayPalette, session)
 
             clientNotification != null -> handleClientNotification(clientNotification, session)
-
-            // Firmware rebooted without a transport-level disconnect (common on serial/TCP).
-            // Re-handshake immediately rather than waiting for the 30s stall guard.
-            proto.rebooted != null -> {
-                Logger.w { "Firmware rebooted (rebooted=${proto.rebooted}), re-initiating handshake" }
-                configFlowManager.value.triggerWantConfig(session)
-            }
         }
     }
 

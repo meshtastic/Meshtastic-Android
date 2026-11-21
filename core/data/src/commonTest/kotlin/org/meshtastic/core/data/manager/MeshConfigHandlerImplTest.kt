@@ -23,7 +23,6 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CancellationException
@@ -36,13 +35,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
@@ -60,9 +56,7 @@ import kotlin.test.assertTrue
 class MeshConfigHandlerImplTest {
 
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
-    private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
-    private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
     private val localConfigFlow = MutableStateFlow(LocalConfig.Builder().build())
@@ -77,6 +71,7 @@ class MeshConfigHandlerImplTest {
     fun setUp() {
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
+        every { radioInterfaceService.isSessionActive(session) } returns true
         every { radioInterfaceService.runIfSessionActive(session, any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
@@ -95,9 +90,7 @@ class MeshConfigHandlerImplTest {
 
     private fun createHandler(scope: CoroutineScope): MeshConfigHandlerImpl = MeshConfigHandlerImpl(
         radioConfigRepository = radioConfigRepository,
-        serviceStateWriter = serviceRepository,
         nodeManager = nodeManager,
-        connectionManager = lazy { this.connectionManager },
         radioInterfaceService = radioInterfaceService,
         scope = scope.asServiceScope(),
     )
@@ -138,7 +131,7 @@ class MeshConfigHandlerImplTest {
     // ---------- handleDeviceConfig ----------
 
     @Test
-    fun `handleDeviceConfig persists config and updates progress`() = runTest(testDispatcher) {
+    fun `handleDeviceConfig persists config`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val config =
             Config.Builder()
@@ -153,11 +146,10 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setLocalConfig(config) }
-        verify { serviceRepository.setConnectionProgress("Device config received") }
     }
 
     @Test
-    fun `stale session cannot persist config or advance handshake`() = runTest(testDispatcher) {
+    fun `stale session cannot persist config`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val config =
             Config.Builder()
@@ -174,12 +166,10 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend(mode = VerifyMode.exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
-        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
-        verify(mode = VerifyMode.exactly(0)) { connectionManager.onHandshakeProgress() }
     }
 
     @Test
-    fun `active session persists device config and advances handshake`() = runTest(testDispatcher) {
+    fun `active session persists device config`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val config =
             Config.Builder()
@@ -209,8 +199,6 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setLocalConfig(config) }
-        verify { serviceRepository.setConnectionProgress("Device config received") }
-        verify { connectionManager.onHandshakeProgress() }
     }
 
     @Test
@@ -238,8 +226,6 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend(mode = VerifyMode.exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
-        verify { serviceRepository.setConnectionProgress("Device config received") }
-        verify { connectionManager.onHandshakeProgress() }
     }
 
     @Test
@@ -268,7 +254,7 @@ class MeshConfigHandlerImplTest {
     // ---------- handleModuleConfig ----------
 
     @Test
-    fun `handleModuleConfig persists config and updates progress`() = runTest(testDispatcher) {
+    fun `handleModuleConfig persists config`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val config =
             ModuleConfig.Builder()
@@ -278,7 +264,6 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setLocalModuleConfig(config) }
-        verify { serviceRepository.setConnectionProgress("Module config received") }
     }
 
     @Test
@@ -390,48 +375,6 @@ class MeshConfigHandlerImplTest {
     }
 
     @Test
-    fun `handleChannel shows progress with max channels when myNodeInfo available`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        every { nodeManager.getMyNodeInfo() } returns
-            MyNodeInfo(
-                myNodeNum = 123,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            )
-
-        val channel = Channel.Builder().also { wb -> wb.index = 2 }.build()
-        handler.handleChannel(channel, session)
-        advanceUntilIdle()
-
-        verify { serviceRepository.setConnectionProgress("Channels (3 / 8)") }
-    }
-
-    @Test
-    fun `handleChannel shows progress without max channels when myNodeInfo unavailable`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        every { nodeManager.getMyNodeInfo() } returns null
-
-        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
-        handler.handleChannel(channel, session)
-        advanceUntilIdle()
-
-        verify { serviceRepository.setConnectionProgress("Channels (1)") }
-    }
-
-    // ---------- handleDeviceUIConfig ----------
-
-    @Test
     fun `handleDeviceUIConfig persists config`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val config = DeviceUIConfig.Builder().build()
@@ -439,60 +382,6 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setDeviceUIConfig(config) }
-    }
-
-    // ---------- onHandshakeProgress ----------
-
-    @Test
-    fun `handleDeviceConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        val config =
-            Config.Builder()
-                .also { wb ->
-                    wb.device =
-                        Config.DeviceConfig.Builder()
-                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
-                            .build()
-                }
-                .build()
-        handler.handleDeviceConfig(config, session)
-        advanceUntilIdle()
-
-        verify { connectionManager.onHandshakeProgress() }
-    }
-
-    @Test
-    fun `handleModuleConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        val config =
-            ModuleConfig.Builder()
-                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
-                .build()
-        handler.handleModuleConfig(config, session)
-        advanceUntilIdle()
-
-        verify { connectionManager.onHandshakeProgress() }
-    }
-
-    @Test
-    fun `handleChannel calls onHandshakeProgress`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        every { nodeManager.getMyNodeInfo() } returns null
-
-        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
-        handler.handleChannel(channel, session)
-        advanceUntilIdle()
-
-        verify { connectionManager.onHandshakeProgress() }
-    }
-
-    @Test
-    fun `handleDeviceUIConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
-        handler = createHandler(backgroundScope)
-        handler.handleDeviceUIConfig(DeviceUIConfig.Builder().build(), session)
-        advanceUntilIdle()
-
-        verify { connectionManager.onHandshakeProgress() }
     }
 
     // ---------- handleRegionPresets ----------
@@ -505,6 +394,5 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setLoraRegionPresetMap(map) }
-        verify { connectionManager.onHandshakeProgress() }
     }
 }

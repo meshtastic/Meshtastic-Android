@@ -1317,9 +1317,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         every { transportFactory.createTransport(any(), any()) } calls
             { args ->
                 callbacks += args.arg<RadioInterfaceService>(1)
-                object : RadioTransport by FakeRadioTransport() {
-                    override val managesPhoneApi = true
-                }
+                object : RadioTransport by FakeRadioTransport() {}
             }
         service.connect()
         testDispatcher.scheduler.runCurrent()

@@ -65,7 +65,6 @@ internal class SdkPhoneApiRadioTransport(
     private val nodeManager: Lazy<NodeManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
 ) : RadioTransport {
-    override val managesPhoneApi: Boolean = true
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
 
@@ -213,6 +212,8 @@ internal class SdkPhoneApiRadioTransport(
                 moduleConfigs = config?.moduleConfigs.orEmpty(),
                 deviceUiConfig = config?.deviceUIConfig,
                 nodes = event.nodes.values.toList(),
+                files = event.files,
+                regionPresets = event.regionPresets,
             ),
         )
     }

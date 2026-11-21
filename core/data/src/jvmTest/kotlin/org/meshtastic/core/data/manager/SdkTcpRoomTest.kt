@@ -124,7 +124,14 @@ class SdkTcpRoomTest {
         withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE) { port -> exerciseLockdown(port, autoUnlock = true) }
     }
 
-    private suspend fun exerciseLockdown(port: Int, autoUnlock: Boolean) {
+    @Test
+    fun sdkTcpRestartsAfterRebootDuringInitialConfiguration() = runBlocking {
+        withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE, rebootBeforeConfig = true) { port ->
+            exerciseLockdown(port, autoUnlock = true, expectRestart = true)
+        }
+    }
+
+    private suspend fun exerciseLockdown(port: Int, autoUnlock: Boolean, expectRestart: Boolean = false) {
         Dispatchers.setMain(Dispatchers.Unconfined)
         val job = SupervisorJob()
         val scope = CoroutineScope(job + Dispatchers.Default)
@@ -156,7 +163,15 @@ class SdkTcpRoomTest {
                 }
                 ingress.appConnection.first { it == ConnectionState.Connected }
                 assertEquals(LockdownState.Unlocked, ingress.lockdownState.value)
-                assertEquals(session, radio.activeSession.value)
+                assertEquals(listOf(SdkRoomReplayTest.file), ingress.files.first())
+                assertEquals(SdkRoomReplayTest.regionPresets, ingress.regionPresets.first())
+                val readySession = assertNotNull(radio.activeSession.value)
+                assertEquals(session.address, readySession.address)
+                if (expectRestart) {
+                    assertTrue(readySession.generation > session.generation)
+                } else {
+                    assertEquals(session, readySession)
+                }
                 databases.withReadDb { db ->
                     assertEquals(SdkRoomReplayTest.LOCAL_NODE, db.nodeInfoDao().getMyNodeEntity()?.myNodeNum)
                 }
@@ -275,13 +290,11 @@ class SdkTcpRoomTest {
         private val installer =
             MeshConfigFlowManagerImpl(
                 nodeManager,
-                lazy { error("SDK TCP must own the handshake") },
                 nodeRepository,
                 config,
                 state,
                 mock(MockMode.autofill),
                 mock(MockMode.autofill),
-                DataLayerHeartbeatSender(mock(MockMode.autofill)),
                 FakeNotificationPrefs(),
                 radio,
                 serviceScope,
@@ -292,6 +305,8 @@ class SdkTcpRoomTest {
         private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
         val appConnection = state.connectionState
         val lockdownState = state.lockdownState
+        val files = config.fileManifestFlow
+        val regionPresets = config.loraRegionPresetMapFlow
         val lockdown =
             LockdownCoordinatorImpl(
                 state,
@@ -342,6 +357,8 @@ class SdkTcpRoomTest {
                     moduleConfigs = config?.moduleConfigs.orEmpty(),
                     deviceUiConfig = config?.deviceUIConfig,
                     nodes = ready.nodes.values.toList(),
+                    files = ready.files,
+                    regionPresets = ready.regionPresets,
                 ),
             )
         }

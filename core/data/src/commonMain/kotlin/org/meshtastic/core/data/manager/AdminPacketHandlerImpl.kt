@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.AdminRequestRegistry
-import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioSessionContext
@@ -36,7 +35,6 @@ import org.meshtastic.proto.MeshPacket
 class AdminPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val configHandler: Lazy<MeshConfigHandler>,
-    private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val sessionManager: SessionManager,
     private val adminRequestRegistry: AdminRequestRegistry,
 ) : AdminPacketHandler {
@@ -77,13 +75,7 @@ class AdminPacketHandlerImpl(
             u.get_channel_response?.let { configHandler.value.handleChannel(it, session) }
         }
 
-        u.get_device_metadata_response?.let {
-            if (fromNum == myNodeNum) {
-                configFlowManager.value.handleLocalMetadata(it, session)
-            } else {
-                nodeManager.insertMetadata(fromNum, it, session)
-            }
-        }
+        u.get_device_metadata_response?.let { nodeManager.insertMetadata(fromNum, it, session) }
     }
 }
 

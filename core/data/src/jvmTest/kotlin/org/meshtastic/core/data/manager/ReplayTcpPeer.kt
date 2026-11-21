@@ -41,55 +41,69 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 
 /** Exposes the scripted PhoneAPI fixture as a TCP peer for the SDK's production transport. */
-internal suspend fun withReplayTcpPeer(lockdownPassphrase: String? = null, exercise: suspend (port: Int) -> Unit) =
-    coroutineScope {
-        ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { server ->
-            val accepted = AtomicReference<Socket>()
-            val peer =
-                launch(Dispatchers.IO) {
-                    try {
+internal suspend fun withReplayTcpPeer(
+    lockdownPassphrase: String? = null,
+    rebootBeforeConfig: Boolean = false,
+    exercise: suspend (port: Int) -> Unit,
+) = coroutineScope {
+    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { server ->
+        val accepted = AtomicReference<Socket>()
+        val peer =
+            launch(Dispatchers.IO) {
+                try {
+                    if (rebootBeforeConfig) {
                         server.accept().use { socket ->
                             accepted.set(socket)
-                            val scripted =
-                                SdkRoomReplayTest.SdkReplayTransport(
-                                    this,
-                                    "replay:tcp",
-                                    SdkRoomReplayTest.replayAsset(),
-                                )
-                            scripted.connect()
-                            val output = socket.getOutputStream()
-                            val writer = launch {
-                                scripted.frames().collect {
-                                    output.write(it.bytes.toByteArray())
-                                    output.flush()
-                                }
-                            }
-                            try {
-                                val input = DataInputStream(socket.getInputStream())
-                                if (lockdownPassphrase != null) input.unlock(output, lockdownPassphrase)
-                                while (true) scripted.send(input.readFrame() ?: break)
-                            } finally {
-                                writer.cancelAndJoin()
-                                scripted.disconnect()
+                            checkNotNull(DataInputStream(socket.getInputStream()).readFrame())
+                            socket
+                                .getOutputStream()
+                                .sendEnvelope(FromRadio.Builder().also { it.rebooted = true }.build())
+                            // Leave the link up until the SDK retires it in response to the reboot frame.
+                            socket.getInputStream().transferTo(OutputStream.nullOutputStream())
+                        }
+                    }
+                    server.accept().use { socket ->
+                        accepted.set(socket)
+                        val scripted =
+                            SdkRoomReplayTest.SdkReplayTransport(
+                                this,
+                                "replay:tcp",
+                                SdkRoomReplayTest.replayAsset(),
+                            )
+                        scripted.connect()
+                        val output = socket.getOutputStream()
+                        val writer = launch {
+                            scripted.frames().collect {
+                                output.write(it.bytes.toByteArray())
+                                output.flush()
                             }
                         }
-                    } catch (closed: SocketException) {
-                        ensureActive()
-                        throw closed
+                        try {
+                            val input = DataInputStream(socket.getInputStream())
+                            if (lockdownPassphrase != null) input.unlock(output, lockdownPassphrase)
+                            while (true) scripted.send(input.readFrame() ?: break)
+                        } finally {
+                            writer.cancelAndJoin()
+                            scripted.disconnect()
+                        }
                     }
+                } catch (closed: SocketException) {
+                    ensureActive()
+                    throw closed
                 }
-            try {
-                exercise(server.localPort)
-            } finally {
-                withContext(NonCancellable) {
-                    peer.cancel()
-                    accepted.get()?.close()
-                    server.close()
-                    peer.join()
-                }
+            }
+        try {
+            exercise(server.localPort)
+        } finally {
+            withContext(NonCancellable) {
+                peer.cancel()
+                accepted.get()?.close()
+                server.close()
+                peer.join()
             }
         }
     }
+}
 
 private fun DataInputStream.unlock(output: OutputStream, passphrase: String) {
     fun request(): ToRadio = ToRadio.ADAPTER.decode(checkNotNull(readFrame()).bytes.substring(WireFraming.HEADER_SIZE))

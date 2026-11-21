@@ -42,7 +42,6 @@ import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
@@ -50,14 +49,12 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.XModem
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
 class FromRadioPacketHandlerImplTest {
 
@@ -97,8 +94,6 @@ class FromRadioPacketHandlerImplTest {
                 block(sessionLease)
                 true
             }
-        every { configFlowManager.handleNodeInfo(any(), any()) } returns true
-        every { configFlowManager.handleConfigComplete(any(), any()) } returns true
         handler =
             FromRadioPacketHandlerImpl(
                 serviceRepository,
@@ -115,96 +110,6 @@ class FromRadioPacketHandlerImplTest {
     }
 
     private fun handle(proto: FromRadio) = handler.handleFromRadio(proto, session)
-
-    @Test
-    fun `handleFromRadio routes MY_INFO to configFlowManager`() {
-        val myInfo = MyNodeInfo.Builder().also { wb -> wb.my_node_num = 1234 }.build()
-        val proto = FromRadio.Builder().also { wb -> wb.my_info = myInfo }.build()
-
-        handle(proto)
-
-        verify { configFlowManager.handleMyInfo(myInfo, session) }
-    }
-
-    @Test
-    fun `handleFromRadio routes METADATA to configFlowManager`() {
-        val metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "v1.0" }.build()
-        val proto = FromRadio.Builder().also { wb -> wb.metadata = metadata }.build()
-
-        handle(proto)
-
-        verify { configFlowManager.handleLocalMetadata(metadata, session) }
-    }
-
-    @Test
-    fun `handleFromRadio routes NODE_INFO to configFlowManager and updates status`() {
-        val nodeInfo = ProtoNodeInfo.Builder().also { wb -> wb.num = 1234 }.build()
-        val proto = FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build()
-
-        every { configFlowManager.newNodeCount } returns 1
-
-        handle(proto)
-
-        verify { configFlowManager.handleNodeInfo(nodeInfo, session) }
-        verify { serviceRepository.setConnectionProgress("Nodes (1)") }
-    }
-
-    @Test
-    fun `handleFromRadio routes CONFIG_COMPLETE_ID to configFlowManager`() {
-        val nonce = 69420
-        val proto = FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build()
-
-        handle(proto)
-
-        verify { configFlowManager.handleConfigComplete(nonce, session) }
-    }
-
-    @Test
-    fun `stale NODE_INFO does not update connection progress`() {
-        val nodeInfo = ProtoNodeInfo.Builder().also { wb -> wb.num = 1234 }.build()
-        every { configFlowManager.handleNodeInfo(nodeInfo, session) } returns false
-
-        handle(FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build())
-
-        verify { configFlowManager.handleNodeInfo(nodeInfo, session) }
-        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
-    }
-
-    @Test
-    fun `stale CONFIG_COMPLETE does not notify lockdown coordinator`() {
-        val nonce = 69420
-        every { configFlowManager.handleConfigComplete(nonce, session) } returns false
-
-        handle(FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build())
-
-        verify { configFlowManager.handleConfigComplete(nonce, session) }
-    }
-
-    @Test
-    fun `revoked session skips node progress after handler returns`() {
-        val nodeInfo = ProtoNodeInfo.Builder().also { wb -> wb.num = 1234 }.build()
-        var active = true
-        every { configFlowManager.handleNodeInfo(nodeInfo, session) } calls
-            {
-                active = false
-                true
-            }
-        every { radioInterfaceService.runIfSessionActive(session, any()) } calls
-            {
-                if (!active) {
-                    false
-                } else {
-                    @Suppress("UNCHECKED_CAST")
-                    val block = it.args[1] as () -> Unit
-                    block()
-                    true
-                }
-            }
-
-        handle(FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build())
-
-        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
-    }
 
     @Test
     fun `revoked session skips direct packet-dispatch branches`() {

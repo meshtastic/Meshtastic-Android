@@ -70,11 +70,7 @@ class LockdownCoordinatorImplTest {
 
         override fun onRadioConfigLoaded() = Unit
 
-        override fun startConfigOnly() = error("The SDK refreshes configuration after unlock")
-
-        override fun startNodeInfoOnly() = Unit
-
-        override fun onMyNodeInfoReceived(myNodeNum: Int) = Unit
+        override suspend fun refreshRadioIdentity() = Unit
 
         override suspend fun onNodeDbReady() = Unit
 
@@ -85,12 +81,6 @@ class LockdownCoordinatorImplTest {
         override fun clearRadioConfig() {
             clearRadioConfigCalled = true
         }
-
-        override fun onHandshakeComplete() = Unit
-
-        override fun onHandshakeProgress() = Unit
-
-        override fun recoverPostHandshakeFailure() = Unit
     }
 
     // endregion

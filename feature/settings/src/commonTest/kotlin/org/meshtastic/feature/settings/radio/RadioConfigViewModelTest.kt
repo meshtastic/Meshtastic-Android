@@ -527,7 +527,7 @@ class RadioConfigViewModelTest {
         packetFlow.emit(routingAck(requestId = 77, from = 456))
         runCurrent()
 
-        verify { connectionManager.startConfigOnly() }
+        verifySuspend { connectionManager.refreshRadioIdentity() }
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
     }
 
@@ -561,7 +561,7 @@ class RadioConfigViewModelTest {
         runCurrent()
         packetFlow.emit(routingAck(requestId = 91, from = 456))
         runCurrent()
-        verify { connectionManager.startConfigOnly() }
+        verifySuspend { connectionManager.refreshRadioIdentity() }
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
 
         // The re-handshake lands: the radio reports its new number and is installed under it.
@@ -614,7 +614,7 @@ class RadioConfigViewModelTest {
         packetFlow.emit(routingAck(requestId = 78, from = 456))
         runCurrent()
 
-        verify(exactly(0)) { connectionManager.startConfigOnly() }
+        verifySuspend(exactly(0)) { connectionManager.refreshRadioIdentity() }
         val state = viewModel.radioConfigState.value
         assertTrue(
             state.responseState is ResponseState.Loading,

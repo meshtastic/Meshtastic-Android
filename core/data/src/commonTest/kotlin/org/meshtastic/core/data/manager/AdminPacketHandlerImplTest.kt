@@ -23,7 +23,6 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioSessionContext
@@ -44,7 +43,6 @@ class AdminPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val configHandler = mock<MeshConfigHandler>(MockMode.autofill)
-    private val configFlowManager = mock<MeshConfigFlowManager>(MockMode.autofill)
     private val sessionManager = mock<SessionManager>(MockMode.autofill)
     private val adminRequestRegistry = AdminRequestRegistryImpl()
 
@@ -59,7 +57,6 @@ class AdminPacketHandlerImplTest {
             AdminPacketHandlerImpl(
                 nodeManager = nodeManager,
                 configHandler = lazy { configHandler },
-                configFlowManager = lazy { configFlowManager },
                 sessionManager = sessionManager,
                 adminRequestRegistry = adminRequestRegistry,
             )
@@ -265,7 +262,7 @@ class AdminPacketHandlerImplTest {
     // ---------- get_device_metadata_response ----------
 
     @Test
-    fun `device metadata from own node delegates to configFlowManager`() {
+    fun `device metadata from own node persists under its session`() {
         val metadata =
             DeviceMetadata.Builder()
                 .also { wb ->
@@ -278,7 +275,7 @@ class AdminPacketHandlerImplTest {
 
         handle(packet)
 
-        verify { configFlowManager.handleLocalMetadata(metadata, session) }
+        verify { nodeManager.insertMetadata(myNodeNum, metadata, session) }
     }
 
     @Test

@@ -27,12 +27,10 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
@@ -44,9 +42,7 @@ import org.meshtastic.proto.ModuleConfig
 @Single
 class MeshConfigHandlerImpl(
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
-    private val connectionManager: Lazy<MeshConnectionManager>,
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
 ) : MeshConfigHandler {
@@ -75,8 +71,6 @@ class MeshConfigHandlerImpl(
         val admitted =
             runForSession(session) {
                 Logger.d { "Device config received: ${config.summarize()}" }
-                serviceStateWriter.setConnectionProgress("Device config received")
-                connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
             launchPersistenceForSession(session, "config ${config.summarize()} persist") {
@@ -96,8 +90,6 @@ class MeshConfigHandlerImpl(
                         nodeManager.myNodeNum.value?.let { nodeNum -> nodeNum to status.node_status }
                     }
                 Logger.d { "Module config received: ${config.summarize()}" }
-                serviceStateWriter.setConnectionProgress("Module config received")
-                connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
             launchPersistenceForSession(session, "moduleConfig ${config.summarize()} persist") {
@@ -118,18 +110,7 @@ class MeshConfigHandlerImpl(
     }
 
     override fun handleChannel(channel: Channel, session: RadioSessionContext): Boolean {
-        val admitted =
-            runForSession(session) {
-                // Update status message if we have node info, otherwise use a generic one.
-                val mi = nodeManager.getMyNodeInfo()
-                val index = channel.index
-                if (mi != null) {
-                    serviceStateWriter.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
-                } else {
-                    serviceStateWriter.setConnectionProgress("Channels (${index + 1})")
-                }
-                connectionManager.value.onHandshakeProgress()
-            }
+        val admitted = radioInterfaceService.isSessionActive(session)
         if (admitted) {
             // We always want to save channel settings we receive from the radio.
             launchPersistenceForSession(session, "channel persist") {
@@ -144,10 +125,6 @@ class MeshConfigHandlerImpl(
         val admitted =
             runForSession(session) {
                 Logger.d { "DeviceUI config received" }
-                // deviceuiConfig arrives during Stage 1 immediately after my_info. It proves the transport
-                // is alive, so surface it as handshake progress — without this, a long gap before the next
-                // meaningful packet could falsely trip the fast-path watchdog on TCP/USB.
-                connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
             launchPersistenceForSession(session, "deviceuiConfig persist") {
@@ -162,7 +139,6 @@ class MeshConfigHandlerImpl(
         val admitted =
             runForSession(session) {
                 Logger.d { "Region presets received (${map.region_groups.size} regions, ${map.groups.size} groups)" }
-                connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
             launchPersistenceForSession(session, "region_presets persist") {

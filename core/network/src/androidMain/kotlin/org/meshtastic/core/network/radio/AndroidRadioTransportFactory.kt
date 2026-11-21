@@ -114,7 +114,6 @@ class AndroidRadioTransportFactory(
         private val service: RadioInterfaceService,
         private val reason: TransportDisconnectReason?,
     ) : RadioTransport {
-        override val managesPhoneApi: Boolean = true
 
         override fun start() = service.onDisconnect(isPermanent = reason != null, reason = reason)
 

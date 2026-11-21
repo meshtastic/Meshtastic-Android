@@ -103,7 +103,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
         logWarn("NoopRadioInterfaceService.disconnect()")
     }
 
-    override suspend fun restartTransport() {
+    override suspend fun restartTransport(expectedSession: RadioSessionContext?) {
         logWarn("NoopRadioInterfaceService.restartTransport()")
     }
 

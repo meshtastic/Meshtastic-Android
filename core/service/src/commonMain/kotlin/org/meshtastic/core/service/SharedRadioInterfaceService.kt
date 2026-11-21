@@ -506,9 +506,6 @@ class SharedRadioInterfaceService(
 
     @Volatile private var radioTransport: RadioTransport? = null
 
-    override val transportManagesPhoneApi: Boolean
-        get() = radioTransport?.managesPhoneApi == true
-
     override fun requestNodeDbRefresh(session: RadioSessionContext): Boolean {
         var queued = false
         runIfSessionActive(session) { queued = radioTransport?.requestNodeDbRefresh() == true }
@@ -770,7 +767,7 @@ class SharedRadioInterfaceService(
         }
     }
 
-    override suspend fun restartTransport() {
+    override suspend fun restartTransport(expectedSession: RadioSessionContext?) {
         // Claim the restart before waiting for the mutex so overlapping requests cannot queue another cycle.
         if (!isRestarting.compareAndSet(expect = false, update = true)) {
             Logger.d { "restartTransport: skipped, concurrent restart in progress" }
@@ -778,13 +775,7 @@ class SharedRadioInterfaceService(
         }
         try {
             transportMutex.withLock {
-                // Silent recovery for app-level handshake stalls. The transport may still be physically
-                // up (TCP socket alive, firmware unresponsive to want_config_id), so cycling it in place
-                // WITHOUT clearing connectionRequested avoids the split-brain where setDeviceAddress's
-                // fast-path would otherwise block same-node reconnect. The caller (MeshConnectionManager)
-                // is responsible for the app-level Disconnected flip; this method only cycles the
-                // transport and emits the transport-level DeviceSleep -> Connected transitions via
-                // callbacks (no Connecting — that is an app-level state, not a transport emission).
+                if (expectedSession != null && !isSessionActive(expectedSession)) return@withLock
                 if (!connectionRequested) {
                     Logger.d { "restartTransport: skipped-not-requested" }
                     return@withLock
@@ -803,14 +794,7 @@ class SharedRadioInterfaceService(
                     return@withLock
                 }
                 Logger.w { "restartTransport: restarting transport for ${getDeviceAddress()?.anonymize}" }
-                // Emit a transport-level
-                // Connected -> DeviceSleep transition before the stop/start cycle so
-                // transport-level observers see a full DeviceSleep -> Connected cycle when
-                // the fresh transport's onConnect() fires and can re-trigger their onConnected
-                // logic. The caller (runSiblingHandshakeRecovery) flips the app-level state to
-                // Disconnected before invoking restartTransport(), so this emission exists for
-                // transport-level coordination, not for app-level StateFlow dedupe. Silent:
-                // transient DeviceSleep, not a permanent Disconnected.
+                // Cycle the selected link without clearing the request to stay connected.
                 onDisconnect(isPermanent = false)
                 // notifyPermanent=false below (no user-facing Disconnected modal — the app-level
                 // state machine drives that separately).
