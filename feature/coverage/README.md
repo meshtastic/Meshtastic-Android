@@ -16,7 +16,7 @@ map layer and move the map to the transmitter.
 | --- | --- |
 | Android, Google flavor | `MapView` |
 | Android, F-Droid flavor | `SitePlannerSlot` |
-| Desktop | `MapLibreSitePlannerSlot` |
+| Desktop | `DesktopSitePlannerSlot` |
 
 ## Shape
 

@@ -32,7 +32,6 @@
     <ID>TooManyFunctions:MapView.kt:org.meshtastic.app.map.MapView.kt</ID>
     <ID>UnnecessaryLaunchedEffect:Main.kt:LaunchedEffect</ID>
     <ID>UnnecessaryLaunchedEffect:MapView.kt:LaunchedEffect</ID>
-    <ID>UnnecessaryLaunchedEffect:TracerouteMap.kt:LaunchedEffect</ID>
     <ID>UnnecessaryLaunchedEffect:WaypointMarkers.kt:LaunchedEffect</ID>
     <ID>UseOrEmpty:MapView.kt:RenderedMapLayer$dataLayer.properties["groundOverlays"] as? List&lt;KmlGroundOverlay&gt; ?: emptyList()</ID>
     <ID>UseOrEmpty:MapView.kt:RenderedMapLayer$dataLayer.properties["images"] as? Map&lt;String, Bitmap&gt; ?: emptyMap()</ID>

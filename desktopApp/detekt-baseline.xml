@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>UnnecessaryLaunchedEffect:DesktopTracerouteMap.kt:LaunchedEffect</ID>
     <ID>UnnecessaryLaunchedEffect:Main.kt:LaunchedEffect</ID>
     <ID>UnusedPrivateProperty:MacOSNotificationSender.kt:MacOSNotificationSender$unused: Unit = Unit</ID>
   </CurrentIssues>

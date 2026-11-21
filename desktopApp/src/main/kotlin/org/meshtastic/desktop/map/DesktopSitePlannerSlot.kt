@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.maplibre
+package org.meshtastic.desktop.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.feature.coverage.RegionTerrain
@@ -28,18 +29,15 @@ import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.layers.MapLayersManager
+import org.meshtastic.feature.map.maplibre.SitePlannerSession
 import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
 
-/**
- * Runs the Site Planner for the MapLibre hosts. The estimate becomes a GeoJSON map layer through [onImportLayer] and
- * the map moves to the transmitter so it's on screen.
- *
- * No phone-GPS shortcut is offered: the coordinate fields stay manual, with the map center and the node's own position
- * as shortcuts.
- */
+/** Runs the Site Planner for the desktop map; the estimate becomes a GeoJSON map layer and the map moves to it. */
 @Composable
-fun MapLibreSitePlannerSlot(session: SitePlannerSession, onImportLayer: (name: String, geoJson: String) -> Unit) {
+fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     val sharedViewModel: SharedMapViewModel = koinViewModel()
+    val layersManager: MapLayersManager = koinInject()
 
     val ourNode by sharedViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val channelSet by sharedViewModel.channelSet.collectAsStateWithLifecycle()
@@ -59,7 +57,7 @@ fun MapLibreSitePlannerSlot(session: SitePlannerSession, onImportLayer: (name: S
         estimate = rememberCoverageEstimate(offlineTerrain),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->
-            onImportLayer(name, geoJson)
+            layersManager.addGeoJsonLayer(name, geoJson)
             session.moveTo(Position(longitude = longitude, latitude = latitude))
         },
         onUseNodeLocation =

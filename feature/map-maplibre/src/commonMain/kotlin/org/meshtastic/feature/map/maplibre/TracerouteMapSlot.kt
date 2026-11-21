@@ -57,12 +57,9 @@ fun MapLibreTracerouteMapSlot(
 
     // The host shows "n of m hops mappable"; m counts every hop the traceroute named, n only those
     // we can actually place, so a route through nodes we have never heard from still reports honestly.
-    LaunchedEffect(selection.nodeLookup.size, selection.overlayNodeNums.size) {
-        reportCount(
-            selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) },
-            selection.overlayNodeNums.size,
-        )
-    }
+    val total = selection.overlayNodeNums.size
+    val shown = selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) }
+    LaunchedEffect(shown, total) { reportCount(shown, total) }
 
     MapLibreTracerouteMap(
         forwardRoute = tracerouteOverlay?.forwardRoute.orEmpty(),

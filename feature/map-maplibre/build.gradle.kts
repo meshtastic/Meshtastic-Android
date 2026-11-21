@@ -43,7 +43,6 @@ kotlin {
             implementation(projects.core.repository)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
-            implementation(projects.feature.coverage)
             implementation(projects.feature.map)
             // Offline terrain math (elevation decode, contour generation, zoom-banded intervals) and storage
             // (TerrainTileStore, TerrainRegionExtractor) — see feature/map-terrain's own build.gradle.kts for why the
