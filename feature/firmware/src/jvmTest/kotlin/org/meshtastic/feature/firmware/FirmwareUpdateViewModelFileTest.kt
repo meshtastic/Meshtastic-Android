@@ -1176,7 +1176,7 @@ class FirmwareUpdateViewModelFileTest {
         everySuspend { maintenanceUf2Repository.getSnapshot() } returns
             testMaintenanceUf2Manifest.copy(
                 otafixReleaseTag = "0.9.2-OTAFIX2.5",
-                otafixBase = "https://example.invalid/otafix",
+                otafixBase = "https://github.com/meshtastic/nRF52_Bootloader/releases/download/0.9.2-OTAFIX2.5",
                 otafixByBoardId =
                 mapOf("WisBlock-RAK4631-Board" to OtafixAssetEntry("wiscore_rak4631_board", "0".repeat(64))),
                 otafixSupportedTargets = listOf("rak4631"),

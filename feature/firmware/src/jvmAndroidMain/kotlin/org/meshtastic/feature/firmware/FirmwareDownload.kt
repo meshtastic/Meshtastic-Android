@@ -37,10 +37,17 @@ private const val DOWNLOAD_BUFFER_SIZE = 8192
  * progress hook pairs naturally with `HttpResponse.body(): ByteArray`, but that holds an entire firmware image — tens
  * of MB — in memory (twice over, briefly), which isn't worth it just to drop a manual loop on a download this size.
  *
- * @throws IOException if the transfer is shorter than the response's declared `Content-Length`.
+ * @param maxBytes ceiling on the body; the transfer stops and [targetFile] is deleted once it is exceeded.
+ * @throws IOException if the transfer is shorter than the response's declared `Content-Length`, or longer than
+ *   [maxBytes].
  * @throws kotlinx.coroutines.CancellationException if the calling coroutine is cancelled mid-transfer.
  */
-internal suspend fun downloadResponseToFile(response: HttpResponse, targetFile: File, onProgress: (Float) -> Unit) {
+internal suspend fun downloadResponseToFile(
+    response: HttpResponse,
+    targetFile: File,
+    onProgress: (Float) -> Unit,
+    maxBytes: Long = MAX_FIRMWARE_ZIP_BYTES,
+) {
     val body = response.bodyAsChannel()
     val contentLength = response.contentLength() ?: -1L
 
@@ -53,8 +60,13 @@ internal suspend fun downloadResponseToFile(response: HttpResponse, targetFile: 
             while (input.read(buffer).also { bytesRead = it } != -1) {
                 coroutineContext.ensureActive()
 
-                output.write(buffer, 0, bytesRead)
                 totalBytesRead += bytesRead
+                if (totalBytesRead > maxBytes) {
+                    output.close()
+                    targetFile.delete()
+                    throw IOException("Download too large: more than $maxBytes bytes")
+                }
+                output.write(buffer, 0, bytesRead)
 
                 if (contentLength > 0) {
                     onProgress(totalBytesRead.toFloat() / contentLength)

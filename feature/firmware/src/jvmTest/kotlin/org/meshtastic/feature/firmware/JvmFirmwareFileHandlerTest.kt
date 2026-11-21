@@ -19,16 +19,21 @@ package org.meshtastic.feature.firmware
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.request.get
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -81,5 +86,42 @@ class JvmFirmwareFileHandlerTest {
         assertNotNull(artifact)
         handler.deleteFile(artifact)
         assertEquals(1, engine.requestHistory.size)
+    }
+
+    /** Streams [body] with no declared length, so only the running byte count can stop it. */
+    private suspend fun download(body: ByteArray, target: File, maxBytes: Long): Result<Unit> {
+        val streaming = HttpClient(MockEngine { respond(ByteReadChannel(body)) })
+        return try {
+            val response = streaming.get("https://example.invalid/firmware.bin")
+            runCatching { downloadResponseToFile(response, target, {}, maxBytes) }
+        } finally {
+            streaming.close()
+        }
+    }
+
+    private fun tempTarget(): File = Files.createTempFile("firmware-download-test", ".bin").toFile().apply { delete() }
+
+    @Test
+    fun `a body that outgrows the limit is aborted and its partial file removed`() = runTest {
+        val target = tempTarget()
+
+        val result = download(ByteArray(20_000), target, maxBytes = 10_000)
+
+        assertFailsWith<IOException> { result.getOrThrow() }
+        assertFalse(target.exists())
+    }
+
+    @Test
+    fun `a body exactly at the limit is written in full`() = runTest {
+        val target = tempTarget()
+        try {
+            val body = ByteArray(10_000) { it.toByte() }
+
+            download(body, target, maxBytes = 10_000).getOrThrow()
+
+            assertEquals(body.size.toLong(), target.length())
+        } finally {
+            target.delete()
+        }
     }
 }
