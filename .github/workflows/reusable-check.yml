@@ -75,8 +75,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    # A pull request that edits build-logic misses the remote cache on every task, and a pull request build never
-    # writes to it, so each push and rerun of one runs cold: about 20 minutes of Gradle, measured over 239 CI scans.
+    # A pull request that edits build-logic misses the remote cache on every task, so its first run is cold: about
+    # 20 minutes of Gradle, measured over 239 CI scans.
     timeout-minutes: 45
     if: inputs.run_lint == true
     env:
