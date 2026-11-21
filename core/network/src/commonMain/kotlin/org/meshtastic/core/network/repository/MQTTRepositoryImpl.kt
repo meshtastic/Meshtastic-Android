@@ -52,6 +52,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.network.mqtt.MqttRootTopic
+import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.mqtt.ConnectionState
@@ -67,6 +68,7 @@ import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
+import org.meshtastic.proto.ToRadio
 import kotlin.uuid.Uuid
 
 @Single(binds = [MQTTRepository::class])
@@ -329,6 +331,11 @@ class MQTTRepositoryImpl(
         val noLocal = version == MqttProtocolVersion.V5_0
         return buildList {
             globalIds.forEach { globalId ->
+                // A name holding a wildcard or level separator would subscribe outside its own channel topic.
+                if (!MqttRootTopic.isSubscribableChannelName(globalId)) {
+                    Logger.w { "MQTT channel skipped: its name holds a wildcard or '/'" }
+                    return@forEach
+                }
                 add(
                     Subscription(
                         "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
@@ -369,7 +376,7 @@ class MQTTRepositoryImpl(
                 if (selfTraffic != MqttSelfTraffic.FORWARD) {
                     Logger.d { "MQTT json dropped ($selfTraffic)" }
                 } else {
-                    trySend(
+                    forwardIfFits(
                         MqttClientProxyMessage.Builder()
                             .also { wb ->
                                 wb.topic = topic
@@ -414,7 +421,7 @@ class MQTTRepositoryImpl(
                     }
 
                 else ->
-                    trySend(
+                    forwardIfFits(
                         MqttClientProxyMessage.Builder()
                             .also { wb ->
                                 wb.topic = topic
@@ -424,6 +431,17 @@ class MQTTRepositoryImpl(
                             .build(),
                     )
             }
+        }
+    }
+
+    /** Forwards [message] only when the `ToRadio` that wraps it fits one phone API frame. */
+    private fun ProducerScope<MqttClientProxyMessage>.forwardIfFits(message: MqttClientProxyMessage) {
+        val toRadio = ToRadio.Builder().also { wb -> wb.mqttClientProxyMessage = message }.build()
+        val encodedSize = ToRadio.ADAPTER.encodedSize(toRadio)
+        if (encodedSize > StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE) {
+            Logger.w { "MQTT downlink dropped: $encodedSize-byte ToRadio over the phone API frame limit" }
+        } else {
+            trySend(message)
         }
     }
 

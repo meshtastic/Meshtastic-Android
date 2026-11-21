@@ -161,7 +161,7 @@ class TcpTransport(
      * The payload is wrapped with the START1/START2 header by the codec.
      */
     suspend fun sendPacket(payload: ByteArray) {
-        codec.frameAndSend(payload = payload, sendBytes = ::sendBytesRaw, flush = ::flushBytes)
+        if (!codec.frameAndSend(payload = payload, sendBytes = ::sendBytesRaw, flush = ::flushBytes)) return
         packetsSent++
         bytesSent += payload.size
     }
