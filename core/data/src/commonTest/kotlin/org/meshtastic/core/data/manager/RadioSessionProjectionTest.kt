@@ -25,10 +25,10 @@ import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -69,7 +69,7 @@ class RadioSessionProjectionTest {
                 radioConfigRepository = FakeRadioConfigRepository(),
                 serviceStateWriter = FakeServiceRepository(),
                 analytics = mock(MockMode.autofill),
-                commandSender = FakeCommandSender(),
+                packetHandler = FakePacketHandler(),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,
                 scope = scope.asServiceScope(),

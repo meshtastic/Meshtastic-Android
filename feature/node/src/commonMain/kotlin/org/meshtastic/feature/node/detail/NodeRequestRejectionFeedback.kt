@@ -17,9 +17,13 @@
 package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.getStringResFrom
+import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.node_request_send_failed
+import org.meshtastic.core.resources.request_failed_from
 import org.meshtastic.core.ui.util.SnackbarManager
 
 /** Logs one expected node-request availability failure and presents the shared localized failure message. */
@@ -31,4 +35,24 @@ internal suspend fun showNodeRequestFailure(
 ) {
     Logger.w(failure) { operation }
     snackbarManager.showSnackbar(resolveUiText(UiText.Resource(Res.string.node_request_send_failed)))
+}
+
+/**
+ * Waits for [pending] to settle and, when the mesh failed it, passes the routing error to [onNak] and shows which
+ * [request] to [longName] failed and why. A request that is answered, or never answered, shows nothing.
+ */
+internal suspend fun showNodeRequestNak(
+    pending: NodeRequest,
+    request: StringResource,
+    longName: String,
+    snackbarManager: SnackbarManager,
+    resolveUiText: suspend (UiText) -> String,
+    onNak: (routingError: Int) -> Unit = {},
+) {
+    val routingError = pending.awaitRoutingError() ?: return
+    onNak(routingError)
+    val reason = getStringResFrom(routingError)
+    snackbarManager.showSnackbar(
+        resolveUiText(UiText.Resource(Res.string.request_failed_from, request, longName, reason)),
+    )
 }

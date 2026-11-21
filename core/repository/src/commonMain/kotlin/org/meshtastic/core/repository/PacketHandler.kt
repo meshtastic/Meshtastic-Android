@@ -16,22 +16,29 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.PacedMessageHandle
 
-/** Interface for handling the transmission of packets to the radio and managing the packet queue. */
+/**
+ * Sends packets through the session's SDK paced queue and projects each send's delivery status onto its durable Room
+ * row.
+ */
 interface PacketHandler {
-    /** Sends a command/packet directly to the radio, logging when no active transport accepts it. */
-    fun sendToRadio(p: ToRadio)
+    /** The last packet ID [generatePacketId] handed out. */
+    val currentPacketId: Long
+
+    /** Generates a fresh non-zero packet ID, so a durable row and its wire packet share one identity. */
+    fun generatePacketId(): Int
 
     /**
-     * Attempts a direct command/packet dispatch to the active transport.
-     *
-     * @return `true` when the transport accepted the bytes for asynchronous handoff, or `false` when no active
-     *   transport accepted them. This is admission only; it does not confirm firmware processing.
+     * Sends a data packet under its persisted ID, assigning one when it has none. If the radio session refuses
+     * admission, the packet is marked [org.meshtastic.core.model.MessageStatus.ERROR] and
+     * [PacketQueueRejectedException] is thrown so the persistence owner can requeue or fail its durable record instead
+     * of treating a normal return as successful admission.
      */
-    fun trySendToRadio(p: ToRadio): Boolean
+    suspend fun sendData(p: DataPacket)
 
     /**
      * Adds a mesh packet to the queue for sending.
@@ -42,18 +49,10 @@ interface PacketHandler {
      * @return `true` when the packet's non-zero ID was reserved and queued, or `false` when the packet was invalid, its
      *   ID was already reserved, the radio is not connected, or the owning service scope has shut down.
      */
-    suspend fun sendToRadio(packet: MeshPacket): Boolean
+    suspend fun sendToRadio(packet: MeshPacket): Boolean = sendTracked(packet) != null
 
-    /**
-     * Adds [packet] only while [expectedConnectionVersion] still owns the connected lifecycle generation.
-     *
-     * This is the admission path for work captured by a specific connection and closes the check-then-send race across
-     * disconnect/reconnect.
-     *
-     * @return `true` when the expected generation is still current and the packet is admitted, or `false` when the
-     *   generation is stale or admission fails for any reason documented by [sendToRadio].
-     */
-    suspend fun sendToRadioForConnection(packet: MeshPacket, expectedConnectionVersion: Long): Boolean
+    /** Queues [packet] as [sendToRadio] does and returns its SDK handle, or null when admission fails. */
+    suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle?
 
     /**
      * Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.
@@ -75,8 +74,7 @@ interface PacketHandler {
 
     /**
      * [sendToRadioAndAwaitResult] admitted only while [expectedConnectionVersion] still owns the connected lifecycle
-     * generation, as [sendToRadioForConnection] does for queued sends. A stale generation is reported as
-     * [AwaitedSendStatus.TRANSPORT_STOPPED] with `dispatched == false`.
+     * generation. A stale generation is reported as [AwaitedSendStatus.TRANSPORT_STOPPED] with `dispatched == false`.
      */
     suspend fun sendToRadioAndAwaitResultForConnection(
         packet: MeshPacket,

@@ -16,114 +16,23 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.AdminMessage
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.LocalConfig
-import org.meshtastic.core.model.Position as ModelPosition
-import org.meshtastic.proto.Position as ProtoPosition
-
-/** Interface for sending commands and packets to the mesh network. */
-@Suppress("TooManyFunctions")
+/**
+ * The node requests the SDK cannot yet send as firmware expects, built here and queued through [PacketHandler].
+ *
+ * The SDK's `RoutingApi.traceRoute` sends a `ROUTING_APP` route request that firmware's `TraceRouteModule` never sees,
+ * its `requestNeighborInfo` sends a remote request with hop limit 0 and no `want_ack` on channel 0, neither exposes the
+ * request ID the app logs and times the reply by, and `TelemetryApi.requestLocalStats` reaches only the local node.
+ *
+ * @throws PacketQueueRejectedException from each request when the radio session refuses admission.
+ * @throws LocalNodeUnavailableException from each request before the local node identity is known.
+ */
 interface CommandSender {
-    /** Returns the current packet ID. */
-    fun getCurrentPacketId(): Long
+    /** Requests a traceroute to [destNum] and records its start for the reply's duration. */
+    suspend fun requestTraceroute(destNum: Int): NodeRequest
 
-    /** Returns the cached local configuration. */
-    fun getCachedLocalConfig(): LocalConfig
+    /** Requests [destNum]'s neighbor table and records its start for the reply's duration. */
+    suspend fun requestNeighborInfo(destNum: Int): NodeRequest
 
-    /** Returns the cached channel set. */
-    fun getCachedChannelSet(): ChannelSet
-
-    /** Generates a new unique packet ID. */
-    fun generatePacketId(): Int
-
-    /**
-     * Sends a data packet to the mesh. If the outbound queue refuses admission, the packet is marked
-     * [org.meshtastic.core.model.MessageStatus.ERROR] and [PacketQueueRejectedException] is thrown so the persistence
-     * owner can requeue or fail its durable record instead of treating a normal return as successful admission.
-     */
-    suspend fun sendData(p: DataPacket)
-
-    /**
-     * Sends an admin message to a specific node, or throws if the outbound queue rejects it.
-     *
-     * The message is bound to the connection lifecycle `version` current when this call is made: a disconnect or radio
-     * switch before the queue dispatches it rejects it with [PacketQueueRejectedException] instead of sending it
-     * through the replacement transport. Admin messages carry the passkey of one session, so none outlives it.
-     */
-    suspend fun sendAdmin(
-        destNum: Int,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    )
-
-    /**
-     * Sends an admin message immediately, bypassing the outbound packet queue. The queue only drains while the
-     * connection state is Connected, so mid-handshake sends (e.g. set_time_only at MyNodeInfo) must use this path or
-     * they stall until the handshake finishes.
-     */
-    fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage)
-
-    /** Sends our current position to the mesh, or throws if the outbound queue rejects it. */
-    suspend fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false)
-
-    /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestPosition(destNum: Int, currentPosition: ModelPosition, requestId: Int = 0)
-
-    /** Requests user info from a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestUserInfo(destNum: Int, requestId: Int = 0)
-
-    /** Requests a traceroute to a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestTraceroute(requestId: Int, destNum: Int)
-
-    /** Requests telemetry from a specific node, or throws if the outbound queue rejects it. */
-    suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
-
-    /**
-     * Requests telemetry only if [expectedConnectionVersion] still owns queue admission.
-     *
-     * Pass the `version` from [ConnectionStateProvider.connectionLifecycle] captured by the caller.
-     *
-     * @throws PacketQueueRejectedException when the expected version is stale or the outbound queue otherwise refuses
-     *   the request.
-     */
-    suspend fun requestTelemetryForConnection(
-        requestId: Int,
-        destNum: Int,
-        typeValue: Int,
-        expectedConnectionVersion: Long,
-    )
-
-    /**
-     * Requests neighbor info from a specific node.
-     *
-     * @throws LocalNodeUnavailableException when the local node identity is unavailable before admission.
-     * @throws PacketQueueRejectedException when the outbound queue rejects the request.
-     */
-    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
-
-    /**
-     * Sends a lockdown passphrase to authenticate with a locked device.
-     *
-     * @param disable when `true`, instructs the device to decrypt storage back to plaintext and leave lockdown (the off
-     *   switch). The device reboots and reconnects reporting `DISABLED`.
-     * @return `true` when the active transport accepted the command for asynchronous handoff, or `false` when the
-     *   command could not be dispatched. Firmware acceptance is reported separately through `LockdownStatus`.
-     */
-    fun sendLockdownPassphrase(
-        passphrase: String,
-        boots: Int = 0,
-        hours: Int = 0,
-        maxSessionSeconds: Int = 0,
-        disable: Boolean = false,
-    ): Boolean
-
-    /**
-     * Sends a Lock Now command to immediately lock a locked-firmware device.
-     *
-     * @return `true` when the active transport accepted the command for asynchronous handoff.
-     */
-    fun sendLockNow(): Boolean
+    /** Requests the local stats of [destNum], which may be a remote node. */
+    suspend fun requestLocalStats(destNum: Int): NodeRequest
 }

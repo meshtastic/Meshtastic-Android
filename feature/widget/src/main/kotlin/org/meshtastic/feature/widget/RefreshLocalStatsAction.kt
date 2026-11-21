@@ -24,10 +24,10 @@ import co.touchlab.kermit.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.QueryController
 
 internal suspend fun runTelemetryRequestBestEffort(type: TelemetryType, request: suspend () -> Unit) {
     try {
@@ -53,7 +53,7 @@ class RefreshLocalStatsAction :
     ActionCallback,
     KoinComponent {
 
-    private val commandSender: CommandSender by inject()
+    private val queryController: QueryController by inject()
     private val nodeManager: NodeManager by inject()
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
@@ -64,7 +64,7 @@ class RefreshLocalStatsAction :
         }
 
         requestLocalStatsRefresh(myNodeNum) { nodeNum, type ->
-            commandSender.requestTelemetry(commandSender.generatePacketId(), nodeNum, type.ordinal)
+            queryController.requestTelemetry(nodeNum, type)
         }
     }
 }

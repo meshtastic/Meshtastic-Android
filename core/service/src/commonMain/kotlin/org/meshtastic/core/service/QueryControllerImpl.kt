@@ -16,63 +16,137 @@
  */
 package org.meshtastic.core.service
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRequest
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.QueryController
+import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.AdminMessage
+import org.meshtastic.core.repository.routingErrorOrNull
+import org.meshtastic.core.repository.toNodeRequest
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.MessageHandle
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.requestNodeInfoOnHeardChannel
+import org.meshtastic.sdk.requestPaxcount
+import org.meshtastic.sdk.requestPositionOnHeardChannel
+import org.meshtastic.proto.Position as ProtoPosition
 
 /**
- * [QueryController] implementation: position, traceroute, telemetry, user info, and metadata "pull" queries.
- *
- * Focused collaborator of [RadioControllerImpl]. Mirrors the SDK's `TelemetryApi`/`RoutingApi` surface.
+ * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, the request helpers and the
+ * admin metadata read. [commandSender] keeps the requests the SDK cannot yet send as firmware expects.
  */
 internal class QueryControllerImpl(
     private val commandSender: CommandSender,
+    private val radio: RadioInterfaceService,
     private val nodeManager: NodeManager,
     private val uiPrefs: UiPrefs,
+    private val scope: CoroutineScope,
 ) : QueryController {
 
-    private val myNodeNum: Int
-        get() = nodeManager.myNodeNum.value ?: 0
+    private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
 
-    override suspend fun refreshMetadata(destNum: Int, requestId: Int) {
-        commandSender.sendAdmin(destNum, requestId = requestId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
+    private fun requireClient(operation: String): RadioClient =
+        radio.activeSession.value?.let(radio::clientForSession) ?: throw PacketQueueRejectedException(operation)
+
+    /** Sends through [client]'s request helper; an SDK refusal reads as the session refusing admission. */
+    private suspend fun send(operation: String, request: suspend RadioClient.() -> MessageHandle): NodeRequest {
+        val client = requireClient(operation)
+        val handle =
+            try {
+                client.request()
+            } catch (e: MeshtasticException) {
+                throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
+            }
+        return handle.toNodeRequest()
+    }
+
+    /** Starts [rpc] on [client] and returns once the SDK has queued it; the reply settles the [NodeRequest]. */
+    private fun rpc(operation: String, rpc: suspend RadioClient.() -> AdminResult<*>): NodeRequest {
+        val client = requireClient(operation)
+        val outcome =
+            scope.async(start = CoroutineStart.UNDISPATCHED) {
+                try {
+                    client.rpc().routingErrorOrNull()
+                } catch (_: MeshtasticException) {
+                    null
+                }
+            }
+        return NodeRequest(requestId = null) { outcome.await() }
+    }
+
+    override suspend fun refreshMetadata(destNum: Int): NodeRequest {
+        val local = isLocal(destNum)
+        return rpc("Metadata request") {
+            val target = if (local) admin else admin.forNode(NodeId(destNum)).withRpcTimeout(REMOTE_READ_TIMEOUT)
+            target.getDeviceMetadata()
         }
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {
-        if (destNum == nodeManager.myNodeNum.value) return
-        val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
-        // Position(0.0, 0.0, 0) means "attach no coordinates"; the sender leaves them off the wire.
-        val resolvedPosition =
-            if (provideLocation) {
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position): NodeRequest {
+        if (isLocal(destNum)) return NodeRequest.NONE
+        val myNodeNum = nodeManager.myNodeNum.value ?: 0
+        val ours =
+            if (uiPrefs.shouldProvideNodeLocation(myNodeNum).value) {
                 currentPosition.takeIf { it.isValid() }
                     ?: nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
-                    ?: Position(0.0, 0.0, 0)
             } else {
-                Position(0.0, 0.0, 0)
+                null
             }
-        commandSender.requestPosition(destNum, resolvedPosition, requestId)
+        // Firmware coarsens a phone-originated position to the channel precision, so an explicit 0,0 goes out as a
+        // real-looking coordinate. Without a valid fix only the time is shared, which the SDK stamps.
+        val shared =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    if (ours != null) {
+                        wb.latitude_i = Position.degI(ours.latitude)
+                        wb.longitude_i = Position.degI(ours.longitude)
+                        wb.altitude = ours.altitude
+                    }
+                }
+                .build()
+        return send("Position request") { requestPositionOnHeardChannel(NodeId(destNum), shared) }
     }
 
-    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {
-        if (destNum != nodeManager.myNodeNum.value) {
-            commandSender.requestUserInfo(destNum, requestId)
+    override suspend fun requestUserInfo(destNum: Int): NodeRequest {
+        if (isLocal(destNum)) return NodeRequest.NONE
+        return send("User-info request") { requestNodeInfoOnHeardChannel(NodeId(destNum)) }
+    }
+
+    override suspend fun requestTraceroute(destNum: Int): NodeRequest = commandSender.requestTraceroute(destNum)
+
+    override suspend fun requestTelemetry(destNum: Int, type: TelemetryType): NodeRequest {
+        val node = NodeId(destNum)
+        return when (type) {
+            TelemetryType.PAX -> send("Paxcount request") { requestPaxcount(node) }
+
+            TelemetryType.LOCAL_STATS ->
+                if (isLocal(destNum)) {
+                    rpc("Telemetry request") { telemetry.requestLocalStats() }
+                } else {
+                    commandSender.requestLocalStats(destNum)
+                }
+
+            TelemetryType.DEVICE -> rpc("Telemetry request") { telemetry.requestDevice(node) }
+
+            TelemetryType.ENVIRONMENT -> rpc("Telemetry request") { telemetry.requestEnvironment(node) }
+
+            TelemetryType.AIR_QUALITY -> rpc("Telemetry request") { telemetry.requestAirQuality(node) }
+
+            TelemetryType.POWER -> rpc("Telemetry request") { telemetry.requestPower(node) }
+
+            TelemetryType.HOST -> rpc("Telemetry request") { telemetry.requestHost(node) }
         }
     }
 
-    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {
-        commandSender.requestTraceroute(requestId, destNum)
-    }
-
-    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
-        commandSender.requestTelemetry(requestId, destNum, typeValue)
-    }
-
-    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        commandSender.requestNeighborInfo(requestId, destNum)
-    }
+    override suspend fun requestNeighborInfo(destNum: Int): NodeRequest = commandSender.requestNeighborInfo(destNum)
 }

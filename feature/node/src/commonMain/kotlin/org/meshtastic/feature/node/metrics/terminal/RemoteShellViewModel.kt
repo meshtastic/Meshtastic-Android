@@ -33,17 +33,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.effectiveLongName
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.resources.Res
@@ -57,7 +54,6 @@ import org.meshtastic.core.resources.remote_shell_session_closed
 import org.meshtastic.core.resources.remote_shell_session_closed_reason
 import org.meshtastic.core.ui.input.RemoteKey
 import org.meshtastic.core.ui.viewmodel.safeLaunch
-import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RemoteShell
 
 private const val MAX_OUTPUT_LINES = 1_000
@@ -106,7 +102,7 @@ class RemoteShellViewModel(
     @InjectedParam val destNum: Int,
     private val dispatchers: CoroutineDispatchers,
     private val nodeRepository: NodeRepository,
-    private val commandSender: CommandSender,
+    private val messagingController: MessagingController,
     private val remoteShellHandler: RemoteShellHandler,
     private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
@@ -183,7 +179,12 @@ class RemoteShellViewModel(
         if (_sessionState.value !in OPENABLE_STATES) return
         _sessionState.value = SessionState.OPENING
         safeLaunch(context = dispatchers.io, tag = "remoteShellOpen") {
-            val fresh = RemoteShellLink(sessionId = commandSender.generatePacketId())
+            val sessionId = messagingController.newRemoteShellSessionId()
+            if (sessionId == null) {
+                _sessionState.value = SessionState.ERROR
+                return@safeLaunch
+            }
+            val fresh = RemoteShellLink(sessionId = sessionId)
             linkMutex.withLock { link = fresh }
             withLink { it.open(cols, rows, nowMillis) }
             startTicking()
@@ -451,19 +452,9 @@ class RemoteShellViewModel(
     private fun publishPending() = screenState.update { it.copy(unsent = inputBuffer.toString()) }
 
     private fun transmit(frame: RemoteShell) {
-        val myNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
-        val packet =
-            DataPacket(
-                to = NodeAddress.numToDefaultId(destNum),
-                from = NodeAddress.numToDefaultId(myNum),
-                bytes = RemoteShell.ADAPTER.encode(frame).toByteString(),
-                dataType = PortNum.REMOTE_SHELL_APP.value,
-                channel = NodeAddress.PKC_CHANNEL_INDEX,
-                wantAck = false,
-            )
         // Not viewModelScope: the CLOSE sent from onCleared would otherwise never leave.
         applicationScope.launch(dispatchers.io) {
-            safeCatching { commandSender.sendData(packet) }
+            safeCatching { messagingController.sendRemoteShell(destNum, frame) }
                 .onFailure { Logger.w(it) { "RemoteShell send failed op=${frame.op} seq=${frame.seq}" } }
         }
     }

@@ -534,7 +534,7 @@ class AiFunctionProviderImpl(
 
         /**
          * Protobuf framing a text message costs inside the `Data` envelope that
-         * [org.meshtastic.core.data.manager.CommandSenderImpl.sendData] size-checks:
+         * [org.meshtastic.core.data.manager.PacketHandlerImpl.sendData] size-checks:
          * * `portnum` tag + varint value: 2 bytes
          * * `payload` tag: 1 byte
          * * `payload` length varint: 2 bytes (any payload of 128 bytes or more)
@@ -545,7 +545,7 @@ class AiFunctionProviderImpl(
         /**
          * Largest text message (UTF-8 bytes, not characters) that survives the send path.
          *
-         * `Constants.DATA_PAYLOAD_LEN` is 233, and `CommandSenderImpl.sendData` applies it to the **whole encoded
+         * `Constants.DATA_PAYLOAD_LEN` is 233, and `PacketHandlerImpl.sendData` applies it to the **whole encoded
          * `Data` proto** via `Data.ADAPTER.isWithinSizeLimit`, not to the `payload` field alone — so the text budget is
          * 233 less [TEXT_DATA_ENVELOPE_BYTES]. Checking it here returns `InvalidArgument` before the send path runs, so
          * an over-long message is never written to history.

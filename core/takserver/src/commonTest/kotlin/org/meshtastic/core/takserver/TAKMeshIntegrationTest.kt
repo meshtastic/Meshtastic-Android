@@ -20,9 +20,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeMeshConfigHandler
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeTakPrefs
 import org.meshtastic.core.testing.TestDataFactory
@@ -57,7 +57,7 @@ class TAKMeshIntegrationTest {
 
     private data class TestHarness(
         val serverManager: FakeTAKServerManager = FakeTAKServerManager(),
-        val commandSender: FakeCommandSender = FakeCommandSender(),
+        val packetHandler: FakePacketHandler = FakePacketHandler(),
         val serviceRepository: FakeServiceRepository = FakeServiceRepository(),
         val meshConfigHandler: FakeMeshConfigHandler = FakeMeshConfigHandler(),
         val nodeRepository: FakeNodeRepository = fakeNodeRepository(),
@@ -71,7 +71,7 @@ class TAKMeshIntegrationTest {
         val integration =
             TAKMeshIntegration(
                 takServerManager = serverManager,
-                commandSender = commandSender,
+                packetHandler = packetHandler,
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
@@ -119,7 +119,7 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("after-stop"))
 
-        assertTrue(h.commandSender.sentPackets.isEmpty())
+        assertTrue(h.packetHandler.sentPackets.isEmpty())
     }
 
     // ── TAK-Talk strip preservation (regression) ────────────────────────────
@@ -225,8 +225,8 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v1-until-version-known"))
 
-        assertEquals(1, h.commandSender.sentPackets.size)
-        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+        assertEquals(1, h.packetHandler.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.packetHandler.sentPackets.single().dataType)
     }
 
     @Test
@@ -236,8 +236,8 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v2-known"))
 
-        assertEquals(1, h.commandSender.sentPackets.size)
-        assertEquals(PortNum.ATAK_PLUGIN_V2.value, h.commandSender.sentPackets.single().dataType)
+        assertEquals(1, h.packetHandler.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN_V2.value, h.packetHandler.sentPackets.single().dataType)
     }
 
     @Test
@@ -247,8 +247,8 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v1"))
 
-        assertEquals(1, h.commandSender.sentPackets.size)
-        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+        assertEquals(1, h.packetHandler.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.packetHandler.sentPackets.single().dataType)
     }
 
     // ── Outbound channel selection ───────────────────────────────────────────
@@ -260,7 +260,7 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-default-channel"))
 
-        assertEquals(0, h.commandSender.sentPackets.single().channel)
+        assertEquals(0, h.packetHandler.sentPackets.single().channel)
     }
 
     @Test
@@ -271,7 +271,7 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v2-channel"))
 
-        val sent = h.commandSender.sentPackets.single()
+        val sent = h.packetHandler.sentPackets.single()
         assertEquals(PortNum.ATAK_PLUGIN_V2.value, sent.dataType)
         assertEquals(3, sent.channel)
     }
@@ -284,7 +284,7 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v1-channel"))
 
-        val sent = h.commandSender.sentPackets.single()
+        val sent = h.packetHandler.sentPackets.single()
         assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
         assertEquals(5, sent.channel)
     }
@@ -297,7 +297,7 @@ class TAKMeshIntegrationTest {
         val marker = CoTMessage(uid = "marker-1", type = "a-h-G", stale = Clock.System.now() + 5.minutes)
         h.serverManager.emitInbound(marker)
 
-        assertTrue(h.commandSender.sentPackets.isEmpty())
+        assertTrue(h.packetHandler.sentPackets.isEmpty())
     }
 
     // ── Dropped-outcome discrimination (regression: #6583 self-test blind spot) ────────
@@ -356,8 +356,8 @@ class TAKMeshIntegrationTest {
         h.serverManager.emitInbound(chatMsg, clientInfo)
 
         // GeoChat on legacy V1 should produce a sent packet with the enriched callsign
-        if (h.commandSender.sentPackets.isNotEmpty()) {
-            val sent = h.commandSender.sentPackets.first()
+        if (h.packetHandler.sentPackets.isNotEmpty()) {
+            val sent = h.packetHandler.sentPackets.first()
             assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
         }
     }

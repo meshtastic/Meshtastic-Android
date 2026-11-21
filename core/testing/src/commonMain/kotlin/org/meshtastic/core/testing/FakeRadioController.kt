@@ -23,9 +23,11 @@ import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.EditSettingsTransactionException
+import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
@@ -173,7 +175,9 @@ class FakeRadioController :
 
     /** Failure thrown by [sendSharedContact], when set. */
     var sendSharedContactFailure: Exception? = null
-    val neighborInfoRequests = mutableListOf<Pair<Int, Int>>()
+
+    /** Destinations of [requestNeighborInfo] calls, in order. */
+    val neighborInfoRequests = mutableListOf<Int>()
 
     /**
      * When set, a channel write throws after this many total local/admin [channelWrites] — simulates mid-write failure.
@@ -199,9 +203,7 @@ class FakeRadioController :
     var selectedDeviceAddress: String? = null
 
     /** Deterministic test hook invoked inside every [requestRebootOta] call with the request parameters. */
-    var onRequestRebootOta: suspend (requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) -> Unit =
-        { _, _, _, _ ->
-        }
+    var onRequestRebootOta: suspend (destNum: Int, mode: Int, hash: ByteArray?) -> Unit = { _, _, _ -> }
 
     init {
         registerResetAction {
@@ -243,7 +245,7 @@ class FakeRadioController :
             editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
-            onRequestRebootOta = { _, _, _, _ -> }
+            onRequestRebootOta = { _, _, _ -> }
             gattCacheInvalidationRequested = false
             beforeRestoreLocalConfiguration = {}
             selectedDeviceAddress = null
@@ -280,7 +282,11 @@ class FakeRadioController :
 
     override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
 
-    override suspend fun refreshMetadata(destNum: Int, requestId: Int) {}
+    override suspend fun refreshMetadata(destNum: Int): NodeRequest = NodeRequest.NONE
+
+    override fun newRemoteShellSessionId(): Int? = null
+
+    override suspend fun sendRemoteShell(destNum: Int, frame: org.meshtastic.proto.RemoteShell) {}
 
     val displayMirrorCalls = mutableListOf<Boolean>()
     var displayFrameRequests = 0
@@ -439,8 +445,8 @@ class FakeRadioController :
 
     override suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit> = writeResult
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
-        onRequestRebootOta(requestId, destNum, mode, hash)
+    override suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?) {
+        onRequestRebootOta(destNum, mode, hash)
     }
 
     override suspend fun shutdown(destNum: Int): AdminResult<Unit> = writeResult
@@ -457,17 +463,18 @@ class FakeRadioController :
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {}
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position): NodeRequest = NodeRequest.NONE
 
-    override suspend fun requestUserInfo(destNum: Int, requestId: Int) {}
+    override suspend fun requestUserInfo(destNum: Int): NodeRequest = NodeRequest.NONE
 
-    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
+    override suspend fun requestTraceroute(destNum: Int): NodeRequest = NodeRequest.NONE
 
-    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
+    override suspend fun requestTelemetry(destNum: Int, type: TelemetryType): NodeRequest = NodeRequest.NONE
 
-    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        neighborInfoRequests += requestId to destNum
+    override suspend fun requestNeighborInfo(destNum: Int): NodeRequest {
+        neighborInfoRequests += destNum
         requestNeighborInfoFailure?.let { throw it }
+        return NodeRequest.NONE
     }
 
     private fun Throwable.containsCauseIdentity(expected: Throwable): Boolean {

@@ -138,7 +138,7 @@ class Esp32OtaUpdateHandlerTest {
         // makes the notification arrive after those steps on every dispatcher — no fixed-delay sibling coroutine
         // that can fire too early (or too late) under slower host timing.
         confirmationMessage?.let { msg ->
-            radioController.onRequestRebootOta = { _, _, _, _ ->
+            radioController.onRequestRebootOta = { _, _, _ ->
                 radioController.setClientNotification(
                     ClientNotification.Builder().also { wb -> wb.message = msg }.build(),
                 )

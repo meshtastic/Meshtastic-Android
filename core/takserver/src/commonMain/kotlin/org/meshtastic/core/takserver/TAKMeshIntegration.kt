@@ -32,9 +32,9 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.repository.TakServerIntegration
@@ -57,7 +57,7 @@ import kotlin.time.Duration.Companion.minutes
  * reporting both as the same opaque "failed".
  */
 internal sealed interface TakSendOutcome {
-    /** The CoT was successfully handed to [CommandSender.sendData] as [wireBytes] bytes. */
+    /** The CoT was successfully handed to [PacketHandler.sendData] as [wireBytes] bytes. */
     data class Sent(val wireBytes: Int) : TakSendOutcome
 
     /**
@@ -93,7 +93,7 @@ internal sealed interface TakSendOutcome {
 @Suppress("TooManyFunctions")
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
-    private val commandSender: CommandSender,
+    private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
     private val nodeRepository: NodeRepository,
@@ -309,7 +309,7 @@ class TAKMeshIntegration(
                     dataType = PortNum.ATAK_PLUGIN_V2.value,
                     channel = takPrefs.takServerChannel.value,
                 )
-            commandSender.sendData(dataPacket)
+            packetHandler.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
         } catch (e: CancellationException) {
@@ -360,7 +360,7 @@ class TAKMeshIntegration(
                     dataType = PortNum.ATAK_PLUGIN.value,
                     channel = takPrefs.takServerChannel.value,
                 )
-            commandSender.sendData(dataPacket)
+            packetHandler.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
         } catch (e: CancellationException) {

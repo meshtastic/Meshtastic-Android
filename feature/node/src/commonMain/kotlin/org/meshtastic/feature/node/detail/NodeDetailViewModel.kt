@@ -116,7 +116,6 @@ class NodeDetailViewModel(
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
     private val snackbarManager: SnackbarManager,
-    private val nakWatcher: RequestNakWatcher,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : ViewModel() {
 
@@ -227,9 +226,8 @@ class NodeDetailViewModel(
      */
     fun refreshMetadata(destNum: Int, longName: String) = safeLaunch(tag = "refreshMetadata") {
         try {
-            nakWatcher.watch(Res.string.request_metadata, longName) { id ->
-                queryController.refreshMetadata(destNum, id)
-            }
+            val pending = queryController.refreshMetadata(destNum)
+            showNodeRequestNak(pending, Res.string.request_metadata, longName, snackbarManager, resolveUiText)
         } catch (e: PacketQueueRejectedException) {
             showNodeRequestFailure(e, QUEUE_REJECTION_LOG_MESSAGE, snackbarManager, resolveUiText)
         } catch (e: LocalNodeUnavailableException) {

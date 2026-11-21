@@ -327,6 +327,7 @@ class SdkTcpRoomTest {
                 radio,
                 lazy { mock(MockMode.autofill) },
                 state,
+                nodeManager,
                 serviceScope,
             )
 
@@ -384,16 +385,6 @@ class SdkTcpRoomTest {
         val lockdown =
             LockdownCoordinatorImpl(
                 state,
-                CommandSenderImpl(
-                    mock(MockMode.autofill),
-                    nodeManager,
-                    config,
-                    mock(MockMode.autofill),
-                    mock(MockMode.autofill),
-                    mock(MockMode.autofill),
-                    serviceScope,
-                    radio,
-                ),
                 passphraseStore,
                 radio,
                 lazy { connectionManager },

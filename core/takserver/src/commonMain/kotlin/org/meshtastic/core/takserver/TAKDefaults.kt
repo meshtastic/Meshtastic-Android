@@ -57,7 +57,7 @@ internal const val TAK_DIRECT_MESSAGE_PARTS_MIN = 3
 /**
  * Hard cap on the size of a TAK v2 wire payload we will hand to the mesh layer.
  *
- * `CommandSenderImpl.sendData` checks `Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)` where
+ * `PacketHandlerImpl.sendData` checks `Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)` where
  * `DATA_PAYLOAD_LEN = 233`. That 233 applies to the ENTIRE encoded `Data` proto (portnum tag + payload length-delim +
  * reply_id + emoji), not just the `payload` bytes. The wrapper for a port-78 (`ATAK_PLUGIN_V2`) message costs roughly:
  * * portnum varint + tag: 2 bytes

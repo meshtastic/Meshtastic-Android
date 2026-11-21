@@ -20,61 +20,101 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
-import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.proto.MeshPacket
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.request_failed_from
+import org.meshtastic.core.resources.user_info
 import org.meshtastic.proto.Routing
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CommonNodeRequestActionsTest {
     private val radioController: RadioController = mock()
     private val snackbarManager = RecordingSnackbarManager()
-    private val actions =
+
+    private fun TestScope.actions(resolveUiText: suspend (UiText) -> String = resolveNodeRequestFailureUiText) =
         CommonNodeRequestActions(
             radioController = radioController,
             snackbarManager = snackbarManager,
-            analytics = mock<PlatformAnalytics>(),
-            nakWatcher = testNakWatcher(radioController),
-            resolveUiText = resolveNodeRequestFailureUiText,
+            analytics = mock<PlatformAnalytics>(MockMode.autofill),
+            serviceScope = backgroundScope.asServiceScope(),
+            resolveUiText = resolveUiText,
         )
 
-    @BeforeTest
-    fun setUp() {
-        snackbarManager.messages.clear()
-    }
+    private fun TestScope.sendingActions() = actions { "feedback" }
+
+    private fun answered(requestId: Int = 42) = NodeRequest(requestId) { null }
 
     @Test
     fun `missing local identity uses the same localized request feedback`() = runTest {
-        every { radioController.generatePacketId() } returns 41
-        everySuspend { radioController.requestUserInfo(1234, 41) } throws LocalNodeUnavailableException("local node")
+        everySuspend { radioController.requestUserInfo(1234) } throws LocalNodeUnavailableException("local node")
 
-        actions.requestUserInfo(destNum = 1234, longName = "Test Node")
+        actions().requestUserInfo(destNum = 1234, longName = "Test Node")
 
         assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
     }
 
     @Test
+    fun `a request the mesh refuses shows which request failed and why`() = runTest {
+        everySuspend { radioController.requestUserInfo(1234) } returns
+            NodeRequest(41) { Routing.Error.NOT_AUTHORIZED.value }
+        val resolved = mutableListOf<UiText>()
+
+        actions {
+            resolved += it
+            ""
+        }
+            .requestUserInfo(destNum = 1234, longName = "Test Node")
+        runCurrent()
+
+        val nak = resolved.filterIsInstance<UiText.Resource>().single { it.res == Res.string.request_failed_from }
+        assertEquals(
+            listOf(Res.string.user_info, "Test Node", getStringResFrom(Routing.Error.NOT_AUTHORIZED.value)),
+            nak.args.toList(),
+        )
+    }
+
+    @Test
+    fun `an answered request shows no failure`() = runTest {
+        everySuspend { radioController.requestUserInfo(1234) } returns answered()
+        val resolved = mutableListOf<UiText>()
+
+        actions {
+            resolved += it
+            ""
+        }
+            .requestUserInfo(destNum = 1234, longName = "Test Node")
+        runCurrent()
+
+        assertTrue(resolved.filterIsInstance<UiText.Resource>().none { it.res == Res.string.request_failed_from })
+    }
+
+    @Test
     fun `traceroute queue rejection is surfaced without starting the request timer`() = runTest {
-        val rejection = PacketQueueRejectedException("Traceroute request")
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(42, 1234) } throws rejection
+        val actions = actions()
+        everySuspend { radioController.requestTraceroute(1234) } throws PacketQueueRejectedException("Traceroute")
 
         actions.requestTraceroute(destNum = 1234, longName = "Test Node")
 
@@ -84,9 +124,8 @@ class CommonNodeRequestActionsTest {
 
     @Test
     fun `neighbor queue rejection is surfaced without starting the request timer`() = runTest {
-        val rejection = PacketQueueRejectedException("Neighbor info request")
-        every { radioController.generatePacketId() } returns 43
-        everySuspend { radioController.requestNeighborInfo(43, 1234) } throws rejection
+        val actions = actions()
+        everySuspend { radioController.requestNeighborInfo(1234) } throws PacketQueueRejectedException("Neighbor")
 
         actions.requestNeighborInfo(destNum = 1234, longName = "Test Node")
 
@@ -94,50 +133,32 @@ class CommonNodeRequestActionsTest {
         assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
     }
 
-    private fun sendingActions() = CommonNodeRequestActions(
-        radioController = radioController,
-        snackbarManager = snackbarManager,
-        analytics = mock<PlatformAnalytics>(MockMode.autofill),
-        nakWatcher = testNakWatcher(radioController),
-        resolveUiText = { "feedback" },
-    )
-
     @Test
     fun `traceroute request stamps the shared cooldown`() = runTest {
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        everySuspend { radioController.requestTraceroute(any()) } returns answered()
         val sending = sendingActions()
 
         sending.requestTraceroute(destNum = 1234, longName = "Test Node")
 
         assertNotNull(sending.lastTracerouteTime.value)
-        verifySuspend(exactly(1)) { radioController.requestTraceroute(42, 1234) }
+        verifySuspend(exactly(1)) { radioController.requestTraceroute(1234) }
     }
 
     @Test
     fun `a rate limit refusal is recorded against the traceroute request`() = runTest {
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
-        val packets = MutableSharedFlow<MeshPacket>()
-        val sending =
-            CommonNodeRequestActions(
-                radioController = radioController,
-                snackbarManager = snackbarManager,
-                analytics = mock<PlatformAnalytics>(MockMode.autofill),
-                nakWatcher = testNakWatcher(radioController, packets = packets),
-                resolveUiText = { "feedback" },
-            )
+        everySuspend { radioController.requestTraceroute(any()) } returns
+            NodeRequest(42) { Routing.Error.RATE_LIMIT_EXCEEDED.value }
+        val sending = sendingActions()
 
         sending.requestTraceroute(destNum = 1234, longName = "Test Node")
-        packets.emit(routingNakPacket(requestId = 42, from = 1, error = Routing.Error.RATE_LIMIT_EXCEEDED))
+        runCurrent()
 
         assertEquals(mapOf(42 to Routing.Error.RATE_LIMIT_EXCEEDED.value), sending.tracerouteNaks.value)
     }
 
     @Test
     fun `second traceroute request inside the cooldown is not sent`() = runTest {
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        everySuspend { radioController.requestTraceroute(any()) } returns answered()
         val sending = sendingActions()
 
         sending.requestTraceroute(destNum = 1234, longName = "Test Node")
@@ -145,14 +166,17 @@ class CommonNodeRequestActionsTest {
         sending.requestTraceroute(destNum = 5678, longName = "Other Node")
 
         assertEquals(stamped, sending.lastTracerouteTime.value)
-        verifySuspend(exactly(1)) { radioController.requestTraceroute(any(), any()) }
+        verifySuspend(exactly(1)) { radioController.requestTraceroute(any()) }
     }
 
     @Test
     fun `concurrent traceroute requests send exactly once`() = runTest {
         val gate = CompletableDeferred<Unit>()
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(any(), any()) } calls { gate.await() }
+        everySuspend { radioController.requestTraceroute(any()) } calls
+            {
+                gate.await()
+                answered()
+            }
         val sending = sendingActions()
 
         val first = launch { sending.requestTraceroute(destNum = 1234, longName = "Test Node") }
@@ -162,23 +186,22 @@ class CommonNodeRequestActionsTest {
         first.join()
         second.join()
 
-        verifySuspend(exactly(1)) { radioController.requestTraceroute(any(), any()) }
+        verifySuspend(exactly(1)) { radioController.requestTraceroute(any()) }
         assertNotNull(sending.lastTracerouteTime.value)
     }
 
     @Test
     fun `failed traceroute send leaves the cooldown unclaimed`() = runTest {
-        every { radioController.generatePacketId() } returns 42
-        everySuspend { radioController.requestTraceroute(any(), any()) } throws PacketQueueRejectedException("x")
+        everySuspend { radioController.requestTraceroute(any()) } throws PacketQueueRejectedException("x")
         val sending = sendingActions()
 
         sending.requestTraceroute(destNum = 1234, longName = "Test Node")
         assertNull(sending.lastTracerouteTime.value)
 
-        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        everySuspend { radioController.requestTraceroute(any()) } returns answered()
         sending.requestTraceroute(destNum = 1234, longName = "Test Node")
 
         assertNotNull(sending.lastTracerouteTime.value)
-        verifySuspend(exactly(2)) { radioController.requestTraceroute(any(), any()) }
+        verifySuspend(exactly(2)) { radioController.requestTraceroute(any()) }
     }
 }

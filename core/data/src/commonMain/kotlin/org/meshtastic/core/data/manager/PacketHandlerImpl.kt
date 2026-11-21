@@ -17,12 +17,14 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import okio.ByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
@@ -30,28 +32,36 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.model.util.toOneLineString
-import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PersistedReactionId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.proto.Constants
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
-import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.QueueReceipt
 import org.meshtastic.sdk.SendFailure
 import org.meshtastic.sdk.SendOutcome
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -65,6 +75,7 @@ class PacketHandlerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val connectionStateProvider: ConnectionStateProvider,
+    private val nodeManager: NodeManager,
     private val scope: ServiceScope,
 ) : PacketHandler {
 
@@ -84,6 +95,23 @@ class PacketHandlerImpl(
          * just after the config handshake, so give it a moment before stamping a timeout.
          */
         internal val REARM_GRACE = 30.seconds
+
+        private const val PACKET_ID_MASK = 0xffffffffL
+        private const val PACKET_ID_SHIFT_BITS = 32
+
+        /** Firmware's `HOP_RELIABLE`, used when the radio's LoRa config sets no hop limit. */
+        private const val DEFAULT_HOP_LIMIT = 3
+    }
+
+    private val packetIdCounter = atomic(Random(nowMillis).nextLong().absoluteValue)
+
+    override val currentPacketId: Long
+        get() = packetIdCounter.value
+
+    override fun generatePacketId(): Int {
+        val numPacketIds = ((1L shl PACKET_ID_SHIFT_BITS) - 1)
+        val next = packetIdCounter.incrementAndGet() and PACKET_ID_MASK
+        return ((next % numPacketIds) + 1L).toInt()
     }
 
     private enum class StatusPersistence {
@@ -104,27 +132,6 @@ class PacketHandlerImpl(
 
     private data class Submission(val handle: PacedMessageHandle, val departureEpoch: Long)
 
-    override fun sendToRadio(p: ToRadio) {
-        if (!trySendToRadio(p)) {
-            Logger.w { "sendToRadio dropped: no active transport accepted outbound command" }
-        }
-    }
-
-    override fun trySendToRadio(p: ToRadio): Boolean = dispatchToRadio(p)
-
-    private fun dispatchToRadio(p: ToRadio): Boolean {
-        Logger.d { "Sending to radio ${p.toPIIString()}" }
-        val session = radioInterfaceService.activeSession.value
-        val dispatched = radioInterfaceService.trySendToRadio(p.encode())
-        if (!dispatched) return false
-
-        p.packet?.let { packet ->
-            logPacket(packet)
-            if (session != null) scope.handledLaunch { projectStatus(session, packet, MessageStatus.ENROUTE) }
-        }
-        return true
-    }
-
     private fun logPacket(packet: MeshPacket) {
         if (packet.decoded != null) {
             val packetToSave =
@@ -141,16 +148,87 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun sendToRadio(packet: MeshPacket): Boolean = enqueuePacket(packet, expectedVersion = null)
+    override suspend fun sendData(p: DataPacket) {
+        if (p.id == 0) p.id = generatePacketId()
+        require(p.dataType != 0) { "Port numbers must be non-zero!" }
+        val data =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP
+                    wb.payload = p.bytes ?: ByteString.EMPTY
+                    wb.reply_id = p.replyId ?: 0
+                    wb.emoji = p.emoji
+                }
+                .build()
+        if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
+            p.status = MessageStatus.ERROR
+            error("Message too long: ${Data.ADAPTER.encodedSize(data)} bytes")
+        }
+        p.status = MessageStatus.QUEUED
+        val packet = meshPacketFor(p, data)
+        if (packet == null || !sendToRadio(packet)) {
+            p.status = MessageStatus.ERROR
+            // Persistence owners treat a normal return as successful admission; throw so they can requeue or fail it.
+            throw PacketQueueRejectedException("Data packet")
+        }
+        p.time = nowMillis
+    }
 
-    override suspend fun sendToRadioForConnection(packet: MeshPacket, expectedConnectionVersion: Long): Boolean =
-        enqueuePacket(packet, expectedConnectionVersion)
+    /**
+     * The wire form of [p] under its persisted ID. The SDK's send builder assigns its own ID and carries no reply,
+     * emoji or PKI fields, so the durable send path builds the packet the SDK's paced queue then owns.
+     */
+    private fun meshPacketFor(p: DataPacket, data: Data): MeshPacket? {
+        val client =
+            radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession) ?: return null
+        val to = resolveNodeNum(NodeAddress.fromString(p.to))
+        val pki = p.channel == NodeAddress.PKC_CHANNEL_INDEX
+        // Firmware raises a zero hop limit only on a want_ack packet, so a zero would go out unrelayed.
+        val hopLimit =
+            p.hopLimit.takeIf { it > 0 }
+                ?: client.configBundle.value?.configs?.firstNotNullOfOrNull { it.lora }?.hop_limit?.takeIf { it > 0 }
+                ?: DEFAULT_HOP_LIMIT
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.to = to
+                wb.id = p.id
+                wb.want_ack = p.wantAck
+                wb.hop_limit = hopLimit
+                wb.channel = if (pki) 0 else p.channel
+                if (pki) {
+                    wb.pki_encrypted = true
+                    wb.public_key = publicKeyOf(to)
+                }
+                wb.decoded = data
+            }
+            .build()
+    }
 
-    private suspend fun enqueuePacket(packet: MeshPacket, expectedVersion: Long?): Boolean {
-        if (packet.id == 0) return false
-        return safeCatching { submit(packet, expectedVersion)?.handle?.awaitAdmission() == true }
+    /** The key [Node.hasPKC][org.meshtastic.core.model.Node.hasPKC] reads: the stored key, else the user's. */
+    private fun publicKeyOf(nodeNum: Int): ByteString {
+        val node = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val key = node?.let { it.publicKey ?: it.user.public_key } ?: ByteString.EMPTY
+        if (key.size == 0) Logger.w { "No public key for node ${nodeNum.toUInt()}, PKI encryption will fail" }
+        return key
+    }
+
+    private fun resolveNodeNum(address: NodeAddress): Int = when (address) {
+        NodeAddress.Broadcast -> NodeAddress.NODENUM_BROADCAST
+
+        NodeAddress.Local -> nodeManager.myNodeNum.value ?: 0
+
+        is NodeAddress.ByNum -> address.num
+
+        is NodeAddress.ById ->
+            nodeManager.getNodeById(address.id)?.num
+                ?: throw IllegalArgumentException("Unknown node ID ${address.id}")
+    }
+
+    override suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle? {
+        if (packet.id == 0) return null
+        return safeCatching { submit(packet, expectedVersion = null)?.handle?.takeIf { it.awaitAdmission() } }
             .onFailure { Logger.w(it) { "SDK send submission failed for packet ${packet.id.toUInt()}" } }
-            .getOrDefault(false)
+            .getOrNull()
     }
 
     override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult =

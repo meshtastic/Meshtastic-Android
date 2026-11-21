@@ -19,9 +19,9 @@ package org.meshtastic.core.takserver
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeMeshConfigHandler
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeTakPrefs
 import org.meshtastic.core.testing.TestDataFactory
@@ -41,7 +41,7 @@ class TakMeshTestRunnerTest {
 
     private class Harness(firmwareVersion: String?) {
         val serverManager = FakeTAKServerManager()
-        val commandSender = FakeCommandSender()
+        val packetHandler = FakePacketHandler()
         val serviceRepository = FakeServiceRepository()
         val meshConfigHandler = FakeMeshConfigHandler()
         val nodeRepository =
@@ -61,7 +61,7 @@ class TakMeshTestRunnerTest {
         val integration =
             TAKMeshIntegration(
                 takServerManager = serverManager,
-                commandSender = commandSender,
+                packetHandler = packetHandler,
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
@@ -97,7 +97,7 @@ class TakMeshTestRunnerTest {
         h.runner.runAll()
 
         val v2Results = h.runner.results.value.filter { it.protocol == TakProtocol.V2 }
-        val v2Sent = h.commandSender.sentPackets.count { it.dataType == PortNum.ATAK_PLUGIN_V2.value }
+        val v2Sent = h.packetHandler.sentPackets.count { it.dataType == PortNum.ATAK_PLUGIN_V2.value }
         assertEquals(v2Results.count { it.passed }, v2Sent, "every passing v2 result must correspond to a v2 send")
         assertTrue(v2Sent > 0, "at least one fixture must round-trip through the real v2 pipeline")
     }
@@ -112,7 +112,7 @@ class TakMeshTestRunnerTest {
         h.runner.runAll()
 
         val v1Results = h.runner.results.value.filter { it.protocol == TakProtocol.V1 }
-        val v1Sent = h.commandSender.sentPackets.count { it.dataType == PortNum.ATAK_PLUGIN.value }
+        val v1Sent = h.packetHandler.sentPackets.count { it.dataType == PortNum.ATAK_PLUGIN.value }
         assertEquals(v1Results.count { it.passed }, v1Sent, "every passing v1 result must correspond to a v1 send")
         assertTrue(v1Sent > 0, "PLI/GeoChat fixtures must still round-trip through the real v1 pipeline")
     }

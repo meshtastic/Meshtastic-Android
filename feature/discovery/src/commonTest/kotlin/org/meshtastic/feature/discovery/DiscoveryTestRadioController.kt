@@ -18,6 +18,7 @@ package org.meshtastic.feature.discovery
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Channel
@@ -44,7 +45,7 @@ internal class DiscoveryTestRadioController(private val delegate: FakeRadioContr
         }
 
     var requestNeighborInfoFailure: Exception? = null
-    val neighborInfoRequests = mutableListOf<Pair<Int, Int>>()
+    val neighborInfoRequests = mutableListOf<Int>()
 
     var selectedDeviceAddress: String?
         get() = delegate.selectedDeviceAddress
@@ -89,9 +90,7 @@ internal class DiscoveryTestRadioController(private val delegate: FakeRadioContr
         primaryChannel: Channel?,
     ): Boolean = deviceSwitchMutex.withLock {
         if (
-            expectedDeviceAddress == null ||
-            selectedDeviceAddress != expectedDeviceAddress ||
-            !acceptConditionalRestore
+            expectedDeviceAddress == null || selectedDeviceAddress != expectedDeviceAddress || !acceptConditionalRestore
         ) {
             return@withLock false
         }
@@ -100,10 +99,10 @@ internal class DiscoveryTestRadioController(private val delegate: FakeRadioContr
         true
     }
 
-    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        neighborInfoRequests += requestId to destNum
+    override suspend fun requestNeighborInfo(destNum: Int): NodeRequest {
+        neighborInfoRequests += destNum
         requestNeighborInfoFailure?.let { throw it }
-        delegate.requestNeighborInfo(requestId, destNum)
+        return delegate.requestNeighborInfo(destNum)
     }
 
     override suspend fun setDeviceAddress(address: String) {

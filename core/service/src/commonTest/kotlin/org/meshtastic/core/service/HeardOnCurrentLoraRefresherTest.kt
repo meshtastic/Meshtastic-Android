@@ -40,7 +40,6 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -92,7 +91,6 @@ class HeardOnCurrentLoraRefresherTest {
         }
 
     private fun TestScope.controller() = AdminControllerImpl(
-        commandSender = FakeCommandSender(),
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = radio,

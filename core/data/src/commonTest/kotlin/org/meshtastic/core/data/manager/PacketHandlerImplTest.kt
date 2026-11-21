@@ -27,15 +27,23 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.AwaitedSendStatus
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
@@ -49,8 +57,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.Routing
-import org.meshtastic.proto.ToRadio
-import org.meshtastic.proto.XModem
+import org.meshtastic.proto.User
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
@@ -59,6 +66,7 @@ import org.meshtastic.sdk.testing.FakeRadioTransport
 import org.meshtastic.sdk.testing.toFrame
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
@@ -198,7 +206,6 @@ class PacketHandlerImplTest {
         fixture.service.setConnectionState(ConnectionState.Disconnected)
         fixture.service.setConnectionState(ConnectionState.Connected)
 
-        assertFalse(fixture.handler.sendToRadioForConnection(packet(801), version))
         val result = fixture.handler.sendToRadioAndAwaitResultForConnection(packet(801), version)
         assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, result.status)
         assertFalse(result.dispatched)
@@ -228,11 +235,101 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `raw accessory commands still use transport admission`() = runTest {
+    fun `a data packet goes out under its persisted ID with its reply and emoji`() = runTest {
         val fixture = fixture()
-        val command = ToRadio.Builder().also { it.xmodemPacket = XModem.Builder().build() }.build()
-        assertTrue(fixture.handler.trySendToRadio(command))
-        assertEquals(command, ToRadio.ADAPTER.decode(fixture.radio.sentToRadio.single()))
+        val packet =
+            DataPacket(
+                to = NodeAddress.numToDefaultId(PEER),
+                bytes = "👍".encodeUtf8(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = 1,
+                replyId = 77,
+                wantAck = true,
+                emoji = 1,
+            )
+                .also { it.id = 901 }
+
+        fixture.handler.sendData(packet)
+        runCurrent()
+
+        val sent = fixture.transport.outboundPackets().single { it.decoded?.portnum == PortNum.TEXT_MESSAGE_APP }
+        assertEquals(901, sent.id)
+        assertEquals(PEER, sent.to)
+        assertEquals(1, sent.channel)
+        assertTrue(sent.want_ack)
+        assertEquals(77, sent.decoded?.reply_id)
+        assertEquals(1, sent.decoded?.emoji)
+        assertEquals(MessageStatus.QUEUED, packet.status)
+        assertTrue(packet.time > 0)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a data packet without its own hop limit goes out with firmware's default rather than zero`() = runTest {
+        val fixture = fixture()
+        val packet =
+            DataPacket(to = NodeAddress.ID_BROADCAST, bytes = "x".encodeUtf8(), dataType = PortNum.ATAK_PLUGIN.value)
+
+        fixture.handler.sendData(packet)
+        runCurrent()
+
+        val sent = fixture.transport.outboundPackets().single { it.decoded?.portnum == PortNum.ATAK_PLUGIN }
+        assertEquals(NodeAddress.NODENUM_BROADCAST, sent.to)
+        assertTrue(packet.id != 0)
+        // HOP_RELIABLE in firmware's MeshTypes.h; the handshake here carries no LoRa config.
+        assertEquals(3, sent.hop_limit)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a direct message on the PKI channel is encrypted to the stored key on channel 0`() = runTest {
+        val fixture = fixture()
+        val packet =
+            DataPacket(
+                to = NodeAddress.numToDefaultId(PEER),
+                bytes = "hi".encodeUtf8(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+
+        fixture.handler.sendData(packet)
+        runCurrent()
+
+        val sent = fixture.transport.outboundPackets().single { it.decoded?.portnum == PortNum.TEXT_MESSAGE_APP }
+        assertTrue(sent.pki_encrypted)
+        assertEquals(PEER_KEY, sent.public_key)
+        assertEquals(0, sent.channel)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a data packet the session refuses is marked failed and throws`() = runTest {
+        val fixture = fixture()
+        fixture.radio.disconnect()
+        val packet = DataPacket(to = NodeAddress.ID_BROADCAST, bytes = "x".encodeUtf8(), dataType = 1, time = 0)
+
+        assertFailsWith<PacketQueueRejectedException> { fixture.handler.sendData(packet) }
+
+        assertEquals(MessageStatus.ERROR, packet.status)
+        assertEquals(0L, packet.time)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a data packet over the encoded Data limit is refused before it is queued`() = runTest {
+        val fixture = fixture()
+        val packet =
+            DataPacket(
+                to = NodeAddress.ID_BROADCAST,
+                bytes = ByteString.of(*ByteArray(300) { 0x42 }),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+
+        val failure = assertFailsWith<IllegalStateException> { fixture.handler.sendData(packet) }
+
+        assertTrue(failure.message.orEmpty().contains("Message too long"))
+        assertEquals(MessageStatus.ERROR, packet.status)
+        assertTrue(fixture.sentTextIds().isEmpty())
         fixture.client.disconnect()
     }
 
@@ -251,6 +348,7 @@ class PacketHandlerImplTest {
             FakeRadioInterfaceService(backgroundScope).apply {
                 setDeviceAddress("tselected")
                 connect()
+                this.client = client
             }
         val service = FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) }
         val radioService =
@@ -271,6 +369,7 @@ class PacketHandlerImplTest {
                 radioService,
                 lazy { mock(MockMode.autofill) },
                 service,
+                nodeManager(),
                 backgroundScope.asServiceScope(),
             )
         return Fixture(handler, repository, service, radio, transport, client)
@@ -299,6 +398,12 @@ class PacketHandlerImplTest {
             transport.outboundPackets().filter { it.decoded?.portnum == PortNum.TEXT_MESSAGE_APP }.map { it.id }
     }
 
+    private fun nodeManager(): NodeManager = mock<NodeManager>().also {
+        dev.mokkery.every { it.myNodeNum } returns MutableStateFlow(LOCAL_NODE)
+        dev.mokkery.every { it.nodeDBbyNodeNum } returns
+            mapOf(PEER to Node(num = PEER, user = User.Builder().also { u -> u.public_key = PEER_KEY }.build()))
+    }
+
     private fun packet(id: Int, destination: Int = PEER): MeshPacket = MeshPacket.Builder()
         .also {
             it.id = id
@@ -312,6 +417,7 @@ class PacketHandlerImplTest {
     private companion object {
         const val LOCAL_NODE = 123
         const val PEER = 456
+        val PEER_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
         val PERSISTED_ID = PersistedPacketId(myNodeNum = LOCAL_NODE, uuid = 456L)
     }
 }

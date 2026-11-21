@@ -39,7 +39,6 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.LocalNodeUnavailableException
@@ -61,7 +60,14 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.send
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -80,7 +86,6 @@ class MeshConnectionManagerImpl(
     private val mqttManager: MqttManager,
     private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
-    private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
@@ -145,7 +150,7 @@ class MeshConnectionManagerImpl(
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
                                     locationManager.start(scope) { pos ->
-                                        val failure = safeCatching { commandSender.sendPosition(pos) }.exceptionOrNull()
+                                        val failure = safeCatching { sendOwnPosition(pos) }.exceptionOrNull()
                                         when (failure) {
                                             null -> locationRejectionLogged.value = false
 
@@ -343,12 +348,7 @@ class MeshConnectionManagerImpl(
                             myNodeNum = myNodeNum,
                             connectedVersion = connectedLifecycle.version,
                         ) {
-                            commandSender.requestTelemetryForConnection(
-                                commandSender.generatePacketId(),
-                                myNodeNum,
-                                type.ordinal,
-                                connectedLifecycle.version,
-                            )
+                            requestLocalTelemetry(type, myNodeNum, connectedLifecycle.version)
                         }
                     }
                 }
@@ -378,6 +378,46 @@ class MeshConnectionManagerImpl(
         } else {
             Logger.d { "$warning (still pending)" }
         }
+    }
+
+    private fun activeClient(operation: String): RadioClient =
+        radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession)
+            ?: throw PacketQueueRejectedException(operation)
+
+    /**
+     * Sends the phone's fix to our own node with the send builder, so its time and precision survive. Firmware delivers
+     * a packet addressed to itself locally, never over the air.
+     */
+    private suspend fun sendOwnPosition(pos: Position) {
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
+        val client = activeClient("Position update")
+        try {
+            client.send {
+                data(PortNum.POSITION_APP, pos.encode())
+                to(NodeId(myNum))
+            }
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
+        }
+        if (radioConfigRepository.localConfigFlow.first().position?.fixed_position != true) {
+            nodeManager.handleReceivedPosition(myNum, myNum, pos, nowMillis)
+        }
+    }
+
+    /** Asks our own node for [type] telemetry, only while [connectedVersion] still owns the connection. */
+    private suspend fun requestLocalTelemetry(type: TelemetryType, myNodeNum: Int, connectedVersion: Long) {
+        val operation = "$type telemetry request"
+        if (serviceRepository.connectionLifecycle.value.version != connectedVersion) {
+            throw PacketQueueRejectedException(operation)
+        }
+        val telemetry = activeClient(operation).telemetry
+        val result =
+            if (type == TelemetryType.LOCAL_STATS) {
+                telemetry.requestLocalStats()
+            } else {
+                telemetry.requestDevice(NodeId(myNodeNum))
+            }
+        if (result !is AdminResult.Success) Logger.w { "$operation was not answered: $result" }
     }
 
     private fun ownsPostHandshakeRequests(myNodeNum: Int, connectedVersion: Long): Boolean =

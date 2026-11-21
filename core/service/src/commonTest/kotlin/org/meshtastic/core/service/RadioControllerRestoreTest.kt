@@ -23,6 +23,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
@@ -44,6 +45,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -61,6 +63,7 @@ import kotlin.test.assertTrue
 class RadioControllerRestoreTest {
     private class Fixture {
         val commandSender: CommandSender = mock(MockMode.autofill)
+        val packetHandler: PacketHandler = mock(MockMode.autofill)
         val nodeManager: NodeManager = mock(MockMode.autofill)
         val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
         val meshPrefs: MeshPrefs = mock(MockMode.autofill)
@@ -92,6 +95,7 @@ class RadioControllerRestoreTest {
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
                 commandSender = commandSender,
+                packetHandler = packetHandler,
                 nodeManager = nodeManager,
                 radioInterfaceService = radioInterfaceService,
                 locationManager = locationManager,
@@ -129,7 +133,7 @@ class RadioControllerRestoreTest {
             )
 
         assertFalse(restored)
-        verifySuspend(exactly(0)) { fixture.commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { fixture.radioInterfaceService.adminForSession(any()) }
     }
 
     @Test
@@ -149,7 +153,7 @@ class RadioControllerRestoreTest {
             )
 
         assertFalse(restored)
-        verifySuspend(exactly(0)) { fixture.commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { fixture.radioInterfaceService.adminForSession(any()) }
     }
 
     @Test
@@ -226,12 +230,12 @@ class RadioControllerRestoreTest {
         runCurrent()
 
         assertFalse(restore.isCompleted, "restore must wait behind the in-flight device selection")
-        verifySuspend(exactly(0)) { fixture.commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { fixture.radioInterfaceService.adminForSession(any()) }
 
         releaseSwitch.complete(Unit)
         selection.join()
 
         assertFalse(restore.await())
-        verifySuspend(exactly(0)) { fixture.commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { fixture.radioInterfaceService.adminForSession(any()) }
     }
 }

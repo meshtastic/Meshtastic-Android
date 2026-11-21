@@ -31,7 +31,6 @@ import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
@@ -65,14 +64,14 @@ internal fun editSettingsFailureMessage(result: AdminResult<*>): String =
  * [AdminController] implementation: local/remote configuration, channels, owner, device lifecycle, and the
  * [editSettings] transaction.
  *
- * Focused collaborator of [RadioControllerImpl]. Standalone writes build [AdminMessage] protos for [CommandSender] and
- * may update local caches optimistically. The [editSettings] transaction runs on the active session's SDK admin API and
- * stages its local projections until the SDK reports the commit applied, so failed edits cannot publish settings the
- * device did not commit. The device remains the source of truth and re-sends its full config on every connection.
+ * Focused collaborator of [RadioControllerImpl]. Every command runs on the active session's SDK admin API; standalone
+ * writes may update local caches optimistically. The [editSettings] transaction runs on the active session's SDK admin
+ * API and stages its local projections until the SDK reports the commit applied, so failed edits cannot publish
+ * settings the device did not commit. The device remains the source of truth and re-sends its full config on every
+ * connection.
  */
 @Suppress("TooManyFunctions")
 internal class AdminControllerImpl(
-    private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val radio: RadioInterfaceService,
@@ -80,9 +79,6 @@ internal class AdminControllerImpl(
     private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
     private val scope: CoroutineScope,
 ) : AdminController {
-
-    private val myNodeNum: Int
-        get() = nodeManager.myNodeNum.value ?: 0
 
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
 
@@ -166,14 +162,19 @@ internal class AdminControllerImpl(
     }
 
     override fun setDisplayMirror(enabled: Boolean) {
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.set_display_mirror = enabled }.build()
-        }
+        launchLocal("Display mirror") { setDisplayMirror(enabled) }
     }
 
     override fun requestDisplayFrame() {
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.get_display_frame_request = true }.build()
+        launchLocal("Display frame") { requestDisplayFrame() }
+    }
+
+    /** Starts a local-only [command]; with no radio session there is no display to drive, so it is dropped. */
+    private fun launchLocal(operation: String, command: suspend AdminApi.() -> AdminResult<*>) {
+        try {
+            sessionAdmin.launch(operation, command = command)
+        } catch (e: PacketQueueRejectedException) {
+            Logger.d(e) { "$operation dropped without a radio session" }
         }
     }
 
@@ -260,9 +261,7 @@ internal class AdminControllerImpl(
     }
 
     override suspend fun playRingtone(destNum: Int) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.play_ringtone_request = true }.build()
-        }
+        launchOnNode("Play ringtone", destNum) { playRingtone() }
     }
 
     override suspend fun getRingtone(destNum: Int): AdminResult<String> = onNode(destNum, read = true) { getRingtone() }
@@ -307,7 +306,7 @@ internal class AdminControllerImpl(
 
     override suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit> = onNode(nodeNum) { enterDfuMode() }
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+    override suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
             AdminMessage.OTAEvent.Builder()
@@ -316,9 +315,7 @@ internal class AdminControllerImpl(
                     wb.ota_hash = hash?.toByteString() ?: ByteString.EMPTY
                 }
                 .build()
-        commandSender.sendAdmin(destNum, requestId) {
-            AdminMessage.Builder().also { wb -> wb.ota_request = otaEvent }.build()
-        }
+        launchOnNode("OTA request", destNum) { otaRequest(otaEvent) }
     }
 
     override suspend fun shutdown(destNum: Int): AdminResult<Unit> =

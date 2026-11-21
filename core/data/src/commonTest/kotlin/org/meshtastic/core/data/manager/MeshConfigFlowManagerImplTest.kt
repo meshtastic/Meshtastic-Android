@@ -34,7 +34,6 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -43,6 +42,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
@@ -63,7 +63,7 @@ class MeshConfigFlowManagerImplTest {
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
-    private val commandSender = mock<CommandSender>(MockMode.autofill)
+    private val packetHandler = FakePacketHandler()
     private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
@@ -97,7 +97,6 @@ class MeshConfigFlowManagerImplTest {
 
     @BeforeTest
     fun setUp() {
-        every { commandSender.getCurrentPacketId() } returns 100
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
         activeSessionFlow.value = activeSession
@@ -145,7 +144,7 @@ class MeshConfigFlowManagerImplTest {
                 radioConfigRepository = radioConfigRepository,
                 serviceStateWriter = serviceRepository,
                 analytics = analytics,
-                commandSender = commandSender,
+                packetHandler = packetHandler,
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radioInterfaceService,
                 scope = testScope.asServiceScope(),

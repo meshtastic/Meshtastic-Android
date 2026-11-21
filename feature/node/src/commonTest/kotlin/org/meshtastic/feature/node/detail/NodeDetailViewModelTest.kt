@@ -92,7 +92,6 @@ class NodeDetailViewModelTest {
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
         snackbarManager = snackbarManager,
-        nakWatcher = testNakWatcher(),
         resolveUiText = resolveNodeDetailUiTextForTest,
     )
 

@@ -49,6 +49,7 @@ import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
@@ -111,7 +112,8 @@ internal suspend fun restoreLocalConfigurationIfOwned(
 class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
-    private val commandSender: CommandSender,
+    commandSender: CommandSender,
+    private val packetHandler: PacketHandler,
     private val nodeManager: NodeManager,
     private val radioInterfaceService: RadioInterfaceService,
     private val locationManager: MeshLocationManager,
@@ -129,7 +131,6 @@ class RadioControllerImpl(
     private val deviceAddressChangeHook: DeviceAddressChangeHook,
 ) : RadioController,
     AdminController by AdminControllerImpl(
-        commandSender = commandSender,
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = radioInterfaceService,
@@ -146,7 +147,8 @@ class RadioControllerImpl(
         scope = scope,
     ),
     MessagingController by MessagingControllerImpl(
-        commandSender,
+        packetHandler,
+        radioInterfaceService,
         SessionAdmin(radioInterfaceService, scope),
         nodeManager,
         nodeRepository,
@@ -161,7 +163,7 @@ class RadioControllerImpl(
         packetRepository,
         scope,
     ),
-    QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
+    QueryController by QueryControllerImpl(commandSender, radioInterfaceService, nodeManager, uiPrefs, scope) {
 
     private val deviceSwitchMutex = Mutex()
 
@@ -271,7 +273,7 @@ class RadioControllerImpl(
 
     // ── Packet ID & Location ────────────────────────────────────────────────
 
-    override fun generatePacketId(): Int = commandSender.generatePacketId()
+    override fun generatePacketId(): Int = packetHandler.generatePacketId()
 
     override suspend fun restoreLocalConfiguration(
         expectedDeviceAddress: String?,

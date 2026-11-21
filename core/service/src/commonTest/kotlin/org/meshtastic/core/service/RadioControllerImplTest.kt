@@ -62,6 +62,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -81,6 +82,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminApi
@@ -105,6 +107,7 @@ class RadioControllerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
+    private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val locationManager: MeshLocationManager = mock(MockMode.autofill)
@@ -177,6 +180,7 @@ class RadioControllerImplTest {
             serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
             commandSender = commandSender,
+            packetHandler = packetHandler,
             nodeManager = nodeManager,
             radioInterfaceService = radioInterfaceService,
             locationManager = locationManager,
@@ -374,13 +378,13 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun sendMessageDelegatesToCommandSender() = runTest {
+    fun sendMessageDelegatesToPacketHandler() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 456)
         val packet = DataPacket(to = NodeAddress.ID_BROADCAST, channel = 1, text = "ping")
 
         controller.sendMessage(packet)
 
-        verifySuspend { commandSender.sendData(packet) }
+        verifySuspend { packetHandler.sendData(packet) }
         verifySuspend { dataHandler.rememberDataPacket(packet, 456, false) }
     }
 
@@ -389,7 +393,7 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 456)
         val packet = DataPacket(to = NodeAddress.ID_BROADCAST, channel = 1, text = "ping")
         val rejection = PacketQueueRejectedException("Data packet")
-        everySuspend { commandSender.sendData(packet) } throws rejection
+        everySuspend { packetHandler.sendData(packet) } throws rejection
 
         val failure = assertFailsWith<PacketQueueRejectedException> { controller.sendMessage(packet) }
 
@@ -732,11 +736,11 @@ class RadioControllerImplTest {
         val node = Node(num = 1234, user = user)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to node)
         every { nodeManager.getMyId() } returns "!abcd1234"
-        // Production CommandSenderImpl.sendData stamps QUEUED on successful queue admission. DataPacket.status is
+        // Production PacketHandlerImpl.sendData stamps QUEUED on successful queue admission. DataPacket.status is
         // nullable but defaults to UNKNOWN, so the default value does not exercise the controller's null fallback.
         // Mirror the production stamp here so this assertion exercises the realistic happy-path contract; the explicit
-        // ERROR-stamping path is covered by sendReactionPersistsStatusStampedByCommandSender.
-        everySuspend { commandSender.sendData(any()) } calls
+        // ERROR-stamping path is covered by sendReactionPersistsStatusStampedByPacketHandler.
+        everySuspend { packetHandler.sendData(any()) } calls
             {
                 (it.args[0] as DataPacket).status = MessageStatus.QUEUED
             }
@@ -747,7 +751,7 @@ class RadioControllerImplTest {
         controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
 
         // Reaction must be persisted (not fire-and-forget) with the queue-admission QUEUED status.
-        verifySuspend { commandSender.sendData(any()) }
+        verifySuspend { packetHandler.sendData(any()) }
         assertEquals(MessageStatus.QUEUED, reactions.single().status)
     }
 
@@ -765,7 +769,7 @@ class RadioControllerImplTest {
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
         every { nodeManager.getMyId() } returns "!abcd1234"
         val rejection = PacketQueueRejectedException("Reaction")
-        everySuspend { commandSender.sendData(any()) } calls
+        everySuspend { packetHandler.sendData(any()) } calls
             {
                 (it.args[0] as DataPacket).status = MessageStatus.ERROR
                 throw rejection
@@ -793,7 +797,7 @@ class RadioControllerImplTest {
                 .build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
         every { nodeManager.getMyId() } returns "!abcd1234"
-        everySuspend { commandSender.sendData(any()) } calls { (it.args[0] as DataPacket).status = null }
+        everySuspend { packetHandler.sendData(any()) } calls { (it.args[0] as DataPacket).status = null }
         val reactions = mutableListOf<Reaction>()
         everySuspend { packetRepository.insertReaction(capture(reactions), any()) } returns Unit
 
@@ -956,34 +960,30 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun playRingtoneSendsPlayRequestWithoutAskingForAResponse() = runTest {
-        val controller = createController(scope = backgroundScope)
-
-        var sentTo: Int? = null
-        var wantResponse: Boolean? = null
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                sentTo = it.args[0] as Int
-                wantResponse = it.args[2] as Boolean
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
+    fun playRingtoneAsksTheTargetNodeToPlay() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
 
         controller.playRingtone(destNum = 101)
+        runCurrent()
 
-        assertEquals(101, sentTo)
-        assertEquals(false, wantResponse)
-        assertEquals(true, sentMessage?.play_ringtone_request)
+        assertEquals(listOf("playRingtone"), admin.commands)
+        assertEquals(listOf(NodeId(101)), admin.targets)
     }
 
     @Test
-    fun refreshMetadataSendsAdminWithWantResponse() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun esp32OtaRequestCarriesTheRebootModeAndFirmwareHash() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
+        val hash = ByteArray(32) { it.toByte() }
 
-        controller.refreshMetadata(destNum = 101)
+        controller.requestRebootOta(destNum = 1234, mode = OTAMode.OTA_BLE.value, hash = hash)
+        runCurrent()
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        val event = admin.otaEvents.single()
+        assertEquals(OTAMode.OTA_BLE, event.reboot_ota_mode)
+        assertEquals(hash.toByteString(), event.ota_hash)
+        assertTrue(admin.targets.isEmpty())
     }
 
     /** SDK admin double: records transaction writes and, like the SDK, commits even when the block throws. */
@@ -1040,6 +1040,15 @@ class RadioControllerImplTest {
         override suspend fun nodeDbReset(preserveFavorites: Boolean) = record("nodeDbReset:$preserveFavorites")
 
         override suspend fun enterDfuMode() = record("dfu")
+
+        override suspend fun playRingtone() = record("playRingtone")
+
+        val otaEvents = mutableListOf<AdminMessage.OTAEvent>()
+
+        override suspend fun otaRequest(event: AdminMessage.OTAEvent): AdminResult<Unit> {
+            otaEvents += event
+            return AdminResult.Success(Unit)
+        }
 
         override suspend fun setFixedPosition(position: org.meshtastic.proto.Position) =
             record("fixed_position:${position.latitude_i}")

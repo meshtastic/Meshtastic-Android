@@ -29,9 +29,7 @@ import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.EditSettingsTransactionException
-import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -278,8 +276,8 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `FakeCommandSender mirrors queued status after successful admission`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler mirrors queued status after successful admission`() = runTest {
+        val sender = FakePacketHandler()
         val packet =
             DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value).apply { errorMessage = "original" }
 
@@ -303,20 +301,20 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `FakeCommandSender rejects data packets without a port number before assigning an id`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler rejects data packets without a port number before assigning an id`() = runTest {
+        val sender = FakePacketHandler()
         val packet = DataPacket(bytes = null, dataType = 0)
-        val nextPacketId = sender.getCurrentPacketId()
+        val nextPacketId = sender.currentPacketId
 
         assertFailsWith<IllegalArgumentException> { sender.sendData(packet) }
         assertEquals(0, packet.id)
-        assertEquals(nextPacketId, sender.getCurrentPacketId())
+        assertEquals(nextPacketId, sender.currentPacketId)
         assertTrue(sender.sentPackets.isEmpty())
     }
 
     @Test
-    fun `FakeCommandSender mirrors rejected data admission`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler mirrors rejected data admission`() = runTest {
+        val sender = FakePacketHandler()
         val rejection = PacketQueueRejectedException("Test packet")
         val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value, time = 123L)
         sender.sendDataFailure = rejection
@@ -327,79 +325,6 @@ class RepositoryFakesTest {
         assertEquals(MessageStatus.ERROR, packet.status)
         assertEquals(123L, packet.time)
         assertTrue(sender.sentPackets.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender records retryable admin and telemetry requests and clears them on reset`() = runTest {
-        val sender = FakeCommandSender()
-        val adminMessage = AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
-
-        sender.sendAdmin(destNum = 123, requestId = 7, wantResponse = true) { adminMessage }
-        sender.requestTelemetry(requestId = 8, destNum = 456, typeValue = 2)
-
-        assertEquals(
-            listOf(FakeCommandSender.AdminRequest(123, 7, wantResponse = true, adminMessage)),
-            sender.adminRequests,
-        )
-        assertEquals(listOf(FakeCommandSender.TelemetryRequest(8, 456, 2)), sender.telemetryRequests)
-
-        sender.reset()
-
-        assertTrue(sender.adminRequests.isEmpty())
-        assertTrue(sender.telemetryRequests.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender accepts local-node failures on command paths`() = runTest {
-        val sender = FakeCommandSender()
-        sender.commandFailure = LocalNodeUnavailableException("Test command")
-
-        assertFailsWith<LocalNodeUnavailableException> { sender.requestUserInfo(123) }
-    }
-
-    @Test
-    fun `FakeCommandSender applies command failure before data mutation`() = runTest {
-        val failure = LocalNodeUnavailableException("Test command")
-        val sender = FakeCommandSender().apply { commandFailure = failure }
-        val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value)
-
-        assertSame(failure, assertFailsWith<LocalNodeUnavailableException> { sender.sendData(packet) })
-        assertEquals(0, packet.id)
-        assertTrue(sender.sentPackets.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender applies command failure before immediate command mutation`() {
-        val failure = PacketQueueRejectedException("queue closed")
-        val sender = FakeCommandSender().apply { commandFailure = failure }
-        val message = AdminMessage.Builder().also { wb -> wb.set_time_only = 123 }.build()
-
-        assertSame(failure, assertFailsWith<PacketQueueRejectedException> { sender.sendAdminImmediate(7) { message } })
-        assertSame(
-            failure,
-            assertFailsWith<PacketQueueRejectedException> {
-                sender.sendLockdownPassphrase("secret", boots = 1, hours = 2, maxSessionSeconds = 3, disable = false)
-            },
-        )
-        assertSame(failure, assertFailsWith<PacketQueueRejectedException> { sender.sendLockNow() })
-
-        assertTrue(sender.adminRequests.isEmpty())
-        assertNull(sender.lastPassphrase)
-        assertFalse(sender.lockNowCalled)
-    }
-
-    @Test
-    fun `FakeCommandSender records connection ownership on post-handshake requests`() = runTest {
-        val sender = FakeCommandSender()
-
-        sender.requestTelemetryForConnection(
-            requestId = 8,
-            destNum = 123,
-            typeValue = 2,
-            expectedConnectionVersion = 41,
-        )
-
-        assertEquals(41L, sender.telemetryRequests.single().expectedConnectionVersion)
     }
 
     @Test

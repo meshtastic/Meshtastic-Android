@@ -54,7 +54,7 @@ class DiscoveryTestRadioControllerTest {
         val controller = DiscoveryTestRadioController()
         controller.requestNeighborInfoFailure = IllegalStateException("Neighbor info failed")
 
-        assertFailsWith<IllegalStateException> { controller.requestNeighborInfo(requestId = 1, destNum = 2) }
+        assertFailsWith<IllegalStateException> { controller.requestNeighborInfo(destNum = 2) }
     }
 
     @Test

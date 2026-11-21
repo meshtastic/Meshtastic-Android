@@ -298,7 +298,7 @@ class AiFunctionProviderImplTest {
 
     // --- sendMessage length boundary tests ---
     //
-    // The ceiling is UTF-8 *bytes*, not characters: CommandSenderImpl.sendData applies
+    // The ceiling is UTF-8 *bytes*, not characters: PacketHandlerImpl.sendData applies
     // Constants.DATA_PAYLOAD_LEN (233) to the whole encoded Data proto, leaving
     // AiFunctionProviderImpl.MAX_MESSAGE_LENGTH bytes for the text itself.
 
@@ -368,7 +368,7 @@ class AiFunctionProviderImplTest {
 
     @Test
     fun maxMessageLength_is_the_largest_text_the_send_path_will_encode() {
-        // Pins the constant to the predicate CommandSenderImpl.sendData actually applies, so a change to the
+        // Pins the constant to the predicate PacketHandlerImpl.sendData actually applies, so a change to the
         // Data proto's framing fails here instead of in the send queue.
         fun encodesWithinLimit(byteCount: Int): Boolean {
             val data =

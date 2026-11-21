@@ -163,8 +163,8 @@ interface AdminController {
     /** Commands a node to reboot into DFU mode; firmware answers nothing, so success means sent. */
     suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit>
 
-    /** Initiates an OTA reboot request. */
-    suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)
+    /** Sends an ESP32 OTA reboot request without waiting for the node's answer. */
+    suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?)
 
     /** Commands a node to shut down. */
     suspend fun shutdown(destNum: Int): AdminResult<Unit>
