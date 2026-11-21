@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-11-20
+last_updated: 2026-11-21
 description: Connect your phone, desktop or browser to a Meshtastic node over Bluetooth, USB, TCP/IP or WebSocket.
 aliases:
   - bluetooth
@@ -155,7 +155,7 @@ Network discovery uses mDNS, which only works when both your phone and the node 
 
 **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol. It does not configure Wi-Fi on an ordinary Meshtastic node. It is available on Android, desktop and web.
 
-1. Open the screen and wait while the app finds the device over Bluetooth.
+1. Open the screen and wait while the app searches over Bluetooth, then tap your device in the list. Each row shows the device's name, address and signal strength. Tap **Scan again** if it is not listed. A link that names a device shows its name and address first; tap **Connect** to continue.
 2. Tap **Scan for Networks**, then pick a network from **Available Networks**, or turn on **Hidden network** and type the name into **Network Name (SSID)**.
 3. Enter the **Password** and tap **Apply**.
 
