@@ -36,6 +36,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.toFixedPositionProto
@@ -68,6 +69,7 @@ internal class AdminControllerImpl(
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val radio: RadioInterfaceService,
+    private val sessionAdmin: SessionAdmin,
     private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
     private val scope: CoroutineScope,
 ) : AdminController {
@@ -154,8 +156,10 @@ internal class AdminControllerImpl(
                     wb.touch_y = touchY
                 }
                 .build()
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.send_input_event = inputEvent }.build()
+        try {
+            sessionAdmin.launch("Input event") { sendInputEvent(inputEvent) }
+        } catch (e: PacketQueueRejectedException) {
+            Logger.d(e) { "Input event dropped without a radio session" }
         }
     }
 

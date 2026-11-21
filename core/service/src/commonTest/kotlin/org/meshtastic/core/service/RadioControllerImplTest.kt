@@ -431,8 +431,9 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun sendSharedContactCallsCommandSenderAdminAwait() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun sendSharedContactReportsTheSdkResult() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val nodeNum = 321
         val user =
             User.Builder()
@@ -445,12 +446,12 @@ class RadioControllerImplTest {
                 .build()
         val node = Node(num = nodeNum, user = user, manuallyVerified = true)
         every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns node
-        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
 
-        val result = controller.sendSharedContact(nodeNum)
+        assertTrue(controller.sendSharedContact(nodeNum))
+        assertEquals(listOf("contact:321:true"), admin.commands)
 
-        assertTrue(result)
-        verifySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        admin.contactResult = AdminResult.Timeout
+        assertFalse(controller.sendSharedContact(nodeNum))
     }
 
     @Test
@@ -748,20 +749,21 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun setFavoriteSendsAdminAndUpdatesState() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun setFavoriteSendsTheSdkCommandAndUpdatesState() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setFavorite(99, favorite = true)
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(listOf("favorite:99:true"), admin.commands)
         verify { nodeManager.updateNode(any(), any(), any()) }
     }
 
     @Test
     fun unfavoritingClearsTheNodesLowBatteryWarning() = runTest {
-        val controller = createController(scope = backgroundScope)
+        val controller = editController(backgroundScope, recordingAdmin())
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = true)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
@@ -772,84 +774,112 @@ class RadioControllerImplTest {
 
     @Test
     fun setFavoriteIsNoOpWhenAlreadyInRequestedState() = runTest {
-        val controller = createController(scope = backgroundScope)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = true)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setFavorite(99, favorite = true)
 
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
         verify(exactly(0)) { nodeManager.updateNode(any(), any(), any()) }
     }
 
     @Test
-    fun setIgnoredSendsAdminUpdatesStateAndFiltersPackets() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun setIgnoredSendsTheSdkCommandUpdatesStateAndFiltersPackets() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isIgnored = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setIgnored(99, ignored = true)
         runCurrent()
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(listOf("ignored:99:true"), admin.commands)
         verify { nodeManager.updateNode(any(), any(), any()) }
         verifySuspend { packetRepository.updateFilteredBySender("!node99", true) }
     }
 
     @Test
-    fun toggleMutedSendsAdminAndUpdatesState() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun toggleMutedSendsTheSdkCommandAndUpdatesState() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isMuted = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.toggleMuted(99)
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(listOf("muted:99"), admin.commands)
         verify { nodeManager.updateNode(any(), any(), any()) }
     }
 
     @Test
+    fun nodeCommandsWithoutASessionAreRejectedBeforeTheLocalUpdate() = runTest {
+        val controller = editController(backgroundScope, recordingAdmin(), activeSession = MutableStateFlow(null))
+        val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = false)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        assertFailsWith<PacketQueueRejectedException> { controller.setFavorite(99, favorite = true) }
+
+        verify(exactly(0)) { nodeManager.updateNode(any(), any(), any()) }
+    }
+
+    @Test
     fun nodeManagementReturnsEarlyWhenMyNodeNumIsNull() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = null)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = null)
 
         controller.setFavorite(99, favorite = true)
         controller.setIgnored(99, ignored = true)
         controller.toggleMuted(99)
 
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
     }
 
     @Test
-    fun removeByNodenumAlwaysRemovesLocallyAndSendsAdminWhenConnected() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun removeByNodenumAlwaysRemovesLocallyAndSendsTheSdkCommandWhenConnected() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
 
         controller.removeByNodenum(packetId = 1, nodeNum = 55)
 
         verifySuspend { nodeManager.removeByNodenum(55) }
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(listOf("remove:55"), admin.commands)
     }
 
     @Test
-    fun removeByNodenumRetainsLocalRemovalWhenAdminQueueRejects() = runTest {
-        val controller = createController(scope = backgroundScope)
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws
-            PacketQueueRejectedException("Remove node")
+    fun removeByNodenumRetainsLocalRemovalWithoutASession() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, activeSession = MutableStateFlow(null))
 
         controller.removeByNodenum(packetId = 1, nodeNum = 55)
 
         verifySuspend { nodeManager.removeByNodenum(55) }
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
+    }
+
+    @Test
+    fun sendInputEventSendsTheSdkCommandAndIsDroppedWithoutASession() = runTest {
+        val activeSession = MutableStateFlow<RadioSessionContext?>(EDIT_SESSION)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, activeSession = activeSession)
+
+        controller.sendInputEvent(eventCode = 7)
+        activeSession.value = null
+        controller.sendInputEvent(eventCode = 8)
+
+        assertEquals(listOf("input:7"), admin.commands)
     }
 
     @Test
     fun removeByNodenumRemovesLocallyEvenWhenDisconnected() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = null)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = null)
 
         controller.removeByNodenum(packetId = 1, nodeNum = 55)
 
         verifySuspend { nodeManager.removeByNodenum(55) }
-        // No admin message sent when disconnected
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
     }
 
     @Test
@@ -947,7 +977,30 @@ class RadioControllerImplTest {
         var commitFailure: AdminResult<Nothing>? = null
         var beforeCommit: suspend () -> Unit = {}
 
+        val commands = mutableListOf<String>()
+        var contactResult: AdminResult<Unit> = AdminResult.Success(Unit)
+
         override fun forNode(dest: NodeId): AdminApi = also { targets += dest }
+
+        override suspend fun setFavorite(node: NodeId, favorite: Boolean) = record("favorite:${node.raw}:$favorite")
+
+        override suspend fun setIgnored(node: NodeId, ignored: Boolean) = record("ignored:${node.raw}:$ignored")
+
+        override suspend fun toggleMuted(node: NodeId) = record("muted:${node.raw}")
+
+        override suspend fun removeNode(node: NodeId) = record("remove:${node.raw}")
+
+        override suspend fun sendInputEvent(event: AdminMessage.InputEvent) = record("input:${event.event_code}")
+
+        override suspend fun addContact(contact: SharedContact): AdminResult<Unit> {
+            commands += "contact:${contact.node_num}:${contact.manually_verified}"
+            return contactResult
+        }
+
+        private fun record(command: String): AdminResult<Unit> {
+            commands += command
+            return AdminResult.Success(Unit)
+        }
 
         override suspend fun <T> editSettings(block: suspend AdminEdit.() -> T): AdminResult<T> {
             transactions++
@@ -1271,8 +1324,9 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun importContactSendsAdminAndUpdatesNodeManager() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun importContactSendsTheSdkCommandAndUpdatesNodeManager() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         // A QR-scanned contact arrives with manually_verified = false (proto default).
         val contact =
             SharedContact.Builder()
@@ -1289,24 +1343,17 @@ class RadioControllerImplTest {
                 }
                 .build()
 
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
-
         controller.importContact(contact)
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
         // The verification state encoded by the sharer is honored as-is, not forced to true.
-        assertEquals(false, sentMessage?.add_contact?.manually_verified)
+        assertEquals(listOf("contact:42:false"), admin.commands)
         verify { nodeManager.handleReceivedUser(42, any(), any(), false) }
     }
 
     @Test
     fun importContactPreservesEncodedVerificationState() = runTest {
-        val controller = createController(scope = backgroundScope)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         // A contact shared as already verified stays verified on import.
         val contact =
             SharedContact.Builder()
@@ -1324,17 +1371,9 @@ class RadioControllerImplTest {
                 }
                 .build()
 
-        var sentMessage: AdminMessage? = null
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                sentMessage = (it.args[3] as () -> AdminMessage)()
-            }
-
         controller.importContact(contact)
 
-        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-        assertEquals(true, sentMessage?.add_contact?.manually_verified)
+        assertEquals(listOf("contact:42:true"), admin.commands)
         verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
     }
 
@@ -1519,7 +1558,8 @@ class RadioControllerImplTest {
 
     @Test
     fun importContactReturnsEarlyWhenDisconnected() = runTest {
-        val controller = createController(scope = backgroundScope, myNodeNum = null)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = null)
         val contact =
             SharedContact.Builder()
                 .also { wb ->
@@ -1530,12 +1570,13 @@ class RadioControllerImplTest {
 
         controller.importContact(contact)
 
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
     }
 
     @Test
     fun sendSharedContactRejectsNodeWithNoPublicKey() = runTest {
-        val controller = createController(scope = backgroundScope)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val nodeNum = 321
         val user =
             User.Builder()
@@ -1550,12 +1591,13 @@ class RadioControllerImplTest {
         val result = controller.sendSharedContact(nodeNum)
 
         assertFalse(result)
-        verifySuspend(exactly(0)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
     }
 
     @Test
     fun importContactRejectsEmptyPublicKey() = runTest {
-        val controller = createController(scope = backgroundScope)
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
         val contact =
             SharedContact.Builder()
                 .also { wb ->
@@ -1572,7 +1614,7 @@ class RadioControllerImplTest {
 
         controller.importContact(contact)
 
-        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertTrue(admin.commands.isEmpty())
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
     }
 }

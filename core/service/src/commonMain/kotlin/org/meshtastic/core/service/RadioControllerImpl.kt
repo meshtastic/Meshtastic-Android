@@ -135,6 +135,7 @@ class RadioControllerImpl(
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = radioInterfaceService,
+        sessionAdmin = SessionAdmin(radioInterfaceService, scope),
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
@@ -148,13 +149,20 @@ class RadioControllerImpl(
     ),
     MessagingController by MessagingControllerImpl(
         commandSender,
+        SessionAdmin(radioInterfaceService, scope),
         nodeManager,
         nodeRepository,
         dataHandler,
         analytics,
         packetRepository,
     ),
-    NodeController by NodeControllerImpl(commandSender, nodeManager, serviceNotifications, packetRepository, scope),
+    NodeController by NodeControllerImpl(
+        SessionAdmin(radioInterfaceService, scope),
+        nodeManager,
+        serviceNotifications,
+        packetRepository,
+        scope,
+    ),
     QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
 
     private val deviceSwitchMutex = Mutex()

@@ -34,10 +34,10 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminResult
 
 /**
  * [MessagingController] implementation: sends data packets, reactions, and shared contacts.
@@ -47,6 +47,7 @@ import org.meshtastic.proto.User
  */
 internal class MessagingControllerImpl(
     private val commandSender: CommandSender,
+    private val sessionAdmin: SessionAdmin,
     private val nodeManager: NodeManager,
     private val nodeRepository: NodeRepository,
     private val dataHandler: Lazy<MeshDataHandler>,
@@ -116,7 +117,7 @@ internal class MessagingControllerImpl(
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
-        val myNum = nodeManager.myNodeNum.value ?: return false
+        nodeManager.myNodeNum.value ?: return false
         val nodeDef = nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum))
         // Firmware assigns public_key unconditionally, so a keyless contact clears the key the radio already holds.
         return if (nodeDef.user.public_key.size == 0) {
@@ -131,17 +132,13 @@ internal class MessagingControllerImpl(
                         wb.manually_verified = nodeDef.manuallyVerified
                     }
                     .build()
-            safeCatching {
-                commandSender.sendAdminAwait(myNum) {
-                    AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
-                }
-            }
+            safeCatching { sessionAdmin.await("Share contact") { addContact(contact) } is AdminResult.Success }
                 .getOrDefault(false)
         }
     }
 
     override suspend fun importContact(contact: SharedContact) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+        nodeManager.myNodeNum.value ?: return
         val user = contact.user
         // An empty key is not a no-op on the radio: it overwrites a stored key and breaks a working conversation.
         if (contact.node_num == 0 || user == null || user.public_key.size == 0) {
@@ -150,7 +147,7 @@ internal class MessagingControllerImpl(
         }
         // Cross-platform policy: honor the verification state encoded by the sharer as-is
         // (see meshtastic/design standards/audits/nfc-alignment-audit.md).
-        commandSender.sendAdmin(myNum) { AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build() }
+        sessionAdmin.launch("Import contact") { addContact(contact) }
         nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = contact.manually_verified)
     }
 

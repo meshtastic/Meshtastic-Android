@@ -72,6 +72,7 @@ class HeardOnCurrentLoraRefresherTest {
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = FakeRadioInterfaceService(),
+        sessionAdmin = SessionAdmin(FakeRadioInterfaceService(), backgroundScope),
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
