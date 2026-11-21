@@ -136,10 +136,10 @@ Both the graph sentinel (`MyFeatureRoute.MyFeatureGraph`) and the primary screen
 navigate to the same composable, so the feature is reachable via either a top-level push or a deep-link graph
 push — the same pattern `feature:wifi-provision` and `feature:firmware` use.
 
-Then wire it up: call `myFeatureGraph(backStack)` from the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt`, from `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, and, for a module that
-applies `meshtastic.kmp.web`, from `webNavGraph` in `webApp`'s `WebNavigation.kt`, alongside the
-other features' entries functions. See [Navigation Entry Registration](navigation-and-deep-links#navigation-entry-registration).
+Then wire it up: add the module to `appShell/build.gradle.kts` and call `myFeatureGraph(backStack)` from
+`sharedNavGraph` in `appShell`'s `MeshtasticMainScreen.kt`, alongside the other features' entries functions, so
+the Android, desktop and web hosts all show it. A module with no web target is called from `appShell`'s
+`nonWebMain` behind an `expect`, as `mapGraph` is. See [Navigation Entry Registration](navigation-and-deep-links#navigation-entry-registration).
 
 ## Source Set Guidelines
 

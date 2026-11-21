@@ -55,6 +55,13 @@ The browser (Kotlin/Wasm) entry point, opt-in with `-Pmeshtastic.web=true`; see 
 - The Room database on SQLite's OPFS SAH pool, held by one tab at a time
 - `WasmJsRadioTransportFactory` in `core:network`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
 
+### `appShell/` — Shared Main Screen
+
+The screen the Android, desktop and web hosts all show:
+- `MeshtasticMainScreen`: the app shell, navigation suite and `MeshtasticNavDisplay` over `sharedNavGraph`, which registers every feature's graphs
+- A host passes only what is its own: visible tabs, window insets, a fallback for an unknown key
+- `mapGraph` is an `expect` with an empty web actual, since the map has no web target
+
 ### `feature/*` — Feature Modules
 
 Each `feature/` module owns a vertical slice of functionality:
@@ -141,6 +148,7 @@ src/
 ├── iosMain/            ← iOS-specific
 ├── wasmJsMain/         ← Browser-specific
 ├── nonWebMain/         ← Shared by every target except wasmJs (`nonWebTest/` holds its tests)
+├── nonAndroidMain/     ← Shared by every target except Android
 ├── nativeMain/         ← Kotlin/Native code, built for the one iOS target (iosSimulatorArm64)
 ├── jvmTest/            ← Desktop test host
 ├── androidHostTest/    ← Android host (JVM) unit tests
@@ -149,7 +157,7 @@ src/
 
 `jvmAndroidMain` exists only in modules that apply `meshtastic.kmp.jvm.android`. `nativeMain`,
 `androidHostTest` (modules that call `withHostTest`) and `androidDeviceTest` exist only in the
-modules that need them. `wasmJsMain` and `nonWebMain` exist only in modules that apply
+modules that need them. `wasmJsMain`, `nonWebMain` and `nonAndroidMain` exist only in modules that apply
 `meshtastic.kmp.web`, and the wasmJs target itself is registered only with `-Pmeshtastic.web=true`
 (`webApp/README.md`).
 

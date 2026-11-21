@@ -31,7 +31,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
   - `java.util.concurrent.locks.*` -> `kotlinx.coroutines.sync.Mutex`.
   - `java.io.*` -> `Okio` (`BufferedSource`/`BufferedSink`).
 - **Networking:** Pure **Ktor** in shared code. The Android host's `HttpClient` runs on Ktor's OkHttp engine (the platform `HttpURLConnection` engine crashes on canceled gzip reads); desktop uses the Java engine. The one direct OkHttp use is the google flavor's map-tile client (`MapTileHttpClient`); add no others. Ktor `Logging` plugin for debugging.
-- **HTTP Configuration:** Use `HttpClientDefaults` from `core:network` for shared base URL (`API_BASE_URL`), timeouts, and retry constants. Both the Android (`androidApp/.../di/NetworkModule.kt`) and Desktop (`desktopApp/.../di/DesktopRuntimeModule.kt`) `HttpClient` instances must use these. Feature API services use relative paths; `DefaultRequest` sets the base URL.
+- **HTTP Configuration:** Every host's API `HttpClient` calls `installApiDefaults` from `core:network`, which installs the shared base URL (`API_BASE_URL`), JSON, timeouts and retry policy. A host passes its `Json`, a `userAgent` (null where the platform sets its own, as a browser does) and `logRequests`, which alone turns on request logging, and supplies its engine (`androidApp/.../di/NetworkModule.kt`, `desktopApp/.../di/DesktopRuntimeModule.kt`, `webApp/.../di/WebRuntimeModule.kt`). Feature API services use relative paths; `DefaultRequest` sets the base URL.
 - **BLE:** Route through `core:ble` using **Kable**.
 - **Room KMP:** Use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder`.
 
