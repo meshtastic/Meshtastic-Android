@@ -13,7 +13,7 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 - Provide the mesh node database interface (`NodeRepository`)
 - Expose the active radio session's SDK admin API and per-node admin session status (`RadioInterfaceService.adminForSession`, `adminSessionStatus`)
 - Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
-- Declare the outbound message queue, MQTT proxy, and XModem file transfer contracts
+- Declare the outbound message queue and MQTT proxy contracts, and expose the active session's SDK client (`RadioInterfaceService.clientForSession`)
 - Declare the app preference interfaces (`AppPreferences.kt`) that `:core:prefs` implements
 - Provide the `AppWidgetUpdater` contract so the mesh service can trigger widget refreshes without depending on Android widget APIs directly
 
@@ -39,7 +39,7 @@ src/
 │   ├── QueryController.kt             ← telemetry, traceroute, position, neighbor info queries
 │   ├── AppPreferences.kt              ← UiPrefs, MapPrefs, RadioPrefs, TakPrefs and the other prefs interfaces
 │   ├── *Repository.kt                 ← firmware, hardware, device links, discovery, mesh beacon, …
-│   ├── CommandSender.kt
+│   ├── CommandSender.kt               ← requests the SDK cannot yet send as firmware expects
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt
@@ -50,6 +50,7 @@ src/
 │   ├── MqttManager.kt
 │   ├── NeighborInfoHandler.kt
 │   ├── NodeManager.kt
+│   ├── NodeRequest.kt                 ← a sent node request and the routing error that failed it
 │   ├── Notification.kt / NotificationManager.kt
 │   ├── PacketHandler.kt / PacketRepository.kt
 │   ├── QuickChatActionRepository.kt
@@ -60,7 +61,6 @@ src/
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt
 │   ├── TracerouteHandler.kt / TracerouteSnapshotRepository.kt
-│   ├── XModemFile.kt / XModemManager.kt
 │   ├── usecase/
 │   │   └── SendMessageUseCase.kt
 │   └── di/
