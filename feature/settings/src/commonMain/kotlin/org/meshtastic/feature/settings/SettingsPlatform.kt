@@ -39,6 +39,7 @@ import org.meshtastic.core.navigation.WifiProvisionRoute
  *   permission without prompting.
  * @property reloadApp restarts the app in place, or null where the user restarts it themselves.
  */
+@Suppress("LongParameterList")
 class SettingsPlatform(
     val localMeshDiscovery: Boolean,
     val wifiProvisioning: Boolean,
