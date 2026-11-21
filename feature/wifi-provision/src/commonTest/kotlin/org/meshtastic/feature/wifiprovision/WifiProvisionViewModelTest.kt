@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -41,6 +42,7 @@ import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
+import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -62,6 +64,8 @@ import kotlin.uuid.Uuid
 class WifiProvisionViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+
+    private val deviceAddress = "AA:BB:CC:DD:EE:FF"
 
     private lateinit var scanner: FakeBleScanner
     private lateinit var connection: FakeBleConnection
@@ -109,7 +113,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `connectToDevice transitions to ConnectingBle immediately`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF", name = "mpwrd-nm-1234"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
 
         // After one dispatcher step, should be in ConnectingBle
         assertEquals(Phase.ConnectingBle, viewModel.uiState.value.phase)
@@ -118,7 +122,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `connectToDevice transitions to DeviceFound on success`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF", name = "mpwrd-nm-1234"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -150,7 +154,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `connectToDevice uses device address when name is null`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF", name = null))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -162,7 +166,7 @@ class WifiProvisionViewModelTest {
     fun `connectToDevice sets error and returns to Idle on BLE connect failure`() = runTest {
         connection.failNextN = 1
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -174,7 +178,7 @@ class WifiProvisionViewModelTest {
     fun `connectToDevice sets error when connection throws exception`() = runTest {
         connection.connectException = RuntimeException("BLE unavailable")
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -191,7 +195,7 @@ class WifiProvisionViewModelTest {
     fun `scanNetworks transitions to LoadingNetworks then Connected with results`() = runTest {
         // First connect
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
         assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
 
@@ -213,7 +217,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `scanNetworks deduplicates networks by SSID`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         emitNymeaResponse("""{"c":4,"r":0}""")
@@ -235,14 +239,13 @@ class WifiProvisionViewModelTest {
     }
 
     @Test
-    fun `scanNetworks reconnects if no service exists`() = runTest {
-        // Don't connect first — scanNetworks should trigger connectToDevice
+    fun `scanNetworks without a connection connects nothing`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
         viewModel.scanNetworks()
         advanceUntilIdle()
 
-        // Should have connected (DeviceFound) via the reconnect path
-        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+        assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+        assertEquals(0, connection.connectAndAwaitCalls)
     }
 
     // -----------------------------------------------------------------------
@@ -253,7 +256,7 @@ class WifiProvisionViewModelTest {
     fun `provisionWifi transitions to Provisioning then Connected with Success`() = runTest {
         // Connect and scan first
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         emitNymeaResponse("""{"c":4,"r":0}""")
@@ -275,7 +278,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `provisionWifi sets Failed status on error response`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         emitNymeaResponse("""{"c":4,"r":0}""")
@@ -297,7 +300,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `provisionWifi ignores blank SSID`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val phaseBefore = viewModel.uiState.value.phase
@@ -324,7 +327,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `disconnect resets state to initial`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
         assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
 
@@ -342,13 +345,186 @@ class WifiProvisionViewModelTest {
     @Test
     fun `disconnect calls BLE disconnect`() = runTest {
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         viewModel.disconnect()
         advanceUntilIdle()
 
         assertTrue(connection.disconnectCalls >= 1, "BLE disconnect should be called")
+    }
+
+    // -----------------------------------------------------------------------
+    // Device choice
+    // -----------------------------------------------------------------------
+
+    private val firstSeen = FakeBleDevice("00:00:00:00:00:0A", name = "first seen", rssi = -80)
+    private val strongest = FakeBleDevice("00:00:00:00:00:0B", name = "strongest", rssi = -50)
+    private val chosen = FakeBleDevice("00:00:00:00:00:0C", name = "chosen", rssi = -65)
+
+    @Test
+    fun `listed devices connect nothing until one is tapped and the tapped one is connected`() = runTest {
+        scanner.emitDevice(firstSeen)
+        scanner.emitDevice(strongest)
+        scanner.emitDevice(chosen)
+
+        viewModel.startDiscovery()
+        runCurrent()
+
+        assertEquals(Phase.Discovering, viewModel.uiState.value.phase)
+        assertEquals(
+            listOf(strongest.address, chosen.address, firstSeen.address),
+            viewModel.uiState.value.devices.map { it.address },
+        )
+        assertEquals(0, connection.connectAndAwaitCalls)
+
+        advanceUntilIdle()
+        assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
+        assertEquals(0, connection.connectAndAwaitCalls)
+
+        viewModel.connectToDiscovered(chosen.address)
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+        assertEquals(chosen.address, connection.device?.address)
+        assertEquals(chosen.address, viewModel.uiState.value.deviceAddress)
+        assertEquals("chosen", viewModel.uiState.value.deviceName)
+        assertEquals(1, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a single advertiser is listed and not connected`() = runTest {
+        scanner.emitDevice(strongest)
+
+        viewModel.startDiscovery()
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
+        assertEquals(listOf(strongest.address), viewModel.uiState.value.devices.map { it.address })
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a scan that finds nothing offers a rescan that lists a device found later`() = runTest {
+        viewModel.startDiscovery()
+        advanceUntilIdle()
+        assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
+        assertTrue(viewModel.uiState.value.devices.isEmpty())
+
+        scanner.emitDevice(chosen)
+        viewModel.rescan()
+        advanceUntilIdle()
+
+        assertEquals(listOf(chosen.address), viewModel.uiState.value.devices.map { it.address })
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `connectToDevice without an address lists devices where the app scans itself`() = runTest {
+        scanner.emitDevice(firstSeen)
+
+        viewModel.connectToDevice()
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceList, viewModel.uiState.value.phase)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a device chooser still connects the device it returns without an address`() = runTest {
+        val picker =
+            WifiProvisionViewModel(
+                bleScanner = PickingChooser(chosen),
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
+                dispatchers =
+                CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                applicationScope = FakeApplicationCoroutineScope(testDispatcher),
+            )
+
+        picker.connectToDevice()
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceFound, picker.uiState.value.phase)
+        assertEquals(chosen.address, picker.uiState.value.deviceAddress)
+    }
+
+    @Test
+    fun `a supplied address waits for confirmation and connects nothing`() = runTest {
+        scanner.emitDevice(firstSeen)
+        scanner.emitDevice(chosen)
+
+        viewModel.requestConnect(chosen.address)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(Phase.ConfirmDevice, state.phase)
+        assertEquals(chosen.address, state.pendingAddress)
+        assertEquals("chosen", state.pendingName)
+        assertEquals(0, connection.connectAndAwaitCalls)
+
+        viewModel.confirmConnect()
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+        assertEquals(chosen.address, connection.device?.address)
+    }
+
+    @Test
+    fun `cancelling the confirmation leaves the supplied address unconnected`() = runTest {
+        scanner.emitDevice(chosen)
+
+        viewModel.requestConnect(chosen.address)
+        advanceUntilIdle()
+        viewModel.cancelPending()
+        viewModel.confirmConnect()
+        advanceUntilIdle()
+
+        assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+        assertNull(viewModel.uiState.value.pendingAddress)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `starting discovery does not discard a pending confirmation`() = runTest {
+        scanner.emitDevice(chosen)
+
+        viewModel.requestConnect(chosen.address)
+        viewModel.startDiscovery()
+        advanceUntilIdle()
+
+        assertEquals(Phase.ConfirmDevice, viewModel.uiState.value.phase)
+        assertEquals(chosen.address, viewModel.uiState.value.pendingAddress)
+    }
+
+    @Test
+    fun `devices are ordered strongest first with unknown signal last`() {
+        val unknown = FakeBleDevice("00:00:00:00:00:0D", name = "unknown", rssi = null)
+        val zeroDbm = FakeBleDevice("00:00:00:00:00:0E", name = "zero", rssi = 0)
+
+        val listed =
+            listOf(unknown, firstSeen, strongest, zeroDbm, chosen).fold(emptyList<DiscoveredDevice>()) { list, device ->
+                WifiProvisionViewModel.upsertByStrength(list, device)
+            }
+
+        assertEquals(
+            listOf(zeroDbm.address, strongest.address, chosen.address, firstSeen.address, unknown.address),
+            listed.map { it.address },
+        )
+    }
+
+    @Test
+    fun `a repeated advertisement refreshes its row without moving it`() {
+        val listed =
+            listOf(strongest, firstSeen).fold(emptyList<DiscoveredDevice>()) { list, device ->
+                WifiProvisionViewModel.upsertByStrength(list, device)
+            }
+
+        val refreshed =
+            WifiProvisionViewModel.upsertByStrength(listed, FakeBleDevice(firstSeen.address, name = null, rssi = -40))
+
+        assertEquals(listOf(strongest.address, firstSeen.address), refreshed.map { it.address })
+        assertEquals(-40, refreshed[1].rssi)
+        assertEquals("first seen", refreshed[1].name)
     }
 
     // -----------------------------------------------------------------------
@@ -361,9 +537,9 @@ class WifiProvisionViewModelTest {
         val viewModel = createViewModel(factory)
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
 
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         assertEquals(2, factory.created.size)
@@ -377,9 +553,9 @@ class WifiProvisionViewModelTest {
         val factory = RecordingBleConnectionFactory()
         val viewModel = createViewModel(factory)
 
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         runCurrent()
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         runCurrent()
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
         advanceUntilIdle()
@@ -394,7 +570,7 @@ class WifiProvisionViewModelTest {
         val factory = RecordingBleConnectionFactory()
         val viewModel = createViewModel(factory)
         scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
-        viewModel.connectToDevice()
+        viewModel.connectToDevice(deviceAddress)
         advanceUntilIdle()
 
         val store = ViewModelStore()
@@ -414,6 +590,13 @@ class WifiProvisionViewModelTest {
         override val picksDevice: Boolean = true
 
         override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = emptyFlow()
+    }
+
+    /** A browser chooser the user answered: it picks devices, and its scan emits the one device picked. */
+    private class PickingChooser(private val picked: BleDevice) : BleScanner {
+        override val picksDevice: Boolean = true
+
+        override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flowOf(picked)
     }
 
     /** Hands out a fresh [FakeBleConnection] per [create], so each service's connection can be checked on its own. */

@@ -83,6 +83,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -95,32 +97,43 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.action_select_network
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.connect
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.img_mpwrd_logo
 import org.meshtastic.core.resources.mpwrd_os
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.retry
 import org.meshtastic.core.resources.show_password
+import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.resources.web_bluetooth_unsupported
 import org.meshtastic.core.resources.wifi_provision_available_networks
 import org.meshtastic.core.resources.wifi_provision_choose_device
 import org.meshtastic.core.resources.wifi_provision_choose_device_detail
+import org.meshtastic.core.resources.wifi_provision_confirm_device
+import org.meshtastic.core.resources.wifi_provision_confirm_device_detail
 import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
+import org.meshtastic.core.resources.wifi_provision_device_address
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
 import org.meshtastic.core.resources.wifi_provision_hidden_network
 import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
+import org.meshtastic.core.resources.wifi_provision_no_devices
+import org.meshtastic.core.resources.wifi_provision_no_devices_detail
 import org.meshtastic.core.resources.wifi_provision_no_networks
+import org.meshtastic.core.resources.wifi_provision_pick_device
+import org.meshtastic.core.resources.wifi_provision_rescan
 import org.meshtastic.core.resources.wifi_provision_scan_failed
 import org.meshtastic.core.resources.wifi_provision_scan_networks
 import org.meshtastic.core.resources.wifi_provision_scanning_ble
 import org.meshtastic.core.resources.wifi_provision_scanning_wifi
 import org.meshtastic.core.resources.wifi_provision_sending_credentials
+import org.meshtastic.core.resources.wifi_provision_signal_dbm
 import org.meshtastic.core.resources.wifi_provision_signal_strength
 import org.meshtastic.core.resources.wifi_provision_ssid_label
 import org.meshtastic.core.resources.wifi_provision_ssid_placeholder
@@ -142,8 +155,11 @@ import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.EmptyState
+import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -159,6 +175,7 @@ import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
 import org.meshtastic.feature.wifiprovision.WifiProvisionViewModel
+import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
 private const val NETWORK_LIST_MAX_HEIGHT_DP = 240
@@ -187,11 +204,15 @@ fun WifiProvisionScreen(
         }
 
     LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
-    // A device chooser opens only from a click, so the browser waits for the pick button; a known address reconnects
-    // to its grant, and falls back to the button when the browser no longer holds one.
+    // A device chooser opens only from a click, so the browser waits for the pick button, and falls back to it when a
+    // confirmed address has no grant. Nothing connects on arrival: an address waits for the user's Connect, and
+    // otherwise the app lists what it finds and waits for a tap.
     val waitForPick = viewModel.picksDevice && (address == null || uiState.pickDismissed)
     LaunchedEffect(viewModel, address) {
-        if (!viewModel.picksDevice || address != null) viewModel.connectToDevice(address)
+        when {
+            address != null -> viewModel.requestConnect(address)
+            !viewModel.picksDevice -> viewModel.startDiscovery()
+        }
     }
 
     Scaffold(
@@ -221,15 +242,41 @@ fun WifiProvisionScreen(
                 when (key) {
                     ScreenKey.PickDevice -> PickDeviceContent(onPick = { viewModel.connectToDevice(address) })
 
+                    ScreenKey.DeviceList ->
+                        DeviceListContent(
+                            devices = uiState.devices,
+                            isScanning = uiState.phase == Phase.Discovering,
+                            onSelect = viewModel::connectToDiscovered,
+                            onRescan = viewModel::rescan,
+                        )
+
+                    ScreenKey.ConfirmDevice ->
+                        ConfirmDeviceContent(
+                            address = uiState.pendingAddress.orEmpty(),
+                            name = uiState.pendingName,
+                            onConnect = viewModel::confirmConnect,
+                            onCancel = {
+                                viewModel.cancelPending()
+                                onNavigateUp()
+                            },
+                        )
+
                     ScreenKey.ConnectingBle ->
                         ScanningBleContent(
                             error = uiState.error as? WifiProvisionError.ConnectFailed,
-                            onRetry = { viewModel.connectToDevice(address) },
+                            onRetry = {
+                                if (address != null || viewModel.picksDevice) {
+                                    viewModel.connectToDevice(address)
+                                } else {
+                                    viewModel.rescan()
+                                }
+                            },
                         )
 
                     ScreenKey.DeviceFound ->
                         DeviceFoundContent(
                             deviceName = uiState.deviceName,
+                            deviceAddress = uiState.deviceAddress,
                             onProceed = viewModel::scanNetworks,
                             onCancel = onNavigateUp,
                         )
@@ -262,6 +309,8 @@ fun WifiProvisionScreen(
 
 private enum class ScreenKey {
     PickDevice,
+    DeviceList,
+    ConfirmDevice,
     ConnectingBle,
     DeviceFound,
     LoadingNetworks,
@@ -271,6 +320,12 @@ private enum class ScreenKey {
 private fun screenKey(state: WifiProvisionUiState, waitForPick: Boolean): ScreenKey = when (state.phase) {
     // A failed connect returns to Idle with its error, which ScanningBleContent shows with a retry.
     Phase.Idle -> if (waitForPick && state.error == null) ScreenKey.PickDevice else ScreenKey.ConnectingBle
+
+    Phase.Discovering,
+    Phase.DeviceList,
+    -> ScreenKey.DeviceList
+
+    Phase.ConfirmDevice -> ScreenKey.ConfirmDevice
 
     Phase.ConnectingBle -> ScreenKey.ConnectingBle
 
@@ -284,7 +339,11 @@ private fun screenKey(state: WifiProvisionUiState, waitForPick: Boolean): Screen
 }
 
 private val Phase.isLoading: Boolean
-    get() = this == Phase.ConnectingBle || this == Phase.LoadingNetworks || this == Phase.Provisioning
+    get() =
+        this == Phase.Discovering ||
+            this == Phase.ConnectingBle ||
+            this == Phase.LoadingNetworks ||
+            this == Phase.Provisioning
 
 // ---------------------------------------------------------------------------
 // Sub-composables
@@ -351,11 +410,154 @@ internal fun PickDeviceContent(onPick: () -> Unit, bluetoothSupported: Boolean =
 }
 
 /**
+ * The provisioning devices in range, strongest first. Nothing connects until a row is tapped, even for a single device,
+ * because the device chosen here receives the Wi-Fi password.
+ */
+@Composable
+internal fun DeviceListContent(
+    devices: List<DiscoveredDevice>,
+    isScanning: Boolean,
+    onSelect: (address: String) -> Unit,
+    onRescan: () -> Unit,
+) {
+    if (devices.isEmpty() && !isScanning) {
+        CenteredStatusContent {
+            EmptyState(
+                icon = MeshtasticIcons.BluetoothSearching,
+                title = stringResource(Res.string.wifi_provision_no_devices),
+                supportingText = stringResource(Res.string.wifi_provision_no_devices_detail),
+                action = {
+                    FilledTonalButton(onClick = onRescan) { Text(stringResource(Res.string.wifi_provision_rescan)) }
+                },
+            )
+        }
+        return
+    }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            stringResource(Res.string.wifi_provision_pick_device),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (isScanning) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LoadingIndicator(modifier = Modifier.size(24.dp))
+                Text(
+                    stringResource(Res.string.wifi_provision_scanning_ble),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        Card(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            modifier = Modifier.weight(1f, fill = false),
+        ) {
+            LazyColumn {
+                items(devices, key = { it.address }) { device ->
+                    DeviceRow(device = device, onClick = { onSelect(device.address) })
+                }
+            }
+        }
+        if (!isScanning) {
+            OutlinedButton(onClick = onRescan, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.wifi_provision_rescan))
+            }
+        }
+    }
+}
+
+@Composable
+internal fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(device.name ?: stringResource(Res.string.unknown_device)) },
+        supportingContent = { Text(device.address) },
+        leadingContent = {
+            Icon(
+                MeshtasticIcons.Bluetooth,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        trailingContent = {
+            device.rssi?.let { rssi ->
+                val description = stringResource(Res.string.wifi_provision_signal_dbm, rssi)
+                MaterialBluetoothSignalInfo(
+                    rssi = rssi,
+                    modifier = Modifier.clearAndSetSemantics { contentDescription = description },
+                )
+            }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier =
+        Modifier.clickable(
+            onClickLabel = stringResource(Res.string.action_select_device),
+            role = Role.Button,
+            onClick = onClick,
+        ),
+    )
+}
+
+/**
+ * Asks the user to confirm an address that came from outside the screen, such as a link, before anything connects. The
+ * name is whatever the device advertises, so the address is what to check against the device's label.
+ */
+@Composable
+internal fun ConfirmDeviceContent(address: String, name: String?, onConnect: () -> Unit, onCancel: () -> Unit) {
+    CenteredStatusContent {
+        Icon(
+            MeshtasticIcons.Bluetooth,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            stringResource(Res.string.wifi_provision_confirm_device),
+            style = MaterialTheme.typography.headlineSmallEmphasized,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            name ?: stringResource(Res.string.unknown_device),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            stringResource(Res.string.wifi_provision_device_address, address),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(Res.string.wifi_provision_confirm_device_detail),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(32.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
+            Button(onClick = onConnect) { Text(stringResource(Res.string.connect)) }
+        }
+    }
+}
+
+/**
  * Confirmation step shown after BLE device discovery — the Android analog of the web flasher's native BLE pairing
  * prompt. Gives the user a clear "device found" moment before proceeding.
  */
 @Composable
-internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
+internal fun DeviceFoundContent(
+    deviceName: String?,
+    onProceed: () -> Unit,
+    onCancel: () -> Unit,
+    deviceAddress: String? = null,
+) {
     CenteredStatusContent {
         Icon(
             MeshtasticIcons.Bluetooth,
@@ -374,6 +576,15 @@ internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCa
             Text(
                 deviceName,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (deviceAddress != null) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                stringResource(Res.string.wifi_provision_device_address, deviceAddress),
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )

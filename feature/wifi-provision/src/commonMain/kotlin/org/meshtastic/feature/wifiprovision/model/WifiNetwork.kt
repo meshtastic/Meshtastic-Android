@@ -28,6 +28,15 @@ data class WifiNetwork(
     val isProtected: Boolean,
 )
 
+/** A provisioning-capable BLE device seen while scanning. */
+data class DiscoveredDevice(
+    /** Name the device advertises; the device chooses it, so the [address] is what identifies the hardware. */
+    val name: String?,
+    val address: String,
+    /** Signal strength in dBm, or null when the scan reported none. 0 dBm is a real reading, not "unknown". */
+    val rssi: Int?,
+)
+
 /** Result of a WiFi provisioning attempt. */
 sealed interface ProvisionResult {
     data class Success(

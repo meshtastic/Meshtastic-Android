@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
+import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
 // ---------------------------------------------------------------------------
@@ -70,6 +71,13 @@ private val manyNetworks =
         )
     }
 
+private val sampleDevices =
+    listOf(
+        DiscoveredDevice(name = "mpwrd-nm-A1B2", address = "AA:BB:CC:DD:EE:01", rssi = -52),
+        DiscoveredDevice(name = null, address = "AA:BB:CC:DD:EE:02", rssi = -71),
+        DiscoveredDevice(name = "mpwrd-nm-C3D4", address = "AA:BB:CC:DD:EE:03", rssi = null),
+    )
+
 private val noOp: () -> Unit = {}
 private val noOpProvision: (String, String, Boolean) -> Unit = { _, _, _ -> }
 
@@ -92,7 +100,57 @@ fun ScanningBlePreview() {
 fun DeviceFoundPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
-            DeviceFoundContent(deviceName = "mpwrd-nm-A1B2", onProceed = noOp, onCancel = noOp)
+            DeviceFoundContent(
+                deviceName = "mpwrd-nm-A1B2",
+                onProceed = noOp,
+                onCancel = noOp,
+                deviceAddress = "AA:BB:CC:DD:EE:01",
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DeviceListPreview() {
+    AppTheme {
+        Surface(Modifier.fillMaxSize()) {
+            DeviceListContent(devices = sampleDevices, isScanning = false, onSelect = {}, onRescan = noOp)
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DeviceListScanningPreview() {
+    AppTheme {
+        Surface(Modifier.fillMaxSize()) {
+            DeviceListContent(devices = sampleDevices.take(1), isScanning = true, onSelect = {}, onRescan = noOp)
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DeviceListEmptyPreview() {
+    AppTheme {
+        Surface(Modifier.fillMaxSize()) {
+            DeviceListContent(devices = emptyList(), isScanning = false, onSelect = {}, onRescan = noOp)
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ConfirmDevicePreview() {
+    AppTheme {
+        Surface(Modifier.fillMaxSize()) {
+            ConfirmDeviceContent(
+                address = "AA:BB:CC:DD:EE:01",
+                name = "mpwrd-nm-A1B2",
+                onConnect = noOp,
+                onCancel = noOp,
+            )
         }
     }
 }

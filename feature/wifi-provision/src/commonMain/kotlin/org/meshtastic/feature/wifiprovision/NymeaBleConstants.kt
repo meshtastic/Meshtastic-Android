@@ -67,6 +67,9 @@ internal object NymeaBleConstants {
     /** Scan + connect timeout. */
     val SCAN_TIMEOUT = 10.seconds
 
+    /** How long the device list collects advertisers before it offers a rescan. */
+    val DISCOVERY_WINDOW = 8.seconds
+
     /** Maximum time to wait for a command response. */
     val RESPONSE_TIMEOUT = 15.seconds
 

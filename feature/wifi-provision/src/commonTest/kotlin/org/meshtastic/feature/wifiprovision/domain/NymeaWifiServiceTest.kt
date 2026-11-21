@@ -67,7 +67,7 @@ class NymeaWifiServiceTest {
         deviceName: String? = "mpwrd-nm-1234",
     ): Result<String> {
         scanner.emitDevice(FakeBleDevice(address, name = deviceName))
-        return service.connect()
+        return service.connect(address)
     }
 
     private fun emitResponse(connection: FakeBleConnection, json: String) {
@@ -101,9 +101,48 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
 
         scanner.emitDevice(FakeBleDevice(address))
-        val result = service.connect()
+        val result = service.connect(address)
 
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `connect to an address skips an earlier advertiser with another address`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "other"))
+        scanner.emitDevice(FakeBleDevice(address, name = "target"))
+        val result = service.connect(address)
+
+        assertEquals("target", result.getOrThrow())
+        assertEquals(address, connection.device?.address)
+        assertEquals(address, service.deviceAddress)
+    }
+
+    @Test
+    fun `connect without an address connects nothing where the app scans itself`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice(address))
+        val result = service.connect(address = null)
+
+        assertTrue(result.isFailure)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `connect to a chosen device connects that device and not an advertiser seen first`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "first seen"))
+        val result = service.connect(FakeBleDevice(address, name = "chosen"))
+
+        assertEquals("chosen", result.getOrThrow())
+        assertEquals(address, connection.device?.address)
+        assertEquals(1, connection.connectAndAwaitCalls)
     }
 
     @Test
@@ -113,7 +152,7 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
 
         scanner.emitDevice(FakeBleDevice(address))
-        val result = service.connect()
+        val result = service.connect(address)
 
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull()?.message?.contains("Bluetooth off") == true)

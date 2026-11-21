@@ -33,6 +33,7 @@ import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.common.util.safeCatching
@@ -84,15 +85,23 @@ class NymeaWifiService(
 
     // region Public API
 
+    /** Address of the device [connect] last connected to, or null before a connection. */
+    var deviceAddress: String? = null
+        private set
+
     /**
-     * Scan for a device advertising the nymea wireless service and connect to it.
+     * Find the device with [address], or the one the user picks in the scanner's own chooser, and connect to it.
      *
-     * @param address Optional MAC address filter. If null, the first advertising device is used.
-     * @return The discovered device's advertised name on success, or a [NoDevicePickedException] failure when the
-     *   scanner is a device chooser the user dismissed.
-     * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT].
+     * A scanner that lists devices itself needs an [address]: choosing among advertisers is the caller's job, which
+     * then calls [connect] with the [BleDevice] picked.
+     *
+     * @param address The MAC address to connect to, or null where [BleScanner.picksDevice] is true.
+     * @return The device's advertised name on success, or a [NoDevicePickedException] failure when the scanner is a
+     *   device chooser the user dismissed.
+     * @throws IllegalStateException if the device is not found within [SCAN_TIMEOUT].
      */
-    suspend fun connect(address: String? = null): Result<String> = safeCatching {
+    suspend fun connect(address: String?): Result<String> = safeCatching {
+        require(address != null || scanner.picksDevice) { "A device must be chosen before connecting" }
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=${address.anonymize()})…" }
 
         val scan = scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = WIRELESS_SERVICE_UUID, address = address)
@@ -101,11 +110,19 @@ class NymeaWifiService(
                 // A chooser stays open until the user answers, so no timeout; dismissing it ends the scan empty.
                 scan.firstOrNull() ?: throw NoDevicePickedException()
             } else {
-                withTimeout(SCAN_TIMEOUT) { scan.first() }
+                withTimeout(SCAN_TIMEOUT) { scan.first { it.address.equals(address, ignoreCase = true) } }
             }
 
+        openConnection(device)
+    }
+
+    /** Connect to [device], which the caller already chose from a scan, and return its advertised name. */
+    suspend fun connect(device: BleDevice): Result<String> = safeCatching { openConnection(device) }
+
+    private suspend fun openConnection(device: BleDevice): String {
         val deviceName = device.name ?: device.address
-        Logger.i { "$TAG: Found device @ ${device.address.anonymize()}" }
+        Logger.i { "$TAG: Connecting to device @ ${device.address.anonymize()}" }
+        deviceAddress = device.address
 
         val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT)
         check(state is BleConnectionState.Connected) {
@@ -140,7 +157,7 @@ class NymeaWifiService(
             Logger.i { "$TAG: Wireless service ready" }
         }
 
-        deviceName
+        return deviceName
     }
 
     /**

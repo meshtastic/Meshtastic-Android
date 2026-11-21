@@ -25,16 +25,23 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.DISCOVERY_WINDOW
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_SERVICE_UUID
 import org.meshtastic.feature.wifiprovision.domain.NoDevicePickedException
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
+import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
@@ -48,6 +55,14 @@ data class WifiProvisionUiState(
     val error: WifiProvisionError? = null,
     /** Name of the BLE device we connected to, shown in the DeviceFound confirmation. */
     val deviceName: String? = null,
+    /** Address of the BLE device we connected to, shown beside [deviceName] before any password is sent. */
+    val deviceAddress: String? = null,
+    /** Provisioning-capable devices seen by the current scan, in the order they are listed. */
+    val devices: List<DiscoveredDevice> = emptyList(),
+    /** Address a link or caller asked for, held in [Phase.ConfirmDevice] until the user connects or cancels. */
+    val pendingAddress: String? = null,
+    /** Name the pending address advertises, once a scan has seen it. */
+    val pendingName: String? = null,
     /** IPv4 address reported by nymea after successful provisioning (if available). */
     val ipAddress: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
@@ -59,7 +74,16 @@ data class WifiProvisionUiState(
         /** No operation running — initial state before BLE connect. */
         Idle,
 
-        /** Scanning BLE for a nymea device. */
+        /** Scanning BLE and listing the provisioning devices found so far; nothing is connected. */
+        Discovering,
+
+        /** The scan window ended; the list (possibly empty) waits for the user to pick or rescan. */
+        DeviceList,
+
+        /** An address was supplied from outside the screen; the user confirms it before any connection. */
+        ConfirmDevice,
+
+        /** Connecting to the chosen device. */
         ConnectingBle,
 
         /** BLE device found and connected; waiting for user to proceed. */
@@ -113,6 +137,7 @@ sealed interface WifiProvisionError {
  * [NymeaWifiService] (and its own [BleConnectionFactory]-backed [org.meshtastic.core.ble.BleConnection]) is created
  * lazily for each provisioning session and cleaned up via [onCleared].
  */
+@Suppress("TooManyFunctions") // one entry point per user action in the provisioning flow
 @KoinViewModel
 class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
@@ -136,18 +161,159 @@ class WifiProvisionViewModel(
 
     private var connectJob: Job? = null
 
+    /** The scan feeding the device list, or the name lookup behind the confirmation. */
+    private var scanJob: Job? = null
+
+    /** Devices the current scan has seen, so the one the user taps is the one connected. */
+    private val found = mutableMapOf<String, BleDevice>()
+
     // region Public actions (called from UI)
 
     /**
-     * Scan for the nearest nymea-networkmanager device and connect to it. Pauses at the
-     * [WifiProvisionUiState.Phase.DeviceFound] phase so the user can confirm before proceeding — this is the Android
-     * analog of the web flasher's native BLE pairing dialog.
+     * Scan for provisioning devices and list them. Nothing connects until the user taps one ([connectToDiscovered]). A
+     * no-op unless the screen is idle, so a re-run of the screen's effect cannot discard a pending choice.
+     */
+    fun startDiscovery() {
+        if (_uiState.value.phase != WifiProvisionUiState.Phase.Idle) return
+        beginDiscovery()
+    }
+
+    /** Clear the list and scan again, from the list or after a failed scan or connect. */
+    fun rescan() {
+        val phase = _uiState.value.phase
+        if (phase != WifiProvisionUiState.Phase.DeviceList && phase != WifiProvisionUiState.Phase.Idle) return
+        beginDiscovery()
+    }
+
+    /**
+     * Ask the user to confirm [address] before connecting to it; used where the address came from outside the screen.
+     * Only a passive scan runs, to read the name the device advertises. A no-op unless the screen is idle.
+     */
+    fun requestConnect(address: String) {
+        if (_uiState.value.phase != WifiProvisionUiState.Phase.Idle) return
+        found.clear()
+        val previousJob = scanJob
+        _uiState.update {
+            it.copy(
+                phase = WifiProvisionUiState.Phase.ConfirmDevice,
+                error = null,
+                pickDismissed = false,
+                pendingAddress = address,
+                pendingName = null,
+            )
+        }
+        scanJob = viewModelScope.launch {
+            previousJob?.cancelAndJoin()
+            safeCatching {
+                withTimeoutOrNull(DISCOVERY_WINDOW) {
+                    bleScanner.scan(DISCOVERY_WINDOW, WIRELESS_SERVICE_UUID, address).first {
+                        it.address.equals(address, ignoreCase = true)
+                    }
+                }
+            }
+                .onSuccess { device ->
+                    val name = device?.name
+                    _uiState.update {
+                        if (it.phase == WifiProvisionUiState.Phase.ConfirmDevice && name != null) {
+                            it.copy(pendingName = name)
+                        } else {
+                            it
+                        }
+                    }
+                }
+                .onFailure { Logger.w(it) { "$TAG: advertised name lookup failed" } }
+        }
+    }
+
+    /** The user accepted the address held by [requestConnect]. */
+    fun confirmConnect() {
+        val state = _uiState.value
+        val address = state.pendingAddress
+        if (state.phase != WifiProvisionUiState.Phase.ConfirmDevice || address == null) return
+        connectToDevice(address)
+    }
+
+    /** The user declined the address held by [requestConnect]; nothing was connected. */
+    fun cancelPending() {
+        scanJob?.cancel()
+        scanJob = null
+        _uiState.update {
+            if (it.phase == WifiProvisionUiState.Phase.ConfirmDevice) {
+                it.copy(phase = WifiProvisionUiState.Phase.Idle, pendingAddress = null, pendingName = null)
+            } else {
+                it
+            }
+        }
+    }
+
+    /** Connect to the listed device with [address], which the user tapped. */
+    fun connectToDiscovered(address: String) {
+        val device = found[address] ?: return
+        launchConnect { it.connect(device) }
+    }
+
+    /**
+     * Connect to the device with [address], or to the one the user picks in the browser's own chooser when [address] is
+     * null there. Where the app scans itself, a null [address] starts the device list instead: the connection never
+     * goes to whichever device advertises first. Pauses at [WifiProvisionUiState.Phase.DeviceFound] so the user can
+     * check the device before proceeding.
      *
-     * @param address Optional MAC address to target a specific device.
+     * @param address MAC address of the device to connect to.
      */
     fun connectToDevice(address: String? = null) {
+        if (address == null && !picksDevice) {
+            beginDiscovery()
+            return
+        }
+        launchConnect { it.connect(address) }
+    }
+
+    private fun beginDiscovery() {
+        val previousScan = scanJob
+        val previousJob = connectJob
+        val previousService = service
+        service = null
+        found.clear()
         _uiState.update {
-            it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null, pickDismissed = false)
+            WifiProvisionUiState(phase = WifiProvisionUiState.Phase.Discovering)
+        }
+        scanJob = viewModelScope.launch {
+            previousScan?.cancelAndJoin()
+            release(previousJob, previousService)
+            safeCatching {
+                withTimeoutOrNull(DISCOVERY_WINDOW) {
+                    bleScanner.scan(DISCOVERY_WINDOW, WIRELESS_SERVICE_UUID).collect(::onAdvertiser)
+                }
+            }
+                .onSuccess { _uiState.update { state -> state.copy(phase = WifiProvisionUiState.Phase.DeviceList) } }
+                .onFailure { e ->
+                    Logger.e(e) { "$TAG: device scan failed" }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.Idle,
+                            error = WifiProvisionError.ConnectFailed(e.message ?: "Unknown error"),
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun onAdvertiser(device: BleDevice) {
+        found[device.address] = device
+        _uiState.update { it.copy(devices = upsertByStrength(it.devices, device)) }
+    }
+
+    private fun launchConnect(connect: suspend (NymeaWifiService) -> Result<String>) {
+        scanJob?.cancel()
+        scanJob = null
+        _uiState.update {
+            it.copy(
+                phase = WifiProvisionUiState.Phase.ConnectingBle,
+                error = null,
+                pickDismissed = false,
+                pendingAddress = null,
+                pendingName = null,
+            )
         }
 
         val previousJob = connectJob
@@ -158,11 +324,16 @@ class WifiProvisionViewModel(
         connectJob = viewModelScope.launch {
             release(previousJob, previousService)
 
-            nymeaService
-                .connect(address)
+            connect(nymeaService)
                 .onSuccess { deviceName ->
                     Logger.i { "$TAG: BLE connected to: $deviceName" }
-                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.DeviceFound, deviceName = deviceName) }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.DeviceFound,
+                            deviceName = deviceName,
+                            deviceAddress = nymeaService.deviceAddress,
+                        )
+                    }
                 }
                 .onFailure { e ->
                     if (e is NoDevicePickedException) {
@@ -185,12 +356,7 @@ class WifiProvisionViewModel(
 
     /** Called when the user confirms they want to scan networks after device discovery. */
     fun scanNetworks() {
-        val nymeaService =
-            service
-                ?: run {
-                    connectToDevice()
-                    return
-                }
+        val nymeaService = service ?: return
         viewModelScope.launch { loadNetworks(nymeaService) }
     }
 
@@ -244,6 +410,9 @@ class WifiProvisionViewModel(
     fun disconnect() {
         val nymeaService = service
         service = null
+        scanJob?.cancel()
+        scanJob = null
+        found.clear()
         viewModelScope.launch {
             nymeaService?.close()
             _uiState.value = WifiProvisionUiState()
@@ -299,6 +468,34 @@ class WifiProvisionViewModel(
 
     companion object {
         private const val TAG = "WifiProvisionViewModel"
+
+        /**
+         * Add or refresh [device] in [devices]. A new device goes in ahead of the first weaker one, so the list reads
+         * strongest-first as it fills; a device already listed keeps its row, so rows do not move under a tap as
+         * advertisements repeat. A missing RSSI ranks below every reading, never as 0 dBm.
+         */
+        internal fun upsertByStrength(devices: List<DiscoveredDevice>, device: BleDevice): List<DiscoveredDevice> {
+            val index = devices.indexOfFirst { it.address == device.address }
+            if (index >= 0) {
+                val current = devices[index]
+                val refreshed =
+                    DiscoveredDevice(
+                        name = device.name ?: current.name,
+                        address = device.address,
+                        rssi = device.rssi ?: current.rssi,
+                    )
+                return devices.toMutableList().also { it[index] = refreshed }
+            }
+            val entry = DiscoveredDevice(name = device.name, address = device.address, rssi = device.rssi)
+            val position = devices.indexOfFirst { isStronger(entry.rssi, it.rssi) }
+            return devices.toMutableList().also { it.add(if (position < 0) it.size else position, entry) }
+        }
+
+        private fun isStronger(candidate: Int?, other: Int?): Boolean = when {
+            candidate == null -> false
+            other == null -> true
+            else -> candidate > other
+        }
 
         /**
          * Deduplicate networks by SSID, keeping the entry with the strongest signal for each. Since we only send SSID
