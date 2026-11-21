@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import okio.ByteString
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.Node
@@ -99,30 +100,30 @@ class RadioSessionEventHandler(
         }
     }
 
+    /** Test seam over the title lookup; compose resources cannot load on a headless JVM. */
+    internal var titleResolver: suspend (StringResource) -> String = { getStringSuspend(it) }
+
     private suspend fun dispatchClientNotification(cn: ClientNotification) {
         if (cn.isOtaStatusNotification() && firmwareUpdateStatusRepository.status.value.isOtaUpdateActive) {
             Logger.i { "OTA status ClientNotification received; skipping duplicate generic alert" }
             return
         }
-        val (title, type) =
+        val (resource, type) =
             when {
-                cn.key_verification_number_inform != null ->
-                    getStringSuspend(Res.string.key_verification_title) to Notification.Type.Info
+                cn.key_verification_number_inform != null -> Res.string.key_verification_title to Notification.Type.Info
 
                 cn.key_verification_number_request != null ->
-                    getStringSuspend(Res.string.key_verification_request_title) to Notification.Type.Info
+                    Res.string.key_verification_request_title to Notification.Type.Info
 
-                cn.key_verification_final != null ->
-                    getStringSuspend(Res.string.key_verification_final_title) to Notification.Type.Info
+                cn.key_verification_final != null -> Res.string.key_verification_final_title to Notification.Type.Info
 
-                cn.duplicated_public_key != null ->
-                    getStringSuspend(Res.string.duplicated_public_key_title) to Notification.Type.Warning
+                cn.duplicated_public_key != null -> Res.string.duplicated_public_key_title to Notification.Type.Warning
 
-                cn.low_entropy_key != null ->
-                    getStringSuspend(Res.string.low_entropy_key_title) to Notification.Type.Warning
+                cn.low_entropy_key != null -> Res.string.low_entropy_key_title to Notification.Type.Warning
 
-                else -> getStringSuspend(Res.string.client_notification) to Notification.Type.Info
+                else -> Res.string.client_notification to Notification.Type.Info
             }
+        val title = titleResolver(resource)
         serviceNotifications.showClientNotification(cn, title, type)
     }
 }

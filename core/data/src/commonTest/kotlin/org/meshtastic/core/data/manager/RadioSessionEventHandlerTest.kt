@@ -19,13 +19,11 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import kotlinx.coroutines.CoroutineExceptionHandler
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
@@ -34,11 +32,14 @@ import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.DuplicatedPublicKey
+import org.meshtastic.proto.KeyVerificationNumberRequest
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.MeshEvent
@@ -51,7 +52,7 @@ import kotlin.test.assertTrue
 
 class RadioSessionEventHandlerTest {
 
-    private class Harness(scope: CoroutineScope, alertScope: CoroutineScope = scope) {
+    private class Harness(scope: CoroutineScope) {
         val radio =
             FakeRadioInterfaceService(scope).apply {
                 setDeviceAddress("tcp:events")
@@ -60,6 +61,7 @@ class RadioSessionEventHandlerTest {
         val session: RadioSessionContext = checkNotNull(radio.activeSession.value)
         val notifications = mock<MeshNotificationManager>(MockMode.autofill)
         val serviceRepository = FakeServiceRepository()
+        val firmwareUpdates = FirmwareUpdateStatusRepository()
         val nodeManager = NodeManagerImpl(FakeNodeRepository(), notifications, radio, scope.asServiceScope())
         val handler =
             RadioSessionEventHandler(
@@ -68,10 +70,11 @@ class RadioSessionEventHandlerTest {
                 mqttManager = mock(MockMode.autofill),
                 nodeManager = nodeManager,
                 serviceNotifications = notifications,
-                firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+                firmwareUpdateStatusRepository = firmwareUpdates,
                 radioInterfaceService = radio,
-                scope = alertScope.asServiceScope(),
+                scope = scope.asServiceScope(),
             )
+                .apply { titleResolver = { resource -> resource.key } }
 
         fun holdNodeWithKey(key: ByteString) {
             nodeManager.updateNode(REMOTE) {
@@ -110,44 +113,88 @@ class RadioSessionEventHandlerTest {
 
     @Test
     fun `platform-suppressed client notification skips modal state`() = runTest {
-        withAlertScope { alerts ->
-            val harness = Harness(backgroundScope, alerts)
-            val notification = protectedPositionAdvisory()
-            every { harness.notifications.suppressClientNotificationModal(notification) } returns true
+        val harness = Harness(backgroundScope)
+        val notification = protectedPositionAdvisory()
+        every { harness.notifications.suppressClientNotificationModal(notification) } returns true
 
-            harness.handler.handle(MeshEvent.Notification(notification), harness.session)
-            runCurrent()
+        harness.handler.handle(MeshEvent.Notification(notification), harness.session)
+        runCurrent()
 
-            assertNull(harness.serviceRepository.clientNotification.value)
-        }
+        assertNull(harness.serviceRepository.clientNotification.value)
     }
 
     @Test
     fun `default platform policy publishes the client notification modal`() = runTest {
-        withAlertScope { alerts ->
-            val harness = Harness(backgroundScope, alerts)
-            val notification = protectedPositionAdvisory()
-            every { harness.notifications.suppressClientNotificationModal(notification) } returns false
+        val harness = Harness(backgroundScope)
+        val notification = protectedPositionAdvisory()
+        every { harness.notifications.suppressClientNotificationModal(notification) } returns false
 
-            harness.handler.handle(MeshEvent.Notification(notification), harness.session)
-            runCurrent()
+        harness.handler.handle(MeshEvent.Notification(notification), harness.session)
+        runCurrent()
 
-            assertEquals(notification, harness.serviceRepository.clientNotification.value)
+        assertEquals(notification, harness.serviceRepository.clientNotification.value)
+    }
+
+    @Test
+    fun `a key verification request posts under its own title as information`() = runTest {
+        val harness = Harness(backgroundScope)
+        val request =
+            ClientNotification.Builder()
+                .also { it.key_verification_number_request = KeyVerificationNumberRequest.Builder().build() }
+                .build()
+
+        harness.handler.handle(MeshEvent.Notification(request), harness.session)
+        runCurrent()
+
+        verifySuspend {
+            harness.notifications.showClientNotification(
+                request,
+                "key_verification_request_title",
+                Notification.Type.Info,
+            )
         }
     }
 
-    /**
-     * The system alert resolves compose resources, which cannot load on a headless JVM; its failure is not under test.
-     */
-    private suspend fun TestScope.withAlertScope(block: suspend (CoroutineScope) -> Unit) {
-        val alerts =
-            CoroutineScope(
-                SupervisorJob() + StandardTestDispatcher(testScheduler) + CoroutineExceptionHandler { _, _ -> },
+    @Test
+    fun `a duplicated public key posts as a warning`() = runTest {
+        val harness = Harness(backgroundScope)
+        val duplicated =
+            ClientNotification.Builder()
+                .also { it.duplicated_public_key = DuplicatedPublicKey.Builder().build() }
+                .build()
+
+        harness.handler.handle(MeshEvent.Notification(duplicated), harness.session)
+        runCurrent()
+
+        verifySuspend {
+            harness.notifications.showClientNotification(
+                duplicated,
+                "duplicated_public_key_title",
+                Notification.Type.Warning,
             )
-        try {
-            block(alerts)
-        } finally {
-            alerts.cancel()
+        }
+    }
+
+    @Test
+    fun `an OTA status notification during an update posts no generic alert`() = runTest {
+        val harness = Harness(backgroundScope)
+        harness.firmwareUpdates.beginOtaUpdate()
+
+        harness.handler.handle(MeshEvent.Notification(otaRebooting), harness.session)
+        runCurrent()
+
+        verifySuspend(VerifyMode.not) { harness.notifications.showClientNotification(any(), any(), any()) }
+    }
+
+    @Test
+    fun `an OTA status notification outside an update is delivered`() = runTest {
+        val harness = Harness(backgroundScope)
+
+        harness.handler.handle(MeshEvent.Notification(otaRebooting), harness.session)
+        runCurrent()
+
+        verifySuspend {
+            harness.notifications.showClientNotification(otaRebooting, "client_notification", Notification.Type.Info)
         }
     }
 
@@ -164,5 +211,8 @@ class RadioSessionEventHandlerTest {
         const val REMOTE = 0x1234
         val heldKey = ByteArray(Node.PUBLIC_KEY_SIZE) { 0x11 }.toByteString()
         val offeredKey = ByteArray(Node.PUBLIC_KEY_SIZE) { 0x22 }.toByteString()
+
+        // AdminModule sends "Rebooting to %s OTA" before switching to the OTA loader.
+        val otaRebooting = ClientNotification.Builder().also { it.message = "Rebooting to WiFi OTA" }.build()
     }
 }

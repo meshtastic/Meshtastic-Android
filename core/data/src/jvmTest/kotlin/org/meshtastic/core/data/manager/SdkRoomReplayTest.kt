@@ -39,6 +39,7 @@ import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoReadDataSource
 import org.meshtastic.core.data.repository.MeshLogRepositoryImpl
 import org.meshtastic.core.data.repository.PacketRepositoryImpl
@@ -48,11 +49,10 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.network.radio.ReplayRadioTransport
 import org.meshtastic.core.repository.ActiveConversationTracker
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
@@ -63,7 +63,9 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
@@ -78,6 +80,7 @@ import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.Frame
 import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.sdk.RadioTransport
@@ -102,7 +105,11 @@ class SdkRoomReplayTest {
         val sdk = getInMemoryDatabaseBuilder().build()
         try {
             val sdkIngress = RoomIngress(backgroundScope, dispatchers, sdk, session)
+            val startedAt = nowSeconds.toInt()
             replaySdk(asset, backgroundScope, sdkIngress, session)
+
+            // The SDK stamps a packet without rx_time with its own clock when it folds it into the sender's node.
+            assertTrue(sdkIngress.peerLastHeard() >= startedAt, "the projected NodeChanged reached the node database")
 
             val expected =
                 ReplayResult(
@@ -188,13 +195,17 @@ class SdkRoomReplayTest {
                         processed.complete(Unit)
                     }
 
-                    is RadioSessionEvent.Lockdown,
                     is RadioSessionEvent.NodeDbRefreshed,
                     is RadioSessionEvent.NodeChanged,
                     is RadioSessionEvent.ConfigChanged,
                     is RadioSessionEvent.ChannelsChanged,
                     is RadioSessionEvent.Event,
-                    -> Unit
+                    -> {
+                        assertEquals(sdkSession, event.sessionId)
+                        ingress.receive(event, session)
+                    }
+
+                    is RadioSessionEvent.Lockdown -> Unit
 
                     is RadioSessionEvent.Ended -> assertEquals(sdkSession, event.sessionId)
                 }
@@ -203,7 +214,10 @@ class SdkRoomReplayTest {
         try {
             client.connect()
             processed.await()
-            if (awaitNotification) ingress.notified.await()
+            if (awaitNotification) {
+                ingress.notified.await()
+                ingress.peerChanged.await()
+            }
         } finally {
             client.disconnect()
             delivery.cancelAndJoin()
@@ -217,38 +231,67 @@ class SdkRoomReplayTest {
         session: RadioSessionContext,
     ) {
         private val selectedSession = MutableStateFlow(session)
-        private val nodeDbReady = MutableStateFlow(false)
-        private val myNodeNum = MutableStateFlow<Int?>(null)
         private val channelSet = MutableStateFlow(ChannelSet.Builder().build())
         private val db = ReplayDatabaseProvider(database)
         private val radio = mock<RadioInterfaceService>(MockMode.autofill)
-        private val nodeManager = mock<NodeManager>(MockMode.autofill)
+        private val notificationManager = mock<MeshNotificationManager>(MockMode.autofill)
+        private val nodeManager =
+            NodeManagerImpl(FakeNodeRepository(), notificationManager, radio, scope.asServiceScope())
         private val notifications = mutableListOf<String>()
         val notified = CompletableDeferred<Unit>()
+        val peerChanged = CompletableDeferred<Unit>()
         private val projection: RadioSessionProjection
 
         init {
             bindSessionAdmission()
-            every { nodeManager.isNodeDbReady } returns nodeDbReady
-            every { nodeManager.myNodeNum } returns myNodeNum
-            every { nodeManager.toNodeID(PEER_NODE) } returns PEER_ID
-            every { nodeManager.toNodeID(BROADCAST) } returns NodeAddress.ID_BROADCAST
-            every { nodeManager.getMyId() } returns LOCAL_ID
-            every { nodeManager.getNodeById(PEER_ID) } returns Node(PEER_NODE, user = peer)
-
-            val notificationManager = mock<MeshNotificationManager>(MockMode.autofill)
             everySuspend {
                 notificationManager.updateMessageNotification(any(), any(), any(), any(), any(), any())
             } calls
                 {
-                    check(nodeDbReady.value) { "Message notification was published before Room was ready" }
+                    check(nodeManager.isNodeDbReady.value) {
+                        "Message notification was published before Room was ready"
+                    }
                     notifications += it.args[2] as String
                     notified.complete(Unit)
                 }
             val config = mock<RadioConfigRepository>(MockMode.autofill)
             every { config.channelSetFlow } returns channelSet
+            val configFlowManager =
+                MeshConfigFlowManagerImpl(
+                    nodeManager = nodeManager,
+                    nodeRepository = FakeNodeRepository(),
+                    radioConfigRepository = config,
+                    serviceStateWriter = mock(MockMode.autofill),
+                    analytics = mock(MockMode.autofill),
+                    packetHandler = FakePacketHandler(),
+                    notificationPrefs = FakeNotificationPrefs(),
+                    radioInterfaceService = radio,
+                    scope = scope.asServiceScope(),
+                )
+            val eventHandler =
+                RadioSessionEventHandler(
+                    serviceStateWriter = mock(MockMode.autofill),
+                    configFlowManager = lazy { configFlowManager },
+                    mqttManager = mock(MockMode.autofill),
+                    nodeManager = nodeManager,
+                    serviceNotifications = notificationManager,
+                    firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+                    radioInterfaceService = radio,
+                    scope = scope.asServiceScope(),
+                )
+                    .apply { titleResolver = { it.key } }
             projection =
-                createRoomReplayProjection(scope, dispatchers, db, nodeManager, radio, config, notificationManager)
+                createRoomReplayProjection(
+                    scope,
+                    dispatchers,
+                    db,
+                    nodeManager,
+                    radio,
+                    config,
+                    notificationManager,
+                    configFlowManager = lazy { configFlowManager },
+                    eventHandler = lazy { eventHandler },
+                )
         }
 
         private fun bindSessionAdmission() {
@@ -283,8 +326,7 @@ class SdkRoomReplayTest {
         }
 
         fun select(database: MeshtasticDatabase, session: RadioSessionContext) {
-            nodeDbReady.value = false
-            myNodeNum.value = null
+            nodeManager.clear()
             selectedSession.value = session
             db.currentDb.value = database
         }
@@ -304,13 +346,19 @@ class SdkRoomReplayTest {
                         set.settings = channels.sortedBy { it.index }.map { assertNotNull(it.settings) }
                     }
                     .build()
-            myNodeNum.value = info.my_node_num
-            nodeDbReady.value = true
+            nodes.forEach(nodeManager::installNodeInfo)
+            nodeManager.setMyNodeNum(info.my_node_num)
+            nodeManager.setNodeDbReady(true)
+            nodeManager.setAllowNodeDbWrites(true)
         }
 
-        suspend fun receive(packet: RadioSessionEvent.Packet, session: RadioSessionContext) {
-            projection.project(packet, session)
+        suspend fun receive(event: RadioSessionEvent, session: RadioSessionContext) {
+            projection.project(event, session)
+            val peerUpdate = (event as? RadioSessionEvent.NodeChanged)?.change as? NodeChange.Updated
+            if (peerUpdate?.node?.num == PEER_NODE) peerChanged.complete(Unit)
         }
+
+        fun peerLastHeard(): Int = nodeManager.nodeDBbyNodeNum.getValue(PEER_NODE).lastHeard
 
         suspend fun result(): ReplayResult = db.withReadDb { database ->
             ReplayResult(
@@ -508,6 +556,7 @@ internal fun createRoomReplayProjection(
     config: RadioConfigRepository,
     notificationManager: MeshNotificationManager,
     configFlowManager: Lazy<MeshConfigFlowManagerImpl> = lazy { error("config install is not under test") },
+    eventHandler: Lazy<RadioSessionEventHandler> = lazy { error("session events are not under test") },
 ): RadioSessionProjection {
     val packetRepository = PacketRepositoryImpl(db, dispatchers)
     val logPrefs = mock<MeshLogPrefs>(MockMode.autofill)
@@ -555,5 +604,6 @@ internal fun createRoomReplayProjection(
         meshLogRepository = logs,
         serviceStateWriter = mock(MockMode.autofill),
         configFlowManager = configFlowManager,
+        eventHandler = eventHandler,
     )
 }
