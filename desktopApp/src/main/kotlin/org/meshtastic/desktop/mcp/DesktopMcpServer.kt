@@ -90,8 +90,9 @@ fun DesktopMcpLifecycle() {
 }
 
 /**
- * Opt-in MCP server for agents, wired to the app's radio layer rather than its UI. Starts only when [PORT_ENV] or
- * [PORT_PROPERTY] names a port, and binds loopback only.
+ * Opt-in MCP server for agents, wired to the app's radio layer rather than its UI. Starts only when [PORT_PROPERTY]
+ * names a port, and binds loopback only. The environment is never a source: the `run` and `hotRun` tasks translate
+ * [PORT_ENV] into the property, so a packaged app does not read it.
  */
 class DesktopMcpServer(
     private val serviceRepository: ServiceRepository,
@@ -318,7 +319,7 @@ class DesktopMcpServer(
             setOf(MessageStatus.DELIVERED, MessageStatus.ERROR, MessageStatus.SFPP_CONFIRMED, MessageStatus.RECEIVED)
 
         /** The configured port, or null when the server stays off. */
-        fun configuredPort(): Int? = parseMcpPort(System.getProperty(PORT_PROPERTY) ?: System.getenv(PORT_ENV))
+        fun configuredPort(): Int? = parseMcpPort(System.getProperty(PORT_PROPERTY))
     }
 }
 

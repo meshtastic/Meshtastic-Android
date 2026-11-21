@@ -182,7 +182,10 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     /**
      * Download the ESP32 OTA firmware binary. Tries in order:
-     * 1. `.mt.json` manifest resolution (2.7.17+) — the authoritative `app0` partition image.
+     * 1. `.mt.json` manifest resolution (2.7.17+) — the authoritative `app0` partition image. When the manifest names
+     *    the image and the download fails its size or digest check, the file is deleted and `null` is returned with no
+     *    fallback. The fallbacks below apply only when no manifest is published, it has no `app0` entry, or the image
+     *    it names could not be downloaded.
      * 2. `firmware-<target>-<version>-update.bin` — the bare app image. Preferred over the plain `.bin` because on
      *    pre-2.7.17 releases (which ship no manifest) `firmware-<target>-<version>.bin` is a *merged* image
      *    (bootloader + partition table + app); flashing that to the `app0` partition leaves it misaligned and the
@@ -202,8 +205,10 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
 
         // ── Primary: .mt.json manifest (2.7.17+) ────────────────────────────
-        resolveFromManifest(version, target, release, hardware, onProgress)?.let {
-            return it
+        when (val resolution = resolveFromManifest(version, target, release, hardware, onProgress)) {
+            is ManifestResolution.Verified -> return resolution.artifact
+            ManifestResolution.Rejected -> return null
+            ManifestResolution.Unavailable -> Unit
         }
 
         // ── Fallback 1: bare app image `-update.bin` (unambiguous OTA image when published; required for pre-2.7.17,
@@ -247,6 +252,17 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     // ── Manifest resolution ──────────────────────────────────────────────────
 
+    private sealed interface ManifestResolution {
+        /** The manifest named the image and the download passed its checks. */
+        data class Verified(val artifact: FirmwareArtifact) : ManifestResolution
+
+        /** The manifest named the image and the download failed its checks; the file is already deleted. */
+        data object Rejected : ManifestResolution
+
+        /** No usable manifest entry, or its image could not be downloaded; the filename fallbacks apply. */
+        data object Unavailable : ManifestResolution
+    }
+
     @Suppress("ReturnCount")
     private suspend fun resolveFromManifest(
         version: String,
@@ -254,13 +270,13 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
-    ): FirmwareArtifact? {
+    ): ManifestResolution {
         val manifestUrl = "${release.artifactBaseUrl}/firmware-$target-$version.mt.json"
 
         val text = fileHandler.fetchText(manifestUrl)
         if (text == null) {
             Logger.d { "Manifest not available at $manifestUrl — falling back to filename heuristics" }
-            return null
+            return ManifestResolution.Unavailable
         }
 
         val manifest =
@@ -268,13 +284,13 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 manifestJson.decodeFromString<FirmwareManifest>(text)
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.w(e) { "Failed to parse manifest from $manifestUrl" }
-                return null
+                return ManifestResolution.Unavailable
             }
 
         val otaEntry = manifest.files.firstOrNull { it.partName == OTA_PART_NAME }
         if (otaEntry == null) {
             Logger.w { "Manifest has no '$OTA_PART_NAME' entry — files: ${manifest.files.map { it.partName }}" }
-            return null
+            return ManifestResolution.Unavailable
         }
 
         Logger.i { "Manifest resolved OTA firmware: ${otaEntry.name} (${otaEntry.bytes} bytes, md5=${otaEntry.md5})" }
@@ -287,13 +303,15 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 fileSuffix = ".bin",
                 internalFileExtension = ".bin",
                 preferredFilename = otaEntry.name,
-            ) ?: return null
+            ) ?: return ManifestResolution.Unavailable
 
-        // Verify the download against the manifest before handing it to the OTA flow. On mismatch we return null so the
-        // caller falls back to the filename heuristics (exactly like a missing/garbage manifest) — surfacing a bad
-        // download here beats rebooting the device into OTA mode, which tears down the mesh link, only to fail
-        // device-side hash verification mid-flash.
-        return artifact.takeIf { verifyAgainstManifest(it, otaEntry) }
+        // A mismatch is terminal: no fallback may supply an image the manifest rejected. Failing here also beats
+        // rebooting the device into OTA mode, which tears down the mesh link, only to fail device-side verification.
+        if (!verifyAgainstManifest(artifact, otaEntry)) {
+            fileHandler.deleteFile(artifact)
+            return ManifestResolution.Rejected
+        }
+        return ManifestResolution.Verified(artifact)
     }
 
     /**

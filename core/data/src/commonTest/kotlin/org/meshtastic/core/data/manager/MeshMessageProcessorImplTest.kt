@@ -47,6 +47,8 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -988,4 +990,82 @@ class MeshMessageProcessorImplTest {
 
         verifySuspend { meshLogRepository.insert(any()) }
     }
+
+    @Test
+    fun `config frame is persisted without the bluetooth pin while the live frame is untouched`() =
+        runTest(testDispatcher) {
+            processor = createProcessor(backgroundScope)
+            val fromRadio =
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.config =
+                            Config.Builder()
+                                .also { c ->
+                                    c.bluetooth =
+                                        Config.BluetoothConfig.Builder()
+                                            .also { b ->
+                                                b.enabled = true
+                                                b.fixed_pin = 424242
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build()
+
+            processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
+            advanceUntilIdle()
+
+            verifySuspend {
+                meshLogRepository.insert(
+                    matches { it.fromRadio.config?.bluetooth?.fixed_pin == 0 && !it.raw_message.contains("424242") },
+                )
+            }
+            verify { fromRadioDispatcher.handleFromRadio(matches { it.config?.bluetooth?.fixed_pin == 424242 }, any()) }
+        }
+
+    @Test
+    fun `received admin packet is persisted with cleared keys and still reaches the handler intact`() =
+        runTest(testDispatcher) {
+            processor = createProcessor(backgroundScope)
+            isNodeDbReady.value = true
+            val secret = ByteArray(32) { 0x7A }.toByteString()
+            val admin = AdminMessage.Builder().also { it.session_passkey = secret }.build()
+            val packet =
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 11
+                        wb.from = 999
+                        wb.rx_time = 1700000000
+                        wb.decoded =
+                            Data.Builder()
+                                .also {
+                                    it.portnum = PortNum.ADMIN_APP
+                                    it.payload = AdminMessage.ADAPTER.encodeByteString(admin)
+                                }
+                                .build()
+                    }
+                    .build()
+
+            processor.handleReceivedMeshPacket(packet, myNodeNum)
+            advanceUntilIdle()
+
+            verifySuspend {
+                meshLogRepository.insert(
+                    matches {
+                        AdminMessage.ADAPTER.decode(it.fromRadio.packet!!.decoded!!.payload).session_passkey ==
+                            ByteString.EMPTY && !it.raw_message.contains(secret.hex())
+                    },
+                )
+            }
+            verify {
+                dataHandler.handleReceivedData(
+                    matches { it.decoded?.payload == AdminMessage.ADAPTER.encodeByteString(admin) },
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
+        }
 }

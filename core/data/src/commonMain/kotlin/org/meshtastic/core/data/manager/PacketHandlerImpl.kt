@@ -217,15 +217,16 @@ class PacketHandlerImpl(
         p.packet?.let { changeStatus(it, MessageStatus.ENROUTE) }
         val packet = p.packet
         if (packet?.decoded != null) {
+            val loggedPacket = packet.redactedForLog()
             val packetToSave =
                 MeshLog(
                     uuid = Uuid.random().toString(),
                     message_type = "Packet",
                     received_date = nowMillis,
-                    raw_message = packet.toString(),
+                    raw_message = loggedPacket.toString(),
                     fromNum = MeshLog.NODE_NUM_LOCAL,
                     portNum = packet.decoded?.portnum?.value ?: 0,
-                    fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
+                    fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
                 )
             insertMeshLog(packetToSave)
         }

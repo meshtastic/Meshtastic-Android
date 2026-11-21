@@ -75,6 +75,21 @@ class BleBootloaderUpgradeGateTest {
     }
 
     @Test
+    fun refusesAPackageBaseOffTheReleaseRepository() {
+        listOf(
+            "http://github.com/meshtastic/nRF52_Bootloader/releases/download/2.6.0",
+            "https://example.invalid/nRF52_Bootloader/releases/download/2.6.0",
+            "https://github.com@example.invalid/meshtastic/nRF52_Bootloader/releases/download/2.6.0",
+        )
+            .forEach { base ->
+                assertNull(
+                    bootloaderDfuZipFor(manifest.copy(otafixBase = base), "rak4631", null),
+                    "package resolved for base '$base'",
+                )
+            }
+    }
+
+    @Test
     fun offersForTheSharedLegacyVersion() {
         assertNotNull(gate(BootloaderStatus(InstalledBootloader.OlderThanFirstNumbered, latest)))
     }

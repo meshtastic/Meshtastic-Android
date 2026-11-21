@@ -203,12 +203,22 @@ class StreamFrameCodec(
      * Frames a payload into the Meshtastic stream protocol format: [START1][START2][MSB len][LSB len][payload].
      *
      * Thread-safe via an internal mutex — multiple callers can call this concurrently.
+     *
+     * A payload over [MAX_TO_FROM_RADIO_SIZE] is refused rather than written, since the radio accepts no longer frame.
+     * Refusal drops that one payload and leaves the link up.
+     *
+     * @return `true` when the frame was written, `false` when the payload was refused.
      */
     suspend fun frameAndSend(
         payload: ByteArray,
         sendBytes: suspend (ByteArray) -> Unit,
         flush: suspend () -> Unit = {},
-    ) {
+    ): Boolean {
+        if (payload.size > MAX_TO_FROM_RADIO_SIZE) {
+            // Size only — a payload can carry message content or keys.
+            Logger.w { "$logTag: refusing a ${payload.size}-byte payload over $MAX_TO_FROM_RADIO_SIZE" }
+            return false
+        }
         writeMutex.withLock {
             val header = ByteArray(HEADER_SIZE)
             header[0] = START1
@@ -220,6 +230,7 @@ class StreamFrameCodec(
             sendBytes(payload)
             flush()
         }
+        return true
     }
 
     /** Resets the framing state machine. Call when reconnecting. */

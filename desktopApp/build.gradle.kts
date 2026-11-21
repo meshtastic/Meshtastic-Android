@@ -17,6 +17,9 @@
 
 import dev.detekt.gradle.Detekt
 import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.ExecOperations
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
@@ -128,6 +131,16 @@ kotlin {
 
 // Exclude generated Compose resource files from detekt analysis
 tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
+
+// The MCP server reads only the `meshtastic.mcp.port` system property; developer run tasks translate
+// MESHTASTIC_MCP_PORT into it so a packaged app never reads the environment.
+class McpPortArgumentProvider(@get:Input @get:Optional val port: String?) : CommandLineArgumentProvider {
+    override fun asArguments(): Iterable<String> = listOfNotNull(port?.let { "-Dmeshtastic.mcp.port=$it" })
+}
+
+tasks.withType<JavaExec>().configureEach {
+    jvmArgumentProviders.add(McpPortArgumentProvider(providers.environmentVariable("MESHTASTIC_MCP_PORT").orNull))
+}
 
 // Signed dependency jars (BouncyCastle) keep their META-INF signature files after ProGuard rewrites their classes or
 // the uber jar merges them, and the JVM then rejects the jar. Homebrew, Flatpak and the release installers ship these.

@@ -21,10 +21,10 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
-import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.di.DataStoreScope
@@ -54,6 +54,7 @@ import org.meshtastic.core.prefs.di.asMeshLogDataStore
 import org.meshtastic.core.prefs.di.asRadioDataStore
 import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.prefs.store.asPrefsStore
+import java.io.File
 
 /** Typed preference-datastore singletons for each preference domain, one file each under the data directory. */
 @Suppress("TooManyFunctions")
@@ -111,7 +112,7 @@ class DesktopPreferencesDataStoreModule {
 /** [name] is an on-disk identity — changing it orphans existing user data. */
 private fun prefsStore(name: String, scope: DataStoreScope): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
-    FileSystem.SYSTEM.createDirectories(dir.toPath())
+    createOwnerOnlyDirectories(File(dir))
     return PreferenceDataStoreFactory.createWithPath(
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
         scope = scope,

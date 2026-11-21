@@ -19,19 +19,31 @@ package org.meshtastic.feature.firmware
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.utils.io.writeFully
+import io.ktor.utils.io.writer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class JvmFirmwareFileHandlerTest {
     private val engine = MockEngine { respond(ByteArray(4) { 1 }) }
@@ -81,5 +93,71 @@ class JvmFirmwareFileHandlerTest {
         assertNotNull(artifact)
         handler.deleteFile(artifact)
         assertEquals(1, engine.requestHistory.size)
+    }
+
+    private val chunk = ByteArray(DOWNLOAD_CHUNK) { it.toByte() }
+
+    /**
+     * Downloads a [sentBytes] body with no declared length. With [thenStalls] the server sends those bytes and then
+     * never finishes the body, so only a download that stops on its own can return.
+     */
+    private suspend fun download(sentBytes: Int, target: File, maxBytes: Long, thenStalls: Boolean): Boolean {
+        val scope = CoroutineScope(Dispatchers.Default)
+        val streaming =
+            HttpClient(
+                MockEngine {
+                    respond(
+                        scope
+                            .writer(autoFlush = true) {
+                                repeat(sentBytes / chunk.size) { channel.writeFully(chunk) }
+                                if (thenStalls) awaitCancellation()
+                            }
+                            .channel,
+                    )
+                },
+            )
+        return try {
+            // Real time, not runTest's virtual clock: the stalled body never completes on its own.
+            withContext(Dispatchers.Default) {
+                withTimeout(STALL_TIMEOUT) {
+                    downloadUrlToFile(streaming, "https://example.invalid/firmware.bin", target, {}, maxBytes)
+                }
+            }
+        } finally {
+            streaming.close()
+            scope.cancel()
+        }
+    }
+
+    private fun tempTarget(): File = Files.createTempFile("firmware-download-test", ".bin").toFile().apply { delete() }
+
+    @Test
+    fun `a body that outgrows the limit stops the transfer and removes its partial file`() = runTest {
+        val target = tempTarget()
+        val cap = 10 * DOWNLOAD_CHUNK.toLong()
+
+        // The server sends well past the cap and then stalls: stopping at the cap is the only way to return.
+        assertFailsWith<IOException> { download(64 * DOWNLOAD_CHUNK, target, maxBytes = cap, thenStalls = true) }
+
+        assertFalse(target.exists())
+    }
+
+    @Test
+    fun `a body exactly at the limit is written in full`() = runTest {
+        val target = tempTarget()
+        try {
+            val size = 10 * DOWNLOAD_CHUNK
+
+            assertTrue(download(size, target, maxBytes = size.toLong(), thenStalls = false))
+
+            assertEquals(size.toLong(), target.length())
+        } finally {
+            target.delete()
+        }
+    }
+
+    private companion object {
+        const val DOWNLOAD_CHUNK = 8192
+        val STALL_TIMEOUT = 20.seconds
     }
 }
