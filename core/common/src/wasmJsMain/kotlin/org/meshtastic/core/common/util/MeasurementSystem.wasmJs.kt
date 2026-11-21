@@ -20,18 +20,8 @@ package org.meshtastic.core.common.util
 // best available signal, same fallback the JVM actual uses below Android P.
 actual fun getSystemMeasurementSystem(): MeasurementSystem = measurementSystemForRegion(currentRegionCode())
 
-// No browser API for this either; CLDR's region list is reused verbatim from the JVM actual.
-actual fun getSystemTemperatureUnit(): TemperatureUnit = when (currentRegionCode()) {
-    "US",
-    "BS",
-    "BZ",
-    "KY",
-    "PR",
-    "PW",
-    -> TemperatureUnit.FAHRENHEIT
-
-    else -> TemperatureUnit.CELSIUS
-}
+// No browser API for this either; the region table in commonMain is the source.
+actual fun getSystemTemperatureUnit(): TemperatureUnit = temperatureUnitForRegion(currentRegionCode())
 
 actual fun currentLocaleCode(): String = parsedBrowserLocale().language
 
