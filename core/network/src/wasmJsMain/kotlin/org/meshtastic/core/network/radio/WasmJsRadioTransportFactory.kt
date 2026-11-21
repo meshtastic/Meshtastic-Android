@@ -16,13 +16,11 @@
  */
 package org.meshtastic.core.network.radio
 
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -32,8 +30,8 @@ import org.meshtastic.core.repository.RadioTransportFactory
 class WasmJsRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     private val sdk: WebSdkRadioTransportFactory,
-    private val virtual: VirtualRadioSessionFactory,
-) : BaseRadioTransportFactory(bluetoothRepository) {
+    virtual: VirtualRadioSessionFactory,
+) : BaseRadioTransportFactory(bluetoothRepository, virtual) {
 
     // Network is the WebSocket phone link alone: raw TCP never reaches a browser.
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
@@ -54,33 +52,6 @@ class WasmJsRadioTransportFactory(
     override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
         sdk.ble(address, service)
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
-        val rest = address.substring(1)
-
-        return when (interfaceId) {
-            InterfaceId.MOCK -> virtual.demo(rest, service)
-
-            InterfaceId.REPLAY -> {
-                Logger.w { "Replay device selected but no capture asset ships on web — falling back to mock" }
-                virtual.demo(rest, service)
-            }
-
-            InterfaceId.TCP ->
-                error(
-                    "TCP transport is not supported on web: browsers cannot open raw sockets " +
-                        "(permanent sandbox limitation)",
-                )
-
-            InterfaceId.SERIAL -> sdk.serial(rest, service)
-
-            InterfaceId.NOP,
-            null,
-            -> NopRadioTransport(rest)
-
-            InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
-
-            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
-        }
-    }
+    override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        sdk.serial(rest, service)
 }

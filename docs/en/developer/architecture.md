@@ -81,7 +81,7 @@ Feature modules:
 - Use the `meshtastic.kmp.feature` convention plugin, except `feature:widget` and `feature:xr`, which apply `meshtastic.android.library`
 - Depend on `core` modules, not on other `feature` modules. The two exceptions are `feature:map-maplibre` and `feature:coverage`, which both build on `feature:map` and `feature:map-terrain`
 - Own their navigation entries and DI registrations
-- Contain platform-specific implementations in `androidMain`/`jvmMain`/`iosMain`
+- Contain platform-specific implementations in `androidMain`/`jvmMain`/`iosMain`, and `wasmJsMain` where the module has a web target
 
 ### `core/*` — Core Modules
 
@@ -139,6 +139,8 @@ src/
 ├── jvmMain/            ← Desktop JVM-specific
 ├── jvmAndroidMain/     ← Shared by Android and desktop JVM
 ├── iosMain/            ← iOS-specific
+├── wasmJsMain/         ← Browser-specific
+├── nonWebMain/         ← Shared by every target except wasmJs (`nonWebTest/` holds its tests)
 ├── nativeMain/         ← Kotlin/Native code, built for the one iOS target (iosSimulatorArm64)
 ├── jvmTest/            ← Desktop test host
 ├── androidHostTest/    ← Android host (JVM) unit tests
@@ -147,7 +149,9 @@ src/
 
 `jvmAndroidMain` exists only in modules that apply `meshtastic.kmp.jvm.android`. `nativeMain`,
 `androidHostTest` (modules that call `withHostTest`) and `androidDeviceTest` exist only in the
-modules that need them.
+modules that need them. `wasmJsMain` and `nonWebMain` exist only in modules that apply
+`meshtastic.kmp.web`, and the wasmJs target itself is registered only with `-Pmeshtastic.web=true`
+(`webApp/README.md`).
 
 **Golden Rules:**
 - No `android.*` imports in `commonMain`

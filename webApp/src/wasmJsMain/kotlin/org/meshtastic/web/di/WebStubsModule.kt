@@ -37,6 +37,10 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.MeshLocationManager
+import org.meshtastic.core.repository.NoopAppWidgetUpdater
+import org.meshtastic.core.repository.NoopMagneticFieldProvider
+import org.meshtastic.core.repository.NoopPlatformAnalytics
+import org.meshtastic.core.repository.NoopReverseGeocoder
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.ReverseGeocoder
@@ -44,6 +48,8 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.service.DeviceAddressChangeHook
 import org.meshtastic.core.service.LastBleNodeRecorder
 import org.meshtastic.core.service.LocalNetworkAccess
+import org.meshtastic.core.service.NoopDeviceAddressChangeHook
+import org.meshtastic.core.service.NoopLocalNetworkAccess
 import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
 import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.docs.ai.AIDocAssistant
@@ -59,14 +65,8 @@ import org.meshtastic.web.platform.WebLocationRepository
 import org.meshtastic.web.platform.WebLocationService
 import org.meshtastic.web.platform.WebMeshLocationManager
 import org.meshtastic.web.platform.WebPhoneLocationProvider
-import org.meshtastic.web.stub.NoopAppWidgetUpdater
-import org.meshtastic.web.stub.NoopDeviceAddressChangeHook
-import org.meshtastic.web.stub.NoopLocalNetworkAccess
 import org.meshtastic.web.stub.NoopLocaleChangeNotifier
 import org.meshtastic.web.stub.NoopLockdownPassphraseStore
-import org.meshtastic.web.stub.NoopMagneticFieldProvider
-import org.meshtastic.web.stub.NoopPlatformAnalytics
-import org.meshtastic.web.stub.NoopReverseGeocoder
 import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
 import org.meshtastic.web.stub.NoopServiceDiscovery
 

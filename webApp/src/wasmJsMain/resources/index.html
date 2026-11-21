@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <title>Meshtastic</title>
+    <!-- The distribution puts a preload for each wasm module webApp.js names on the next line. -->
+    <!-- wasm-preload -->
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -120,7 +122,7 @@
         if (!window.isSecureContext) {
             reason = "It needs a secure connection. Open it over https.";
         } else if (!wasmOk) {
-            reason = "This browser is missing WebAssembly features the app is built on. Use a current version of Chrome or Edge.";
+            reason = "This browser is missing WebAssembly features the app is built on. Use a current version of Chrome, Edge, Firefox or Safari.";
         }
         if (reason) {
             document.getElementById("loading").hidden = true;

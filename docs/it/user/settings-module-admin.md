@@ -1,7 +1,7 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -39,7 +39,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Indirizzo                | MQTT broker address                                                                                                                                                                                                                                                              | `mqtt.meshtastic.org` |
 | Crittografia abilitata   | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| Output JSON abilitato    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Disattivato           |
+| JSON Output Enabled      | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Disattivato           |
 | Map Reporting            | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Disattivato           |
 | Proxy to client attivato | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Disattivato           |
 | MQTT abilitato           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Disattivato           |
@@ -70,7 +70,7 @@ Enables serial port communication for external device integrations (GPS modules,
 | Velocità della seriale                                                                           | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Predefinito |
 | Echo abilitato                                                                                   | Echo packets you send back over the serial port                                                                                                                                                                                     | Disattivato |
 | Modalità seriale                                                                                 | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Predefinito |
-| Sovrascrivi porta seriale della console                                                          | Take over the port the debug console normally uses                                                                                                                                                                                  | Disattivato |
+| Sovrascrivi La Porta Seriale Della Console                                                       | Take over the port the debug console normally uses                                                                                                                                                                                  | Disattivato |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0           |
 | Seriale abilitata                                                                                | Turn serial communication on                                                                                                                                                                                                        | Disattivato |
 | Timeout                                                                                          | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0           |
@@ -146,7 +146,8 @@ battery health often and sensors rarely. The intervals run from 30 minutes to 72
 | Modulo metriche di alimentazione abilitato        | Report the per-channel voltage and current readings                                                                                                                                         | Disattivato |
 | Intervallo aggiornamento metriche alimentazione   | How often to report them                                                                                                                                                                    | —           |
 | Metriche di alimentazione visualizzate su schermo | Also show power readings on the device's display                                                                                                                                            | Disattivato |
-| Metriche ambientali visualizzate su schermo       | Also show environment readings on the device's display                                                                                                                                      | Disattivato |
+| Show air quality on device screen                 | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | Disattivato |
+| Show environment on device screen                 | Also show environment readings on the device's display                                                                                                                                      | Disattivato |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

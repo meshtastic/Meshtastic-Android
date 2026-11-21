@@ -1,7 +1,7 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -39,7 +39,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Address                | MQTT broker address                                                                                                                                                                                                                                                              | `mqtt.meshtastic.org` |
 | Encryption Enabled     | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON output enabled    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
+| JSON Output Enabled    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
 | Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
 | MQTT Client Proxy      | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
 | MQTT Enabled           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
@@ -70,7 +70,7 @@ Enables serial port communication for external device integrations (GPS modules,
 | Baud                                                                                             | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Default |
 | Echo                                                                                             | Echo packets you send back over the serial port                                                                                                                                                                                     | Off     |
 | Mode                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Default |
-| Override console serial port                                                                     | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
+| Override Console Serial Port                                                                     | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0       |
 | Serial Enabled                                                                                   | Turn serial communication on                                                                                                                                                                                                        | Off     |
 | Tan pase                                                                                         | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0       |
@@ -134,19 +134,20 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| Setting                      | Deskripsyon                                                                                                                                                                                 | Default |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Air Quality Metrics Enabled  | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
-| Air Quality Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Broadcast Device Metrics     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
-| Device Metrics Interval      | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
-| Display Fahrenheit           | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
-| Environment Metrics Enabled  | Report the attached environment sensors                                                                                                                                                     | Off     |
-| Environment Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Power Measurement Enabled    | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
-| Power Metrics Interval       | How often to report them                                                                                                                                                                    | —       |
-| Power Screen                 | Also show power readings on the device's display                                                                                                                                            | Off     |
-| Show on device screen        | Also show environment readings on the device's display                                                                                                                                      | Off     |
+| Setting                           | Deskripsyon                                                                                                                                                                                 | Default |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Air Quality Metrics Enabled       | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
+| Air Quality Metrics Interval      | How often to report them                                                                                                                                                                    | —       |
+| Broadcast Device Metrics          | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
+| Device Metrics Interval           | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
+| Display Fahrenheit                | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
+| Environment Metrics Enabled       | Report the attached environment sensors                                                                                                                                                     | Off     |
+| Environment Metrics Interval      | How often to report them                                                                                                                                                                    | —       |
+| Power Measurement Enabled         | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
+| Power Metrics Interval            | How often to report them                                                                                                                                                                    | —       |
+| Power Screen                      | Also show power readings on the device's display                                                                                                                                            | Off     |
+| Show air quality on device screen | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | Off     |
+| Show environment on device screen | Also show environment readings on the device's display                                                                                                                                      | Off     |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

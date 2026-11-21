@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -132,7 +132,9 @@ A status label appears under **your own** outgoing messages only (incoming messa
 | Confirmed on SF++ chain | Confirmed delivered via the SF++ chain |
 | Error | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors)) |
 
-Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
+Tap the status under any message you sent to open its delivery details. For a failed message, or a direct message marked **Relayed, not confirmed by recipient**, choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
+
+The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded.
 
 ### Delivery Errors
 
@@ -142,7 +144,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 |-------|---------|------------|
 | No route | No path exists to the destination node | The recipient may be offline or out of mesh range. Try later or move closer. |
 | No radio interface | No radio interface available to send | Check that your node is connected and available. |
-| Failed to deliver to mesh | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
+| Failed to deliver to mesh | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits. A message a relay already acknowledged keeps **Delivered to mesh** or **Relayed, not confirmed by recipient** when its retransmits run out | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
 | Rate limited | The mesh is throttling you for sending too fast | Wait before sending again. |
 | Not authorized | The destination refused the request | Check you have the right channel and keys for that node. |
 | Recipient needs your key | Direct-message encryption could not complete because the other node does not have your public key yet | Exchange node info — the key travels with it. Common on a first DM to a new contact. |

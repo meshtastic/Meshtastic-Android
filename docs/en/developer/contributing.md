@@ -82,7 +82,7 @@ Run formatting:
 
 ## Architecture Rules
 
-- Feature modules must not depend on other feature modules; `feature:map-maplibre` and `feature:coverage` building on `feature:map` and `feature:map-terrain` are the exceptions
+- Feature modules must not depend on other feature modules; `feature:map-maplibre` and `feature:coverage` building on `feature:map` and `feature:map-terrain` are the exceptions. `appShell` is where the hosts' shared screen composes them
 - `commonMain` must not contain `android.*`, `java.io.*`, or platform-specific imports
 - Prefer interface + DI over `expect`/`actual` for complex platform behaviors
 - All navigation routes must be `@Serializable` and defined in `Routes.kt`

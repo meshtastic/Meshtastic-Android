@@ -38,7 +38,7 @@ before a connection is attempted.
 
 **Module:** `core:network` (the `BleRadioTransport` implementation) built on `core:ble` (BLE connection
 primitives)  
-**Platforms:** Android, Desktop (JVM via Kable); code compiles for iOS, but no iOS app ships
+**Platforms:** Android, Desktop (JVM via Kable), Web (Kable over Web Bluetooth); code compiles for iOS, but no iOS app ships
 
 The primary transport for mobile devices and also available on desktop:
 - Service discovery for Meshtastic GATT services
@@ -56,13 +56,13 @@ The primary transport for mobile devices and also available on desktop:
 ## USB Serial
 
 **Module:** `core:network`  
-**Platforms:** Android (OTG), Desktop
+**Platforms:** Android (OTG), Desktop, Web (Web Serial)
 
 Serial communication over USB:
 - Uses `usb-serial-for-android` library on Android
 - Direct serial port access on Desktop (JVM)
 - Probe table for supported USB vendor/product IDs
-- Automatic detection when USB device is connected
+- Automatic detection when USB device is connected; on Web only for a port the user has already granted through the browser's port picker
 
 ### Where the Code Lives
 
@@ -81,6 +81,16 @@ Network-based transport for Wi-Fi-enabled nodes:
 - Nodes on the local network found through mDNS (`_meshtastic._tcp`): `NsdManager` on Android, JmDNS on Desktop
 - Used for development with meshtasticd and simulated nodes
 - Available when BLE/USB is impractical
+
+## WebSocket
+
+**Module:** `meshtastic-sdk:transport-websocket`
+
+**Platforms:** Android, Desktop, Web
+
+Firmware's WebSocket phone API carries one binary `ToRadio` or `FromRadio` per message at `/api/v1/ws`, for one client at a time. Addresses are `ws://` or `wss://` URLs, and an empty path becomes `/api/v1/ws` (`WebSocketUrl.kt`). Released firmware does not serve it yet. In a browser it is the only network transport.
+
+The shared SDK session uses the same WebSocket factory on Android, desktop and Web. The app’s session service handles reselecting the link after a recoverable disconnect.
 
 ## Transport Factory
 
@@ -108,18 +118,17 @@ to notice. Every consumer must read that one flow — the visibility path and th
 admission path have to agree, or the demo entry appears and then refuses to connect.
 
 `BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it creates
-`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and hands every other
-address to the platform's `createPlatformTransport`. On hardware without Bluetooth LE it refuses BLE
+`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and dispatches every other
+address in `createPlatformTransport`: mock and no-device itself, and replay, TCP and serial through hooks a platform overrides. `NonWebRadioTransportFactory` (`nonWebMain`) supplies raw TCP for Android and Desktop. On hardware without Bluetooth LE it refuses BLE
 addresses, and the Android factory refuses serial addresses on hardware with no USB host, so a saved
 address restored onto such a device is kept but never armed.
 
 Platform-specific implementations:
 - **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
-- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and the replay transport isn't wired
+- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
 
-`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP, and names a failure from the close code: a refused upgrade, a TLS failure (not detectable in a browser), a slot given to another client (4001), a message too big, or a contested slot. The last three hold every automatic redial, network recovery included, until the user connects again.
 
 ## Connection Lifecycle
 

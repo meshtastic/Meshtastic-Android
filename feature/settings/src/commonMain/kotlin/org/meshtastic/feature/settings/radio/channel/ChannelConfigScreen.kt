@@ -357,7 +357,7 @@ private const val PSK_EXPLICITLY_EDITED_FLAG = 1 shl 2
  * @param settingsList Current list of channels on the node.
  * @return the index of the channel within `settingsList`.
  */
-private fun determineLocationSharingChannel(capabilities: Capabilities, settingsList: List<ChannelSettings>): Int {
+internal fun determineLocationSharingChannel(capabilities: Capabilities, settingsList: List<ChannelSettings>): Int {
     var output = -1
     if (capabilities.supportsSecondaryChannelLocation) {
         /* Essentially the first index with the setting enabled */
@@ -369,8 +369,8 @@ private fun determineLocationSharingChannel(capabilities: Capabilities, settings
         }
     } else {
         /* Only the primary channel at index 0 can share locations automatically */
-        val primary = settingsList[0]
-        if ((primary.module_settings?.position_precision ?: 0) > 0) {
+        val primary = settingsList.firstOrNull()
+        if (primary != null && (primary.module_settings?.position_precision ?: 0) > 0) {
             output = 0
         }
     }

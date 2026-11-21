@@ -16,10 +16,11 @@
  */
 package org.meshtastic.feature.node.detail
 
+import org.meshtastic.core.model.canDirectMessage
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.canDirectMessage
 
 /**
  * Shared handler for [NodeDetailAction]s that are common across all platforms.
@@ -50,8 +51,9 @@ internal fun handleNodeAction(
                     // A node we can no longer send to is only reachable through its existing thread: the computed
                     // route falls back to node.channel without a key, which opens a different, empty conversation.
                     val route =
-                        uiState.existingContactKey.takeIf { !menuAction.node.canDirectMessage }
-                            ?: viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
+                        uiState.existingContactKey.takeIf {
+                            !menuAction.node.canDirectMessage(uiState.ourNode.isLicensedLocal)
+                        } ?: viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
                     navigateToMessages(route)
                 }
 

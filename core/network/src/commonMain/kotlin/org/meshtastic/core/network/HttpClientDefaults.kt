@@ -16,13 +16,21 @@
  */
 package org.meshtastic.core.network
 
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpRequestRetryConfig
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 /**
- * Shared HTTP client configuration used by both Android and Desktop Ktor `HttpClient` setups.
- *
- * These values are consumed by the platform-specific Koin modules (`NetworkModule` on Android, `DesktopKoinModule` on
- * Desktop) when installing [io.ktor.client.plugins.HttpTimeout] and [io.ktor.client.plugins.HttpRequestRetry].
+ * The values every host's Ktor `HttpClient` shares. [installApiDefaults] applies them; a host supplies only its engine.
  */
 object HttpClientDefaults {
     /** Timeout in milliseconds for connect and socket operations. */
@@ -75,7 +83,33 @@ object HttpClientDefaults {
 }
 
 /**
- * Shared [io.ktor.client.plugins.HttpRequestRetry] policy for both engines.
+ * What every host's API client installs, whatever its engine: JSON content negotiation, the API base URL, the shared
+ * timeouts and retry policy, and request logging through Kermit when [logRequests].
+ *
+ * @param userAgent sent with every request; null where the platform sets its own, as a browser does.
+ */
+fun HttpClientConfig<*>.installApiDefaults(json: Json, userAgent: String?, logRequests: Boolean) {
+    install(ContentNegotiation) { json(json) }
+    install(DefaultRequest) {
+        url(HttpClientDefaults.API_BASE_URL)
+        if (userAgent != null) header(HttpHeaders.UserAgent, userAgent)
+    }
+    install(HttpTimeout) {
+        requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
+        connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+        socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+    }
+    install(HttpRequestRetry) { configureDefaultRetry() }
+    if (logRequests) {
+        install(Logging) {
+            logger = KermitHttpLogger
+            level = LogLevel.INFO
+        }
+    }
+}
+
+/**
+ * Shared [io.ktor.client.plugins.HttpRequestRetry] policy for every engine.
  *
  * Retries on 5xx server errors and on transient connection/IO failures (dropped sockets, DNS blips, read timeouts) —
  * the common failure mode on flaky cellular — with exponential backoff. [HttpClientDefaults.MAX_RETRIES] applies to

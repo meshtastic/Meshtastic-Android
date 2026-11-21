@@ -117,6 +117,36 @@ class HandleNodeActionTest {
     }
 
     @Test
+    fun `direct message to a keyless node from a licensed local node opens the channel conversation`() =
+        runTest(testDispatcher) {
+            val node = Node(num = 1234, user = User.Builder().also { wb -> wb.id = "!000004d2" }.build())
+            val ourNode =
+                Node(
+                    num = 9999,
+                    user =
+                    User.Builder()
+                        .also { wb ->
+                            wb.id = "!0000270f"
+                            wb.is_licensed = true
+                        }
+                        .build(),
+                )
+            val viewModel = createViewModel()
+            var route: String? = null
+
+            handleNodeAction(
+                action = NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node)),
+                uiState = NodeDetailUiState(ourNode = ourNode, existingContactKey = "9!000004d2"),
+                navigateToMessages = { route = it },
+                onNavigateUp = {},
+                onNavigate = {},
+                viewModel = viewModel,
+            )
+
+            assertEquals("0!000004d2", route)
+        }
+
+    @Test
     fun `direct message to a keyed node uses the computed route rather than an old thread`() = runTest(testDispatcher) {
         val node =
             Node(

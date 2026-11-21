@@ -143,6 +143,8 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | `displaymode` | Enum | Dropdown: `DisplayMode` entries | — |
 | `oled` | Enum | Dropdown: `OledType` entries | — |
 | `compass_orientation` | Enum | Dropdown: `CompassOrientation` entries | — |
+| `use_long_node_name` | Boolean | Toggle | Schema gate: firmware 2.7.13 and later |
+| `enable_message_bubbles` | Boolean | Toggle | Schema gate: firmware 2.7.19 and later |
 
 ### LoRa (`Config.LoRaConfig`)
 
@@ -201,7 +203,7 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | `encryption_enabled` | Boolean | Toggle | — |
 | `json_enabled` | Boolean | Toggle | Schema gate: deprecated from firmware 2.8.0, so shown only on older firmware or when set |
 | `tls_enabled` | Boolean | Toggle | Stored and sent exactly as shown. For the public broker the summary notes that the phone's MQTT proxy upgrades to TLS itself |
-| `root` | String | maxSize: 31 bytes (proto max_size: 32); `MqttRootTopic.problem` must be null | MQTT root topic. Any script is accepted; whitespace or control characters, `+`, `#`, a leading or trailing slash, `//` and a final `/2` segment block Save. Empty is the firmware default |
+| `root` | String | maxSize: 31 bytes (proto max_size: 32); `MqttRootTopic.problem` must be null | MQTT root topic. Any script is accepted; whitespace or control characters, `+`, `#`, a trailing slash, `//` and a final `/2` segment block Save. Empty is the firmware default |
 | `proxy_to_client_enabled` | Boolean | Toggle | — |
 | `map_reporting_enabled` | Boolean | Toggle | Controls visibility of map report fields. While on, Save requires the location-sharing consent and an interval of at least 3600 seconds |
 | `map_report_settings.publish_interval_secs` | Interval | Dropdown: `BROADCAST_MEDIUM` intervals | 1 hour – 72 hours |
@@ -276,6 +278,7 @@ turned off.
 | `environment_display_fahrenheit` | Boolean | Toggle | — |
 | `air_quality_enabled` | Boolean | Toggle | — |
 | `air_quality_interval` | Interval | Dropdown: `BROADCAST_SHORT` intervals | 30 min – 72 hours |
+| `air_quality_screen_enabled` | Boolean | Toggle | Schema gate: firmware 2.7.18 and later |
 | `power_measurement_enabled` | Boolean | Toggle | — |
 | `power_update_interval` | Interval | Dropdown: `BROADCAST_SHORT` intervals | 30 min – 72 hours |
 | `power_screen_enabled` | Boolean | Toggle | — |

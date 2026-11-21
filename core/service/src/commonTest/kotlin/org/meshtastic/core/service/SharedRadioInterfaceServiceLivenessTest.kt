@@ -52,6 +52,7 @@ import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
+import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -409,7 +410,10 @@ class SharedRadioInterfaceServiceLivenessTest {
             every { analytics.isPlatformServicesAvailable } returns false
             val requestedTransports = mutableListOf<String>()
             val realFactory =
-                object : BaseRadioTransportFactory(bluetoothRepository = bluetoothRepository) {
+                object : BaseRadioTransportFactory(
+                    bluetoothRepository = bluetoothRepository,
+                    virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+                ) {
 
                     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
 

@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
+import dev.mokkery.MockMode
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.DeviceType
@@ -37,7 +39,10 @@ class MockTransportAddressAdmissionTest {
     private val gate = MutableStateFlow(false)
 
     private val factory =
-        object : BaseRadioTransportFactory(bluetoothRepository = FakeBluetoothRepository()) {
+        object : BaseRadioTransportFactory(
+                bluetoothRepository = FakeBluetoothRepository(),
+                virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+            ) {
 
             override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP)
 

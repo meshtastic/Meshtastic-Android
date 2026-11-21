@@ -1,7 +1,7 @@
 ---
 title: Asetukset — Moduulit ja ylläpito
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.
 aliases:
   - moduulit
@@ -39,7 +39,7 @@ Yhdistää verkon viestejä MQTT-välityspalvelimeen ja sieltä takaisin interne
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Osoite                                            | MQTT-välityspalvelimen osoite                                                                                                                                                                                                                                                      | `mqtt.meshtastic.org` |
 | Salaus käytössä                                   | Publish packets still encrypted with the channel key                                                                                                                                                                                                                               | Käytössä              |
-| JSON ulostulo käytössä                            | Julkaise ja vastaanota MQTT-viestejä JSON-muodossa. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                 | Pois                  |
+| JSON Output Enabled                               | Julkaise ja vastaanota MQTT-viestejä JSON-muodossa. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                 | Pois                  |
 | Karttaraportointi                                 | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                       | Pois                  |
 | Välityspalvelin käytössä                          | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                                | Pois                  |
 | MQTT käytössä                                     | Turn the MQTT bridge on                                                                                                                                                                                                                                                            | Pois                  |
@@ -70,7 +70,7 @@ Mahdollistaa sarjaporttiviestinnän ulkoisten laiteintegraatioiden kanssa (GPS-m
 | Sarjaportin nopeus                                                                               | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Oletus |
 | Palautus päällä                                                                                  | Echo packets you send back over the serial port                                                                                                                                                                                     | Pois   |
 | Sarjaportin tila                                                                                 | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Oletus |
-| Korvaa konsolin sarjaportti                                                                      | Ota käyttöön portti, jota virheenkorjauskonsoli normaalisti käyttää                                                                                                                                                                 | Pois   |
+| Ohita konsolin sarjaliitännän portti                                                             | Ota käyttöön portti, jota virheenkorjauskonsoli normaalisti käyttää                                                                                                                                                                 | Pois   |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | Sarjayhteyden GPIO-nastat                                                                                                                                                                                                           | 0      |
 | Sarjaportti käytössä                                                                             | Turn serial communication on                                                                                                                                                                                                        | Pois   |
 | Aikakatkaisu                                                                                     | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0      |
@@ -144,7 +144,8 @@ Jokaisella neljällä mittausryhmällä on oma käyttöönottokytkin ja oma mitt
 | Virrankulutuksen moduuli käytössä     | Raportoi kanavakohtaiset jännite- ja virtamittaukset                                                                                                                                        | Pois   |
 | Virtamittareiden päivitysväli         | Kuinka usein tiedot raportoidaan                                                                                                                                                            | —      |
 | Virrankulutuksen näyttö käytössä      | Näytä virtamittaukset myös radion omalla näytöllä                                                                                                                                           | Pois   |
-| Näytä ympäristötiedot näytöllä        | Also show environment readings on the device's display                                                                                                                                      | Pois   |
+| Show air quality on device screen     | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | Pois   |
+| Show environment on device screen     | Also show environment readings on the device's display                                                                                                                                      | Pois   |
 
 Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi tietoa tuetuista antureista ja määrityssuosituksista.
 
@@ -340,6 +341,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

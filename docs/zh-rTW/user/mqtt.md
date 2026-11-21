@@ -44,7 +44,7 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **Username**            | 代理伺服器驗證                                                                                                                                                     | meshdev                                                                                                |
 | **Password**            | 代理伺服器驗證                                                                                                                                                     | large4cats                                                                                             |
 | **Encryption Enabled**  | Publish packets still encrypted with the channel key                                                                                                        | 已啟用                                                                                                    |
-| **JSON output enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | 已停用                                                                                                    |
+| **JSON Output Enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | 已停用                                                                                                    |
 | **TLS Enabled**         | 與代理伺服器的安全連線                                                                                                                                                 | 已停用                                                                                                    |
 | **Root Topic**          | Base topic for messages. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
 | **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | 已停用                                                                                                    |
@@ -144,7 +144,7 @@ Uplink and downlink are per-channel settings, not MQTT module settings. Open **S
 
 Gateways publish packets as binary Meshtastic protobufs on the `/2/e/` topic, which is what node-to-node mesh bridging uses.
 
-Firmware 2.7 and older can also publish human-readable JSON on the `/2/json/` topic for consumers outside the mesh, such as dashboards and home automation, when `json_enabled` is on. Firmware 2.8 removed JSON support and ignores the field. The app shows **JSON output enabled** only for a node on older firmware, or while the setting is still on, and while it is on the app's own MQTT proxy also subscribes to the `/2/json/` topic and decodes those payloads.
+Firmware 2.7 and older can also publish human-readable JSON on the `/2/json/` topic for consumers outside the mesh, such as dashboards and home automation, when `json_enabled` is on. Firmware 2.8 removed JSON support and ignores the field. The app shows **JSON Output Enabled** only for a node on older firmware, or while the setting is still on, and while it is on the app's own MQTT proxy also subscribes to the `/2/json/` topic and decodes those payloads.
 
 ## 加密與隱私
 

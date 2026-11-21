@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
+import dev.mokkery.MockMode
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.DeviceType
@@ -33,7 +35,10 @@ import kotlin.test.assertTrue
 class TcpAddressAdmissionTest {
 
     private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) =
-        object : BaseRadioTransportFactory(bluetoothRepository = FakeBluetoothRepository()) {
+        object : BaseRadioTransportFactory(
+                bluetoothRepository = FakeBluetoothRepository(),
+                virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+            ) {
 
             override val supportedDeviceTypes: List<DeviceType> = types.toList()
 

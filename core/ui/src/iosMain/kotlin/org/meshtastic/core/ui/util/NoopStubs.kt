@@ -17,7 +17,6 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.text.AnnotatedString
@@ -67,18 +66,9 @@ actual fun KeepScreenOn(enabled: Boolean) {
 
 actual val bleScanRequiresLocationServices: Boolean = false
 
-@Composable actual fun isGpsDisabled(): Boolean = false
-
 @Composable actual fun isBluetoothDisabled(): Boolean = false
 
 @Composable actual fun isBluetoothSupported(): Boolean = true
-
-@Composable actual fun isWifiUnavailable(): Boolean = false
-
-@Composable
-actual fun SetScreenBrightness(brightness: Float) {
-    // No-op iOS stub.
-}
 
 @Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
 
@@ -93,5 +83,3 @@ actual fun SetScreenBrightness(brightness: Float) {
 @Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 @Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
-
-actual fun KeyEvent.isFromSoftKeyboard(): Boolean = false

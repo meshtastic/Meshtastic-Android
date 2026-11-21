@@ -16,24 +16,15 @@
  */
 package org.meshtastic.core.takserver
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeCommandSender
+import org.meshtastic.core.testing.FakeMeshConfigHandler
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeTakPrefs
 import org.meshtastic.core.testing.TestDataFactory
-import org.meshtastic.proto.Channel
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.DeviceUIConfig
-import org.meshtastic.proto.LoRaRegionPresetMap
-import org.meshtastic.proto.LocalConfig
-import org.meshtastic.proto.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,21 +38,6 @@ import kotlin.test.assertTrue
  * radio's firmware and older firmware silently falls back to the much more limited v1 schema.
  */
 class TakMeshTestRunnerTest {
-
-    private class FakeMeshConfigHandler : MeshConfigHandler {
-        override val localConfig = MutableStateFlow(LocalConfig.Builder().build())
-        override val moduleConfig = MutableStateFlow(LocalModuleConfig.Builder().build())
-
-        override fun handleDeviceConfig(config: Config, session: RadioSessionContext) = true
-
-        override fun handleModuleConfig(config: ModuleConfig, session: RadioSessionContext) = true
-
-        override fun handleChannel(channel: Channel, session: RadioSessionContext) = true
-
-        override fun handleDeviceUIConfig(config: DeviceUIConfig, session: RadioSessionContext) = true
-
-        override fun handleRegionPresets(map: LoRaRegionPresetMap, session: RadioSessionContext) = true
-    }
 
     private class Harness(firmwareVersion: String?) {
         val serverManager = FakeTAKServerManager()

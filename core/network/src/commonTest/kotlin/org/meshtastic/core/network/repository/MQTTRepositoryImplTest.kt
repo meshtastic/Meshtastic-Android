@@ -484,6 +484,53 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
+    fun `a wildcard root ends the proxy without creating a client or connecting`() = runTest {
+        val harness = createHarness(radioConfigRepository = radioConfigWithRoot("msh/#"))
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(0, harness.setups.size)
+        assertEquals(0, harness.client.connectCalls.size)
+        assertIs<MqttRootWildcardException>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
+    fun `a plus wildcard in the root ends the proxy without connecting`() = runTest {
+        val harness = createHarness(radioConfigRepository = radioConfigWithRoot("msh/+/US"))
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+
+        assertEquals(0, harness.client.connectCalls.size)
+        assertIs<MqttRootWildcardException>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
+    fun `a root with a leading slash still connects`() = runTest {
+        val harness = createHarness(radioConfigRepository = radioConfigWithRoot("/msh"))
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(listOf("/msh/2/e/PKI/+"), harness.client.subscribeCalls.single().map { it.topicFilter })
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    private fun radioConfigWithRoot(root: String) = FakeRadioConfigRepository().apply {
+        setLocalModuleConfigDirect(
+            LocalModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { it.root = root }.build() }
+                .build(),
+        )
+    }
+
+    @Test
     fun `only credential and identity reason codes classify as credential rejections`() {
         val fatal =
             listOf(

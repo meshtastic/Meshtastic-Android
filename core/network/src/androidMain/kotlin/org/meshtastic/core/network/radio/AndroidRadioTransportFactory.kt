@@ -47,7 +47,7 @@ class AndroidRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     private val sdk: AndroidSdkTransportFactory,
     private val virtual: VirtualRadioSessionFactory,
-) : BaseRadioTransportFactory(bluetoothRepository) {
+) : BaseRadioTransportFactory(bluetoothRepository, virtual) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
@@ -86,28 +86,11 @@ class AndroidRadioTransportFactory(
     override fun isPlatformAddressValid(address: String): Boolean =
         address.firstOrNull()?.let { InterfaceId.forIdChar(it) } == InterfaceId.NOP
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
-        val rest = address.substring(1)
+    override fun createTcpTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        sdk.tcp(rest, service)
 
-        return when (interfaceId) {
-            InterfaceId.MOCK -> virtual.demo(rest, service)
-
-            InterfaceId.REPLAY -> createReplayTransport(service, rest)
-
-            InterfaceId.TCP -> sdk.tcp(rest, service)
-
-            InterfaceId.SERIAL -> createSdkUsbTransport(rest, service)
-
-            InterfaceId.NOP,
-            null,
-            -> NopRadioTransport(rest)
-
-            InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
-
-            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
-        }
-    }
+    override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        createSdkUsbTransport(rest, service)
 
     override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
         sdk.ble(address, service)
@@ -146,7 +129,7 @@ class AndroidRadioTransportFactory(
      * benchmark) builds; when it is absent we fall back to the lightweight synthetic [MockRadioTransport] so selecting
      * the entry still yields a working virtual device.
      */
-    private fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
+    override fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
         val replayFrames = runCatching {
             context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() }
         }

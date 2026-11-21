@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
 import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
@@ -39,8 +38,8 @@ import org.meshtastic.desktop.DesktopBuildConfig
 class DesktopRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     private val sdk: DesktopSdkTransportFactory,
-    private val virtual: VirtualRadioSessionFactory,
-) : BaseRadioTransportFactory(bluetoothRepository) {
+    virtual: VirtualRadioSessionFactory,
+) : BaseRadioTransportFactory(bluetoothRepository, virtual) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
@@ -57,10 +56,9 @@ class DesktopRadioTransportFactory(
     override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
         sdk.create(InterfaceId.WEBSOCKET, url, service)
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
-        address.startsWith(InterfaceId.MOCK.id) -> virtual.demo(address.substring(1), service)
-        address.startsWith(InterfaceId.TCP.id) -> sdk.create(InterfaceId.TCP, address.substring(1), service)
-        address.startsWith(InterfaceId.SERIAL.id) -> sdk.create(InterfaceId.SERIAL, address.substring(1), service)
-        else -> error("Unsupported transport for address: ${address.anonymize()}")
-    }
+    override fun createTcpTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        sdk.create(InterfaceId.TCP, rest, service)
+
+    override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        sdk.create(InterfaceId.SERIAL, rest, service)
 }

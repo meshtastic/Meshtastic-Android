@@ -13,6 +13,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - **`androidMain`:** Android framework integration (`Context`, system services, NFC hardware, BLE Android bindings).
 - **`jvmMain`:** Desktop-only JVM code.
 - **`nonWebMain` / `nonWebTest`:** Code and tests for every target but the browser (raw sockets, DataStore, bundled SQLite, `runBlocking`). The `meshtastic.kmp.web` convention builds them in every module it is applied to, whether or not the build registers wasmJs (`-Pmeshtastic.web=true`), and nests `iosMain`, `jvmAndroidMain` and the Android host tests under them. Configure `wasmJsMain` through `meshtasticWeb.wasmJsMain {}`, never `sourceSets.wasmJsMain`, which would create the source set in builds without the web target.
+- **`nonAndroidMain`:** An `actual` that is the same on every target but Android (jvm, native, and wasmJs when registered), such as a no-op for an Android-only capability. Move one here only when every non-Android actual is identical.
 - **`jvmAndroidMain`:** JVM code shared between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
 - **`androidApp` / `desktopApp`:** Host shells. Responsible for Koin DI root wiring (`MainKoinModule`/`AppKoinModule`, `DesktopKoinModule`), host-level UI themes, and running the `MeshtasticNavDisplay`.
 

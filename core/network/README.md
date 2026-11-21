@@ -21,7 +21,7 @@ The module uses **Ktor** as its HTTP client. `ApiService` (`service/`) defines t
 - **`SerialTransport`** (`jvmMain`): Desktop USB/serial transport powered by jSerialComm. Android uses `SerialRadioTransport` over usb-serial-for-android instead.
 - **`BleRadioTransport`** (`radio/`): The `RadioTransport` implementation for Bluetooth devices.
 - **`MockRadioTransport`**, **`ReplayRadioTransport`**, **`NopRadioTransport`**: Demo Mode and no-op transports that reach no node.
-- **`BaseRadioTransportFactory`**: Common factory for instantiating the KMP transports; `AndroidRadioTransportFactory` creates the Android-only ones.
+- **`BaseRadioTransportFactory`**: Common factory that dispatches every address on its prefix. BLE, WebSocket, mock and no-device are built here on every platform; an unknown prefix opens `NopRadioTransport`, and `r` opens the mock unless a platform supplies a capture (only `AndroidRadioTransportFactory` does, from a debug-build asset). TCP and serial are platform hooks.
 
 ### 4. Repositories
 - **`MQTTRepository`**: The MQTT client used to proxy mesh traffic to and from a broker, over TCP or WebSockets.

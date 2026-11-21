@@ -20,14 +20,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.url
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
@@ -35,9 +27,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.network.HttpClientDefaults
-import org.meshtastic.core.network.KermitHttpLogger
-import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.installApiDefaults
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.AppIconBadge
@@ -112,20 +102,7 @@ class WebRuntimeModule {
     /** Ktor [HttpClient] on the browser's fetch. A browser sets its own User-Agent. */
     @Single
     fun httpClient(json: Json): HttpClient = HttpClient(Js) {
-        install(ContentNegotiation) { json(json) }
-        install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
-        install(HttpTimeout) {
-            requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
-            connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-            socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-        }
-        install(HttpRequestRetry) { configureDefaultRetry() }
-        if (WebBuildConfig.IS_DEBUG) {
-            install(Logging) {
-                logger = KermitHttpLogger
-                level = LogLevel.INFO
-            }
-        }
+        installApiDefaults(json, userAgent = null, logRequests = WebBuildConfig.IS_DEBUG)
     }
 
     /** No bundled assets ship with a browser tab; repositories seed from the network instead. */

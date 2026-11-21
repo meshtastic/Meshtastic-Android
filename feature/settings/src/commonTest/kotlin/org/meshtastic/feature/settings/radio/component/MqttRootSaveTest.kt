@@ -38,8 +38,14 @@ class MqttRootSaveTest {
     }
 
     @Test
+    fun aRootWithALeadingSlashIsAcceptedAndSaves() {
+        assertTrue(mqttRootAccepted("/myroottopic"))
+        assertTrue(mqttSaveEnabled(editable = true, root = "/myroottopic"))
+    }
+
+    @Test
     fun aMalformedRootIsRejected() {
-        assertFalse(mqttRootAccepted("/msh/US"))
+        assertFalse(mqttRootAccepted("//myroottopic"))
         assertFalse(mqttRootAccepted("msh/US/"))
         assertFalse(mqttRootAccepted("msh/US/2"))
     }

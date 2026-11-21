@@ -26,7 +26,10 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
 /** Common address admission and dispatch for platform [RadioTransportFactory] implementations. */
-abstract class BaseRadioTransportFactory(private val bluetoothRepository: BluetoothRepository) : RadioTransportFactory {
+abstract class BaseRadioTransportFactory(
+    private val bluetoothRepository: BluetoothRepository,
+    private val virtual: VirtualRadioSessionFactory,
+) : RadioTransportFactory {
 
     init {
         if (!bluetoothRepository.isSupported) Logger.w { "No Bluetooth LE on this hardware; BLE addresses are refused" }
@@ -97,6 +100,24 @@ abstract class BaseRadioTransportFactory(private val bluetoothRepository: Blueto
     /** Creates a WebSocket transport for a normalized radio URL. */
     protected abstract fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport
 
-    /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
-    protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport
+    protected open fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val rest = address.drop(1)
+        return when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
+            InterfaceId.MOCK -> virtual.demo(rest, service)
+            InterfaceId.REPLAY -> createReplayTransport(service, rest)
+            InterfaceId.TCP -> createTcpTransport(service, rest)
+            InterfaceId.SERIAL -> createSerialTransport(service, rest)
+            InterfaceId.BLUETOOTH, InterfaceId.WEBSOCKET -> error("Address is handled by createTransport")
+            InterfaceId.NOP, null -> NopRadioTransport(rest)
+        }
+    }
+
+    protected open fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        virtual.demo(rest, service)
+
+    protected open fun createTcpTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        error("TCP transport is not supported on this platform")
+
+    protected open fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        error("Serial transport is not supported on this platform")
 }

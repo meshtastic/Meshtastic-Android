@@ -19,7 +19,6 @@ package org.meshtastic.desktop.stub
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.feature.map.hud.CameraPoseProvider
@@ -47,9 +46,4 @@ class NoopCameraPoseProvider : CameraPoseProvider {
 /** No-op [PhonePressureProvider]: desktop has no barometer. */
 class NoopPhonePressureProvider : PhonePressureProvider {
     override fun pressureUpdates(): Flow<Float> = emptyFlow()
-}
-
-/** No-op [MagneticFieldProvider] — always returns zero declination. */
-class NoopMagneticFieldProvider : MagneticFieldProvider {
-    override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float = 0f
 }
