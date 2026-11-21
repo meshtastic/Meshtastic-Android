@@ -1401,6 +1401,7 @@ mqtt_probe_timeout
 mqtt_probe_tls_failure
 mqtt_proxy_local
 mqtt_proxy_local_summary
+mqtt_root_has_wildcard
 mqtt_root_problem_empty
 mqtt_root_problem_empty_segment
 mqtt_root_problem_ends_with_version
