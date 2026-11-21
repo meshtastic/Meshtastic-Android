@@ -467,7 +467,7 @@ jobs:
   # on it, and a failed web build loses neither the release nor its tag.
   release-web:
     runs-on: ubuntu-26.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     continue-on-error: true
     steps:
       - name: Checkout code
