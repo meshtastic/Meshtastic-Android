@@ -66,7 +66,6 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.CapturingLogWriter
-import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -100,7 +99,6 @@ class MeshConnectionManagerImplTest {
     private lateinit var packetRepository: PacketRepository
     private lateinit var workerManager: MeshWorkerManager
     private lateinit var appWidgetUpdater: AppWidgetUpdater
-    private lateinit var lockdownCoordinator: FakeLockdownCoordinator
 
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
@@ -133,7 +131,6 @@ class MeshConnectionManagerImplTest {
         packetRepository = mock(MockMode.autofill)
         workerManager = mock(MockMode.autofill)
         appWidgetUpdater = mock(MockMode.autofill)
-        lockdownCoordinator = FakeLockdownCoordinator()
 
         testDispatcher = UnconfinedTestDispatcher()
         radioConnectionState.value = ConnectionState.Disconnected
@@ -180,7 +177,6 @@ class MeshConnectionManagerImplTest {
         workerManager,
         appWidgetUpdater,
         DataLayerHeartbeatSender(packetHandler),
-        lockdownCoordinator,
         scope.asServiceScope(),
         NodeRestartTracker(scope),
     )
@@ -211,7 +207,6 @@ class MeshConnectionManagerImplTest {
             serviceRepository.connectionState.value,
             "State should be Connecting after radio Connected",
         )
-        assertEquals(true, lockdownCoordinator.connectCalled)
     }
 
     @Test
@@ -304,7 +299,6 @@ class MeshConnectionManagerImplTest {
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
         verify { adminRequestRegistry.clearAll() }
-        assertEquals(true, lockdownCoordinator.disconnectCalled)
     }
 
     @Test

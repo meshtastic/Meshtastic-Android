@@ -90,7 +90,6 @@ abstract class BaseRadioTransportFactory(
 
                 else -> createPlatformTransport(address, service)
             }
-        transport.start()
         return transport
     }
 

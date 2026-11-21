@@ -50,11 +50,14 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
@@ -81,6 +84,8 @@ class CommandSenderImplTest {
     private val connectionLifecycle =
         MutableStateFlow(ConnectionLifecycle(version = CONNECTION_VERSION, state = ConnectionState.Connected))
 
+    private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
+
     private lateinit var commandSender: CommandSenderImpl
 
     @BeforeTest
@@ -103,6 +108,7 @@ class CommandSenderImplTest {
                 adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = TestScope().asServiceScope(),
+                radioInterfaceService = radioInterfaceService,
             )
     }
 
@@ -154,6 +160,7 @@ class CommandSenderImplTest {
                 adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = TestScope().asServiceScope(),
+                radioInterfaceService = radioInterfaceService,
             )
         assertEquals(0, commandSender.resolveNodeNum(NodeAddress.Local))
     }
@@ -370,29 +377,23 @@ class CommandSenderImplTest {
     // --- lockdown direct dispatch ---
 
     @Test
-    fun sendLockdownPassphrase_returnsDirectTransportAdmission() {
-        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns true
+    fun sendLockdownPassphrase_usesSdkAdmissionBeforeLocalNodeIdentityIsAvailable() {
+        val session = RadioSessionContext(1L, "tlocalhost")
+        every { radioInterfaceService.activeSession } returns MutableStateFlow(session)
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        every { radioInterfaceService.tryLockdown(session, any()) } returns true
 
         assertTrue(commandSender.sendLockdownPassphrase("secret", boots = 3, hours = 4, maxSessionSeconds = 5))
-
-        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns false
-        assertFalse(commandSender.sendLockdownPassphrase("secret", boots = 3, hours = 4, maxSessionSeconds = 5))
-    }
-
-    @Test
-    fun sendLockdownPassphrase_returnsFalseWhenLocalNodeIdentityIsUnavailable() {
-        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
-
-        assertFalse(commandSender.sendLockdownPassphrase("secret"))
+        verify { radioInterfaceService.tryLockdown(session, any<LockdownAuth>()) }
         verify(exactly(0)) { packetHandler.trySendToRadio(any<ToRadio>()) }
+
+        every { radioInterfaceService.tryLockdown(session, any()) } returns false
+        assertFalse(commandSender.sendLockdownPassphrase("secret"))
     }
 
     @Test
-    fun sendLockNow_returnsDirectTransportAdmission() {
-        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns true
-        assertTrue(commandSender.sendLockNow())
-
-        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns false
+    fun sendLockNow_requiresActiveSession() {
+        every { radioInterfaceService.activeSession } returns MutableStateFlow(null)
         assertFalse(commandSender.sendLockNow())
     }
 
@@ -721,6 +722,7 @@ class CommandSenderImplTest {
                 adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = testScope.asServiceScope(),
+                radioInterfaceService = radioInterfaceService,
             )
         testScope.testScheduler.advanceUntilIdle()
         everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } returns true

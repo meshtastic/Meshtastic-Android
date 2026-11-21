@@ -25,7 +25,6 @@ import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.FromRadioPacketHandler
-import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -61,7 +60,6 @@ class FromRadioPacketHandlerImpl(
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshNotificationManager,
-    private val lockdownCoordinator: LockdownCoordinator,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val radioInterfaceService: RadioInterfaceService,
 ) : FromRadioPacketHandler {
@@ -86,7 +84,6 @@ class FromRadioPacketHandlerImpl(
         val fileInfo = proto.fileInfo
         val regionPresets = proto.region_presets
         val xmodemPacket = proto.xmodemPacket
-        val lockdownStatus = proto.lockdown_status
         val displayFrame = proto.display_frame
         val displayPalette = proto.display_palette
 
@@ -107,11 +104,7 @@ class FromRadioPacketHandlerImpl(
                 }
             }
 
-            configCompleteId != null -> {
-                if (configFlowManager.value.handleConfigComplete(configCompleteId, session)) {
-                    runIfSessionActive(session, "lockdown config completion") { lockdownCoordinator.onConfigComplete() }
-                }
-            }
+            configCompleteId != null -> configFlowManager.value.handleConfigComplete(configCompleteId, session)
 
             mqttProxyMessage != null ->
                 runIfSessionActive(session, "MQTT proxy message") {
@@ -139,11 +132,6 @@ class FromRadioPacketHandlerImpl(
             displayFrame != null -> handleDisplayFrame(displayFrame, session)
 
             displayPalette != null -> handleDisplayPalette(displayPalette, session)
-
-            lockdownStatus != null ->
-                runIfSessionActive(session, "lockdown status") {
-                    lockdownCoordinator.handleLockdownStatus(lockdownStatus)
-                }
 
             clientNotification != null -> handleClientNotification(clientNotification, session)
 

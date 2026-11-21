@@ -96,6 +96,7 @@ import org.meshtastic.core.resources.websocket_not_supported
 import org.meshtastic.core.resources.websocket_replaced_by_another_client
 import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
+import org.meshtastic.proto.LockdownAuth
 import kotlin.concurrent.Volatile
 
 /**
@@ -385,28 +386,30 @@ class SharedRadioInterfaceService(
     }
 
     /** Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. */
-    private fun admitTransportSend(): TransportSendAdmission = synchronized(sessionCallbackLock) {
-        val session = activeTransportSession
-        val transport = radioTransport
-        when {
-            !sessionAdmissionOpen -> TransportSendAdmission.AdmissionClosed
+    private fun admitTransportSend(expected: RadioSessionContext? = null): TransportSendAdmission =
+        synchronized(sessionCallbackLock) {
+            val session = activeTransportSession
+            val transport = radioTransport
+            when {
+                !sessionAdmissionOpen -> TransportSendAdmission.AdmissionClosed
 
-            session == null -> TransportSendAdmission.NoActiveSession
-
-            transport == null -> TransportSendAdmission.NoTransport
-
-            else -> {
-                val state = sessionOperationStates[session.generation]
-                if (state == null) {
-                    Logger.e { "Session generation ${session.generation} has no operation state at send admission" }
+                session == null || (expected != null && session.context != expected) ->
                     TransportSendAdmission.NoActiveSession
-                } else {
-                    state.admittedOperations++
-                    TransportSendAdmission.Admitted(session = session, transport = transport)
+
+                transport == null -> TransportSendAdmission.NoTransport
+
+                else -> {
+                    val state = sessionOperationStates[session.generation]
+                    if (state == null) {
+                        Logger.e { "Session generation ${session.generation} has no operation state at send admission" }
+                        TransportSendAdmission.NoActiveSession
+                    } else {
+                        state.admittedOperations++
+                        TransportSendAdmission.Admitted(session = session, transport = transport)
+                    }
                 }
             }
         }
-    }
 
     /** Runs a callback only while [session] still owns admission, atomically with session teardown. */
     private inline fun runIfTransportSessionActive(session: RadioTransportSession, block: () -> Unit): Boolean =
@@ -1031,6 +1034,17 @@ class SharedRadioInterfaceService(
             }
             throw publicationFailure
         }
+        try {
+            newTransport.start()
+        } catch (failure: Throwable) {
+            try {
+                stopTransportLocked(notifyPermanent = false)
+            } catch (closeFailure: Exception) {
+                failure.addSuppressed(closeFailure)
+            }
+            _connectionState.value = connectionStateBeforeStart
+            throw failure
+        }
         runningTransportId = DeviceAddress.parse(address)?.interfaceId
         isStarted = true
     }
@@ -1054,11 +1068,18 @@ class SharedRadioInterfaceService(
         }
     }
 
+    override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean =
+        when (val admission = admitTransportSend(expected = session)) {
+            is TransportSendAdmission.Admitted -> sendThroughAdmittedTransport(admission) { it.tryLockdown(auth) }
+            else -> false
+        }
+
     override fun trySendToRadio(bytes: ByteArray): Boolean =
         // Admission and teardown share one session gate. Once accepted, teardown drains the synchronous handoff before
         // revoking the session; transport implementations still own their asynchronous delivery outcome.
         when (val admission = admitTransportSend()) {
-            is TransportSendAdmission.Admitted -> sendThroughAdmittedTransport(admission, bytes)
+            is TransportSendAdmission.Admitted ->
+                sendThroughAdmittedTransport(admission) { it.handleSendToRadio(bytes) }
 
             TransportSendAdmission.AdmissionClosed,
             TransportSendAdmission.NoActiveSession,
@@ -1073,21 +1094,23 @@ class SharedRadioInterfaceService(
             }
         }
 
-    private fun sendThroughAdmittedTransport(admission: TransportSendAdmission.Admitted, bytes: ByteArray): Boolean =
-        try {
-            val sent = safeCatching {
-                admission.transport.handleSendToRadio(bytes)
-            }
-                .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
-                .getOrDefault(false)
-            if (sent) {
-                safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
-                    .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }
-            }
-            sent
-        } finally {
-            releaseSessionOperation(admission.session)
+    private inline fun sendThroughAdmittedTransport(
+        admission: TransportSendAdmission.Admitted,
+        send: (RadioTransport) -> Boolean,
+    ): Boolean = try {
+        val sent = safeCatching {
+            send(admission.transport)
         }
+            .onFailure { Logger.w(it) { "trySendToRadio: active transport send failed" } }
+            .getOrDefault(false)
+        if (sent) {
+            safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
+                .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }
+        }
+        sent
+    } finally {
+        releaseSessionOperation(admission.session)
+    }
 
     @Suppress("TooGenericExceptionCaught")
     override fun handleFromRadio(bytes: ByteArray) {

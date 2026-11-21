@@ -35,6 +35,7 @@ import org.meshtastic.core.model.TransportFailure
 import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.NodeManager
@@ -42,6 +43,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshtasticException
@@ -61,10 +63,13 @@ internal class SdkPhoneApiRadioTransport(
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val nodeManager: Lazy<NodeManager>,
+    private val lockdownCoordinator: Lazy<LockdownCoordinator>,
 ) : RadioTransport {
     override val managesPhoneApi: Boolean = true
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
+
+    override fun tryLockdown(auth: LockdownAuth): Boolean = currentClient.value?.tryLockdown(auth) == true
 
     override fun requestNodeDbRefresh(): Boolean = currentClient.value?.requestNodeDbRefresh() == true
 
@@ -72,6 +77,7 @@ internal class SdkPhoneApiRadioTransport(
     private var run: Job? = null
 
     override fun start() {
+        lockdownCoordinator.value.onConnect()
         run = service.serviceScope.launch { runPhoneApiSession() }
     }
 
@@ -135,6 +141,12 @@ internal class SdkPhoneApiRadioTransport(
             .takeWhile { it !is RadioSessionEvent.Ended }
             .collect { event ->
                 when (event) {
+                    is RadioSessionEvent.Lockdown -> {
+                        service.runWithSessionLease(session) {
+                            lockdownCoordinator.value.handleLockdownStatus(event.status)
+                        }
+                    }
+
                     is RadioSessionEvent.Ready -> {
                         linkStatus.cancelAndJoin()
                         service.onConnect()
@@ -240,7 +252,12 @@ internal class SdkPhoneApiRadioTransport(
         .getOrDefault(false)
 
     override suspend fun close() = withContext(NonCancellable) {
-        run?.cancelAndJoin()
-        run = null
+        val job = run ?: return@withContext
+        try {
+            job.cancelAndJoin()
+        } finally {
+            run = null
+            lockdownCoordinator.value.onDisconnect()
+        }
     }
 }

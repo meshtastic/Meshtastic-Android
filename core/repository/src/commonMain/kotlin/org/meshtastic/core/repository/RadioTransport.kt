@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.proto.LockdownAuth
+
 /**
  * Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
@@ -24,6 +26,9 @@ interface RadioTransport {
     /** True when this transport owns the PhoneAPI handshake, heartbeat and disconnect request. */
     val managesPhoneApi: Boolean
         get() = false
+
+    /** Queues local lockdown authentication on the current link. */
+    fun tryLockdown(auth: LockdownAuth): Boolean = false
 
     /** Queues a nodes-only refresh when this transport owns the PhoneAPI session. */
     fun requestNodeDbRefresh(): Boolean = false
@@ -39,7 +44,7 @@ interface RadioTransport {
     fun handleSendToRadio(p: ByteArray): Boolean
 
     /**
-     * Initializes the transport after construction. Called by the factory once the transport has been fully created.
+     * Initializes the transport after construction. Called by the service after publishing the transport.
      *
      * This separates construction from side effects (connecting, launching coroutines), making transports easier to
      * test and reason about.

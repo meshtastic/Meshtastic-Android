@@ -43,6 +43,7 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.toFixedPositionAdminMessage
@@ -82,6 +83,7 @@ class CommandSenderImpl(
     private val adminRequestRegistry: AdminRequestRegistry,
     private val connectionStateProvider: ConnectionStateProvider,
     private val scope: ServiceScope,
+    private val radioInterfaceService: RadioInterfaceService,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
 
@@ -537,37 +539,14 @@ class CommandSenderImpl(
                     wb.disable = disable
                 }
                 .build()
-        return sendLockdownAdmin(AdminMessage.Builder().also { wb -> wb.lockdown_auth = lockdownAuth }.build())
+        return sendLockdown(lockdownAuth)
     }
 
-    override fun sendLockNow(): Boolean = sendLockdownAdmin(
-        AdminMessage.Builder()
-            .also { wb -> wb.lockdown_auth = LockdownAuth.Builder().also { wb -> wb.lock_now = true }.build() }
-            .build(),
-    )
+    override fun sendLockNow(): Boolean = sendLockdown(LockdownAuth.Builder().also { it.lock_now = true }.build())
 
-    private fun sendLockdownAdmin(adminMessage: AdminMessage): Boolean {
-        val myNum = nodeManager.myNodeNum.value ?: return false
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.to = myNum
-                    wb.id = generatePacketId()
-                    wb.channel = 0
-                    wb.want_ack = true
-                    wb.hop_limit = DEFAULT_HOP_LIMIT
-                    wb.hop_start = DEFAULT_HOP_LIMIT
-                    wb.priority = MeshPacket.Priority.RELIABLE
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ADMIN_APP
-                                wb.payload = adminMessage.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        return packetHandler.trySendToRadio(ToRadio.Builder().also { wb -> wb.packet = packet }.build())
+    private fun sendLockdown(auth: LockdownAuth): Boolean {
+        val session = radioInterfaceService.activeSession.value ?: return false
+        return radioInterfaceService.tryLockdown(session, auth)
     }
 
     fun resolveNodeNum(address: NodeAddress): Int = when (address) {

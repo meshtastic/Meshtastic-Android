@@ -188,6 +188,8 @@ class SdkRoomReplayTest {
                         processed.complete(Unit)
                     }
 
+                    is RadioSessionEvent.Lockdown -> Unit
+
                     is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
 
                     is RadioSessionEvent.NodeDbRefreshed -> Unit

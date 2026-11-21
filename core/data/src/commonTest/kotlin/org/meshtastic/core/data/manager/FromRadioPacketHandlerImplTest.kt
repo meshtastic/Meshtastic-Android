@@ -39,7 +39,6 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.XModemManager
-import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -48,7 +47,6 @@ import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
-import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -57,7 +55,6 @@ import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.XModem
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
@@ -72,7 +69,6 @@ class FromRadioPacketHandlerImplTest {
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
     private val displayMirrorManager: DisplayMirrorManager = mock(MockMode.autofill)
-    private val lockdownCoordinator = FakeLockdownCoordinator()
     private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
@@ -113,7 +109,6 @@ class FromRadioPacketHandlerImplTest {
                 mqttManager,
                 packetHandler,
                 serviceNotifications,
-                lockdownCoordinator,
                 firmwareUpdateStatusRepository,
                 radioInterfaceService,
             )
@@ -162,7 +157,6 @@ class FromRadioPacketHandlerImplTest {
         handle(proto)
 
         verify { configFlowManager.handleConfigComplete(nonce, session) }
-        assertTrue(lockdownCoordinator.configCompleteCalled)
     }
 
     @Test
@@ -184,7 +178,6 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build())
 
         verify { configFlowManager.handleConfigComplete(nonce, session) }
-        assertFalse(lockdownCoordinator.configCompleteCalled)
     }
 
     @Test
@@ -219,7 +212,6 @@ class FromRadioPacketHandlerImplTest {
         val proxyMessage = MqttClientProxyMessage.Builder().also { wb -> wb.topic = "test/topic" }.build()
         val queueStatus = QueueStatus.Builder().also { wb -> wb.free = 10 }.build()
         val xmodemPacket = XModem.Builder().build()
-        val lockdownStatus = LockdownStatus.Builder().also { wb -> wb.state = LockdownStatus.State.LOCKED }.build()
 
         val displayFrame =
             DisplayFrame.Builder()
@@ -233,7 +225,6 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.mqttClientProxyMessage = proxyMessage }.build())
         handle(FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build())
         handle(FromRadio.Builder().also { wb -> wb.xmodemPacket = xmodemPacket }.build())
-        handle(FromRadio.Builder().also { wb -> wb.lockdown_status = lockdownStatus }.build())
         handle(FromRadio.Builder().also { wb -> wb.display_frame = displayFrame }.build())
         handle(FromRadio.Builder().also { wb -> wb.display_palette = displayPalette }.build())
 
@@ -242,7 +233,6 @@ class FromRadioPacketHandlerImplTest {
         verify(mode = VerifyMode.exactly(0)) { xmodemManager.handleIncomingXModem(any()) }
         verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingFrame(any()) }
         verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingPalette(any()) }
-        assertEquals(null, lockdownCoordinator.lastStatus)
     }
 
     @Test
@@ -275,22 +265,6 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.display_palette = palette }.build())
 
         verify { displayMirrorManager.handleIncomingPalette(palette) }
-    }
-
-    @Test
-    fun `handleFromRadio routes LOCKDOWN_STATUS to lockdownCoordinator`() {
-        val lockdownStatus =
-            LockdownStatus.Builder()
-                .also { wb ->
-                    wb.state = LockdownStatus.State.LOCKED
-                    wb.lock_reason = "token_missing"
-                }
-                .build()
-        val proto = FromRadio.Builder().also { wb -> wb.lockdown_status = lockdownStatus }.build()
-
-        handle(proto)
-
-        assertEquals(lockdownStatus, lockdownCoordinator.lastStatus)
     }
 
     @Test

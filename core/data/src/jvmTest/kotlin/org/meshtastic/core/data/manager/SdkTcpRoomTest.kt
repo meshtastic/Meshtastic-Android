@@ -66,12 +66,18 @@ import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.datastore.store.Store
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
+import org.meshtastic.core.repository.LockdownPassphraseStore
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ReceivedRadioFrame
+import org.meshtastic.core.repository.StoredPassphrase
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.core.service.SharedRadioInterfaceService
 import org.meshtastic.core.testing.FakeBluetoothRepository
@@ -105,6 +111,65 @@ class SdkTcpRoomTest {
         } else {
             val port = System.getenv("MESHTASTIC_SDK_TCP_PORT")?.toInt() ?: 4403
             exerciseConnection(liveHost, port, expectReplayText = false)
+        }
+    }
+
+    @Test
+    fun sdkTcpPromptsForLockdownBeforeInstallingRoomSnapshot() = runBlocking {
+        withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE) { port -> exerciseLockdown(port, autoUnlock = false) }
+    }
+
+    @Test
+    fun sdkTcpReplaysSavedPassphraseBeforeInstallingRoomSnapshot() = runBlocking {
+        withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE) { port -> exerciseLockdown(port, autoUnlock = true) }
+    }
+
+    private suspend fun exerciseLockdown(port: Int, autoUnlock: Boolean) {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        val job = SupervisorJob()
+        val scope = CoroutineScope(job + Dispatchers.Default)
+        val dispatchers =
+            CoroutineDispatchers(io = Dispatchers.IO, main = Dispatchers.Main, default = Dispatchers.Default)
+        val prefs = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "sdk-lockdown-${Uuid.random()}.preferences_pb"
+        val store = PreferenceDataStoreFactory.createWithPath(scope = scope, produceFile = { prefs })
+        val databases = TestDatabases(store.asDatabaseDataStore(), dispatchers)
+        val lifecycle = TestLifecycleOwner()
+        val address = "t127.0.0.1:$port"
+        val passphraseStore = mock<LockdownPassphraseStore>(MockMode.autofill)
+        every { passphraseStore.getPassphrase(address) } returns
+            if (autoUnlock) StoredPassphrase(TEST_PASSPHRASE, 5, 0) else null
+        lateinit var ingress: RoomIngress
+        val radio =
+            createRadio(lifecycle.lifecycle, dispatchers, address) { service ->
+                ingress.createSdkTransport(service, port)
+            }
+        ingress = RoomIngress(scope, lifecycle.lifecycle, dispatchers, databases, radio, passphraseStore)
+        try {
+            withTimeout(10.seconds) {
+                databases.switchActiveDatabase(address)
+                radio.connect()
+                val session = radio.activeSession.filterNotNull().first()
+                if (!autoUnlock) {
+                    ingress.lockdownState.first { it is LockdownState.Locked }
+                    databases.withReadDb { db -> assertNull(db.nodeInfoDao().getMyNodeEntity()) }
+                    assertTrue(ingress.lockdown.submitPassphrase(TEST_PASSPHRASE, 5, 0, 0, false))
+                }
+                ingress.appConnection.first { it == ConnectionState.Connected }
+                assertEquals(LockdownState.Unlocked, ingress.lockdownState.value)
+                assertEquals(session, radio.activeSession.value)
+                databases.withReadDb { db ->
+                    assertEquals(SdkRoomReplayTest.LOCAL_NODE, db.nodeInfoDao().getMyNodeEntity()?.myNodeNum)
+                }
+                radio.disconnect()
+                assertEquals(LockdownState.None, ingress.lockdownState.value)
+            }
+        } finally {
+            radio.disconnect()
+            lifecycle.destroy()
+            databases.close()
+            job.cancelAndJoin()
+            FileSystem.SYSTEM.delete(prefs)
+            Dispatchers.resetMain()
         }
     }
 
@@ -176,6 +241,7 @@ class SdkTcpRoomTest {
         dispatchers: CoroutineDispatchers,
         databases: DatabaseManager,
         private val radio: SharedRadioInterfaceService,
+        passphraseStore: LockdownPassphraseStore = mock(MockMode.autofill),
     ) {
         private val notified = CompletableDeferred<String>()
         private val notifications = mock<MeshNotificationManager>(MockMode.autofill)
@@ -222,6 +288,39 @@ class SdkTcpRoomTest {
             )
         private val processor =
             createRoomReplayProcessor(scope, dispatchers, databases, nodeManager, radio, config, notifications)
+
+        private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
+        val appConnection = state.connectionState
+        val lockdownState = state.lockdownState
+        val lockdown =
+            LockdownCoordinatorImpl(
+                state,
+                CommandSenderImpl(
+                    mock(MockMode.autofill),
+                    nodeManager,
+                    config,
+                    mock(MockMode.autofill),
+                    mock(MockMode.autofill),
+                    mock(MockMode.autofill),
+                    mock(MockMode.autofill),
+                    mock(MockMode.autofill),
+                    serviceScope,
+                    radio,
+                ),
+                passphraseStore,
+                radio,
+                lazy { connectionManager },
+            )
+
+        fun createSdkTransport(service: RadioInterfaceService, port: Int): RadioTransport = SdkPhoneApiRadioTransport(
+            { TcpTransport("127.0.0.1", port) },
+            service,
+            lazy { installer },
+            lazy { connectionManager },
+            lazy { processor },
+            lazy { nodeManager },
+            lazy { lockdown },
+        )
 
         init {
             everySuspend { notifications.updateMessageNotification(any(), any(), any(), any(), any(), any()) } calls
@@ -282,6 +381,8 @@ class SdkTcpRoomTest {
                                 nodeManager.myNodeNum.value,
                             )
                         }
+
+                        is RadioSessionEvent.Lockdown -> Unit
 
                         is RadioSessionEvent.Envelope -> error("Envelopes were disabled")
 
@@ -345,6 +446,7 @@ class SdkTcpRoomTest {
         lifecycle: Lifecycle,
         dispatchers: CoroutineDispatchers,
         address: String,
+        createTransport: (RadioInterfaceService) -> RadioTransport = { FakeRadioTransport() },
     ): SharedRadioInterfaceService {
         val network = mock<NetworkRepository>(MockMode.autofill)
         every { network.networkAvailable } returns MutableStateFlow(true)
@@ -352,7 +454,7 @@ class SdkTcpRoomTest {
         val factory = mock<RadioTransportFactory>(MockMode.autofill)
         every { factory.isAddressValid(any()) } returns true
         every { factory.mockTransportEnabled } returns MutableStateFlow(false)
-        every { factory.createTransport(any(), any()) } calls { FakeRadioTransport() }
+        every { factory.createTransport(any(), any()) } calls { createTransport(it.args[1] as RadioInterfaceService) }
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
             bluetoothRepository = FakeBluetoothRepository(),
@@ -367,5 +469,9 @@ class SdkTcpRoomTest {
             analytics = mock(MockMode.autofill),
             radioOperationLock = RadioOperationLock(),
         )
+    }
+
+    private companion object {
+        const val TEST_PASSPHRASE = "example"
     }
 }

@@ -25,6 +25,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.TransportStatus
+import org.meshtastic.proto.LockdownAuth
 
 /** A lifecycle lease held by one already-admitted operation for [session]. */
 interface RadioSessionLease {
@@ -116,6 +117,9 @@ interface RadioInterfaceService :
     RadioTransportCallback,
     RadioSessionAuthority,
     RadioTransportWriter {
+    /** Queues authentication only while [session] owns the link. */
+    fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean = false
+
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 

@@ -66,14 +66,11 @@ class LockdownCoordinatorImplTest {
     }
 
     private class FakeConnectionManager : MeshConnectionManager {
-        var configOnlyCalled = false
         var clearRadioConfigCalled = false
 
         override fun onRadioConfigLoaded() = Unit
 
-        override fun startConfigOnly() {
-            configOnlyCalled = true
-        }
+        override fun startConfigOnly() = error("The SDK refreshes configuration after unlock")
 
         override fun startNodeInfoOnly() = Unit
 
@@ -300,7 +297,6 @@ class LockdownCoordinatorImplTest {
 
         assertTrue(serviceRepo.sessionAuthorized.value)
         assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
-        assertTrue(connectionManager.configOnlyCalled)
 
         val stored = passphraseStore.saved[testDeviceAddress]
         assertEquals("mypass", stored?.passphrase)
