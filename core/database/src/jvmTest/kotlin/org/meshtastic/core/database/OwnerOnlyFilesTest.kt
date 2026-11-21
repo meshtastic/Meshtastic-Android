@@ -98,4 +98,39 @@ class OwnerOnlyFilesTest {
         assertEquals("rw-------", mode(file))
         assertEquals("rwx------", mode(dir))
     }
+
+    @Test
+    fun `an existing explicit data root keeps its mode while the database file is owner only`() {
+        if (!posix) return
+        setMode(root, "rwxrwx---")
+
+        val dbFile = prepareDatabaseFile(root.path, "meshtastic")
+        val dataDir = prepareDataDir(root.path, home = "/unused")
+
+        assertEquals("rwxrwx---", mode(root))
+        assertEquals(root.path, dataDir)
+        assertEquals("rw-------", mode(dbFile))
+    }
+
+    @Test
+    fun `a missing explicit data root is created owner only`() {
+        if (!posix) return
+        val missing = File(root, "mesh/data")
+
+        prepareDatabaseFile(missing.path, "meshtastic")
+
+        assertEquals("rwx------", mode(missing))
+    }
+
+    @Test
+    fun `the default data root is tightened when it already exists`() {
+        if (!posix) return
+        val home = File(root, "home").apply { mkdir() }
+        val dataRoot = File(home, ".meshtastic").apply { mkdir() }
+        setMode(dataRoot, "rwxr-xr-x")
+
+        prepareDataDir(override = null, home = home.path)
+
+        assertEquals("rwx------", mode(dataRoot))
+    }
 }

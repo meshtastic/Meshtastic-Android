@@ -42,10 +42,18 @@ private fun posixSupported(): Boolean = "posix" in FileSystems.getDefault().supp
  * already existed. Existing parents are left untouched.
  */
 fun createOwnerOnlyDirectories(dir: File) {
-    createOwnerOnlyDirectories(dir, posixSupported())
+    createOwnerOnlyDirectories(dir, posixSupported(), tightenExisting = true)
 }
 
-internal fun createOwnerOnlyDirectories(dir: File, posix: Boolean) {
+/**
+ * Creates [dir] and any missing parents, each owner-only, and leaves [dir] untouched when it already exists. For a
+ * directory the user chose, such as an explicit `MESHTASTIC_DATA_DIR`.
+ */
+fun createMissingOwnerOnlyDirectories(dir: File) {
+    createOwnerOnlyDirectories(dir, posixSupported(), tightenExisting = false)
+}
+
+internal fun createOwnerOnlyDirectories(dir: File, posix: Boolean, tightenExisting: Boolean = true) {
     val missing = generateSequence(dir.absoluteFile) { it.parentFile }.takeWhile { !it.exists() }.toList().asReversed()
     for (target in missing) {
         val created =
@@ -62,7 +70,7 @@ internal fun createOwnerOnlyDirectories(dir: File, posix: Boolean) {
         if (!created) break
         if (!posix) restrictToOwner(target, posix = false)
     }
-    if (dir.isDirectory) restrictToOwner(dir, posix)
+    if (tightenExisting && dir.isDirectory) restrictToOwner(dir, posix)
 }
 
 /** Creates [file] owner-only when absent, or restricts it when it already exists. Its parent must exist. */

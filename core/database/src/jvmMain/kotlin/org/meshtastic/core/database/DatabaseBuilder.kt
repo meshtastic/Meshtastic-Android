@@ -44,20 +44,26 @@ fun desktopDataDir(): String = resolvedDataDir
  * subdirectories and files inside it.
  */
 private val resolvedDataDir: String by lazy {
-    val override = System.getenv("MESHTASTIC_DATA_DIR")
-    if (!override.isNullOrBlank()) {
-        override
-    } else {
-        (System.getProperty("user.home") + "/.meshtastic").also { createOwnerOnlyDirectories(File(it)) }
-    }
+    prepareDataDir(System.getenv("MESHTASTIC_DATA_DIR"), System.getProperty("user.home"))
+}
+
+internal fun prepareDataDir(override: String?, home: String): String {
+    if (!override.isNullOrBlank()) return override
+    return "$home/.meshtastic".also { createOwnerOnlyDirectories(File(it)) }
+}
+
+/** The database file for [dbName] in [dataDir], created owner-only. A data directory that exists is left as it is. */
+internal fun prepareDatabaseFile(dataDir: String, dbName: String): File {
+    val dbFile = File(dataDir, "$dbName.db")
+    dbFile.parentFile?.let(::createMissingOwnerOnlyDirectories)
+    // SQLite gives the -wal and -shm files the main file's permissions.
+    ensureOwnerOnlyFile(dbFile)
+    return dbFile
 }
 
 /** Returns a [RoomDatabase.Builder] configured for JVM/Desktop with the given [dbName]. */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
-    val dbFile = File(desktopDataDir(), "$dbName.db")
-    dbFile.parentFile?.let(::createOwnerOnlyDirectories)
-    // SQLite gives the -wal and -shm files the main file's permissions.
-    ensureOwnerOnlyFile(dbFile)
+    val dbFile = prepareDatabaseFile(desktopDataDir(), dbName)
     return Room.databaseBuilder<MeshtasticDatabase>(
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
