@@ -117,8 +117,8 @@ to notice. Every consumer must read that one flow — the visibility path and th
 admission path have to agree, or the demo entry appears and then refuses to connect.
 
 `BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it creates
-`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and hands every other
-address to the platform's `createPlatformTransport`. On hardware without Bluetooth LE it refuses BLE
+`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and dispatches every other
+address in `createPlatformTransport`: mock and no-device itself, and replay, TCP and serial through hooks a platform overrides. `NonWebRadioTransportFactory` (`nonWebMain`) supplies raw TCP for Android and Desktop. On hardware without Bluetooth LE it refuses BLE
 addresses, and the Android factory refuses serial addresses on hardware with no USB host, so a saved
 address restored onto such a device is kept but never armed.
 
