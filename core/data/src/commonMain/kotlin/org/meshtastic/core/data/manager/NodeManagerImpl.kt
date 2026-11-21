@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
@@ -54,6 +55,7 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import kotlinx.coroutines.flow.update as updateStateFlow
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
@@ -289,11 +291,18 @@ class NodeManagerImpl(
          * of overwriting them.
          */
         val revision: Long = 0L,
+        /** Numbers the user removed locally; the radio still holds them until the removeNode ack. */
+        val pendingRemovals: PersistentSet<Int> = persistentSetOf(),
     ) {
         fun isRetiredAbsent(nodeNum: Int): Boolean = nodeNum in retiredNodeNums && nodeNum !in index.byNum
+
+        fun isSuppressed(nodeNum: Int): Boolean = isRetiredAbsent(nodeNum) || nodeNum in pendingRemovals
     }
 
     private val nodeState = atomic(NodeState())
+
+    /** The favorite, ignored and muted flags the SDK last reported per node in this session. */
+    private val reportedFlags = atomic(persistentMapOf<Int, ReportedFlags>())
 
     /**
      * Session generation, bumped by [clear]. Captured by [loadCachedNodeDB] before its suspending snapshot read so a
@@ -513,6 +522,7 @@ class NodeManagerImpl(
         // index.
         sessionGeneration.incrementAndGet()
         nodeState.value = NodeState()
+        reportedFlags.value = persistentMapOf()
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
@@ -549,7 +559,13 @@ class NodeManagerImpl(
     }
 
     override fun removeByNodenum(nodeNum: Int) {
-        nodeState.update { state -> state.copy(index = state.index.remove(nodeNum), revision = state.revision + 1) }
+        nodeState.update { state ->
+            state.copy(
+                index = state.index.remove(nodeNum),
+                pendingRemovals = state.pendingRemovals.adding(nodeNum),
+                revision = state.revision + 1,
+            )
+        }
         serviceNotifications.cancelLowBatteryNotification(nodeNum)
     }
 
@@ -615,7 +631,7 @@ class NodeManagerImpl(
         var change: NodeStateChange? = null
         nodeState.update { state ->
             change = null
-            if (state.isRetiredAbsent(nodeNum)) return@update state
+            if (state.isSuppressed(nodeNum)) return@update state
             val current = state.index.byNum[nodeNum] ?: createDefaultNode(nodeNum, channel)
             val next = transform(current)
             change = NodeStateChange(previous = current, next = next)
@@ -678,6 +694,10 @@ class NodeManagerImpl(
         val arrivalSessionGeneration = sessionGeneration.value
         while (sessionGeneration.value == arrivalSessionGeneration) {
             val before = nodeState.value
+            if (fromNum in before.pendingRemovals) {
+                Logger.d { "[NodeIdentity] user from=$fromNum discarded while its removal awaits the radio" }
+                return
+            }
             val transition =
                 reduceReceivedUser(
                     before.index,
@@ -785,47 +805,120 @@ class NodeManagerImpl(
     override fun installNodeInfo(info: ProtoNodeInfo) {
         val reportsHeard = reportsHeardOnCurrentLora.value
         cancelLowBatteryIfUnfavorited(info)
+        recordReportedFlags(info)
+        // The handshake snapshot is firmware's word on the node, so it ends a removal still waiting for its ack.
+        nodeState.update { state ->
+            if (info.num in state.pendingRemovals) {
+                state.copy(pendingRemovals = state.pendingRemovals.removing(info.num))
+            } else {
+                state
+            }
+        }
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
         updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    override fun applySessionNode(info: ProtoNodeInfo, userChanged: Boolean, session: RadioSessionContext) {
+    override fun applySessionNode(info: ProtoNodeInfo, changed: Set<NodeField>?, session: RadioSessionContext) {
+        // The SDK still holds a node the user removed until the ack, so only a later add brings it back.
+        if (changed != null && info.num in nodeState.value.pendingRemovals) return
+        if (changed == null) nodeState.update { it.copy(pendingRemovals = it.pendingRemovals.removing(info.num)) }
         val user = info.user
         val heldUnknown = nodeState.value.index.byNum[info.num]?.isUnknownUser != false
+        val userChanged = changed == null || NodeField.User in changed || NodeField.Name in changed
         if (user != null && (userChanged || heldUnknown)) {
             handleReceivedUser(info.num, sanitizeReceivedUser(user, info.via_mqtt), info.channel, session = session)
         }
+        val flags = reportedFlagChanges(info, changed)
+        if (flags.favorite == false) cancelLowBatteryIfUnfavorited(info)
         val reportsHeard = reportsHeardOnCurrentLora.value
-        cancelLowBatteryIfUnfavorited(info)
         updateNodeAndSchedulePersistence(info.num, info.channel, session) { node ->
-            applySessionNodeFields(node, info, reportsHeard)
+            applySessionNodeFields(node, info, changed, flags, reportsHeard)
         }
     }
 
+    override fun applySessionNodeRemoved(nodeNum: Int) {
+        nodeState.update { state ->
+            state.copy(
+                index = state.index.remove(nodeNum),
+                pendingRemovals = state.pendingRemovals.removing(nodeNum),
+                revision = state.revision + 1,
+            )
+        }
+        reportedFlags.update { it.removing(nodeNum) }
+        serviceNotifications.cancelLowBatteryNotification(nodeNum)
+    }
+
     /**
-     * The SDK reports SNR only for packets it heard and never RSSI or the transport, so the packet projection owns the
-     * link metrics. A live update never clears a heard-on-current-LoRa flag the packets set.
+     * Each live update carries the SDK's flags, which trail a local optimistic write until its admin ack. A flag is
+     * applied only when an [NodeField.Other] change moved it from the value the SDK last reported, or when the node is
+     * new to the session.
      */
-    private fun applySessionNodeFields(node: Node, info: ProtoNodeInfo, reportsHeard: Boolean): Node {
+    private fun reportedFlagChanges(info: ProtoNodeInfo, changed: Set<NodeField>?): ReportedFlagChanges {
+        val reported = ReportedFlags(info.is_favorite, info.is_ignored, info.is_muted)
+        val previous = recordReportedFlags(info)
+        return when {
+            changed == null || previous == null ->
+                ReportedFlagChanges(reported.favorite, reported.ignored, reported.muted)
+
+            NodeField.Other !in changed -> ReportedFlagChanges()
+
+            else ->
+                ReportedFlagChanges(
+                    favorite = reported.favorite.takeIf { it != previous.favorite },
+                    ignored = reported.ignored.takeIf { it != previous.ignored },
+                    muted = reported.muted.takeIf { it != previous.muted },
+                )
+        }
+    }
+
+    /** Stores what the SDK now reports for [info] and returns what it reported before. */
+    private fun recordReportedFlags(info: ProtoNodeInfo): ReportedFlags? {
+        val reported = ReportedFlags(info.is_favorite, info.is_ignored, info.is_muted)
+        return reportedFlags.getAndUpdate { it.putting(info.num, reported) }[info.num]
+    }
+
+    /**
+     * The packet projection owns the link metrics and hop count, which the SDK computes differently or not at all, and
+     * a live update never clears a heard-on-current-LoRa flag the packets set. Position and channel move only when the
+     * change says they did, so a stale SDK copy cannot overwrite a fixed position the app just wrote.
+     */
+    private fun applySessionNodeFields(
+        node: Node,
+        info: ProtoNodeInfo,
+        changed: Set<NodeField>?,
+        flags: ReportedFlagChanges,
+        reportsHeard: Boolean,
+    ): Node {
         val position =
-            info.position?.let { incoming ->
-                val timed = incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(incoming.time) }.build()
-                preservingKnownPrecision(timed, node.position)
-            } ?: node.position
+            info.position
+                ?.takeIf { changed == null || NodeField.Position in changed }
+                ?.let { incoming ->
+                    val timed =
+                        incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(incoming.time) }.build()
+                    preservingKnownPrecision(timed, node.position)
+                } ?: node.position
         return node.copy(
             position = position,
+            channel = if (changed == null || NodeField.Other in changed) info.channel else node.channel,
             heardOnCurrentLora = node.heardOnCurrentLora || !reportsHeard || info.heard_on_current_lora,
             lastHeard = maxOf(node.lastHeard, clampTimestampToNow(info.last_heard)),
             deviceMetrics = info.device_metrics ?: node.deviceMetrics,
             viaMqtt = info.via_mqtt,
-            hopsAway = info.hops_away ?: node.hopsAway,
-            isFavorite = info.is_favorite,
-            isIgnored = info.is_ignored,
-            isMuted = info.is_muted,
+            isFavorite = flags.favorite ?: node.isFavorite,
+            isIgnored = flags.ignored ?: node.isIgnored,
+            isMuted = flags.muted ?: node.isMuted,
             signsPackets = info.has_xeddsa_signed,
             manuallyVerified = node.manuallyVerified || info.is_key_manually_verified,
         )
     }
+
+    private data class ReportedFlags(val favorite: Boolean, val ignored: Boolean, val muted: Boolean)
+
+    private data class ReportedFlagChanges(
+        val favorite: Boolean? = null,
+        val ignored: Boolean? = null,
+        val muted: Boolean? = null,
+    )
 
     /** Only favorites are warned about, and one unfavorited from another client arrives here, not via setFavorite. */
     private fun cancelLowBatteryIfUnfavorited(info: ProtoNodeInfo) {

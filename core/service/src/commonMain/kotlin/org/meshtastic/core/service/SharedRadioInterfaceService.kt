@@ -1090,6 +1090,10 @@ class SharedRadioInterfaceService(
             else -> false
         }
 
+    override fun reportReceiveActivity() {
+        _meshActivity.tryEmit(MeshActivity.Receive)
+    }
+
     override fun onConnect() {
         synchronized(sessionCallbackLock) { publishConnected() }
     }

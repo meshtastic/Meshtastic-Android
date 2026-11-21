@@ -50,10 +50,13 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -3480,11 +3483,179 @@ class NodeManagerImplTest {
                 }
                 .build()
 
-        nodeManager.applySessionNode(info, userChanged = true, RadioSessionContext(1L, "tcp:live"))
+        nodeManager.applySessionNode(info, changed = null, RadioSessionContext(1L, "tcp:live"))
 
         val node = nodeManager.nodeDBbyNodeNum.getValue(num)
         assertEquals("Ham Shack (MQTT)", node.user.long_name)
         assertEquals(ByteString.EMPTY, node.user.public_key)
         assertEquals(ByteString.EMPTY, node.publicKey)
+    }
+
+    // ---------- Live SDK node changes ----------
+
+    private val liveSession = RadioSessionContext(7L, "tcp:live")
+
+    private fun sdkNode(
+        num: Int = LIVE_NODE,
+        favorite: Boolean = false,
+        muted: Boolean = false,
+        channel: Int = 0,
+        lastHeard: Int = 1_000,
+        hopsAway: Int? = null,
+        position: ProtoPosition? = null,
+        user: User? = liveUser(num),
+    ) = ProtoNodeInfo.Builder()
+        .also { wb ->
+            wb.num = num
+            wb.user = user
+            wb.is_favorite = favorite
+            wb.is_muted = muted
+            wb.channel = channel
+            wb.last_heard = lastHeard
+            wb.hops_away = hopsAway
+            wb.position = position
+        }
+        .build()
+
+    private fun liveUser(num: Int) = User.Builder()
+        .also { wb ->
+            wb.id = NodeAddress.numToDefaultId(num)
+            wb.long_name = "Live Node"
+            wb.short_name = "LIVE"
+            wb.hw_model = HardwareModel.TLORA_V2
+        }
+        .build()
+
+    @Test
+    fun `a LastSeen update keeps a local mute the radio has not acknowledged yet`() {
+        nodeManager.installNodeInfo(sdkNode(muted = false))
+        nodeManager.updateNode(LIVE_NODE) { it.copy(isMuted = true) }
+
+        nodeManager.applySessionNode(sdkNode(muted = false, lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).isMuted)
+    }
+
+    @Test
+    fun `an Other update applies the flag the radio changed and keeps the one it did not`() {
+        nodeManager.installNodeInfo(sdkNode(favorite = false, muted = false))
+        nodeManager.updateNode(LIVE_NODE) { it.copy(isMuted = true) }
+
+        nodeManager.applySessionNode(sdkNode(favorite = true, muted = false), setOf(NodeField.Other), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertTrue(node.isFavorite)
+        assertTrue(node.isMuted)
+    }
+
+    @Test
+    fun `a NodeInfo heard on another channel moves the node to that channel`() {
+        nodeManager.installNodeInfo(sdkNode(channel = 0))
+
+        nodeManager.applySessionNode(sdkNode(channel = 2), setOf(NodeField.Other), liveSession)
+
+        assertEquals(2, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).channel)
+    }
+
+    @Test
+    fun `a live update leaves the packet-derived hop count alone`() {
+        nodeManager.installNodeInfo(sdkNode())
+        // The packet projection marks an MQTT-heard sender's hops unknown.
+        nodeManager.updateNode(LIVE_NODE) { it.copy(hopsAway = -1) }
+
+        nodeManager.applySessionNode(sdkNode(hopsAway = 2), setOf(NodeField.SignalQuality), liveSession)
+
+        assertEquals(-1, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).hopsAway)
+    }
+
+    @Test
+    fun `a stale SDK position does not overwrite a fixed position without a position change`() {
+        val fixed =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 375_000_000
+                    wb.longitude_i = -1_220_000_000
+                }
+                .build()
+        val stale =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 100_000_000
+                    wb.longitude_i = 200_000_000
+                }
+                .build()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.updateNode(LIVE_NODE) { it.copy(position = fixed) }
+
+        nodeManager.applySessionNode(
+            sdkNode(position = stale, lastHeard = 2_000),
+            setOf(NodeField.LastSeen),
+            liveSession,
+        )
+
+        assertEquals(375_000_000, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).position.latitude_i)
+    }
+
+    @Test
+    fun `a node the user removed stays gone until the radio confirms the removal`() {
+        admitLeases(liveSession)
+        enableDbWrites()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.removeByNodenum(LIVE_NODE)
+
+        nodeManager.updateNodeForSession(LIVE_NODE, liveSession) { it.copy(rssi = -90) }
+        nodeManager.applySessionNode(sdkNode(lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+        testScope.advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
+
+        nodeManager.applySessionNodeRemoved(LIVE_NODE)
+        nodeManager.applySessionNode(sdkNode(lastHeard = 3_000), changed = null, liveSession)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+    }
+
+    @Test
+    fun `a node the radio adds with its hardware posts the new-node notification`() {
+        admitLeases(liveSession)
+        enableDbWrites()
+
+        nodeManager.applySessionNode(sdkNode(), changed = null, liveSession)
+        testScope.advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(1)) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
+    }
+
+    @Test
+    fun `a user change keeps the columns only the app writes`() {
+        val environment = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 21.5f }.build()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.updateNode(LIVE_NODE) {
+            it.copy(
+                rssi = -97,
+                snr = 6.25f,
+                lastTransport = MeshPacket.TransportMechanism.TRANSPORT_LORA.value,
+                environmentMetrics = environment,
+                nodeStatus = "On duty",
+                notes = "Ridge repeater",
+            )
+        }
+        val renamed = liveUser(LIVE_NODE).newBuilder().also { wb -> wb.long_name = "Renamed" }.build()
+
+        nodeManager.applySessionNode(sdkNode(user = renamed), setOf(NodeField.User, NodeField.Name), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertEquals("Renamed", node.user.long_name)
+        assertEquals(-97, node.rssi)
+        assertEquals(6.25f, node.snr)
+        assertEquals(MeshPacket.TransportMechanism.TRANSPORT_LORA.value, node.lastTransport)
+        assertEquals(environment, node.environmentMetrics)
+        assertEquals("On duty", node.nodeStatus)
+        assertEquals("Ridge repeater", node.notes)
+    }
+
+    private companion object {
+        const val LIVE_NODE = 0x2468
     }
 }

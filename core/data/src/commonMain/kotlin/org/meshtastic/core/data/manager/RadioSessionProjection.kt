@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
@@ -24,6 +25,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
@@ -41,6 +43,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -51,9 +54,7 @@ import org.meshtastic.sdk.ConfigBundle
 import org.meshtastic.sdk.DisplayMirrorFrame
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
-import org.meshtastic.sdk.NodeField
 import org.meshtastic.sdk.RadioSessionEvent
-import kotlin.concurrent.Volatile
 import kotlin.uuid.Uuid
 
 /**
@@ -75,9 +76,12 @@ class RadioSessionProjection(
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
 ) {
-    @Volatile private var lastLocalNodeRefreshMs = 0L
+    private data class LocalRefresh(val generation: Long, val atMillis: Long)
 
-    @Volatile private var lastLocalNodeRefreshGeneration = Long.MIN_VALUE
+    private val lastLocalRefresh = atomic<LocalRefresh?>(null)
+
+    /** The config last written to the MeshLog, so a change logs only the sections it moved. */
+    private val loggedConfig = atomic<ConfigBundle?>(null)
 
     /** Installs the handshake snapshot; the caller publishes app readiness only when this returns true. */
     suspend fun installReady(event: RadioSessionEvent.Ready, session: RadioSessionContext): Boolean {
@@ -100,15 +104,26 @@ class RadioSessionProjection(
             )
         if (installed) {
             logFromRadio(session, MeshLog.TYPE_MY_INFO, myInfo.toOneLineString()) { it.my_info = myInfo }
-            config?.let { logConfigBundle(session, it) }
+            loggedConfig.value = null
+            config?.let { logConfigChanges(session, it) }
             logChannels(session, event.channels.orEmpty())
             logNodes(session, event.nodes.values)
         }
         return installed
     }
 
-    /** Projects one post-Ready event of the SDK session that [session] carries. */
+    /**
+     * Projects one post-Ready event of the SDK session that [session] carries. A handler failure drops that event only:
+     * one malformed payload from any node on the mesh must not end the session.
+     */
     suspend fun project(event: RadioSessionEvent, session: RadioSessionContext) {
+        safeCatching { projectEvent(event, session) }
+            .onFailure { failure ->
+                Logger.e(failure) { "Dropped an SDK ${event::class.simpleName} after a handler error; session kept" }
+            }
+    }
+
+    private suspend fun projectEvent(event: RadioSessionEvent, session: RadioSessionContext) {
         when (event) {
             is RadioSessionEvent.Packet -> runForSession(session, "packet") { handlePacket(event, session) }
 
@@ -120,7 +135,7 @@ class RadioSessionProjection(
 
             is RadioSessionEvent.ConfigChanged -> {
                 configFlowManager.value.installConfigBundle(session, event.bundle)
-                logConfigBundle(session, event.bundle)
+                logConfigChanges(session, event.bundle)
             }
 
             is RadioSessionEvent.ChannelsChanged -> {
@@ -164,16 +179,20 @@ class RadioSessionProjection(
      * frequent events do not rewrite the local node row on every frame.
      */
     fun refreshLocalNodeLastHeard(session: RadioSessionContext, localNodeNum: Int? = nodeManager.myNodeNum.value) {
-        val now = nowMillis
-        val sameGeneration = lastLocalNodeRefreshGeneration == session.generation
-        if (sameGeneration && now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
         val myNum = localNodeNum ?: return
+        val now = nowMillis
+        val previous = lastLocalRefresh.value
+        val due =
+            previous == null ||
+                previous.generation != session.generation ||
+                now - previous.atMillis >= LOCAL_NODE_REFRESH_INTERVAL_MS
+        // The side-flow heartbeat and the event collector both call this; only the caller that claims the slot writes.
+        if (!due || !lastLocalRefresh.compareAndSet(previous, LocalRefresh(session.generation, now))) return
         nodeManager.updateNodeForSession(myNum, session) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
-        lastLocalNodeRefreshGeneration = session.generation
-        lastLocalNodeRefreshMs = now
     }
 
     private fun handlePacket(event: RadioSessionEvent.Packet, session: RadioSessionContext) {
+        radioInterfaceService.reportReceiveActivity()
         val myNodeNum = nodeManager.myNodeNum.value ?: return
         val packet =
             event.packet
@@ -197,24 +216,37 @@ class RadioSessionProjection(
         if (packet.from != myNodeNum) refreshLocalNodeLastHeard(session, myNodeNum)
         if (packet.from != 0) {
             nodeManager.updateNodeForSession(packet.from, session, channel = packet.channel) { node ->
-                applyPacketLinkMetrics(node, packet)
+                applyPacketLinkMetrics(node, packet, decoded)
             }
         }
         if (event.correlatedAdminResponse) applyCorrelatedAdminResponse(packet, myNodeNum, session)
         dataHandler.value.handleReceivedData(packet, myNodeNum, session, log.uuid, logJob)
     }
 
-    /** Link metrics are the app's: the SDK tracks no RSSI or transport, and reports SNR for relayed packets too. */
-    private fun applyPacketLinkMetrics(node: Node, packet: MeshPacket): Node {
+    /**
+     * Link metrics and the hop count are the app's: the SDK tracks no RSSI or transport, reports SNR for relayed
+     * packets too, and keeps a stale hop count where the app shows the hops as unknown.
+     */
+    private fun applyPacketLinkMetrics(node: Node, packet: MeshPacket, decoded: Data): Node {
         val viaMqtt = packet.via_mqtt
         val updateRadioMetrics = packet.hop_start == packet.hop_limit && packet.isLora() && !viaMqtt
         // Stored packets firmware replays after a NodeDB dump are marked LoRa but carry no rx_rssi.
         val heardOverOurRadio = packet.rx_rssi != null && !viaMqtt
+        // Range test packets go out with zero hops, so the sender is heard directly whatever hop_start says.
+        val hopsAway =
+            when {
+                decoded.portnum == PortNum.RANGE_TEST_APP -> 0
+                viaMqtt -> HOPS_UNKNOWN
+                packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0 -> HOPS_UNKNOWN
+                packet.hop_limit > packet.hop_start -> HOPS_UNKNOWN
+                else -> packet.hop_start - packet.hop_limit
+            }
         return node.copy(
             heardOnCurrentLora = node.heardOnCurrentLora || heardOverOurRadio,
             lastTransport = packet.transport_mechanism.value,
             snr = if (updateRadioMetrics) packet.snrOrNull() ?: node.snr else node.snr,
             rssi = if (updateRadioMetrics) packet.rx_rssi ?: node.rssi else node.rssi,
+            hopsAway = hopsAway,
         )
     }
 
@@ -236,17 +268,14 @@ class RadioSessionProjection(
 
     private fun applyNodeChange(change: NodeChange, session: RadioSessionContext) {
         when (change) {
-            is NodeChange.Added -> nodeManager.applySessionNode(change.node, userChanged = true, session)
+            is NodeChange.Added -> nodeManager.applySessionNode(change.node, changed = null, session)
 
-            is NodeChange.Updated -> {
-                val userChanged = NodeField.User in change.changed || NodeField.Name in change.changed
-                nodeManager.applySessionNode(change.node, userChanged, session)
-            }
+            is NodeChange.Updated -> nodeManager.applySessionNode(change.node, change.changed, session)
 
             // Only an acknowledged removeNode write removes a node; the handshake never deletes what firmware dropped.
             is NodeChange.Removed -> {
                 val nodeNum = change.nodeId.raw
-                nodeManager.removeByNodenum(nodeNum)
+                nodeManager.applySessionNodeRemoved(nodeNum)
                 launchSessionBound(session, "node removal") { nodeRepository.deleteNode(nodeNum) }
             }
 
@@ -269,17 +298,27 @@ class RadioSessionProjection(
 
             is MeshEvent.DeviceRebooted -> logFromRadio(session, TYPE_REBOOTED, event.reason) { it.rebooted = true }
 
+            is MeshEvent.XmodemPacket ->
+                logFromRadio(session, TYPE_XMODEM, event.packet.toString()) { it.xmodemPacket = event.packet }
+
             else -> Unit
         }
     }
 
-    private fun logConfigBundle(session: RadioSessionContext, bundle: ConfigBundle) {
-        bundle.configs.forEach { config ->
+    /** Logs the sections of [bundle] that differ from the last logged bundle; after Ready, that is all of them. */
+    private fun logConfigChanges(session: RadioSessionContext, bundle: ConfigBundle) {
+        val previous = loggedConfig.getAndSet(bundle)
+        (bundle.configs - previous?.configs.orEmpty().toSet()).forEach { config ->
             logFromRadio(session, TYPE_CONFIG, config.toOneLineString()) { it.config = config }
         }
-        bundle.moduleConfigs.forEach { moduleConfig ->
+        (bundle.moduleConfigs - previous?.moduleConfigs.orEmpty().toSet()).forEach { moduleConfig ->
             logFromRadio(session, TYPE_MODULE_CONFIG, moduleConfig.toOneLineString()) { it.moduleConfig = moduleConfig }
         }
+        bundle.deviceUIConfig
+            ?.takeIf { it != previous?.deviceUIConfig }
+            ?.let { ui ->
+                logFromRadio(session, TYPE_DEVICE_UI_CONFIG, ui.toString()) { it.deviceuiConfig = ui }
+            }
     }
 
     private fun logChannels(session: RadioSessionContext, channels: List<org.meshtastic.proto.Channel>) {
@@ -337,5 +376,10 @@ class RadioSessionProjection(
         const val TYPE_CLIENT_NOTIFICATION = "ClientNotification"
         const val TYPE_FILE_INFO = "FileInfo"
         const val TYPE_REBOOTED = "Rebooted"
+        const val TYPE_XMODEM = "XmodemPacket"
+        const val TYPE_DEVICE_UI_CONFIG = "DeviceUIConfig"
+
+        /** The app's hop count for a sender it cannot place: MQTT, a pre-2.3 header or a corrupt one. */
+        const val HOPS_UNKNOWN = -1
     }
 }

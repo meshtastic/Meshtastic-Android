@@ -192,6 +192,9 @@ interface RadioInterfaceService :
     /** Flow of radio activity events. */
     val meshActivity: Flow<MeshActivity>
 
+    /** Reports one frame received from the radio on [meshActivity]. */
+    fun reportReceiveActivity() = Unit
+
     /** Hands a broker message to the active session's MQTT client proxy; false when no session can take it. */
     suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean = false
 

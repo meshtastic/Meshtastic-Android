@@ -25,6 +25,7 @@ import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -195,11 +196,14 @@ interface NodeManager : NodeIdLookup {
     fun installNodeInfo(info: ProtoNodeInfo)
 
     /**
-     * Applies a node the SDK session added or updated after Ready. [userChanged] routes the node's [User] through
-     * [handleReceivedUser] so identity correlation, retirement and the new-node notification apply; the other fields
-     * merge without touching the app-owned link metrics.
+     * Applies a node the SDK session added ([changed] null) or updated after Ready. A user change routes through
+     * [handleReceivedUser] so identity correlation, retirement and the new-node notification apply; other fields merge
+     * only as far as [changed] names them, and never touch the app-owned link metrics.
      */
-    fun applySessionNode(info: ProtoNodeInfo, userChanged: Boolean, session: RadioSessionContext)
+    fun applySessionNode(info: ProtoNodeInfo, changed: Set<NodeField>?, session: RadioSessionContext)
+
+    /** Removes a node the SDK dropped after an acknowledged removeNode, ending any local removal waiting for it. */
+    fun applySessionNodeRemoved(nodeNum: Int)
 
     /** Inserts hardware metadata for a node. */
     fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext? = null)

@@ -306,6 +306,14 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         return true
     }
 
+    /** How many received frames were reported through [reportReceiveActivity]. */
+    var receiveActivityReports = 0
+        private set
+
+    override fun reportReceiveActivity() {
+        receiveActivityReports++
+    }
+
     /** Broker messages handed to [deliverMqttProxy], in order. */
     val deliveredMqttProxyMessages = mutableListOf<MqttClientProxyMessage>()
 

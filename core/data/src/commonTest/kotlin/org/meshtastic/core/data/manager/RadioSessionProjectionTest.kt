@@ -17,13 +17,19 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
+import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -37,6 +43,7 @@ import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Waypoint
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioSessionEvent
@@ -47,7 +54,7 @@ import kotlin.test.assertTrue
 
 class RadioSessionProjectionTest {
 
-    private class Harness(scope: CoroutineScope) {
+    private class Harness(scope: CoroutineScope, dataHandler: MeshDataHandler = mock(MockMode.autofill)) {
         val radio =
             FakeRadioInterfaceService(scope).apply {
                 setDeviceAddress("tcp:projection")
@@ -79,6 +86,7 @@ class RadioSessionProjectionTest {
                 nodeManager,
                 radio,
                 scope,
+                dataHandler = dataHandler,
                 meshLogRepository = logs,
                 nodeRepository = nodeRepository,
                 configFlowManager = lazy { configFlowManager },
@@ -152,22 +160,89 @@ class RadioSessionProjectionTest {
         assertNull(harness.nodeRepository.nodeDBbyNum.value[REMOTE])
     }
 
-    private fun loraPacket(hopStart: Int, hopLimit: Int, rssi: Int, snr: Float) = MeshPacket.Builder()
+    @Test
+    fun `a malformed waypoint from the mesh drops only that packet`() = runTest {
+        val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
+        // MeshDataHandlerImpl decodes a WAYPOINT_APP payload with Waypoint.ADAPTER.decode, which throws on bad bytes.
+        every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
+            { args ->
+                val decoded = checkNotNull(args.arg<MeshPacket>(0).decoded)
+                if (decoded.portnum == PortNum.WAYPOINT_APP) check(Waypoint.ADAPTER.decode(decoded.payload).id >= 0)
+            }
+        val harness = Harness(backgroundScope, dataHandler)
+        // A waypoint id varint whose continuation bit promises a byte that never comes.
+        val truncated = byteArrayOf(0x08, 0xFF.toByte()).toByteString()
+
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 3, port = PortNum.WAYPOINT_APP, payload = truncated))
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 3, rssi = -97, snr = 6.25f))
+        runCurrent()
+
+        assertEquals(-97, harness.nodeManager.nodeDBbyNodeNum.getValue(REMOTE).rssi)
+    }
+
+    @Test
+    fun `range test and MQTT packets get the app's hop counts`() = runTest {
+        val harness = Harness(backgroundScope)
+
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 1, port = PortNum.RANGE_TEST_APP, from = RANGE_TESTER))
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 1, viaMqtt = true, from = MQTT_PEER))
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 1, from = RELAYED_PEER))
+        runCurrent()
+
+        val nodes = harness.nodeManager.nodeDBbyNodeNum
+        assertEquals(0, nodes.getValue(RANGE_TESTER).hopsAway)
+        assertEquals(-1, nodes.getValue(MQTT_PEER).hopsAway)
+        assertEquals(2, nodes.getValue(RELAYED_PEER).hopsAway)
+    }
+
+    @Test
+    fun `every received packet lights the receive activity indicator`() = runTest {
+        val harness = Harness(backgroundScope)
+        val encrypted = MeshPacket.Builder().also { it.from = REMOTE }.build()
+
+        harness.packet(encrypted)
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 3))
+        runCurrent()
+
+        assertEquals(2, harness.radio.receiveActivityReports)
+    }
+
+    @Suppress("LongParameterList")
+    private fun loraPacket(
+        hopStart: Int,
+        hopLimit: Int,
+        rssi: Int? = null,
+        snr: Float = 0f,
+        port: PortNum = PortNum.PRIVATE_APP,
+        payload: ByteString = ByteString.EMPTY,
+        viaMqtt: Boolean = false,
+        from: Int = REMOTE,
+    ) = MeshPacket.Builder()
         .also {
-            it.from = REMOTE
+            it.from = from
             it.to = LOCAL
             it.hop_start = hopStart
             it.hop_limit = hopLimit
             it.rx_rssi = rssi
             it.rx_snr = snr
+            it.via_mqtt = viaMqtt
             it.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
-            it.decoded = Data.Builder().also { data -> data.portnum = PortNum.PRIVATE_APP }.build()
+            it.decoded =
+                Data.Builder()
+                    .also { data ->
+                        data.portnum = port
+                        data.payload = payload
+                    }
+                    .build()
         }
         .build()
 
     private companion object {
         const val LOCAL = 0x0a0b0c0d
         const val REMOTE = 0x1234
+        const val RANGE_TESTER = 0x2001
+        const val MQTT_PEER = 0x2002
+        const val RELAYED_PEER = 0x2003
         const val SDK_SESSION = 1L
     }
 }
