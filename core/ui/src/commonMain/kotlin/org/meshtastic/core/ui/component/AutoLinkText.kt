@@ -223,7 +223,10 @@ private fun collectAutolinkMatches(display: String): List<Pair<IntRange, String>
         matches.add(match.range to if (url.startsWith("www.", ignoreCase = true)) "https://$url" else url)
     }
     EMAIL_REGEX.findAll(display).forEach { match -> matches.add(match.range to "mailto:${match.value}") }
-    PHONE_REGEX.findAll(display).forEach { match -> matches.add(match.range to "tel:${match.value}") }
+    PHONE_REGEX.findAll(display).forEach { match ->
+        // A number written with spaces dials without them.
+        matches.add(match.range to "tel:${match.value.filterNot { it.isWhitespace() }}")
+    }
     return matches.sortedWith(compareBy({ it.first.first }, { -(it.first.last - it.first.first) }))
 }
 

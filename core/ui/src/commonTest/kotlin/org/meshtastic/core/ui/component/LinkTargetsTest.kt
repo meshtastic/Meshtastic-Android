@@ -50,6 +50,18 @@ class LinkTargetsTest {
     }
 
     @Test
+    fun backslash_in_a_target_is_rejected() {
+        assertNull(openableLinkTarget("https://example.com\\@meshtastic.org"))
+    }
+
+    @Test
+    fun web_address_without_a_host_after_the_slashes_is_rejected() {
+        assertNull(openableLinkTarget("https:example.com"))
+        assertNull(openableLinkTarget("https:///example.com"))
+        assertEquals("mailto:a@e.com", openableLinkTarget("mailto:a@e.com"))
+    }
+
+    @Test
     fun tel_is_opt_in() {
         assertNull(openableLinkTarget("tel:+15551234567"))
         assertEquals("tel:+15551234567", openableLinkTarget("tel:+15551234567", allowTel = true))

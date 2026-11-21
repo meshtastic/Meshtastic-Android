@@ -196,6 +196,23 @@ class AutoLinkTextRenderTest {
     }
 
     @Test
+    fun styled_or_escaped_label_naming_another_host_renders_as_text() {
+        for (source in listOf("[**meshtastic.org**](https://example.com)", "[meshtastic\\.org](https://example.com)")) {
+            val result = build(source)
+            val label = result.text.indexOf("meshtastic")
+            assertTrue(result.urlLinks().none { label in it.second until it.third }, source)
+        }
+    }
+
+    @Test
+    fun detected_phone_written_with_spaces_dials_without_them() {
+        val link = build("call 555 123 4567").urlLinks().single()
+        assertEquals("tel:5551234567", link.first)
+        assertEquals("call ".length, link.second)
+        assertEquals("call 555 123 4567".length, link.third)
+    }
+
+    @Test
     fun bare_ftp_address_is_not_linked() {
         assertTrue(build("get ftp://files.e.com/x").urlLinks().isEmpty())
     }
