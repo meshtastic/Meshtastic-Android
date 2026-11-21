@@ -18,6 +18,20 @@
 pluginManagement {
     includeBuild("settings-plugin")
     repositories {
+        // Google-only groups resolve from Google's repository alone, as in the root settings.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("../offline-repository")
+                },
+            )
+            filter {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
         maven {
             name = "MavenCentralMirror"
@@ -26,13 +40,6 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
         maven { url = uri("../offline-repository") }
     }
 }
@@ -43,6 +50,20 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
+        // Google-only groups resolve from Google's repository alone, as in the root settings.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("../offline-repository")
+                },
+            )
+            filter {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
         maven {
             name = "MavenCentralMirror"
@@ -51,13 +72,6 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
         maven { url = uri("../offline-repository") }
     }
     versionCatalogs {
