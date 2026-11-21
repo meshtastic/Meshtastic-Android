@@ -56,6 +56,7 @@ kotlin {
 // Compose UI tests that find no displayed node, or cannot inject input, in headless Chrome.
 meshtasticWeb.browserTestExclusions.addAll(
     "*MessageItemTest.*",
+    "*ReactionDialogTest.*",
     "*ContactsSelectionToolbarTest.selectingAPinnedConversationOffersUnpin",
     "*ContactsSelectionToolbarTest.selectingAnUnmutedConversationOffersMute",
 )

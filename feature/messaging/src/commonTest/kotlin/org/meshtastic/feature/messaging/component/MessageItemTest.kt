@@ -18,6 +18,7 @@ package org.meshtastic.feature.messaging.component
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -372,6 +373,42 @@ class MessageItemTest {
         setContent { MessageStatusDialog(message = message, resendOption = false, onResend = {}, onDismiss = {}) }
 
         onNodeWithText("elayed by", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun receivedMessageActions_nameTheRelay() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(node = testNode, status = MessageStatus.RECEIVED)
+                .copy(fromLocal = false, hopsAway = 2, relayNode = 0x5A)
+        openActionsSheet(message, testNode)
+
+        onNodeWithText("Relayed by Ridge (0x5A)").assertIsDisplayed()
+    }
+
+    @Test
+    fun sentMessageActions_leaveTheAckRelayToTheStatusDialog() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(node = testNode, status = MessageStatus.RECEIVED).copy(hopsAway = 2, relayNode = 0x5A)
+        openActionsSheet(message, testNode)
+
+        onNodeWithText("Relayed by", substring = true).assertDoesNotExist()
+    }
+
+    private fun ComposeUiTest.openActionsSheet(message: Message, node: Node) {
+        setContent {
+            MessageItem(
+                message = message,
+                node = node,
+                selected = false,
+                ourNode = node,
+                quickReactionsOpen = true,
+                resolveRelay = { relay -> if (relay == 0x5A) "Ridge (0x5A)" else null },
+            )
+        }
+        onNodeWithContentDescription("More message actions").performClick()
+        waitForIdle()
     }
 
     @Test

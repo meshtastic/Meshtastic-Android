@@ -60,6 +60,7 @@ import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
+import org.meshtastic.core.resources.relayed_by
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.security_signed_message_info
 import org.meshtastic.core.resources.security_signed_verified
@@ -73,6 +74,7 @@ import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Dangerous
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.History
+import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
@@ -98,6 +100,7 @@ fun MessageActionsContent(
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
     timestamp: String? = null,
+    relay: String? = null,
     xeddsaSigned: Boolean = false,
     ackProofStatus: Int = 0,
     translationRowState: TranslationRowState? = null,
@@ -142,6 +145,13 @@ fun MessageActionsContent(
                     )
                 },
                 leadingContent = { Icon(MeshtasticIcons.History, contentDescription = null) },
+            )
+        }
+
+        if (relay != null) {
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.relayed_by, relay)) },
+                leadingContent = { Icon(MeshtasticIcons.HopCount, contentDescription = null) },
             )
         }
 
