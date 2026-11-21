@@ -33,7 +33,6 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isWithinSizeLimit
-import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocalNodeUnavailableException
@@ -44,8 +43,6 @@ import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.TracerouteHandler
-import org.meshtastic.core.repository.toFixedPositionAdminMessage
-import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.ChannelSet
@@ -218,20 +215,10 @@ class CommandSenderImpl(
     private fun currentConnectionVersion(): Long = connectionStateProvider.connectionLifecycle.value.version
 
     override suspend fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
-        sendAdminForConnection(destNum, currentConnectionVersion(), requestId, wantResponse, initFn)
-    }
-
-    override suspend fun sendAdminForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ) {
         enqueueOrThrow(
             buildAdminMessagePacket(destNum, requestId, wantResponse, initFn),
             "Admin command",
-            expectedConnectionVersion,
+            currentConnectionVersion(),
         )
     }
 
@@ -239,25 +226,6 @@ class CommandSenderImpl(
         val packet = buildAdminPacket(to = destNum, adminMessage = initFn())
         packetHandler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = packet }.build())
     }
-
-    override suspend fun sendAdminAwaitResult(
-        destNum: Int,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult =
-        sendAdminAwaitResultForConnection(destNum, currentConnectionVersion(), requestId, wantResponse, initFn)
-
-    override suspend fun sendAdminAwaitResultForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult = packetHandler.sendToRadioAndAwaitResultForConnection(
-        buildAdminMessagePacket(destNum, requestId, wantResponse, initFn),
-        expectedConnectionVersion,
-    )
 
     override suspend fun sendPosition(pos: ProtoPosition, destNum: Int?, wantResponse: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
@@ -316,20 +284,6 @@ class CommandSenderImpl(
             ),
             "Position request",
         )
-    }
-
-    override suspend fun setFixedPosition(destNum: Int, pos: Position) {
-        val removesFixedPosition = pos.isFixedPositionRemoval()
-        val myNodeNum =
-            if (removesFixedPosition) {
-                null
-            } else {
-                nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
-            }
-        sendAdmin(destNum) { pos.toFixedPositionAdminMessage() }
-        if (myNodeNum != null) {
-            nodeManager.handleReceivedPosition(destNum, myNodeNum, pos.toFixedPositionProto(), nowMillis)
-        }
     }
 
     override suspend fun requestUserInfo(destNum: Int, requestId: Int) {

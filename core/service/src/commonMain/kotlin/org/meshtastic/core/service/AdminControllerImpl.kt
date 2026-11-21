@@ -104,6 +104,12 @@ internal class AdminControllerImpl(
         }
     }
 
+    /** Starts [command] on [destNum] without waiting for its answer; see [SessionAdmin.launch]. */
+    private fun launchOnNode(operation: String, destNum: Int, command: suspend AdminApi.() -> AdminResult<*>) {
+        val local = isLocal(destNum)
+        sessionAdmin.launch(operation) { (if (local) this else forNode(NodeId(destNum))).command() }
+    }
+
     // ── Owner ───────────────────────────────────────────────────────────────
 
     override suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit> =
@@ -250,9 +256,7 @@ internal class AdminControllerImpl(
     // ── Ringtone & Canned Messages ─────────────────────────────────────────
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.set_ringtone_message = ringtone }.build()
-        }
+        launchOnNode("Set ringtone", destNum) { setRingtone(ringtone) }
     }
 
     override suspend fun playRingtone(destNum: Int) {
@@ -264,9 +268,7 @@ internal class AdminControllerImpl(
     override suspend fun getRingtone(destNum: Int): AdminResult<String> = onNode(destNum, read = true) { getRingtone() }
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.set_canned_message_module_messages = messages }.build()
-        }
+        launchOnNode("Set canned messages", destNum) { setCannedMessages(messages) }
     }
 
     override suspend fun setTime(destNum: Int): AdminResult<Unit> {
@@ -280,7 +282,14 @@ internal class AdminControllerImpl(
     // ── Position ────────────────────────────────────────────────────────────
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
-        commandSender.setFixedPosition(destNum, position)
+        if (position.isFixedPositionRemoval()) {
+            launchOnNode("Remove fixed position", destNum) { removeFixedPosition() }
+            return
+        }
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
+        val protoPosition = position.toFixedPositionProto()
+        launchOnNode("Set fixed position", destNum) { setFixedPosition(protoPosition) }
+        nodeManager.handleReceivedPosition(destNum, myNum, protoPosition, nowMillis)
     }
 
     // ── Device Status & Lifecycle ───────────────────────────────────────────

@@ -20,8 +20,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.repository.AwaitedSendResult
-import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.AdminMessage
@@ -85,8 +83,6 @@ class FakeCommandSender :
     var lockNowCalled: Boolean = false
         private set
 
-    var awaitedAdminResult: AwaitedSendResult =
-        AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
     var sendDataFailure: PacketQueueRejectedException? = null
     var commandFailure: Exception? = null
 
@@ -105,7 +101,6 @@ class FakeCommandSender :
             lockNowDispatchAccepted = true
             onLockdownPassphraseDispatchAttempt = null
             lockNowCalled = false
-            awaitedAdminResult = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
             sendDataFailure = null
             commandFailure = null
         }
@@ -139,43 +134,9 @@ class FakeCommandSender :
         mutableAdminRequests += AdminRequest(destNum, requestId, wantResponse, initFn())
     }
 
-    override suspend fun sendAdminForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ) {
-        failCommandIfConfigured()
-        mutableAdminRequests += AdminRequest(destNum, requestId, wantResponse, initFn(), expectedConnectionVersion)
-    }
-
     override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
         failCommandIfConfigured()
         mutableAdminRequests += AdminRequest(destNum, requestId = 0, wantResponse = false, message = initFn())
-    }
-
-    override suspend fun sendAdminAwaitResult(
-        destNum: Int,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult {
-        failCommandIfConfigured()
-        mutableAdminRequests += AdminRequest(destNum, requestId, wantResponse, initFn())
-        return awaitedAdminResult
-    }
-
-    override suspend fun sendAdminAwaitResultForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult {
-        failCommandIfConfigured()
-        mutableAdminRequests += AdminRequest(destNum, requestId, wantResponse, initFn(), expectedConnectionVersion)
-        return awaitedAdminResult
     }
 
     override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
@@ -183,10 +144,6 @@ class FakeCommandSender :
     }
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int) {
-        failCommandIfConfigured()
-    }
-
-    override suspend fun setFixedPosition(destNum: Int, pos: Position) {
         failCommandIfConfigured()
     }
 

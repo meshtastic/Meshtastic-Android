@@ -41,8 +41,6 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.repository.AwaitedSendResult
-import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NeighborInfoHandler
@@ -269,74 +267,6 @@ class CommandSenderImplTest {
         assertFailsWith<PacketQueueRejectedException> {
             commandSender.sendAdmin(DEST_NODE) { AdminMessage.Builder().build() }
         }
-    }
-
-    @Test
-    fun sendAdminForConnectionForwardsLifecycleOwnershipToAdmission() = runTest {
-        val packets = mutableListOf<MeshPacket>()
-        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), 17L) } returns true
-
-        commandSender.sendAdminForConnection(DEST_NODE, expectedConnectionVersion = 17L) {
-            AdminMessage.Builder().build()
-        }
-
-        assertEquals(1, packets.size)
-        verifySuspend { packetHandler.sendToRadioForConnection(any<MeshPacket>(), 17L) }
-    }
-
-    @Test
-    fun sendAdminAwaitResult_generatesNonZeroIdWhenCallerSuppliesZero() = runTest {
-        val packets = mutableListOf<MeshPacket>()
-        everySuspend {
-            packetHandler.sendToRadioAndAwaitResultForConnection(capture(packets), CONNECTION_VERSION)
-        } returns AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
-
-        commandSender.sendAdminAwaitResult(DEST_NODE, requestId = 0) {
-            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-        }
-
-        assertNotEquals(0, packets.single().id)
-    }
-
-    @Test
-    fun sendAdminAwaitResult_bindsToTheConnectionVersionCurrentAtTheCall() = runTest {
-        connectionLifecycle.value = ConnectionLifecycle(version = 43L, state = ConnectionState.Connected)
-        val expected = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
-        everySuspend { packetHandler.sendToRadioAndAwaitResultForConnection(any<MeshPacket>(), 43L) } returns expected
-
-        val result = commandSender.sendAdminAwaitResult(DEST_NODE) { AdminMessage.Builder().build() }
-
-        assertEquals(expected, result)
-        verifySuspend(exactly(0)) { packetHandler.sendToRadioAndAwaitResult(any<MeshPacket>()) }
-    }
-
-    @Test
-    fun sendAdminAwaitResultForConnection_forwardsTheCallerVersion() = runTest {
-        val expected = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
-        everySuspend { packetHandler.sendToRadioAndAwaitResultForConnection(any<MeshPacket>(), 19L) } returns expected
-
-        val result =
-            commandSender.sendAdminAwaitResultForConnection(DEST_NODE, expectedConnectionVersion = 19L) {
-                AdminMessage.Builder().build()
-            }
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun sendAdminAwaitResult_preservesNonAcceptedStatus() = runTest {
-        val expected = AwaitedSendResult(AwaitedSendStatus.REJECTED)
-        everySuspend {
-            packetHandler.sendToRadioAndAwaitResultForConnection(any<MeshPacket>(), CONNECTION_VERSION)
-        } returns expected
-
-        val result =
-            commandSender.sendAdminAwaitResult(DEST_NODE) {
-                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-            }
-
-        assertEquals(expected, result)
-        assertFalse(result.accepted)
     }
 
     // --- lockdown direct dispatch ---
@@ -617,44 +547,6 @@ class CommandSenderImplTest {
         assertFailsWith<LocalNodeUnavailableException> { commandSender.requestUserInfo(DEST_NODE) }
 
         verifySuspend(exactly(0)) { packetHandler.sendToRadio(any<MeshPacket>()) }
-    }
-
-    @Test
-    fun setFixedPosition_rejectsBeforeDeviceMutationWhenLocalNodeIdentityIsUnavailable() = runTest {
-        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
-
-        assertFailsWith<LocalNodeUnavailableException> {
-            commandSender.setFixedPosition(DEST_NODE, Position(latitude = 1.0, longitude = 2.0, altitude = 3))
-        }
-
-        verifySuspend(exactly(0)) { packetHandler.sendToRadioForConnection(any<MeshPacket>(), any()) }
-        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun setFixedPosition_doesNotUpdateLocalPositionWhenQueueRejectsPacket() = runTest {
-        everySuspend { packetHandler.sendToRadioForConnection(any<MeshPacket>(), CONNECTION_VERSION) } returns false
-
-        assertFailsWith<PacketQueueRejectedException> {
-            commandSender.setFixedPosition(DEST_NODE, Position(latitude = 1.0, longitude = 2.0, altitude = 3))
-        }
-
-        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun setFixedPosition_doesNotProjectZeroPositionWhenRemovingIt() = runTest {
-        val packets = mutableListOf<MeshPacket>()
-        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
-
-        commandSender.setFixedPosition(
-            DEST_NODE,
-            Position(latitude = 0.0, longitude = 0.0, altitude = 0, time = 1, satellitesInView = 9),
-        )
-
-        val adminMessage = AdminMessage.ADAPTER.decode(requireNotNull(packets.single().decoded).payload)
-        assertEquals(true, adminMessage.remove_fixed_position)
-        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any()) }
     }
 
     @Test

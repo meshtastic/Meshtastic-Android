@@ -392,9 +392,6 @@ class RepositoryFakesTest {
     fun `FakeCommandSender records connection ownership on post-handshake requests`() = runTest {
         val sender = FakeCommandSender()
 
-        sender.sendAdminForConnection(destNum = 123, expectedConnectionVersion = 41, requestId = 7) {
-            AdminMessage.Builder().build()
-        }
         sender.requestTelemetryForConnection(
             requestId = 8,
             destNum = 123,
@@ -402,7 +399,6 @@ class RepositoryFakesTest {
             expectedConnectionVersion = 41,
         )
 
-        assertEquals(41L, sender.adminRequests.single().expectedConnectionVersion)
         assertEquals(41L, sender.telemetryRequests.single().expectedConnectionVersion)
     }
 

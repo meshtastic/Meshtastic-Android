@@ -60,87 +60,17 @@ interface CommandSender {
     )
 
     /**
-     * Sends an admin message only if [expectedConnectionVersion] still owns queue admission.
-     *
-     * Pass the `version` from [ConnectionStateProvider.connectionLifecycle] captured by the caller.
-     *
-     * @throws PacketQueueRejectedException when the expected version is stale or the outbound queue otherwise refuses
-     *   the command.
-     */
-    suspend fun sendAdminForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    )
-
-    /**
      * Sends an admin message immediately, bypassing the outbound packet queue. The queue only drains while the
      * connection state is Connected, so mid-handshake sends (e.g. set_time_only at MyNodeInfo) must use this path or
      * they stall until the handshake finishes.
      */
     fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage)
 
-    /**
-     * Sends an admin message and suspends until firmware processes it and returns a routing acknowledgement.
-     *
-     * This is used when the caller needs a processing barrier before proceeding, such as sending a shared contact
-     * before the first DM to a node. Time spent behind existing FIFO entries does not count against the
-     * routing-response timeout; the timeout starts only after an active transport admits this packet.
-     *
-     * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
-     *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
-     */
-    suspend fun sendAdminAwait(
-        destNum: Int,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    ): Boolean = sendAdminAwaitResult(destNum, requestId, wantResponse, initFn).accepted
-
-    /**
-     * Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. Queue or transport
-     * rejection is represented by a non-accepted [AwaitedSendResult] with `dispatched == false`; it is not reported as
-     * [PacketQueueRejectedException]. Bound to the current lifecycle `version` like [sendAdmin].
-     */
-    suspend fun sendAdminAwaitResult(
-        destNum: Int,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult
-
-    /** [sendAdminAwait] bound to a `version` the caller captured earlier; see [sendAdminAwaitResultForConnection]. */
-    suspend fun sendAdminAwaitForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    ): Boolean =
-        sendAdminAwaitResultForConnection(destNum, expectedConnectionVersion, requestId, wantResponse, initFn).accepted
-
-    /**
-     * [sendAdminAwaitResult] bound to a `version` the caller captured earlier, for a sequence of writes that must all
-     * reach the same transport session. A stale version is a non-accepted result with `dispatched == false`.
-     */
-    suspend fun sendAdminAwaitResultForConnection(
-        destNum: Int,
-        expectedConnectionVersion: Long,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
-        initFn: () -> AdminMessage,
-    ): AwaitedSendResult
-
     /** Sends our current position to the mesh, or throws if the outbound queue rejects it. */
     suspend fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false)
 
     /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestPosition(destNum: Int, currentPosition: ModelPosition, requestId: Int = 0)
-
-    /** Sets a fixed position for a node, or throws if the outbound queue rejects the admin command. */
-    suspend fun setFixedPosition(destNum: Int, pos: ModelPosition)
 
     /** Requests user info from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestUserInfo(destNum: Int, requestId: Int = 0)

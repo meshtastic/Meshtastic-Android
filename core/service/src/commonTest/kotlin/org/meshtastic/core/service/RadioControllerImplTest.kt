@@ -419,16 +419,48 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun fixedPositionPropagatesQueueRejection() = runTest {
-        val controller = createController(scope = backgroundScope)
+    fun fixedPositionWithoutASessionIsRejectedBeforeTheLocalUpdate() = runTest {
+        val controller = editController(backgroundScope, recordingAdmin(), activeSession = MutableStateFlow(null))
         val position = Position(latitude = 1.0, longitude = 2.0, altitude = 3)
-        val rejection = PacketQueueRejectedException("Fixed position")
-        everySuspend { commandSender.setFixedPosition(123, position) } throws rejection
 
-        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setFixedPosition(123, position) }
+        assertFailsWith<PacketQueueRejectedException> { controller.setFixedPosition(123, position) }
 
-        assertSame(rejection, failure)
         verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun fixedPositionIsSentThroughTheSdkAndProjectedLocally() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
+
+        controller.setFixedPosition(1234, Position(latitude = 1.0, longitude = 2.0, altitude = 3))
+
+        assertEquals(listOf("fixed_position:10000000"), admin.commands)
+        verify(exactly(1)) { nodeManager.handleReceivedPosition(1234, 1234, any(), any(), any()) }
+    }
+
+    @Test
+    fun removingAFixedPositionSendsTheRemovalWithoutProjectingZero() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin)
+
+        controller.setFixedPosition(99, Position(latitude = 0.0, longitude = 0.0, altitude = 0))
+
+        assertEquals(listOf("remove_fixed_position"), admin.commands)
+        assertEquals(listOf(NodeId(99)), admin.targets)
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun fixedPositionIsRejectedBeforeSendingWhenTheLocalNodeIsUnknown() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = null)
+
+        assertFailsWith<LocalNodeUnavailableException> {
+            controller.setFixedPosition(99, Position(latitude = 1.0, longitude = 2.0, altitude = 3))
+        }
+
+        assertTrue(admin.commands.isEmpty())
     }
 
     @Test
@@ -1012,6 +1044,15 @@ class RadioControllerImplTest {
         override suspend fun nodeDbReset(preserveFavorites: Boolean) = record("nodeDbReset:$preserveFavorites")
 
         override suspend fun enterDfuMode() = record("dfu")
+
+        override suspend fun setFixedPosition(position: org.meshtastic.proto.Position) =
+            record("fixed_position:${position.latitude_i}")
+
+        override suspend fun removeFixedPosition() = record("remove_fixed_position")
+
+        override suspend fun setRingtone(rtttl: String) = record("ringtone:$rtttl")
+
+        override suspend fun setCannedMessages(messages: String) = record("canned:$messages")
 
         private fun <T> read(command: String, value: T): AdminResult<T> {
             commands += command
