@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-11-20
+last_updated: 2026-11-21
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -227,6 +227,7 @@ React to messages with emoji:
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
+- Tap a reaction badge to see who reacted. A received reaction names the node that relayed it, and the delivery details of your own reaction name the relay the same way a sent message does
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
@@ -257,7 +258,9 @@ Touch & hold or double-tap a message to open the quick reaction bar, then tap **
 sheet — that is where reactions live. Beneath it, **Signed · verified** appears on a message whose
 signature your node checked against the sender's key, and **Delivery proven**, **Delivery proof
 failed**, or **Delivery proof unchecked** appears when the acknowledgment for your message carried
-a delivery proof. The message's timestamp and delivery status follow, then these actions:
+a delivery proof. The message's timestamp and delivery status follow, and for a received message
+the node that relayed it to you, such as **Relayed by Ridge (0x5A)**. No relay shows for a message
+heard directly from its sender or one that came in over MQTT. Then these actions:
 
 - **Reply** — quote the message in your response
 - **Copy** — copy the message text to the clipboard

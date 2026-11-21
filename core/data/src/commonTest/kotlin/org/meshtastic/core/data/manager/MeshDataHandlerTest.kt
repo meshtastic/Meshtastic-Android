@@ -1392,6 +1392,52 @@ class MeshDataHandlerTest {
     }
 
     @Test
+    fun `a received reaction is persisted with the relay byte from its header`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 97
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.hop_start = 3
+                    wb.hop_limit = 2
+                    wb.relay_node = 0x5A
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 97,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(97) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        assertEquals(0x5A, assertNotNull(persistedReaction).relayNode)
+    }
+
+    @Test
     fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
         val emoji = "+1"
         val packet =

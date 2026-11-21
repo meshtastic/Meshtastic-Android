@@ -661,6 +661,7 @@ class MeshDataHandlerImpl(
                     },
                     packetId = packet.id,
                     status = MessageStatus.RECEIVED,
+                    relayNode = packet.relay_node,
                     to = toId,
                     channel = dataPacket.channel,
                     xeddsaSigned = packet.xeddsa_signed,
