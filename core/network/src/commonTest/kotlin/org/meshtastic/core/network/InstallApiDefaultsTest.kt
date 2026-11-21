@@ -36,12 +36,13 @@ import kotlin.test.assertNull
 class InstallApiDefaultsTest {
     private val requests = mutableListOf<HttpRequestData>()
 
-    private fun client(userAgent: String?, logRequests: Boolean = false) = HttpClient(
-        MockEngine { request ->
-            requests += request
-            respond("{}")
-        },
-    ) {
+    private fun client(userAgent: String?, logRequests: Boolean = false) = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                requests += request
+                respond("{}")
+            }
+        }
         installApiDefaults(Json, userAgent = userAgent, logRequests = logRequests)
     }
 
