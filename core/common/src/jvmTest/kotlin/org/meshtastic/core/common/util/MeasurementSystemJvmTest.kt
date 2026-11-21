@@ -21,10 +21,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * The desktop client has no ICU measurement data, so it resolves units from the region table alone. It shares the table
- * and the override reader with Android so the two clients cannot drift into disagreeing about the same locale.
- */
+/** Wiring only: the region table and override mapping are covered in commonTest. */
 class MeasurementSystemJvmTest {
 
     private val originalLocale: Locale = Locale.getDefault()
@@ -40,25 +37,19 @@ class MeasurementSystemJvmTest {
     }
 
     @Test
-    fun `regions keep their own system`() {
+    fun `locale region and extension reach the lookup`() {
         assertEquals(MeasurementSystem.IMPERIAL, measurementSystemFor("en-US"))
-        assertEquals(MeasurementSystem.IMPERIAL, measurementSystemFor("en-GB"))
-        assertEquals(MeasurementSystem.METRIC, measurementSystemFor("en-ID"))
         assertEquals(MeasurementSystem.METRIC, measurementSystemFor("fr-FR"))
-    }
-
-    // Android 16 writes this extension; the desktop honors it so a shared account reads the same.
-    @Test
-    fun `measurement-system override beats the region`() {
         assertEquals(MeasurementSystem.METRIC, measurementSystemFor("en-US-u-ms-metric"))
         assertEquals(MeasurementSystem.IMPERIAL, measurementSystemFor("fr-FR-u-ms-ussystem"))
-        assertEquals(MeasurementSystem.IMPERIAL, measurementSystemFor("fr-FR-u-ms-uksystem"))
+        assertEquals(MeasurementSystem.METRIC, measurementSystemFor("en"))
     }
 
-    // A region-less locale must never be read as imperial; metric is what most of the world uses.
     @Test
-    fun `region-less locale is metric`() {
-        assertEquals(MeasurementSystem.METRIC, measurementSystemFor("en"))
-        assertEquals(MeasurementSystem.METRIC, measurementSystemFor("fr"))
+    fun `locale region reaches the temperature lookup`() {
+        Locale.setDefault(Locale.US)
+        assertEquals(TemperatureUnit.FAHRENHEIT, getSystemTemperatureUnit())
+        Locale.setDefault(Locale.UK)
+        assertEquals(TemperatureUnit.CELSIUS, getSystemTemperatureUnit())
     }
 }

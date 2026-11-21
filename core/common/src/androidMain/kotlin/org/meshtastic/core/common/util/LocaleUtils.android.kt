@@ -23,12 +23,6 @@ import android.os.Build
 import androidx.core.text.util.LocalePreferences
 import java.util.Locale
 
-actual fun currentLocaleCode(): String = Locale.getDefault().language
-
-actual fun currentRegionCode(): String = Locale.getDefault().country
-
-actual fun currentLocaleTag(): String = Locale.getDefault().toLanguageTag()
-
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()
 

@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.DeviceModelRepository
+import org.meshtastic.core.testing.FakeDisplayMirrorManager
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController

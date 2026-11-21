@@ -14,14 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service
+@file:Suppress("EmptyFunctionBlock")
 
-import org.koin.core.annotation.Single
-import org.meshtastic.core.repository.GeocodedPlace
-import org.meshtastic.core.repository.ReverseGeocoder
+package org.meshtastic.core.repository
 
-/** Desktop has no geocoder; the topic finder falls back to the region and the roots it hears. */
-@Single
-class JvmReverseGeocoder : ReverseGeocoder {
-    override suspend fun place(latitude: Double, longitude: Double): GeocodedPlace? = null
+/** [AppWidgetUpdater] for hosts with no widgets. Bind it per platform; it has no Koin binding of its own. */
+class NoopAppWidgetUpdater : AppWidgetUpdater {
+    override suspend fun updateAll() {}
 }

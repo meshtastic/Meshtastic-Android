@@ -16,10 +16,7 @@
  */
 package org.meshtastic.core.service
 
-import org.koin.core.annotation.Single
-
-/** Desktop runs the service in-process, so a new address needs nothing started. */
-@Single
+/** [DeviceAddressChangeHook] for hosts with no mesh service to start. Bind it per platform. */
 class NoopDeviceAddressChangeHook : DeviceAddressChangeHook {
     override fun onDeviceAddressChanged() = Unit
 }

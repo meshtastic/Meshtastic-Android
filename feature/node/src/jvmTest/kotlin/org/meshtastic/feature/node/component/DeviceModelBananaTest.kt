@@ -35,6 +35,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.DeviceModelRepository
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.testing.FakeDisplayMirrorManager
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController

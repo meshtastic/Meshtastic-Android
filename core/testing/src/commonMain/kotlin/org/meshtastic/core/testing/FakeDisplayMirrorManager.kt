@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.component
+@file:Suppress("EmptyFunctionBlock")
+
+package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +26,8 @@ import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
 
-internal class FakeDisplayMirrorManager : DisplayMirrorManager {
+/** A [DisplayMirrorManager] with no frames; [resets] counts calls to [reset]. */
+class FakeDisplayMirrorManager : DisplayMirrorManager {
     override val frame: StateFlow<MirrorFrame?> = MutableStateFlow(null)
     override val palette: StateFlow<MirrorPalette?> = MutableStateFlow(null)
 
