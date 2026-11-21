@@ -38,6 +38,7 @@ class UIViewModelImportSummaryTest {
         assertTrue(summary.contains("hasFragment=true"))
         assertTrue(summary.contains("fragmentLength=${fragment.length}"))
         assertTrue(summary.contains("queryParameterCount=2"))
+        assertTrue(summary.contains("schemeLength=5"))
         assertFalse(summary.contains("token"))
         assertFalse(summary.contains("add"))
     }
@@ -47,6 +48,39 @@ class UIViewModelImportSummaryTest {
         val summary = CommonUri.parse("https://meshtastic.org/e/#").toSanitizedImportSummary()
 
         assertTrue(summary.contains("hasFragment=false"))
+    }
+
+    @Test
+    fun sanitized_import_summary_handles_opaque_mailto_uri() {
+        val summary = CommonUri.parse("mailto:someone@example.com").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("queryParameterCount=0"))
+        assertTrue(summary.contains("schemeLength=6"))
+        assertFalse(summary.contains("someone@example.com"))
+    }
+
+    @Test
+    fun sanitized_import_summary_omits_a_host_that_is_not_meshtastic() {
+        val summary = CommonUri.parse("https://alice%40example.com/").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("meshtasticHost=false"))
+        assertFalse(summary.contains("alice"))
+        assertFalse(summary.contains("example.com"))
+    }
+
+    @Test
+    fun sanitized_import_summary_flags_a_meshtastic_host() {
+        val summary = CommonUri.parse("https://www.meshtastic.org/e/").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("meshtasticHost=true"))
+    }
+
+    @Test
+    fun sanitized_import_summary_handles_opaque_scheme_only_uri() {
+        val summary = CommonUri.parse("foo:bar").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("schemeLength=3"))
+        assertTrue(summary.contains("queryParameterCount=0"))
     }
 
     @Test
