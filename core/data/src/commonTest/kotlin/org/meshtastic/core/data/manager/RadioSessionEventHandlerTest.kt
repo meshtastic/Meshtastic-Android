@@ -137,10 +137,14 @@ class RadioSessionEventHandlerTest {
         }
     }
 
-    /** The system alert resolves compose resources, which cannot load on a headless JVM; its failure is not under test. */
+    /**
+     * The system alert resolves compose resources, which cannot load on a headless JVM; its failure is not under test.
+     */
     private suspend fun TestScope.withAlertScope(block: suspend (CoroutineScope) -> Unit) {
         val alerts =
-            CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler) + CoroutineExceptionHandler { _, _ -> })
+            CoroutineScope(
+                SupervisorJob() + StandardTestDispatcher(testScheduler) + CoroutineExceptionHandler { _, _ -> },
+            )
         try {
             block(alerts)
         } finally {
