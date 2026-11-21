@@ -134,7 +134,7 @@ class RadioControllerImpl(
         commandSender = commandSender,
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
-        connectionStateProvider = serviceRepository,
+        radio = radioInterfaceService,
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,

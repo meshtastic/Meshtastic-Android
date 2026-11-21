@@ -36,6 +36,7 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeCommandSender
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -70,7 +71,7 @@ class HeardOnCurrentLoraRefresherTest {
         commandSender = commandSender,
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
-        connectionStateProvider = serviceRepository,
+        radio = FakeRadioInterfaceService(),
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
