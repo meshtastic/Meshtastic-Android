@@ -1,7 +1,7 @@
 ---
 title: Asetukset — Radio ja käyttäjä
 nav_order: 7
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - asetukset
@@ -161,19 +161,21 @@ Kaikkien samalla kanavalla olevien radioiden on käytettävä samaa modeemiesias
 
 On **Settings → Device configuration → Display**. These control the **node's own screen**, not the app's.
 
-| Asetus                              | Kuvaus                                                                                                                                                                               | Oletus                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| Käytä 12 tunnin kelloa              | Show the node's clock as 12-hour rather than 24-hour                                                                                                                                 | Pois                                           |
-| Osoita aina pohjoiseen              | Lukitsee kompassinäytön näyttämään pohjoiseen sen sijaan, että se kääntyisi kulkusuunnan mukaan. Independent of **Compass Orientation** — neither replaces the other | Pois                                           |
-| Lihavoitu otsikko                   | Näytä näytön otsikkoteksti lihavoituna                                                                                                                                               | Pois                                           |
-| Karusellin aikaväli                 | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                            | Ei yhdistetty                                  |
-| Kompassin suuntaus                  | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                       | 0°                                             |
-| Näyttötila                          | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays**       | Default, or color on nodes with a color screen |
-| Näyttöyksiköt                       | **Metric** or **Imperial** on the node's screen                                                                                                                                      | Metrijärjestelmä                               |
-| Käännä näyttö                       | Flip the display for an inverted mounting                                                                                                                                            | Pois                                           |
-| OLED-tyyppi                         | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                         | Detect Automatically                           |
-| Näytön päälläoloaika                | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                                    | 10 minutes                                     |
-| Herätä napautuksesta tai liikkeestä | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                            | Pois                                           |
+| Asetus                              | Kuvaus                                                                                                                                                                               | Oletus                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Käytä 12 tunnin kelloa              | Show the node's clock as 12-hour rather than 24-hour                                                                                                                                 | Pois                                                      |
+| Osoita aina pohjoiseen              | Lukitsee kompassinäytön näyttämään pohjoiseen sen sijaan, että se kääntyisi kulkusuunnan mukaan. Independent of **Compass Orientation** — neither replaces the other | Pois                                                      |
+| Lihavoitu otsikko                   | Näytä näytön otsikkoteksti lihavoituna                                                                                                                                               | Pois                                                      |
+| Karusellin aikaväli                 | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                            | Ei yhdistetty                                             |
+| Kompassin suuntaus                  | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                       | 0°                                                        |
+| Näyttötila                          | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays**       | Default, or color on nodes with a color screen            |
+| Näyttöyksiköt                       | **Metric** or **Imperial** on the node's screen                                                                                                                                      | Metrijärjestelmä                                          |
+| Käännä näyttö                       | Flip the display for an inverted mounting                                                                                                                                            | Pois                                                      |
+| Long Node Names                     | Show full node names on the node's screen instead of short names. Shown for firmware 2.7.13 and later                                | Pois                                                      |
+| Viestikuplat                        | Draw messages on the node's screen as bubbles. Shown for firmware 2.7.19 and later                                                   | On for a color screen 200 pixels or larger, otherwise Off |
+| OLED-tyyppi                         | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                         | Detect Automatically                                      |
+| Näytön päälläoloaika                | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                                    | 10 minutes                                                |
+| Herätä napautuksesta tai liikkeestä | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                            | Pois                                                      |
 
 ## Sijainnin asetukset
 
@@ -195,16 +197,16 @@ On **Settings → Device configuration → Position**. These settings decide whe
 
 On **Settings → Device configuration → Power**. These settings trade battery life against availability.
 
-| Asetus                                                      | Kuvaus                                                                                                                                                                                     | Oletus        |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| ADC-kertoimen ohitus                                        | Ota akun jännitemittauksille käyttöön manuaalinen korjaus                                                                                                                                  | Pois          |
-| Korvaava AD-muuntimen kerroin                               | The correction factor itself, shown only while the override is on                                                                                                                          | —             |
-| INA_2XX-akun valvontapiirin I2C-osoite | Ulkoisen INA-sarjan tehoanturin osoite, jos sellainen on asennettu                                                                                                                         | 0             |
-| Vähimmäisherätyksen kesto                                   | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds    |
-| Ota virransäästötila käyttöön                               | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Pois          |
-| Sammuta virran katketessa                                   | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Ei yhdistetty |
-| Super-syväunen kesto                                        | Kuinka kauan syvin lepotila kestää                                                                                                                                                         | —             |
-| Bluetoothin odotusaika                                      | Kuinka kauan odotetaan puhelimen yhteyden muodostumista ennen lepotilaan siirtymistä                                                                                                       | 1 minuutti    |
+| Asetus                                           | Kuvaus                                                                                                                                                                                     | Oletus        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| ADC-kertoimen ohitus                             | Ota akun jännitemittauksille käyttöön manuaalinen korjaus                                                                                                                                  | Pois          |
+| Korvaava AD-muuntimen kerroin                    | The correction factor itself, shown only while the override is on                                                                                                                          | —             |
+| Battery INA_2XX I2C Address | Ulkoisen INA-sarjan tehoanturin osoite, jos sellainen on asennettu                                                                                                                         | 0             |
+| Minimi heräämisaika                              | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds    |
+| Ota virransäästötila käyttöön                    | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Pois          |
+| Sammuta virran katketessa                        | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Ei yhdistetty |
+| Supersyvän lepotilan kesto                       | Kuinka kauan syvin lepotila kestää                                                                                                                                                         | —             |
+| Bluetoothin odotusaika                           | Kuinka kauan odotetaan puhelimen yhteyden muodostumista ennen lepotilaan siirtymistä                                                                                                       | 1 minuutti    |
 
 ## Verkon asetukset
 

@@ -1,7 +1,7 @@
 ---
 title: Settings — Radio & User
 nav_order: 7
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - paramètres
@@ -162,19 +162,21 @@ The range estimates in the [Modem Presets](#modem-presets) table assume flat ter
 
 On **Settings → Device configuration → Display**. These control the **node's own screen**, not the app's.
 
-| Setting                        | Description                                                                                                                                                                    | Par défaut                                     |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| Utiliser le format horaire 12h | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | Éteint                                         |
-| Toujours pointer vers le nord  | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | Éteint                                         |
-| Titre en gras                  | Draw the screen's heading text in bold                                                                                                                                         | Éteint                                         |
-| Intervalle du carrousel        | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | Désactivé                                      |
-| Orientation de la boussole     | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                             |
-| Mode d'affichage               | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen |
-| Unités d'affichage             | **Metric** or **Imperial** on the node's screen                                                                                                                                | Métrique                                       |
-| Inverser l'écran               | Flip the display for an inverted mounting                                                                                                                                      | Éteint                                         |
-| Type d'OLED                    | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                           |
-| Écran allumé pour              | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                     |
-| Réveil par appui ou mouvement  | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | Éteint                                         |
+| Setting                        | Description                                                                                                                                                                    | Par défaut                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Utiliser le format horaire 12h | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | Éteint                                                    |
+| Toujours pointer vers le nord  | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | Éteint                                                    |
+| Titre en gras                  | Draw the screen's heading text in bold                                                                                                                                         | Éteint                                                    |
+| Intervalle du carrousel        | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | Désactivé                                                 |
+| Orientation de la boussole     | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                                        |
+| Mode d'affichage               | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen            |
+| Unités d'affichage             | **Metric** or **Imperial** on the node's screen                                                                                                                                | Métrique                                                  |
+| Inverser l'écran               | Flip the display for an inverted mounting                                                                                                                                      | Éteint                                                    |
+| Long Node Names                | Show full node names on the node's screen instead of short names. Shown for firmware 2.7.13 and later                          | Éteint                                                    |
+| Message Bubbles                | Draw messages on the node's screen as bubbles. Shown for firmware 2.7.19 and later                                             | On for a color screen 200 pixels or larger, otherwise Off |
+| Type d'OLED                    | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                                      |
+| Écran allumé pour              | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                                |
+| Réveil par appui ou mouvement  | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | Éteint                                                    |
 
 ## Configuration de la position
 
@@ -196,16 +198,16 @@ On **Settings → Device configuration → Position**. These settings decide whe
 
 On **Settings → Device configuration → Power**. These settings trade battery life against availability.
 
-| Setting                                                 | Description                                                                                                                                                                                | Par défaut |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| Remplacer le multiplicateur ADC                         | Turn on a manual correction for battery-voltage readings                                                                                                                                   | Éteint     |
-| Facteur de remplacement du multiplicateur ADC           | The correction factor itself, shown only while the override is on                                                                                                                          | —          |
-| Adresse I2C de la batterie INA_2XX | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0          |
-| Durée minimale de réveil                                | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds |
-| Activer le mode économie d'énergie                      | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Éteint     |
-| Arrêt en cas de perte d'alimentation                    | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Désactivé  |
-| Durée du sommeil extra profond                          | How long the deepest sleep state lasts                                                                                                                                                     | —          |
-| Durée d'attente max du Bluetooth                        | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minute   |
+| Setting                                          | Description                                                                                                                                                                                | Par défaut |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| Remplacer le multiplicateur ADC                  | Turn on a manual correction for battery-voltage readings                                                                                                                                   | Éteint     |
+| Facteur de remplacement du multiplicateur ADC    | The correction factor itself, shown only while the override is on                                                                                                                          | —          |
+| Battery INA_2XX I2C Address | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0          |
+| Temps d’éveil minimal                            | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds |
+| Activer le mode économie d'énergie               | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Éteint     |
+| Arrêt en cas de perte d'alimentation             | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Désactivé  |
+| Durée de veille profonde                         | How long the deepest sleep state lasts                                                                                                                                                     | —          |
+| Durée d'attente max du Bluetooth                 | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minute   |
 
 ## Configuration du réseau
 

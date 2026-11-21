@@ -1,7 +1,7 @@
 ---
 title: ノード
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -25,6 +25,7 @@ The node list shows every node your node has heard, including:
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **最後の通信：** 最後に通信してからの経過時間
 - **距離：** 推定距離（位置情報が共有されている場合）
+- **Elevation** — altitude from the node's last position, shown only when that position carries one
 - **バッテリー：** リモートノードのバッテリー残量（テレメトリが有効な場合）
 
 ### Choosing what the list shows

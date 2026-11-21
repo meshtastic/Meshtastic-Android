@@ -1,7 +1,7 @@
 ---
 title: Локальное обнаружение сети
 nav_order: 12
-last_updated: 2026-11-12
+last_updated: 2026-11-20
 description: Исследуйте свою mesh-сеть — сканер локального обнаружения mesh-сети, трассировка путей, карты соседей и инструменты обнаружения нодов.
 aliases:
   - discovery
@@ -177,7 +177,7 @@ Once enabled and transmitting over LoRa, your node periodically broadcasts its n
 
 #### Viewing neighbor data
 
-- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list. Its log button opens everything that node has reported, and its request button asks the node for a fresh list.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list, or while the Neighbor Info module is on for your connected node. Its request button asks the node for a fresh list, and appears only while your connected node has the module on, because firmware drops neighbor info on a node that has it off. Its log button opens the node's [Neighbor Info log](node-metrics#neighbor-info).
 - Каждая запись о соседе показывает ноду, которая была услышана напрямую, и качество её сигнала.
 - Объединяйте данные о соседях от нескольких нод, чтобы понять полную топологию mesh-сети.
 

@@ -1,7 +1,7 @@
 ---
 title: 設定：モジュールと管理
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: オプションの機能モジュール（MQTT、テレメトリ、定型メッセージ、TAK など）を設定し、デバイスの管理を行います。
 aliases:
   - modules
@@ -39,7 +39,7 @@ Saving a module screen restarts the node: the button reads **Save & restart**, a
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | アドレス                   | MQTT サーバーのアドレス                                                                                                                                                                                                                                                                   | `mqtt.meshtastic.org` |
 | 暗号化の有効化                | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | オフ                    |
+| JSON Output Enabled    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | オフ                    |
 | マップ報告                  | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | オフ                    |
 | クライアントへのプロキシの有効化       | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | オフ                    |
 | MQTTを有効化               | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | オフ                    |
@@ -70,7 +70,7 @@ until you agree:
 | シリアルボーレイト                                                                                        | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | デフォルト |
 | Echoを有効化                                                                                         | Echo packets you send back over the serial port                                                                                                                                                                                     | オフ    |
 | シリアルモード                                                                                          | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | デフォルト |
-| コンソールのシリアルポートを上書き                                                                                | Take over the port the debug console normally uses                                                                                                                                                                                  | オフ    |
+| Override Console Serial Port                                                                     | Take over the port the debug console normally uses                                                                                                                                                                                  | オフ    |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0     |
 | シリアル通信を有効化                                                                                       | Turn serial communication on                                                                                                                                                                                                        | オフ    |
 | タイムアウト                                                                                           | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0     |
@@ -134,19 +134,20 @@ public.
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| 設定項目             | 説明                                                                                                                                                                                          | デフォルト |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 空気品質測定モジュールを有効化  | Report particulate and CO₂ sensor data                                                                                                                                                      | オフ    |
-| 空気品質メトリクスの更新間隔   | How often to report them                                                                                                                                                                    | —     |
-| デバイステレメトリを送信     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | オフ    |
-| デバイスメトリクスの更新間隔   | How often to report battery, uptime and channel utilization                                                                                                                                 | —     |
-| 環境メトリクスは華氏を使用    | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | オフ    |
-| 環境メトリクスモジュールを有効化 | Report the attached environment sensors                                                                                                                                                     | オフ    |
-| 環境メトリクスの更新間隔     | How often to report them                                                                                                                                                                    | —     |
-| 電源メトリクスモジュール有効   | Report the per-channel voltage and current readings                                                                                                                                         | オフ    |
-| 電源メトリクスの更新間隔     | How often to report them                                                                                                                                                                    | —     |
-| 電源メトリクスを画面上で有効化  | Also show power readings on the device's display                                                                                                                                            | オフ    |
-| 環境メトリクスを画面上で有効化  | Also show environment readings on the device's display                                                                                                                                      | オフ    |
+| 設定項目                              | 説明                                                                                                                                                                                          | デフォルト |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 空気品質測定モジュールを有効化                   | Report particulate and CO₂ sensor data                                                                                                                                                      | オフ    |
+| 空気品質メトリクスの更新間隔                    | How often to report them                                                                                                                                                                    | —     |
+| デバイステレメトリを送信                      | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | オフ    |
+| デバイスメトリクスの更新間隔                    | How often to report battery, uptime and channel utilization                                                                                                                                 | —     |
+| 環境メトリクスは華氏を使用                     | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | オフ    |
+| 環境メトリクスモジュールを有効化                  | Report the attached environment sensors                                                                                                                                                     | オフ    |
+| 環境メトリクスの更新間隔                      | How often to report them                                                                                                                                                                    | —     |
+| 電源メトリクスモジュール有効                    | Report the per-channel voltage and current readings                                                                                                                                         | オフ    |
+| 電源メトリクスの更新間隔                      | How often to report them                                                                                                                                                                    | —     |
+| 電源メトリクスを画面上で有効化                   | Also show power readings on the device's display                                                                                                                                            | オフ    |
+| Show air quality on device screen | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | オフ    |
+| Show environment on device screen | Also show environment readings on the device's display                                                                                                                                      | オフ    |
 
 対応センサーと設定の推奨事項については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

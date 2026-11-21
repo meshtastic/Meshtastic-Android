@@ -1,7 +1,7 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -39,7 +39,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | 地址                     | MQTT broker address                                                                                                                                                                                                                                                              | `mqtt.meshtastic.org` |
 | 启用加密                   | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| 启用JSON输出               | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | 关闭                    |
+| JSON Output Enabled    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | 关闭                    |
 | Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | 关闭                    |
 | 启用客户端代理                | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | 关闭                    |
 | 启用MQTT                 | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | 关闭                    |
@@ -70,7 +70,7 @@ Enables serial port communication for external device integrations (GPS modules,
 | 串口波特率                                                                                            | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | 默认 |
 | 启用Echo                                                                                           | Echo packets you send back over the serial port                                                                                                                                                                                     | 关闭 |
 | 串口模式                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | 默认 |
-| 覆盖控制台串口端口                                                                                        | Take over the port the debug console normally uses                                                                                                                                                                                  | 关闭 |
+| 覆盖控制台串行端口                                                                                        | Take over the port the debug console normally uses                                                                                                                                                                                  | 关闭 |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0  |
 | 启用串口                                                                                             | Turn serial communication on                                                                                                                                                                                                        | 关闭 |
 | 超时                                                                                               | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0  |
@@ -134,19 +134,20 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| Setting    | 说明                                                                                                                                                                                          | 默认 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -- |
-| 启用空气质量计量模块 | Report particulate and CO₂ sensor data                                                                                                                                                      | 关闭 |
-| 空气质量计量更新间隔 | How often to report them                                                                                                                                                                    | —  |
-| 发送设备远程数据   | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | 关闭 |
-| 设备计量更新间隔   | How often to report battery, uptime and channel utilization                                                                                                                                 | —  |
-| 环境测量值使用华氏度 | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | 关闭 |
-| 启用环境计量模块   | Report the attached environment sensors                                                                                                                                                     | 关闭 |
-| 环境计量更新间隔   | How often to report them                                                                                                                                                                    | —  |
-| 启用电源计量模块   | Report the per-channel voltage and current readings                                                                                                                                         | 关闭 |
-| 电量计更新间隔    | How often to report them                                                                                                                                                                    | —  |
-| 在屏幕上启用电源指标 | Also show power readings on the device's display                                                                                                                                            | 关闭 |
-| 屏幕显示环境指标   | Also show environment readings on the device's display                                                                                                                                      | 关闭 |
+| Setting                           | 说明                                                                                                                                                                                          | 默认 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -- |
+| 启用空气质量计量模块                        | Report particulate and CO₂ sensor data                                                                                                                                                      | 关闭 |
+| 空气质量计量更新间隔                        | How often to report them                                                                                                                                                                    | —  |
+| 发送设备远程数据                          | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | 关闭 |
+| 设备计量更新间隔                          | How often to report battery, uptime and channel utilization                                                                                                                                 | —  |
+| 环境测量值使用华氏度                        | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | 关闭 |
+| 启用环境计量模块                          | Report the attached environment sensors                                                                                                                                                     | 关闭 |
+| 环境计量更新间隔                          | How often to report them                                                                                                                                                                    | —  |
+| 启用电源计量模块                          | Report the per-channel voltage and current readings                                                                                                                                         | 关闭 |
+| 电量计更新间隔                           | How often to report them                                                                                                                                                                    | —  |
+| 在屏幕上启用电源指标                        | Also show power readings on the device's display                                                                                                                                            | 关闭 |
+| Show air quality on device screen | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | 关闭 |
+| Show environment on device screen | Also show environment readings on the device's display                                                                                                                                      | 关闭 |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.
