@@ -38,7 +38,7 @@ before a connection is attempted.
 
 **Module:** `core:network` (the `BleRadioTransport` implementation) built on `core:ble` (BLE connection
 primitives)  
-**Platforms:** Android, Desktop (JVM via Kable); code compiles for iOS, but no iOS app ships
+**Platforms:** Android, Desktop (JVM via Kable), Web (Kable over Web Bluetooth); code compiles for iOS, but no iOS app ships
 
 The primary transport for mobile devices and also available on desktop:
 - Service discovery for Meshtastic GATT services
@@ -56,13 +56,13 @@ The primary transport for mobile devices and also available on desktop:
 ## USB Serial
 
 **Module:** `core:network`  
-**Platforms:** Android (OTG), Desktop
+**Platforms:** Android (OTG), Desktop, Web (Web Serial)
 
 Serial communication over USB:
 - Uses `usb-serial-for-android` library on Android
 - Direct serial port access on Desktop (JVM)
 - Probe table for supported USB vendor/product IDs
-- Automatic detection when USB device is connected
+- Automatic detection when USB device is connected; on Web only for a port the user has already granted through the browser's port picker
 
 ### Where the Code Lives
 
@@ -81,6 +81,15 @@ Network-based transport for Wi-Fi-enabled nodes:
 - Nodes on the local network found through mDNS (`_meshtastic._tcp`): `NsdManager` on Android, JmDNS on Desktop
 - Used for development with meshtasticd and simulated nodes
 - Available when BLE/USB is impractical
+
+## WebSocket
+
+**Module:** `core:network` (`WebSocketRadioTransport`)  
+**Platforms:** Android, Desktop, Web
+
+Firmware's WebSocket phone API carries one binary `ToRadio` or `FromRadio` per message at `/api/v1/ws`, for one client at a time. Addresses are `ws://` or `wss://` URLs, and an empty path becomes `/api/v1/ws` (`WebSocketUrl.kt`). Released firmware does not serve it yet. In a browser it is the only network transport.
+
+`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP. A failed dial is named from the upgrade response: a 404 at `/api/v1/ws` (firmware without the WebSocket route), any other refused upgrade, or a TLS failure. A browser reports none of these: its engine gives no upgrade status, so a 404, a refused upgrade or a TLS failure all read as a failed connection there. A dropped connection is named from its close: a slot given to another client (4001), a message too big (1009), or a contested slot. Those three hold every automatic redial, network recovery included, until the user connects again.
 
 ## Transport Factory
 
@@ -119,7 +128,6 @@ Platform-specific implementations:
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
 
-`WebSocketRadioTransport` reconnects with the same `ReconnectBackoff` as TCP, and names a failure from the close code: a refused upgrade, a TLS failure (not detectable in a browser), a slot given to another client (4001), a message too big, or a contested slot. The last three hold every automatic redial, network recovery included, until the user connects again.
 
 ## Connection Lifecycle
 

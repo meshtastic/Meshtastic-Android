@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Repository layout, package namespacing, and the Gradle build system — convention plugins, build variants, and key tasks.
 aliases:
   - repository-layout
@@ -112,6 +112,7 @@ Located in `build-logic/convention/src/main/kotlin/`. The full set is registered
 | `meshtastic.kmp.library` | Shared KMP library module |
 | `meshtastic.kmp.library.compose` | KMP library that also ships Compose UI |
 | `meshtastic.kmp.jvm.android` | Adds the `jvmAndroidMain` source set shared by the Android and desktop JVM targets |
+| `meshtastic.kmp.web` | Adds the opt-in `wasmJs` target, registered only with `-Pmeshtastic.web=true`, and the `nonWebMain`/`nonWebTest` source sets |
 | `meshtastic.koin` | Koin Annotations + K2 compiler plugin |
 | `meshtastic.kotlinx.serialization` | Serialization plugin setup |
 | `meshtastic.android.room` | Room KMP setup and schema location |

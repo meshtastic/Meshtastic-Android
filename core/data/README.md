@@ -9,6 +9,7 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 - **`NodeRepositoryImpl`**: High-level access to node information and mesh state (Room KMP backed).
 - **`PacketRepositoryImpl`** / **`MeshLogRepositoryImpl`**: Stored messages and packets, and historical logs and diagnostics.
 - **`RadioConfigRepositoryImpl`**: The connected device's config, module config and channel set.
+- **`SignalSurveyRepositoryImpl`**: Signal survey sessions and their readings, stored through `SignalSurveyLocalDataSource`.
 - **`FirmwareReleaseRepositoryImpl`** / **`DeviceHardwareRepositoryImpl`**: Firmware releases and the hardware list, served by `staleWhileRevalidateFlow` from the local data sources and bundled assets in `datasource/`, refreshed from the `:core:network` remote data sources.
 
 ### 2. Manager implementations (`manager/`)

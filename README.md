@@ -106,7 +106,7 @@ BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
 
 ### Modern Android Development (MAD)
 The app follows modern Android development practices, built on top of a shared Kotlin Multiplatform (KMP) Core:
-- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, targeting Android and Compose Desktop.
+- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, targeting Android and Compose Desktop, plus the opt-in Kotlin/Wasm browser build (`-Pmeshtastic.web=true`).
 - **UI:** JetBrains Compose Multiplatform (Material 3) using Compose Multiplatform resources.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
 - **Dependency Injection:** Koin with Koin Annotations (K2 Compiler Plugin).
@@ -114,7 +114,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms). Protobuf models are consumed from the upstream `org.meshtastic:protobufs` Maven artifact, pinned in `gradle/libs.versions.toml`.
 
 ### Bluetooth Low Energy (BLE)
-The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across all supported targets (Android, Desktop). This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
+The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication on Android, Desktop and the web build (over Web Bluetooth). See [core/ble/README.md](core/ble/README.md) for details.
 
 ### Module Documentation
 
