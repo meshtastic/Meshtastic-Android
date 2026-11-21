@@ -31,7 +31,6 @@ import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
-import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.duplicated_public_key_title
@@ -52,7 +51,6 @@ import org.meshtastic.sdk.MeshEvent
 class RadioSessionEventHandler(
     private val serviceStateWriter: ServiceStateWriter,
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
-    private val xmodemManager: Lazy<XModemManager>,
     private val mqttManager: MqttManager,
     private val nodeManager: NodeManager,
     private val serviceNotifications: MeshNotificationManager,
@@ -65,8 +63,6 @@ class RadioSessionEventHandler(
             is MeshEvent.Notification -> handleClientNotification(event.notification, session)
 
             is MeshEvent.MqttProxyMessage -> mqttManager.handleMqttProxyMessage(event.message)
-
-            is MeshEvent.XmodemPacket -> xmodemManager.value.handleIncomingXModem(event.packet)
 
             is MeshEvent.FileInfoReceived -> configFlowManager.value.handleFileInfo(event.info, session)
 

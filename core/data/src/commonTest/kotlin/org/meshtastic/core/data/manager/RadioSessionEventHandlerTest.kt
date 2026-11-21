@@ -65,7 +65,6 @@ class RadioSessionEventHandlerTest {
             RadioSessionEventHandler(
                 serviceStateWriter = serviceRepository,
                 configFlowManager = lazy { error("file manifest is not under test") },
-                xmodemManager = lazy { error("XModem is not under test") },
                 mqttManager = mock(MockMode.autofill),
                 nodeManager = nodeManager,
                 serviceNotifications = notifications,
