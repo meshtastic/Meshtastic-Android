@@ -1,7 +1,7 @@
 ---
 title: Ноды
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -25,6 +25,7 @@ The node list shows every node your node has heard, including:
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Последнее услышанное** — время с последнего общения
 - **Расстояние** — предполагаемое расстояние (если позиции общие)
+- **Elevation** — altitude from the node's last position, shown only when that position carries one
 - **Батарея** — уровень заряда батареи удалённой ноды (если включена телеметрия)
 
 ### Выбери, что покажет список

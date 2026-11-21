@@ -1,7 +1,7 @@
 ---
 title: Sõlmed
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - sõlmede loend
@@ -25,6 +25,7 @@ The node list shows every node your node has heard, including:
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Last heard** — time since last communication
 - **Vahemaa** — hinnanguline vahemaa (kui asukohta jagatakse)
+- **Elevation** — altitude from the node's last position, shown only when that position carries one
 - **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
 ### Choosing what the list shows

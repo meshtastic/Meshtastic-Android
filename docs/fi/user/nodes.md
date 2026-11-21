@@ -1,7 +1,7 @@
 ---
 title: Laitteet
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -25,6 +25,7 @@ The node list shows every node your node has heard, including:
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Viimeksi kuultu** — aika viimeisimmästä yhteydestä
 - **Etäisyys** — arvioitu etäisyys (jos sijaintitiedot jaetaan)
+- **Elevation** — altitude from the node's last position, shown only when that position carries one
 - **Akku** — etäradion akun varaustaso (jos telemetria on käytössä)
 
 ### Choosing what the list shows

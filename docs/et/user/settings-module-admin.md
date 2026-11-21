@@ -1,7 +1,7 @@
 ---
 title: Sätted - moodulid & admin
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -39,7 +39,7 @@ Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. 
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Aadress                    | MQTT vahendaja aadress                                                                                                                                                                                                                                                           | `mqtt.meshtastic.org` |
 | Krüpteerimine lubatud      | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON väljund lubatud       | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Väljas                |
+| JSON Output Enabled        | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Väljas                |
 | Kaardiaruannete koostamine | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Väljas                |
 | Kliendi proksi lubatud     | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Väljas                |
 | MQTT lubatud               | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Väljas                |
@@ -70,7 +70,7 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 | Jadapordi kiirus                                                                                 | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Vaikimisi |
 | Kaja lubatud                                                                                     | Echo packets you send back over the serial port                                                                                                                                                                                     | Väljas    |
 | Jadapordi režiim                                                                                 | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Vaikimisi |
-| Konsooli jadapordi alistamine                                                                    | Take over the port the debug console normally uses                                                                                                                                                                                  | Väljas    |
+| Override Console Serial Port                                                                     | Take over the port the debug console normally uses                                                                                                                                                                                  | Väljas    |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0         |
 | Jadaport lubatud                                                                                 | Turn serial communication on                                                                                                                                                                                                        | Väljas    |
 | Aegunud                                                                                          | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0         |
@@ -146,7 +146,8 @@ battery health often and sensors rarely. The intervals run from 30 minutes to 72
 | Toitemõõdiku moodul on lubatud                  | Report the per-channel voltage and current readings                                                                                                                                         | Väljas    |
 | Toitemõõdikute värskendamise intervall          | How often to report them                                                                                                                                                                    | —         |
 | Toitemõõdiku ekraanil kuvamine lubatud          | Also show power readings on the device's display                                                                                                                                            | Väljas    |
-| Keskkonnamõõdikute ekraanil kuvamine lubatud    | Also show environment readings on the device's display                                                                                                                                      | Väljas    |
+| Show air quality on device screen               | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | Väljas    |
+| Show environment on device screen               | Also show environment readings on the device's display                                                                                                                                      | Väljas    |
 
 Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja sätete soovituste kohta.
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.
