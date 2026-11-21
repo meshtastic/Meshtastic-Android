@@ -24,6 +24,7 @@ Meshtastic-Android/
 │   └── src/fdroid/         # F-Droid flavor (FOSS-only)
 ├── desktopApp/             # Desktop JVM application
 ├── webApp/                 # Kotlin/Wasm browser application, opt-in (webApp/README.md)
+├── appShell/               # The main screen and navigation graph every host shows
 ├── feature/                # Feature modules (KMP, except widget and xr)
 │   ├── intro/
 │   ├── messaging/
@@ -112,7 +113,7 @@ Located in `build-logic/convention/src/main/kotlin/`. The full set is registered
 | `meshtastic.kmp.library` | Shared KMP library module |
 | `meshtastic.kmp.library.compose` | KMP library that also ships Compose UI |
 | `meshtastic.kmp.jvm.android` | Adds the `jvmAndroidMain` source set shared by the Android and desktop JVM targets |
-| `meshtastic.kmp.web` | Adds the opt-in `wasmJs` target, registered only with `-Pmeshtastic.web=true`, and the `nonWebMain`/`nonWebTest` source sets |
+| `meshtastic.kmp.web` | Adds the opt-in `wasmJs` target, registered only with `-Pmeshtastic.web=true`, and the `nonWebMain`/`nonWebTest` and `nonAndroidMain` source sets |
 | `meshtastic.koin` | Koin Annotations + K2 compiler plugin |
 | `meshtastic.kotlinx.serialization` | Serialization plugin setup |
 | `meshtastic.android.room` | Room KMP setup and schema location |

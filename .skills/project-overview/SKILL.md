@@ -16,6 +16,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 | Directory | Description |
 | :--- | :--- |
+| `appShell/` | `MeshtasticMainScreen` and `sharedNavGraph`: the one main screen the Android, desktop and web hosts show. A feature's graph is registered here. |
 | `androidApp/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
 | `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.feature`, `meshtastic.kmp.library`, `meshtastic.kmp.jvm.android`, `meshtastic.koin`). |
 | `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |

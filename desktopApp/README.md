@@ -48,7 +48,7 @@ Release builds run ProGuard 7.9.1 to shrink the app. Obfuscation is off (`obfusc
 
 The module depends on the JVM variants of the KMP modules: every `core:*` module except `core:nfc`, `core:barcode`, `core:konsist` and `core:testing`, and every `feature:*` module except `feature:widget` (`feature:map-terrain` arrives through `feature:map-maplibre`). The map is `feature:map-maplibre`, shared with the `fdroid` Android flavor, with exactly one MapLibre native runtime chosen for the build host's architecture.
 
-**Navigation:** Uses the JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle. `DesktopMainScreen` assembles the shared `MeshtasticAppShell`, `MeshtasticNavigationSuite` and `MeshtasticNavDisplay`, and `desktopNavGraph` registers the graphs each feature module exports from `commonMain` (`nodesGraph`, `contactsGraph`, `channelsGraph`, `mapGraph`, `settingsGraph`, `connectionsGraph`, `discoveryGraph`, `firmwareGraph`, `wifiProvisionGraph`).
+**Navigation:** Uses the JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle. `DesktopMainScreen` shows the shared `MeshtasticMainScreen` from `:appShell` with room for the window's bottom edge; `:appShell` assembles the app shell, navigation suite and `MeshtasticNavDisplay`, and its `sharedNavGraph` registers the graphs each feature module exports.
 
 **Coroutines:** Requires `kotlinx-coroutines-swing` for `Dispatchers.Main` on JVM/Desktop. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` crashes at runtime.
 
@@ -69,8 +69,7 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 | File | Purpose |
 |---|---|
 | `Main.kt` | App entry point: Koin bootstrap, Compose Desktop window and tray, theme and locale application, update check |
-| `ui/DesktopMainScreen.kt` | Navigation 3 shell: shared app shell, navigation suite and `MeshtasticNavDisplay` |
-| `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
+| `ui/DesktopMainScreen.kt` | The shared `MeshtasticMainScreen`, padded for the window's bottom edge |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB (jSerialComm) and BLE (Kable) transports |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |
