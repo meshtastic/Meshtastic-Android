@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.radio.component
+package org.meshtastic.feature.settings
 
-import androidx.compose.runtime.Composable
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.Config
-
-@Composable
-actual fun SecurityKeyBackupActions(
-    viewModel: RadioConfigViewModel,
-    enabled: Boolean,
-    securityConfig: Config.SecurityConfig,
-) {
-    // Desktop currently does not implement key backup/restore within the config screen.
-    // If it did, we'd add it here.
-}
+actual val settingsPlatform: SettingsPlatform =
+    SettingsPlatform(
+        localMeshDiscovery = true,
+        wifiProvisioning = true,
+        helpDocs = true,
+        firmware = true,
+        tak = true,
+        databasePerDevice = true,
+        deviceLocation = false,
+        keyBackup = false,
+        locationFailureHint = false,
+        reloadApp = null,
+    )

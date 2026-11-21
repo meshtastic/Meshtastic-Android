@@ -39,20 +39,17 @@ import org.meshtastic.core.resources.position_location_unavailable
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.settingsPlatform
 
 /**
- * Fills the fixed position from the browser's Geolocation API; the browser asks for permission on this click. A click
- * that brings back no fix says why underneath, since a blocked permission makes the browser refuse without a prompt.
+ * Fills the fixed position from this device's location. With `settingsPlatform.locationFailureHint`, a click that
+ * brings back no fix says why underneath, since a blocked browser permission refuses without a prompt.
  */
 @Composable
-@Suppress("ModifierMissing") // the expect signature has no modifier to take
-actual fun DeviceLocationButton(
-    viewModel: RadioConfigViewModel,
-    enabled: Boolean,
-    onLocationReceived: (Position) -> Unit,
-) {
+@Suppress("ModifierMissing") // fixed signature shared with the call site; no modifier to take
+fun DeviceLocationButton(viewModel: RadioConfigViewModel, enabled: Boolean, onLocationReceived: (Position) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    val permission = rememberLocationPermissionState()
+    val hint = settingsPlatform.locationFailureHint
     var noFix by remember { mutableStateOf(false) }
 
     Column {
@@ -76,17 +73,23 @@ actual fun DeviceLocationButton(
         ) {
             Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
         }
-        val blocked = permission.status == PermissionStatus.PERMANENTLY_DENIED
-        if (blocked || noFix) {
-            Text(
-                text =
-                stringResource(
-                    if (blocked) Res.string.position_location_blocked else Res.string.position_location_unavailable,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-            )
+        if (hint) {
+            val blocked = rememberLocationPermissionState().status == PermissionStatus.PERMANENTLY_DENIED
+            if (blocked || noFix) {
+                Text(
+                    text =
+                    stringResource(
+                        if (blocked) {
+                            Res.string.position_location_blocked
+                        } else {
+                            Res.string.position_location_unavailable
+                        },
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
         }
     }
 }

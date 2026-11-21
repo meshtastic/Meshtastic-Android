@@ -76,14 +76,8 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
+import org.meshtastic.feature.settings.settingsPlatform
 import org.meshtastic.proto.Config
-
-@Composable
-expect fun SecurityKeyBackupActions(
-    viewModel: RadioConfigViewModel,
-    enabled: Boolean,
-    securityConfig: Config.SecurityConfig,
-)
 
 @Composable
 @Suppress("LongMethod")
@@ -166,7 +160,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 // Backup/restore operates on this phone's own key file, so it is meaningless for a remote node
                 // whose private key we never receive.
-                if (state.isLocal) {
+                if (state.isLocal && settingsPlatform.keyBackup) {
                     SecurityKeyBackupActions(
                         viewModel = viewModel,
                         enabled = state.connected,

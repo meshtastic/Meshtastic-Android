@@ -52,8 +52,10 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.SecurityKeyBackupOption
 import org.meshtastic.proto.Config
 
+/** This phone's own key backup, offered only where `settingsPlatform.keyBackup` holds. */
 @Composable
-actual fun SecurityKeyBackupActions(
+@Suppress("ModifierMissing", "MultipleEmitters") // fixed signature; emits a divider-separated button list
+fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
