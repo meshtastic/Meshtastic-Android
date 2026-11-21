@@ -172,7 +172,7 @@ class MQTTRepositoryImpl(
             close(MqttEndpointUnsupportedException())
             return@callbackFlow
         }
-        val session = ActiveMqttSession(newClient)
+        val session = ActiveMqttSession(newClient, rootTopic)
         closeSession(replaceActiveSession(session))
 
         // Collect from the SharedFlow before connecting to avoid missing retained messages
@@ -459,6 +459,10 @@ class MQTTRepositoryImpl(
                     }
                     return@withPermit
                 }
+                if (!MqttRootTopic.isUnder(session.rootTopic, topic)) {
+                    Logger.w { "MQTT publish dropped: topic is outside the root" }
+                    return@withPermit
+                }
                 safeCatching {
                     session.client.publish(
                         MqttMessage(topic = topic, payload = data, qos = QoS.AT_LEAST_ONCE, retain = retained),
@@ -478,7 +482,8 @@ class MQTTRepositoryImpl(
     }
 }
 
-private class ActiveMqttSession(val client: MqttClientSession) {
+/** [rootTopic] is the root the subscriptions were built under, fixed for the life of the session. */
+private class ActiveMqttSession(val client: MqttClientSession, val rootTopic: String) {
     val closeStarted = atomic(false)
     val connectJob = atomic<Job?>(null)
     val subscriptionRefusal = MutableStateFlow<MqttException.SubscriptionRefused?>(null)
