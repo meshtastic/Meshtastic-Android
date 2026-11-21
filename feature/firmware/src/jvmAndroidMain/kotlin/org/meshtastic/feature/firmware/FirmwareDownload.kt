@@ -48,7 +48,7 @@ internal suspend fun downloadUrlToFile(
     onProgress: (Float) -> Unit,
     maxBytes: Long = MAX_FIRMWARE_ZIP_BYTES,
 ): Boolean {
-    var copyFailure: Throwable? = null
+    var copyFailure: Exception? = null
     val completed =
         try {
             client.prepareGet(url).execute { response ->
@@ -56,14 +56,9 @@ internal suspend fun downloadUrlToFile(
                     Logger.w { "Download failed: ${response.status.value} for $url" }
                     return@execute false
                 }
-                try {
-                    downloadResponseToFile(response, targetFile, onProgress, maxBytes)
-                    true
-                } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-                    // Surfaced after the response closes, so a copy failure is never mistaken for a request failure.
-                    copyFailure = e
-                    false
-                }
+                // Surfaced after the response closes, so a copy failure is never mistaken for a request failure.
+                copyFailure = copyFailureOrNull(response, targetFile, onProgress, maxBytes)
+                copyFailure == null
             }
         } catch (e: CancellationException) {
             throw e
@@ -73,6 +68,21 @@ internal suspend fun downloadUrlToFile(
         }
     copyFailure?.let { throw it }
     return completed
+}
+
+/** Runs [downloadResponseToFile] and returns its failure instead of throwing it; cancellation still propagates. */
+private suspend fun copyFailureOrNull(
+    response: HttpResponse,
+    targetFile: File,
+    onProgress: (Float) -> Unit,
+    maxBytes: Long,
+): Exception? = try {
+    downloadResponseToFile(response, targetFile, onProgress, maxBytes)
+    null
+} catch (e: CancellationException) {
+    throw e
+} catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+    e
 }
 
 /**
