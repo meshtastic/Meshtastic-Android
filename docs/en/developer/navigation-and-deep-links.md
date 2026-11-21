@@ -168,9 +168,9 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 }
 ```
 
-The apps call every feature's entries function from one place: the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt`, `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, and `webNavGraph`
-in `webApp`'s `WebNavigation.kt` for a feature with a web target.
+The apps call every feature's entries function from one place: `sharedNavGraph` in `appShell`'s
+`MeshtasticMainScreen.kt`, which `MeshtasticMainScreen` hands to `MeshtasticNavDisplay` on Android, desktop
+and web.
 
 ## Testing
 
