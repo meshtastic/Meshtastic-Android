@@ -44,9 +44,11 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.sdk.RadioSessionOverflowException
@@ -67,6 +69,8 @@ internal class SdkPhoneApiRadioTransport(
 ) : RadioTransport {
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
+
+    override fun sendPaced(packet: MeshPacket): PacedMessageHandle? = currentClient.value?.sendPaced(packet)
 
     override fun tryLockdown(auth: LockdownAuth): Boolean = currentClient.value?.tryLockdown(auth) == true
 

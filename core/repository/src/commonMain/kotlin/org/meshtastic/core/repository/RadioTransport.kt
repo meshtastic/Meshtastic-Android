@@ -17,12 +17,17 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.PacedMessageHandle
 
 /**
  * Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
 interface RadioTransport {
+    /** Submits a mesh packet to the SDK send queue on this link. */
+    fun sendPaced(packet: MeshPacket): PacedMessageHandle? = null
+
     /** Queues local lockdown authentication on the current link. */
     fun tryLockdown(auth: LockdownAuth): Boolean = false
 

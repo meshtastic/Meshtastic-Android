@@ -58,7 +58,6 @@ import org.meshtastic.core.repository.MessageAnnouncement
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -98,7 +97,6 @@ import org.meshtastic.proto.Waypoint
 @Single
 class MeshDataHandlerImpl(
     private val nodeManager: NodeManager,
-    private val packetHandler: PacketHandler,
     private val serviceStateWriter: ServiceStateWriter,
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceNotifications: MeshNotificationManager,
@@ -478,7 +476,6 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(settled.copy(ackProofStatus = provenAckProof))
                 }
             }
-            packetHandler.completeDispatchedResponse(requestId, complete = isAck, from = fromNum)
         }
     }
 

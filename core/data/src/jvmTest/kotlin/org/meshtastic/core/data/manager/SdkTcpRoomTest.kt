@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -52,6 +53,7 @@ import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoWriteDataSource
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
+import org.meshtastic.core.data.repository.PacketRepositoryImpl
 import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
@@ -66,6 +68,8 @@ import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.datastore.store.Store
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
@@ -84,10 +88,13 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
@@ -98,6 +105,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -131,7 +139,22 @@ class SdkTcpRoomTest {
         }
     }
 
-    private suspend fun exerciseLockdown(port: Int, autoUnlock: Boolean, expectRestart: Boolean = false) {
+    @Test
+    fun sdkTcpLocalDeliveryUpdatesRoomWithoutRoutingEcho() = runBlocking {
+        withReplayTcpPeer(
+            lockdownPassphrase = TEST_PASSPHRASE,
+            localDeliveryPacketId = LOCAL_DELIVERY_PACKET_ID,
+        ) { port ->
+            exerciseLockdown(port, autoUnlock = true, verifyLocalDelivery = true)
+        }
+    }
+
+    private suspend fun exerciseLockdown(
+        port: Int,
+        autoUnlock: Boolean,
+        expectRestart: Boolean = false,
+        verifyLocalDelivery: Boolean = false,
+    ) {
         Dispatchers.setMain(Dispatchers.Unconfined)
         val job = SupervisorJob()
         val scope = CoroutineScope(job + Dispatchers.Default)
@@ -175,6 +198,7 @@ class SdkTcpRoomTest {
                 databases.withReadDb { db ->
                     assertEquals(SdkRoomReplayTest.LOCAL_NODE, db.nodeInfoDao().getMyNodeEntity()?.myNodeNum)
                 }
+                if (verifyLocalDelivery) ingress.assertLocalDelivery(LOCAL_DELIVERY_PACKET_ID)
                 radio.disconnect()
                 assertEquals(LockdownState.None, ingress.lockdownState.value)
             }
@@ -299,6 +323,50 @@ class SdkTcpRoomTest {
                 radio,
                 serviceScope,
             )
+        private val outboundRepository = PacketRepositoryImpl(databases, dispatchers)
+        private val outgoing =
+            PacketHandlerImpl(
+                lazy { outboundRepository },
+                radio,
+                lazy { mock(MockMode.autofill) },
+                state,
+                serviceScope,
+            )
+
+        suspend fun assertLocalDelivery(packetId: Int) {
+            val port = PortNum.TEXT_MESSAGE_APP
+            val localNode = SdkRoomReplayTest.LOCAL_NODE
+            val id =
+                outboundRepository.savePacket(
+                    myNodeNum = localNode,
+                    contactKey = SdkRoomReplayTest.LOCAL_ID,
+                    packet =
+                    DataPacket(
+                        from = SdkRoomReplayTest.LOCAL_ID,
+                        to = SdkRoomReplayTest.LOCAL_ID,
+                        bytes = null,
+                        dataType = port.value,
+                        id = packetId,
+                        status = MessageStatus.QUEUED,
+                    ),
+                    receivedTime = 0,
+                )
+            val packet =
+                MeshPacket.Builder()
+                    .also {
+                        it.id = packetId
+                        it.from = localNode
+                        it.to = localNode
+                        it.want_ack = true
+                        it.decoded = Data.Builder().also { data -> data.portnum = port }.build()
+                    }
+                    .build()
+            assertTrue(outgoing.sendToRadioAndAwaitResult(packet).accepted)
+            while (outboundRepository.getPacketByPersistedId(id)?.status != MessageStatus.DELIVERED) {
+                delay(10.milliseconds)
+            }
+        }
+
         private val processor =
             createRoomReplayProcessor(scope, dispatchers, databases, nodeManager, radio, config, notifications)
 
@@ -490,5 +558,6 @@ class SdkTcpRoomTest {
 
     private companion object {
         const val TEST_PASSPHRASE = "example"
+        const val LOCAL_DELIVERY_PACKET_ID = 7123
     }
 }

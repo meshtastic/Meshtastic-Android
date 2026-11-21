@@ -1173,11 +1173,12 @@ private fun String?.matchesNodeNum(nodeNum: Int, localNodeNum: Int): Boolean =
 /**
  * Queue-stage status guard shared with callers that decide whether to arm follow-up work.
  *
- * Only [MessageStatus.ENROUTE] and [MessageStatus.ERROR] are owned by this transition. Terminal routing and SFPP
- * statuses are applied by their dedicated state transitions.
+ * An SDK queue receipt can also prove immediate local delivery. Routing and SFPP keep their own transitions.
  */
 fun shouldApplyOutgoingQueueStatus(current: MessageStatus?, status: MessageStatus): Boolean = when (status) {
     MessageStatus.ENROUTE -> current == null || current == MessageStatus.UNKNOWN || current == MessageStatus.QUEUED
+
+    MessageStatus.DELIVERED -> current == MessageStatus.ENROUTE || current == MessageStatus.QUEUED
 
     MessageStatus.ERROR ->
         current == null ||

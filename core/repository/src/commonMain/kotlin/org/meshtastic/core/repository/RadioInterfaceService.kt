@@ -26,6 +26,8 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.PacedMessageHandle
 
 /** A lifecycle lease held by one already-admitted operation for [session]. */
 interface RadioSessionLease {
@@ -117,6 +119,9 @@ interface RadioInterfaceService :
     RadioTransportCallback,
     RadioSessionAuthority,
     RadioTransportWriter {
+    /** Submits a mesh packet only while [session] owns transport admission. */
+    fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? = null
+
     /** Queues authentication only while [session] owns the link. */
     fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean = false
 

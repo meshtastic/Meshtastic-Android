@@ -61,6 +61,7 @@ includeBuild(sdkCheckout) {
     name = "meshtastic-sdk-checkout"
     dependencySubstitution {
         substitute(module("org.meshtastic:sdk-core")).using(project(":core"))
+        substitute(module("org.meshtastic:sdk-testing")).using(project(":testing"))
         substitute(module("org.meshtastic:sdk-transport-ble")).using(project(":transport-ble"))
         substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
         substitute(module("org.meshtastic:sdk-transport-websocket")).using(project(":transport-websocket"))

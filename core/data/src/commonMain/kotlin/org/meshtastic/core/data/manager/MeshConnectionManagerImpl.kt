@@ -234,7 +234,6 @@ class MeshConnectionManagerImpl(
     private fun tearDownConnection() {
         postHandshakeRequestsJob?.cancel()
         postHandshakeRequestsJob = null
-        packetHandler.stopPacketQueue()
         sessionManager.clearAll() // Prevent stale per-node passkeys on reconnect.
         adminRequestRegistry.clearAll()
         locationManager.stop()

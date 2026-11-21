@@ -515,7 +515,6 @@ internal fun createRoomReplayProcessor(
     val data =
         MeshDataHandlerImpl(
             nodeManager = nodeManager,
-            packetHandler = mock(MockMode.autofill),
             serviceStateWriter = mock(MockMode.autofill),
             packetRepository = lazy { packetRepository },
             serviceNotifications = notificationManager,

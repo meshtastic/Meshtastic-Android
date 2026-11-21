@@ -30,7 +30,6 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
@@ -58,7 +57,6 @@ class FromRadioPacketHandlerImpl(
     private val xmodemManager: Lazy<XModemManager>,
     private val displayMirrorManager: Lazy<DisplayMirrorManager>,
     private val mqttManager: MqttManager,
-    private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshNotificationManager,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val radioInterfaceService: RadioInterfaceService,
@@ -71,7 +69,6 @@ class FromRadioPacketHandlerImpl(
     @Suppress("CyclomaticComplexMethod")
     override fun handleFromRadio(proto: FromRadio, session: RadioSessionContext) {
         val mqttProxyMessage = proto.mqttClientProxyMessage
-        val queueStatus = proto.queueStatus
         val config = proto.config
         val moduleConfig = proto.moduleConfig
         val channel = proto.channel
@@ -90,9 +87,6 @@ class FromRadioPacketHandlerImpl(
                 runIfSessionActive(session, "MQTT proxy message") {
                     mqttManager.handleMqttProxyMessage(mqttProxyMessage)
                 }
-
-            queueStatus != null ->
-                runIfSessionActive(session, "queue status") { packetHandler.handleQueueStatus(queueStatus) }
 
             config != null -> configHandler.value.handleDeviceConfig(config, session)
 

@@ -83,22 +83,6 @@ interface PacketHandler {
         expectedConnectionVersion: Long,
     ): AwaitedSendResult
 
-    /** Processes queue status updates from the radio. */
-    fun handleQueueStatus(queueStatus: QueueStatus)
-
-    /**
-     * Completes the strict routing response for [dataRequestId] when an active transport already dispatched that
-     * packet. Replies that arrive before dispatch are stale and ignored. The packet ID remains reserved until both the
-     * firmware queue stage and this routing stage are terminal.
-     *
-     * An ACK [from] a node other than the packet's destination is a relay's implicit ACK and leaves the wait open; a
-     * NAK from any node ends it. A null [from] is treated as the destination.
-     */
-    suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean, from: Int? = null)
-
-    /** Stops the packet queue. */
-    fun stopPacketQueue()
-
     /**
      * Re-arms the send-ACK timeout for every persisted packet still awaiting its routing ACK/NAK, so sends orphaned by
      * a disconnect or app restart become retryable instead of showing as sending forever. Call once per connection,

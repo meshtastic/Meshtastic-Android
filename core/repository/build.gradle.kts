@@ -28,6 +28,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.core.model)
             api(libs.meshtastic.protobufs)
+            api("org.meshtastic:sdk-core")
             implementation(projects.core.common)
             implementation(projects.core.database)
 

@@ -33,7 +33,6 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MqttManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
@@ -49,7 +48,6 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.XModem
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -60,7 +58,6 @@ class FromRadioPacketHandlerImplTest {
 
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val mqttManager: MqttManager = mock(MockMode.autofill)
-    private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
@@ -102,7 +99,6 @@ class FromRadioPacketHandlerImplTest {
                 lazy { xmodemManager },
                 lazy { displayMirrorManager },
                 mqttManager,
-                packetHandler,
                 serviceNotifications,
                 firmwareUpdateStatusRepository,
                 radioInterfaceService,
@@ -115,7 +111,6 @@ class FromRadioPacketHandlerImplTest {
     fun `revoked session skips direct packet-dispatch branches`() {
         every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
         val proxyMessage = MqttClientProxyMessage.Builder().also { wb -> wb.topic = "test/topic" }.build()
-        val queueStatus = QueueStatus.Builder().also { wb -> wb.free = 10 }.build()
         val xmodemPacket = XModem.Builder().build()
 
         val displayFrame =
@@ -128,13 +123,11 @@ class FromRadioPacketHandlerImplTest {
         val displayPalette = DisplayPalette.Builder().also { wb -> wb.signature = 1 }.build()
 
         handle(FromRadio.Builder().also { wb -> wb.mqttClientProxyMessage = proxyMessage }.build())
-        handle(FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build())
         handle(FromRadio.Builder().also { wb -> wb.xmodemPacket = xmodemPacket }.build())
         handle(FromRadio.Builder().also { wb -> wb.display_frame = displayFrame }.build())
         handle(FromRadio.Builder().also { wb -> wb.display_palette = displayPalette }.build())
 
         verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
-        verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
         verify(mode = VerifyMode.exactly(0)) { xmodemManager.handleIncomingXModem(any()) }
         verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingFrame(any()) }
         verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingPalette(any()) }
@@ -170,16 +163,6 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.display_palette = palette }.build())
 
         verify { displayMirrorManager.handleIncomingPalette(palette) }
-    }
-
-    @Test
-    fun `handleFromRadio routes QUEUESTATUS to packetHandler`() {
-        val queueStatus = QueueStatus.Builder().also { wb -> wb.free = 10 }.build()
-        val proto = FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build()
-
-        handle(proto)
-
-        verify { packetHandler.handleQueueStatus(queueStatus) }
     }
 
     @Test

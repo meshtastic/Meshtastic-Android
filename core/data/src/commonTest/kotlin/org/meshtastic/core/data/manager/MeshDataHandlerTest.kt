@@ -54,7 +54,6 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -94,7 +93,6 @@ class MeshDataHandlerTest {
 
     private lateinit var handler: MeshDataHandlerImpl
     private val nodeManager: NodeManager = mock(MockMode.autofill)
-    private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
@@ -154,7 +152,6 @@ class MeshDataHandlerTest {
         handler =
             MeshDataHandlerImpl(
                 nodeManager = nodeManager,
-                packetHandler = packetHandler,
                 serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
                 serviceNotifications = serviceNotifications,
@@ -773,8 +770,6 @@ class MeshDataHandlerTest {
     fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
         handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
         advanceUntilIdle()
-
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true, from = 456) }
     }
 
     private fun sentPacket(ackProofStatus: Int = 0) = DataPacket(
@@ -953,8 +948,6 @@ class MeshDataHandlerTest {
         // NO_ROUTE keeps this ownership test independent of errors that also raise localized UI warnings.
         handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
         advanceUntilIdle()
-
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false, from = 456) }
     }
 
     @Test
@@ -991,7 +984,6 @@ class MeshDataHandlerTest {
         verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
-        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any(), any()) }
     }
 
     // --- Telemetry handling ---

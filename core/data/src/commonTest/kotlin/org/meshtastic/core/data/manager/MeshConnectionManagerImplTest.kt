@@ -150,7 +150,6 @@ class MeshConnectionManagerImplTest {
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
         everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } returns Unit
         everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap<Int, Node>()
@@ -224,7 +223,6 @@ class MeshConnectionManagerImplTest {
             serviceRepository.connectionState.value,
             "State should be Disconnected after radio Disconnected",
         )
-        verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
         verify { adminRequestRegistry.clearAll() }

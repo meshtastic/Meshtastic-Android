@@ -35,7 +35,6 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.network)
             implementation(libs.meshtastic.protobufs)
-            implementation("org.meshtastic:sdk-core")
             implementation("org.meshtastic:sdk-transport-ble")
             implementation("org.meshtastic:sdk-transport-websocket")
 
@@ -71,7 +70,10 @@ kotlin {
             implementation(libs.kable.core)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation("org.meshtastic:sdk-testing")
+        }
 
         getByName("jvmTest").dependencies {
             implementation(projects.core.service)

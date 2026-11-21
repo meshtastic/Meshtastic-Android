@@ -97,6 +97,8 @@ import org.meshtastic.core.resources.websocket_replaced_by_another_client
 import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
 import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.PacedMessageHandle
 import kotlin.concurrent.Volatile
 
 /**
@@ -1049,6 +1051,19 @@ class SharedRadioInterfaceService(
             _serviceScope.cancel("stopping transport")
             _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
             if (notifyPermanent && currentTransport != null) onDisconnect(isPermanent = true)
+        }
+    }
+
+    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? {
+        val admission = admitTransportSend(expected = session) as? TransportSendAdmission.Admitted ?: return null
+        return try {
+            admission.transport.sendPaced(packet)?.also { handle ->
+                serviceScope.launch {
+                    if (handle.awaitDispatch()) runIfSessionActive(session) { _meshActivity.tryEmit(MeshActivity.Send) }
+                }
+            }
+        } finally {
+            releaseSessionOperation(admission.session)
         }
     }
 

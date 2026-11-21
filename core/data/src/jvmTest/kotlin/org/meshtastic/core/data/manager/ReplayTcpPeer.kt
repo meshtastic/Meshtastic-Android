@@ -28,6 +28,7 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.Frame
 import org.meshtastic.sdk.WireFraming
@@ -44,6 +45,7 @@ import kotlin.test.assertEquals
 internal suspend fun withReplayTcpPeer(
     lockdownPassphrase: String? = null,
     rebootBeforeConfig: Boolean = false,
+    localDeliveryPacketId: Int? = null,
     exercise: suspend (port: Int) -> Unit,
 ) = coroutineScope {
     ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { server ->
@@ -74,14 +76,33 @@ internal suspend fun withReplayTcpPeer(
                         val output = socket.getOutputStream()
                         val writer = launch {
                             scripted.frames().collect {
-                                output.write(it.bytes.toByteArray())
-                                output.flush()
+                                synchronized(output) {
+                                    output.write(it.bytes.toByteArray())
+                                    output.flush()
+                                }
                             }
                         }
                         try {
                             val input = DataInputStream(socket.getInputStream())
                             if (lockdownPassphrase != null) input.unlock(output, lockdownPassphrase)
-                            while (true) scripted.send(input.readFrame() ?: break)
+                            while (true) {
+                                val frame = input.readFrame() ?: break
+                                val packet =
+                                    ToRadio.ADAPTER.decode(frame.bytes.substring(WireFraming.HEADER_SIZE)).packet
+                                if (localDeliveryPacketId != null && packet?.id == localDeliveryPacketId) {
+                                    assertEquals(SdkRoomReplayTest.LOCAL_NODE, packet.to)
+                                    val receipt =
+                                        QueueStatus.Builder()
+                                            .also {
+                                                it.mesh_packet_id = packet.id
+                                                it.res = 35
+                                            }
+                                            .build()
+                                    output.sendEnvelope(FromRadio.Builder().also { it.queueStatus = receipt }.build())
+                                } else {
+                                    scripted.send(frame)
+                                }
+                            }
                         } finally {
                             writer.cancelAndJoin()
                             scripted.disconnect()
@@ -134,8 +155,10 @@ private fun OutputStream.sendEnvelope(envelope: FromRadio) {
             .writeByte(WireFraming.MAGIC_1.toInt())
             .writeShort(payload.size)
             .write(payload)
-    write(frame.readByteArray())
-    flush()
+    synchronized(this) {
+        write(frame.readByteArray())
+        flush()
+    }
 }
 
 private fun DataInputStream.readFrame(): Frame? {
