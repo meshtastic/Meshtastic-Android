@@ -28,6 +28,7 @@ import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
@@ -186,6 +187,9 @@ interface RadioInterfaceService :
 
     /** Flow of radio activity events. */
     val meshActivity: Flow<MeshActivity>
+
+    /** Hands a broker message to the active session's MQTT client proxy; false when no session can take it. */
+    suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean = false
 
     /** Initiates the connection to the radio. */
     fun connect()

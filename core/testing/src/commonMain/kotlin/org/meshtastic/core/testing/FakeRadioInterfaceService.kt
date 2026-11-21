@@ -41,6 +41,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.MqttClientProxyMessage
 
 /**
  * A test double for [RadioInterfaceService] that provides an in-memory implementation.
@@ -278,6 +279,14 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override fun onStatus(status: TransportStatus) {
         synchronized(sessionAdmissionLock) { reportedStatuses += status }
         _transportStatus.value = status
+    }
+
+    /** Broker messages handed to [deliverMqttProxy], in order. */
+    val deliveredMqttProxyMessages = mutableListOf<MqttClientProxyMessage>()
+
+    override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean {
+        deliveredMqttProxyMessages += message
+        return true
     }
 
     // --- Helper methods for testing ---

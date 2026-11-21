@@ -45,7 +45,7 @@ import org.meshtastic.core.network.repository.mqttTransportFactory
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
@@ -62,13 +62,12 @@ import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.ProbeResult
 import org.meshtastic.mqtt.probe
 import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.proto.ToRadio
 import kotlin.uuid.Uuid
 
 @Single
 class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
-    private val packetHandler: PacketHandler,
+    private val radioInterfaceService: RadioInterfaceService,
     private val serviceStateWriter: ServiceStateWriter,
     private val nodeRepository: NodeRepository,
     private val scope: ServiceScope,
@@ -105,9 +104,9 @@ class MqttManagerImpl(
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
                     .onEach { message ->
-                        packetHandler.sendToRadio(
-                            ToRadio.Builder().also { wb -> wb.mqttClientProxyMessage = message }.build(),
-                        )
+                        if (!radioInterfaceService.deliverMqttProxy(message)) {
+                            Logger.d { "MQTT proxy message from the broker not delivered; no radio session took it" }
+                        }
                     }
                     .catch { throwable ->
                         _proxyActive.value = false

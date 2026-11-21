@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
@@ -43,6 +44,9 @@ interface RadioTransport {
 
     /** Queues a nodes-only refresh when this transport owns the PhoneAPI session. */
     fun requestNodeDbRefresh(): Boolean = false
+
+    /** Hands a broker message to the radio's MQTT client proxy; false when no session can take it. */
+    suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean = false
 
     /**
      * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required

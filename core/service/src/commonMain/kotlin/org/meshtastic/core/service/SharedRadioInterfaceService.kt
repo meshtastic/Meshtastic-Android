@@ -97,6 +97,7 @@ import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
@@ -1073,6 +1074,14 @@ class SharedRadioInterfaceService(
     } finally {
         releaseSessionOperation(admission.session)
     }
+
+    override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean =
+        when (val admission = admitTransportSend()) {
+            is TransportSendAdmission.Admitted ->
+                sendThroughAdmittedTransport(admission) { it.deliverMqttProxy(message) }
+
+            else -> false
+        }
 
     override fun onConnect() {
         synchronized(sessionCallbackLock) { publishConnected() }

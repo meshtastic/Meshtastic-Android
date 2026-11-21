@@ -46,6 +46,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
@@ -225,6 +226,9 @@ internal class SdkPhoneApiRadioTransport(
                 }
         }
     }
+
+    override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean =
+        currentClient.value?.mqttProxy?.deliver(message) == true
 
     override fun handleSendToRadio(p: ByteArray): Boolean = safeCatching {
         val frame = ToRadio.ADAPTER.decode(p)
