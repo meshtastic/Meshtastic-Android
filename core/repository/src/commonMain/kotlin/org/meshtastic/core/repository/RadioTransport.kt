@@ -25,6 +25,9 @@ interface RadioTransport {
     val managesPhoneApi: Boolean
         get() = false
 
+    /** Queues a nodes-only refresh when this transport owns the PhoneAPI session. */
+    fun requestNodeDbRefresh(): Boolean = false
+
     /**
      * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required
      * synchronous admission checks and enqueue asynchronous I/O internally.

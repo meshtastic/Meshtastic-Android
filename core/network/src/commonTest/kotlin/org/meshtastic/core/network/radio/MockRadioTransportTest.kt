@@ -17,7 +17,10 @@
 package org.meshtastic.core.network.radio
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -38,6 +41,9 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -88,12 +94,38 @@ class MockRadioTransportTest {
      */
     private fun TestScope.transportScope() = CoroutineScope(StandardTestDispatcher(testScheduler))
 
+    private fun TestScope.mockLink(callback: RadioTransportCallback, scope: CoroutineScope, address: String) =
+        VirtualRadioFixture(this, MockRadioTransport(scope, address), callback, connectOnFirstSend = true)
+
+    @Test
+    fun `SDK completes the demo radio handshake`() = runTest {
+        val client =
+            RadioClient.Builder()
+                .transport(MockRadioTransport(backgroundScope, address = ""))
+                .storage(InMemoryStorageProvider())
+                .coroutineContext(backgroundScope.coroutineContext)
+                .autoSyncTimeOnConnect(false)
+                .sessionReceive()
+                .build()
+        try {
+            val ready = async {
+                assertNotNull(client.sessionEvents).filterIsInstance<RadioSessionEvent.Ready>().first()
+            }
+            client.connect()
+            val snapshot = ready.await()
+            assertNotNull(snapshot.myInfo)
+            assertTrue(snapshot.nodes.size >= MIN_DEMO_NODES)
+        } finally {
+            client.disconnect()
+        }
+    }
+
     @Test
     fun `start signals onConnect without emitting frames`() = runTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            MockRadioTransport(callback, scope, address = "").start()
+            mockLink(callback, scope, address = "").start()
 
             assertEquals(1, callback.connects)
             assertTrue(callback.received.isEmpty())
@@ -107,7 +139,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
 
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
 
@@ -127,7 +159,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             callback.received.clear()
 
@@ -145,7 +177,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             callback.received.clear()
 
@@ -188,7 +220,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
 
             transport.handleSendToRadio(wantConfig(1234))
 
@@ -203,7 +235,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             val myNodeNum = assertNotNull(callback.received.firstNotNullOfOrNull { it.my_info }).my_node_num
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
@@ -244,7 +276,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             callback.received.clear()
@@ -294,7 +326,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "")
+            val transport = mockLink(callback, scope, address = "")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             // Drop the handshake frames before timing the seed pass. Asserting on a recorder that still holds them
@@ -354,7 +386,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val transport = mockLink(callback = callback, scope = scope, address = "mock")
             val outbound =
                 ToRadio.Builder()
                     .also { wb ->
@@ -390,7 +422,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val transport = mockLink(callback = callback, scope = scope, address = "mock")
             val outbound =
                 ToRadio.Builder()
                     .also { wb ->
@@ -426,13 +458,17 @@ class MockRadioTransportTest {
     }
 
     @Test
-    fun `malformed payload is rejected without escaping the admission contract`() = runTest {
+    fun `malformed payload produces no reply and the mock remains connected`() = runTest {
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback = RecordingCallback(), scope = scope, address = "mock")
+            val callback = RecordingCallback()
+            val transport = mockLink(callback = callback, scope = scope, address = "mock")
 
             transport.start()
-            assertFalse(transport.handleSendToRadio(byteArrayOf(0x80.toByte())))
+            transport.handleSendToRadio(byteArrayOf(0x80.toByte()))
+            assertTrue(callback.received.isEmpty())
+            assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE)))
+            assertEquals(listOf(HandshakeConstants.CONFIG_NONCE), callback.completions)
 
             transport.close()
         } finally {
@@ -445,7 +481,7 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val callback = RecordingCallback()
-            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val transport = mockLink(callback = callback, scope = scope, address = "mock")
             val outbound =
                 ToRadio.Builder()
                     .also { wb ->
@@ -516,7 +552,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            val transport = mockLink(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
 
@@ -555,7 +591,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = "anything")
+            val transport = mockLink(callback, scope, address = "anything")
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
 
@@ -571,7 +607,7 @@ class MockRadioTransportTest {
         val callback = RecordingCallback()
         val scope = transportScope()
         try {
-            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            val transport = mockLink(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
             transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             testScheduler.advanceTimeBy(SEED_WINDOW_MS)

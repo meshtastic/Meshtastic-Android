@@ -28,6 +28,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api("org.meshtastic:sdk-core")
             api(projects.core.repository)
             implementation(projects.core.common)
             implementation(projects.core.di)
@@ -74,7 +75,12 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                implementation("org.meshtastic:sdk-transport-serial")
+            }
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

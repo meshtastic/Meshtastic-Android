@@ -333,9 +333,23 @@ class MeshConfigFlowManagerImpl(
                 snapshot.deviceUiConfig?.let { setDeviceUIConfig(it) }
             }
             snapshot.metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
-            ready = installAndPublishNodeDatabase(HandshakeState.ReceivingNodeInfo(session, info, snapshot.nodes))
+            ready =
+                installAndPublishNodeDatabase(HandshakeState.ReceivingNodeInfo(session, info, snapshot.nodes)) &&
+                runForSession(session) { handshakeState.value = HandshakeState.Complete(session, info) }
         }
         return ready
+    }
+
+    /** Applies a complete nodes-only SDK download under the same session lease as the initial snapshot. */
+    internal suspend fun installRefreshedNodes(session: RadioSessionContext, nodes: List<NodeInfo>) {
+        runWhileForSession(session, "SDK NodeDB refresh") {
+            val state = handshakeState.value as? HandshakeState.Complete ?: return@runWhileForSession
+            if (state.session == session) {
+                installAndPublishNodeDatabase(
+                    HandshakeState.ReceivingNodeInfo(session, state.myNodeInfo, nodes, refresh = true),
+                )
+            }
+        }
     }
 
     @Suppress("ReturnCount")
@@ -536,6 +550,7 @@ class MeshConfigFlowManagerImpl(
 
     override fun refreshNodeInfo(): Boolean {
         val session = radioInterfaceService.activeSession.value ?: return false
+        if (radioInterfaceService.transportManagesPhoneApi) return radioInterfaceService.requestNodeDbRefresh(session)
         var requested = false
         runForSession(session) {
             val state = handshakeState.value

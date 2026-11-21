@@ -60,7 +60,7 @@ class BleAddressLoggingTest {
      * vendor-product pair (`usbSerialStableKey()`), which identifies the chip model, and the firmware retriever's are
      * UF2 flash offsets.
      */
-    private val notPersonalAddressFiles = listOf("SerialRadioTransport.kt", "FirmwareRetriever.kt")
+    private val notPersonalAddressFiles = listOf("FirmwareRetriever.kt")
 
     /**
      * Start of a call whose text reaches a log or a crash report. A `Logger.withTag(...)` prefix is part of the start.
@@ -102,7 +102,6 @@ class BleAddressLoggingTest {
         val expected =
             listOf(
                 "KableBleConnection.kt",
-                "BleRadioTransport.kt",
                 "SharedRadioInterfaceService.kt",
                 "DiscoveryScanEngine.kt",
             )

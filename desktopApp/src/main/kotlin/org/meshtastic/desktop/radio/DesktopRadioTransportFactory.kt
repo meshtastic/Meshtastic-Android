@@ -18,39 +18,29 @@ package org.meshtastic.desktop.radio
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
-import org.meshtastic.core.network.radio.MockRadioTransport
-import org.meshtastic.core.network.radio.TcpRadioTransport
+import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.desktop.DesktopBuildConfig
 
 /**
- * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP) and providing
- * platform-specific transports (USB/Serial) via jSerialComm.
+ * Desktop [RadioTransportFactory] for SDK radio links and the app demo radio.
  *
  * Registered manually in [DesktopRuntimeModule] — do NOT add @Single to avoid double-registration with
  * the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
  */
 class DesktopRadioTransportFactory(
-    scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
-    connectionFactory: BleConnectionFactory,
-    dispatchers: CoroutineDispatchers,
-    sdkTransportFactory: DesktopSdkTransportFactory? = null,
-) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
-
-    private val sdk = sdkTransportFactory.takeIf { DesktopBuildConfig.IS_DEBUG }
+    private val sdk: DesktopSdkTransportFactory,
+    private val virtual: VirtualRadioSessionFactory,
+) : BaseRadioTransportFactory(bluetoothRepository) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
@@ -61,40 +51,16 @@ class DesktopRadioTransportFactory(
     /** Desktop bundles no capture asset, and [createPlatformTransport] does not wire a replay address. */
     override val isReplayTransportAvailable: Boolean = false
 
+    override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        sdk.create(InterfaceId.BLUETOOTH, address, service)
+
     override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
-        sdk?.create(InterfaceId.WEBSOCKET, url, service) ?: super.createWebSocketTransport(url, service)
+        sdk.create(InterfaceId.WEBSOCKET, url, service)
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
-        address.startsWith(InterfaceId.MOCK.id) -> {
-            MockRadioTransport(
-                callback = service,
-                scope = service.serviceScope,
-                address = address.removePrefix(InterfaceId.MOCK.id.toString()),
-            )
-        }
-
-        address.startsWith(InterfaceId.TCP.id) -> {
-            val endpoint = address.removePrefix(InterfaceId.TCP.id.toString())
-            sdk?.create(InterfaceId.TCP, endpoint, service)
-                ?: TcpRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    dispatchers = dispatchers,
-                    address = endpoint,
-                )
-        }
-
-        address.startsWith(InterfaceId.SERIAL.id) -> {
-            val endpoint = address.removePrefix(InterfaceId.SERIAL.id.toString())
-            sdk?.create(InterfaceId.SERIAL, endpoint, service)
-                ?: SerialTransport.create(
-                    portName = endpoint,
-                    callback = service,
-                    scope = service.serviceScope,
-                    dispatchers = dispatchers,
-                )
-        }
-
+        address.startsWith(InterfaceId.MOCK.id) -> virtual.demo(address.substring(1), service)
+        address.startsWith(InterfaceId.TCP.id) -> sdk.create(InterfaceId.TCP, address.substring(1), service)
+        address.startsWith(InterfaceId.SERIAL.id) -> sdk.create(InterfaceId.SERIAL, address.substring(1), service)
         else -> error("Unsupported transport for address: ${address.anonymize()}")
     }
 }

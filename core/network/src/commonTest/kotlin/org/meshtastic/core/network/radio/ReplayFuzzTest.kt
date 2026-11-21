@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioTransportCallback
@@ -77,15 +79,27 @@ class ReplayFuzzTest {
     /**
      * A corrupt asset must fail fast and *only* as [IllegalArgumentException] — never OOM, hang, or leak okio errors.
      */
+    private fun TestScope.replayLink(
+        callback: RadioTransportCallback,
+        scope: CoroutineScope,
+        address: String,
+        frames: ByteArray,
+        packetDelayMs: Long = ReplayRadioTransport.DEFAULT_PACKET_DELAY_MS,
+    ) = VirtualRadioFixture(
+        this,
+        ReplayRadioTransport(scope, address, frames, packetDelayMs),
+        callback,
+        connectOnFirstSend = false,
+    )
+
     @Test
     fun `corrupt assets fail only with IllegalArgumentException`() = runTest {
         ReplayFuzz.forSeeds { random, seed ->
             val input = if (seed % 2 == 0) ReplayFuzz.mutate(random, validAsset()) else ReplayFuzz.randomBytes(random)
-            val error =
-                runCatching {
-                    ReplayRadioTransport(Sink(), backgroundScope, address = "", frames = input, packetDelayMs = 0)
-                }
-                    .exceptionOrNull()
+            val error = runCatching {
+                replayLink(Sink(), backgroundScope, address = "", frames = input, packetDelayMs = 0)
+            }
+                .exceptionOrNull()
             assertTrue(
                 error == null || error is IllegalArgumentException,
                 "seed=$seed: parser raised ${error?.let { it::class.simpleName }}: ${error?.message}",
@@ -96,17 +110,15 @@ class ReplayFuzzTest {
     /** The transport must absorb any outbound bytes — undecodable [ToRadio] is dropped, not thrown. */
     @Test
     fun `handleSendToRadio tolerates arbitrary outbound bytes`() = runTest {
-        val transport =
-            ReplayRadioTransport(Sink(), backgroundScope, address = "", frames = validAsset(), packetDelayMs = 0)
+        val transport = replayLink(Sink(), backgroundScope, address = "", frames = validAsset(), packetDelayMs = 0)
         transport.start()
         try {
             ReplayFuzz.forSeeds { random, seed ->
-                val error =
-                    runCatching {
-                        transport.handleSendToRadio(ReplayFuzz.mutate(random, wantConfig(1)))
-                        transport.handleSendToRadio(ReplayFuzz.randomBytes(random))
-                    }
-                        .exceptionOrNull()
+                val error = runCatching {
+                    transport.handleSendToRadio(ReplayFuzz.mutate(random, wantConfig(1)))
+                    transport.handleSendToRadio(ReplayFuzz.randomBytes(random))
+                }
+                    .exceptionOrNull()
                 assertTrue(error == null, "seed=$seed: handleSendToRadio threw $error")
             }
             testScheduler.runCurrent()
@@ -145,7 +157,7 @@ class ReplayFuzzTest {
                 FromRadio.Builder().also { wb -> wb.packet = ReplayFuzz.adversarialPacket(Random(it)) }.build()
             }
         val transport =
-            ReplayRadioTransport(
+            replayLink(
                 callback = sink,
                 scope = backgroundScope,
                 address = "",

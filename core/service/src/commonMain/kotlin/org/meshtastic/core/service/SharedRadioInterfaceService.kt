@@ -509,6 +509,12 @@ class SharedRadioInterfaceService(
     override val transportManagesPhoneApi: Boolean
         get() = radioTransport?.managesPhoneApi == true
 
+    override fun requestNodeDbRefresh(session: RadioSessionContext): Boolean {
+        var queued = false
+        runIfSessionActive(session) { queued = radioTransport?.requestNodeDbRefresh() == true }
+        return queued
+    }
+
     private var runningTransportId: InterfaceId? = null
     private var isStarted = false
 
@@ -728,7 +734,7 @@ class SharedRadioInterfaceService(
                     // A USB firmware-maintenance sequence owns the port: the device is enumerating as bare erase or
                     // bootloader firmware, and binding a mesh transport to it would claim the port the flow needs.
                     if (radioOperationLock.suppressesTransport) return@withLock
-                    if (runningTransportId != InterfaceId.SERIAL) return@withLock
+                    if (radioTransport != null && runningTransportId != InterfaceId.SERIAL) return@withLock
                     // Race-defense: the combine snapshot may be stale by the time we acquire
                     // transportMutex — another path (setDeviceAddress, BLE liveness restart) may
                     // have just brought this transport up to Connected/Connecting. The combine-level
@@ -877,6 +883,7 @@ class SharedRadioInterfaceService(
     }
 
     private fun retirePhoneApiSession(session: RadioTransportSession, recoverable: Boolean, errorMessage: String?) {
+        val interfaceId = DeviceAddress.parse(session.address)?.interfaceId
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
         processLifecycle.coroutineScope.launch {
             val retryDelay = transportMutex.withLock {
@@ -886,17 +893,28 @@ class SharedRadioInterfaceService(
                 if (!recoverable) connectionRequested = false
 
                 ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
-                onDisconnect(isPermanent = true, errorMessage = errorMessage)
+                onDisconnect(
+                    isPermanent =
+                    !recoverable || (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
+                    errorMessage = errorMessage,
+                )
                 if (!connectionRequested) return@launch
 
                 phoneApiRetryDelay.also { phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS) }
             }
 
             delay(retryDelay)
-            // If the link is offline, the normal network observer will start the next attempt on recovery.
-            if (!networkRepository.networkAvailable.first()) return@launch
+            // Network and USB presence observers can restart a link once its environment is ready.
+            if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) return@launch
             transportMutex.withLock {
+                if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return@withLock
                 if (radioOperationLock.suppressesTransport) return@withLock
+                if (interfaceId == InterfaceId.SERIAL) {
+                    val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
+                    // Legacy selections are bus paths. Let the USB factory try its single-device
+                    // resolution for those addresses even if the presence keys use VID/PID.
+                    if (!presence.present && presence.key?.startsWith("/dev/") != true) return@withLock
+                }
                 if (
                     connectionRequested &&
                     radioTransport == null &&
@@ -1397,6 +1415,14 @@ class SharedRadioInterfaceService(
      */
     private inner class SessionBoundRadioInterfaceService(val session: RadioTransportSession) :
         RadioInterfaceService by this@SharedRadioInterfaceService {
+        override fun consumeGattCacheInvalidationRequest(): Boolean {
+            var requested = false
+            runIfTransportSessionActive(session) {
+                requested = this@SharedRadioInterfaceService.consumeGattCacheInvalidationRequest()
+            }
+            return requested
+        }
+
         override fun onConnect() {
             val admitted = runIfTransportSessionActive(session, ::publishConnected)
             if (!admitted) {

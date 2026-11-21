@@ -20,35 +20,20 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.network.serial.WebSerialPortRegistry
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
-/**
- * wasmJs (browser) implementation of [RadioTransportFactory]. BLE is handled entirely by [BaseRadioTransportFactory]
- * via `core:ble`'s Web Bluetooth actuals. Mock/Replay are commonMain-portable and created directly here, same as every
- * other platform. Serial/USB is backed by the Web Serial API via [WasmJsSerialTransport] and [WebSerialPortRegistry].
- * Network is firmware's WebSocket phone API, which [BaseRadioTransportFactory] opens. Raw TCP has no browser equivalent
- * and fails loudly rather than silently degrading: browsers cannot open raw sockets.
- */
+/** Browser implementation of [RadioTransportFactory] for SDK BLE, WebSocket and Web Serial links. */
 @Single(binds = [RadioTransportFactory::class])
 class WasmJsRadioTransportFactory(
-    scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
-    connectionFactory: BleConnectionFactory,
-    dispatchers: CoroutineDispatchers,
-    private val serialPortRegistry: WebSerialPortRegistry,
-    private val buildConfigProvider: BuildConfigProvider,
-    private val sdkWebSocketFactory: WebSdkWebSocketTransportFactory? = null,
-) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
+    private val sdk: WebSdkRadioTransportFactory,
+    private val virtual: VirtualRadioSessionFactory,
+) : BaseRadioTransportFactory(bluetoothRepository) {
 
     // Network is the WebSocket phone link alone: raw TCP never reaches a browser.
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
@@ -64,19 +49,21 @@ class WasmJsRadioTransportFactory(
     override val isReplayTransportAvailable: Boolean = false
 
     override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
-        sdkWebSocketFactory?.takeIf { buildConfigProvider.isDebug }?.create(url, service)
-            ?: super.createWebSocketTransport(url, service)
+        sdk.webSocket(url, service)
+
+    override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        sdk.ble(address, service)
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
         val rest = address.substring(1)
 
         return when (interfaceId) {
-            InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+            InterfaceId.MOCK -> virtual.demo(rest, service)
 
             InterfaceId.REPLAY -> {
                 Logger.w { "Replay device selected but no capture asset ships on web — falling back to mock" }
-                MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+                virtual.demo(rest, service)
             }
 
             InterfaceId.TCP ->
@@ -85,13 +72,7 @@ class WasmJsRadioTransportFactory(
                         "(permanent sandbox limitation)",
                 )
 
-            InterfaceId.SERIAL ->
-                WasmJsSerialTransport(
-                    portId = rest,
-                    registry = serialPortRegistry,
-                    callback = service,
-                    scope = service.serviceScope,
-                )
+            InterfaceId.SERIAL -> sdk.serial(rest, service)
 
             InterfaceId.NOP,
             null,

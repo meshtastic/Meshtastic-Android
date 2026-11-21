@@ -31,8 +31,6 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HandshakeConstants
-import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
@@ -52,6 +50,7 @@ import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.TransportIdentity
 import org.meshtastic.proto.Channel as ProtoChannel
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
@@ -92,11 +91,8 @@ private val defaultChannel =
  *    as internal traffic and contribute no signal information at all.
  */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
-class MockRadioTransport(
-    private val callback: RadioTransportCallback,
-    private val scope: CoroutineScope,
-    val address: String,
-) : RadioTransport {
+class MockRadioTransport(private val scope: CoroutineScope, val address: String) : VirtualRadioLink() {
+    override val identity = TransportIdentity("mock:$address")
 
     /** The mesh this transport plays, picked by the address suffix; see [MockScenario.forAddress]. */
     private val scenario = MockScenario.forAddress(address)
@@ -120,20 +116,18 @@ class MockRadioTransport(
 
     private fun nextPacketId(): Int = packetIdCounter.getAndIncrement()
 
-    override fun start() {
+    override suspend fun connect() {
         lifecycle.runIfOpen {
             Logger.i { "Starting the mock transport" }
-            callback.onConnect() // Tell clients they can use the API
+            connected()
         }
     }
 
-    override fun handleSendToRadio(p: ByteArray): Boolean = lifecycle.runIfOpen {
-        val pr = runCatching { ToRadio.ADAPTER.decode(p) }.getOrNull()
-        if (pr == null) {
-            Logger.w { "Ignoring undecodable ToRadio sent to mock transport (${p.size} bytes)" }
-            return@runIfOpen false
-        }
+    override fun respond(request: ToRadio) {
+        lifecycle.runIfOpen { handleRequest(request) }
+    }
 
+    private fun handleRequest(pr: ToRadio) {
         // Intercept the want_config handshake. Real firmware answers each stage separately and only when asked,
         // and the app's state machine depends on that: see the class doc.
         when (pr.want_config_id) {
@@ -147,8 +141,7 @@ class MockRadioTransport(
 
             else -> Logger.w { "Mock transport ignoring unknown want_config_id ${pr.want_config_id}" }
         }
-        true
-    } ?: false
+    }
 
     private fun handleOutboundTraffic(pr: ToRadio) {
         val packet = pr.packet
@@ -229,11 +222,17 @@ class MockRadioTransport(
                         .build()
                 }
 
+            d.get_owner_request == true ->
+                sendAdmin(packet.to, packet.from, packet.id) {
+                    newBuilder().also { it.get_owner_response = localNodeInfo().user }.build()
+                }
+
             else -> Logger.i { "Ignoring admin sent to mock transport $d" }
         }
     }
 
-    override suspend fun close() {
+    override suspend fun disconnect() {
+        disconnected()
         val completed =
             lifecycle.close(
                 beforeDrain = { transportJob.cancelAndJoin() },
@@ -304,19 +303,17 @@ class MockRadioTransport(
                 FromRadio.Builder().also { wb -> wb.channel = defaultChannel }.build(),
                 FromRadio.Builder().also { wb -> wb.config_complete_id = HandshakeConstants.CONFIG_NONCE }.build(),
             )
-        frames.forEach { callback.handleFromRadio(it.encode()) }
+        frames.forEach { publish(it.encode()) }
     }
 
     /** Stage 2: the node database. This is the only window in which the app accepts `node_info`. */
     private fun sendNodeInfoStage() {
         Logger.d { "Mock transport answering node-info stage with ${scenario.peers.size + 1} nodes" }
-        callback.handleFromRadio(FromRadio.Builder().also { wb -> wb.node_info = localNodeInfo() }.build().encode())
+        publish(FromRadio.Builder().also { wb -> wb.node_info = localNodeInfo() }.build().encode())
         scenario.peers.forEach { peer ->
-            callback.handleFromRadio(
-                FromRadio.Builder().also { wb -> wb.node_info = peer.toNodeInfo() }.build().encode(),
-            )
+            publish(FromRadio.Builder().also { wb -> wb.node_info = peer.toNodeInfo() }.build().encode())
         }
-        callback.handleFromRadio(
+        publish(
             FromRadio.Builder()
                 .also { wb -> wb.config_complete_id = HandshakeConstants.NODE_INFO_NONCE }
                 .build()
@@ -405,14 +402,14 @@ class MockRadioTransport(
     private suspend fun seedTraffic() {
         scenario.peers.forEach { peer ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(peer.positionPacket(nextPacketId(), peer.secondsSinceHeard).encode())
+                publish(peer.positionPacket(nextPacketId(), peer.secondsSinceHeard).encode())
             }
             delay(SEED_SPACING_MS)
         }
 
         scenario.peers.take(scenario.telemetryPeerCount).forEach { peer ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(
+                publish(
                     peer.deviceTelemetryPacket(nextPacketId(), tick = 0, ageSeconds = peer.secondsSinceHeard).encode(),
                 )
             }
@@ -422,7 +419,7 @@ class MockRadioTransport(
         scenario.peers.forEach { peer ->
             val environment = peer.environment ?: return@forEach
             lifecycle.runIfOpen {
-                callback.handleFromRadio(
+                publish(
                     peer
                         .environmentTelemetryPacket(nextPacketId(), environment, tick = 0, peer.secondsSinceHeard)
                         .encode(),
@@ -432,15 +429,13 @@ class MockRadioTransport(
         }
 
         lifecycle.runIfOpen {
-            callback.handleFromRadio(
-                scenario.peers[0].let { it.neighborInfoPacket(nextPacketId(), it.secondsSinceHeard) }.encode(),
-            )
+            publish(scenario.peers[0].let { it.neighborInfoPacket(nextPacketId(), it.secondsSinceHeard) }.encode())
         }
         delay(SEED_SPACING_MS)
         scenario.peers.forEach { peer ->
             val status = peer.status ?: return@forEach
             lifecycle.runIfOpen {
-                callback.handleFromRadio(peer.nodeStatusPacket(nextPacketId(), status, peer.secondsSinceHeard).encode())
+                publish(peer.nodeStatusPacket(nextPacketId(), status, peer.secondsSinceHeard).encode())
             }
             delay(SEED_SPACING_MS)
         }
@@ -460,7 +455,7 @@ class MockRadioTransport(
         scenario.channelConversation.forEachIndexed { index, (peerIndex, text) ->
             val peer = scenario.peers[peerIndex]
             lifecycle.runIfOpen {
-                callback.handleFromRadio(
+                publish(
                     peer
                         .textPacket(
                             id = nextPacketId(),
@@ -476,7 +471,7 @@ class MockRadioTransport(
 
         scenario.directConversation.forEachIndexed { index, text ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(
+                publish(
                     scenario.peers[scenario.directPeerIndex]
                         .textPacket(
                             id = nextPacketId(),
@@ -503,14 +498,12 @@ class MockRadioTransport(
         while (true) {
             delay(LIVE_TICK_MS)
             val peer = scenario.peers[tick % scenario.telemetryPeerCount]
-            lifecycle.runIfOpen { callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick).encode()) }
+            lifecycle.runIfOpen { publish(peer.deviceTelemetryPacket(nextPacketId(), tick).encode()) }
             val weatherPeer = scenario.peers.firstOrNull { it.environment != null }
             val environment = weatherPeer?.environment
             if (tick % WEATHER_TICK_INTERVAL == 0 && environment != null) {
                 lifecycle.runIfOpen {
-                    callback.handleFromRadio(
-                        weatherPeer.environmentTelemetryPacket(nextPacketId(), environment, tick).encode(),
-                    )
+                    publish(weatherPeer.environmentTelemetryPacket(nextPacketId(), environment, tick).encode())
                 }
             }
             tick++
@@ -535,7 +528,7 @@ class MockRadioTransport(
         transportScope.handledLaunch {
             delay(REPLY_DELAY_MS)
             lifecycle.runIfOpen {
-                callback.handleFromRadio(
+                publish(
                     responder
                         .textPacket(id = nextPacketId(), to = replyTo, text = AUTO_REPLY_TEXT, ageSeconds = 0)
                         .encode(),
@@ -795,7 +788,7 @@ class MockRadioTransport(
             .build(),
     )
 
-    private fun sendQueueStatus(msgId: Int) = callback.handleFromRadio(
+    private fun sendQueueStatus(msgId: Int) = publish(
         FromRadio.Builder()
             .also { wb ->
                 wb.queueStatus =
@@ -835,7 +828,7 @@ class MockRadioTransport(
                 // Firmware answers remote admin over PKI; the app discards a remote response without it.
                 pkiEncrypted = fromIn != toIn,
             )
-        callback.handleFromRadio(p.encode())
+        publish(p.encode())
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
@@ -845,7 +838,7 @@ class MockRadioTransport(
             delay(ACK_DELAY_MS)
             lifecycle.runIfOpen {
                 val directPeer = scenario.peers[scenario.directPeerIndex]
-                callback.handleFromRadio(makeAck(directPeer.num, packet.from, packet.id).encode())
+                publish(makeAck(directPeer.num, packet.from, packet.id).encode())
             }
         }
     }

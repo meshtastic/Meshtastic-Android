@@ -801,6 +801,17 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `refreshNodeInfo delegates to the SDK for the active session`() = testScope.runTest {
+        every { radioInterfaceService.transportManagesPhoneApi } returns true
+        every { radioInterfaceService.requestNodeDbRefresh(activeSession) } returns true
+
+        assertTrue(manager.refreshNodeInfo())
+
+        verify { radioInterfaceService.requestNodeDbRefresh(activeSession) }
+        verify(VerifyMode.not) { connectionManager.startNodeInfoOnly() }
+    }
+
+    @Test
     fun `refreshNodeInfo after a completed handshake requests only the node info stage`() = testScope.runTest {
         completeHandshake()
 

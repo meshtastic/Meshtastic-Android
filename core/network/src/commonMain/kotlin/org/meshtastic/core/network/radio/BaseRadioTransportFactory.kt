@@ -17,10 +17,7 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.normalizeWebSocketUrl
@@ -28,16 +25,8 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
-/**
- * Common base class for platform [RadioTransportFactory] implementations. Handles KMP-friendly transports (BLE) while
- * delegating platform-specific ones (like TCP, USB/Serial and Mocks) to the abstract [createPlatformTransport].
- */
-abstract class BaseRadioTransportFactory(
-    protected val scanner: BleScanner,
-    protected val bluetoothRepository: BluetoothRepository,
-    protected val connectionFactory: BleConnectionFactory,
-    protected val dispatchers: CoroutineDispatchers,
-) : RadioTransportFactory {
+/** Common address admission and dispatch for platform [RadioTransportFactory] implementations. */
+abstract class BaseRadioTransportFactory(private val bluetoothRepository: BluetoothRepository) : RadioTransportFactory {
 
     init {
         if (!bluetoothRepository.isSupported) Logger.w { "No Bluetooth LE on this hardware; BLE addresses are refused" }
@@ -86,14 +75,7 @@ abstract class BaseRadioTransportFactory(
             when {
                 address.startsWith(InterfaceId.BLUETOOTH.id) || address.startsWith("!") -> {
                     val bleAddress = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()).removePrefix("!")
-                    BleRadioTransport(
-                        scope = service.serviceScope,
-                        scanner = scanner,
-                        bluetoothRepository = bluetoothRepository,
-                        connectionFactory = connectionFactory,
-                        callback = service,
-                        address = bleAddress,
-                    )
+                    createBleTransport(bleAddress, service)
                 }
 
                 // Common to every platform: the transport brings its own Ktor CIO client. Normalizing here also gives a
@@ -109,9 +91,11 @@ abstract class BaseRadioTransportFactory(
         return transport
     }
 
+    /** Creates a BLE transport from a saved address with its interface prefix removed. */
+    protected abstract fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport
+
     /** Creates a WebSocket transport for a normalized radio URL. */
-    protected open fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
-        WebSocketRadioTransport(callback = service, scope = service.serviceScope, url = url)
+    protected abstract fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport
 
     /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
     protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport

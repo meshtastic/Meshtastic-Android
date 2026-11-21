@@ -54,7 +54,7 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     override val picksDevice: Boolean = true
 
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
-        val peripheral = if (address != null) granted(address) else pick(serviceUuid)
+        val peripheral = if (address != null) grantedPeripheral(address) else pick(serviceUuid)
         if (peripheral != null) emit(peripheral.toBleDevice())
     }
 
@@ -91,7 +91,8 @@ class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
         }
     }
 
-    private suspend fun granted(address: String): Peripheral? {
+    /** Returns the page's granted peripheral without opening the browser chooser. */
+    suspend fun grantedPeripheral(address: String): Peripheral? {
         val peripheral = WebBluetoothGrants.find(address) ?: restoreGrant(address)?.let(WebBluetoothGrants::remember)
         if (peripheral != null) {
             // Without the new permissions backend there is no watchAdvertisements; the connect then tries as it is.

@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import org.koin.core.annotation.Single
-import org.meshtastic.core.network.SerialTransport
+import org.meshtastic.core.network.availableSerialPortNames
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.JvmUsbDeviceData
 import kotlin.coroutines.coroutineContext
@@ -32,7 +32,7 @@ class JvmUsbScanner : UsbScanner {
     override fun scanUsbDevices(): Flow<List<DeviceListEntry.Usb>> = flow {
         while (coroutineContext.isActive) {
             val ports =
-                SerialTransport.getAvailablePorts().map { portName ->
+                availableSerialPortNames().map { portName ->
                     DeviceListEntry.Usb(
                         usbData = JvmUsbDeviceData(portName),
                         name = portName,

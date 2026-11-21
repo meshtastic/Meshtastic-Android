@@ -48,15 +48,16 @@ plugins {
     id("org.meshtastic.flatpak.sources.settings") version "0.2.2"
 }
 
-// Local SDK integration builds consume the SDK as a composite.
-providers.gradleProperty("meshtasticSdkCheckout").orNull?.let { checkout ->
-    includeBuild(checkout) {
-        name = "meshtastic-sdk-checkout"
-        dependencySubstitution {
-            substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
-            substitute(module("org.meshtastic:sdk-transport-websocket")).using(project(":transport-websocket"))
-            substitute(module("org.meshtastic:sdk-transport-serial")).using(project(":transport-serial"))
-        }
+// Consume the cutover SDK from source until its APIs are published.
+val sdkCheckout = providers.gradleProperty("meshtasticSdkCheckout").orNull ?: "../meshtastic-sdk"
+includeBuild(sdkCheckout) {
+    name = "meshtastic-sdk-checkout"
+    dependencySubstitution {
+        substitute(module("org.meshtastic:sdk-core")).using(project(":core"))
+        substitute(module("org.meshtastic:sdk-transport-ble")).using(project(":transport-ble"))
+        substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
+        substitute(module("org.meshtastic:sdk-transport-websocket")).using(project(":transport-websocket"))
+        substitute(module("org.meshtastic:sdk-transport-serial")).using(project(":transport-serial"))
     }
 }
 

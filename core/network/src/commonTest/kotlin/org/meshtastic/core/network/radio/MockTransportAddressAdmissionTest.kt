@@ -16,14 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
-import dev.mokkery.MockMode
-import dev.mokkery.mock
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -43,18 +37,8 @@ class MockTransportAddressAdmissionTest {
     private val gate = MutableStateFlow(false)
 
     private val factory =
-        object :
-            BaseRadioTransportFactory(
-                scanner = mock<BleScanner>(MockMode.autofill),
-                bluetoothRepository = FakeBluetoothRepository(),
-                connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
-                dispatchers =
-                CoroutineDispatchers(
-                    io = Dispatchers.Unconfined,
-                    main = Dispatchers.Unconfined,
-                    default = Dispatchers.Unconfined,
-                ),
-            ) {
+        object : BaseRadioTransportFactory(bluetoothRepository = FakeBluetoothRepository()) {
+
             override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP)
 
             override val mockTransportEnabled: StateFlow<Boolean> = gate
@@ -63,6 +47,12 @@ class MockTransportAddressAdmissionTest {
             // asset ships only decides if the entry is worth offering, and must not make `r` connectable when Demo
             // Mode is locked.
             override val isReplayTransportAvailable: Boolean = false
+
+            override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+                error("Unexpected Ble link in address-admission test")
+
+            override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+                NopRadioTransport(url)
 
             override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
                 NopRadioTransport(address)

@@ -35,6 +35,9 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.network)
             implementation(libs.meshtastic.protobufs)
+            implementation("org.meshtastic:sdk-core")
+            implementation("org.meshtastic:sdk-transport-ble")
+            implementation("org.meshtastic:sdk-transport-websocket")
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
@@ -54,52 +57,27 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
-            if (providers.gradleProperty("meshtasticSdkCheckout").isPresent) {
-                implementation("org.meshtastic:sdk-transport-tcp")
-            }
+            implementation("org.meshtastic:sdk-transport-tcp")
+            implementation("org.meshtastic:sdk-transport-serial")
+            implementation(libs.kable.core)
         }
-        if (providers.gradleProperty("meshtasticSdkCheckout").isPresent) {
-            androidMain {
-                kotlin.srcDir("src/sdkTcpAndroidMain/kotlin")
-                kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
-            }
-            if (providers.gradleProperty("meshtasticSdkWeb").orNull == "true") {
-                getByName("wasmJsMain") {
-                    kotlin.srcDir("src/sdkWebWasmMain/kotlin")
-                    kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
-                    dependencies { implementation("org.meshtastic:sdk-transport-websocket") }
-                }
-            }
-            if (providers.gradleProperty("meshtasticSdkDesktop").orNull == "true") {
-                getByName("jvmMain") {
-                    kotlin.srcDir("src/sdkDesktopJvmMain/kotlin")
-                    kotlin.srcDir("src/sdkPhoneApiMain/kotlin")
-                    dependencies {
-                        implementation("org.meshtastic:sdk-transport-tcp")
-                        implementation("org.meshtastic:sdk-transport-websocket")
-                        implementation("org.meshtastic:sdk-transport-serial")
-                    }
-                }
-            }
+        getByName("jvmMain").dependencies {
+            implementation(libs.kable.core)
+            implementation("org.meshtastic:sdk-transport-tcp")
+            implementation("org.meshtastic:sdk-transport-serial")
+        }
+        findByName("wasmJsMain")?.dependencies {
+            implementation(projects.core.ble)
+            implementation(libs.kable.core)
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }
 
-        providers.gradleProperty("sdkReplayJar").orNull?.let { sdkJar ->
-            getByName("jvmTest") {
-                kotlin.srcDir("src/sdkReplayTest/kotlin")
-                dependencies {
-                    implementation(files(sdkJar))
-                    providers.gradleProperty("sdkTcpJar").orNull?.let { tcpJar ->
-                        kotlin.srcDir("src/sdkTcpTest/kotlin")
-                        implementation(files(tcpJar))
-                        implementation(projects.core.service)
-                        implementation(projects.core.ble)
-                        implementation(libs.ktor.network)
-                        implementation(libs.androidx.datastore.preferences)
-                    }
-                }
-            }
+        getByName("jvmTest").dependencies {
+            implementation(projects.core.service)
+            implementation(projects.core.ble)
+            implementation(libs.ktor.network)
+            implementation(libs.androidx.datastore.preferences)
         }
 
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }

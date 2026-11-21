@@ -16,14 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
-import dev.mokkery.MockMode
-import dev.mokkery.mock
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -40,23 +34,19 @@ class BleAddressAdmissionTest {
 
     private val bluetoothRepository = FakeBluetoothRepository()
 
-    private fun factory() = object :
-        BaseRadioTransportFactory(
-            scanner = mock<BleScanner>(MockMode.autofill),
-            bluetoothRepository = bluetoothRepository,
-            connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
-            dispatchers =
-            CoroutineDispatchers(
-                io = Dispatchers.Unconfined,
-                main = Dispatchers.Unconfined,
-                default = Dispatchers.Unconfined,
-            ),
-        ) {
+    private fun factory() = object : BaseRadioTransportFactory(bluetoothRepository = bluetoothRepository) {
+
         override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
 
         override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
         override val isReplayTransportAvailable: Boolean = false
+
+        override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+            error("Unexpected Ble link in address-admission test")
+
+        override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+            NopRadioTransport(url)
 
         override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
             NopRadioTransport(address)

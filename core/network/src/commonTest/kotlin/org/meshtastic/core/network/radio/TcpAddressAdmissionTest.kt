@@ -16,14 +16,8 @@
  */
 package org.meshtastic.core.network.radio
 
-import dev.mokkery.MockMode
-import dev.mokkery.mock
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -38,29 +32,26 @@ import kotlin.test.assertTrue
  */
 class TcpAddressAdmissionTest {
 
-    private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) = object :
-        BaseRadioTransportFactory(
-            scanner = mock<BleScanner>(MockMode.autofill),
-            bluetoothRepository = FakeBluetoothRepository(),
-            connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
-            dispatchers =
-            CoroutineDispatchers(
-                io = Dispatchers.Unconfined,
-                main = Dispatchers.Unconfined,
-                default = Dispatchers.Unconfined,
-            ),
-        ) {
-        override val supportedDeviceTypes: List<DeviceType> = types.toList()
+    private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) =
+        object : BaseRadioTransportFactory(bluetoothRepository = FakeBluetoothRepository()) {
 
-        override val isRawTcpSupported: Boolean = rawTcp
+            override val supportedDeviceTypes: List<DeviceType> = types.toList()
 
-        override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+            override val isRawTcpSupported: Boolean = rawTcp
 
-        override val isReplayTransportAvailable: Boolean = false
+            override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
-        override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
-            error("no transport is built for an address that is refused")
-    }
+            override val isReplayTransportAvailable: Boolean = false
+
+            override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+                error("Unexpected Ble link in address-admission test")
+
+            override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+                NopRadioTransport(url)
+
+            override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
+                error("no transport is built for an address that is refused")
+        }
 
     @Test
     fun `tcp addresses are refused where the platform has no tcp transport`() {

@@ -24,9 +24,9 @@ import org.koin.core.annotation.Single
 /**
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
- * The desktop serial transport (`SerialTransport` backed by jSerialComm) does not currently publish a hot-plug device
- * set, so this implementation reports a perpetually-empty set. Transport recovery on replug is therefore a no-op on JVM
- * until/unless jSerialComm enumeration is exposed as a flow.
+ * Desktop serial does not currently publish a hot-plug device set, so this implementation reports a perpetually-empty
+ * set. Transport recovery on replug is therefore a no-op on JVM until/unless jSerialComm enumeration is exposed as a
+ * flow.
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {

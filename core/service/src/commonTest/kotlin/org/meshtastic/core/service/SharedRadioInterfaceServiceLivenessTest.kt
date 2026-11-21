@@ -43,8 +43,6 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
@@ -411,13 +409,8 @@ class SharedRadioInterfaceServiceLivenessTest {
             every { analytics.isPlatformServicesAvailable } returns false
             val requestedTransports = mutableListOf<String>()
             val realFactory =
-                object :
-                    BaseRadioTransportFactory(
-                        scanner = mock<BleScanner>(MockMode.autofill),
-                        bluetoothRepository = bluetoothRepository,
-                        connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
-                        dispatchers = dispatchers,
-                    ) {
+                object : BaseRadioTransportFactory(bluetoothRepository = bluetoothRepository) {
+
                     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
 
                     override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
@@ -428,6 +421,12 @@ class SharedRadioInterfaceServiceLivenessTest {
                         requestedTransports += address
                         return super.createTransport(address, service)
                     }
+
+                    override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+                        error("Unexpected Ble link in address-admission test")
+
+                    override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+                        FakeRadioTransport()
 
                     override fun createPlatformTransport(address: String, service: RadioInterfaceService) =
                         FakeRadioTransport()
@@ -1813,8 +1812,12 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
-    private fun createPhoneApiService(callbacks: MutableList<RadioInterfaceService>): SharedRadioInterfaceService {
-        val service = createConnectedService("t192.0.2.1", startConnected = false)
+    private fun createPhoneApiService(
+        callbacks: MutableList<RadioInterfaceService>,
+        address: String = "t192.0.2.1",
+        networkAvailability: MutableStateFlow<Boolean> = MutableStateFlow(true),
+    ): SharedRadioInterfaceService {
+        val service = createConnectedService(address, networkAvailability = networkAvailability, startConnected = false)
         every { transportFactory.createTransport(any(), any()) } calls
             { args ->
                 callbacks += args.arg<RadioInterfaceService>(1)
@@ -1825,6 +1828,46 @@ class SharedRadioInterfaceServiceLivenessTest {
         service.connect()
         testDispatcher.scheduler.runCurrent()
         return service
+    }
+
+    @Test
+    fun `SDK USB replug takes one fresh generation without a network`() = runTest(testDispatcher) {
+        val key = "9114-32809"
+        serialDeviceKeys.value = setOf(key)
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service =
+            createPhoneApiService(callbacks, address = "s$key", networkAvailability = MutableStateFlow(false))
+        val initialSession = assertNotNull(service.activeSession.value)
+        try {
+            val original = callbacks.single()
+            original.onConnect()
+            testDispatcher.scheduler.runCurrent()
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            original.onPhoneApiSessionEnded(recoverable = true)
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+            assertNull(service.activeSession.value)
+
+            serialDeviceKeys.value = setOf("6790-21972")
+            advanceTimeBy(2_000L)
+            assertEquals(1, callbacks.size)
+
+            serialDeviceKeys.value = setOf(key)
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(2, callbacks.size)
+            assertTrue(assertNotNull(service.activeSession.value).generation > initialSession.generation)
+
+            // A late SDK callback cannot retire the replacement.
+            callbacks.last().onConnect()
+            original.onPhoneApiSessionEnded(recoverable = false)
+            advanceTimeBy(2_000L)
+            assertEquals(2, callbacks.size)
+            assertEquals(ConnectionState.Connected, service.connectionState.value)
+        } finally {
+            service.disconnect()
+        }
     }
 
     @Test
@@ -2632,6 +2675,49 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     // ─── Post-OTA GATT cache invalidation flag lifecycle ───────────────────────────────────────
+
+    @Test
+    fun `PhoneAPI retries BLE without an IP network`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service =
+            createPhoneApiService(
+                callbacks,
+                address = "!AA:BB:CC:DD:EE:FF",
+                networkAvailability = MutableStateFlow(false),
+            )
+        try {
+            callbacks.single().onConnect()
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+
+            advanceTimeBy(1_000L)
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(2, callbacks.size)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `retired BLE transport cannot consume the next generation's GATT request`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            val retired = callbacks.single()
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(2, callbacks.size)
+            service.requestGattCacheInvalidationOnNextConnect()
+
+            assertFalse(retired.consumeGattCacheInvalidationRequest())
+            assertTrue(callbacks.last().consumeGattCacheInvalidationRequest())
+            assertFalse(callbacks.last().consumeGattCacheInvalidationRequest())
+        } finally {
+            service.disconnect()
+        }
+    }
 
     /**
      * The one-shot cache-invalidation flag is armed by

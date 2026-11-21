@@ -22,18 +22,16 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.TransportDisconnectReason
 
 /**
  * Android implementation of [RadioTransportFactory]. Handles pure-KMP transports (BLE) via [BaseRadioTransportFactory]
@@ -46,12 +44,10 @@ class AndroidRadioTransportFactory(
     private val buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
     hiddenFeaturesUnlock: HiddenFeaturesUnlock,
-    scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
-    connectionFactory: BleConnectionFactory,
-    dispatchers: CoroutineDispatchers,
-    private val sdkTcpFactory: AndroidSdkTcpTransportFactory? = null,
-) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
+    private val sdk: AndroidSdkTransportFactory,
+    private val virtual: VirtualRadioSessionFactory,
+) : BaseRadioTransportFactory(bluetoothRepository) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
@@ -86,7 +82,7 @@ class AndroidRadioTransportFactory(
 
     override val isSerialSupported: Boolean = usbRepository.isSupported
 
-    // Presence and USB permission are left to SerialRadioTransport, which reports a denied permission to the user.
+    // USB presence and permission are checked when the selected device opens.
     override fun isPlatformAddressValid(address: String): Boolean =
         address.firstOrNull()?.let { InterfaceId.forIdChar(it) } == InterfaceId.NOP
 
@@ -95,29 +91,13 @@ class AndroidRadioTransportFactory(
         val rest = address.substring(1)
 
         return when (interfaceId) {
-            InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+            InterfaceId.MOCK -> virtual.demo(rest, service)
 
             InterfaceId.REPLAY -> createReplayTransport(service, rest)
 
-            InterfaceId.TCP ->
-                sdkTcpFactory
-                    ?.takeIf { buildConfigProvider.isDebug && context.getFileStreamPath(SDK_TCP_FLAG).exists() }
-                    ?.create(rest, service)
-                    ?: TcpRadioTransport(
-                        callback = service,
-                        scope = service.serviceScope,
-                        dispatchers = dispatchers,
-                        address = rest,
-                    )
+            InterfaceId.TCP -> sdk.tcp(rest, service)
 
-            InterfaceId.SERIAL ->
-                SerialRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    serialDevices = usbRepository.serialDevices,
-                    createSerialConnection = usbRepository::createSerialConnection,
-                    address = rest,
-                )
+            InterfaceId.SERIAL -> createSdkUsbTransport(rest, service)
 
             InterfaceId.NOP,
             null,
@@ -127,6 +107,37 @@ class AndroidRadioTransportFactory(
 
             InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
         }
+    }
+
+    override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        sdk.ble(address, service)
+
+    override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+        sdk.webSocket(url, service)
+
+    private fun createSdkUsbTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val devices = usbRepository.serialDevices.value
+        // Old installations persisted a bus path. A missing stable key must not open a different device.
+        val device =
+            (devices[address] ?: devices.values.singleOrNull()?.takeIf { address.startsWith("/dev/") })?.device
+                ?: return UsbUnavailableTransport(service, reason = null)
+        if (!usbRepository.hasPermission(device)) {
+            return UsbUnavailableTransport(service, TransportDisconnectReason.UsbPermissionDenied)
+        }
+        return sdk.usb(device, service)
+    }
+
+    private class UsbUnavailableTransport(
+        private val service: RadioInterfaceService,
+        private val reason: TransportDisconnectReason?,
+    ) : RadioTransport {
+        override val managesPhoneApi: Boolean = true
+
+        override fun start() = service.onDisconnect(isPermanent = reason != null, reason = reason)
+
+        override fun handleSendToRadio(p: ByteArray): Boolean = false
+
+        override suspend fun close() = Unit
     }
 
     /**
@@ -143,20 +154,14 @@ class AndroidRadioTransportFactory(
             ?.takeIf { it.isNotEmpty() }
         return if (replayFrames != null) {
             Logger.i { "Replay device → replaying $REPLAY_ASSET_NAME (${replayFrames.size} bytes)" }
-            ReplayRadioTransport(
-                callback = service,
-                scope = service.serviceScope,
-                address = rest,
-                frames = replayFrames,
-            )
+            virtual.replay(rest, replayFrames, service)
         } else {
             Logger.w { "Replay device selected but $REPLAY_ASSET_NAME asset is missing — falling back to mock" }
-            MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+            virtual.demo(rest, service)
         }
     }
 
     private companion object {
         const val REPLAY_ASSET_NAME = "burningmesh.fromradio"
-        const val SDK_TCP_FLAG = "enable-sdk-tcp"
     }
 }

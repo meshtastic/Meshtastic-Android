@@ -20,7 +20,7 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 
-/** Creates a transport that owns the desktop PhoneAPI session, when the SDK accepts the endpoint. */
+/** Creates a transport that owns the desktop PhoneAPI session, for a real desktop link. */
 fun interface DesktopSdkTransportFactory {
-    fun create(interfaceId: InterfaceId, endpoint: String, service: RadioInterfaceService): RadioTransport?
+    fun create(interfaceId: InterfaceId, endpoint: String, service: RadioInterfaceService): RadioTransport
 }

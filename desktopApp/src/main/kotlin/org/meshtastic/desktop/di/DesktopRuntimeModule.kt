@@ -30,8 +30,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -39,6 +37,7 @@ import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
+import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -88,18 +87,10 @@ class DesktopRuntimeModule {
 
     @Single
     fun radioTransportFactory(
-        dispatchers: CoroutineDispatchers,
-        scanner: BleScanner,
         bluetoothRepository: BluetoothRepository,
-        connectionFactory: BleConnectionFactory,
-        sdkTransportFactory: DesktopSdkTransportFactory? = null,
-    ): RadioTransportFactory = DesktopRadioTransportFactory(
-        dispatchers = dispatchers,
-        scanner = scanner,
-        bluetoothRepository = bluetoothRepository,
-        connectionFactory = connectionFactory,
-        sdkTransportFactory = sdkTransportFactory,
-    )
+        sdkTransportFactory: DesktopSdkTransportFactory,
+        virtual: VirtualRadioSessionFactory,
+    ): RadioTransportFactory = DesktopRadioTransportFactory(bluetoothRepository, sdkTransportFactory, virtual)
 
     /**
      * Only the Linux sender holds a native handle; the others are stateless. `Main.kt` closes it explicitly during

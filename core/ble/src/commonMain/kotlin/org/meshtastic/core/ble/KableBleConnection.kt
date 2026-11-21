@@ -113,8 +113,8 @@ internal inline fun <T> asException(block: () -> T): T = try {
  *
  * Connection attempts follow Kable's recommended pattern from the SensorTag sample: use a direct connect when a fresh
  * advertisement is available, then fall back to `autoConnect = true` on failure. Advertisement-less devices start on
- * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
- * macro-level retry/backoff loop.
+ * the `autoConnect` path. At most two attempts are made per [connect] call — the caller owns the macro-level
+ * retry/backoff loop.
  */
 class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
     BleConnection {
@@ -220,7 +220,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                     connectFailure = e
                     if (autoConnect) {
                         // Already on the autoConnect path and still failing: surface a clear Disconnected
-                        // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
+                        // and let the caller own the macro retry budget.
                         Logger.w {
                             "[${device.address.anonymize()}] autoConnect also failed; deferring to outer reconnect loop"
                         }

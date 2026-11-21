@@ -142,6 +142,9 @@ interface RadioInterfaceService :
     val transportManagesPhoneApi: Boolean
         get() = false
 
+    /** Queues a nodes-only refresh for the admitted SDK session. */
+    fun requestNodeDbRefresh(session: RadioSessionContext): Boolean = false
+
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 
