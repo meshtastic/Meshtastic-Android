@@ -61,16 +61,17 @@ class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
             remote(develocity.buildCache) {
                 isEnabled = true
                 val accessKey = System.getenv("DEVELOCITY_ACCESS_KEY")?.trim()
-                // Write only from trusted events. A same-repository pull request DOES
-                // receive repository secrets, so gating on the access key alone let PR
-                // builds write into the shared cache; excluding pull_request here keeps
-                // unmerged code out of it. Fork PRs have no key and are excluded twice
-                // over, and local builds are excluded by isCI.
+                // Write from CI events that hold the access key. A same-repository pull request receives
+                // repository secrets and writes too: one that edits build-logic misses the cache on every
+                // task, and without its own entries each push and rerun of it ran cold. That lets unmerged
+                // code from a branch in this repository into the shared cache. Fork pull requests have no
+                // key, and local builds are excluded by isCI.
                 val event = System.getenv("GITHUB_EVENT_NAME")
                 // A reusable workflow sees its caller's ref, so a release cut dispatched from main passes.
                 val dispatchedFromMain =
                     event == "workflow_dispatch" && System.getenv("GITHUB_REF") == "refs/heads/main"
-                val trustedForPush = event == "push" || event == "merge_group" || dispatchedFromMain
+                val trustedForPush =
+                    event == "push" || event == "merge_group" || event == "pull_request" || dispatchedFromMain
                 isPush = isCI && trustedForPush && !accessKey.isNullOrEmpty()
             }
         }
