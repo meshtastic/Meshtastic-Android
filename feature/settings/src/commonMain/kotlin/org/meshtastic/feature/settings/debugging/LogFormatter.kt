@@ -24,13 +24,46 @@ import kotlinx.datetime.toLocalDateTime
 import org.meshtastic.core.common.util.nowMillis
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
-// `psk` is channel key material and reaches the debug log via set_channel / get_channel_response like any other field.
-internal val redactedKeys = listOf("session_passkey", "private_key", "admin_key", "psk")
+// Credential-bearing proto fields, matched as a suffix of the rendered field name (`psk` also covers `wifi_psk`).
+// `psk` ChannelSettings, `wifi_psk` NetworkConfig, `private_key`/`admin_key` SecurityConfig, `session_passkey`
+// AdminMessage, `password`/`username` MQTTConfig, `passphrase` LockdownAuth, `fixed_pin` BluetoothConfig, `pin_code`
+// DeviceUIConfig, `security_number` key verification, `channel_url` DeviceProfile.
+// `public_key`
+// is deliberately absent. `secret` and `token` catch any future field named so.
+internal val redactedKeys =
+    listOf(
+        "session_passkey",
+        "private_key",
+        "admin_key",
+        "psk",
+        "password",
+        "passphrase",
+        "username",
+        "secret",
+        "token",
+        "fixed_pin",
+        "pin_code",
+        "security_number",
+        "channel_url",
+    )
 
-// Matches `key: value`, `key=value`, `key=[hex=..]`, and one level of nested list like `admin_key=[[hex=..], [..]]`.
-// The value alternation is ordered bracket-list | quoted | bare-token so the widest match wins.
-private val REDACT_REGEX =
-    Regex("(${redactedKeys.joinToString("|")})\\s*([:=])\\s*(\\[(?:[^\\[\\]]|\\[[^\\]]*\\])*\\]|\"[^\"]*\"|\\S+)")
+// A bare numeric `pin` (BluetoothConnectionStatus) needs a left guard so GPIO fields such as `monitor_pin` stay
+// readable.
+private const val BARE_PIN = """(?<![A-Za-z0-9_])pin(?=\s*[:=]\s*\d)"""
+
+// Value shapes after `key=` or `key:`, tried in this order:
+// - bytes rendered as text, `[text=..]` or `[size=N text=..…]`: okio does not escape `]` in the text, so the end of the
+//   value is ambiguous and everything to the end of the line is redacted
+// - a list of bytes renderings: `[[hex=..], [hex=..]]`
+// - one hex rendering: `[hex=..]`, `[size=N hex=..…]`, which cannot contain `]`
+// - a quoted value that ends the field
+// - anything else up to an unescaped `,` or `}`. Wire writes strings unquoted, with `, [ ] { } \` backslash-escaped and
+//   spaces kept, so a password with spaces is one value and the last field of a message keeps its closing brace.
+private const val FIELD_END = """(?=\s*(?:,|\}|$))"""
+private const val VALUE_SHAPES =
+    """\[\[?(?:size=\d+ )?text=.*|\[(?:\[[^\]]*\](?:,\s*)?)+\]|\[.*?\]$FIELD_END|"(?:[^"\\]|\\.)*"$FIELD_END|(?:[^,}\\]|\\.)+"""
+
+private val REDACT_REGEX = Regex("""(${redactedKeys.joinToString("|")}|$BARE_PIN)\s*([:=])\s*($VALUE_SHAPES)""")
 
 /**
  * Matches an undecoded binary `payload` field in a proto `toString()`, in every shape okio can render it.
@@ -48,16 +81,15 @@ private val PAYLOAD_HEX_REGEX = Regex("""(payload)\s*([:=])\s*\[(?:size=\d+ )?he
 
 /** Builds a collision-free export file name, e.g. `meshtastic_logcat_20260701_143312.txt`. */
 internal fun timestampedExportName(prefix: String): String {
-    val format =
-        LocalDateTime.Format {
-            year()
-            monthNumber()
-            day()
-            char('_')
-            hour()
-            minute()
-            second()
-        }
+    val format = LocalDateTime.Format {
+        year()
+        monthNumber()
+        day()
+        char('_')
+        hour()
+        minute()
+        second()
+    }
     val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
     return "${prefix}_$timestamp.txt"
 }
