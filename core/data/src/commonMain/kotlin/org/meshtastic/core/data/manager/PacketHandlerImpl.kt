@@ -148,6 +148,24 @@ class PacketHandlerImpl(
         }
     }
 
+    override fun logRequest(requestId: Int, to: Int, port: PortNum) = logPacket(
+        MeshPacket.Builder()
+            .also { wb ->
+                wb.id = requestId
+                wb.from = nodeManager.myNodeNum.value ?: 0
+                wb.to = to
+                wb.decoded =
+                    Data.Builder()
+                        .also { data ->
+                            data.portnum = port
+                            data.want_response = true
+                            data.dest = to
+                        }
+                        .build()
+            }
+            .build(),
+    )
+
     override suspend fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
         require(p.dataType != 0) { "Port numbers must be non-zero!" }

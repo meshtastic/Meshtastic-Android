@@ -18,6 +18,7 @@ package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.sdk.PacedMessageHandle
 
@@ -39,6 +40,12 @@ interface PacketHandler {
      * of treating a normal return as successful admission.
      */
     suspend fun sendData(p: DataPacket)
+
+    /**
+     * Records a request the SDK sent to [to] on [port] under [requestId] in the mesh log, which the request logs and
+     * reply matching read.
+     */
+    fun logRequest(requestId: Int, to: Int, port: PortNum)
 
     /**
      * Adds a mesh packet to the queue for sending.

@@ -38,7 +38,6 @@ import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
@@ -46,6 +45,7 @@ import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -58,6 +58,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
@@ -112,8 +113,9 @@ internal suspend fun restoreLocalConfigurationIfOwned(
 class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
-    commandSender: CommandSender,
     private val packetHandler: PacketHandler,
+    tracerouteHandler: TracerouteHandler,
+    neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
     private val radioInterfaceService: RadioInterfaceService,
     private val locationManager: MeshLocationManager,
@@ -163,7 +165,15 @@ class RadioControllerImpl(
         packetRepository,
         scope,
     ),
-    QueryController by QueryControllerImpl(commandSender, radioInterfaceService, nodeManager, uiPrefs, scope) {
+    QueryController by QueryControllerImpl(
+        radioInterfaceService,
+        packetHandler,
+        tracerouteHandler,
+        neighborInfoHandler,
+        nodeManager,
+        uiPrefs,
+        scope,
+    ) {
 
     private val deviceSwitchMutex = Mutex()
 

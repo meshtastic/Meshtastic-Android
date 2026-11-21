@@ -24,6 +24,7 @@ import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.PacedMessageHandle
 
 /** Recording [PacketHandler] for tests that send data packets without a radio session. */
@@ -40,11 +41,15 @@ class FakePacketHandler :
     /** Thrown by [sendData] after it marks the packet [MessageStatus.ERROR], when set. */
     var sendDataFailure: PacketQueueRejectedException? = null
 
+    /** Requests [logRequest] recorded, as (request ID, destination, port). */
+    val loggedRequests = mutableListOf<Triple<Int, Int, PortNum>>()
+
     private var nextPacketId = 1
 
     init {
         registerResetAction {
             mutableSentPackets.clear()
+            loggedRequests.clear()
             nextPacketId = 1
             sendDataFailure = null
         }
@@ -65,6 +70,10 @@ class FakePacketHandler :
         p.status = MessageStatus.QUEUED
         p.time = nowMillis
         mutableSentPackets += p.snapshot()
+    }
+
+    override fun logRequest(requestId: Int, to: Int, port: PortNum) {
+        loggedRequests += Triple(requestId, to, port)
     }
 
     private fun DataPacket.snapshot(): DataPacket = copy().also { it.errorMessage = errorMessage }

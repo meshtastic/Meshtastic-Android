@@ -37,7 +37,6 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
@@ -62,7 +61,6 @@ import kotlin.test.assertTrue
 
 class RadioControllerRestoreTest {
     private class Fixture {
-        val commandSender: CommandSender = mock(MockMode.autofill)
         val packetHandler: PacketHandler = mock(MockMode.autofill)
         val nodeManager: NodeManager = mock(MockMode.autofill)
         val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
@@ -94,7 +92,8 @@ class RadioControllerRestoreTest {
             return RadioControllerImpl(
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
-                commandSender = commandSender,
+                tracerouteHandler = mock(MockMode.autofill),
+                neighborInfoHandler = mock(MockMode.autofill),
                 packetHandler = packetHandler,
                 nodeManager = nodeManager,
                 radioInterfaceService = radioInterfaceService,

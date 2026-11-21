@@ -21,16 +21,19 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRequest
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.repository.toNodeRequest
+import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.MessageHandle
@@ -42,12 +45,16 @@ import org.meshtastic.sdk.requestPositionOnHeardChannel
 import org.meshtastic.proto.Position as ProtoPosition
 
 /**
- * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, the request helpers and the
- * admin metadata read. [commandSender] keeps the requests the SDK cannot yet send as firmware expects.
+ * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, `RoutingApi`, the request
+ * helpers and the admin metadata read. Traceroute and neighbor-info requests go out under an ID from [packetHandler],
+ * which logs them where the request logs read them and times the reply.
  */
+@Suppress("LongParameterList")
 internal class QueryControllerImpl(
-    private val commandSender: CommandSender,
     private val radio: RadioInterfaceService,
+    private val packetHandler: PacketHandler,
+    private val tracerouteHandler: TracerouteHandler,
+    private val neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
     private val uiPrefs: UiPrefs,
     private val scope: CoroutineScope,
@@ -71,8 +78,10 @@ internal class QueryControllerImpl(
     }
 
     /** Starts [rpc] on [client] and returns once the SDK has queued it; the reply settles the [NodeRequest]. */
-    private fun rpc(operation: String, rpc: suspend RadioClient.() -> AdminResult<*>): NodeRequest {
-        val client = requireClient(operation)
+    private fun rpc(operation: String, rpc: suspend RadioClient.() -> AdminResult<*>): NodeRequest =
+        rpc(requireClient(operation), requestId = null, rpc)
+
+    private fun rpc(client: RadioClient, requestId: Int?, rpc: suspend RadioClient.() -> AdminResult<*>): NodeRequest {
         val outcome =
             scope.async(start = CoroutineStart.UNDISPATCHED) {
                 try {
@@ -81,7 +90,7 @@ internal class QueryControllerImpl(
                     null
                 }
             }
-        return NodeRequest(requestId = null) { outcome.await() }
+        return NodeRequest(requestId) { outcome.await() }
     }
 
     override suspend fun refreshMetadata(destNum: Int): NodeRequest {
@@ -122,31 +131,34 @@ internal class QueryControllerImpl(
         return send("User-info request") { requestNodeInfoOnHeardChannel(NodeId(destNum)) }
     }
 
-    override suspend fun requestTraceroute(destNum: Int): NodeRequest = commandSender.requestTraceroute(destNum)
+    override suspend fun requestTraceroute(destNum: Int): NodeRequest {
+        val client = requireClient("Traceroute request")
+        val requestId = packetHandler.generatePacketId()
+        tracerouteHandler.recordStartTime(requestId, destNum)
+        val request = rpc(client, requestId) { routing.traceRoute(NodeId(destNum), requestId = requestId) }
+        packetHandler.logRequest(requestId, destNum, PortNum.TRACEROUTE_APP)
+        return request
+    }
 
     override suspend fun requestTelemetry(destNum: Int, type: TelemetryType): NodeRequest {
         val node = NodeId(destNum)
         return when (type) {
             TelemetryType.PAX -> send("Paxcount request") { requestPaxcount(node) }
-
-            TelemetryType.LOCAL_STATS ->
-                if (isLocal(destNum)) {
-                    rpc("Telemetry request") { telemetry.requestLocalStats() }
-                } else {
-                    commandSender.requestLocalStats(destNum)
-                }
-
+            TelemetryType.LOCAL_STATS -> rpc("Telemetry request") { telemetry.requestLocalStats(node) }
             TelemetryType.DEVICE -> rpc("Telemetry request") { telemetry.requestDevice(node) }
-
             TelemetryType.ENVIRONMENT -> rpc("Telemetry request") { telemetry.requestEnvironment(node) }
-
             TelemetryType.AIR_QUALITY -> rpc("Telemetry request") { telemetry.requestAirQuality(node) }
-
             TelemetryType.POWER -> rpc("Telemetry request") { telemetry.requestPower(node) }
-
             TelemetryType.HOST -> rpc("Telemetry request") { telemetry.requestHost(node) }
         }
     }
 
-    override suspend fun requestNeighborInfo(destNum: Int): NodeRequest = commandSender.requestNeighborInfo(destNum)
+    override suspend fun requestNeighborInfo(destNum: Int): NodeRequest {
+        val client = requireClient("Neighbor-info request")
+        val requestId = packetHandler.generatePacketId()
+        neighborInfoHandler.recordStartTime(requestId)
+        val request = rpc(client, requestId) { routing.requestNeighborInfo(NodeId(destNum), requestId = requestId) }
+        packetHandler.logRequest(requestId, destNum, PortNum.NEIGHBORINFO_APP)
+        return request
+    }
 }

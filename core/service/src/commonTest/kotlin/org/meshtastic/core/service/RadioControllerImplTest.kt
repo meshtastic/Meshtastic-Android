@@ -51,7 +51,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
@@ -106,7 +105,6 @@ private val EDIT_SESSION = RadioSessionContext(generation = 7L, address = "tcp:e
 class RadioControllerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
-    private val commandSender: CommandSender = mock(MockMode.autofill)
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
@@ -179,7 +177,8 @@ class RadioControllerImplTest {
         return RadioControllerImpl(
             serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
-            commandSender = commandSender,
+            tracerouteHandler = mock(MockMode.autofill),
+            neighborInfoHandler = mock(MockMode.autofill),
             packetHandler = packetHandler,
             nodeManager = nodeManager,
             radioInterfaceService = radioInterfaceService,

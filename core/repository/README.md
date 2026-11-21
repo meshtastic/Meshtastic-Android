@@ -39,7 +39,6 @@ src/
 │   ├── QueryController.kt             ← telemetry, traceroute, position, neighbor info queries
 │   ├── AppPreferences.kt              ← UiPrefs, MapPrefs, RadioPrefs, TakPrefs and the other prefs interfaces
 │   ├── *Repository.kt                 ← firmware, hardware, device links, discovery, mesh beacon, …
-│   ├── CommandSender.kt               ← requests the SDK cannot yet send as firmware expects
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt

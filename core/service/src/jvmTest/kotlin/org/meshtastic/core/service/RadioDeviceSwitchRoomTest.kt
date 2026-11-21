@@ -183,7 +183,8 @@ class RadioDeviceSwitchRoomTest {
         return RadioControllerImpl(
             serviceRepository = ServiceRepositoryImpl(),
             nodeRepository = mock(MockMode.autofill),
-            commandSender = mock(MockMode.autofill),
+            tracerouteHandler = mock(MockMode.autofill),
+            neighborInfoHandler = mock(MockMode.autofill),
             packetHandler = mock(MockMode.autofill),
             nodeManager = nodeManager,
             radioInterfaceService = radio,

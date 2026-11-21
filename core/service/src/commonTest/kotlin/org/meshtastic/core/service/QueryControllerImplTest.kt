@@ -19,16 +19,19 @@ package org.meshtastic.core.service
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.proto.MeshPacket
@@ -48,18 +51,29 @@ import kotlin.test.assertTrue
 import org.meshtastic.proto.Position as ProtoPosition
 
 class QueryControllerImplTest {
-    /** Records the requests left to the app sender. */
-    private class RecordingCommandSender : CommandSender {
-        val localStats = mutableListOf<Int>()
+    /** Records the request timers started, as (request ID, destination). */
+    private class RecordingRequestTimers :
+        TracerouteHandler,
+        NeighborInfoHandler {
+        val traceroutes = mutableListOf<Pair<Int, Int>>()
+        val neighborInfo = mutableListOf<Int>()
 
-        override suspend fun requestTraceroute(destNum: Int): NodeRequest = NodeRequest.NONE
-
-        override suspend fun requestNeighborInfo(destNum: Int): NodeRequest = NodeRequest.NONE
-
-        override suspend fun requestLocalStats(destNum: Int): NodeRequest {
-            localStats += destNum
-            return NodeRequest.NONE
+        override fun recordStartTime(requestId: Int, destination: Int) {
+            traceroutes += requestId to destination
         }
+
+        override fun recordStartTime(requestId: Int) {
+            neighborInfo += requestId
+        }
+
+        override fun handleTraceroute(
+            packet: MeshPacket,
+            logUuid: String?,
+            logInsertJob: Job?,
+            session: RadioSessionContext,
+        ) = Unit
+
+        override fun handleNeighborInfo(packet: MeshPacket) = Unit
     }
 
     private class Fixture(
@@ -67,7 +81,8 @@ class QueryControllerImplTest {
         val client: RadioClient,
         val radio: FakeRadioInterfaceService,
         val uiPrefs: FakeUiPrefs,
-        val commandSender: RecordingCommandSender,
+        val packetHandler: FakePacketHandler,
+        val timers: RecordingRequestTimers,
         val controller: QueryControllerImpl,
     ) {
         fun sent(port: PortNum): MeshPacket = transport.outboundPackets().single { it.decoded?.portnum == port }
@@ -95,9 +110,11 @@ class QueryControllerImplTest {
                 every { it.nodeDBbyNodeNum } returns emptyMap()
             }
         val uiPrefs = FakeUiPrefs()
-        val commandSender = RecordingCommandSender()
-        val controller = QueryControllerImpl(commandSender, radio, nodeManager, uiPrefs, backgroundScope)
-        return Fixture(transport, client, radio, uiPrefs, commandSender, controller)
+        val packetHandler = FakePacketHandler()
+        val timers = RecordingRequestTimers()
+        val controller =
+            QueryControllerImpl(radio, packetHandler, timers, timers, nodeManager, uiPrefs, backgroundScope)
+        return Fixture(transport, client, radio, uiPrefs, packetHandler, timers, controller)
     }
 
     @Test
@@ -150,17 +167,79 @@ class QueryControllerImplTest {
     }
 
     @Test
-    fun `local stats of a remote node go through the app sender and ours through the SDK`() = runTest {
+    fun `local stats can be requested from a remote node`() = runTest {
         val fixture = fixture()
 
         fixture.controller.requestTelemetry(PEER, TelemetryType.LOCAL_STATS)
-        fixture.controller.requestTelemetry(LOCAL, TelemetryType.LOCAL_STATS)
         runCurrent()
 
-        assertEquals(listOf(PEER), fixture.commandSender.localStats)
         val sent = fixture.sent(PortNum.TELEMETRY_APP)
-        assertEquals(LOCAL, sent.to)
+        assertEquals(PEER, sent.to)
+        assertEquals(PEER, sent.decoded?.dest)
         assertNotNull(Telemetry.ADAPTER.decode(checkNotNull(sent.decoded).payload).local_stats)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a traceroute goes out on the traceroute port under the ID its timer and log row use`() = runTest {
+        val fixture = fixture()
+
+        val request = fixture.controller.requestTraceroute(PEER)
+        runCurrent()
+
+        val sent = fixture.sent(PortNum.TRACEROUTE_APP)
+        assertEquals(PEER, sent.to)
+        assertTrue(sent.want_ack)
+        assertEquals(true, sent.decoded?.want_response)
+        assertEquals(PEER, sent.decoded?.dest)
+        assertEquals(sent.id, request.requestId)
+        assertEquals(listOf(sent.id to PEER), fixture.timers.traceroutes)
+        assertEquals(listOf(Triple(sent.id, PEER, PortNum.TRACEROUTE_APP)), fixture.packetHandler.loggedRequests)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a routing NAK to a traceroute settles its request with that error`() = runTest {
+        val fixture = fixture()
+        val request = fixture.controller.requestTraceroute(PEER)
+        runCurrent()
+
+        fixture.transport.injectRoutingError(
+            checkNotNull(request.requestId),
+            Routing.Error.NO_CHANNEL,
+            fromNode = LOCAL,
+        )
+        runCurrent()
+
+        assertEquals(Routing.Error.NO_CHANNEL.value, request.awaitRoutingError())
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a traceroute without a radio session starts no timer and logs nothing`() = runTest {
+        val fixture = fixture()
+        fixture.radio.disconnect()
+
+        assertFailsWith<PacketQueueRejectedException> { fixture.controller.requestTraceroute(PEER) }
+
+        assertTrue(fixture.timers.traceroutes.isEmpty())
+        assertTrue(fixture.packetHandler.loggedRequests.isEmpty())
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a remote neighbor request names its destination under the ID its timer and log row use`() = runTest {
+        val fixture = fixture()
+
+        fixture.controller.requestNeighborInfo(PEER)
+        runCurrent()
+
+        val sent = fixture.sent(PortNum.NEIGHBORINFO_APP)
+        assertEquals(PEER, sent.to)
+        assertEquals(PEER, sent.decoded?.dest)
+        assertTrue(sent.want_ack)
+        assertEquals(listOf(sent.id), fixture.timers.neighborInfo)
+        assertEquals(listOf(Triple(sent.id, PEER, PortNum.NEIGHBORINFO_APP)), fixture.packetHandler.loggedRequests)
         fixture.client.disconnect()
     }
 
