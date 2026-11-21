@@ -16,16 +16,11 @@
  */
 package org.meshtastic.core.domain.usecase.session
 
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -33,126 +28,94 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.model.routingNakOrNull
-import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.SessionManager
+import org.meshtastic.proto.Routing
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Ensures a remote-admin session exists for the target node, dispatching a metadata request and awaiting a refreshed
- * passkey if necessary.
- *
- * Why this exists: the firmware embeds an 8-byte rotating passkey in every admin response and rejects admin traffic
- * lacking a fresh key (`firmware/src/modules/AdminModule.cpp:1460-1481`). Before this use case the UI silently tunneled
- * the user into a remote-admin screen that immediately failed if no metadata had been requested first.
- *
- * Concurrency model:
- * - One in-flight ensure per `destNum`. Concurrent callers dedupe onto the same `Deferred` so a double-tap doesn't
- *   blast two metadata requests at the radio.
- * - The refresh-flow subscription is established **before** the metadata request is dispatched to avoid losing the
- *   response on the inherently raceful `MutableSharedFlow`.
- * - A connection departure completes the shared ensure as [EnsureSessionResult.Disconnected], so a later connection
- *   never inherits an old request or UX deadline.
- * - The `withTimeoutOrNull` is a UX deadline only — late responses still update the durable `SessionStatus` flow that
- *   the UI observes, so a "Timeout" outcome here can self-heal in the chip without re-tapping.
- */
+/** Opens the SDK's remote admin session before presenting an admin screen. */
 @Single
 open class EnsureRemoteAdminSessionUseCase(
-    private val sessionManager: SessionManager,
-    private val radioController: RadioController,
+    private val radio: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
     private val serviceScope: ServiceScope,
 ) {
-    private val inFlightMutex = Mutex()
-    private val inFlight = mutableMapOf<Int, Deferred<EnsureSessionResult>>()
+    private data class Request(val session: RadioSessionContext, val node: NodeId)
 
-    @Suppress("ReturnCount")
+    private val inFlightMutex = Mutex()
+    private val inFlight = mutableMapOf<Request, Deferred<EnsureSessionResult>>()
+
     open suspend operator fun invoke(destNum: Int): EnsureSessionResult {
         if (serviceRepository.connectionState.value != ConnectionState.Connected) {
             return EnsureSessionResult.Disconnected
         }
-        if (sessionManager.observeSessionStatus(destNum).first() is SessionStatus.Active) {
-            return EnsureSessionResult.AlreadyActive
-        }
+        val session = radio.activeSession.value ?: return EnsureSessionResult.Disconnected
+        val request = Request(session, NodeId(destNum))
+        val admin = radio.adminForSession(session)?.forNode(request.node) ?: return EnsureSessionResult.Disconnected
+        val status = radio.adminSessionStatus(request.node).first()
+        if (!radio.isSessionActive(session)) return EnsureSessionResult.Disconnected
+        if (status is AdminSessionStatus.Active) return EnsureSessionResult.AlreadyActive
 
         val deferred = inFlightMutex.withLock {
-            inFlight[destNum]?.takeIf { !it.isCompleted }
-                ?: run {
-                    lateinit var newDeferred: Deferred<EnsureSessionResult>
-                    newDeferred =
-                        serviceScope.async(start = CoroutineStart.LAZY) {
-                            try {
-                                runEnsure(destNum)
-                            } finally {
-                                // Cleanup belongs to the shared Deferred itself. NonCancellable guarantees that a
-                                // service-scope cancellation cannot strand a completed entry in the dedupe map.
-                                withContext(NonCancellable) {
-                                    inFlightMutex.withLock {
-                                        if (inFlight[destNum] === newDeferred) inFlight.remove(destNum)
-                                    }
-                                }
-                            }
-                        }
-                    // Register before the lazy deferred starts. The identity check above prevents an old completion
-                    // from removing a newer ensure for the same node.
-                    inFlight[destNum] = newDeferred
-                    // The service scope, not the first awaiting caller, owns dispatch once the entry is visible.
-                    // A lazy child can already be cancelled when its parent scope is shutting down; in that case
-                    // its body never runs, so remove the entry here instead of relying on the body-level finally.
-                    if (!newDeferred.start() && inFlight[destNum] === newDeferred) inFlight.remove(destNum)
-                    newDeferred
-                }
+            inFlight[request]?.takeIf { !it.isCompleted } ?: startRequest(request, admin)
         }
         return deferred.await()
     }
 
-    private suspend fun runEnsure(destNum: Int): EnsureSessionResult {
-        Logger.d { "EnsureRemoteAdminSession dispatching metadata request to $destNum" }
-        return withTimeoutOrNull(UX_TIMEOUT) {
-            coroutineScope {
-                // Subscribe to every terminal event before dispatch so neither a synchronous response nor a
-                // concurrent connection departure can be missed. UNDISPATCHED is deliberate: these children do no
-                // work before suspending in first(), so starting inline only establishes the subscriptions.
-                val refreshed =
-                    async(start = CoroutineStart.UNDISPATCHED) {
-                        sessionManager.sessionRefreshFlow.filter { it == destNum }.first()
-                    }
-                val disconnected =
-                    async(start = CoroutineStart.UNDISPATCHED) {
-                        serviceRepository.connectionState.filter { it != ConnectionState.Connected }.first()
-                    }
-                val requestId = radioController.generatePacketId()
-                val rejected =
-                    async(start = CoroutineStart.UNDISPATCHED) {
-                        serviceRepository.meshPacketFlow
-                            .mapNotNull { it.routingNakOrNull() }
-                            .first { it.requestId == requestId }
-                    }
+    private fun startRequest(request: Request, admin: AdminApi): Deferred<EnsureSessionResult> {
+        lateinit var task: Deferred<EnsureSessionResult>
+        task =
+            serviceScope.async(start = CoroutineStart.LAZY) {
                 try {
-                    if (disconnected.isCompleted) return@coroutineScope EnsureSessionResult.Disconnected
-                    radioController.refreshMetadata(destNum, requestId)
-                    select<EnsureSessionResult> {
-                        disconnected.onAwait { EnsureSessionResult.Disconnected }
-                        refreshed.onAwait { EnsureSessionResult.Refreshed }
-                        rejected.onAwait { EnsureSessionResult.Rejected(it) }
-                    }
+                    refresh(request, admin)
                 } finally {
-                    disconnected.cancel()
-                    refreshed.cancel()
-                    rejected.cancel()
+                    withContext(NonCancellable) {
+                        inFlightMutex.withLock { if (inFlight[request] === task) inFlight.remove(request) }
+                    }
                 }
             }
-        } ?: EnsureSessionResult.Timeout
+        inFlight[request] = task
+        if (!task.start()) inFlight.remove(request)
+        return task
+    }
+
+    private suspend fun refresh(request: Request, admin: AdminApi): EnsureSessionResult {
+        if (!radio.isSessionActive(request.session)) return EnsureSessionResult.Disconnected
+        val result = withTimeoutOrNull(UX_TIMEOUT) { admin.getDeviceMetadata() }
+        if (!radio.isSessionActive(request.session)) return EnsureSessionResult.Disconnected
+        return when (result) {
+            is AdminResult.Success -> {
+                val status = radio.adminSessionStatus(request.node).first()
+                if (!radio.isSessionActive(request.session)) {
+                    EnsureSessionResult.Disconnected
+                } else if (status is AdminSessionStatus.Active) {
+                    EnsureSessionResult.Refreshed
+                } else {
+                    EnsureSessionResult.Timeout
+                }
+            }
+
+            is AdminResult.Failed -> EnsureSessionResult.Rejected(result.routingError.value)
+
+            AdminResult.Unauthorized -> EnsureSessionResult.Rejected(Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value)
+
+            AdminResult.SessionKeyExpired -> EnsureSessionResult.Rejected(Routing.Error.ADMIN_BAD_SESSION_KEY.value)
+
+            AdminResult.RateLimited -> EnsureSessionResult.Rejected(Routing.Error.RATE_LIMIT_EXCEEDED.value)
+
+            AdminResult.NodeUnreachable,
+            AdminResult.Timeout,
+            null,
+            -> EnsureSessionResult.Timeout
+        }
     }
 
     companion object {
-        /**
-         * UX deadline for surfacing a result to the user. Multi-hop remote-admin responses can legitimately take well
-         * over ten seconds; the metadata request keeps flying after this, and late responses still update the durable
-         * `SessionStatus` flow.
-         */
         val UX_TIMEOUT = 30.seconds
     }
 }

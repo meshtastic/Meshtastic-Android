@@ -16,8 +16,13 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 
 /**
@@ -25,6 +30,11 @@ import org.meshtastic.sdk.PacedMessageHandle
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
 interface RadioTransport {
+    val admin: AdminApi?
+        get() = null
+
+    fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = flowOf(AdminSessionStatus.NoSession)
+
     /** Submits a mesh packet to the SDK send queue on this link. */
     fun sendPaced(packet: MeshPacket): PacedMessageHandle? = null
 

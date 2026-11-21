@@ -526,7 +526,6 @@ internal fun createRoomReplayProcessor(
             messageFilter = mock(MockMode.autofill),
             storeForwardHandler = mock(MockMode.autofill),
             telemetryHandler = mock(MockMode.autofill),
-            adminPacketHandler = mock(MockMode.autofill),
             remoteShellHandler = mock(MockMode.autofill),
             collectorRegistry = DiscoveryPacketCollectorRegistryImpl(),
             geofenceMonitor =

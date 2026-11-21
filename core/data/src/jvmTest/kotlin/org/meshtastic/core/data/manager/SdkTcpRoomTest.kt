@@ -385,8 +385,6 @@ class SdkTcpRoomTest {
                     mock(MockMode.autofill),
                     mock(MockMode.autofill),
                     mock(MockMode.autofill),
-                    mock(MockMode.autofill),
-                    mock(MockMode.autofill),
                     serviceScope,
                     radio,
                 ),
@@ -403,6 +401,7 @@ class SdkTcpRoomTest {
             lazy { processor },
             lazy { nodeManager },
             lazy { lockdown },
+            lazy { AdminPacketHandlerImpl(nodeManager, lazy { mock(MockMode.autofill) }) },
         )
 
         init {

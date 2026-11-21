@@ -18,14 +18,18 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,6 +39,7 @@ import org.meshtastic.core.model.TransportFailure
 import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
+import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -46,8 +51,11 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
@@ -66,9 +74,18 @@ internal class SdkPhoneApiRadioTransport(
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val nodeManager: Lazy<NodeManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
+    private val adminPacketHandler: Lazy<AdminPacketHandler>,
 ) : RadioTransport {
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
+
+    override val admin: AdminApi?
+        get() = currentClient.value?.admin
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = currentClient.flatMapLatest {
+        it?.adminSessionStatus(node) ?: flowOf(AdminSessionStatus.NoSession)
+    }
 
     override fun sendPaced(packet: MeshPacket): PacedMessageHandle? = currentClient.value?.sendPaced(packet)
 
@@ -163,6 +180,13 @@ internal class SdkPhoneApiRadioTransport(
 
                     is RadioSessionEvent.Packet -> {
                         if (event.sessionId == sdkSession) {
+                            if (event.correlatedAdminResponse) {
+                                service.runWithSessionLease(session) {
+                                    nodeManager.value.myNodeNum.value?.let { localNode ->
+                                        adminPacketHandler.value.handleAdminMessage(event.packet, localNode, session)
+                                    }
+                                }
+                            }
                             val envelope = FromRadio.Builder().also { it.packet = event.packet }.build()
                             handleEnvelope(envelope)
                         }

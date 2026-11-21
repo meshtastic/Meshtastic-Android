@@ -42,7 +42,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateHolder
@@ -63,7 +62,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -92,8 +90,6 @@ class MeshConnectionManagerImplTest {
     private lateinit var historyManager: HistoryManager
     private lateinit var radioConfigRepository: RadioConfigRepository
     private lateinit var commandSender: CommandSender
-    private lateinit var sessionManager: SessionManager
-    private lateinit var adminRequestRegistry: AdminRequestRegistry
     private lateinit var nodeManager: NodeManager
     private lateinit var analytics: PlatformAnalytics
     private lateinit var packetRepository: PacketRepository
@@ -124,8 +120,6 @@ class MeshConnectionManagerImplTest {
         historyManager = mock(MockMode.autofill)
         radioConfigRepository = mock(MockMode.autofill)
         commandSender = mock(MockMode.autofill)
-        sessionManager = mock(MockMode.autofill)
-        adminRequestRegistry = mock(MockMode.autofill)
         nodeManager = mock(MockMode.autofill)
         analytics = mock(MockMode.autofill)
         packetRepository = mock(MockMode.autofill)
@@ -148,7 +142,6 @@ class MeshConnectionManagerImplTest {
                 applyConnectionState(call.arg<ConnectionState>(0))
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } returns Unit
         everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } returns Unit
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
@@ -168,8 +161,6 @@ class MeshConnectionManagerImplTest {
         historyManager,
         radioConfigRepository,
         commandSender,
-        sessionManager,
-        adminRequestRegistry,
         nodeManager,
         analytics,
         packetRepository,
@@ -225,7 +216,6 @@ class MeshConnectionManagerImplTest {
         )
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
-        verify { adminRequestRegistry.clearAll() }
     }
 
     @Test
@@ -380,7 +370,6 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `onNodeDbReady retains owned requests until queue admission opens`() = runTest(testDispatcher) {
-        var seedAttempts = 0
         var historyAttempts = 0
         val telemetryAttempts = mutableMapOf<Int, Int>()
         val admissionVersions = mutableListOf<Long>()
@@ -391,12 +380,6 @@ class MeshConnectionManagerImplTest {
                         ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build()
                 }
                 .build()
-        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
-            { call ->
-                admissionVersions += call.arg<Long>(1)
-                seedAttempts++
-                if (seedAttempts < 3) throw PacketQueueRejectedException("test passkey seed")
-            }
         everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } calls
             { call ->
                 admissionVersions += call.arg<Long>(3)
@@ -428,7 +411,6 @@ class MeshConnectionManagerImplTest {
         )
         runCurrent()
 
-        assertEquals(3, seedAttempts)
         assertEquals(2, historyAttempts)
         assertEquals(2, telemetryAttempts[TelemetryType.LOCAL_STATS.ordinal])
         assertEquals(2, telemetryAttempts[TelemetryType.DEVICE.ordinal])
@@ -437,10 +419,12 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `post-handshake admission retries stop when the connected lifecycle changes`() = runTest(testDispatcher) {
-        var seedAttempts = 0
-        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
+        var telemetryAttempts = 0
+        everySuspend {
+            commandSender.requestTelemetryForConnection(any(), any(), TelemetryType.LOCAL_STATS.ordinal, any())
+        } calls
             {
-                seedAttempts++
+                telemetryAttempts++
                 throw PacketQueueRejectedException("queue closed")
             }
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
@@ -451,7 +435,7 @@ class MeshConnectionManagerImplTest {
         serviceRepository.setConnectionState(ConnectionState.Connected)
         manager.onNodeDbReady()
         runCurrent()
-        assertEquals(1, seedAttempts)
+        assertEquals(1, telemetryAttempts)
 
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
         advanceTimeBy(
@@ -461,15 +445,17 @@ class MeshConnectionManagerImplTest {
         )
         runCurrent()
 
-        assertEquals(1, seedAttempts, "a stale connection generation must not keep retrying admission")
+        assertEquals(1, telemetryAttempts, "a stale connection generation must not keep retrying admission")
     }
 
     @Test
     fun `post-handshake admission retries stop at the attempt cap`() = runTest(testDispatcher) {
-        var seedAttempts = 0
-        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
+        var telemetryAttempts = 0
+        everySuspend {
+            commandSender.requestTelemetryForConnection(any(), any(), TelemetryType.LOCAL_STATS.ordinal, any())
+        } calls
             {
-                seedAttempts++
+                telemetryAttempts++
                 throw PacketQueueRejectedException("queue closed")
             }
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
@@ -488,7 +474,7 @@ class MeshConnectionManagerImplTest {
         advanceTimeBy(retryWindowMillis)
         runCurrent()
 
-        assertEquals(MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS, seedAttempts)
+        assertEquals(MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS, telemetryAttempts)
     }
 
     @Test

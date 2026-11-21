@@ -52,7 +52,6 @@ import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
@@ -78,9 +77,7 @@ class CommandSenderImplTest {
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val tracerouteHandler = mock<TracerouteHandler>(MockMode.autofill)
     private val neighborInfoHandler = mock<NeighborInfoHandler>(MockMode.autofill)
-    private val sessionManager = mock<SessionManager>(MockMode.autofill)
     private val connectionStateProvider = mock<ConnectionStateProvider>(MockMode.autofill)
-    private val adminRequestRegistry = AdminRequestRegistryImpl()
     private val connectionLifecycle =
         MutableStateFlow(ConnectionLifecycle(version = CONNECTION_VERSION, state = ConnectionState.Connected))
 
@@ -94,7 +91,6 @@ class CommandSenderImplTest {
         every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
         every { nodeManager.myNodeNum } returns MutableStateFlow(MY_NODE_NUM)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        every { sessionManager.getPasskey(any()) } returns ByteString.EMPTY
         every { connectionStateProvider.connectionLifecycle } returns connectionLifecycle
 
         commandSender =
@@ -104,8 +100,6 @@ class CommandSenderImplTest {
                 radioConfigRepository = radioConfigRepository,
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
-                sessionManager = sessionManager,
-                adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = TestScope().asServiceScope(),
                 radioInterfaceService = radioInterfaceService,
@@ -156,8 +150,6 @@ class CommandSenderImplTest {
                 radioConfigRepository = radioConfigRepository,
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
-                sessionManager = sessionManager,
-                adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = TestScope().asServiceScope(),
                 radioInterfaceService = radioInterfaceService,
@@ -237,16 +229,14 @@ class CommandSenderImplTest {
     // --- sendAdmin ---
 
     @Test
-    fun sendAdmin_injectsSessionPasskey() = runTest {
-        val passkey = "secret".encodeUtf8()
-        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
+    fun sendAdmin_leavesThePasskeyToTheSdk() = runTest {
         val packets = mutableListOf<MeshPacket>()
         everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
 
         commandSender.sendAdmin(DEST_NODE) { AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build() }
 
         val adminMessage = AdminMessage.ADAPTER.decode(requireNotNull(packets.single().decoded).payload)
-        assertEquals(passkey, adminMessage.session_passkey)
+        assertEquals(ByteString.EMPTY, adminMessage.session_passkey)
     }
 
     @Test
@@ -270,31 +260,6 @@ class CommandSenderImplTest {
         }
 
         assertNotEquals(0, packets.single().id)
-    }
-
-    @Test
-    fun sendAdmin_registersTheSentPacketIdAsOutstanding() = runTest {
-        val packets = mutableListOf<MeshPacket>()
-        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
-
-        commandSender.sendAdmin(DEST_NODE, requestId = 0, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-        }
-
-        assertTrue(adminRequestRegistry.consume(packets.single().id))
-        assertFalse(adminRequestRegistry.consume(packets.single().id))
-    }
-
-    @Test
-    fun sendAdminImmediate_registersTheSentPacketIdAsOutstanding() {
-        val packets = mutableListOf<ToRadio>()
-        every { packetHandler.sendToRadio(capture(packets)) } returns Unit
-
-        commandSender.sendAdminImmediate(DEST_NODE) {
-            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-        }
-
-        assertTrue(adminRequestRegistry.consume(requireNotNull(packets.single().packet).id))
     }
 
     @Test
@@ -400,9 +365,7 @@ class CommandSenderImplTest {
     // --- sendAdminImmediate ---
 
     @Test
-    fun sendAdminImmediate_dispatchesDirectToRadioWithPasskeyAndNoResponse() {
-        val passkey = "secret".encodeUtf8()
-        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
+    fun sendAdminImmediate_dispatchesDirectToRadioWithoutResponse() {
         every { packetHandler.sendToRadio(any<ToRadio>()) } returns Unit
 
         commandSender.sendAdminImmediate(DEST_NODE) {
@@ -410,7 +373,7 @@ class CommandSenderImplTest {
         }
 
         // Direct ToRadio dispatch (not the Connected-gated MeshPacket queue), correct destination,
-        // no want_response, and the session passkey injected into the admin payload.
+        // no want_response, and the payload preserved.
         verify {
             packetHandler.sendToRadio(
                 matches<ToRadio> { toRadio ->
@@ -421,7 +384,7 @@ class CommandSenderImplTest {
                         decoded.portnum == PortNum.ADMIN_APP &&
                         !decoded.want_response &&
                         admin.set_time_only == 12345 &&
-                        admin.session_passkey == passkey
+                        admin.session_passkey == ByteString.EMPTY
                 },
             )
         }
@@ -718,8 +681,6 @@ class CommandSenderImplTest {
                 radioConfigRepository = radioConfigRepository,
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
-                sessionManager = sessionManager,
-                adminRequestRegistry = adminRequestRegistry,
                 connectionStateProvider = connectionStateProvider,
                 scope = testScope.asServiceScope(),
                 radioInterfaceService = radioInterfaceService,

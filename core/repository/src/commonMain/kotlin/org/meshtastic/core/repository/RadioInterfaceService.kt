@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -27,6 +28,9 @@ import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 
 /** A lifecycle lease held by one already-admitted operation for [session]. */
@@ -119,6 +123,12 @@ interface RadioInterfaceService :
     RadioTransportCallback,
     RadioSessionAuthority,
     RadioTransportWriter {
+    /** Captures the SDK admin API for a single active radio session. */
+    fun adminForSession(session: RadioSessionContext): AdminApi? = null
+
+    /** Observes per-node admin status across radio session changes. */
+    fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = flowOf(AdminSessionStatus.NoSession)
+
     /** Submits a mesh packet only while [session] owns transport admission. */
     fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? = null
 

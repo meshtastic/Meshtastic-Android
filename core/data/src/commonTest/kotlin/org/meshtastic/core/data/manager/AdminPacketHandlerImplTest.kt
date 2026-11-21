@@ -20,13 +20,11 @@ import dev.mokkery.MockMode
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import dev.mokkery.verify.VerifyMode
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -43,8 +41,6 @@ class AdminPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val configHandler = mock<MeshConfigHandler>(MockMode.autofill)
-    private val sessionManager = mock<SessionManager>(MockMode.autofill)
-    private val adminRequestRegistry = AdminRequestRegistryImpl()
 
     private lateinit var handler: AdminPacketHandlerImpl
 
@@ -57,14 +53,11 @@ class AdminPacketHandlerImplTest {
             AdminPacketHandlerImpl(
                 nodeManager = nodeManager,
                 configHandler = lazy { configHandler },
-                sessionManager = sessionManager,
-                adminRequestRegistry = adminRequestRegistry,
             )
     }
 
     /** Builds a response to a request this app sent unless [requestId] names one it did not. */
-    private fun makePacket(from: Int, adminMessage: AdminMessage, requestId: Int = SENT_REQUEST_ID): MeshPacket {
-        if (requestId == SENT_REQUEST_ID) adminRequestRegistry.register(requestId)
+    private fun makePacket(from: Int, adminMessage: AdminMessage, requestId: Int = 77): MeshPacket {
         val payload = adminMessage.encode().toByteString()
         return MeshPacket.Builder()
             .also { wb ->
@@ -84,83 +77,6 @@ class AdminPacketHandlerImplTest {
     private fun handle(packet: MeshPacket) = handler.handleAdminMessage(packet, myNodeNum, session)
 
     // ---------- Request correlation ----------
-
-    @Test
-    fun `config response claiming own node without an outstanding request is ignored`() {
-        val config = Config.Builder().also { wb -> wb.security = Config.SecurityConfig.Builder().build() }.build()
-        val adminMsg =
-            AdminMessage.Builder()
-                .also { wb ->
-                    wb.get_config_response = config
-                    wb.session_passkey = ByteString.of(9, 9, 9, 9)
-                }
-                .build()
-        val packet = makePacket(myNodeNum, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
-
-        handle(packet)
-
-        verify(VerifyMode.not) { configHandler.handleDeviceConfig(any(), any()) }
-        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
-    }
-
-    @Test
-    fun `channel response claiming own node without an outstanding request is ignored`() {
-        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
-        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_channel_response = channel }.build()
-        val packet = makePacket(myNodeNum, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
-
-        handle(packet)
-
-        verify(VerifyMode.not) { configHandler.handleChannel(any(), any()) }
-    }
-
-    @Test
-    fun `metadata from a remote node without an outstanding request is ignored`() {
-        val metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "9.9.9" }.build()
-        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_device_metadata_response = metadata }.build()
-        val packet = makePacket(99999, adminMsg, requestId = UNSOLICITED_REQUEST_ID)
-
-        handle(packet)
-
-        verify(VerifyMode.not) { nodeManager.insertMetadata(any(), any(), any()) }
-    }
-
-    @Test
-    fun `a request id answers once`() {
-        val config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
-        val adminMsg = AdminMessage.Builder().also { wb -> wb.get_config_response = config }.build()
-
-        val packet = makePacket(myNodeNum, adminMsg)
-
-        handle(packet)
-        handle(packet)
-
-        verify(VerifyMode.exactly(1)) { configHandler.handleDeviceConfig(config, session) }
-    }
-
-    // ---------- Session passkey ----------
-
-    @Test
-    fun `session passkey is updated when present`() {
-        val passkey = ByteString.of(1, 2, 3, 4)
-        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
-        val packet = makePacket(myNodeNum, adminMsg)
-
-        handle(packet)
-
-        verify { sessionManager.recordSession(myNodeNum, passkey) }
-    }
-
-    @Test
-    fun `empty session passkey does not record refresh`() {
-        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = ByteString.EMPTY }.build()
-        val packet = makePacket(myNodeNum, adminMsg)
-
-        handle(packet)
-        // recordSession should NOT be called for empty passkey
-    }
-
-    // ---------- get_config_response ----------
 
     @Test
     fun `get_config_response from own node delegates to configHandler`() {
@@ -328,29 +244,5 @@ class AdminPacketHandlerImplTest {
                 .build()
         handle(packet)
         // No crash — decodes as default AdminMessage with no fields set
-    }
-
-    @Test
-    fun `combined admin message with passkey and config response`() {
-        val passkey = ByteString.of(5, 6, 7, 8)
-        val config = Config.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build()
-        val adminMsg =
-            AdminMessage.Builder()
-                .also { wb ->
-                    wb.session_passkey = passkey
-                    wb.get_config_response = config
-                }
-                .build()
-        val packet = makePacket(myNodeNum, adminMsg)
-
-        handle(packet)
-
-        verify { sessionManager.recordSession(myNodeNum, passkey) }
-        verify { configHandler.handleDeviceConfig(config, session) }
-    }
-
-    private companion object {
-        const val SENT_REQUEST_ID = 4242
-        const val UNSOLICITED_REQUEST_ID = 777
     }
 }

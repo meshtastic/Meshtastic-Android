@@ -38,7 +38,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
@@ -59,9 +58,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
@@ -84,8 +81,6 @@ class MeshConnectionManagerImpl(
     private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val commandSender: CommandSender,
-    private val sessionManager: SessionManager,
-    private val adminRequestRegistry: AdminRequestRegistry,
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
@@ -234,8 +229,6 @@ class MeshConnectionManagerImpl(
     private fun tearDownConnection() {
         postHandshakeRequestsJob?.cancel()
         postHandshakeRequestsJob = null
-        sessionManager.clearAll() // Prevent stale per-node passkeys on reconnect.
-        adminRequestRegistry.clearAll()
         locationManager.stop()
         mqttManager.stop()
     }
@@ -343,17 +336,6 @@ class MeshConnectionManagerImpl(
             // The requests are independent. One unexpected request failure must not cancel the others, and
             // teardown serializes with this job publication through connectionMutex.
             supervisorScope {
-                launch {
-                    retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
-                        commandSender.sendAdminForConnection(
-                            destNum = myNodeNum,
-                            expectedConnectionVersion = connectedLifecycle.version,
-                            wantResponse = true,
-                        ) {
-                            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-                        }
-                    }
-                }
                 listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
                     launch {
                         retryPostHandshakeRequest(

@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.domain.usecase.session
 
-import org.meshtastic.core.model.RoutingNak
-
 /**
  * Transient outcome of a single call to [EnsureRemoteAdminSessionUseCase]. This is the *event* the UI reacts to
  * (snackbar / navigate / disable button) — distinct from the durable `SessionStatus` flow used by chips and gates.
@@ -36,7 +34,7 @@ sealed interface EnsureSessionResult {
     data object Timeout : EnsureSessionResult
 
     /** A routing NAK answered the metadata request, such as the target refusing our admin key. */
-    data class Rejected(val nak: RoutingNak) : EnsureSessionResult
+    data class Rejected(val routingError: Int) : EnsureSessionResult
 
     /** The radio is not in [org.meshtastic.core.model.ConnectionState.Connected]; no packet was sent. */
     data object Disconnected : EnsureSessionResult

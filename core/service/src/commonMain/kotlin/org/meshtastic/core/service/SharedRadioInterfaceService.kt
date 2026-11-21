@@ -25,6 +25,7 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
@@ -46,6 +47,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -98,6 +101,9 @@ import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import kotlin.concurrent.Volatile
 
@@ -506,7 +512,12 @@ class SharedRadioInterfaceService(
 
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
-    @Volatile private var radioTransport: RadioTransport? = null
+    private val activeTransport = MutableStateFlow<RadioTransport?>(null)
+    private var radioTransport: RadioTransport?
+        get() = activeTransport.value
+        set(value) {
+            activeTransport.value = value
+        }
 
     override fun requestNodeDbRefresh(session: RadioSessionContext): Boolean {
         var queued = false
@@ -1052,6 +1063,17 @@ class SharedRadioInterfaceService(
             _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
             if (notifyPermanent && currentTransport != null) onDisconnect(isPermanent = true)
         }
+    }
+
+    override fun adminForSession(session: RadioSessionContext): AdminApi? {
+        var admin: AdminApi? = null
+        runIfSessionActive(session) { admin = radioTransport?.admin }
+        return admin
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = activeTransport.flatMapLatest {
+        it?.adminSessionStatus(node) ?: flowOf(AdminSessionStatus.NoSession)
     }
 
     override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? {

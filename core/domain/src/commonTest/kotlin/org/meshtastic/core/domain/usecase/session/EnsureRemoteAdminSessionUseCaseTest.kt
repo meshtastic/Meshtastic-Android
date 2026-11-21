@@ -21,297 +21,126 @@ import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import okio.ByteString
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.RoutingNak
-import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.SessionManager
-import org.meshtastic.proto.Data
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.PortNum
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.Routing
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EnsureRemoteAdminSessionUseCaseTest {
-
-    private val destNum = 0xCAFE
-
-    private fun stubSessionManager(
-        initialStatus: SessionStatus = SessionStatus.NoSession,
-        refreshFlow: MutableSharedFlow<Int> = MutableSharedFlow(extraBufferCapacity = 8),
-    ): SessionManager {
-        val mgr = mock<SessionManager>(MockMode.autofill)
-        every { mgr.observeSessionStatus(any()) } returns flowOf(initialStatus)
-        every { mgr.sessionRefreshFlow } returns refreshFlow
-        every { mgr.getPasskey(any()) } returns ByteString.EMPTY
-        return mgr
-    }
-
-    private fun connectedRepo(
-        state: ConnectionState = ConnectionState.Connected,
-        packets: MutableSharedFlow<MeshPacket> = MutableSharedFlow(extraBufferCapacity = 8),
-    ): ServiceRepository {
-        val repo = mock<ServiceRepository>(MockMode.autofill)
-        every { repo.connectionState } returns MutableStateFlow(state)
-        every { repo.meshPacketFlow } returns packets
-        return repo
-    }
-
-    private fun routingNak(requestId: Int, error: Routing.Error): MeshPacket {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
-        val data =
-            Data.Builder()
-                .also { wb ->
-                    wb.portnum = PortNum.ROUTING_APP
-                    wb.request_id = requestId
-                    wb.payload = routing.encode().toByteString()
-                }
-                .build()
-        return MeshPacket.Builder()
-            .also { wb ->
-                wb.from = destNum
-                wb.decoded = data
-            }
-            .build()
+    @Test
+    fun disconnectedDoesNotRequestMetadata() = runTest {
+        val fixture = fixture()
+        fixture.service.setConnectionState(ConnectionState.Disconnected)
+        assertEquals(EnsureSessionResult.Disconnected, fixture.ensure(DEST.raw))
+        verifySuspend(exactly(0)) { fixture.admin.getDeviceMetadata() }
     }
 
     @Test
-    fun `returns Disconnected without dispatching when not connected`() = runTest {
-        val sessionManager = stubSessionManager()
-        val controller = mock<RadioController>(MockMode.autofill)
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(
-                sessionManager,
-                controller,
-                connectedRepo(ConnectionState.Disconnected),
-                this.asServiceScope(),
-            )
-
-        val result = useCase(destNum)
-
-        assertEquals(EnsureSessionResult.Disconnected, result)
+    fun activeSdkSessionDoesNotRequestMetadata() = runTest {
+        val fixture = fixture()
+        fixture.status.value = ACTIVE
+        assertEquals(EnsureSessionResult.AlreadyActive, fixture.ensure(DEST.raw))
+        verifySuspend(exactly(0)) { fixture.admin.getDeviceMetadata() }
     }
 
     @Test
-    fun `returns AlreadyActive without dispatching when status already Active`() = runTest {
-        val active = SessionStatus.Active(Clock.System.now())
-        val sessionManager = stubSessionManager(initialStatus = active)
-        val controller = mock<RadioController>(MockMode.autofill)
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        val result = useCase(destNum)
-
-        assertEquals(EnsureSessionResult.AlreadyActive, result)
-    }
-
-    @Test
-    fun `dispatches metadata request and returns Refreshed when refresh flow emits`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        // Simulate the radio responding by emitting on the refresh flow when the metadata request fires.
-        everySuspend { controller.refreshMetadata(any(), any()) } calls { refresh.tryEmit(destNum) }
-
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        val result = useCase(destNum)
-
-        assertEquals(EnsureSessionResult.Refreshed, result)
-        verifySuspend { controller.refreshMetadata(destNum, any()) }
-    }
-
-    @Test
-    fun `returns Rejected when a routing nak answers the metadata request`() = runTest {
-        val packets = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 8)
-        val controller = mock<RadioController>(MockMode.autofill)
-        every { controller.generatePacketId() } returns REQUEST_ID
-        everySuspend { controller.refreshMetadata(any(), any()) } calls
-            {
-                packets.tryEmit(routingNak(REQUEST_ID, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED))
-            }
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(
-                stubSessionManager(),
-                controller,
-                connectedRepo(packets = packets),
-                this.asServiceScope(),
-            )
-
-        val result = useCase(destNum)
-
-        val expected = RoutingNak(REQUEST_ID, destNum, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value)
-        assertEquals(EnsureSessionResult.Rejected(expected), result)
-        verifySuspend { controller.refreshMetadata(destNum, REQUEST_ID) }
-    }
-
-    @Test
-    fun `ignores a nak for another request and a plain ack`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val packets = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 8)
-        val controller = mock<RadioController>(MockMode.autofill)
-        every { controller.generatePacketId() } returns REQUEST_ID
-        everySuspend { controller.refreshMetadata(any(), any()) } calls
-            {
-                packets.tryEmit(routingNak(REQUEST_ID + 1, Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED))
-                packets.tryEmit(routingNak(REQUEST_ID, Routing.Error.NONE))
-                refresh.tryEmit(destNum)
-            }
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(
-                stubSessionManager(refreshFlow = refresh),
-                controller,
-                connectedRepo(packets = packets),
-                this.asServiceScope(),
-            )
-
-        assertEquals(EnsureSessionResult.Refreshed, useCase(destNum))
-    }
-
-    @Test
-    fun `accepts a valid refresh arriving after the former ten second deadline`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        everySuspend { controller.refreshMetadata(any(), any()) } returns Unit
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        var observed: EnsureSessionResult? = null
-        val job = launch { observed = useCase(destNum) }
-        runCurrent()
-        // Keep the emission late while deriving the boundary from the production UX deadline.
-        advanceTimeBy(EnsureRemoteAdminSessionUseCase.UX_TIMEOUT.inWholeMilliseconds - 1.seconds.inWholeMilliseconds)
-        refresh.emit(destNum)
-        advanceUntilIdle()
-        job.join()
-
-        assertEquals(EnsureSessionResult.Refreshed, observed)
-        verifySuspend { controller.refreshMetadata(destNum, any()) }
-    }
-
-    @Test
-    fun `returns Timeout when no refresh arrives within deadline`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        everySuspend { controller.refreshMetadata(any(), any()) } returns Unit
-
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        var observed: EnsureSessionResult? = null
-        val job = launch { observed = useCase(destNum) }
-        advanceTimeBy(EnsureRemoteAdminSessionUseCase.UX_TIMEOUT.inWholeMilliseconds + 100)
-        advanceUntilIdle()
-        job.join()
-
-        assertEquals(EnsureSessionResult.Timeout, observed)
-    }
-
-    @Test
-    fun `canceling one caller keeps the shared ensure alive for another caller`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        var dispatches = 0
-        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        val firstCaller = launch { useCase(destNum) }
-        runCurrent()
-        val secondCaller = async { useCase(destNum) }
+    fun concurrentCallsShareTheTypedMetadataRequest() = runTest {
+        val fixture = fixture()
+        val reply = CompletableDeferred<AdminResult<DeviceMetadata>>()
+        everySuspend { fixture.admin.getDeviceMetadata() } calls { reply.await() }
+        val first = async { fixture.ensure(DEST.raw) }
+        val second = async { fixture.ensure(DEST.raw) }
         runCurrent()
 
-        firstCaller.cancelAndJoin()
-        assertEquals(1, dispatches)
-        refresh.emit(destNum)
-        runCurrent()
-
-        assertEquals(EnsureSessionResult.Refreshed, secondCaller.await())
-        assertEquals(1, dispatches)
-    }
-
-    @Test
-    fun `completed ensure is not reused by a later caller`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        var dispatches = 0
-        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
-        val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
-
-        val first = async { useCase(destNum) }
-        runCurrent()
-        refresh.emit(destNum)
-        runCurrent()
+        fixture.status.value = ACTIVE
+        reply.complete(AdminResult.Success(DeviceMetadata.Builder().build()))
         assertEquals(EnsureSessionResult.Refreshed, first.await())
-
-        val second = async { useCase(destNum) }
-        runCurrent()
-        assertEquals(2, dispatches)
-        refresh.emit(destNum)
-        runCurrent()
-
         assertEquals(EnsureSessionResult.Refreshed, second.await())
+        verifySuspend(exactly(1)) { fixture.admin.getDeviceMetadata() }
     }
 
     @Test
-    fun `departed ensure is not reused after reconnect`() = runTest {
-        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
-        val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val controller = mock<RadioController>(MockMode.autofill)
-        var dispatches = 0
-        everySuspend { controller.refreshMetadata(any(), any()) } calls { dispatches++ }
-        val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        val repository = mock<ServiceRepository>(MockMode.autofill)
-        every { repository.connectionState } returns connectionState
-        every { repository.meshPacketFlow } returns MutableSharedFlow()
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, controller, repository, this.asServiceScope())
-
-        val departed = async { useCase(destNum) }
-        runCurrent()
-        assertEquals(1, dispatches)
-        connectionState.value = ConnectionState.Disconnected
-        runCurrent()
-        assertEquals(EnsureSessionResult.Disconnected, departed.await())
-
-        connectionState.value = ConnectionState.Connected
-        val reconnected = async { useCase(destNum) }
-        runCurrent()
-        assertEquals(2, dispatches, "Reconnect must dispatch a new metadata request")
-        refresh.emit(destNum)
-        runCurrent()
-
-        assertEquals(EnsureSessionResult.Refreshed, reconnected.await())
+    fun metadataWithoutAUsableSessionDoesNotOpenAdmin() = runTest {
+        val fixture = fixture()
+        everySuspend { fixture.admin.getDeviceMetadata() } returns AdminResult.Success(DeviceMetadata.Builder().build())
+        assertEquals(EnsureSessionResult.Timeout, fixture.ensure(DEST.raw))
     }
+
+    @Test
+    fun retiredSdkSessionCannotAuthorizeReplacement() = runTest {
+        val fixture = fixture()
+        val reply = CompletableDeferred<AdminResult<DeviceMetadata>>()
+        everySuspend { fixture.admin.getDeviceMetadata() } calls { reply.await() }
+        val result = async { fixture.ensure(DEST.raw) }
+        runCurrent()
+        fixture.session.value = SESSION.copy(generation = 2)
+        fixture.status.value = ACTIVE
+        reply.complete(AdminResult.Success(DeviceMetadata.Builder().build()))
+        assertEquals(EnsureSessionResult.Disconnected, result.await())
+    }
+
+    @Test
+    fun sdkAuthorizationFailureRemainsActionable() = runTest {
+        val fixture = fixture()
+        everySuspend { fixture.admin.getDeviceMetadata() } returns AdminResult.Unauthorized
+        assertEquals(
+            EnsureSessionResult.Rejected(Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value),
+            fixture.ensure(DEST.raw),
+        )
+    }
+
+    private fun TestScope.fixture(): Fixture {
+        val session = MutableStateFlow<RadioSessionContext?>(SESSION)
+        val status = MutableStateFlow<AdminSessionStatus>(AdminSessionStatus.NoSession)
+        val radio = mock<RadioInterfaceService>(MockMode.autofill)
+        val admin = mock<AdminApi>(MockMode.autofill)
+        every { radio.activeSession } returns session
+        every { radio.isSessionActive(SESSION) } calls { session.value == SESSION }
+        every { radio.adminForSession(SESSION) } returns admin
+        every { radio.adminSessionStatus(DEST) } returns status
+        every { admin.forNode(DEST) } returns admin
+        val service = FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) }
+        return Fixture(
+            EnsureRemoteAdminSessionUseCase(radio, service, backgroundScope.asServiceScope()),
+            admin,
+            service,
+            status,
+            session,
+        )
+    }
+
+    private data class Fixture(
+        val ensure: EnsureRemoteAdminSessionUseCase,
+        val admin: AdminApi,
+        val service: FakeServiceRepository,
+        val status: MutableStateFlow<AdminSessionStatus>,
+        val session: MutableStateFlow<RadioSessionContext?>,
+    )
 
     private companion object {
-        const val REQUEST_ID = 0x1234
+        val SESSION = RadioSessionContext(1, "tselected")
+        val DEST = NodeId(1234)
+        val ACTIVE = AdminSessionStatus.Active(Instant.fromEpochSeconds(1), Instant.fromEpochSeconds(151))
     }
 }

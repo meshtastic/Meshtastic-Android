@@ -48,7 +48,6 @@ import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.ActiveConversationTracker
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshBeaconRepository
@@ -108,7 +107,6 @@ class MeshDataHandlerImpl(
     private val messageFilter: MessageFilter,
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
-    private val adminPacketHandler: AdminPacketHandler,
     private val remoteShellHandler: RemoteShellHandler,
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val geofenceMonitor: GeofenceMonitor,
@@ -195,9 +193,7 @@ class MeshDataHandlerImpl(
                 storeForwardHandler.handleStoreForwardPlusPlus(packet, session)
             }
 
-            PortNum.ADMIN_APP -> {
-                adminPacketHandler.handleAdminMessage(packet, myNodeNum, session)
-            }
+            PortNum.ADMIN_APP -> Unit
 
             PortNum.REMOTE_SHELL_APP -> {
                 remoteShellHandler.handleRemoteShell(packet)

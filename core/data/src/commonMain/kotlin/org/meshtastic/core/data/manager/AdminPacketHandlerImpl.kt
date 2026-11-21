@@ -19,11 +19,9 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AdminPacketHandler
-import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
 
@@ -35,8 +33,6 @@ import org.meshtastic.proto.MeshPacket
 class AdminPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val configHandler: Lazy<MeshConfigHandler>,
-    private val sessionManager: SessionManager,
-    private val adminRequestRegistry: AdminRequestRegistry,
 ) : AdminPacketHandler {
 
     override fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
@@ -44,20 +40,7 @@ class AdminPacketHandlerImpl(
         val payload = data.payload
         val u = AdminMessage.ADAPTER.decode(payload)
         Logger.d { "Admin message from=${packet.from} fields=${u.summarize()}" }
-        // The firmware forwards every decoded ADMIN_APP packet addressed to it, so a response is authoritative
-        // only when it answers a request we sent.
-        if (!adminRequestRegistry.consume(data.request_id)) {
-            Logger.w { "Ignoring admin message from=${packet.from} with no outstanding request id=${data.request_id}" }
-            return
-        }
-        // Firmware embeds the session_passkey in every admin response. A missing (default-empty)
-        // field must not reset stored state, so only record refreshes when bytes arrived.
-        val incomingPasskey = u.session_passkey
-        if (incomingPasskey.size > 0) {
-            sessionManager.recordSession(packet.from, incomingPasskey)
-        }
-
-        val fromNum = packet.from
+        val fromNum = packet.from.takeIf { it != 0 } ?: myNodeNum
         u.get_module_config_response?.let {
             if (fromNum == myNodeNum) {
                 configHandler.value.handleModuleConfig(it, session)

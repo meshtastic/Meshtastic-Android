@@ -20,6 +20,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.network.radio.MockRadioTransport
 import org.meshtastic.core.network.radio.ReplayRadioTransport
 import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
+import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -36,6 +37,7 @@ internal class SdkPhoneApiSessions(
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val nodeManager: Lazy<NodeManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
+    private val adminPacketHandler: Lazy<AdminPacketHandler>,
 ) : VirtualRadioSessionFactory {
     fun open(service: RadioInterfaceService, transport: suspend () -> SdkRadioTransport): RadioTransport =
         SdkPhoneApiRadioTransport(
@@ -46,6 +48,7 @@ internal class SdkPhoneApiSessions(
             messageProcessor,
             nodeManager,
             lockdownCoordinator,
+            adminPacketHandler,
         )
 
     fun webSocket(url: String, service: RadioInterfaceService): RadioTransport =

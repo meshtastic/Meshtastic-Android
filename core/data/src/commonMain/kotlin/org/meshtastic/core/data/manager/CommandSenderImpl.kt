@@ -33,7 +33,6 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isWithinSizeLimit
-import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -44,7 +43,6 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.toFixedPositionAdminMessage
 import org.meshtastic.core.repository.toFixedPositionProto
@@ -79,8 +77,6 @@ class CommandSenderImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
-    private val sessionManager: SessionManager,
-    private val adminRequestRegistry: AdminRequestRegistry,
     private val connectionStateProvider: ConnectionStateProvider,
     private val scope: ServiceScope,
     private val radioInterfaceService: RadioInterfaceService,
@@ -214,8 +210,7 @@ class CommandSenderImpl(
         to = destNum,
         id = requestId.nonZeroRequestId(),
         wantResponse = wantResponse,
-        adminMessage =
-        initFn().newBuilder().also { wb -> wb.session_passkey = sessionManager.getPasskey(destNum) }.build(),
+        adminMessage = initFn(),
     )
 
     // Admin writes are bound to the lifecycle version current at the call, so one queued behind a radio switch is
@@ -241,9 +236,7 @@ class CommandSenderImpl(
     }
 
     override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
-        val adminMsg =
-            initFn().newBuilder().also { wb -> wb.session_passkey = sessionManager.getPasskey(destNum) }.build()
-        val packet = buildAdminPacket(to = destNum, adminMessage = adminMsg)
+        val packet = buildAdminPacket(to = destNum, adminMessage = initFn())
         packetHandler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = packet }.build())
     }
 
@@ -627,7 +620,6 @@ class CommandSenderImpl(
                 }
                 .build(),
         )
-            .also { adminRequestRegistry.register(it.id) }
 
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL

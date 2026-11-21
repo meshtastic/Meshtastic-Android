@@ -38,7 +38,6 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.model.RoutingNak
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.getMessageRoutingErrorDetailResFrom
@@ -69,16 +68,12 @@ private const val QUEUE_REJECTION_LOG_MESSAGE = "Node-detail request rejected by
 private const val LOCAL_NODE_UNAVAILABLE_LOG_MESSAGE =
     "Node-detail request deferred until local node identity is available"
 
-// Raised by our own node when it cannot encrypt to the target, so they say more than "unreachable".
-private val LOCAL_KEY_ERRORS = setOf(Routing.Error.PKI_FAILED.value, Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value)
-
-/** A NAK from the target says why it refused; one from anywhere else means the target was never reached. */
-internal fun remoteAdminRefusalText(nak: RoutingNak, destNum: Int): StringResource = when {
-    nak.from == destNum || nak.routingError in LOCAL_KEY_ERRORS ->
-        getMessageRoutingErrorDetailResFrom(nak.routingError) ?: getStringResFrom(nak.routingError)
-
-    else -> Res.string.remote_admin_unreachable
-}
+internal fun remoteAdminRefusalText(error: Int): StringResource =
+    if (error == Routing.Error.MAX_RETRANSMIT.value || error == Routing.Error.NO_ROUTE.value) {
+        Res.string.remote_admin_unreachable
+    } else {
+        getMessageRoutingErrorDetailResFrom(error) ?: getStringResFrom(error)
+    }
 
 /** UI state for the Node Details screen. */
 @androidx.compose.runtime.Stable
@@ -279,7 +274,7 @@ class NodeDetailViewModel(
 
                     is EnsureSessionResult.Rejected ->
                         snackbarManager.showSnackbar(
-                            resolveUiText(UiText.Resource(remoteAdminRefusalText(result.nak, destNum))),
+                            resolveUiText(UiText.Resource(remoteAdminRefusalText(result.routingError))),
                         )
                 }
             } catch (e: PacketQueueRejectedException) {

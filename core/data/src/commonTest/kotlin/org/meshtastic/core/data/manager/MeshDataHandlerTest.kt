@@ -47,7 +47,6 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.ActiveConversationTracker
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -104,7 +103,6 @@ class MeshDataHandlerTest {
     private val messageFilter: MessageFilter = mock(MockMode.autofill)
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
-    private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
     private val remoteShellHandler: RemoteShellHandler = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
@@ -163,7 +161,6 @@ class MeshDataHandlerTest {
                 messageFilter = messageFilter,
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
-                adminPacketHandler = adminPacketHandler,
                 remoteShellHandler = remoteShellHandler,
                 collectorRegistry = mock(MockMode.autofill),
                 // GeofenceMonitor is a final @Single (mokkery can't mock it) — use a real one over mocked
@@ -1590,41 +1587,6 @@ class MeshDataHandlerTest {
     }
 
     // --- Admin message handling ---
-
-    @Test
-    fun `admin message delegates to adminPacketHandler`() {
-        val admin =
-            org.meshtastic.proto.AdminMessage.Builder()
-                .also { wb -> wb.session_passkey = okio.ByteString.of(1, 2, 3) }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 123
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ADMIN_APP
-                                wb.payload = admin.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!local",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = admin.encode().toByteString(),
-                dataType = PortNum.ADMIN_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, 123)
-
-        verify { adminPacketHandler.handleAdminMessage(packet, 123, session) }
-    }
-
-    // --- Message filtering ---
 
     @Test
     fun `filtered message is inserted with filtered flag`() = testScope.runTest {
