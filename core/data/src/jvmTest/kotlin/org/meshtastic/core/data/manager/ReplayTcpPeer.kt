@@ -57,9 +57,12 @@ internal suspend fun withReplayTcpPeer(
                         server.accept().use { socket ->
                             accepted.set(socket)
                             checkNotNull(DataInputStream(socket.getInputStream()).readFrame())
-                            socket
-                                .getOutputStream()
-                                .sendEnvelope(FromRadio.Builder().also { it.rebooted = true }.build())
+                            // Firmware answers want_config with my_info first (PhoneAPI STATE_SEND_MY_INFO).
+                            val myInfo =
+                                MyNodeInfo.Builder().also { it.my_node_num = SdkRoomReplayTest.LOCAL_NODE }.build()
+                            val output = socket.getOutputStream()
+                            output.sendEnvelope(FromRadio.Builder().also { it.my_info = myInfo }.build())
+                            output.sendEnvelope(FromRadio.Builder().also { it.rebooted = true }.build())
                             // Leave the link up until the SDK retires it in response to the reboot frame.
                             socket.getInputStream().transferTo(OutputStream.nullOutputStream())
                         }
