@@ -76,7 +76,7 @@ To remove an archived conversation for good, swipe it left in the conversation l
 
 ## Direct Messages
 
-Direct messages (DMs) go to one specific node. When both nodes hold each other's public keys, your node encrypts the message to the other node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
+Direct messages (DMs) go to one specific node. When both nodes hold each other's public keys, your node encrypts the message to the other node's public key, so no one else on the mesh can read it — not even nodes that share your channel. A licensed (Ham) node never encrypts: its direct messages go out unencrypted, readable by anyone in range, and only a licensed node accepts them.
 
 Unless your node is licensed, it must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a node that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
 

@@ -101,7 +101,7 @@ location, or on desktop, it still lists the region and every root it hears.
 
 If your node has no internet access of its own, it can use the app as its MQTT gateway. Turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config. The app then relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
 
-The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration. A root topic containing `+` or `#` stops the relay with **MQTT stopped: the root topic contains + or #. Remove it in MQTT settings.** Remove the character and turn the relay back on.
+The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration. A root topic containing `+` or `#` stops the relay with **MQTT stopped: the root topic contains + or #. Remove it in MQTT settings.** Remove the character, save the MQTT settings, and turn the relay back on once the node reconnects.
 
 ### Default Meshtastic Broker
 
