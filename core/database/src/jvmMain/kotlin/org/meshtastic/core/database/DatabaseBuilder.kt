@@ -36,16 +36,28 @@ import java.io.File
  *
  * Shared between `core:database` and `desktop` module to ensure all persistent data is co-located.
  */
-fun desktopDataDir(): String {
+fun desktopDataDir(): String = resolvedDataDir
+
+/**
+ * The default `~/.meshtastic/` is restricted to the current user the first time it is resolved, including when it
+ * already exists. An explicit `MESHTASTIC_DATA_DIR` is left as the user set it; the app restricts its own
+ * subdirectories and files inside it.
+ */
+private val resolvedDataDir: String by lazy {
     val override = System.getenv("MESHTASTIC_DATA_DIR")
-    if (!override.isNullOrBlank()) return override
-    return System.getProperty("user.home") + "/.meshtastic"
+    if (!override.isNullOrBlank()) {
+        override
+    } else {
+        (System.getProperty("user.home") + "/.meshtastic").also { createOwnerOnlyDirectories(File(it)) }
+    }
 }
 
 /** Returns a [RoomDatabase.Builder] configured for JVM/Desktop with the given [dbName]. */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
     val dbFile = File(desktopDataDir(), "$dbName.db")
-    dbFile.parentFile?.mkdirs()
+    dbFile.parentFile?.let(::createOwnerOnlyDirectories)
+    // SQLite gives the -wal and -shm files the main file's permissions.
+    ensureOwnerOnlyFile(dbFile)
     return Room.databaseBuilder<MeshtasticDatabase>(
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
@@ -80,7 +92,7 @@ actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 /** Creates a JVM DataStore for database preferences in the data directory. */
 actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
-    File(dir).mkdirs()
+    createOwnerOnlyDirectories(File(dir))
     return PreferenceDataStoreFactory.create(
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
         produceFile = { File(dir, "$name.preferences_pb") },

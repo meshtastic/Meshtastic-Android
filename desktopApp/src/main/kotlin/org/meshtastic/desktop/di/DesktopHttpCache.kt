@@ -20,6 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.cache.storage.FileStorage
 import kotlinx.io.files.Path
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
 import java.io.File
 
@@ -48,7 +49,7 @@ internal fun HttpClient.withApiCache(cacheDir: File): HttpClient = config {
  * once, before the client starts using the directory.
  */
 internal fun trimDirectoryToBudget(directory: File, maxBytes: Long) {
-    directory.mkdirs()
+    createOwnerOnlyDirectories(directory)
     var kept = 0L
     directory
         .walkTopDown()
