@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.model
+package org.meshtastic.core.model
 
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -122,5 +121,18 @@ class CanDirectMessageTest {
     @Test
     fun offersTheActionForAKeylessNodeWhenLocalIsLicensedAndNoThreadExists() {
         assertTrue(node().showsDirectMessageAction(hasConversation = false, localIsLicensed = true))
+    }
+
+    @Test
+    fun directMessagePathNeedsAKeyUnlessLocalIsLicensed() {
+        assertTrue(node(publicKey = key).hasDirectMessagePath(localIsLicensed = false))
+        assertFalse(node().hasDirectMessagePath(localIsLicensed = false))
+        assertTrue(node().hasDirectMessagePath(localIsLicensed = true))
+    }
+
+    @Test
+    fun directMessagePathIgnoresRole() {
+        assertFalse(node(role = Config.DeviceConfig.Role.REPEATER).hasDirectMessagePath(localIsLicensed = false))
+        assertTrue(node(publicKey = key, role = Config.DeviceConfig.Role.REPEATER).hasDirectMessagePath(false))
     }
 }

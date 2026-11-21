@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.isLicensedLocal
+import org.meshtastic.core.model.showsDirectMessageAction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.actions
 import org.meshtastic.core.resources.direct_message
@@ -62,8 +64,6 @@ import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.isLicensedLocal
-import org.meshtastic.feature.node.model.showsDirectMessageAction
 import org.meshtastic.proto.Telemetry
 
 @Composable

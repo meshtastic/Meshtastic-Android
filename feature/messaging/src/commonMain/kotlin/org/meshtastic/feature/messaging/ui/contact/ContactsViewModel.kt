@@ -31,8 +31,10 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.hasDirectMessagePath
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
@@ -93,8 +95,12 @@ class ContactsViewModel(
     private val displayNames: Flow<Map<Int, String>> =
         nodeRepository.nodeDBbyNum.map { db -> db.mapValues { (_, node) -> node.displayName } }.distinctUntilChanged()
 
-    private val nodeProjection: Flow<Pair<Set<Int>, Map<Int, String>>> =
-        combine(keyedNodeNums, displayNames) { keyed, names -> keyed to names }
+    /** Whether our own node is licensed; a licensed radio sends direct messages on the channel without a key. */
+    private val localIsLicensed: Flow<Boolean> =
+        nodeRepository.ourNodeInfo.map { it.isLicensedLocal }.distinctUntilChanged()
+
+    private val nodeProjection: Flow<Boolean> =
+        combine(keyedNodeNums, displayNames, localIsLicensed) { _, _, licensed -> licensed }
 
     /**
      * Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and
@@ -108,7 +114,7 @@ class ContactsViewModel(
             packetRepository.getContactSettings(),
             nodeProjection,
         ) { identity, contacts, channelSet, settings, projection ->
-            val keyedNodes = projection.first
+            val localIsLicensed = projection
             val (myNodeInfo, _) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
@@ -161,11 +167,12 @@ class ContactsViewModel(
                     isMuted = settings[contactKey]?.isMuted == true,
                     draft = settings[contactKey]?.draft.orEmpty(),
                     isPinned = settings[contactKey]?.pinned == true,
-                    // Keyless DM threads stay in the list (never hide a conversation) but are flagged: without a
-                    // public key the radio refuses to send, the same as an unmessagable node. A retired channel has
-                    // no slot at all, so nothing can be sent there either.
+                    // Threads we cannot send to stay in the list (never hide a conversation) but are flagged. A
+                    // retired channel has no slot at all, so nothing can be sent there either.
                     isUnmessageable =
-                    isRetired || (user.is_unmessagable ?: false) || (!toBroadcast && node.num !in keyedNodes),
+                    isRetired ||
+                        (user.is_unmessagable ?: false) ||
+                        (!toBroadcast && !node.hasDirectMessagePath(localIsLicensed)),
                     isRetired = isRetired,
                     nodeColors =
                     if (!toBroadcast) {

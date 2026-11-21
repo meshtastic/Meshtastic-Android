@@ -29,7 +29,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
@@ -40,6 +42,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -204,4 +207,109 @@ class ContactsViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    private fun myNodeInfo() = MyNodeInfo(
+        myNodeNum = 1,
+        hasGPS = false,
+        model = null,
+        firmwareVersion = null,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 0L,
+        messageTimeoutMsec = 0,
+        minAppVersion = 0,
+        maxChannels = 8,
+        hasWifi = false,
+        channelUtilization = 0f,
+        airUtilTx = 0f,
+        deviceId = null,
+    )
+
+    private suspend fun dmContactIsUnmessageable(
+        localIsLicensed: Boolean,
+        peerKey: ByteString = ByteString.EMPTY,
+        peerRole: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
+    ): Boolean {
+        val peer =
+            Node(
+                num = 2,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000002"
+                        wb.public_key = peerKey
+                        wb.role = peerRole
+                    }
+                    .build(),
+            )
+        val local =
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000001"
+                        wb.is_licensed = localIsLicensed
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(local, peer))
+        nodeRepository.setOurNode(local)
+        nodeRepository.setMyNodeInfo(myNodeInfo())
+        nodeRepository.setMyId("!00000001")
+        val dm = DataPacket(to = "!00000001", from = "!00000002", bytes = "hi".encodeUtf8(), dataType = 1)
+        every { packetRepository.getContacts() } returns MutableStateFlow(mapOf("0!00000002" to dm))
+        every { packetRepository.getContactSettings() } returns MutableStateFlow(emptyMap())
+        viewModel =
+            ContactsViewModel(
+                SavedStateHandle(),
+                nodeRepository,
+                packetRepository,
+                SnackbarManager(),
+                radioConfigRepository,
+                connectionStateProvider,
+            )
+
+        var result: Boolean? = null
+        viewModel.contactList.test {
+            var latest = awaitItem()
+            while (latest.none { it.contactKey == "0!00000002" }) latest = awaitItem()
+            result = latest.single { it.contactKey == "0!00000002" }.isUnmessageable
+            cancelAndIgnoreRemainingEvents()
+        }
+        return result!!
+    }
+
+    @Test
+    fun `keyless direct message contact is not flagged unmessageable when our node is licensed`() =
+        runTest(testDispatcher) {
+            assertFalse(dmContactIsUnmessageable(localIsLicensed = true))
+        }
+
+    @Test
+    fun `keyless direct message contact is flagged unmessageable when our node is not licensed`() =
+        runTest(testDispatcher) {
+            assertTrue(dmContactIsUnmessageable(localIsLicensed = false))
+        }
+
+    @Test
+    fun `keyed repeater contact is not flagged unmessageable by role`() = runTest(testDispatcher) {
+        val key = ByteArray(32) { 0x2B.toByte() }.toByteString()
+
+        assertFalse(
+            dmContactIsUnmessageable(
+                localIsLicensed = false,
+                peerKey = key,
+                peerRole = Config.DeviceConfig.Role.REPEATER,
+            ),
+        )
+    }
+
+    @Test
+    fun `keyed direct message contact is not flagged unmessageable when our node is not licensed`() =
+        runTest(testDispatcher) {
+            val key = ByteArray(32) { 0x2B.toByte() }.toByteString()
+
+            assertFalse(dmContactIsUnmessageable(localIsLicensed = false, peerKey = key))
+        }
 }
