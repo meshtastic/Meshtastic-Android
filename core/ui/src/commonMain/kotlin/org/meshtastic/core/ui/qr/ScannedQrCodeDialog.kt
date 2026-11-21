@@ -57,6 +57,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
@@ -438,7 +439,12 @@ private fun loraConfigValueText(value: Any?): String = when (value) {
     is Float -> NumberFormatter.format(value, FREQUENCY_DECIMALS)
 
     is List<*> ->
-        if (value.isEmpty()) stringResource(Res.string.lora_config_values_none) else value.joinToString(", ")
+        if (value.isEmpty()) {
+            stringResource(Res.string.lora_config_values_none)
+        } else {
+            // The config's only list is node numbers; show them the way the rest of the app names a node.
+            value.joinToString(", ") { if (it is Int) NodeAddress.numToDefaultId(it) else it.toString() }
+        }
 
     else -> value.toString()
 }
