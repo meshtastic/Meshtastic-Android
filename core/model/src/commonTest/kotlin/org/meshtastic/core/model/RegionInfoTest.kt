@@ -22,6 +22,7 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * Frequency-slot expectations mirror the firmware's region table and slot math in
@@ -34,6 +35,15 @@ class RegionInfoTest {
         .also { wb ->
             wb.use_preset = true
             wb.modem_preset = preset
+            wb.region = region
+            wb.channel_num = channelNum
+        }
+        .build()
+
+    private fun customLora(region: RegionCode, bandwidthCode: Int, channelNum: Int = 0) = LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = false
+            wb.bandwidth = bandwidthCode
             wb.region = region
             wb.channel_num = channelNum
         }
@@ -180,5 +190,102 @@ class RegionInfoTest {
     fun explicit_channel_num_wins_over_override_slot() {
         val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST, channelNum = 5)
         assertEquals(5, itu1.channelNum("TinyFast"))
+    }
+
+    @Test
+    fun jp_narrow_and_lite_presets_use_15_200kHz_unit_channels() {
+        // ARIB STD-T108: 62.5 kHz and 125 kHz occupy 1 unit channel (0.2 MHz): 9 lower + 6 upper = 15 slots.
+        for (preset in listOf(ModemPreset.NARROW_SLOW, ModemPreset.LITE_FAST)) {
+            val cfg = lora(RegionCode.JP, preset)
+            assertEquals(15, cfg.numChannels)
+            assertEquals(920.6f, cfg.radioFreq(1), 0.001f)
+            assertEquals(920.8f, cfg.radioFreq(2), 0.001f)
+            assertEquals(922.2f, cfg.radioFreq(9), 0.001f)
+            assertEquals(922.4f, cfg.radioFreq(10), 0.001f)
+            assertEquals(923.4f, cfg.radioFreq(15), 0.001f)
+        }
+
+        val narrowSlow = lora(RegionCode.JP, ModemPreset.NARROW_SLOW)
+        assertEquals(2, narrowSlow.channelNum("NarrowSlow"))
+        assertEquals(920.8f, narrowSlow.radioFreq(narrowSlow.channelNum("NarrowSlow")), 0.001f)
+
+        val narrowFast = lora(RegionCode.JP, ModemPreset.NARROW_FAST)
+        assertEquals(11, narrowFast.channelNum("NarrowFast"))
+        assertEquals(922.6f, narrowFast.radioFreq(narrowFast.channelNum("NarrowFast")), 0.001f)
+
+        val liteFast = lora(RegionCode.JP, ModemPreset.LITE_FAST)
+        assertEquals(5, liteFast.channelNum("LiteFast"))
+        assertEquals(921.4f, liteFast.radioFreq(liteFast.channelNum("LiteFast")), 0.001f)
+    }
+
+    @Test
+    fun jp_250kHz_presets_bond_two_unit_channels_without_crossing_922_3_MHz() {
+        // ARIB STD-T108 Table 3-2: 250 kHz bonds 2 unit channels (0.4 MHz): 4 lower + 3 upper = 7 slots.
+        val longFast = lora(RegionCode.JP, ModemPreset.LONG_FAST)
+        assertEquals(7, longFast.numChannels)
+        assertEquals(6, longFast.channelNum("LongFast"))
+        val expected = listOf(920.7f, 921.1f, 921.5f, 921.9f, 922.5f, 922.9f, 923.3f)
+        expected.forEachIndexed { index, freq -> assertEquals(freq, longFast.radioFreq(index + 1), 0.001f) }
+    }
+
+    @Test
+    fun jp_500kHz_turbo_presets_bond_three_unit_channels() {
+        // ARIB STD-T108 Table 3-3: 500 kHz bonds 3 unit channels (0.6 MHz): 3 lower + 2 upper = 5 slots.
+        val shortTurbo = lora(RegionCode.JP, ModemPreset.SHORT_TURBO)
+        assertEquals(5, shortTurbo.numChannels)
+        assertEquals(1, shortTurbo.channelNum("ShortTurbo"))
+        val expected = listOf(920.8f, 921.4f, 922.0f, 922.6f, 923.2f)
+        expected.forEachIndexed { index, freq -> assertEquals(freq, shortTurbo.radioFreq(index + 1), 0.001f) }
+    }
+
+    @Test
+    fun jp_custom_bandwidths_and_overrides_follow_unit_channel_grid() {
+        // 203.125 kHz (wire code 200) exceeds 1 unit channel (200 kHz) so it bonds 2 units (400 kHz -> 7 slots).
+        val bw203 = customLora(RegionCode.JP, bandwidthCode = 200)
+        assertEquals(7, bw203.numChannels)
+        assertEquals(920.7f, bw203.radioFreq(1), 0.001f)
+        assertEquals(922.5f, bw203.radioFreq(5), 0.001f)
+
+        // 406.25 kHz (wire code 400) exceeds 2 unit channels (400 kHz) so it bonds 3 units (600 kHz -> 5 slots).
+        val bw406 = customLora(RegionCode.JP, bandwidthCode = 400)
+        assertEquals(5, bw406.numChannels)
+        assertEquals(920.8f, bw406.radioFreq(1), 0.001f)
+        assertEquals(922.6f, bw406.radioFreq(4), 0.001f)
+
+        val narrowSlow = lora(RegionCode.JP, ModemPreset.NARROW_SLOW)
+        val offset = narrowSlow.newBuilder().also { wb -> wb.frequency_offset = 0.01f }.build()
+        assertEquals(920.81f, offset.radioFreq(2), 0.001f)
+
+        val overrideFreq = narrowSlow.newBuilder().also { wb -> wb.override_frequency = 922.7f }.build()
+        assertEquals(922.7f, overrideFreq.radioFreq(2), 0.001f)
+
+        // Slot 0 must clamp safely to slot 1 instead of underflowing below freqStart.
+        assertEquals(920.7f, lora(RegionCode.JP, ModemPreset.LONG_FAST).radioFreq(0), 0.001f)
+    }
+
+    @Test
+    fun jp_slots_stay_within_band_edges_and_never_straddle_922_3_MHz() {
+        val jpPresets =
+            listOf(ModemPreset.NARROW_SLOW, ModemPreset.LITE_FAST, ModemPreset.LONG_FAST, ModemPreset.SHORT_TURBO)
+        for (preset in jpPresets) {
+            val cfg = lora(RegionCode.JP, preset)
+            val halfBw = requireNotNull(ChannelOption.from(preset)).bandwidth * 0.5f
+            var prevUpper = 0f
+            for (slot in 1..cfg.numChannels) {
+                val center = cfg.radioFreq(slot)
+                val lo = center - halfBw
+                val hi = center + halfBw
+                assertTrue(lo >= 920.5f - 1e-4f, "$preset slot $slot lower edge $lo < 920.5")
+                assertTrue(hi <= 923.5f + 1e-4f, "$preset slot $slot upper edge $hi > 923.5")
+                if (slot > 1) {
+                    assertTrue(lo >= prevUpper - 1e-4f, "$preset slot $slot overlaps previous ($lo < $prevUpper)")
+                }
+                assertTrue(
+                    hi <= 922.3f + 1e-4f || lo >= 922.3f - 1e-4f,
+                    "$preset slot $slot [$lo, $hi] straddles 922.3 MHz",
+                )
+                prevUpper = hi
+            }
+        }
     }
 }
