@@ -16,24 +16,30 @@
  */
 package org.meshtastic.core.datastore.di
 
+import kotlinx.browser.localStorage
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.store.InMemoryStore
 import org.meshtastic.core.datastore.store.LocalStorageStore
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
 
-/** Proto stores backed by the browser's `localStorage`, one per payload type. */
+internal const val LOCAL_CONFIG_STORAGE_KEY = "local_config_ds"
+internal const val MODULE_CONFIG_STORAGE_KEY = "module_config_ds"
+
+/**
+ * Proto stores for the browser. The radio's config holds its keys, Wi-Fi password and MQTT login, and the radio sends
+ * it again on every connect, so those stores live in memory for the page session. Radio stats are not sensitive and
+ * stay in `localStorage`.
+ */
 @Module
 class CoreDatastoreWasmJsModule {
     @Single
-    fun provideLocalConfigDataStore(): CoreLocalConfigDataStore = LocalStorageStore(
-        storageKey = "local_config_ds",
-        defaultValue = LocalConfig.Builder().build(),
-        decode = LocalConfig.ADAPTER::decode,
-        encode = { value, sink -> LocalConfig.ADAPTER.encode(sink, value) },
-    )
-        .asCoreLocalConfigDataStore()
+    fun provideLocalConfigDataStore(): CoreLocalConfigDataStore {
+        removeStoredCopy(LOCAL_CONFIG_STORAGE_KEY)
+        return InMemoryStore(LocalConfig.Builder().build()).asCoreLocalConfigDataStore()
+    }
 
     @Single
     fun provideLocalStatsDataStore(): CoreLocalStatsDataStore = LocalStorageStore(
@@ -45,11 +51,13 @@ class CoreDatastoreWasmJsModule {
         .asCoreLocalStatsDataStore()
 
     @Single
-    fun provideModuleConfigDataStore(): CoreModuleConfigDataStore = LocalStorageStore(
-        storageKey = "module_config_ds",
-        defaultValue = LocalModuleConfig.Builder().build(),
-        decode = LocalModuleConfig.ADAPTER::decode,
-        encode = { value, sink -> LocalModuleConfig.ADAPTER.encode(sink, value) },
-    )
-        .asCoreModuleConfigDataStore()
+    fun provideModuleConfigDataStore(): CoreModuleConfigDataStore {
+        removeStoredCopy(MODULE_CONFIG_STORAGE_KEY)
+        return InMemoryStore(LocalModuleConfig.Builder().build()).asCoreModuleConfigDataStore()
+    }
+}
+
+/** Drops a copy that an earlier version wrote; storage that is off, as in some private windows, has nothing to drop. */
+private fun removeStoredCopy(key: String) {
+    runCatching { localStorage.removeItem(key) }
 }
