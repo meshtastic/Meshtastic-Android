@@ -124,7 +124,7 @@ address restored onto such a device is kept but never armed.
 
 Platform-specific implementations:
 - **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
-- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and the replay transport isn't wired
+- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
 
