@@ -38,6 +38,7 @@ import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.testing.FakeDatabaseProvider
+import org.meshtastic.proto.HardwareModel
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -265,6 +266,15 @@ class DeviceHardwareRepositoryImplTest {
 
         assertEquals(1, api.deviceHardwareCalls, "catalog success must gate further hardware fetches")
         assertEquals(1, links.reconcileCalls, "retry outside TTL must not retry reconcile either")
+    }
+
+    @Test
+    fun aVirtualNodeIsNamedWithoutACatalogEntry() = runBlocking {
+        val hardware = repository.getDeviceHardwareByModel(hwModel = HardwareModel.VIRTUAL_NODE.value).getOrThrow()
+
+        assertEquals("Meshtastic app node", hardware?.displayName)
+        assertEquals("VIRTUAL_NODE", hardware?.hwModelSlug)
+        assertEquals(false, hardware?.activelySupported)
     }
 
     @Test

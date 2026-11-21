@@ -43,6 +43,7 @@ import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
+import org.meshtastic.proto.HardwareModel
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -247,6 +248,7 @@ class DeviceHardwareRepositoryImpl(
         entities: List<DeviceHardwareEntity>,
         target: String?,
     ): DeviceHardware? {
+        if (entities.isEmpty() && hwModel == HardwareModel.VIRTUAL_NODE.value) return virtualNodeHardware()
         val matched = disambiguate(entities, target)
         val snapshot = bootloaderOtaQuirksRepository.getSnapshot()
         val withQuirk = applyBootloaderQuirk(hwModel, matched?.asExternalModel(), snapshot.devices, target)
@@ -321,6 +323,18 @@ class DeviceHardwareRepositoryImpl(
             }
         reportedTarget?.let { withQuirk.copy(platformioTarget = it) } ?: withQuirk
     }
+
+    /**
+     * A phone or desktop app acting as a mesh node of its own reports `VIRTUAL_NODE`, which no catalog entry names:
+     * there is no board, firmware or image behind it.
+     */
+    private fun virtualNodeHardware(): DeviceHardware = DeviceHardware(
+        activelySupported = false,
+        architecture = "kmp",
+        displayName = "Meshtastic app node",
+        hwModel = HardwareModel.VIRTUAL_NODE.value,
+        hwModelSlug = HardwareModel.VIRTUAL_NODE.name,
+    )
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
