@@ -25,6 +25,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.CoreLocalStatsDataStore
@@ -40,6 +41,7 @@ import org.meshtastic.core.datastore.store.asStore
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
+import java.io.File
 
 /** Proto [DataStore] instances (OkioStorage-backed). */
 @Module
@@ -72,7 +74,7 @@ private fun <T> protoStore(
     scope: DataStoreScope,
 ): DataStore<T> {
     val dir = desktopDataDir() + "/datastore"
-    FileSystem.SYSTEM.createDirectories(dir.toPath())
+    createOwnerOnlyDirectories(File(dir))
     return DataStoreFactory.create(
         storage =
         OkioStorage(

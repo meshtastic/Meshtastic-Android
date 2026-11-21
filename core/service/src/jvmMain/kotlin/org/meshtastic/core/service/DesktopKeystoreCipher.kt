@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.service
 
+import org.meshtastic.core.database.ensureOwnerOnlyFile
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -58,6 +59,7 @@ internal class DesktopKeystoreCipher(
         val secretKey = keyGen.generateKey()
         ks.load(null, keystorePassword)
         ks.setEntry(keyAlias, KeyStore.SecretKeyEntry(secretKey), protection)
+        ensureOwnerOnlyFile(ksFile)
         FileOutputStream(ksFile).use { ks.store(it, keystorePassword) }
         return secretKey
     }
