@@ -175,8 +175,9 @@ internal fun buildAnnotatedStringWithLinks(
         }
 
         // Bare URL/email/phone autolinking, skipping anything already covered by a mention or markdown link.
-        for ((range, url) in autoLinks) {
-            if (range.any { it in usedIndices }) continue
+        for ((range, candidate) in autoLinks) {
+            val url = openableLinkTarget(candidate, allowTel = true)
+            if (url == null || range.any { it in usedIndices }) continue
             addLink(LinkAnnotation.Url(url = url, styles = linkStyles), range.first, range.last + 1)
             range.forEach { usedIndices.add(it) }
         }
