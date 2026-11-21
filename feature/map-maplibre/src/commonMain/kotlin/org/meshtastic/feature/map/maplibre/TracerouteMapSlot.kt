@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.desktop.map
+package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,22 +25,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.maplibre.MapLibreTracerouteMap
+import org.meshtastic.feature.map.maplibre.component.customRasterBasemaps
+import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 
 /**
- * Desktop adapter for the traceroute map seam.
- *
- * Mirrors the F-Droid adapter: the seam hands over an overlay plus snapshot positions, and the shared selection helper
- * resolves those into placeable nodes so both platforms count "mappable hops" the same way.
+ * Host-facing traceroute map for the MapLibre hosts. The seam hands over an overlay plus snapshot positions, and the
+ * shared selection helper resolves those into placeable nodes so every host counts "mappable hops" the same way.
  */
 @Composable
-fun DesktopTracerouteMap(
+fun MapLibreTracerouteMapSlot(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     onMappableCountChange: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     val viewModel: SharedMapViewModel = koinViewModel()
     // The effect below restarts on hop-count changes; capturing the callback keeps a recomposition
@@ -55,17 +55,17 @@ fun DesktopTracerouteMap(
             nodes = nodes,
         )
 
-    LaunchedEffect(selection.nodeLookup.size, selection.overlayNodeNums.size) {
-        reportCount(
-            selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) },
-            selection.overlayNodeNums.size,
-        )
-    }
+    // The host shows "n of m hops mappable"; m counts every hop the traceroute named, n only those
+    // we can actually place, so a route through nodes we have never heard from still reports honestly.
+    val total = selection.overlayNodeNums.size
+    val shown = selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) }
+    LaunchedEffect(shown, total) { reportCount(shown, total) }
 
     MapLibreTracerouteMap(
         forwardRoute = tracerouteOverlay?.forwardRoute.orEmpty(),
         returnRoute = tracerouteOverlay?.returnRoute.orEmpty(),
         nodeLookup = selection.nodeLookup,
         modifier = modifier,
+        customBasemaps = customBasemaps,
     )
 }

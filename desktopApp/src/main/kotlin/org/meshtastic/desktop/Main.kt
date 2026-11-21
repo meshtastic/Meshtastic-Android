@@ -117,7 +117,6 @@ import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.DesktopKoinApp
-import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.map.desktopMapViewProvider
 import org.meshtastic.desktop.mcp.DesktopMcpLifecycle
 import org.meshtastic.desktop.notification.DesktopOS
@@ -133,6 +132,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
+import org.meshtastic.feature.map.maplibre.MapLibreTracerouteMapSlot
 import java.awt.Desktop
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -494,7 +494,7 @@ private fun ApplicationScope.MeshtasticWindow(
                     },
                 LocalTracerouteMapProvider provides
                     { overlay, nodePositions, onMappableCountChanged, modifier ->
-                        DesktopTracerouteMap(overlay, nodePositions, onMappableCountChanged, modifier)
+                        MapLibreTracerouteMapSlot(overlay, nodePositions, onMappableCountChanged, modifier)
                     },
                 // Clear of the MapLibre logo and attribution row along the bottom edge.
                 LocalTracerouteMapOverlayInsetsProvider provides
