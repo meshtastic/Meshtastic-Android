@@ -18,7 +18,7 @@ sets hold only two small `expect`/`actual` pairs: `MapLibreRuntime` (whether the
 |---|---|
 | Main map — nodes, waypoints, clusters, geofences, controls | `MapLibreMapViewProvider` → `MeshMap` |
 | Per-node position track | `MapLibreNodeTrackMap` (`NodeTrackMap.kt`) |
-| Traceroute route | `MapLibreTracerouteMap` (`SecondaryMaps.kt`) |
+| Traceroute route | `MapLibreTracerouteMapSlot` (`TracerouteMapSlot.kt`), the entry point every MapLibre host calls, over `MapLibreTracerouteMap` (`SecondaryMaps.kt`) |
 | Discovery scan map | `MapLibreDiscoveryMap` (`SecondaryMaps.kt`) |
 | Node-detail mini-map | `MapLibreInlineMap` (`SecondaryMaps.kt`) |
 

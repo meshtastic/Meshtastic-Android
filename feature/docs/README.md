@@ -136,7 +136,7 @@ The root project's `meshtastic.docs` convention plugin (`DocsTasks.kt` in `build
 
 ## Navigation
 
-Routes are `SettingsRoute` keys, registered by `docsEntries()` from the Android (`Main.kt`) and Desktop (`DesktopNavigation.kt`) nav hosts:
+Routes are `SettingsRoute` keys, registered by `docsEntries()` from `sharedNavGraph` in `:appShell`, which every host shows:
 
 | Route | Description |
 |---|---|

@@ -19,7 +19,7 @@ The `:core:ui` module contains Compose Multiplatform components, themes, and uti
 - **`MeshtasticImportFAB`** (`component/ImportFab.kt`) and **`ScannedQrCodeDialog`** (`qr/`): The import entry points (scan a QR code or NFC tag, or enter a URL) and the dialog that takes in shared channels. For a Replace code it shows the LoRa changes. For an Add code it lists the incoming channels and the channel slots in use.
 
 ### 3. App shell and theme
-- **`MeshtasticAppShell`**, **`MeshtasticNavigationSuite`**, **`MeshtasticNavDisplay`**: The adaptive navigation shell shared by Android and Desktop, on Navigation 3.
+- **`MeshtasticAppShell`**, **`MeshtasticNavigationSuite`**, **`MeshtasticNavDisplay`**: The adaptive navigation shell on Navigation 3, which `MeshtasticMainScreen` in `:appShell` assembles for every host.
 - **`AppTheme`** (`theme/`): The Material 3 theme, colors and typography.
 - **`AlertManager`** / **`SnackbarManager`** (`util/`): App-wide alert and snackbar queues.
 - **`Local*` composition locals** (`util/`): Platform capabilities the hosts provide to shared code, such as the barcode scanner, NFC, and map views.
