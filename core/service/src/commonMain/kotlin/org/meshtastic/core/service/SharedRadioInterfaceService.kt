@@ -102,6 +102,7 @@ import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
 import kotlin.concurrent.Volatile
 
 /**
@@ -1011,6 +1012,12 @@ class SharedRadioInterfaceService(
         var admin: AdminApi? = null
         runIfSessionActive(session) { admin = radioTransport?.admin }
         return admin
+    }
+
+    override fun clientForSession(session: RadioSessionContext): RadioClient? {
+        var client: RadioClient? = null
+        runIfSessionActive(session) { client = radioTransport?.client }
+        return client
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

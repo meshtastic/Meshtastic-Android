@@ -41,7 +41,11 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
 
 /**
  * A test double for [RadioInterfaceService] that provides an in-memory implementation.
@@ -279,6 +283,27 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override fun onStatus(status: TransportStatus) {
         synchronized(sessionAdmissionLock) { reportedStatuses += status }
         _transportStatus.value = status
+    }
+
+    /** The SDK client [clientForSession] hands out while a session is admitted. */
+    var client: RadioClient? = null
+
+    override fun clientForSession(session: RadioSessionContext): RadioClient? =
+        if (isSessionActive(session)) client else null
+
+    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? =
+        clientForSession(session)?.sendPaced(packet)
+
+    /** Lockdown commands [tryLockdown] accepted, in order. */
+    val lockdownCommands = mutableListOf<LockdownAuth>()
+
+    /** Set to false to simulate the link refusing a lockdown command. */
+    var acceptLockdown: Boolean = true
+
+    override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean {
+        if (!isSessionActive(session) || !acceptLockdown) return false
+        lockdownCommands += auth
+        return true
     }
 
     /** Broker messages handed to [deliverMqttProxy], in order. */

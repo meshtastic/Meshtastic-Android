@@ -74,6 +74,9 @@ internal class SdkPhoneApiRadioTransport(
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
 
+    override val client: RadioClient?
+        get() = currentClient.value
+
     override val admin: AdminApi?
         get() = currentClient.value?.admin
 

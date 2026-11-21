@@ -25,6 +25,7 @@ import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
 
 /**
  * Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the
@@ -32,6 +33,10 @@ import org.meshtastic.sdk.PacedMessageHandle
  */
 interface RadioTransport {
     val admin: AdminApi?
+        get() = null
+
+    /** The SDK client of this link's current PhoneAPI session, or null before it starts and after it ends. */
+    val client: RadioClient?
         get() = null
 
     fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = flowOf(AdminSessionStatus.NoSession)

@@ -33,6 +33,7 @@ import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
 
 /** A lifecycle lease held by one already-admitted operation for [session]. */
 interface RadioSessionLease {
@@ -127,6 +128,9 @@ interface RadioInterfaceService :
     RadioTransportWriter {
     /** Captures the SDK admin API for a single active radio session. */
     fun adminForSession(session: RadioSessionContext): AdminApi? = null
+
+    /** Captures the SDK client for a single active radio session, or null once [session] no longer owns admission. */
+    fun clientForSession(session: RadioSessionContext): RadioClient? = null
 
     /** Observes per-node admin status across radio session changes. */
     fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = flowOf(AdminSessionStatus.NoSession)
