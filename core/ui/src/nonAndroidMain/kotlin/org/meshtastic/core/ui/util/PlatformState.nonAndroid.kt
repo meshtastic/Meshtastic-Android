@@ -14,12 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.network.repository
+package org.meshtastic.core.ui.util
 
-import io.ktor.network.tls.TLSConfigBuilder
+import androidx.compose.runtime.Composable
 
-/**
- * Apple's `TLSConfigBuilder` actual has no `trustManager`, so there is nothing to configure here. On iOS a private CA
- * is trusted by installing and enabling the profile system-wide instead.
- */
-actual fun mqttTlsConfig(): (TLSConfigBuilder.() -> Unit)? = null
+@Composable actual fun isGpsDisabled(): Boolean = false
+
+@Composable actual fun isWifiUnavailable(): Boolean = false

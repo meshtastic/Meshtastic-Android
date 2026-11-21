@@ -18,5 +18,4 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.input.key.KeyEvent
 
-/** The browser reports no key source, so every key event is treated as physical. */
 actual fun KeyEvent.isFromSoftKeyboard(): Boolean = false

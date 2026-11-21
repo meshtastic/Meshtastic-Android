@@ -14,8 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ui.util
+package org.meshtastic.core.ble
 
-import androidx.compose.runtime.Composable
+import com.juul.kable.Peripheral
+import com.juul.kable.PeripheralBuilder
 
-@Composable actual fun rememberMeshHudSupported(): Boolean = false
+// Desktop, iOS and the web have no autoConnect, connection-priority or GATT-cache API to drive.
+internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) = Unit
+
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
+
+internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
+
+internal actual fun Peripheral.refreshGattCache(): Boolean = false

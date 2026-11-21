@@ -18,4 +18,8 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 
-@Composable actual fun rememberMeshHudSupported(): Boolean = false
+/** No platform primitive sets the display brightness on desktop, iOS or the web. */
+@Composable
+actual fun SetScreenBrightness(brightness: Float) {
+    // No-op
+}
