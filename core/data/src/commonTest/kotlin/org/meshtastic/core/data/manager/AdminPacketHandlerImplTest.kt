@@ -39,6 +39,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class AdminPacketHandlerImplTest {
 
@@ -210,6 +211,51 @@ class AdminPacketHandlerImplTest {
         handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = 0))
 
         verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+    }
+
+    @Test
+    fun `local response from the previous node number is ignored and stays pending after a renumber`() {
+        val passkey = ByteString.of(1, 1, 1, 1)
+        val config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
+        val adminMsg =
+            AdminMessage.Builder()
+                .also { wb ->
+                    wb.session_passkey = passkey
+                    wb.get_config_response = config
+                }
+                .build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, PREVIOUS_NODE_NUM, null)
+
+        handle(makePacket(PREVIOUS_NODE_NUM, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        verify(VerifyMode.not) { configHandler.handleDeviceConfig(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
+    }
+
+    @Test
+    fun `response from the current node number to a request addressed to the previous one is ignored`() {
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = ByteString.of(2, 2, 2, 2) }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, PREVIOUS_NODE_NUM, null)
+
+        handle(makePacket(myNodeNum, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = true))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
+    }
+
+    @Test
+    fun `non PKI response on a channel other than the admin channel is ignored and stays pending`() {
+        val passkey = ByteString.of(3, 3, 3, 3)
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, ADMIN_CHANNEL_INDEX)
+
+        val otherChannel = ADMIN_CHANNEL_INDEX + 1
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = otherChannel))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
     }
 
     // ---------- Session passkey ----------
@@ -429,6 +475,7 @@ class AdminPacketHandlerImplTest {
         const val OTHER_REQUEST_ID = 555
         const val REMOTE_NODE = 99999
         const val OTHER_NODE = 88888
+        const val PREVIOUS_NODE_NUM = 11111
         const val ADMIN_CHANNEL_INDEX = 3
     }
 }

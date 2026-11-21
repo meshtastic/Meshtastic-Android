@@ -25,6 +25,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
@@ -289,6 +290,20 @@ class MeshConnectionManagerImplTest {
         verify { adminRequestRegistry.clearAll() }
         assertEquals(true, lockdownCoordinator.disconnectCalled)
     }
+
+    @Test
+    fun `MyNodeInfo drops outstanding admin requests before the handshake time sync registers its own`() =
+        runTest(testDispatcher) {
+            every { commandSender.sendAdminImmediate(any(), any()) } returns Unit
+            manager = createManager(backgroundScope)
+
+            manager.onMyNodeInfoReceived(4242)
+
+            verify(VerifyMode.order) {
+                adminRequestRegistry.clearAll()
+                commandSender.sendAdminImmediate(4242, any())
+            }
+        }
 
     @Test
     fun `Disconnected state clears the stale noise floor`() = runTest(testDispatcher) {
