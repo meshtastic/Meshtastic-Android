@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -82,6 +83,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.util.LocalModemPreset
 
 private const val GRID_COLUMNS = 3
+
+const val NODE_ITEM_ELEVATION_TAG = "NodeItemElevation"
 
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -270,6 +273,7 @@ private fun NodeBatteryPositionRow(
             // An unset altitude is no reading, not sea level.
             thatNode.validPosition?.altitude?.let { altitude ->
                 ElevationInfo(
+                    modifier = Modifier.testTag(NODE_ITEM_ELEVATION_TAG),
                     altitude = altitude,
                     system = system,
                     suffix = stringResource(Res.string.elevation_suffix),

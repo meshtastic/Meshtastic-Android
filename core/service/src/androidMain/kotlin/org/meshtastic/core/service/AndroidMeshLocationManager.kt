@@ -21,23 +21,32 @@ import android.app.Application
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Position as ProtoPosition
 
 @Single
-class AndroidMeshLocationManager(private val context: Application, private val locationRepository: LocationRepository) :
-    MeshLocationManager {
+class AndroidMeshLocationManager(
+    private val context: Application,
+    private val locationRepository: LocationRepository,
+    private val radioConfigRepository: RadioConfigRepository,
+) : MeshLocationManager {
     private lateinit var scope: CoroutineScope
-    private var sendPositionFn: (suspend (ProtoPosition) -> Unit)? = null
+    private var sendPositionFn: (suspend (ProtoPosition) -> Boolean)? = null
     private var locationFlow: Job? = null
 
+    /** The bits of the radio's stillness cell, followed while the flow runs. */
+    private val cellBits = MutableStateFlow(0)
+
     @SuppressLint("MissingPermission")
-    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {
+    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Boolean) {
         this.scope = scope
         this.sendPositionFn = sendPositionFn
         if (locationFlow?.isActive == true) return
@@ -45,24 +54,36 @@ class AndroidMeshLocationManager(private val context: Application, private val l
         // Firmware stores this fix as the node's own position and rebroadcasts it at the channel's precision, which
         // it stamps over any precision_bits sent here, so an approximate fix would go out claiming accuracy it lacks.
         if (context.hasLocationPermission(precise = true)) {
-            locationFlow =
-                locationRepository
-                    .getLocations()
-                    .onEach { location ->
-                        sendPositionFn(
-                            phonePosition(
-                                latitude = location.latitude,
-                                longitude = location.longitude,
-                                timeMillis = location.timeMillis,
-                                mslAltitudeMeters = location.mslAltitudeMeters,
-                                haeAltitudeMeters = location.altitudeMeters,
-                                speedMetersPerSecond = location.speedMetersPerSecond,
-                                bearingDegrees = location.bearingDegrees,
-                                gnss = location.gnss,
-                            ),
-                        )
+            locationFlow = scope.launch {
+                launch {
+                    combine(radioConfigRepository.channelSetFlow, radioConfigRepository.localConfigFlow) {
+                            channels,
+                            config,
+                        ->
+                        stillnessCellBits(channels.settings, config.device?.role)
                     }
-                    .launchIn(scope)
+                        .collect { cellBits.value = it }
+                }
+                feedWhileMoving(
+                    fixes = { locationRepository.getLocations() },
+                    cellBits = cellBits,
+                    awaitMotion = { awaitSignificantMotion(context) },
+                ) { location ->
+                    sendPositionFn(
+                        phonePosition(
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            timeMillis = location.timeMillis,
+                            mslAltitudeMeters = location.mslAltitudeMeters,
+                            haeAltitudeMeters = location.altitudeMeters,
+                            speedMetersPerSecond = location.speedMetersPerSecond,
+                            bearingDegrees = location.bearingDegrees,
+                            gnss = location.gnss,
+                        ),
+                    )
+                }
+                coroutineContext.cancelChildren()
+            }
         }
     }
 

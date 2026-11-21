@@ -1,7 +1,7 @@
 ---
 title: Node Metrics
 nav_order: 5
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -70,6 +70,8 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 | 201–250    | Heavily Polluted    |
 | 251–350    | Severely Polluted   |
 | 351 and up | Extremely Polluted  |
+
+On a node's detail screen the **IAQ** tile shows the value with its band label, such as **120 (Lightly Polluted)**, in the band's color.
 
 ![IAQ legend listing the seven bands with their colors](../../assets/screenshots/node-metrics_iaq_scale.png)
 
@@ -162,7 +164,7 @@ The ring on the traceroute button shows the seconds left until the next request 
 
 ### Reading Traceroute Results
 
-A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
+A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path with the route toward the destination solid and the route back to you dashed, as long as the start and destination nodes have both shared a position.
 
 A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`. A hop whose node was last heard over MQTT is marked `(MQTT)`.
 
@@ -186,7 +188,7 @@ The chart button on the **Position** row opens the node's position history: its 
 
 ## Szomszéd-információ
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology. The **Neighbor Info** row appears once that node's neighbor list has reached the app. See [Local Mesh Discovery](discovery#neighbor-info) for turning the module on.
+Shows which nodes a given node can directly hear, useful for understanding mesh topology. The **Neighbor Info** row appears once that node's neighbor list has reached the app, or while the module is on for your connected node. Its log charts the neighbor count and mean SNR of each report, and lists each report and each request that got no answer. See [Local Mesh Discovery](discovery#neighbor-info) for turning the module on.
 
 ## Host Metrics
 

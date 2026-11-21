@@ -1,7 +1,7 @@
 ---
 title: MQTT
 nav_order: 11
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -44,13 +44,13 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **Username**            | Broker authentication                                                                                                                                       | meshdev                                                                                                |
 | **Password**            | Broker authentication                                                                                                                                       | large4cats                                                                                             |
 | **Encryption Enabled**  | Publish packets still encrypted with the channel key                                                                                                        | Увімкнено                                                                                              |
-| **JSON output enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | Disabled                                                                                               |
+| **JSON Output Enabled** | Shown only for a node on firmware older than 2.8, or while the setting is still on. See [Message Formats](#message-formats) | Disabled                                                                                               |
 | **TLS Enabled**         | Secure connection to broker                                                                                                                                 | Disabled                                                                                               |
 | **Root Topic**          | Base topic for messages. Letters in any script are accepted. An empty field uses the firmware default                       | `msh`, which the node rewrites to `msh/<REGION>` when you set a region while it uses the public broker |
 | **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | Disabled                                                                                               |
 | **Map Reporting**       | Report position to public map                                                                                                                               | Disabled                                                                                               |
 
-A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
+A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
 ### Connection Status and Test Connection
 
@@ -69,6 +69,13 @@ broker's access-control list is the usual cause.
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
 TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
+In the web app, the browser reaches a broker only over WebSocket. With a bare broker address,
+the default `mqtt.meshtastic.org` included, **Test connection** and **Find topics near you** stop
+with "A browser reaches MQTT only over WebSocket. Set the broker address to its wss:// URL.", and
+so does the status once **MQTT Client Proxy** has the app relay; without it the status stays
+**Inactive**. This covers only what the app itself connects to; a node reaching the broker over
+its own Wi-Fi is unaffected.
+
 ### Find Topics Near You
 
 The region topic (`msh/US`) carries every gateway in the region. **Find topics near you**, under
@@ -83,7 +90,7 @@ around you, with the number of nodes heard on each.
 - **Active topics** lists every other root heard. Roots under your state or city come first, then
   roots in neighboring states, then the rest.
 - **Custom topic** takes any root the node accepts: up to 31 bytes (letters like æ, ø and å take
-  two), no leading or trailing slash, no `+` or `#`. Suggestions keep your place's own letters, so
+  two), no trailing slash, no `+` or `#`. Suggestions keep your place's own letters, so
   a root like `msh/EU_868/NO/Østlandet` is offered and saved as written.
 
 The finder only subscribes and publishes nothing. Picking a topic fills in the root topic field,
@@ -94,7 +101,7 @@ location, or on desktop, it still lists the region and every root it hears.
 
 If your node has no internet access of its own, it can use the app as its MQTT gateway. Turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config. The app then relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
 
-The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration.
+The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration. A root topic containing `+` or `#` stops the relay with **MQTT stopped: the root topic contains + or #. Remove it in MQTT settings.** Remove the character, save the MQTT settings, and turn the relay back on once the node reconnects.
 
 ### Default Meshtastic Broker
 
@@ -137,7 +144,7 @@ Uplink and downlink are per-channel settings, not MQTT module settings. Open **S
 
 Gateways publish packets as binary Meshtastic protobufs on the `/2/e/` topic, which is what node-to-node mesh bridging uses.
 
-Firmware 2.7 and older can also publish human-readable JSON on the `/2/json/` topic for consumers outside the mesh, such as dashboards and home automation, when `json_enabled` is on. Firmware 2.8 removed JSON support and ignores the field. The app shows **JSON output enabled** only for a node on older firmware, or while the setting is still on, and while it is on the app's own MQTT proxy also subscribes to the `/2/json/` topic and decodes those payloads.
+Firmware 2.7 and older can also publish human-readable JSON on the `/2/json/` topic for consumers outside the mesh, such as dashboards and home automation, when `json_enabled` is on. Firmware 2.8 removed JSON support and ignores the field. The app shows **JSON Output Enabled** only for a node on older firmware, or while the setting is still on, and while it is on the app's own MQTT proxy also subscribes to the `/2/json/` topic and decodes those payloads.
 
 ## Encryption & Privacy
 

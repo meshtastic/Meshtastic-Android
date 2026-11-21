@@ -36,3 +36,6 @@ fun MqttEndpoint.isOpenableHere(): Boolean = mqttTransportFactory(null).supports
 
 /** A broker address this platform has no transport for, as a bare host is in a browser. */
 class MqttEndpointUnsupportedException : IllegalArgumentException("No MQTT transport here opens this broker endpoint")
+
+/** A root topic holding `#` or `+`, which no subscription filter built under it can carry. */
+class MqttRootWildcardException : IllegalArgumentException("The MQTT root topic must not contain a wildcard")

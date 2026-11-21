@@ -20,6 +20,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
+import org.meshtastic.core.data.repository.FusedLocationClient
 import org.meshtastic.core.network.radio.NodeLocationFeed
 import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.map.hud.FusedOrientationSource
@@ -39,6 +40,9 @@ class FlavorModule {
 
     /** No Play services: the in-process node's GPS asks the platform's GPS provider. */
     @Single fun nodeLocationFeed(): NodeLocationFeed = NodeLocationFeed { null }
+
+    /** No Play services: location comes from the platform's providers. */
+    @Single fun fusedLocationClient(): FusedLocationClient = FusedLocationClient.NONE
 
     /** No analytics on F-Droid — the shared Ktor `HttpClient` gets no Datadog interceptor or event listener. */
     @Single fun okHttpNetworkInstrumentation(): OkHttpNetworkInstrumentation = OkHttpNetworkInstrumentation.NONE

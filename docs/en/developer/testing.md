@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-11-12
+last_updated: 2026-11-20
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -18,10 +18,13 @@ Testing strategy and practices for the Meshtastic KMP project.
 
 ### KMP unit tests (`commonTest`)
 
-Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs:
+Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs.
+In modules that apply `meshtastic.kmp.web`, it also runs in headless Chrome, except where a module sets `meshtasticWeb { browserTests = false }` (`feature:node`, `feature:settings`), whose wasmJs tests only compile:
 
 ```shell
 ./gradlew allTests
+# the web target: needs Isolated Projects off
+./gradlew wasmJsBrowserTest -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false
 ```
 
 - Business logic tests
@@ -170,5 +173,12 @@ Tests run automatically on:
 
 Each of these calls `reusable-check.yml`. The test shards compile with `-PwarningsAsErrors=true`, so a Kotlin
 warning that passes a local build fails CI unless you pass the same flag.
+
+A pull request whose changes match the `web` path filter also runs `web-check` in `pull-request.yml`:
+`wasmJsBrowserTest` and the production `:webApp` link. The merge queue and `main` never build the web target.
+
+On a pull request into `main`, Develocity Predictive Test Selection runs only the `jvmTest` tests it predicts the
+change can affect. Pull requests into `release/**`, the merge queue, `main` and local runs execute every test. On a
+pull request `build-desktop` runs `proguardReleaseJars` on `ubuntu-24.04` only, and `main` runs it on every OS.
 
 Single-runner jobs in `reusable-check.yml` run on the pinned Ubuntu LTS x64 label with JDK 25 and Gradle caching. Two jobs use a matrix: `test-shards` splits into `shard-core`, `shard-feature` and `shard-app`, and `build-desktop` runs across macOS, Windows and Linux x64 and arm64, on the labels its own matrix lists. Flatpak verification is its own workflow, not a job here. The pinned Ubuntu LTS arm label and the container-backed `ubuntu-slim` runners carry the lightweight jobs. `.skills/testing-ci/SKILL.md` has the four-tier rule.

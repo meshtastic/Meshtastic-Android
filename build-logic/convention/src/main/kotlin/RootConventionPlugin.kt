@@ -148,6 +148,7 @@ private val ALL_MODULES_FULL =
         ":feature:wifi-provision",
         ":feature:widget",
         ":feature:xr",
+        ":appShell",
         ":desktopApp",
     )
 

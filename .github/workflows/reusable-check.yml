@@ -75,7 +75,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    timeout-minutes: 30
+    # A pull request that edits build-logic misses the remote cache on every task, so its first run is cold: about
+    # 20 minutes of Gradle, measured over 239 CI scans.
+    timeout-minutes: 45
     if: inputs.run_lint == true
     env:
       VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
@@ -99,8 +101,37 @@ jobs:
 
       - name: Spotless, Detekt & Android Lint
         # meshtastic.root routes spotlessCheck and detekt into the included build-logic build; validatePlugins and its TestKit tests it does not.
-        # detektTypeResolved runs the rules that need a classpath, which plain detekt skips.
-        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:validatePlugins :build-logic:convention:test androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
+        run: ./gradlew spotlessCheck detekt :build-logic:convention:validatePlugins :build-logic:convention:test androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
+
+  # The detekt rules that need a classpath, which plain detekt skips. Its own job: cold, the two type-resolved
+  # variants compile every module and take about a third of what lint-check used to.
+  detekt-type-resolved:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: write
+    timeout-minutes: 45
+    if: inputs.run_lint == true
+    env:
+      VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
+          cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
+
+      - name: Detekt with type resolution
+        run: ./gradlew detektTypeResolved -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:

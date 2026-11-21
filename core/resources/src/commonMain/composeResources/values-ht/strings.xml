@@ -287,6 +287,7 @@
     <string name="waypoint_new">Nouvo pwen</string>
     <string name="waypoint_received">Pwen resevwa: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">Move</string>
     <!-- WIFI -->

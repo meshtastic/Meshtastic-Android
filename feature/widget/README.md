@@ -21,7 +21,7 @@ The `:feature:widget` module holds the **Android-only Jetpack Glance home-screen
 
 ```text
 src/main/kotlin/org/meshtastic/feature/widget/
-├── WidgetSizes.kt                   ← size thresholds, line budget and type scale shared by both widgets
+├── WidgetSizes.kt                   ← size thresholds, line budget and type scale shared by all three widgets
 ├── WidgetComponents.kt              ← brand header, identity row, stat and bar rows, status body
 ├── LocalStatsWidget.kt              ← GlanceAppWidget, header and refresh
 ├── LocalStatsLayouts.kt             ← one layout per breakpoint
@@ -41,7 +41,8 @@ src/main/kotlin/org/meshtastic/feature/widget/
 ├── TelemetryWidgetReceiver.kt       ← GlanceAppWidgetReceiver
 ├── TelemetryConfigActivity.kt       ← APPWIDGET_CONFIGURE node and hidden-readings setup
 ├── TelemetryPageAction.kt           ← ActionCallback (page button)
-├── WidgetNodeChip.kt                ← node chip shared by both widgets
+├── WidgetNodeChip.kt                ← node chip shared by all three widgets
+├── WidgetValues.kt                  ← stale-value color and battery text
 ├── AndroidAppWidgetUpdater.kt       ← implements AppWidgetUpdater (core:repository)
 ├── RefreshLocalStatsAction.kt       ← ActionCallback (refresh button)
 ├── WidgetResourceEnvironment.kt     ← bridges Compose resources into Glance
@@ -90,7 +91,7 @@ The widget shows the following information when connected:
 
 The readings fill a grid: one column up to three cells wide, two columns from four (the width counted in font-scaled dp, so a large font keeps one column), with as many lines as the cell's real height holds once the header, identity row and bars (stacked at two cells wide) are taken out (`WidgetSizes.lines`, which scales the text rows and the lines by the font scale so a large font drops a line instead of clipping one). A cell whose lines hold every reading in one column uses one, whatever its width. Nodes online moves into the identity row from three cells wide. When the readings run out before the lines do, the lines spread across the leftover height; otherwise what is left, under a line, sits under them. One row shows the mark, chip, battery and channel utilization, plus nodes online when wide. The refresh button sits in the header only at two rows and two-plus cells wide, where the title leaves room for it; elsewhere tapping the widget opens the app.
 
-Both widgets share one design: a header with the theme-tinted Meshtastic mark and the widget's name (one-row sizes lead their row with the mark instead), the node chip with battery beside it, and the same stat rows and type scale (`WidgetSizes.Type`). A stale tracked node keeps its chip colors and greys its values.
+The Local Stats and Node Tracker widgets share one design: a header with the theme-tinted Meshtastic mark and the widget's name (one-row sizes lead their row with the mark instead), the node chip with battery beside it, and the same stat rows and type scale (`WidgetSizes.Type`). The Telemetry widget carries the mark at the end of its chip row, or in its footer when the chip is not on top. A stale tracked node keeps its chip colors and greys its values.
 
 When not connected, the widget shows the app icon (a progress spinner while connecting) and the connection status: **Disconnected**, **Connecting**, or **Device sleeping**.
 

@@ -1186,6 +1186,27 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `without a network scan neither a toggle nor the auto scan starts one but an address still connects`() =
+        runTest {
+            harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+            val noScan = harness.buildBase(networkScanSupported = false)
+            try {
+                assertEquals(DeviceType.TCP, noScan.activeTransport.value)
+                noScan.startNetworkScan()
+                noScan.startNetworkAutoScan()
+                assertEquals(false, noScan.isNetworkScanning.value)
+
+                noScan.connectToManualAddress("wws://192.168.1.50/api/v1/ws")
+                testScheduler.advanceUntilIdle()
+
+                assertEquals("wws://192.168.1.50/api/v1/ws", radioController.lastSetDeviceAddress)
+                verifySuspend(mode = VerifyMode.exactly(1)) { harness.recentAddressesDataSource.add(any()) }
+            } finally {
+                harness.clearViewModel(noScan)
+            }
+        }
+
+    @Test
     fun `without TCP a saved TCP address reads as no device`() {
         harness.currentDeviceAddressFlow.value = "t192.168.1.50"
         val noNetwork = harness.buildBase(networkSupported = false)

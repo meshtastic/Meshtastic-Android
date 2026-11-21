@@ -58,9 +58,11 @@ import org.meshtastic.core.resources.add_usb_device
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.network_scan_unavailable
 import org.meshtastic.core.resources.no_bluetooth_devices_hint
 import org.meshtastic.core.resources.no_bluetooth_devices_seen
 import org.meshtastic.core.resources.no_network_devices_hint
+import org.meshtastic.core.resources.no_network_devices_saved
 import org.meshtastic.core.resources.no_network_devices_seen
 import org.meshtastic.core.resources.no_serial_ports_allowed
 import org.meshtastic.core.resources.no_serial_ports_allowed_hint
@@ -124,6 +126,7 @@ fun DeviceList(
     header: (@Composable () -> Unit)? = null,
     onRequestUsbDevice: ((showAll: Boolean) -> Unit)? = null,
     showTransportPane: Boolean = true,
+    networkScanSupported: Boolean = true,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = ADD_SHEET_VALUES)
@@ -170,6 +173,7 @@ fun DeviceList(
                         connectionState = connectionState,
                         selectedDevice = selectedDevice,
                         isNetworkScanning = isNetworkScanning,
+                        networkScanSupported = networkScanSupported,
                         onSelectDevice = onSelectDevice,
                         onToggleNetworkScan = onToggleNetworkScan,
                         onAddManually = { showAddDialog = true },
@@ -338,6 +342,7 @@ private fun LazyListScope.networkSection(
     connectionState: ConnectionState,
     selectedDevice: String,
     isNetworkScanning: Boolean,
+    networkScanSupported: Boolean,
     onSelectDevice: (DeviceListEntry) -> Unit,
     onToggleNetworkScan: () -> Unit,
     onAddManually: () -> Unit,
@@ -348,12 +353,14 @@ private fun LazyListScope.networkSection(
             title = stringResource(Res.string.network),
             showProgress = isNetworkScanning,
             trailing = {
-                ScanToggleAction(
-                    isScanning = isNetworkScanning,
-                    scanLabel = stringResource(Res.string.scan_network_devices),
-                    scanningLabel = stringResource(Res.string.scanning_network),
-                    onToggle = onToggleNetworkScan,
-                )
+                if (networkScanSupported) {
+                    ScanToggleAction(
+                        isScanning = isNetworkScanning,
+                        scanLabel = stringResource(Res.string.scan_network_devices),
+                        scanningLabel = stringResource(Res.string.scanning_network),
+                        onToggle = onToggleNetworkScan,
+                    )
+                }
             },
         )
     }
@@ -372,9 +379,16 @@ private fun LazyListScope.networkSection(
 
     if (discoveredTcpDevices.isEmpty() && recentTcpDevices.isEmpty()) {
         item(key = "empty:tcp", contentType = "empty") {
+            // Without a scan, nothing appears here until the user adds an address.
+            val (title, hint) =
+                if (networkScanSupported) {
+                    Res.string.no_network_devices_seen to Res.string.no_network_devices_hint
+                } else {
+                    Res.string.no_network_devices_saved to Res.string.network_scan_unavailable
+                }
             SectionEmptyState(
-                text = stringResource(Res.string.no_network_devices_seen),
-                supportingText = stringResource(Res.string.no_network_devices_hint),
+                text = stringResource(title),
+                supportingText = stringResource(hint),
                 imageVector = MeshtasticIcons.Wifi,
             )
         }

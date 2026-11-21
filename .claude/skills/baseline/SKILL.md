@@ -20,6 +20,7 @@ git diff --name-only HEAD && git diff --cached --name-only
 ```
 - **Strings touched** (`core/resources/.../values/strings.xml`): prepend `python3 scripts/sort-strings.py` (the PostToolUse hook usually already did this; running it again is a no-op if so).
 - **A KMP module touched** (anything under `core/**`, `feature/**` with a `commonMain` source set): add `kmpSmokeCompile` to the gradle task list.
+- **`webApp/` or a module applying `meshtastic.kmp.web` touched**: also run `./gradlew wasmJsBrowserTest :webApp:compileProductionExecutableKotlinWasmJs -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false` as its own invocation, since the web build needs Isolated Projects off and every other build keeps it on.
 - **New top-level module**: confirm its `<root>/**` line is in `.github/workflows/pull-request.yml` `android:` filter, it is in `RootConventionPlugin`'s `ALL_MODULES_FULL`, and its tests are in a `reusable-check.yml` shard; the three `check-changes` drift guards fail the PR otherwise (`python3 scripts/check-changes-filter.py`, `check-module-list.py`, `check-test-shards.py`).
 
 ## 3. Run it via the gradle-runner subagent

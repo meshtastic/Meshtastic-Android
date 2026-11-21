@@ -16,6 +16,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 | Directory | Description |
 | :--- | :--- |
+| `appShell/` | `MeshtasticMainScreen` and `sharedNavGraph`: the one main screen the Android, desktop and web hosts show. A feature's graph is registered here. |
 | `androidApp/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
 | `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.feature`, `meshtastic.kmp.library`, `meshtastic.kmp.jvm.android`, `meshtastic.koin`). |
 | `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |
@@ -27,7 +28,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
 | `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioTransport`). |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `WebSocketRadioTransport`, `SerialTransport`, `BleRadioTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies. `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
@@ -48,7 +49,8 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `baselineprofile/` | Macrobenchmark Baseline Profile generation for `:androidApp` (AOT-compiled cold-start journey). Android-only. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
-| `desktopApp/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. |
+| `webApp/` | Compose Multiplatform web (Kotlin/Wasm) application, opt-in with `-Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false`. Web Bluetooth, Web Serial and WebSocket transports, OPFS database, PWA service worker (`webApp/README.md`). |
+| `desktopApp/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. A debug build serves a loopback MCP server on the radio layer when `MESHTASTIC_MCP_PORT` is set (`desktop/mcp/DesktopMcpServer.kt`). |
 
 ## Namespacing
 - **Standard:** Use the `org.meshtastic.*` namespace for all code.

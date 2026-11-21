@@ -16,10 +16,15 @@
  */
 package org.meshtastic.feature.settings.search
 
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.navigation.SettingsRoute
 import kotlin.test.AfterTest
@@ -33,14 +38,32 @@ import kotlin.test.assertNull
 class SettingsFieldFocusTest {
 
     private val focus = SettingsFieldFocus()
+    private val viewModelJobs = mutableListOf<Job>()
 
     @BeforeTest fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
 
-    @AfterTest fun tearDown() = Dispatchers.resetMain()
+    /**
+     * The search ViewModel resolves its catalog on `Dispatchers.Default` from `init`, and even a cancelled lookup
+     * resumes through Main. Its scope must be complete, not just cancelled, before `resetMain()`, or that resume hits
+     * an unset Main and fails whichever `runTest` starts next.
+     */
+    @AfterTest
+    fun tearDown() {
+        val live = viewModelJobs.count { !it.isCompleted }
+        Dispatchers.resetMain()
+        assertEquals(0, live, "a SettingsSearchViewModel was still running at resetMain")
+    }
+
+    private fun withSearchViewModel(block: (SettingsSearchViewModel) -> Unit) = runTest {
+        val viewModel = SettingsSearchViewModel(focus)
+        val job = viewModel.viewModelScope.coroutineContext.job
+        viewModelJobs += job
+        block(viewModel)
+        job.cancelAndJoin()
+    }
 
     @Test
-    fun choosingAResultLeavesItsFieldPendingForTheScreen() {
-        val viewModel = SettingsSearchViewModel(focus)
+    fun choosingAResultLeavesItsFieldPendingForTheScreen() = withSearchViewModel { viewModel ->
         val entry =
             ResolvedSettingsEntry(
                 id = "hop",

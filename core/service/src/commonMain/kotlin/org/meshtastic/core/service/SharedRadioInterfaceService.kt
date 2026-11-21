@@ -93,6 +93,7 @@ import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.core.resources.websocket_connect_failed
 import org.meshtastic.core.resources.websocket_handshake_rejected
 import org.meshtastic.core.resources.websocket_message_too_big
+import org.meshtastic.core.resources.websocket_not_supported
 import org.meshtastic.core.resources.websocket_replaced_by_another_client
 import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
@@ -178,6 +179,7 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource
     TransportDisconnectReason.ReplacedByAnotherClient -> Res.string.websocket_replaced_by_another_client
     TransportDisconnectReason.WebSocketConnectFailed -> Res.string.websocket_connect_failed
     TransportDisconnectReason.WebSocketHandshakeRejected -> Res.string.websocket_handshake_rejected
+    TransportDisconnectReason.WebSocketNotSupported -> Res.string.websocket_not_supported
     TransportDisconnectReason.WebSocketTlsFailed -> Res.string.websocket_tls_failed
     TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
     TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested

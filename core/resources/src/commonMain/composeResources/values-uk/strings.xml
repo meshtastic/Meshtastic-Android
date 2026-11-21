@@ -1127,6 +1127,7 @@
     <string name="waypoint_new">Новий мітка</string>
     <string name="waypoint_received">Отримано точку маршруту: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Вага</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Поганий</string>

@@ -6,16 +6,16 @@
 
 The `:feature:intro` module provides the onboarding experience for new users. It handles the initial welcome flow and explains and requests the Bluetooth, Location and Notifications permissions. Every permission screen can be skipped.
 
-The screens and their logic are in `commonMain`, but only the Android app hosts the flow: `MainActivity` shows `AppIntroductionScreen` until the intro is completed. The `jvmMain` stubs (`JvmIntroPermissions`, `JvmIntroSettingsNavigator`) report every permission as granted.
+The screens and their logic are in `commonMain`. The Android app shows `AppIntroductionScreen` from `MainActivity`, and the web app from `WebIntroGate`, until the intro is completed. `IntroPlatform` (`rememberIntroPlatform`) supplies the platform differences: in a browser the browser owns the permissions and the critical-alerts step is skipped. Desktop does not host the flow.
 
 ## Key Components
 
-### 1. `AppIntroductionScreen` (`androidMain`)
+### 1. `AppIntroductionScreen`
 Hosts the multi-step onboarding flow and hoists the live permission states. The steps are Navigation 3 keys (`IntroNavKeys.kt`) registered by `introGraph()`, and `IntroViewModel.getNextKey()` picks each next step:
 
 `Welcome` → `Bluetooth` → `Location` → `Notifications` → `CriticalAlerts`
 
-`Bluetooth` is skipped on a device without Bluetooth. `Location` is skipped when the Bluetooth request already covered it, as on Android versions where BLE scanning needs the location permission. `CriticalAlerts` appears only when the notification permission was granted.
+`Bluetooth` is skipped on a device without Bluetooth. `Location` is skipped when the Bluetooth request already covered it, as on Android versions where BLE scanning needs the location permission. `CriticalAlerts` appears only when the notification permission was granted and the platform has a notification channel that can override Do Not Disturb, so never in a browser.
 
 ### 2. Permission Screens
 Dedicated screens for explaining and requesting specific permissions:

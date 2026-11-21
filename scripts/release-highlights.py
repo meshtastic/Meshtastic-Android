@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Prepend the AppStream <description> for this version to the generated release notes.
 
+    release-highlights.py <metainfo> <config.properties> <notes.md>
+    release-highlights.py --text <metainfo> <version>   # print the prose alone
+
 The metainfo entry is the only hand-written, user-facing prose in the repo and is
 already required by pull-request.yml on the VERSION_NAME_BASE bump. Reuse it rather
 than asking anyone to write the same sentence a second time.
@@ -43,6 +46,11 @@ def highlights(metainfo: Path, version: str) -> str | None:
 
 
 def main() -> int:
+    if sys.argv[1:2] == ["--text"]:
+        # The bare prose for one version, for posts that are not release notes; empty when there is none.
+        text = highlights(Path(sys.argv[2]), sys.argv[3])
+        print(text or "")
+        return 0
     metainfo, config, notes = (Path(a) for a in sys.argv[1:4])
     m = re.search(r"^VERSION_NAME_BASE=(.+)$", config.read_text(), re.M)
     if not m:

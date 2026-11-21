@@ -805,6 +805,7 @@ fun ConnectionsScreen(
                     recentTcpDevices = recentTcpDevices,
                     isBleScanning = isBleScanning,
                     isNetworkScanning = isNetworkScanning,
+                    networkScanSupported = scanModel.networkScanSupported,
                     activeTransport = activeTransport,
                     onSelectDevice = { entry ->
                         // Recent TCP addresses are persisted, so this list renders without a scan — and

@@ -1373,6 +1373,7 @@
     <string name="waypoint_new">Nouveau point de repère</string>
     <string name="waypoint_received">Point de passage reçu : %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Poids</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Mauvais</string>

@@ -74,7 +74,7 @@ jobs:
           ref: ${{ inputs.tag_name }}
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+        uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
         with:
           bundler-cache: true
 
@@ -219,6 +219,10 @@ jobs:
           sparse-checkout: |
             scripts
             .github/actions/bot-pr
+
+      # Later steps switch the workspace to main; the Discord post reads the tag's copy kept here.
+      - name: Keep the tag's metainfo
+        run: cp desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml "$RUNNER_TEMP/tag-metainfo.xml"
 
       # A rerun finds the release already moved to the final tag, so that is looked up first.
       - name: Update GitHub Release with gh CLI
@@ -570,6 +574,7 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
           VERSION: ${{ inputs.final_tag }}
+          BASE_VERSION: ${{ inputs.base_version }}
           CHANNEL: ${{ inputs.channel }}
         run: |
           if [[ -z "$DISCORD_WEBHOOK" ]]; then
@@ -582,33 +587,23 @@ jobs:
           if [ "$CHANNEL" == "open" ]; then TRACK="Beta (Open)"; fi
           if [ "$CHANNEL" == "production" ]; then TRACK="Production"; fi
 
-          # Construct JSON Payload
-          PAYLOAD=$(cat <<EOF
-          {
-            "content": null,
-            "embeds": [
-              {
-                "title": "🚀 New Android Release: $VERSION",
-                "description": "A new build has been promoted to the **$TRACK** track.",
-                "color": 5763719,
-                "fields": [
-                  {
-                    "name": "Track",
-                    "value": "$TRACK",
-                    "inline": true
-                  },
-                  {
-                    "name": "Version",
-                    "value": "$VERSION",
-                    "inline": true
-                  }
-                ],
-                "url": "https://github.com/meshtastic/Meshtastic-Android/releases/tag/$VERSION"
-              }
-            ]
-          }
-          EOF
-          )
+          # The same prose as the release Highlights and Play's "What's new", from the tag's metainfo.
+          WHATS_NEW=$(python3 .workflow-ref/scripts/release-highlights.py --text \
+            "$RUNNER_TEMP/tag-metainfo.xml" "$BASE_VERSION")
+          DESCRIPTION="A new build has been promoted to the **$TRACK** track."
+          if [[ -n "$WHATS_NEW" ]]; then
+            DESCRIPTION+=$'\n\n'"**What's new:** $WHATS_NEW"
+          fi
+
+          # jq builds the JSON so quotes and newlines in the prose stay valid. Discord caps a description at 4096.
+          PAYLOAD=$(jq -n \
+            --arg title "🚀 New Android Release: $VERSION" \
+            --arg description "${DESCRIPTION:0:4096}" \
+            --arg track "$TRACK" \
+            --arg version "$VERSION" \
+            --arg url "https://github.com/meshtastic/Meshtastic-Android/releases/tag/$VERSION" \
+            '{content: null, embeds: [{title: $title, description: $description, color: 5763719, url: $url,
+              fields: [{name: "Track", value: $track, inline: true}, {name: "Version", value: $version, inline: true}]}]}')
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
 

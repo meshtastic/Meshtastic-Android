@@ -18,7 +18,7 @@ Manages the state of the chat screen: paged loading of messages from the databas
 Uses `HomoglyphCharacterStringTransformer` (from `:core:common`) to optionally replace national-alphabet characters with visually identical Latin homoglyphs (for example Cyrillic "А" → Latin "A") on outgoing text. `SendMessageUseCase` (`:core:repository`) applies it when the `HomoglyphPrefs` preference is on, and the message input counts bytes against the transformed text. This is a byte-size optimization: such characters encode smaller in UTF-8, fitting roughly 140-145 characters per message instead of ~115-120. It is not a security or anti-phishing feature.
 
 ### 5. Translation
-`MessageTranslationService` translates a received message on request. The `google` flavor binds ML Kit (`MlKitMessageTranslator` in `:androidApp`); F-Droid and Desktop bind `NoOpMessageTranslator`.
+`MessageTranslationService` translates a received message on request. The `google` flavor binds ML Kit (`MlKitMessageTranslator` in `:androidApp`); F-Droid, Desktop and web bind `NoOpMessageTranslator`.
 
 ## Navigation
 

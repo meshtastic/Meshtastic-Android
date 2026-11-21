@@ -98,6 +98,24 @@ internal fun measurementSystemForRegion(region: String): MeasurementSystem = whe
 }
 
 /**
+ * Maps a region code to its default temperature unit, for platforms with no CLDR preference data.
+ *
+ * CLDR unitPreferenceData lists these regions as defaulting to Fahrenheit; everywhere else, and an absent region, is
+ * Celsius.
+ */
+internal fun temperatureUnitForRegion(region: String): TemperatureUnit = when (region.uppercase()) {
+    "US",
+    "BS",
+    "BZ",
+    "KY",
+    "PR",
+    "PW",
+    -> TemperatureUnit.FAHRENHEIT
+
+    else -> TemperatureUnit.CELSIUS
+}
+
+/**
  * The user's in-app units choice. [SYSTEM] follows the OS locale; the other two force one system everywhere.
  *
  * This exists because following the OS is not reachable for everyone: One UI ships no regional-preferences page, some

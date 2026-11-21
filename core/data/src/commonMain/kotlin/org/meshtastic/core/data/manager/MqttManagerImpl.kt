@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.safeCatchingAll
@@ -36,6 +37,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
 import org.meshtastic.core.network.repository.MqttEndpointUnsupportedException
+import org.meshtastic.core.network.repository.MqttRootWildcardException
 import org.meshtastic.core.network.repository.isCredentialRejection
 import org.meshtastic.core.network.repository.isOpenableHere
 import org.meshtastic.core.network.repository.mqttTlsConfig
@@ -52,6 +54,7 @@ import org.meshtastic.core.resources.mqtt_error_credentials_rejected
 import org.meshtastic.core.resources.mqtt_error_proxy_failed
 import org.meshtastic.core.resources.mqtt_error_rejected
 import org.meshtastic.core.resources.mqtt_needs_websocket_url
+import org.meshtastic.core.resources.mqtt_root_has_wildcard
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
@@ -111,21 +114,12 @@ class MqttManagerImpl(
                         // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
                         // compose-resources raises on headless JVM tests; production resolves the
                         // localized string and the error is still surfaced either way.
+                        val resource = proxyFailureMessage(throwable)
                         val message = safeCatchingAll {
-                            when {
-                                throwable is MqttEndpointUnsupportedException ->
-                                    getStringSuspend(Res.string.mqtt_needs_websocket_url)
-
-                                throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
-                                    getStringSuspend(Res.string.mqtt_error_credentials_rejected)
-
-                                throwable is MqttException.ConnectionRejected ->
-                                    getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
-
-                                throwable is MqttException.ConnectionLost ->
-                                    getStringSuspend(Res.string.mqtt_error_connection_lost)
-
-                                else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
+                            if (resource in DETAILED_PROXY_FAILURES) {
+                                getStringSuspend(resource, throwable.detail())
+                            } else {
+                                getStringSuspend(resource)
                             }
                         }
                             .getOrDefault("")
@@ -225,6 +219,24 @@ class MqttManagerImpl(
         is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
     }
 }
+
+/** The message shown when the MQTT proxy flow ends with [throwable]. */
+internal fun proxyFailureMessage(throwable: Throwable): StringResource = when {
+    throwable is MqttEndpointUnsupportedException -> Res.string.mqtt_needs_websocket_url
+
+    throwable is MqttRootWildcardException -> Res.string.mqtt_root_has_wildcard
+
+    throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
+        Res.string.mqtt_error_credentials_rejected
+
+    throwable is MqttException.ConnectionRejected -> Res.string.mqtt_error_rejected
+
+    throwable is MqttException.ConnectionLost -> Res.string.mqtt_error_connection_lost
+
+    else -> Res.string.mqtt_error_proxy_failed
+}
+
+private val DETAILED_PROXY_FAILURES = setOf(Res.string.mqtt_error_rejected, Res.string.mqtt_error_proxy_failed)
 
 /** Failure detail for a user-facing message; a throwable without a message still needs a placeholder to substitute. */
 private suspend fun Throwable.detail(): String = message ?: getStringSuspend(Res.string.unknown)

@@ -1,7 +1,7 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
-last_updated: 2026-10-28
+last_updated: 2026-11-20
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -39,7 +39,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | 地址                     | MQTT broker address                                                                                                                                                                                                                                                              | `mqtt.meshtastic.org` |
 | 已啟用加密                  | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON輸出已啟用              | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
+| JSON Output Enabled    | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
 | 地圖回報                   | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
 | 啟用對客戶端的代理              | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
 | 啟用MQTT服務器              | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
@@ -70,7 +70,7 @@ Enables serial port communication for external device integrations (GPS modules,
 | 序列埠鮑率                                                                                            | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | 默認  |
 | 啟用 Echo                                                                                          | Echo packets you send back over the serial port                                                                                                                                                                                     | Off |
 | 序列埠模式                                                                                            | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | 默認  |
-| 覆蓋控制台序列埠                                                                                         | Take over the port the debug console normally uses                                                                                                                                                                                  | Off |
+| 覆寫主控台序列埠                                                                                         | Take over the port the debug console normally uses                                                                                                                                                                                  | Off |
 | Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0   |
 | 啟用序列埠                                                                                            | Turn serial communication on                                                                                                                                                                                                        | Off |
 | Timeout - 超時                                                                                     | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0   |
@@ -134,19 +134,20 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| 設定          | 描述說明                                                                                                                                                                                        | 默認  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
-| 啟用空氣品質模組    | Report particulate and CO₂ sensor data                                                                                                                                                      | Off |
-| 空氣品質資訊更新間隔  | How often to report them                                                                                                                                                                    | —   |
-| 傳送裝置遙測資料    | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off |
-| 裝置資訊更新間隔    | How often to report battery, uptime and channel utilization                                                                                                                                 | —   |
-| 環境指標以華氏溫度顯示 | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off |
-| 啟用環境資訊模組    | Report the attached environment sensors                                                                                                                                                     | Off |
-| 環境資訊更新間隔    | How often to report them                                                                                                                                                                    | —   |
-| 啟用電池資訊模組    | Report the per-channel voltage and current readings                                                                                                                                         | Off |
-| 電源資訊更新間隔    | How often to report them                                                                                                                                                                    | —   |
-| 在螢幕上顯示電量資訊  | Also show power readings on the device's display                                                                                                                                            | Off |
-| 在螢幕上顯示環境資訊  | Also show environment readings on the device's display                                                                                                                                      | Off |
+| 設定                                | 描述說明                                                                                                                                                                                        | 默認  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| 啟用空氣品質模組                          | Report particulate and CO₂ sensor data                                                                                                                                                      | Off |
+| 空氣品質資訊更新間隔                        | How often to report them                                                                                                                                                                    | —   |
+| 傳送裝置遙測資料                          | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off |
+| 裝置資訊更新間隔                          | How often to report battery, uptime and channel utilization                                                                                                                                 | —   |
+| 環境指標以華氏溫度顯示                       | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off |
+| 啟用環境資訊模組                          | Report the attached environment sensors                                                                                                                                                     | Off |
+| 環境資訊更新間隔                          | How often to report them                                                                                                                                                                    | —   |
+| 啟用電池資訊模組                          | Report the per-channel voltage and current readings                                                                                                                                         | Off |
+| 電源資訊更新間隔                          | How often to report them                                                                                                                                                                    | —   |
+| 在螢幕上顯示電量資訊                        | Also show power readings on the device's display                                                                                                                                            | Off |
+| Show air quality on device screen | Also show air quality readings on the device's display. Shown for firmware 2.7.18 and later                                                 | Off |
+| Show environment on device screen | Also show environment readings on the device's display                                                                                                                                      | Off |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -343,6 +344,7 @@ appears only when your own node is selected. It holds, in order:
 - **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
+  While the phone lies still its GPS rests: after three fixes in a row in the same area, at the precision your node shares its position at, the app stops asking for location until the phone moves, and the node keeps broadcasting the last position. The GPS stays on when no channel shares a position, at full precision, on the Lost and Found role, or on a phone with no motion sensor.
 - **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
 - **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
   is the entry [Units & Locale](units-and-locale) sends you to.

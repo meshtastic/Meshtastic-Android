@@ -734,6 +734,7 @@
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">słaby</string>
     <string name="widget_telemetry_title">Telemetria</string>

@@ -18,23 +18,17 @@ package org.meshtastic.feature.settings.debugging
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.DisplayMirrorManager
-import org.meshtastic.core.repository.MirrorFrame
-import org.meshtastic.core.repository.MirrorPalette
+import org.meshtastic.core.testing.FakeDisplayMirrorManager
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayInfo
-import org.meshtastic.proto.DisplayPalette
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -50,17 +44,6 @@ class DisplayMirrorViewModelTest {
     private val nodeRepository = FakeNodeRepository()
     private val radioConfigRepository = FakeRadioConfigRepository()
     private val mirrorManager = FakeDisplayMirrorManager()
-
-    private class FakeDisplayMirrorManager : DisplayMirrorManager {
-        override val frame: StateFlow<MirrorFrame?> = MutableStateFlow(null)
-        override val palette: StateFlow<MirrorPalette?> = MutableStateFlow(null)
-
-        override fun handleIncomingFrame(chunk: DisplayFrame) {}
-
-        override fun handleIncomingPalette(chunk: DisplayPalette) {}
-
-        override fun reset() {}
-    }
 
     @BeforeTest
     fun setUp() {

@@ -269,6 +269,7 @@
     <string name="via_mqtt">فقط شبكة MQTT</string>
     <string name="voltage">شدة التيار</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <string name="widget_packets_bad">سيئ</string>
     <!-- WIFI -->

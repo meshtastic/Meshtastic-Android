@@ -28,6 +28,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -48,12 +49,15 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import java.time.Duration
 import javax.inject.Inject
 
 /** The Gradle property that registers the wasmJs target and includes `:webApp`; `settings.gradle.kts` reads it too. */
 const val WEB_TARGET_PROPERTY = "meshtastic.web"
 
 private const val WASM_PARALLEL_LINKS = 2
+
+private val BROWSER_TEST_TIMEOUT: Duration = Duration.ofMinutes(12)
 
 /** Whether this build registers the wasmJs target (`-Pmeshtastic.web=true`). */
 val Project.webTargetEnabled: Boolean
@@ -96,9 +100,13 @@ abstract class MeshtasticWebExtension(private val kotlin: KotlinMultiplatformExt
 private val KotlinCompilation<*>.isWeb: Boolean
     get() = platformType == KotlinPlatformType.wasm || platformType == KotlinPlatformType.js
 
+private val KotlinCompilation<*>.isAndroid: Boolean
+    get() = platformType == KotlinPlatformType.androidJvm
+
 /**
  * Registers the wasmJs target when [webTargetEnabled], and always builds the `nonWeb` source sets beside it, so code
- * that has no browser equivalent lives in `nonWebMain` whether or not this build compiles for the web.
+ * that has no browser equivalent lives in `nonWebMain` whether or not this build compiles for the web. `nonAndroidMain`
+ * likewise holds `actual`s shared by every target but Android (jvm, native, and wasmJs when present).
  */
 @OptIn(ExperimentalWasmDsl::class, ExperimentalKotlinGradlePluginApi::class)
 internal fun Project.configureKmpWebTarget() {
@@ -134,6 +142,11 @@ internal fun Project.configureKmpWebTarget() {
                     withCompilations { !it.isWeb }
                     group("native")
                 }
+                // Targets with no Android implementation: where an `actual` that is the same on each of them lives.
+                group("nonAndroid") {
+                    withCompilations { !it.isAndroid }
+                    group("native")
+                }
             }
         }
 
@@ -155,6 +168,9 @@ internal fun Project.configureKmpWebTarget() {
             .configureEach {
                 enabled = browserTests.get()
                 exclusions.get().forEach { filter.excludeTestsMatching(it) }
+                // Karma stops itself at ten minutes and closes Chrome (config/karma); this backstop fails the task for
+                // a Karma that cannot, before CI's job limit kills Gradle and keeps no build scan.
+                timeout.set(BROWSER_TEST_TIMEOUT)
             }
         configureSkikoForWasmTests(kotlin)
 
@@ -260,9 +276,35 @@ internal fun Project.configureWebApplication() {
         }
     }
     configureWasmJsCompilations()
+    preloadWasmInDistribution()
 
     val warningsAsErrors = kotlinWarningsAsErrors
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         compilerOptions.allWarningsAsErrors.set(warningsAsErrors)
     }
 }
+
+private const val WASM_PRELOAD_MARKER = "<!-- wasm-preload -->"
+private val HASHED_WASM = Regex("""[0-9a-f]{20}\.wasm""")
+
+/**
+ * Each distribution's `index.html` preloads the wasm modules `webApp.js` names, so they download beside the script
+ * rather than after it. `as="fetch"` with `crossorigin`, so the loader's own `fetch()` takes the preloaded response and
+ * nothing downloads twice.
+ */
+private fun Project.preloadWasmInDistribution() {
+    tasks
+        .withType<AbstractCopyTask>()
+        .named { it == "wasmJsBrowserDistribution" || it == "wasmJsBrowserDevelopmentExecutableDistribution" }
+        .configureEach {
+            val loader = source.filter { it.name == "webApp.js" }
+            filesMatching("index.html") {
+                filter { line -> if (WASM_PRELOAD_MARKER in line) wasmPreloadLinks(loader.files) else line }
+            }
+        }
+}
+
+internal fun wasmPreloadLinks(loaders: Set<java.io.File>): String = loaders
+    .flatMap { HASHED_WASM.findAll(it.readText()).map { match -> match.value } }
+    .distinct()
+    .joinToString("\n") { """    <link rel="preload" as="fetch" type="application/wasm" crossorigin href="$it">""" }

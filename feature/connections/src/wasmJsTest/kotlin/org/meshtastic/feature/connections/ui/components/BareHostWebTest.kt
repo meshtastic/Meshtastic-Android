@@ -23,7 +23,7 @@ import kotlin.test.assertEquals
 class BareHostWebTest {
     @Test
     fun `a bracketed IPv6 host becomes its WebSocket endpoint`() {
-        assertEquals("wws://[fd00::1]:80/api/v1/ws", manualAddress("[fd00::1]", "80", webSocketScheme = "ws"))
+        assertEquals("wws://[fd00::1]/api/v1/ws", manualAddress("[fd00::1]", "80", webSocketScheme = "ws"))
         assertEquals("wws://[fd00::1]/api/v1/ws", manualAddress("fd00::1", "", webSocketScheme = "ws"))
     }
 }

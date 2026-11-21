@@ -22,19 +22,21 @@ WEB="-Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false"
 ./gradlew wasmJsBrowserTest $WEB
 ```
 
-The production build runs Binaryen's `wasm-opt`, which takes 40 minutes or more. To check that the production executable links, which is where Kotlin/Wasm IR failures show up, compile it without optimizing: `./gradlew :webApp:compileProductionExecutableKotlinWasmJs $WEB`.
+The production build runs Binaryen's `wasm-opt`, which takes several minutes. To check that the production executable links, which is where Kotlin/Wasm IR failures show up, compile it without optimizing: `./gradlew :webApp:compileProductionExecutableKotlinWasmJs $WEB`.
 
 `WebBuildConfig.IS_DEBUG` is false unless you pass `-Pweb.release=false`; the development and production executables link the same compilation.
 
 ## Hosting
 
-The distribution directory is a static site: serve it from any web server.
+The distribution directory is a static site: serve it from any web server. Each release attaches it as `meshtastic-web-<version>.zip`.
 
 - Serve `.wasm` files as `application/wasm`. Browsers refuse to stream-compile a module sent with any other type.
+- Compress the wasm: the app's module is about 22 MB raw, 5.4 MB gzipped and 3.7 MB as Brotli. The production distribution carries a `<name>.br` beside each content-hashed module (the 20-hex-digit names), for a server that serves precompressed files, such as nginx's `brotli_static` or node-headless. Serve those hashed names with `Cache-Control: immutable`; revalidate everything else.
+- A distribution's `index.html` preloads the wasm modules `webApp.js` names, so they download beside the script. Only the development distribution carries JavaScript source maps.
 - Serve it from a secure context, https or `localhost`. The database lives in the Origin Private File System, which browsers offer only to secure contexts; Web Bluetooth and Web Serial need one too.
 - One tab at a time holds the database. A second tab waits, and offers to take the database over.
 - Some private windows offer no usable OPFS, and the database cannot open there.
-- Serve `sw.js` from the same directory as `index.html`; its scope is that directory, so the app works at a site root, under a path, or from node-headless's client directory. It caches the app shell for offline reloads (network first for the page, stale-while-revalidate for the scripts, cache first for the content-hashed `.wasm`) and leaves `api/`, `json/` and every other request alone. After a rebuild, the first reload can still run the cached scripts; reload again, or tick "Update on reload" in DevTools while developing.
+- Serve `sw.js` from the same directory as `index.html`; its scope is that directory, so the app works at a site root, under a path, or from node-headless's client directory. It caches the app shell for offline reloads: network first for the app's own page and for `webApp.js` and the other unhashed scripts, so a deploy runs on the next reload, cache first for the content-hashed modules, and stale-while-revalidate for the other shell files. Only a navigation to the app's page, the scope root or `index.html`, is answered; any other page on the origin, such as node-headless's `/signin`, passes by uncached, as do `api/`, `json/` and every other request.
 
 ## Installed app
 
@@ -42,8 +44,10 @@ The page is an installable PWA: `manifest.webmanifest` takes its icons from the 
 
 ## Browser support
 
-Radios connect over Web Bluetooth and Web Serial, which only Chromium-based browsers implement: Chrome, Edge and Opera. Bluetooth works there on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on; Web Serial works on desktop. Firefox and Safari implement neither, so they can open the app but not connect to a radio. Discovery goes through the browser's device picker rather than a background scan, because Chrome ships the Web Bluetooth scanning API only behind a flag. TCP radios are not offered: a browser cannot open raw sockets.
+Radios connect over Web Bluetooth and Web Serial, which only Chromium-based browsers implement: Chrome, Edge and Opera. Bluetooth works there on Windows, macOS, ChromeOS and Android, and on Linux with Chrome's experimental web platform features flag on; Web Serial works on desktop. Firefox and Safari implement neither. Discovery goes through the browser's device picker rather than a background scan, because Chrome ships the Web Bluetooth scanning API only behind a flag.
+
+Every browser reaches a network radio over firmware's WebSocket phone API (`/api/v1/ws`), which released firmware does not serve yet, the only network transport on web: a browser cannot open raw sockets, so a `tcp` address is refused. A bare host typed in the Network pane connects with `wss` on 443 or 9443, firmware's TLS ports, and elsewhere with the page's own scheme. MQTT through the app, the client proxy, Test connection and Find topics near you, also needs a WebSocket broker: a bare broker address, the default `mqtt.meshtastic.org` included, stops with a message asking for its `wss://` URL.
 
 ## Tests
 
-`meshtastic.kmp.web` runs each web module's wasmJs tests in headless Chrome through Karma, until Kotlin 2.5's Playwright test DSL (KT-87082). Node.js cannot run them: nearly every module links Compose through `core:model`, and skiko's wasm loader works only in a browser. Karma finds Chrome on the `PATH` or through `CHROME_BIN`. A module whose tests cannot pass there sets `meshtasticWeb { browserTests = false }`, and its wasmJs tests only compile. Tests that need a type with no browser equivalent live in `nonWebTest`. This module, and the `wasmJsMain` interop with Web Bluetooth, Web Serial, OPFS, the Permissions API, notifications, the service worker and orientation events, have no automated tests.
+`meshtastic.kmp.web` runs each web module's wasmJs tests in headless Chrome through Karma, until Kotlin 2.5's Playwright test DSL (KT-87082). Node.js cannot run them: nearly every module links Compose through `core:model`, and skiko's wasm loader works only in a browser. Karma finds Chrome on the `PATH` or through `CHROME_BIN`. A run that has not finished after 10 minutes stops itself, closes its Chrome and fails the task (`config/karma/meshtastic.js`), with Gradle's 12-minute task timeout behind it. A module whose tests cannot pass there sets `meshtasticWeb { browserTests = false }`, and its wasmJs tests only compile. Tests that need a type with no browser equivalent live in `nonWebTest`. This module, and the `wasmJsMain` interop with Web Bluetooth, Web Serial, OPFS, the Permissions API, notifications, the service worker and orientation events, have no automated tests.

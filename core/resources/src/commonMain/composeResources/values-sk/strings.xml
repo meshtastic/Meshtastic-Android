@@ -472,6 +472,7 @@
     <string name="waypoint_new">Nový cieľový bod</string>
     <string name="waypoint_received">Prijatý cieľový bod: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Hmotnosť</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Zlý</string>

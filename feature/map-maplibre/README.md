@@ -18,7 +18,7 @@ sets hold only two small `expect`/`actual` pairs: `MapLibreRuntime` (whether the
 |---|---|
 | Main map — nodes, waypoints, clusters, geofences, controls | `MapLibreMapViewProvider` → `MeshMap` |
 | Per-node position track | `MapLibreNodeTrackMap` (`NodeTrackMap.kt`) |
-| Traceroute route | `MapLibreTracerouteMap` (`SecondaryMaps.kt`) |
+| Traceroute route | `MapLibreTracerouteMapSlot` (`TracerouteMapSlot.kt`), the entry point every MapLibre host calls, over `MapLibreTracerouteMap` (`SecondaryMaps.kt`) |
 | Discovery scan map | `MapLibreDiscoveryMap` (`SecondaryMaps.kt`) |
 | Node-detail mini-map | `MapLibreInlineMap` (`SecondaryMaps.kt`) |
 
@@ -30,7 +30,7 @@ The secondary surfaces share the pieces in `SecondaryMapScaffold.kt` (`Secondary
 - **`geojson/`** — mesh data as GeoJSON feature collections. `FeatureSource` rebuilds a collection only when its keys
   change, so panning does not re-serialize every node.
 - **`layers/`** — the MapLibre layers those sources feed: node chips, the just-heard pulse, waypoints, precision
-  circles, traceroute lines, and the user's imported overlays.
+  circles, traceroute lines, the signal survey cells, heatmap and links, and the user's imported overlays.
 - **`style/`** — `Basemaps` (vector styles plus the shared raster catalog), `MapOverlays`, `MapColors`.
 - **`component/`** — the map's own chrome: basemap menu, layers sheet, zoom, ornaments, dialogs.
 - **`terrain/`** — the one downloaded offline-terrain region (`OfflineTerrainRepository`, `OfflineTerrainRegion`),

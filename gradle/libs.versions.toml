@@ -4,7 +4,7 @@ jsqr = "1.4.0"
 xmlutil = "1.0.2.1"
 
 # Android
-agp = "9.5.1"
+agp = "9.5.2"
 appcompat = "1.8.0"
 appfunctions = "1.0.0"
 
@@ -77,7 +77,7 @@ jetbrains-adaptive = "1.3.0"
 # 2.8.0–2.8.1). KML is now read by the app's own xmlutil-based converter and that parser is unused, so
 # the pairing — and the canary test that guarded it — is gone. 7.0.0 is load-bearing again: the map's
 # cluster bubbles use DefaultClusterRenderer.showExactCount, which arrived with it.
-android-maps-utils = "7.0.0"
+android-maps-utils = "7.0.1"
 maplibre-compose = "0.20.0"
 maps-compose = "9.0.1"
 
@@ -110,8 +110,8 @@ markdownRenderer = "0.46.0"
 okio = "3.18.2"
 bouncycastle = "1.87"
 uri-kmp = "0.0.21"
-spotless = "8.11.0"
-sceneview = "4.69.7"
+spotless = "8.12.0"
+sceneview = "4.70.0"
 vico = "3.4.0-next.1"
 kable = "0.46.0"
 mqttastic = "0.9.1"
@@ -123,7 +123,7 @@ takpacket-sdk = "0.10.0"
 # The head of protobufs #1111 (TransportConfig, supported_transports), rebased on master, its branch
 # snapshot on Central. node-kmp may pin an older head of the same branch: protobufs builds buildersOnly,
 # so an added field links and Gradle takes this newer one. Merge path: the protobufs release that carries it.
-meshtastic-protobufs = "2.8.2-b-feat-ble-mesh-protocol-flags.50-g377de3c-SNAPSHOT"
+meshtastic-protobufs = "2.8.3-b-feat-ble-mesh-protocol-flags.10-g9f064b4-SNAPSHOT"
 # node-kmp, from ~/.m2 (-PuseMavenLocal=1). Central publication is the merge gate.
 meshtastic-node-kmp = "0.1.0-SNAPSHOT"
 
@@ -372,7 +372,7 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.5.1" }
+android-tools-common = { module = "com.android.tools:common", version = "32.5.2" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

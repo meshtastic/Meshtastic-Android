@@ -2,7 +2,7 @@
 title: Nodes
 parent: User Guide
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -25,6 +25,7 @@ The node list shows every node your node has heard, including:
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Last heard** — time since last communication
 - **Distance** — estimated distance (if positions are shared)
+- **Elevation** — altitude from the node's last position, shown only when that position carries one
 - **Battery** — remote node battery level (if telemetry is enabled)
 
 ### Choosing what the list shows
@@ -88,13 +89,13 @@ Each node carries one security icon beside its name in the node list. Tap it to 
 |------|---------|-----------|
 | Person with a shield check (green) | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too | Any firmware version |
 | Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you haven't verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
-| 🔒 Closed lock (green) | **Public Key Encryption**: a public key is on file and matches, so direct messages to this node are encrypted | Firmware before 2.8, or no reported version |
-| 🔓 Open lock (yellow) | **No public key**: no public key has been received for this node, so it can't be direct messaged. Use **Request User Info** on the node detail page to ask for one | Firmware before 2.8, or no reported version |
+| 🔒 Closed lock (green) | **Public Key Encryption**: a public key is on file and matches, so direct messages to this node are encrypted, unless your own node is licensed | Firmware before 2.8, or no reported version |
+| 🔓 Open lock (yellow) | **No public key**: no public key has been received for this node, so it can't be direct messaged unless your own node is licensed. Use **Request User Info** on the node detail page to ask for one | Firmware before 2.8, or no reported version |
 | Crossed-out key (red) | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting | Any firmware version |
 
 Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks aren't shown.
 
-Direct messages always use public-key encryption, so your node needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.
+Direct messages use public-key encryption, so your node needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. A licensed (Ham) node needs no key: it never encrypts, so its direct messages go out unencrypted, and only a licensed node accepts them. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.
 
 A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info can't silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two nodes exchange keys again the next time yours hears it.
 
@@ -153,7 +154,7 @@ The sort button at the end of the search field opens a menu with the sort option
 |--------|-------------|
 | **Hide offline nodes** | Show only nodes heard within the last 2 hours |
 | **Only show direct nodes** | Show only nodes your node heard directly over LoRa, with no relay in between. Nodes heard over MQTT are left out |
-| **Include unknown** | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and can't be direct messaged until their user info brings a public key |
+| **Include unknown** | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and can't be direct messaged until their user info brings a public key, unless your own node is licensed, and then only a licensed node accepts the message |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that can't be messaged, whatever its role |
 | **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
 | **Hide unheard nodes** | Hide nodes your own node hasn't heard since its LoRa settings changed. Off by default, and it does nothing unless your node runs firmware 2.8.1 or newer |

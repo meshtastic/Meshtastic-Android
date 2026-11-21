@@ -1,7 +1,7 @@
 ---
 title: Settings — Radio & User
 nav_order: 7
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 设置
@@ -162,19 +162,21 @@ The range estimates in the [Modem Presets](#modem-presets) table assume flat ter
 
 On **Settings → Device configuration → Display**. These control the **node's own screen**, not the app's.
 
-| Setting     | 说明                                                                                                                                                                             | 默认                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| 使用 12 小时制格式 | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | 关闭                                             |
-| 总是朝北        | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | 关闭                                             |
-| 加粗标题        | Draw the screen's heading text in bold                                                                                                                                         | 关闭                                             |
-| 轮播间隔        | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | 未设置                                            |
-| 罗盘方向        | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                             |
-| 显示模式        | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen |
-| 显示单位        | **Metric** or **Imperial** on the node's screen                                                                                                                                | 公制                                             |
-| 翻转屏幕        | Flip the display for an inverted mounting                                                                                                                                      | 关闭                                             |
-| OLED 类型     | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                           |
-| 开启屏幕        | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                     |
-| 点击或移动时唤醒屏幕  | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | 关闭                                             |
+| Setting         | 说明                                                                                                                                                                             | 默认                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| 使用 12 小时制格式     | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | 关闭                                                        |
+| 总是朝北            | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | 关闭                                                        |
+| 加粗标题            | Draw the screen's heading text in bold                                                                                                                                         | 关闭                                                        |
+| 轮播间隔            | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | 未设置                                                       |
+| 罗盘方向            | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                                        |
+| 显示模式            | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen            |
+| 显示单位            | **Metric** or **Imperial** on the node's screen                                                                                                                                | 公制                                                        |
+| 翻转屏幕            | Flip the display for an inverted mounting                                                                                                                                      | 关闭                                                        |
+| Long Node Names | Show full node names on the node's screen instead of short names. Shown for firmware 2.7.13 and later                          | 关闭                                                        |
+| Message Bubbles | Draw messages on the node's screen as bubbles. Shown for firmware 2.7.19 and later                                             | On for a color screen 200 pixels or larger, otherwise Off |
+| OLED 类型         | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                                      |
+| 开启屏幕            | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                                |
+| 点击或移动时唤醒屏幕      | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | 关闭                                                        |
 
 ## 定位配置
 
@@ -196,16 +198,16 @@ On **Settings → Device configuration → Position**. These settings decide whe
 
 On **Settings → Device configuration → Power**. These settings trade battery life against availability.
 
-| Setting                               | 说明                                                                                                                                                                                         | 默认         |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| ADC 倍数覆盖                              | Turn on a manual correction for battery-voltage readings                                                                                                                                   | 关闭         |
-| ADC乘数修正比率                             | The correction factor itself, shown only while the override is on                                                                                                                          | —          |
-| 电池INA_2XX I2C 地址 | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0          |
-| 最小唤醒时间                                | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds |
-| 启用节能模式                                | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | 关闭         |
-| 断电时关机                                 | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | 未设置        |
-| 深度睡眠时间                                | How long the deepest sleep state lasts                                                                                                                                                     | —          |
-| 等待蓝牙持续时间                              | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minute   |
+| Setting                                          | 说明                                                                                                                                                                                         | 默认         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| ADC 倍数覆盖                                         | Turn on a manual correction for battery-voltage readings                                                                                                                                   | 关闭         |
+| ADC乘数修正比率                                        | The correction factor itself, shown only while the override is on                                                                                                                          | —          |
+| Battery INA_2XX I2C Address | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0          |
+| 最小唤醒时间                                           | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds |
+| 启用节能模式                                           | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | 关闭         |
+| 断电时关机                                            | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | 未设置        |
+| 深度睡眠时间                                           | How long the deepest sleep state lasts                                                                                                                                                     | —          |
+| 等待蓝牙持续时间                                         | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minute   |
 
 ## 网络配置
 

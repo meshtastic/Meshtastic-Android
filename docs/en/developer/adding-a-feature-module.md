@@ -2,7 +2,7 @@
 title: Adding a Feature Module
 parent: Developer Guide
 nav_order: 3
-last_updated: 2026-10-21
+last_updated: 2026-11-20
 description: Step-by-step guide for creating a new KMP feature module — module directory, build script, DI, routes, navigation entries, and the checklist.
 aliases:
   - new-module
@@ -86,11 +86,12 @@ import org.koin.core.annotation.Module
 class FeatureMyFeatureModule
 ```
 
-## Register DI in App/Desktop
+## Register DI in each host
 
 Add your module to:
 - `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
 - `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`
+- `webApp/src/wasmJsMain/kotlin/org/meshtastic/web/di/WebKoinModule.kt`, only for a module that applies `meshtastic.kmp.web`. Also add the module to `wasmJsMain.dependencies` in `webApp/build.gradle.kts`, or `WebKoinModule.kt` cannot import it, and add its directory to the `web` filter in `.github/workflows/pull-request.yml`, which `scripts/check-changes-filter.py` enforces
 
 ## Add Navigation Routes
 
@@ -135,9 +136,10 @@ Both the graph sentinel (`MyFeatureRoute.MyFeatureGraph`) and the primary screen
 navigate to the same composable, so the feature is reachable via either a top-level push or a deep-link graph
 push — the same pattern `feature:wifi-provision` and `feature:firmware` use.
 
-Then wire it up: call `myFeatureGraph(backStack)` from the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt` and from `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`, alongside the
-other features' entries functions. See [Navigation Entry Registration](navigation-and-deep-links#navigation-entry-registration).
+Then wire it up: add the module to `appShell/build.gradle.kts` and call `myFeatureGraph(backStack)` from
+`sharedNavGraph` in `appShell`'s `MeshtasticMainScreen.kt`, alongside the other features' entries functions, so
+the Android, desktop and web hosts all show it. A module with no web target is called from `appShell`'s
+`nonWebMain` behind an `expect`, as `mapGraph` is. See [Navigation Entry Registration](navigation-and-deep-links#navigation-entry-registration).
 
 ## Source Set Guidelines
 
@@ -165,7 +167,7 @@ Every feature module should have:
 - [ ] Added to a test shard in `.github/workflows/reusable-check.yml` (`shard-feature` for a feature module): its `:feature:my-feature:allTests` task in `tasks` and its `koverXmlReport` in `kover`; `python3 scripts/check-test-shards.py` fails for a module with no test task in any shard, unless the module is listed in the script's `COVERED_ELSEWHERE` or `NO_TESTS_YET` sets
 - [ ] If the module is user-facing, a page under `docs/en/user/` and a `MODULE_TO_DOCS` entry for it in `scripts/check-doc-coverage.js`; the check fails when a listed module's page is missing, and a module with no entry needs no page
 - [ ] DI module created with `@ComponentScan`
-- [ ] DI module registered in app and desktop roots
+- [ ] DI module registered in the app and desktop roots, and the web root for a module with a web target
 - [ ] Routes added to `Routes.kt`, the sealed interface registered in `NavigationConfig.kt`, and an instance of each route in `NavigationConfigTest`
 - [ ] Navigation entries registered
 - [ ] `./gradlew kmpSmokeCompile` passes

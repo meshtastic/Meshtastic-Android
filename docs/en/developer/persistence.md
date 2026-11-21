@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: The app's three persistence layers — Room, DataStore, and core:prefs — and when a contributor should use each.
 aliases:
   - room
@@ -63,6 +63,8 @@ The primary structured data store:
 | `MaintenanceUf2CacheEntity` | Single-row cache of the maintenance-UF2 manifest (`/resource/maintenanceUf2`), stored as one serialized envelope |
 | `MqttRootsCacheEntity` | Single-row cache of the MQTT root directory the topic finder places a user with (`/resource/mqttRoots`), stored as one serialized envelope |
 | `MergeMarkerEntity` | Marks a completed `DatabaseMerger` merge so a re-run on the next connection skips it instead of duplicating rows |
+| `SignalSurveySessionEntity` | One signal survey session |
+| `SignalSampleEntity` | One signal survey reading, deleted with its session |
 
 > ℹ️ **Note:** Waypoints are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Telemetry isn't a `Packet`: `MeshLogRepository.getTelemetryFrom` reads it from `MeshLog`. Channel *configuration* (names and LoRa settings) lives separately, in `ChannelSetEntity`.
 

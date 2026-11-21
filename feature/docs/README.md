@@ -4,12 +4,12 @@
 
 The `:feature:docs` module is an **in-app documentation browser** with Compose Multiplatform UI. It bundles the Meshtastic user guide and developer guide as Compose resources at build time, provides full-text keyword search, Crowdin-backed multilingual content, optional ML Kit runtime translation (Google Play flavor), and a "Chirpy" AI Q&A assistant (Gemini Nano on Google Play; keyword fallback on F-Droid and Desktop).
 
-**Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature` convention plugin)
+**Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature`) · wasmJs (via `meshtastic.kmp.web`, only with `-Pmeshtastic.web=true`)
 
 ## Key Responsibilities
 
 - Bundle `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` as Compose resources at build time
-- Sync Crowdin-translated locales into `composeResources/files/{locale}/docs/`
+- Sync Crowdin-translated locales into `composeResources/files/{locale}/docs/`, leaving out a page that is 90% or more English (`UNTRANSLATED_DOC_THRESHOLD`); the loader shows the English page for it
 - Weighted keyword search across the full doc bundle (title, then keyword, alias and page-id matches)
 - Locale-aware content loading with Crowdin → ML Kit fallback chain
 - Adaptive list/detail layout (single pane on phones, split pane on tablets/desktop)
@@ -136,7 +136,7 @@ The root project's `meshtastic.docs` convention plugin (`DocsTasks.kt` in `build
 
 ## Navigation
 
-Routes are `SettingsRoute` keys, registered by `docsEntries()` from the Android (`Main.kt`) and Desktop (`DesktopNavigation.kt`) nav hosts:
+Routes are `SettingsRoute` keys, registered by `docsEntries()` from `sharedNavGraph` in `:appShell`, which every host shows:
 
 | Route | Description |
 |---|---|

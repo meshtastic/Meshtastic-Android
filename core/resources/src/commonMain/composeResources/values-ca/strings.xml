@@ -265,6 +265,7 @@
     <string name="waypoint_new">Nou punt de pas</string>
     <string name="waypoint_received">Punt de pas rebut: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <!-- WIDGET -->
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adreça IP</string>

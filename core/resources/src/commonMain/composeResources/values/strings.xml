@@ -1457,10 +1457,10 @@
     <string name="mqtt_probe_tls_failure">TLS handshake failed: %1$s</string>
     <string name="mqtt_proxy_local">MQTT proxy in this app</string>
     <string name="mqtt_proxy_local_summary">This app relays MQTT traffic for the connected device. Turn off to cut the relay immediately without changing the device's MQTT setting, which helps when MQTT traffic is overwhelming the connection. Turn back on to resume relaying.</string>
+    <string name="mqtt_root_has_wildcard">MQTT stopped: the root topic contains + or #. Remove it in MQTT settings.</string>
     <string name="mqtt_root_problem_empty">Enter a topic.</string>
     <string name="mqtt_root_problem_empty_segment">Topics cannot contain two slashes in a row.</string>
     <string name="mqtt_root_problem_ends_with_version">Topics cannot end with /2.</string>
-    <string name="mqtt_root_problem_leading_slash">Topics cannot start with a slash.</string>
     <string name="mqtt_root_problem_too_long">Topics are limited to 31 bytes (æ, ø and å use two).</string>
     <string name="mqtt_root_problem_trailing_slash">Topics cannot end with a slash.</string>
     <string name="mqtt_root_problem_whitespace">Topics cannot contain spaces or control characters.</string>
@@ -1481,7 +1481,7 @@
     <string name="mqtt_topic_finder_counts">Counts are nodes heard during the sample. Busy topics fill in within seconds; quiet ones may stay at zero.</string>
     <string name="mqtt_topic_finder_custom">Custom topic</string>
     <string name="mqtt_topic_finder_custom_example" translatable="false">msh/US/WA/seattle</string>
-    <string name="mqtt_topic_finder_custom_hint">Up to 31 bytes, no leading or trailing slash, no + or #.</string>
+    <string name="mqtt_topic_finder_custom_hint">Up to 31 bytes, no trailing slash, no + or #.</string>
     <string name="mqtt_topic_finder_failed_closed">The broker closed the connection.</string>
     <string name="mqtt_topic_finder_failed_connect">Could not connect to the broker.</string>
     <string name="mqtt_topic_finder_failed_error">The sample stopped on an unexpected error.</string>
@@ -1539,6 +1539,7 @@
     <string name="neighbor_mean_snr_description">The average SNR at which this node heard its reported neighbors.</string>
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
+    <string name="network_scan_unavailable">A browser can't scan the network. Add a radio by its address.</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="new_messages_below">New messages below</string>
     <string name="new_node_seen">New Node Seen: %1$s</string>
@@ -1557,6 +1558,7 @@
     <string name="no_map_layers_loaded">No map layers loaded.</string>
     <string name="no_network_devices_found">No network devices found</string>
     <string name="no_network_devices_hint">Ensure you're connected to the same network as the device.</string>
+    <string name="no_network_devices_saved">No network devices yet</string>
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>
@@ -2467,12 +2469,13 @@
     <string name="web_database_unavailable">This browser does not let Meshtastic store its data here. Private windows often block it; try a regular window.</string>
     <string name="web_database_use_here">Use here</string>
     <string name="web_serial_unsupported">This browser has no USB serial access. USB works in Chrome, Edge and Opera on a computer.</string>
-    <string name="web_transports_unsupported">This browser can't connect to a radio. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
+    <string name="web_transports_unsupported">This browser has no Bluetooth or USB serial access, so it reaches a radio only over the network. Bluetooth and USB work in Chrome, Edge and Opera on a computer, and Bluetooth also in Chrome on Android.</string>
     <string name="website">Website</string>
     <!-- WEBSOCKET -->
     <string name="websocket_connect_failed">Couldn't reach the radio's WebSocket. Check the address and that the radio is on this network.</string>
     <string name="websocket_handshake_rejected">The radio refused a WebSocket at this address. Check that the path is /api/v1/ws and that its firmware has the WebSocket API.</string>
     <string name="websocket_message_too_big">The radio closed the WebSocket because a message was too large.</string>
+    <string name="websocket_not_supported">This radio's firmware doesn't support WebSocket connections yet. Update the firmware or connect over TCP.</string>
     <string name="websocket_port_in_url">Not used for a ws:// or wss:// address. Put the port in the URL.</string>
     <string name="websocket_replaced_by_another_client">Another app took this radio's WebSocket connection. Connect again to take it back.</string>
     <string name="websocket_slot_contested">The radio keeps dropping this WebSocket connection. Another app may be using it. Connect again to retry.</string>

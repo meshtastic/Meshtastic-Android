@@ -18,15 +18,28 @@
 pluginManagement {
     includeBuild("settings-plugin")
     repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        google {
-            content {
+        // Google-only groups resolve from Google's repository alone, as in the root settings.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("../offline-repository")
+                },
+            )
+            filter {
                 includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
+        mavenCentral()
+        gradlePluginPortal()
         maven { url = uri("../offline-repository") }
     }
 }
@@ -37,15 +50,28 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        google {
-            content {
+        // Google-only groups resolve from Google's repository alone, as in the root settings.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("../offline-repository")
+                },
+            )
+            filter {
                 includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Ahead of Central, as in the root settings: Central rate-limits CI's shared egress.
+        maven {
+            name = "MavenCentralMirror"
+            url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+            mavenContent { releasesOnly() }
+        }
+        mavenCentral()
+        gradlePluginPortal()
         maven { url = uri("../offline-repository") }
     }
     versionCatalogs {

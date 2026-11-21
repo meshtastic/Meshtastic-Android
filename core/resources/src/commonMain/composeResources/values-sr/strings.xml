@@ -493,6 +493,7 @@
     <string name="waypoint_received">Примљена тачка путање: %1$s</string>
     <!-- WEB -->
     <string name="website">Вебсајт</string>
+    <!-- WEBSOCKET -->
     <string name="what_is_meshtastic">Шта је Мештастик?</string>
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
     <!-- WIDGET -->

@@ -527,6 +527,7 @@
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">Ağırlık</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">Kötü</string>

@@ -6,7 +6,7 @@ nav_order: 0
 
 # Meshtastic Android App Documentation
 
-User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
+User and developer documentation for the Meshtastic Android, Desktop and web app, built with Kotlin Multiplatform.
 
 Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
 

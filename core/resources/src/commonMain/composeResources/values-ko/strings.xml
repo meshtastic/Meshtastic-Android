@@ -515,6 +515,7 @@
     <string name="waypoint_new">새 웨이포인트</string>
     <string name="waypoint_received">웨이포인트 수신: %1$s</string>
     <!-- WEB -->
+    <!-- WEBSOCKET -->
     <string name="weight">무게</string>
     <!-- WIDGET -->
     <string name="widget_packets_bad">나쁨</string>

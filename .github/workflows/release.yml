@@ -460,6 +460,66 @@ jobs:
       soft: true
     secrets: inherit
 
+  # The web app's static site, as one zip beside the installers: the production distribution, with a
+  # Brotli copy of each content-hashed module, for a node-headless host or any web server. The web
+  # target is opt-in and in Beta, so like the screenshots it runs soft: github-release does not gate
+  # on it, and a failed web build loses neither the release nor its tag.
+  release-web:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'false'
+
+      # -Dorg.gradle.isolated-projects=false: KGP's wasm npm resolver configures the root project
+      # from each wasmJs project, which Isolated Projects rejects.
+      - name: Build the web distribution
+        env:
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
+        run: >
+          ./gradlew :webApp:wasmJsBrowserDistribution
+          -Pmeshtastic.web=true
+          -Dorg.gradle.isolated-projects=false
+          -Pkotlin.incremental.wasm=false
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
+
+      - name: Package the web distribution
+        env:
+          VERSION_NAME: ${{ inputs.version_name }}
+        run: |
+          dist=webApp/build/dist/wasmJs/productionExecutable
+          test -f "$dist/index.html"
+          test -f "$dist/webApp.js"
+          (cd "$dist" && zip -qr "$GITHUB_WORKSPACE/meshtastic-web-${VERSION_NAME}.zip" .)
+          ls -l meshtastic-web-*.zip
+
+      - name: Upload the web distribution artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: web-dist
+          path: meshtastic-web-*.zip
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Attest web distribution provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: meshtastic-web-*.zip
+
   # Play receives the bundle only after every leg has built: a failed leg makes the caller
   # delete the tag, and Play keeps any versionCode it has been sent.
   publish-play:
@@ -479,7 +539,7 @@ jobs:
           path: ${{ runner.temp }}/google-aab
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+        uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
         with:
           bundler-cache: true
 
@@ -515,8 +575,9 @@ jobs:
           path: ./artifacts
 
       # Raw captures already uploaded stay out: store-screenshots-assets packages and attaches them.
+      # So does the web zip when it is already built: release-web-assets attaches it either way.
       - name: Exclude intermediate artifacts from release
-        run: rm -rf ./artifacts/flatpak-multisrc-* ./artifacts/store-screenshots-*
+        run: rm -rf ./artifacts/flatpak-multisrc-* ./artifacts/store-screenshots-* ./artifacts/web-dist
 
       # Generate the notes ourselves with an explicit previous tag. GitHub's automatic
       # previous-release selection considers any published release, including the rolling
@@ -632,3 +693,26 @@ jobs:
           REPO: ${{ github.repository }}
           TAG: ${{ inputs.tag_name }}
         run: gh release upload "$TAG" out/* --clobber --repo "$REPO"
+
+  # Attached to the draft github-release created, so the draft never waits on wasm-opt.
+  release-web-assets:
+    if: ${{ !cancelled() && needs.github-release.result == 'success' && needs.release-web.result == 'success' }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    continue-on-error: true
+    needs: [release-web, github-release]
+    permissions:
+      contents: write
+    steps:
+      - name: Download the web distribution
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: web-dist
+          path: out
+
+      - name: Attach the web distribution to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag_name }}
+        run: gh release upload "$TAG" out/meshtastic-web-*.zip --clobber --repo "$REPO"

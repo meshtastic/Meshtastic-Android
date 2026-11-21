@@ -415,6 +415,7 @@ dependencies {
     implementation(projects.core.ble)
 
     // Feature modules (JVM variants for real composable wiring)
+    implementation(projects.appShell)
     implementation(projects.feature.settings)
     implementation(projects.feature.docs)
     implementation(projects.feature.node)

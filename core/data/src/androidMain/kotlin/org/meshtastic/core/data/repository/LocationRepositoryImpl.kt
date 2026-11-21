@@ -25,7 +25,6 @@ import android.location.OnNmeaMessageListener
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import androidx.annotation.RequiresPermission
 import androidx.core.location.LocationCompat
 import androidx.core.location.LocationListenerCompat
@@ -53,6 +52,7 @@ class LocationRepositoryImpl(
     private val locationManager: Lazy<LocationManager>,
     private val analytics: PlatformAnalytics,
     private val dispatchers: CoroutineDispatchers,
+    private val fused: FusedLocationClient,
 ) : LocationRepository {
 
     companion object {
@@ -61,7 +61,7 @@ class LocationRepositoryImpl(
         private const val API_LEVEL_31 = 31
         private const val API_LEVEL_30 = 30
 
-        /** NMEA older than this no longer describes the fix it would sit beside. */
+        /** NMEA stamped further than this from a fix's time does not describe that fix. */
         private const val NMEA_FRESH_MS = 5_000L
     }
 
@@ -79,11 +79,11 @@ class LocationRepositoryImpl(
                 .build()
 
         // Satellites and dilution of precision exist only in the receiver's NMEA, which needs a precise grant.
-        val nmea = NmeaTracker(SystemClock::elapsedRealtime)
-        val nmeaListener = OnNmeaMessageListener { message, _ -> nmea.accept(message) }
+        val nmea = NmeaTracker()
+        val nmeaListener = OnNmeaMessageListener { message, timestamp -> nmea.accept(message, timestamp) }
         val nmeaListening = addNmea(nmeaListener)
 
-        val locationListener = LocationListenerCompat { location ->
+        val onFix: (AndroidLocation) -> Unit = { location ->
             if (location.hasAltitude() && !LocationCompat.hasMslAltitude(location)) {
                 @Suppress("TooGenericExceptionCaught")
                 try {
@@ -92,8 +92,9 @@ class LocationRepositoryImpl(
                     Logger.e(e) { "addMslAltitudeToLocation() failed" }
                 }
             }
-            trySend(location.toLocation(nmea.fresh(NMEA_FRESH_MS)))
+            trySend(location.toLocation(nmea.fresh(location.time, NMEA_FRESH_MS)))
         }
+        val locationListener = LocationListenerCompat { onFix(it) }
 
         val providerList = buildList {
             val providers = allProviders
@@ -112,16 +113,42 @@ class LocationRepositoryImpl(
         _receivingLocationUpdates.value = true
         analytics.track("location_start")
 
+        // A late Play services failure may start the platform providers, so starting and stopping them share a lock.
+        val platformLock = Any()
+        var stopped = false
+
+        @Suppress("TooGenericExceptionCaught")
+        fun requestPlatform() = synchronized(platformLock) {
+            if (stopped) return@synchronized
+            try {
+                providerList.forEach { provider ->
+                    LocationManagerCompat.requestLocationUpdates(
+                        this@requestLocationUpdates,
+                        provider,
+                        locationRequest,
+                        dispatchers.io.asExecutor(),
+                        locationListener,
+                    )
+                }
+            } catch (e: Exception) {
+                close(e)
+            }
+        }
+
+        // Play services' fused provider where the flavor has it and the phone runs it, else the platform's.
+        var fusedHandle: AutoCloseable? = null
+        val onFusedFailure: (Exception) -> Unit = { e ->
+            Logger.w(e) { "Play services refused location updates, using the platform providers" }
+            requestPlatform()
+        }
         @Suppress("TooGenericExceptionCaught")
         try {
-            providerList.forEach { provider ->
-                LocationManagerCompat.requestLocationUpdates(
-                    this@requestLocationUpdates,
-                    provider,
-                    locationRequest,
-                    dispatchers.io.asExecutor(),
-                    locationListener,
-                )
+            fusedHandle =
+                fused.requestLocationUpdates(DEFAULT_INTERVAL_MS, dispatchers.io.asExecutor(), onFix, onFusedFailure)
+            if (fusedHandle != null) {
+                Logger.i { "Location updates from Play services' fused provider" }
+            } else {
+                requestPlatform()
             }
         } catch (e: Exception) {
             close(e)
@@ -132,7 +159,11 @@ class LocationRepositoryImpl(
             _receivingLocationUpdates.value = false
             analytics.track("location_stop")
 
-            LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
+            fusedHandle?.close()
+            synchronized(platformLock) {
+                stopped = true
+                LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
+            }
             if (nmeaListening) removeNmeaListener(nmeaListener)
         }
     }

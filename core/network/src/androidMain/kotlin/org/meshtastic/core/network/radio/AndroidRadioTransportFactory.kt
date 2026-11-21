@@ -36,8 +36,8 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
 /**
- * Android implementation of [RadioTransportFactory]. Handles pure-KMP transports (BLE) via [BaseRadioTransportFactory]
- * while creating platform-specific connections (TCP, USB/Serial, Mock, NOP) directly in [createPlatformTransport].
+ * Android implementation of [RadioTransportFactory]. Dispatch lives in [BaseRadioTransportFactory]; this class supplies
+ * USB/Serial and the bundled replay capture.
  */
 @Single(binds = [RadioTransportFactory::class])
 @Suppress("LongParameterList")
@@ -52,7 +52,7 @@ class AndroidRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     connectionFactory: BleConnectionFactory,
     dispatchers: CoroutineDispatchers,
-) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
+) : NonWebRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
     override val supportedDeviceTypes: List<DeviceType> =
         listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB, DeviceType.NODE)
@@ -92,50 +92,22 @@ class AndroidRadioTransportFactory(
     override fun isPlatformAddressValid(address: String): Boolean =
         address.firstOrNull()?.let { InterfaceId.forIdChar(it) } == InterfaceId.NOP
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
-        val rest = address.substring(1)
+    override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        SerialRadioTransport(
+            callback = service,
+            scope = service.serviceScope,
+            serialDevices = usbRepository.serialDevices,
+            createSerialConnection = usbRepository::createSerialConnection,
+            address = rest,
+        )
 
-        return when (interfaceId) {
-            InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
-
-            InterfaceId.REPLAY -> createReplayTransport(service, rest)
-
-            InterfaceId.TCP ->
-                TcpRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    dispatchers = dispatchers,
-                    address = rest,
-                )
-
-            InterfaceId.SERIAL ->
-                SerialRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    serialDevices = usbRepository.serialDevices,
-                    createSerialConnection = usbRepository::createSerialConnection,
-                    address = rest,
-                )
-
-            InterfaceId.NODE ->
-                NodeRadioTransport(
-                    callback = service,
-                    scope = service.serviceScope,
-                    bearers = nodeBearers,
-                    statusRepository = nodeStatusRepository,
-                    isDebug = buildConfigProvider.isDebug,
-                )
-
-            InterfaceId.NOP,
-            null,
-            -> NopRadioTransport(rest)
-
-            InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
-
-            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
-        }
-    }
+    override fun createNodeTransport(service: RadioInterfaceService): RadioTransport = NodeRadioTransport(
+        callback = service,
+        scope = service.serviceScope,
+        bearers = nodeBearers,
+        statusRepository = nodeStatusRepository,
+        isDebug = buildConfigProvider.isDebug,
+    )
 
     /**
      * Replay selection ("r"). Replays the bundled burningmesh capture asset on-device via [ReplayRadioTransport] —
@@ -143,7 +115,8 @@ class AndroidRadioTransportFactory(
      * benchmark) builds; when it is absent we fall back to the lightweight synthetic [MockRadioTransport] so selecting
      * the entry still yields a working virtual device.
      */
-    private fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
+    override fun createReplayTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val rest = address.substring(1)
         val replayFrames = runCatching {
             context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() }
         }
@@ -159,7 +132,7 @@ class AndroidRadioTransportFactory(
             )
         } else {
             Logger.w { "Replay device selected but $REPLAY_ASSET_NAME asset is missing — falling back to mock" }
-            MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+            createMockTransport(service, rest)
         }
     }
 

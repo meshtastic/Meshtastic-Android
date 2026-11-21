@@ -1,7 +1,7 @@
 ---
 title: ホーム画面ウィジェット
 nav_order: 20
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Add Meshtastic home screen widgets to glance at your connected node's local stats, keep an eye on one node you pick, or read one node's sensors, without opening the app.
 aliases:
   - widget
@@ -74,6 +74,8 @@ The **Telemetry** widget shows one node's sensor readings as tiles, the same til
 - **Environment**: temperature, humidity, pressure, dew point, gas resistance, IAQ, light, wind, rain, soil temperature, soil moisture, radiation and weight
 - **Air quality**: PM1.0, PM2.5, PM10 and CO₂
 - **Power**: voltage and current for each channel, named with the labels you gave the channels
+
+The humidity tile also shows the dew point under the percentage when the node reports both temperature and humidity.
 
 It shows every reading the node reports, in that order, and you can hide any of them. The node's chip sits beside the readings, and the line under them says when the newest reading arrived.
 

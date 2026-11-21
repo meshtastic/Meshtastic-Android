@@ -1,7 +1,7 @@
 ---
 title: ローカルメッシュ探索
 nav_order: 12
-last_updated: 2026-11-12
+last_updated: 2026-11-20
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - discovery
@@ -177,7 +177,7 @@ Once enabled and transmitting over LoRa, your node periodically broadcasts its n
 
 #### Viewing neighbor data
 
-- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list. Its log button opens everything that node has reported, and its request button asks the node for a fresh list.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list, or while the Neighbor Info module is on for your connected node. Its request button asks the node for a fresh list, and appears only while your connected node has the module on, because firmware drops neighbor info on a node that has it off. Its log button opens the node's [Neighbor Info log](node-metrics#neighbor-info).
 - 各隣接ノードの項目には、直接受信したノードとその信号品質が表示されます。
 - 複数のノードの隣接ノードデータを組み合わせて、メッシュ全体のトポロジーを把握します。
 

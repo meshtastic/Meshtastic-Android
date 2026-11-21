@@ -1403,10 +1403,10 @@ mqtt_probe_timeout
 mqtt_probe_tls_failure
 mqtt_proxy_local
 mqtt_proxy_local_summary
+mqtt_root_has_wildcard
 mqtt_root_problem_empty
 mqtt_root_problem_empty_segment
 mqtt_root_problem_ends_with_version
-mqtt_root_problem_leading_slash
 mqtt_root_problem_too_long
 mqtt_root_problem_trailing_slash
 mqtt_root_problem_whitespace
@@ -1485,6 +1485,7 @@ neighbor_mean_snr
 neighbor_mean_snr_description
 network
 network_layer_url_hint
+network_scan_unavailable
 new_channel_rcvd
 new_messages_below
 new_node_seen
@@ -1503,6 +1504,7 @@ no_local_stats
 no_map_layers_loaded
 no_network_devices_found
 no_network_devices_hint
+no_network_devices_saved
 no_network_devices_seen
 no_pax_metrics_logs
 no_public_key
@@ -2380,6 +2382,7 @@ website
 websocket_connect_failed
 websocket_handshake_rejected
 websocket_message_too_big
+websocket_not_supported
 websocket_port_in_url
 websocket_replaced_by_another_client
 websocket_slot_contested

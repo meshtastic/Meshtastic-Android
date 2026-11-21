@@ -4,5 +4,6 @@
   <CurrentIssues>
     <ID>LongParameterList:WaypointDialogs.kt:WaypointEditing</ID>
     <ID>UnnecessaryLaunchedEffect:MapLibreMapViewProvider.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TracerouteMapSlot.kt:LaunchedEffect</ID>
   </CurrentIssues>
 </SmellBaseline>

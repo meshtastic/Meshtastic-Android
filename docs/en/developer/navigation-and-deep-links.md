@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: How typed Navigation 3 routes and DeepLinkRouter work together, the supported deep link URIs, and how to add a new one.
 aliases:
   - deeplinks
@@ -94,7 +94,7 @@ null for them, and the caller hands them to its import fallback.
 | URI Path | Route | Notes |
 |----------|-------|-------|
 | `/connections` | `ConnectionsRoute.Connections(null)` | Connections screen |
-| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Connects to a node once the user confirms the "Connect to this device?" dialog — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app; a debug build started through its shell-only `org.meshtastic.app.AutomationLauncher` alias with the `skip_connect_confirm` intent extra, or with the `--skip-connect-confirm` argument on desktop, applies the address it was launched with without the dialog; links that arrive later still ask. |
+| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Connects to a node once the user confirms the "Connect to this device?" dialog — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `wws://192.168.1.1/api/v1/ws` (WebSocket), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app; a debug build started through its shell-only `org.meshtastic.app.AutomationLauncher` alias with the `skip_connect_confirm` intent extra, or with the `--skip-connect-confirm` argument on desktop, applies the address it was launched with without the dialog; links that arrive later still ask. |
 | `/connections?address={prefixedAddress}&pin={pin}` | `ConnectionsRoute.Connections(address, pin)` | For a BLE address, `pin` is the node's 6-digit pairing PIN (`FIXED_PIN` mode). The confirmation dialog shows the PIN; on confirm, the PIN is copied to the clipboard (marked sensitive) and Android pairs first, answering the PIN request with it where the OS allows. On Android 17, `setPin` needs `BLUETOOTH_PRIVILEGED`, so the system PIN dialog asks and the user pastes the PIN. A `pin` that is not exactly six digits, or on a non-BLE address, is ignored and pairing asks as usual. Desktop shows the PIN but leaves pairing to the OS. The cross-platform link format is meshtastic/design#177; example QR or NFC payload: `meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456`. The same link arrives from an NFC tag (`NDEF_DISCOVERED`) and from the scan action on the Connections screen, which accepts only `meshtastic://meshtastic` and `https://meshtastic.org` links and always asks, even under the debug skip switch. An address with an unknown prefix, `n` with anything after it, or `x` without six hex pairs opens the Connections screen with no prompt. |
 | `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current node instead of connecting (`n` = the internal "no device selected" sentinel), after the same confirmation. |
 | `/wifi-provision` | `WifiProvisionRoute.WifiProvision(null)` | Wi-Fi provisioning screen |
@@ -168,8 +168,9 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 }
 ```
 
-The apps call every feature's entries function from one place: the `entryProvider<NavKey> { }` block in
-`androidApp`'s `Main.kt`, and `desktopNavGraph` in `desktopApp`'s `DesktopNavigation.kt`.
+The apps call every feature's entries function from one place: `sharedNavGraph` in `appShell`'s
+`MeshtasticMainScreen.kt`, which `MeshtasticMainScreen` hands to `MeshtasticNavDisplay` on Android, desktop
+and web.
 
 ## Testing
 

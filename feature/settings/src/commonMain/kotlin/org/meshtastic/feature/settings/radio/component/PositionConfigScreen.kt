@@ -70,6 +70,7 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
+import org.meshtastic.feature.settings.settingsPlatform
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.fieldTitle
@@ -81,13 +82,6 @@ import org.meshtastic.proto.broadcast_smart_minimum_distance
 import org.meshtastic.proto.gps_en_gpio
 import org.meshtastic.proto.rx_gpio
 import org.meshtastic.proto.tx_gpio
-
-@Composable
-expect fun DeviceLocationButton(
-    viewModel: RadioConfigViewModel,
-    enabled: Boolean,
-    onLocationReceived: (Position) -> Unit,
-)
 
 private val PositionStateSaver =
     listSaver<Position, Any?>(
@@ -330,11 +324,13 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
-                    DeviceLocationButton(
-                        viewModel = viewModel,
-                        enabled = state.connected,
-                        onLocationReceived = { locationInput = it },
-                    )
+                    if (settingsPlatform.deviceLocation) {
+                        DeviceLocationButton(
+                            viewModel = viewModel,
+                            enabled = state.connected,
+                            onLocationReceived = { locationInput = it },
+                        )
+                    }
                 } else {
                     HorizontalDivider()
                     DropDownPreference(

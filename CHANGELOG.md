@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.5-internal.3)
+### Closed Beta (v2.8.5-closed.1)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
 #### 🏗️ Features
@@ -31,9 +31,24 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(widget): add a Telemetry widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8057
 * feat(widget): filter the Telemetry widget's node picker by name or id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8059
 * feat(map): signal survey with live map overlay, heatmap and AR ground view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8066
+* feat(messaging): show the relaying node in message details by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8082
+* feat(settings): play the saved ringtone on the node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8098
+* feat(settings): device screen toggles, and anchor the rows the schema refresh labels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8100
+* feat(node): neighbor-info requests follow the radio's module, and the log charts what nodes report by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8108
+* feat(desktop): add a debug-only loopback MCP server for agents by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8122
+* feat(webApp): Compose Multiplatform web target by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8112
+* feat(position): send the receiver's satellites and dilution of precision with the phone's position by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8139
+* feat(connections): connect over firmware's WebSocket phone API by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8099
+* feat(position): let the phone's GPS rest while it is still and the radio has its position by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8144
+* feat(location): take fixes from Play services' fused provider on google by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8143
+* fix(desktop): open the no-op or mock transport for no-device, replay and unknown addresses by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8196
 #### 🖥️ Desktop
 * fix(desktop): let the JVM size the heap from available RAM by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8015
 * fix(resources): keep suspending string lookups off the main dispatcher by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8050
+* refactor(network): dispatch transport addresses in the base factory by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8188
+* refactor: keep one copy of the shared no-ops, region table and test fakes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8194
+* refactor(map): share the traceroute adapter across MapLibre hosts by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8186
+* refactor(network): install the API client's plugins from one place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8187
 #### 🛠️ Fixes
 * fix(widget): compose the picker preview without a glance id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7934
 * fix(map): download regional terrain from every z6 archive a region touches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7943
@@ -67,8 +82,32 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(firmware): clear the recovery record when a bootloader upgrade fails before writing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8068
 * fix(map): draw the traceroute return route dashed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8076
 * fix(survey): do not lose a start that lands while the last recorder shuts down by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8078
+* fix(data): resolve each device hardware model once per catalog refresh by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8094
+* fix(data): keep a delivered message delivered when its retries run out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8103
+* fix(settings): hide Play on node until firmware ships the handler by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8105
+* fix(ble): match a BlueZ object path against a MAC on Linux by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8116
+* fix(widget): carry the Meshtastic mark on the Telemetry widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8126
+* fix(mqtt): say a browser needs a wss:// broker instead of retrying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8146
+* fix(ui): hide a node's elevation when its position carries no altitude by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8138
+* fix(webApp): cache only the app's own page for offline loads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8152
+* fix(position): stamp NMEA by its message and reject malformed decimals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8156
+* fix(resources): say a browser without Bluetooth or USB still reaches a radio over the network by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8162
+* fix(metrics): stack chart and list when the metrics pane is narrow by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8163
+* fix(nav): keep the navigation rail when a phone is in landscape by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8164
+* fix(connections): offer no network scan in a browser by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8165
+* fix(network): keep the WebSocket URL path out of the log label by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8160
+* fix(connections): canonical WebSocket addresses and a clear error when firmware has no WebSocket route by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8161
+* fix(mqtt): accept a root topic with a leading slash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8174
+* fix(node): offer direct message to keyless nodes from a licensed node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8178
+* fix(settings): survive an empty channel list when choosing the location sharing channel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8182
+* fix(ui): summarize an opaque import URI without reading its query by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8180
+* fix(mqtt): stop the proxy on a wildcard root topic instead of retrying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8179
+* fix(messaging): apply the licensed direct message rule to the contact list by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8189
 #### 📝 Other Changes
 * fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
+* feat(connections): move connect-code scan to the import FAB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8083
+* fix(data): retry the bundled hardware catalog after a failed seed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8097
+* refactor(settings): make the location, key backup and TAK permission composables common by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8191
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->

@@ -1,7 +1,7 @@
 ---
 title: Settings — Radio & User
 nav_order: 7
-last_updated: 2026-11-15
+last_updated: 2026-11-20
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - nastavení
@@ -162,19 +162,21 @@ The range estimates in the [Modem Presets](#modem-presets) table assume flat ter
 
 On **Settings → Device configuration → Display**. These control the **node's own screen**, not the app's.
 
-| Nastavení                        | Popis                                                                                                                                                                          | Výchozí                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| Použít 12h formát hodin          | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | Vypnuto                                        |
-| Vždy ukazovat na sever           | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | Vypnuto                                        |
-| Tučný nadpis                     | Draw the screen's heading text in bold                                                                                                                                         | Vypnuto                                        |
-| Interval přepínání obrazovek     | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | Žádné nastavení                                |
-| Orientace kompasu                | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                             |
-| Režim obrazovky                  | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen |
-| Zobrazení jednotek               | **Metric** or **Imperial** on the node's screen                                                                                                                                | Metrický                                       |
-| Překlopit obrazovku              | Flip the display for an inverted mounting                                                                                                                                      | Vypnuto                                        |
-| Typ OLED displeje                | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                           |
-| Obrazovka zapnutá po dobu        | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                     |
-| Probuzení klepnutím nebo pohybem | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | Vypnuto                                        |
+| Nastavení                        | Popis                                                                                                                                                                          | Výchozí                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Použít 12h formát hodin          | Show the node's clock as 12-hour rather than 24-hour                                                                                                                           | Vypnuto                                                   |
+| Vždy ukazovat na sever           | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other                  | Vypnuto                                                   |
+| Tučný nadpis                     | Draw the screen's heading text in bold                                                                                                                                         | Vypnuto                                                   |
+| Interval přepínání obrazovek     | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes                                      | Žádné nastavení                                           |
+| Orientace kompasu                | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant                                                 | 0°                                                        |
+| Režim obrazovky                  | Screen layout: **Default 128x64 screen layout**, **Optimized for 2 color displays**, **Inverted top bar for 2 color displays**, or **TFT Full Color Displays** | Default, or color on nodes with a color screen            |
+| Zobrazení jednotek               | **Metric** or **Imperial** on the node's screen                                                                                                                                | Metrický                                                  |
+| Překlopit obrazovku              | Flip the display for an inverted mounting                                                                                                                                      | Vypnuto                                                   |
+| Long Node Names                  | Show full node names on the node's screen instead of short names. Shown for firmware 2.7.13 and later                          | Vypnuto                                                   |
+| Message Bubbles                  | Draw messages on the node's screen as bubbles. Shown for firmware 2.7.19 and later                                             | On for a color screen 200 pixels or larger, otherwise Off |
+| Typ OLED displeje                | Overrides automatic OLED detection: **Detect Automatically**, **SSD1306**, **SH1106**, **SH1107**, **SH1107 128x128**, or **SH1107 Rotated**                   | Detect Automatically                                      |
+| Obrazovka zapnutá po dobu        | How long the display stays lit after a button press or a received message: 15 seconds to 1 hour, or **Always On**                                              | 10 minutes                                                |
+| Probuzení klepnutím nebo pohybem | Light the screen when the node is tapped or moved. Needs an accelerometer                                                                                      | Vypnuto                                                   |
 
 ## Nastavení pozice
 
@@ -196,16 +198,16 @@ On **Settings → Device configuration → Position**. These settings decide whe
 
 On **Settings → Device configuration → Power**. These settings trade battery life against availability.
 
-| Nastavení                                       | Popis                                                                                                                                                                                      | Výchozí         |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| Přepsání násobiče ADC                           | Turn on a manual correction for battery-voltage readings                                                                                                                                   | Vypnuto         |
-| Vlastní hodnota násobiče pro ADC                | The correction factor itself, shown only while the override is on                                                                                                                          | —               |
-| Adresa INA_2XX I2C baterie | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0               |
-| Minimální doba probuzení                        | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds      |
-| Povolit úsporný režim                           | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Vypnuto         |
-| Vypnutí při ztrátě napájení                     | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Žádné nastavení |
-| Doba super hlubokého spánku                     | How long the deepest sleep state lasts                                                                                                                                                     | —               |
-| Doba čekání na Bluetooth                        | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minuta        |
+| Nastavení                                        | Popis                                                                                                                                                                                      | Výchozí         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| Přepsání násobiče ADC                            | Turn on a manual correction for battery-voltage readings                                                                                                                                   | Vypnuto         |
+| Vlastní hodnota násobiče pro ADC                 | The correction factor itself, shown only while the override is on                                                                                                                          | —               |
+| Battery INA_2XX I2C Address | Address of an external INA-series power sensor, if fitted                                                                                                                                  | 0               |
+| Minimum Wake Time                                | The shortest time the node stays awake once woken                                                                                                                                          | 10 seconds      |
+| Povolit úsporný režim                            | Sleep as much as possible. On the Tracker and Sensor roles this includes the LoRa radio. Not for a node you use with the app, or one without a user button | Vypnuto         |
+| Vypnutí při ztrátě napájení                      | How long after external power is removed before the node powers off. **Unset** disables it, and values under 30 seconds are raised to 30                                   | Žádné nastavení |
+| Super Deep Sleep Duration                        | How long the deepest sleep state lasts                                                                                                                                                     | —               |
+| Doba čekání na Bluetooth                         | How long to wait for a phone to connect before sleeping                                                                                                                                    | 1 minuta        |
 
 ## Nastavení sítě
 

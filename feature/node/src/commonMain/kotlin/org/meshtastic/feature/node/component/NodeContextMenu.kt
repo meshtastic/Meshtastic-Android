@@ -36,6 +36,8 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.canDirectMessage
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.edit_name
@@ -69,7 +71,6 @@ import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
-import org.meshtastic.feature.node.model.canDirectMessage
 
 /** Mute is `toggle_muted_node` sent to our own node, so our firmware, not the muted node's, must support it. */
 internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true
@@ -99,7 +100,7 @@ fun NodeContextMenu(
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-            MessageMenuItem(node, onMessage, onDismiss)
+            MessageMenuItem(node, ourNode, onMessage, onDismiss)
             MenuItem(
                 MeshtasticIcons.Edit,
                 stringResource(Res.string.set_display_name),
@@ -226,13 +227,13 @@ private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) 
 }
 
 @Composable
-private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> Unit) {
+private fun MessageMenuItem(node: Node, ourNode: Node?, onMessage: () -> Unit, onDismiss: () -> Unit) {
     DropdownMenuItem(
         onClick = {
             onMessage()
             onDismiss()
         },
-        enabled = !node.isIgnored && node.canDirectMessage,
+        enabled = !node.isIgnored && node.canDirectMessage(ourNode.isLicensedLocal),
         leadingIcon = { Icon(imageVector = MeshtasticIcons.Message, contentDescription = null) },
         text = { Text(text = stringResource(Res.string.message)) },
     )

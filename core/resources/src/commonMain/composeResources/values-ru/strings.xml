@@ -67,6 +67,7 @@
     <string name="add_network_device">Добавить</string>
     <string name="add_network_device_manually">Добавить устройство вручную…</string>
     <string name="add_network_layer">Добавить сетевой уровень</string>
+    <string name="add_usb_device">Добавляю последовательное устройство…</string>
     <string name="address">Адрес</string>
     <string name="admin_keys">Ключи администратора</string>
     <string name="administration">Администрирование</string>
@@ -355,6 +356,14 @@
     <string name="connected_sleeping">Подключен к ноде, но она спит</string>
     <string name="connecting">Подключение</string>
     <!-- CONNECTION -->
+    <string name="connection_failure_bluetooth_or_location_unavailable">Службы Bluetooth или геолокации отключены.</string>
+    <string name="connection_failure_bluetooth_unavailable">Bluetooth выкл.</string>
+    <string name="connection_failure_link_lost">Соединение прервано.</string>
+    <string name="connection_failure_unknown">Соединение не удалось.</string>
+    <string name="connection_phase_discovering_services">Проверка радио</string>
+    <string name="connection_phase_handshake_nodes">Загрузка списка узлов</string>
+    <string name="connection_phase_pairing">Сопряжение</string>
+    <string name="connection_phase_subscribing">Настройка соединения</string>
     <string name="connection_status">Текущие подключения:</string>
     <string name="connections">Соединения</string>
     <string name="contact_draft_prefix">Черновик: %1$s</string>
@@ -365,6 +374,7 @@
     <string name="contrast_medium">Средний</string>
     <string name="contrast_standard">Стандартный</string>
     <string name="conversations">Чаты</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="copy">Копировать</string>
     <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Создавайте свои собственные сети</string>
@@ -1439,7 +1449,6 @@
     <string name="mqtt_root_problem_empty">Введи тему</string>
     <string name="mqtt_root_problem_empty_segment">Темы не могут содержать два слэша в строке.</string>
     <string name="mqtt_root_problem_ends_with_version">Темы не могут заканчиваться на /2.</string>
-    <string name="mqtt_root_problem_leading_slash">Темы не могут начинаться со слэша.</string>
     <string name="mqtt_root_problem_too_long">Темы ограничены 31 байтом  (æ, ø и å используют два).</string>
     <string name="mqtt_root_problem_trailing_slash">Темы не могут заканчиваться слэшем.</string>
     <string name="mqtt_root_problem_whitespace">Темы не могут содержать пробелы или управляющие символы.</string>
@@ -1459,7 +1468,6 @@
     <string name="mqtt_topic_finder_connecting">Подключение…</string>
     <string name="mqtt_topic_finder_counts">Счетчик количества нод, слышимые во время пробы. Оживленные темы заполняются в течение нескольких секунд; тихие темы могут оставаться на нуле.</string>
     <string name="mqtt_topic_finder_custom">Пользовательская тема</string>
-    <string name="mqtt_topic_finder_custom_hint">До 31 байт, нет начального или конечного слэша, нет + или #.</string>
     <string name="mqtt_topic_finder_failed_closed">Брокер закрыл соединение.</string>
     <string name="mqtt_topic_finder_failed_connect">Не удалось подключиться к брокеру.</string>
     <string name="mqtt_topic_finder_failed_error">Проба остановилась из-за непредвиденной ошибки.</string>
@@ -1538,6 +1546,7 @@
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
     <string name="no_public_key">Нет открытого ключа</string>
     <string name="no_public_key_text">Эта нода не передала открытый ключ, поэтому зашифрованное взаимодействие с ней невозможно. Запроси информацию о пользователе, чтобы запросить ключ.</string>
+    <string name="no_serial_ports_allowed">Последовательные устройства не добавлены</string>
     <string name="no_usb_devices_found">Устройства USB не найдены</string>
     <string name="no_usb_devices_hint">Подключи устройство с помощью USB-кабеля для передачи данных, чтобы использовать последовательное соединение.</string>
     <string name="no_usb_devices_seen">USB-устройства не обнаружены</string>
@@ -1635,6 +1644,7 @@
     <string name="notifications_for_newly_discovered_nodes">Уведомления для новых обнаруженных нод.</string>
     <string name="notifications_on_alert_bell_receipt">Уведомления при получении оповещения/звонка</string>
     <string name="notifications_on_message_receipt">Уведомления о получении сообщения</string>
+    <string name="notifications_turn_on">Включить уведомления</string>
     <string name="now">Только что</string>
     <!-- OFFLINE -->
     <string name="offline_maps">Офлайн-карты</string>
@@ -2004,6 +2014,7 @@
     <string name="scan_network_devices">Сканировать сетевые устройства</string>
     <string name="scan_nfc">Сканировать NFC</string>
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
+    <string name="scan_qr_from_image">Сканировать с изображения</string>
     <string name="scan_shared_contact_nfc">Сканировать NFC контакта</string>
     <string name="scan_shared_contact_qr">Сканировать QR-код контакта</string>
     <string name="scanning_bluetooth">Поиск...</string>
@@ -2055,6 +2066,9 @@
     <!-- SERIAL -->
     <string name="serial">COM-порт</string>
     <string name="serial_config">Настройка COM-порта</string>
+    <string name="serial_port_chip">%1$s последовательное USB</string>
+    <string name="serial_port_unknown">Последовательное устройство</string>
+    <string name="serial_port_usb_ids">Последовательное USB-устройство %1$s</string>
     <string name="session_active">Сессия активна</string>
     <string name="session_refresh_required">Требуется обновление</string>
     <string name="set_display_name">Установить отображаемое имя</string>
@@ -2084,6 +2098,7 @@
     <string name="short_name">Короткое имя</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Ключ шифрования</string>
+    <string name="show_all_serial_ports">Показать все последовательные порты…</string>
     <string name="show_full_message_timestamps">Показывать полные метки времени сообщений</string>
     <string name="show_full_message_timestamps_summary">Всегда показывать дату и время в заголовках бесед и действиях с сообщениями</string>
     <string name="show_iaq_legend">Показать легенду качества воздуха</string>
@@ -2380,7 +2395,10 @@
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
     <!-- WEB -->
+    <string name="web_database_moved">Теперь Meshtastic открыт в другой вкладке.</string>
+    <string name="web_database_use_here">Использовать здесь</string>
     <string name="website">Веб-сайт</string>
+    <!-- WEBSOCKET -->
     <string name="weight">Вес</string>
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
@@ -2413,6 +2431,7 @@
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Доступные сети</string>
+    <string name="wifi_provision_choose_device">Выбери устройство</string>
     <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>

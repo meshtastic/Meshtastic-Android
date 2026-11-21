@@ -23,10 +23,12 @@ import com.datadog.android.okhttp.DatadogEventListener
 import com.datadog.android.okhttp.DatadogInterceptor
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.app.location.GoogleFusedLocationClient
 import org.meshtastic.app.map.hud.GoogleFusedOrientationSource
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
 import org.meshtastic.app.node.PlayLocationFeed
 import org.meshtastic.app.theme.GoogleFontsEventFontResolver
+import org.meshtastic.core.data.repository.FusedLocationClient
 import org.meshtastic.core.network.radio.NodeLocationFeed
 import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.map.hud.FusedOrientationSource
@@ -44,6 +46,9 @@ class FlavorModule {
     /** The in-process node's GPS takes Play services' fused provider where the phone has it, else the platform GPS. */
     @Single
     fun nodeLocationFeed(context: Context): NodeLocationFeed = NodeLocationFeed { PlayLocationFeed.orNull(context) }
+
+    /** Play services' fused location for every location consumer, where the phone runs Play services. */
+    @Single fun fusedLocationClient(context: Context): FusedLocationClient = GoogleFusedLocationClient(context)
 
     /**
      * Datadog network instrumentation for the shared Ktor `HttpClient`. The interceptor emits RUM Resource spans with
