@@ -104,11 +104,20 @@ abstract class BaseRadioTransportFactory(
         val rest = address.drop(1)
         return when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
             InterfaceId.MOCK -> virtual.demo(rest, service)
+
             InterfaceId.REPLAY -> createReplayTransport(service, rest)
+
             InterfaceId.TCP -> createTcpTransport(service, rest)
+
             InterfaceId.SERIAL -> createSerialTransport(service, rest)
-            InterfaceId.BLUETOOTH, InterfaceId.WEBSOCKET -> error("Address is handled by createTransport")
-            InterfaceId.NOP, null -> NopRadioTransport(rest)
+
+            InterfaceId.BLUETOOTH,
+            InterfaceId.WEBSOCKET,
+            -> error("Address is handled by createTransport")
+
+            InterfaceId.NOP,
+            null,
+            -> NopRadioTransport(rest)
         }
     }
 

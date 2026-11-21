@@ -39,7 +39,8 @@ class MockTransportAddressAdmissionTest {
     private val gate = MutableStateFlow(false)
 
     private val factory =
-        object : BaseRadioTransportFactory(
+        object :
+            BaseRadioTransportFactory(
                 bluetoothRepository = FakeBluetoothRepository(),
                 virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
             ) {

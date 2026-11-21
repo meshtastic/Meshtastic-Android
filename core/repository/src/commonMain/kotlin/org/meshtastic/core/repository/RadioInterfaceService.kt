@@ -192,9 +192,8 @@ interface RadioInterfaceService :
     fun connect()
 
     /**
-     * Explicitly tears down the active transport, sending a polite `ToRadio(disconnect = true)` goodbye frame first
-     * when a transport is live. Safe to call when nothing is connected — implementations must no-op in that case.
-     * Suspends until the teardown completes.
+     * Revokes app session admission and closes the active SDK session after its leases drain. The SDK handles the
+     * goodbye frame and link shutdown. Safe to call with no active session. Suspends until teardown completes.
      */
     suspend fun disconnect()
 

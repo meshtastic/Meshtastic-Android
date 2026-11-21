@@ -47,12 +47,6 @@ interface RadioTransport {
     fun start() {}
 
     /**
-     * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
-     * function can be implemented by transports to see if we are really connected.
-     */
-    fun keepAlive() {}
-
-    /**
      * Closes the connection to the device.
      *
      * Implementations that perform potentially-blocking teardown (e.g. BLE GATT disconnect) MUST run that work inside

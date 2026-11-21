@@ -39,12 +39,16 @@ class RadioTransportDispatchTest {
     private class RecordingFactory :
         BaseRadioTransportFactory(
             bluetoothRepository = FakeBluetoothRepository(),
-            virtual = object : VirtualRadioSessionFactory {
+            virtual =
+            object : VirtualRadioSessionFactory {
                 override fun demo(address: String, service: RadioInterfaceService): RadioTransport =
                     NopRadioTransport("demo:$address")
 
-                override fun replay(address: String, frames: ByteArray, service: RadioInterfaceService): RadioTransport =
-                    error("Replay should fall back to demo when no asset is bundled")
+                override fun replay(
+                    address: String,
+                    frames: ByteArray,
+                    service: RadioInterfaceService,
+                ): RadioTransport = error("Replay should fall back to demo when no asset is bundled")
             },
         ) {
         override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)

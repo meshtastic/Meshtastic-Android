@@ -32,11 +32,6 @@ class FakeRadioTransport : RadioTransport {
         synchronized(lock) { mutableSentData.clear() }
     }
 
-    /** Clears the recorded heartbeat without changing transport lifecycle state. */
-    fun clearKeepAlive() {
-        synchronized(lock) { keepAliveCalledState = false }
-    }
-
     private var closeCalledState = false
     val closeCalled: Boolean
         get() = synchronized(lock) { closeCalledState }
@@ -45,18 +40,10 @@ class FakeRadioTransport : RadioTransport {
     val closeCount: Int
         get() = synchronized(lock) { closeCountState }
 
-    private var keepAliveCalledState = false
-    val keepAliveCalled: Boolean
-        get() = synchronized(lock) { keepAliveCalledState }
-
     override fun handleSendToRadio(p: ByteArray): Boolean = synchronized(lock) {
         if (closeCalledState) return@synchronized false
         mutableSentData.add(p.copyOf())
         true
-    }
-
-    override fun keepAlive() {
-        synchronized(lock) { if (!closeCalledState) keepAliveCalledState = true }
     }
 
     override suspend fun close() {

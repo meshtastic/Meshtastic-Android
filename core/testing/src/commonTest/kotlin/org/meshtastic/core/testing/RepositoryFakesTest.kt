@@ -416,11 +416,8 @@ class RepositoryFakesTest {
         val recorded = transport.sentData.single()
         recorded[1] = 9
         transport.close()
-        transport.clearKeepAlive()
 
         assertFalse(transport.handleSendToRadio(byteArrayOf(4, 5, 6)))
-        transport.keepAlive()
-        assertFalse(transport.keepAliveCalled)
         assertEquals(1, transport.sentData.size)
         assertContentEquals(byteArrayOf(1, 2, 3), transport.sentData.single())
     }

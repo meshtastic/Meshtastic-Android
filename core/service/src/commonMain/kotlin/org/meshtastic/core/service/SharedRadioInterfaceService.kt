@@ -25,7 +25,6 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
@@ -65,7 +64,6 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -98,7 +96,6 @@ import org.meshtastic.core.resources.websocket_not_supported
 import org.meshtastic.core.resources.websocket_replaced_by_another_client
 import org.meshtastic.core.resources.websocket_slot_contested
 import org.meshtastic.core.resources.websocket_tls_failed
-import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 
 /**
@@ -521,9 +518,9 @@ class SharedRadioInterfaceService(
     /**
      * True while an explicit connection lifecycle is active (set by [connect]/[setDeviceAddress], cleared by
      * [disconnect]). The hardware ([bluetoothRepository.state]) and network ([networkRepository.networkAvailable])
-     * listeners and the [checkLiveness] zombie-recovery path consult this to avoid starting a transport the user has
-     * torn down — without it, BT/network recovery emissions can wake a transport after explicit disconnect, leaving the
-     * app "connected" with no orchestrator collector and an unloaded NodeDB/channels.
+     * listeners consult this to avoid starting a transport the user has torn down — without it, BT/network recovery
+     * emissions can wake a transport after explicit disconnect, leaving the app "connected" with no orchestrator
+     * collector and an unloaded NodeDB/channels.
      *
      * Guarded by [transportMutex]; every read/write site holds the lock. The @Volatile keeps diagnostic reads honest.
      */
@@ -538,27 +535,10 @@ class SharedRadioInterfaceService(
 
     private val gattCacheInvalidationRequested = atomic(false)
 
-    /** Prevents concurrent liveness-induced transport restarts from stacking. */
+    /** Prevents concurrent transport restarts from stacking. */
     private val isRestarting = atomic(false)
 
     private val listenersInitialized = atomic(false)
-    private var heartbeatJob: Job? = null
-    private var lastHeartbeatMillis = 0L
-
-    @Volatile private var lastDataReceivedMillis = 0L
-
-    /**
-     * Internal test seam for deterministic clock injection. Production uses [nowMillis]; tests override this to a
-     * controllable clock so [onConnect], [handleFromRadio], [checkLiveness], and [keepAlive] all share one coherent
-     * time source. Not a constructor parameter to avoid breaking Koin @Single annotation generation (which would try to
-     * resolve `() -> Long` from the DI graph).
-     */
-    @Volatile
-    @Suppress("MemberVisibilityCanBePrivate")
-    internal var clockMillis: () -> Long = { nowMillis }
-
-    /** The current time from the injected clock. */
-    private fun now(): Long = clockMillis()
 
     companion object {
         /**
@@ -594,21 +574,6 @@ class SharedRadioInterfaceService(
          * enforces the same number on its own path, and ATT caps BLE at the same value in practice.
          */
         const val MAX_FRAME_BYTES = 512
-
-        private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
-
-        // If we haven't received any data from the radio within this window after sending a
-        // heartbeat while the connection is nominally "Connected", the connection is likely a
-        // zombie (BLE stack didn't report disconnect). Two missed heartbeat intervals gives
-        // the firmware a reasonable window to respond or send telemetry.
-        private const val LIVENESS_TIMEOUT_MILLIS = HEARTBEAT_INTERVAL_MILLIS * 2
-
-        /**
-         * Upper bound on how long we wait for the polite `ToRadio(disconnect = true)` frame to flush before tearing the
-         * transport down. 500ms gives BLE's write-retry path (`BleRetry` backs off 500ms) room for one attempt on a
-         * flaky GATT connection. Serial and TCP typically flush well under this window.
-         */
-        private const val POLITE_DISCONNECT_DRAIN_MS = 500L
 
         /**
          * Ceiling on a single [runWhileSessionActive] handler. The block holds [sessionOperationMutex] — the whole
@@ -755,11 +720,11 @@ class SharedRadioInterfaceService(
                     // radioTransport (the I/O-death path emits DeviceSleep but does not null it). Tear it
                     // down silently so startTransportLocked() can build a fresh one for the replugged
                     // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
-                    // user-facing Disconnected), sendPoliteDisconnect=false (the link is already gone).
+                    // user-facing Disconnected).
                     // Keep teardown and bring-up isolated: a transient USB close error must not skip
                     // the fresh start, and neither error should terminate this long-lived recovery flow.
                     ignoreExceptionSuspend {
-                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                        stopTransportLocked(notifyPermanent = false)
                     }
                     ignoreExceptionSuspend { startTransportLocked() }
                 }
@@ -778,7 +743,7 @@ class SharedRadioInterfaceService(
                 if (awaitingUserConnect) {
                     awaitingUserConnect = false
                     ignoreExceptionSuspend {
-                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                        stopTransportLocked(notifyPermanent = false)
                     }
                 }
                 phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
@@ -803,15 +768,7 @@ class SharedRadioInterfaceService(
     }
 
     override suspend fun restartTransport() {
-        // CAS BEFORE the mutex, mirroring checkLiveness()'s coordination structure: both
-        // restart paths CAS synchronously, one wins, one loses immediately. Performing the
-        // CAS inside transportMutex.withLock races checkLiveness's outer
-        // `finally { isRestarting = false }` (which runs AFTER mutex release): a queued
-        // restartTransport that resumes from mutex.wait can observe isRestarting == false,
-        // win the CAS, and produce an extra transport cycle (3 instead of 2) under the JVM's
-        // real dispatcher. The loser here observes isRestarting == true and defers to the
-        // in-flight cycle. startTransportLocked() is idempotent w.r.t. an existing transport,
-        // but the CAS also prevents a double stop/stop race on the teardown side.
+        // Claim the restart before waiting for the mutex so overlapping requests cannot queue another cycle.
         if (!isRestarting.compareAndSet(expect = false, update = true)) {
             Logger.d { "restartTransport: skipped, concurrent restart in progress" }
             return
@@ -843,7 +800,7 @@ class SharedRadioInterfaceService(
                     return@withLock
                 }
                 Logger.w { "restartTransport: restarting transport for ${getDeviceAddress()?.anonymize}" }
-                // Mirror checkLiveness()'s coordination contract: emit a transport-level
+                // Emit a transport-level
                 // Connected -> DeviceSleep transition before the stop/start cycle so
                 // transport-level observers see a full DeviceSleep -> Connected cycle when
                 // the fresh transport's onConnect() fires and can re-trigger their onConnected
@@ -853,9 +810,8 @@ class SharedRadioInterfaceService(
                 // transient DeviceSleep, not a permanent Disconnected.
                 onDisconnect(isPermanent = false)
                 // notifyPermanent=false below (no user-facing Disconnected modal — the app-level
-                // state machine drives that separately) and sendPoliteDisconnect=false (firmware
-                // is unresponsive, writing a goodbye frame into a dead link only delays teardown).
-                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+                // state machine drives that separately).
+                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
                 // Defense-in-depth mirroring the liveness recovery gate; today all
                 // connectionRequested mutators (connect/disconnect/setDeviceAddress) hold
                 // transportMutex so this re-check is unreachable, but it guards against future
@@ -887,12 +843,12 @@ class SharedRadioInterfaceService(
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
         processLifecycle.coroutineScope.launch {
             val retryDelay = transportMutex.withLock {
-                if (radioTransport?.managesPhoneApi != true || !isSessionActive(session.context)) return@launch
+                if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
                 if (linkWasUp) phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
                 if (!recoverable) connectionRequested = false
 
-                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
                 onDisconnect(
                     isPermanent =
                     !recoverable || (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
@@ -1077,183 +1033,25 @@ class SharedRadioInterfaceService(
         }
         runningTransportId = DeviceAddress.parse(address)?.interfaceId
         isStarted = true
-        if (!newTransport.managesPhoneApi) startHeartbeat()
     }
 
-    /**
-     * Must be called under [transportMutex].
-     *
-     * @param notifyPermanent When `true`, emits a permanent disconnect state to [connectionState]. Set `false` during
-     *   automatic liveness recovery to avoid surfacing a user-facing disconnect.
-     * @param sendPoliteDisconnect When `true`, sends a `ToRadio(disconnect = true)` frame to the firmware before
-     *   tearing down. Set `false` when the transport is already dead (zombie session) to avoid writing into a broken
-     *   link.
-     */
-    private suspend fun stopTransportLocked(notifyPermanent: Boolean = true, sendPoliteDisconnect: Boolean = true) =
-        withContext(NonCancellable) { finishTransportTeardown(notifyPermanent, sendPoliteDisconnect) }
-
-    /** Completes teardown after admission closes, even if its requester is cancelled while leases drain. */
-    private suspend fun finishTransportTeardown(notifyPermanent: Boolean, sendPoliteDisconnect: Boolean) {
+    /** Closes the SDK session after its app leases drain. Must be called under [transportMutex]. */
+    private suspend fun stopTransportLocked(notifyPermanent: Boolean = true) = withContext(NonCancellable) {
         val currentTransport = radioTransport
         val currentSession = synchronized(sessionCallbackLock) { activeTransportSession }
-        // Reject queued callbacks and new suspend work immediately, then drain existing leases before admitting a
-        // replacement generation or closing the old transport.
         revokeTransportSession(currentSession)
-        heartbeatJob?.cancel()
-        heartbeatJob = null
         Logger.i { "Stopping transport $currentTransport" }
-        // Best-effort polite goodbye: tell the firmware we're disconnecting on purpose so it can
-        // tear down its side of the link cleanly instead of relying on timeouts / hardware events.
-        // Session admission is already revoked, so normal packets cannot race behind this direct transport write.
-        // Skip only when already Disconnected; firmware can still consume the goodbye while handshaking or sleeping,
-        // so it's worth sending in every other state. The send is fire-and-forget through the
-        // transport's own scope; the drain delay gives async transports a window to flush before
-        // close() cancels their write scope. BLE's retry path backs off 500ms, so this window
-        // also covers one retry on flaky GATT links.
+        isStarted = false
+        radioTransport = null
+        runningTransportId = null
+        _transportStatus.value = null
         try {
-            if (
-                sendPoliteDisconnect &&
-                currentTransport != null &&
-                !currentTransport.managesPhoneApi &&
-                _connectionState.value != ConnectionState.Disconnected
-            ) {
-                ignoreExceptionSuspend {
-                    currentTransport.handleSendToRadio(
-                        ToRadio.Builder().also { wb -> wb.disconnect = true }.build().encode(),
-                    )
-                    delay(POLITE_DISCONNECT_DRAIN_MS)
-                }
-            }
+            currentTransport?.close()
         } finally {
-            isStarted = false
-            radioTransport = null
-            runningTransportId = null
-            // Admission is already revoked, so no late status from the stopped transport can land after this.
-            _transportStatus.value = null
-            try {
-                currentTransport?.close()
-            } finally {
-                _serviceScope.cancel("stopping transport")
-                _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
-
-                if (notifyPermanent && currentTransport != null) {
-                    onDisconnect(isPermanent = true)
-                }
-            }
+            _serviceScope.cancel("stopping transport")
+            _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
+            if (notifyPermanent && currentTransport != null) onDisconnect(isPermanent = true)
         }
-    }
-
-    private fun startHeartbeat() {
-        heartbeatJob?.cancel()
-        lastDataReceivedMillis = now()
-        heartbeatJob = serviceScope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                keepAlive()
-                checkLiveness()
-            }
-        }
-    }
-
-    /**
-     * Detects zombie connections where the BLE stack didn't report a disconnect.
-     *
-     * If we believe we're connected but haven't received any data from the radio within [LIVENESS_TIMEOUT_MILLIS], the
-     * connection is likely dead. Signal a non-permanent disconnect so the reconnect machinery can take over.
-     *
-     * Uses [clockMillis] for the current time so tests can inject a deterministic clock.
-     */
-    internal fun checkLiveness() {
-        if (_connectionState.value != ConnectionState.Connected) return
-
-        val silenceMs = now() - lastDataReceivedMillis
-        if (silenceMs > LIVENESS_TIMEOUT_MILLIS) {
-            // "Silence" = lastDataReceivedMillis not updated by handleFromRadio (no inbound
-            // packets). Only BLE suffers from silent zombie sessions (no disconnect signal from
-            // stack), so the liveness-restart path is BLE-only. For non-BLE transports we return
-            // WITHOUT emitting a disconnect or mutating ConnectionState — there is no
-            // transport-level timeout contract proving that silence past this threshold means
-            // the session is dead.
-            if (runningTransportId != InterfaceId.BLUETOOTH) {
-                Logger.d { "Ignoring liveness timeout for non-BLE transport (silence: ${silenceMs}ms)" }
-                return
-            }
-
-            Logger.w {
-                "Liveness check failed: no data received for ${silenceMs}ms " +
-                    "(threshold: ${LIVENESS_TIMEOUT_MILLIS}ms). Restarting BLE transport."
-            }
-
-            // Force transport restart to recover from silent zombie sessions where the BLE stack
-            // did not report a disconnect. Uses the same processLifecycle scope and transportMutex
-            // pattern as setDeviceAddress() to guarantee clean teardown/restart sequencing.
-            // The onDisconnect notification is emitted INSIDE the compareAndSet guard so that a
-            // double liveness-timeout (timer not cancelled between fires) does not produce
-            // duplicate disconnect notifications for a single restart cycle.
-            if (isRestarting.compareAndSet(expect = false, update = true)) {
-                // Silent recovery: emit the non-permanent state transition (DeviceSleep) so the
-                // reconnect machinery takes over, but do NOT pass an errorMessage. Automatic
-                // liveness recovery is self-healing — surfacing a modal dialog for a transient
-                // condition the app already handled is confusing UX. The warning log above
-                // remains the observability surface for this event.
-                //
-                // Ordering note (pre-existing): onDisconnect fires here, BEFORE the launched
-                // restart coroutine's `connectionRequested` check below. If an explicit disconnect()
-                // races this timeout, a spurious DeviceSleep emission can leak to observers. The
-                // connectionRequested gate still prevents the worse outcome — transport resurrection
-                // — so this is a benign UI-level transient, not a state-machine bug.
-                onDisconnect(isPermanent = false)
-                processLifecycle.coroutineScope.launch {
-                    try {
-                        transportMutex.withLock {
-                            // Defense against a race between checkLiveness() firing and a
-                            // concurrent disconnect(): if the user has torn the connection down
-                            // since the heartbeat scheduled this restart, leave it down. The
-                            // transport is already null after disconnect()'s stopTransportLocked().
-                            if (!connectionRequested) {
-                                Logger.d { "Skipping liveness restart: connection no longer requested" }
-                                return@withLock
-                            }
-                            ignoreExceptionSuspend {
-                                stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
-                            }
-                            // This restart is launched from a heartbeat callback and has no caller to receive a
-                            // recoverable factory exception. The start path rolls back the failed session first;
-                            // contain the rethrow here so a failed reconnect does not crash the app.
-                            ignoreExceptionSuspend { startTransportLocked() }
-                        }
-                    } finally {
-                        isRestarting.value = false
-                    }
-                }
-            }
-        }
-    }
-
-    fun keepAlive(now: Long = now()) {
-        if (now - lastHeartbeatMillis < HEARTBEAT_INTERVAL_MILLIS) return
-
-        when (val admission = admitTransportSend()) {
-            is TransportSendAdmission.Admitted -> {
-                if (keepAliveThroughAdmittedTransport(admission)) lastHeartbeatMillis = now
-            }
-
-            TransportSendAdmission.AdmissionClosed,
-            TransportSendAdmission.NoActiveSession,
-            ->
-                Logger.d { "keepAlive: no admitted transport session, dropping heartbeat" }
-
-            TransportSendAdmission.NoTransport ->
-                Logger.d { "keepAlive: admitted session has no radio transport, dropping heartbeat" }
-        }
-    }
-
-    private fun keepAliveThroughAdmittedTransport(admission: TransportSendAdmission.Admitted): Boolean = try {
-        safeCatching { admission.transport.keepAlive() }
-            .onFailure { Logger.w(it) { "keepAlive: active transport rejected heartbeat" } }
-            .isSuccess
-    } finally {
-        releaseSessionOperation(admission.session)
     }
 
     override fun trySendToRadio(bytes: ByteArray): Boolean =
@@ -1320,12 +1118,6 @@ class SharedRadioInterfaceService(
             }
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
-            if (result.isSuccess) {
-                // Stamp liveness only for frames actually admitted to the queue. Stamping on arrival kept
-                // checkLiveness() satisfied while a wedged consumer dropped every frame — a Connected-looking zombie
-                // the watchdog existed to catch. A full queue now reads as silence and trips liveness recovery.
-                lastDataReceivedMillis = now()
-            }
             if (result.isFailure) {
                 // Rate-limited on purpose: drops only happen under sustained inbound traffic, and Kermit forwards to
                 // Datadog/Crashlytics, so logging every drop would turn a bounded memory problem into unbounded
@@ -1363,7 +1155,6 @@ class SharedRadioInterfaceService(
         // launching a coroutine. The async launch pattern introduced a window where a concurrent
         // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
         // in Connected while the transport was actually disconnected.
-        lastDataReceivedMillis = now()
         linkedGeneration = activeTransportSession?.generation
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }

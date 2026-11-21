@@ -18,17 +18,10 @@ The app talks to the node over four transports (BLE, USB serial, TCP and WebSock
 
 ## Transport Abstraction
 
-The transport layer is abstracted through interfaces defined in `core:repository` (`RadioTransport`,
-`RadioTransportFactory`, `RadioInterfaceService`). Each transport's concrete implementation lives in
-`core:network`: `BleRadioTransport` (BLE), `TcpRadioTransport` (TCP), `WebSocketRadioTransport` (firmware's
-WebSocket phone API, over Ktor), and `SerialRadioTransport` (Android USB serial), alongside `MockRadioTransport` and `ReplayRadioTransport` for development. `core:ble` supplies
-the lower-level BLE connection primitives (scanning, GATT, Kable wiring) that `BleRadioTransport` builds
-on — it does not implement `RadioTransport` itself. This lets the app work identically regardless of the
-underlying connection type.
-
-```text
-Feature UI → RadioController → RadioInterfaceService → RadioTransport (BLE | Serial | TCP | WebSocket)
-```
+The app’s platform factories select links and handle host permissions. The shared session in
+`core:data` runs one SDK client for the admitted generation and installs the radio snapshot in
+Room. The SDK owns the wire handshake, heartbeat and goodbye. Demo and replay simulate the radio
+side of that same protocol.
 
 Every transport address starts with a one-character `InterfaceId`: `x` BLE (`!` is accepted too), `s`
 serial, `t` TCP, `w` WebSocket (a `ws://` or `wss://` URL), `m` mock, `r` replay, and `n` for no device selected. `RadioTransportFactory.isAddressValid` checks that prefix
@@ -36,22 +29,12 @@ before a connection is attempted.
 
 ## Bluetooth Low Energy (BLE)
 
-**Module:** `core:network` (the `BleRadioTransport` implementation) built on `core:ble` (BLE connection
-primitives)  
-**Platforms:** Android, Desktop (JVM via Kable), Web (Kable over Web Bluetooth); code compiles for iOS, but no iOS app ships
+**Module:** `meshtastic-sdk:transport-ble`
 
-The primary transport for mobile devices and also available on desktop:
-- Service discovery for Meshtastic GATT services
-- Characteristic-based read/write for protobuf packets
-- Connection state management and automatic reconnection
-- MTU negotiation for optimal packet sizes
-
-### Where the Code Lives
-
-- `BleRadioTransport` (`core:network`) — the `RadioTransport` implementation for BLE
-- `core:ble` — BLE scanning, connection, and GATT operations (`BleScanner`, `BluetoothRepository`,
-  `KableBleConnection`), which `BleRadioTransport` consumes
-- The Kable scanner and connection are shared `commonMain` code; `androidMain` and `jvmMain` hold each platform's `BluetoothRepository`, Kable setup, and scan rate limiting, and Android adds bonding and the GATT cache refresh
+Available on Android, desktop and Web Bluetooth. The app’s `core:ble` supplies discovery and host
+permission state. On the web it passes the browser’s existing Kable grant to the SDK. On Android
+the SDK handles pairing and GATT traffic and can refresh the cached service table after a firmware
+update.
 
 ## USB Serial
 
@@ -64,15 +47,13 @@ Serial communication over USB:
 - Probe table for supported USB vendor/product IDs
 - Automatic detection when USB device is connected; on Web only for a port the user has already granted through the browser's port picker
 
-### Where the Code Lives
-
-- `SerialRadioTransport` (`core:network`, `androidMain`) — the Android `RadioTransport` implementation
-- `SerialTransport` (`core:network`, `jvmMain`) — the shared serial-port transport Desktop builds on
-- `DesktopRadioTransportFactory` (`desktopApp`) — creates `SerialTransport`, which uses jSerialComm, for Desktop's serial addresses
+Android and desktop use the SDK serial transports. On the web, `WebSerialRadioLink` opens
+the granted browser streams and feeds the shared SDK frame assembler.
 
 ## TCP/IP
 
-**Module:** `core:network`  
+**Module:** `meshtastic-sdk:transport-tcp`
+
 **Platforms:** Android, Desktop (iOS: code compiles, but there's no iOS app target or `RadioTransportFactory` — see [Transport Factory](#transport-factory))
 
 Network-based transport for Wi-Fi-enabled nodes:

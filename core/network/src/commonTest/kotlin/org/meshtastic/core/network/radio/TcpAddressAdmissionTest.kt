@@ -34,29 +34,29 @@ import kotlin.test.assertTrue
  */
 class TcpAddressAdmissionTest {
 
-    private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) =
-        object : BaseRadioTransportFactory(
-                bluetoothRepository = FakeBluetoothRepository(),
-                virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
-            ) {
+    private fun factory(vararg types: DeviceType, rawTcp: Boolean = DeviceType.TCP in types) = object :
+        BaseRadioTransportFactory(
+            bluetoothRepository = FakeBluetoothRepository(),
+            virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+        ) {
 
-            override val supportedDeviceTypes: List<DeviceType> = types.toList()
+        override val supportedDeviceTypes: List<DeviceType> = types.toList()
 
-            override val isRawTcpSupported: Boolean = rawTcp
+        override val isRawTcpSupported: Boolean = rawTcp
 
-            override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+        override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
-            override val isReplayTransportAvailable: Boolean = false
+        override val isReplayTransportAvailable: Boolean = false
 
-            override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
-                error("Unexpected Ble link in address-admission test")
+        override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+            error("Unexpected Ble link in address-admission test")
 
-            override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
-                NopRadioTransport(url)
+        override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+            NopRadioTransport(url)
 
-            override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
-                error("no transport is built for an address that is refused")
-        }
+        override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
+            error("no transport is built for an address that is refused")
+    }
 
     @Test
     fun `tcp addresses are refused where the platform has no tcp transport`() {

@@ -34,29 +34,29 @@ import kotlin.test.assertTrue
  */
 class SerialAddressAdmissionTest {
 
-    private fun factory(serialSupported: Boolean) =
-        object : BaseRadioTransportFactory(
-                bluetoothRepository = FakeBluetoothRepository(),
-                virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
-            ) {
+    private fun factory(serialSupported: Boolean) = object :
+        BaseRadioTransportFactory(
+            bluetoothRepository = FakeBluetoothRepository(),
+            virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+        ) {
 
-            override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
+        override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
 
-            override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+        override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
-            override val isReplayTransportAvailable: Boolean = false
+        override val isReplayTransportAvailable: Boolean = false
 
-            override val isSerialSupported: Boolean = serialSupported
+        override val isSerialSupported: Boolean = serialSupported
 
-            override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
-                error("Unexpected Ble link in address-admission test")
+        override fun createBleTransport(address: String, service: RadioInterfaceService): RadioTransport =
+            error("Unexpected Ble link in address-admission test")
 
-            override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
-                NopRadioTransport(url)
+        override fun createWebSocketTransport(url: String, service: RadioInterfaceService): RadioTransport =
+            NopRadioTransport(url)
 
-            override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
-                NopRadioTransport(address)
-        }
+        override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
+            NopRadioTransport(address)
+    }
 
     @Test
     fun `serial addresses are refused on hardware without USB host`() {

@@ -36,10 +36,11 @@ class BleAddressAdmissionTest {
 
     private val bluetoothRepository = FakeBluetoothRepository()
 
-    private fun factory() = object : BaseRadioTransportFactory(
-                bluetoothRepository = bluetoothRepository,
-                virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
-            ) {
+    private fun factory() = object :
+        BaseRadioTransportFactory(
+            bluetoothRepository = bluetoothRepository,
+            virtual = mock<VirtualRadioSessionFactory>(MockMode.autofill),
+        ) {
 
         override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
 
