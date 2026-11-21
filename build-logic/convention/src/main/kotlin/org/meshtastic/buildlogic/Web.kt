@@ -28,6 +28,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -266,9 +267,35 @@ internal fun Project.configureWebApplication() {
         }
     }
     configureWasmJsCompilations()
+    preloadWasmInDistribution()
 
     val warningsAsErrors = kotlinWarningsAsErrors
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         compilerOptions.allWarningsAsErrors.set(warningsAsErrors)
     }
 }
+
+private const val WASM_PRELOAD_MARKER = "<!-- wasm-preload -->"
+private val HASHED_WASM = Regex("""[0-9a-f]{20}\.wasm""")
+
+/**
+ * Each distribution's `index.html` preloads the wasm modules `webApp.js` names, so they download beside the script
+ * rather than after it. `as="fetch"` with `crossorigin`, so the loader's own `fetch()` takes the preloaded response and
+ * nothing downloads twice.
+ */
+private fun Project.preloadWasmInDistribution() {
+    tasks
+        .withType<AbstractCopyTask>()
+        .named { it == "wasmJsBrowserDistribution" || it == "wasmJsBrowserDevelopmentExecutableDistribution" }
+        .configureEach {
+            val loader = source.filter { it.name == "webApp.js" }
+            filesMatching("index.html") {
+                filter { line -> if (WASM_PRELOAD_MARKER in line) wasmPreloadLinks(loader.files) else line }
+            }
+        }
+}
+
+internal fun wasmPreloadLinks(loaders: Set<java.io.File>): String = loaders
+    .flatMap { HASHED_WASM.findAll(it.readText()).map { match -> match.value } }
+    .distinct()
+    .joinToString("\n") { """    <link rel="preload" as="fetch" type="application/wasm" crossorigin href="$it">""" }
