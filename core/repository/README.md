@@ -40,14 +40,11 @@ src/
 │   ├── AppPreferences.kt              ← UiPrefs, MapPrefs, RadioPrefs, TakPrefs and the other prefs interfaces
 │   ├── *Repository.kt                 ← firmware, hardware, device links, discovery, mesh beacon, …
 │   ├── CommandSender.kt
-│   ├── AdminPacketHandler.kt
-│   ├── FromRadioPacketHandler.kt
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt
 │   ├── MeshLocationManager.kt
 │   ├── MeshLogRepository.kt
-│   ├── MeshMessageProcessor.kt
 │   ├── MessageFilter.kt
 │   ├── MessageQueue.kt
 │   ├── MqttManager.kt
@@ -58,6 +55,7 @@ src/
 │   ├── QuickChatActionRepository.kt
 │   ├── RadioConfigRepository.kt
 │   ├── RadioInterfaceService.kt
+│   ├── RadioSessionContext.kt
 │   ├── RadioTransportCallback.kt / RadioTransportFactory.kt
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt

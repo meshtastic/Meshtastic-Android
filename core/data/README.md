@@ -16,7 +16,8 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 - **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and the config handshake.
 - **`CommandSenderImpl`**: Sends data and admin packets through the outbound queue; `:core:service`'s `RadioControllerImpl` issues commands through it.
 - **`SessionManagerImpl`**: Per-node remote-admin passkey store.
-- **`PacketHandlerImpl`** / **`FromRadioPacketHandlerImpl`** / **`MeshMessageProcessorImpl`**: Inbound mesh packet handling and message processing, with per-port handlers (`AdminPacketHandlerImpl`, `TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others).
+- **`RadioSessionProjection`** / **`RadioSessionEventHandler`**: Project the SDK's typed session events into Room and the repositories: the Ready snapshot, packets, node, config and channel changes, and events such as client notifications, the MQTT proxy and XModem. Packets reach `MeshDataHandlerImpl` and its per-port handlers (`TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others).
+- **`PacketHandlerImpl`**: Outbound packet submission through the SDK's paced send, with its Room delivery projection.
 - **`NodeManagerImpl`**, **`MqttManagerImpl`**, **`XModemManagerImpl`**: The in-memory node database, the MQTT proxy, and XModem file transfer.
 
 ### 3. `ai/`
