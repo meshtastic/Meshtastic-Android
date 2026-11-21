@@ -40,6 +40,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.ConnectionStateHolder
@@ -67,7 +68,10 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 import org.meshtastic.sdk.RadioClient
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -410,6 +414,38 @@ class MeshConnectionManagerImplTest {
         assertEquals(4, clientRequests)
         assertEquals(setOf(connectionStateHolder.connectionLifecycle.value.version), admissionVersions.toSet())
         checkNotNull(sdk).client.disconnect()
+    }
+
+    @Test
+    fun `our phone fix goes to our own node at background priority with its time and precision`() = runTest {
+        var sendPosition: (suspend (Position) -> Boolean)? = null
+        every { uiPrefs.shouldProvideNodeLocation(any()) } returns MutableStateFlow(true)
+        every { locationManager.start(any(), any()) } calls { sendPosition = it.arg(1) }
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        manager = createManager(backgroundScope)
+        nodeRepository.setMyNodeInfo(MyNodeInfo(123, true, null, null, false, false, 0L, 0, 0, 8, false, 0f, 0f, null))
+        runCurrent()
+        val sdk = sdkClientFixture(123)
+        sessionClient = { sdk.client }
+        val fix =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 515_000_000
+                    wb.longitude_i = -1_250_000
+                    wb.time = 1_700_000_000
+                    wb.precision_bits = 13
+                }
+                .build()
+
+        assertTrue(checkNotNull(sendPosition)(fix))
+        runCurrent()
+
+        val sent = sdk.transport.outboundPackets().single { it.decoded?.portnum == PortNum.POSITION_APP }
+        assertEquals(123, sent.to)
+        assertEquals(MeshPacket.Priority.BACKGROUND, sent.priority)
+        assertEquals(fix, Position.ADAPTER.decode(checkNotNull(sent.decoded).payload))
+        verify { nodeManager.handleReceivedPosition(123, 123, fix, any()) }
+        sdk.client.disconnect()
     }
 
     @Test

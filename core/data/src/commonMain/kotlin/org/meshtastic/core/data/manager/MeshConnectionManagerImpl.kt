@@ -60,6 +60,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
@@ -384,10 +385,7 @@ class MeshConnectionManagerImpl(
         radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession)
             ?: throw PacketQueueRejectedException(operation)
 
-    /**
-     * Sends the phone's fix to our own node with the send builder, so its time and precision survive. Firmware delivers
-     * a packet addressed to itself locally, never over the air.
-     */
+    /** Sends the phone's fix to our own node with the send builder, so its time and precision survive. */
     private suspend fun sendOwnPosition(pos: Position) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
         val client = activeClient("Position update")
@@ -395,6 +393,7 @@ class MeshConnectionManagerImpl(
             client.send {
                 data(PortNum.POSITION_APP, pos.encode())
                 to(NodeId(myNum))
+                priority(MeshPacket.Priority.BACKGROUND)
             }
         } catch (e: MeshtasticException) {
             throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
