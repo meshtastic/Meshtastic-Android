@@ -18,15 +18,6 @@ package org.meshtastic.desktop.di
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -35,9 +26,7 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.network.HttpClientDefaults
-import org.meshtastic.core.network.KermitHttpLogger
-import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.installApiDefaults
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -141,23 +130,11 @@ class DesktopRuntimeModule {
             protocolVersion = java.net.http.HttpClient.Version.HTTP_2
             config { followRedirects(java.net.http.HttpClient.Redirect.NORMAL) }
         }
-        install(ContentNegotiation) { json(json) }
-        install(DefaultRequest) {
-            url(HttpClientDefaults.API_BASE_URL)
-            header(HttpHeaders.UserAgent, "Meshtastic-Desktop/${DesktopBuildConfig.VERSION_NAME}")
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
-            connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-            socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-        }
-        install(HttpRequestRetry) { configureDefaultRetry() }
-        if (DesktopBuildConfig.IS_DEBUG) {
-            install(Logging) {
-                logger = KermitHttpLogger
-                level = LogLevel.INFO
-            }
-        }
+        installApiDefaults(
+            json,
+            userAgent = "Meshtastic-Desktop/${DesktopBuildConfig.VERSION_NAME}",
+            logRequests = DesktopBuildConfig.IS_DEBUG,
+        )
     }
 
     /** Desktop has no bundled Android assets; repositories seed from the network instead. */

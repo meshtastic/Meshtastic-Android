@@ -33,15 +33,6 @@ import coil3.util.DebugLogger
 import coil3.util.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.ConnectionPool
@@ -50,9 +41,7 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.network.HttpClientDefaults
-import org.meshtastic.core.network.KermitHttpLogger
-import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.installApiDefaults
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import java.util.concurrent.TimeUnit
@@ -141,25 +130,11 @@ class NetworkModule {
             networkInstrumentation.interceptors.forEach { addInterceptor(it) }
             networkInstrumentation.eventListenerFactory?.let { factory -> config { eventListenerFactory(factory) } }
         }
-        install(plugin = ContentNegotiation) { json(json) }
-        install(DefaultRequest) {
-            url(HttpClientDefaults.API_BASE_URL)
-            header(
-                HttpHeaders.UserAgent,
-                "Meshtastic-Android/${buildConfigProvider.versionName} (${buildConfigProvider.applicationId})",
-            )
-        }
-        install(plugin = HttpTimeout) {
-            requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
-            connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-            socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-        }
-        install(plugin = HttpRequestRetry) { configureDefaultRetry() }
-        if (buildConfigProvider.isDebug) {
-            install(plugin = Logging) {
-                logger = KermitHttpLogger
-                level = LogLevel.INFO
-            }
-        }
+        installApiDefaults(
+            json,
+            userAgent =
+            "Meshtastic-Android/${buildConfigProvider.versionName} (${buildConfigProvider.applicationId})",
+            logRequests = buildConfigProvider.isDebug,
+        )
     }
 }
