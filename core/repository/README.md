@@ -11,7 +11,7 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 - Define the reactive data contracts between the long-running mesh service and all feature/UI layers
 - Declare the raw hardware I/O interface (`RadioTransport`)
 - Provide the mesh node database interface (`NodeRepository`)
-- Expose per-node remote-admin passkey management (`SessionManager`)
+- Expose the active radio session's SDK admin API and per-node admin session status (`RadioInterfaceService.adminForSession`, `adminSessionStatus`)
 - Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
 - Declare the outbound message queue, MQTT proxy, and XModem file transfer contracts
 - Declare the app preference interfaces (`AppPreferences.kt`) that `:core:prefs` implements
@@ -28,7 +28,6 @@ src/
 │   ├── ResponseProviders.kt           ← interfaces: TracerouteResponseProvider, NeighborInfoResponseProvider
 │   ├── ServiceStateWriter.kt          ← interface: write-side for handlers
 │   ├── NodeRepository.kt              ← interface: mesh node database
-│   ├── SessionManager.kt              ← interface: per-node passkey store
 │   ├── MeshConnectionManager.kt       ← interface: connection lifecycle callbacks
 │   ├── AppWidgetUpdater.kt            ← interface: trigger widget refresh
 │   ├── LocationRepository.kt
@@ -172,20 +171,6 @@ interface NodeRepository {
     suspend fun deleteNode(num: Int)
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
     suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int>
-}
-```
-
-### `SessionManager`
-
-Per-node remote-admin passkey store, consumed by `:core:domain`'s `EnsureRemoteAdminSessionUseCase`.
-
-```kotlin
-interface SessionManager {
-    fun recordSession(srcNodeNum: Int, passkey: ByteString)
-    fun getPasskey(destNum: Int): ByteString
-    fun clearAll()
-    val sessionRefreshFlow: Flow<Int>
-    fun observeSessionStatus(destNum: Int): Flow<SessionStatus>
 }
 ```
 
