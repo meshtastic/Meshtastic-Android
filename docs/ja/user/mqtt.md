@@ -50,7 +50,7 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **MQTT Client Proxy**   | Relay MQTT through the connected app                                                                                                                        | 無効                                                                                                     |
 | **Map Reporting**       | 公開マップに位置を報告                                                                                                                                                 | 無効                                                                                                     |
 
-A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a leading or trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
+A root the node would reject turns the field red and blocks **Save**: spaces or control characters, `+` or `#`, a trailing slash, two slashes in a row, or a last segment of `2`. The field takes at most 31 bytes (æ, ø and å count as two) and ignores typing past that.
 
 ### Connection Status and Test Connection
 
@@ -90,7 +90,7 @@ around you, with the number of nodes heard on each.
 - **Active topics** lists every other root heard. Roots under your state or city come first, then
   roots in neighboring states, then the rest.
 - **Custom topic** takes any root the node accepts: up to 31 bytes (letters like æ, ø and å take
-  two), no leading or trailing slash, no `+` or `#`. Suggestions keep your place's own letters, so
+  two), no trailing slash, no `+` or `#`. Suggestions keep your place's own letters, so
   a root like `msh/EU_868/NO/Østlandet` is offered and saved as written.
 
 The finder only subscribes and publishes nothing. Picking a topic fills in the root topic field,
@@ -101,7 +101,7 @@ location, or on desktop, it still lists the region and every root it hears.
 
 If your node has no internet access of its own, it can use the app as its MQTT gateway. Turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config. The app then relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
 
-The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration.
+The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration. A root topic containing `+` or `#` stops the relay with **MQTT stopped: the root topic contains + or #. Remove it in MQTT settings.** Remove the character, save the MQTT settings, and turn the relay back on once the node reconnects.
 
 ### デフォルトの Meshtastic サーバー
 
