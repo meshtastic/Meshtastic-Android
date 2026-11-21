@@ -17,57 +17,17 @@
 package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
-import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.app.map.MapViewModel
-import org.meshtastic.feature.coverage.RegionTerrain
-import org.meshtastic.feature.coverage.rememberCoverageEstimate
-import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.component.SitePlannerHost
-import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.maplibre.MapLibreSitePlannerSlot
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
-import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
 
 /**
- * Runs the Site Planner for the F-Droid map. The estimate becomes a GeoJSON map layer and the map moves to the
- * transmitter so it's on screen.
- *
- * No phone-GPS shortcut is offered: the Google flavor fills that from Play Services' fused location, which must not
- * enter an F-Droid build. The coordinate fields stay manual, with the map center and the node's own position as
- * shortcuts.
+ * Runs the Site Planner for the F-Droid map. The Google flavor fills the coordinates from Play Services' fused
+ * location, which must not enter an F-Droid build, so this one stays manual.
  */
 @Composable
 fun SitePlannerSlot(session: SitePlannerSession) {
-    val sharedViewModel: SharedMapViewModel = koinViewModel()
     val mapViewModel: MapViewModel = koinViewModel()
-
-    val ourNode by sharedViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val channelSet by sharedViewModel.channelSet.collectAsStateWithLifecycle()
-    val nodes by sharedViewModel.nodes.collectAsStateWithLifecycle()
-
-    // A deep link names the node to plan for; a toolbar launch plans for whatever we are connected to.
-    val subject = session.nodeNum?.let { num -> nodes.firstOrNull { it.num == num } } ?: ourNode
-
-    val terrain = OfflineTerrainRepository.default
-    LaunchedEffect(terrain) { terrain.refresh() }
-    val terrainRegion by terrain.region.collectAsStateWithLifecycle()
-    val offlineTerrain =
-        remember(terrainRegion) { listOfNotNull(terrainRegion?.let { RegionTerrain(terrain.tileStore, it.bounds) }) }
-
-    SitePlannerHost(
-        initialParams = subject.toSitePlannerParams(channelSet),
-        estimate = rememberCoverageEstimate(offlineTerrain),
-        onDismiss = session.onDismiss,
-        onImport = { name, geoJson, latitude, longitude ->
-            mapViewModel.addGeoJsonLayer(name, geoJson)
-            session.moveTo(Position(longitude = longitude, latitude = latitude))
-        },
-        onUseNodeLocation =
-        subject?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } },
-        onUseMapCenter = { session.mapCenter().let { it.latitude to it.longitude } },
-    )
+    MapLibreSitePlannerSlot(session) { name, geoJson -> mapViewModel.addGeoJsonLayer(name, geoJson) }
 }

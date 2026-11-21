@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
+import org.meshtastic.feature.map.maplibre.MapLibreSitePlannerSlot
 import org.meshtastic.feature.map.maplibre.component.ImportedLayersSlot
 import org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers
 
@@ -35,6 +36,9 @@ internal fun desktopMapViewProvider(): MapLibreMapViewProvider = MapLibreMapView
         val importedLayers by layersManager.mapLayers.collectAsStateWithLifecycle()
         rememberRenderableLayers(layersManager, importedLayers.filter { it.isVisible })
     },
-    sitePlanner = { session -> DesktopSitePlannerSlot(session) },
+    sitePlanner = { session ->
+        val layersManager: MapLayersManager = koinInject()
+        MapLibreSitePlannerSlot(session) { name, geoJson -> layersManager.addGeoJsonLayer(name, geoJson) }
+    },
     layersSheetExtra = { ImportedLayersSlot() },
 )
