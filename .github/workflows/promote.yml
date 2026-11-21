@@ -220,6 +220,10 @@ jobs:
             scripts
             .github/actions/bot-pr
 
+      # Later steps switch the workspace to main; the Discord post reads the tag's copy kept here.
+      - name: Keep the tag's metainfo
+        run: cp desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml "$RUNNER_TEMP/tag-metainfo.xml"
+
       # A rerun finds the release already moved to the final tag, so that is looked up first.
       - name: Update GitHub Release with gh CLI
         id: release
@@ -585,7 +589,7 @@ jobs:
 
           # The same prose as the release Highlights and Play's "What's new", from the tag's metainfo.
           WHATS_NEW=$(python3 .workflow-ref/scripts/release-highlights.py --text \
-            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml "$BASE_VERSION")
+            "$RUNNER_TEMP/tag-metainfo.xml" "$BASE_VERSION")
           DESCRIPTION="A new build has been promoted to the **$TRACK** track."
           if [[ -n "$WHATS_NEW" ]]; then
             DESCRIPTION+=$'\n\n'"**What's new:** $WHATS_NEW"
