@@ -32,6 +32,11 @@ import org.meshtastic.core.navigation.WifiProvisionRoute
  * @property firmware the shell registers `feature:firmware`, which also hosts ChirpyHop.
  * @property tak the TAK module screen and the local TAK server exist; a page cannot run a server.
  * @property databasePerDevice each radio keeps its own app database; false where one database holds every radio.
+ * @property deviceLocation this device can supply a location for "set fixed position from phone".
+ * @property keyBackup the Security screen offers backup and restore of this phone's own key file; desktop and web
+ *   deliberately do not (web storage is readable by any script on the origin), iOS has its own Keychain flow.
+ * @property locationFailureHint the position button explains a missing fix, since a browser refuses a blocked
+ *   permission without prompting.
  * @property reloadApp restarts the app in place, or null where the user restarts it themselves.
  */
 class SettingsPlatform(
@@ -41,6 +46,9 @@ class SettingsPlatform(
     val firmware: Boolean,
     val tak: Boolean,
     val databasePerDevice: Boolean,
+    val deviceLocation: Boolean,
+    val keyBackup: Boolean,
+    val locationFailureHint: Boolean,
     val reloadApp: (() -> Unit)?,
 ) {
     /** False for a [route] whose destination this shell does not register. */
