@@ -35,7 +35,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -72,6 +71,7 @@ import org.meshtastic.core.resources.quick_chat_new
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
@@ -298,7 +298,7 @@ internal fun QuickChatItem(
     onEdit: (QuickChatAction) -> Unit = {},
 ) {
     Card(modifier = modifier.fillMaxWidth().padding(8.dp), shape = RoundedCornerShape(12.dp)) {
-        ListItem(
+        StaticListItem(
             leadingContent = {
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(

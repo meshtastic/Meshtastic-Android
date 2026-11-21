@@ -66,11 +66,8 @@ fun SwitchPreference(
                 }
             }
         },
-        supportingContent = {
-            if (summary.isNotEmpty()) {
-                Text(text = summary)
-            }
-        },
+        // A present slot counts as a second line for the item's minimum height, even when it draws nothing.
+        supportingContent = summary.takeIf { it.isNotEmpty() }?.let { { Text(text = it) } },
         content = { Text(text = title) },
     )
 }

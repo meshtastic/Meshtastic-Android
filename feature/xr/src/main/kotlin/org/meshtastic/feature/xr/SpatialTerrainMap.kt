@@ -107,6 +107,7 @@ import org.meshtastic.core.resources.xr_terrain_loading
 import org.meshtastic.core.resources.xr_terrain_map
 import org.meshtastic.core.resources.xr_terrain_unavailable
 import org.meshtastic.core.resources.xr_terrain_zoom
+import org.meshtastic.core.ui.component.rememberHoistedSliderState
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.terrain.spatial.SpatialCircle
@@ -236,7 +237,7 @@ fun SpatialTerrainMap(
             if (maxZoom > 1) {
                 Text(stringResource(Res.string.xr_terrain_zoom), style = MaterialTheme.typography.labelLarge)
                 Slider(
-                    slider,
+                    state = rememberHoistedSliderState(slider),
                     onValueChange = { slider = it },
                     onValueChangeFinished = { committed = slider },
                     modifier = Modifier.heightIn(min = XrTargetSize),

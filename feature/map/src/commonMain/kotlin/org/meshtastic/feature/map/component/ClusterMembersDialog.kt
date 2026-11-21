@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.nodes_at_this_location
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.StaticListItem
 
 /**
  * Lists the nodes sharing one spot, when zooming in further will not separate them.
@@ -69,7 +69,7 @@ fun ClusterMembersDialog(
 
 @Composable
 private fun ClusterMemberRow(member: ClusterMemberEntry, onClick: () -> Unit) {
-    ListItem(
+    StaticListItem(
         leadingContent = member.node?.let { { NodeChip(node = it) } },
         headlineContent = { Text(member.title) },
         supportingContent = { if (member.subtitle.isNotBlank()) Text(member.subtitle) },

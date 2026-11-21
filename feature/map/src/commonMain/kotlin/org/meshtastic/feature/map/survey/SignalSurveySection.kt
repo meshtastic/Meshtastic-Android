@@ -34,7 +34,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -76,6 +75,7 @@ import org.meshtastic.core.resources.signal_survey_readings
 import org.meshtastic.core.resources.signal_survey_record
 import org.meshtastic.core.resources.signal_survey_title
 import org.meshtastic.core.ui.component.Quality
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -173,7 +173,7 @@ internal fun SignalSurveyContent(
             style = MaterialTheme.typography.bodySmall,
         )
         SignalLegend(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp))
-        ListItem(
+        StaticListItem(
             modifier =
             Modifier.testTag(SIGNAL_SURVEY_SWITCH_TAG)
                 .toggleable(value = state.recording, role = Role.Switch, onValueChange = actions.onRecordingChange),
@@ -184,7 +184,7 @@ internal fun SignalSurveyContent(
                 Switch(modifier = Modifier.clearAndSetSemantics {}, checked = state.recording, onCheckedChange = null)
             },
         )
-        ListItem(
+        StaticListItem(
             modifier =
             Modifier.testTag(SIGNAL_SURVEY_HEATMAP_TAG)
                 .toggleable(value = state.heatmap, role = Role.Switch, onValueChange = actions.onHeatmapChange),
@@ -232,7 +232,7 @@ private fun SessionRow(
     onDelete: () -> Unit,
 ) {
     val count = item.session.readingCount
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(DateFormatter.formatDateTimeShort(item.session.startedAtMillis)) },
         supportingContent = { Text(pluralStringResource(Res.plurals.signal_survey_readings, count, count)) },
         trailingContent = {

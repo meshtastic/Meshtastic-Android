@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.last_heard_filter_label
+import org.meshtastic.core.ui.component.rememberHoistedSliderState
 import org.meshtastic.feature.map.LastHeardFilter
 import kotlin.math.roundToInt
 
@@ -72,11 +73,9 @@ internal fun LastHeardSlider(selected: LastHeardFilter, onSelect: (LastHeardFilt
             style = MaterialTheme.typography.labelLarge,
         )
         Slider(
-            value = sliderPosition,
+            state = rememberHoistedSliderState(sliderPosition, options.size - 2, 0f..options.lastIndex.toFloat()),
             onValueChange = { sliderPosition = it },
             onValueChangeFinished = { onSelect(options[sliderPosition.roundToInt().coerceIn(0, options.lastIndex)]) },
-            valueRange = 0f..options.lastIndex.toFloat(),
-            steps = options.size - 2,
         )
     }
 }

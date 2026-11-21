@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -82,6 +81,7 @@ import org.meshtastic.core.resources.widget_telemetry_title
 import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.component.MeshtasticSearchBar
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Search
@@ -221,7 +221,7 @@ internal fun TelemetryConfigScreen(
                         history,
                     )
                         as? TelemetryWidgetState.Showing
-                ListItem(
+                StaticListItem(
                     leadingContent = { NodeChip(node = node) },
                     headlineContent = { Text(node.effectiveLongName.ifEmpty { node.user.id }, maxLines = 1) },
                     trailingContent = {
@@ -264,7 +264,7 @@ private fun ReadingList(
         items(state.readings, key = { it.id }) { reading ->
             val tile = telemetryTile(reading, state)
             val shown = reading.id !in hiddenIds
-            ListItem(
+            StaticListItem(
                 modifier =
                 Modifier.clickable {
                     onToggle(reading.id, !shown)

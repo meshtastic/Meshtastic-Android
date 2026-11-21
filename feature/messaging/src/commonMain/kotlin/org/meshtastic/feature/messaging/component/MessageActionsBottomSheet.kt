@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,6 +67,7 @@ import org.meshtastic.core.resources.show_original
 import org.meshtastic.core.resources.show_translation
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.translate
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Dangerous
@@ -114,7 +114,7 @@ fun MessageActionsContent(
         }
 
         if (xeddsaSigned) {
-            ListItem(
+            StaticListItem(
                 headlineContent = { Text(stringResource(Res.string.security_signed_verified)) },
                 supportingContent = { Text(stringResource(Res.string.security_signed_message_info)) },
                 leadingContent = {
@@ -131,7 +131,7 @@ fun MessageActionsContent(
 
         // The caller supplies the same compact or full timestamp shown in the conversation header.
         if (timestamp != null) {
-            ListItem(
+            StaticListItem(
                 headlineContent = {
                     Text(
                         stringResource(
@@ -150,7 +150,7 @@ fun MessageActionsContent(
                 statusString?.first?.let { stringResource(it) } ?: stringResource(Res.string.message_delivery_status)
             val statusText = statusString?.second?.let { stringResource(it) }
 
-            ListItem(
+            StaticListItem(
                 headlineContent = {
                     Text(stringResource(Res.string.device_metrics_label_value, title, statusText.orEmpty()))
                 },
@@ -166,7 +166,7 @@ fun MessageActionsContent(
 
         ReplyAction(canReply = canReply, onReply = onReply)
 
-        ListItem(
+        StaticListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
             leadingContent = { Icon(MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy)) },
             modifier =
@@ -189,7 +189,7 @@ fun MessageActionsContent(
                     TranslationRowState.Translate -> stringResource(Res.string.action_translate_message)
                     else -> stringResource(Res.string.action_toggle_translation)
                 }
-            ListItem(
+            StaticListItem(
                 headlineContent = { Text(headline) },
                 leadingContent = { Icon(MeshtasticIcons.Translate, contentDescription = headline) },
                 modifier =
@@ -206,7 +206,7 @@ fun MessageActionsContent(
             )
         }
 
-        ListItem(
+        StaticListItem(
             headlineContent = { Text(stringResource(Res.string.select)) },
             leadingContent = {
                 Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select))
@@ -219,7 +219,7 @@ fun MessageActionsContent(
             ),
         )
 
-        ListItem(
+        StaticListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
             leadingContent = { Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete)) },
             modifier =
@@ -252,7 +252,7 @@ private fun AckProofListItem(ackProofStatus: Int) {
             MeshPacket.AckProofStatus.ACK_PROOF_NO_KEY -> MaterialTheme.colorScheme.onSurfaceVariant
             else -> MaterialTheme.colorScheme.primary
         }
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(stringResource(headline)) },
         supportingContent = { Text(stringResource(supporting)) },
         leadingContent = { Icon(icon, contentDescription = null, tint = tint) },
@@ -331,7 +331,7 @@ internal fun QuickEmojiRow(
 @Composable
 private fun ReplyAction(canReply: Boolean, onReply: () -> Unit) {
     if (!canReply) return
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(stringResource(Res.string.reply)) },
         leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
         modifier =

@@ -17,27 +17,29 @@
 package org.meshtastic.core.resources
 
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.ResourceEnvironment
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString as composeGetString
+import org.jetbrains.compose.resources.getSystemResourceEnvironment
+import org.meshtastic.core.common.util.currentLocaleTag
+import kotlin.concurrent.Volatile
 
-actual fun getString(stringResource: StringResource): String = runBlocking { composeGetString(stringResource) }
+private class CachedEnvironment(val localeTag: String, val environment: ResourceEnvironment)
 
+@Volatile private var cachedEnvironment: CachedEnvironment? = null
+
+/**
+ * Strings carry no theme or density qualifier, so the locale, read from the same `Locale.getDefault()` the platform
+ * environment uses, is the only key that can change a lookup's result.
+ */
+internal actual fun systemResourceEnvironment(): ResourceEnvironment {
+    val localeTag = currentLocaleTag()
+    cachedEnvironment?.let { if (it.localeTag == localeTag) return it.environment }
+    return getSystemResourceEnvironment().also { cachedEnvironment = CachedEnvironment(localeTag, it) }
+}
+
+actual fun getString(stringResource: StringResource): String = runBlocking { getStringSuspend(stringResource) }
+
+@Suppress("SpreadOperator")
 actual fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    val resolvedArgs =
-        formatArgs
-            .map { arg ->
-                if (arg is StringResource) {
-                    composeGetString(arg)
-                } else {
-                    arg
-                }
-            }
-            .toTypedArray()
-
-    if (resolvedArgs.isNotEmpty()) {
-        @Suppress("SpreadOperator")
-        composeGetString(stringResource, *resolvedArgs)
-    } else {
-        composeGetString(stringResource)
-    }
+    getStringSuspend(stringResource, *formatArgs)
 }

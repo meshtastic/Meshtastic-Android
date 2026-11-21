@@ -18,15 +18,21 @@
 
 package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +40,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -148,7 +155,7 @@ fun BasicListItem(
             content = { Text(text = text, color = textColor) },
         )
     } else {
-        ListItem(
+        StaticListItem(
             modifier = modifier,
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             headlineContent = { Text(text = text, color = textColor) },
@@ -158,6 +165,53 @@ fun BasicListItem(
         )
     }
 }
+
+/**
+ * A non-interactive Material 3 [ListItem] with the geometry of the pre-expressive one: square corners, 8dp vertical
+ * padding (12dp with both an overline and supporting text), 16dp between the leading, headline and trailing slots, and
+ * full-size touch targets in the leading and trailing slots.
+ */
+@Composable
+fun StaticListItem(
+    headlineContent: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    overlineContent: @Composable (() -> Unit)? = null,
+    supportingContent: @Composable (() -> Unit)? = null,
+    leadingContent: @Composable (() -> Unit)? = null,
+    trailingContent: @Composable (() -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(),
+) {
+    // The expressive slots shrink this by their own padding, which takes a trailing IconButton from 48dp to 40dp.
+    val touchTarget = LocalMinimumInteractiveComponentSize.current
+    val slot: (@Composable () -> Unit, Modifier) -> @Composable () -> Unit = { content, padding ->
+        {
+            Box(padding) {
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides touchTarget, content = content)
+            }
+        }
+    }
+    val verticalPadding =
+        if (overlineContent != null && supportingContent != null) ThreeLineVerticalPadding else VerticalPadding
+    // Rounded as whole pixels so the 12dp gap plus this lands on the pixel a single 16dp gap did.
+    val gapTopUp = with(LocalDensity.current) { (SlotGap.roundToPx() - ExpressiveSlotGap.roundToPx()).toDp() }
+    ListItem(
+        modifier = modifier,
+        leadingContent = leadingContent?.let { slot(it, Modifier.padding(end = gapTopUp)) },
+        trailingContent = trailingContent?.let { slot(it, Modifier.padding(start = gapTopUp)) },
+        overlineContent = overlineContent,
+        supportingContent = supportingContent,
+        shapes = ListItemDefaults.shapes(shape = RectangleShape),
+        colors = colors,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = verticalPadding),
+        content = headlineContent,
+    )
+}
+
+// The expressive layout fixes a 12dp gap between slots; the slot padding tops it up to the old 16dp.
+private val SlotGap = 16.dp
+private val ExpressiveSlotGap = 12.dp
+private val VerticalPadding = 8.dp
+private val ThreeLineVerticalPadding = 12.dp
 
 fun ImageVector?.icon(tint: Color = Color.Unspecified): @Composable (() -> Unit)? = this?.let {
     {

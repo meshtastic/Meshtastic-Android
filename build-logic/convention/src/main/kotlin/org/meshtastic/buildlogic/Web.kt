@@ -187,7 +187,8 @@ private fun Project.configureSkikoForWasmTests(kotlin: KotlinMultiplatformExtens
                         .map { it.version }
                         .distinct()
                         .map { version ->
-                            dependencyFactory.create("org.jetbrains.skiko:skiko-js-wasm-runtime:$version")
+                            // The runtime is a classifier jar of skiko-wasm-js, not a module of its own.
+                            dependencyFactory.create("org.jetbrains.skiko:skiko-wasm-js:$version:skiko-runtime@jar")
                         }
                 },
             )

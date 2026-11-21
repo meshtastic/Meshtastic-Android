@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -57,6 +56,7 @@ import org.meshtastic.core.resources.node_filter_only_signed
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.ui.component.StaticListItem
 import org.meshtastic.core.ui.component.label
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Lens
@@ -228,7 +228,7 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun FilterToggle(label: String, checked: Boolean, onToggle: () -> Unit, icon: ImageVector? = null) {
-    ListItem(
+    StaticListItem(
         headlineContent = { Text(label) },
         leadingContent = icon?.let { { Icon(imageVector = it, contentDescription = null) } },
         trailingContent = { Checkbox(checked = checked, onCheckedChange = { onToggle() }) },
