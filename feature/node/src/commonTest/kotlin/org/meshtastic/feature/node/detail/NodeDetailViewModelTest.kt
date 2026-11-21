@@ -46,7 +46,6 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.QueryController
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.proto.Routing
@@ -64,7 +63,6 @@ class NodeDetailViewModelTest {
     private lateinit var viewModel: NodeDetailViewModel
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val queryController: QueryController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val packetRepository: PacketRepository = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
@@ -86,7 +84,6 @@ class NodeDetailViewModelTest {
         savedStateHandle = SavedStateHandle(if (nodeId != null) mapOf("destNum" to nodeId) else emptyMap()),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        queryController = queryController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         packetRepository = packetRepository,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
@@ -209,18 +206,6 @@ class NodeDetailViewModelTest {
         runCurrent()
 
         assertEquals(listOf("Could not reach node — try again or move closer."), snackbarManager.messages)
-    }
-
-    @Test
-    fun `refreshMetadata surfaces queue rejection without throwing from view model scope`() = runTest(testDispatcher) {
-        everySuspend { queryController.refreshMetadata(1234) } throws
-            PacketQueueRejectedException("Metadata request")
-
-        viewModel.refreshMetadata(1234, "Test Node")
-        runCurrent()
-
-        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
-        verifySuspend { queryController.refreshMetadata(1234) }
     }
 
     @Test

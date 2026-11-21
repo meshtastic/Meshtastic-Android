@@ -42,6 +42,7 @@ import org.meshtastic.core.resources.request_device_metrics
 import org.meshtastic.core.resources.request_environment_metrics
 import org.meshtastic.core.resources.request_host_metrics
 import org.meshtastic.core.resources.request_local_stats
+import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.resources.request_pax_metrics
 import org.meshtastic.core.resources.request_power_metrics
 import org.meshtastic.core.resources.requesting_from
@@ -166,5 +167,9 @@ constructor(
         }
         analytics.trackAction("traceroute_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
+    }
+
+    override suspend fun refreshMetadata(destNum: Int, longName: String) = runRequest {
+        watch(radioController.refreshMetadata(destNum), Res.string.request_metadata, longName)
     }
 }

@@ -41,6 +41,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.request_failed_from
+import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.resources.user_info
 import org.meshtastic.proto.Routing
 import kotlin.test.Test
@@ -109,6 +110,29 @@ class CommonNodeRequestActionsTest {
         runCurrent()
 
         assertTrue(resolved.filterIsInstance<UiText.Resource>().none { it.res == Res.string.request_failed_from })
+    }
+
+    @Test
+    fun `a metadata NAK still shows after the screen that asked is gone`() = runTest {
+        val nak = CompletableDeferred<Int?>()
+        everySuspend { radioController.refreshMetadata(1234) } returns NodeRequest(null) { nak.await() }
+        val resolved = mutableListOf<UiText>()
+        val actions = actions {
+            resolved += it
+            ""
+        }
+
+        val screen = launch { actions.refreshMetadata(destNum = 1234, longName = "Test Node") }
+        runCurrent()
+        screen.cancel()
+        nak.complete(Routing.Error.MAX_RETRANSMIT.value)
+        runCurrent()
+
+        val shown = resolved.filterIsInstance<UiText.Resource>().single { it.res == Res.string.request_failed_from }
+        assertEquals(
+            listOf(Res.string.request_metadata, "Test Node", getStringResFrom(Routing.Error.MAX_RETRANSMIT.value)),
+            shown.args.toList(),
+        )
     }
 
     @Test

@@ -36,7 +36,6 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -56,7 +55,6 @@ class HandleNodeActionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val queryController: QueryController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val packetRepository: PacketRepository = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
@@ -189,7 +187,6 @@ class HandleNodeActionTest {
         savedStateHandle = SavedStateHandle(mapOf("destNum" to 1234)),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        queryController = queryController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         packetRepository = packetRepository,
         ensureRemoteAdminSession = ensureRemoteAdminSession,

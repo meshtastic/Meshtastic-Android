@@ -48,12 +48,10 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
 import org.meshtastic.core.resources.remote_admin_unreachable
-import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -110,7 +108,6 @@ class NodeDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
-    private val queryController: QueryController,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
     private val packetRepository: PacketRepository,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
@@ -225,14 +222,7 @@ class NodeDetailViewModel(
      * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
      */
     fun refreshMetadata(destNum: Int, longName: String) = safeLaunch(tag = "refreshMetadata") {
-        try {
-            val pending = queryController.refreshMetadata(destNum)
-            showNodeRequestNak(pending, Res.string.request_metadata, longName, snackbarManager, resolveUiText)
-        } catch (e: PacketQueueRejectedException) {
-            showNodeRequestFailure(e, QUEUE_REJECTION_LOG_MESSAGE, snackbarManager, resolveUiText)
-        } catch (e: LocalNodeUnavailableException) {
-            showNodeRequestFailure(e, LOCAL_NODE_UNAVAILABLE_LOG_MESSAGE, snackbarManager, resolveUiText)
-        }
+        nodeRequestActions.refreshMetadata(destNum, longName)
     }
 
     /**
