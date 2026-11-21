@@ -19,15 +19,18 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.LockdownStatus
 
 /**
@@ -41,7 +44,6 @@ import org.meshtastic.proto.LockdownStatus
 @Suppress("TooManyFunctions")
 class LockdownCoordinatorImpl(
     private val serviceRepository: ServiceRepository,
-    private val commandSender: CommandSender,
     private val passphraseStore: LockdownPassphraseStore,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionManager: Lazy<MeshConnectionManager>,
@@ -135,7 +137,7 @@ class LockdownCoordinatorImpl(
                 // handling for the new attempt.
                 wasAutoAttempt = false
                 val dispatched =
-                    commandSender.sendLockdownPassphrase(
+                    sendPassphrase(
                         stored.passphrase,
                         stored.boots,
                         stored.hours,
@@ -224,7 +226,7 @@ class LockdownCoordinatorImpl(
         maxSessionSeconds: Int,
         disable: Boolean,
     ): Boolean = synchronized(lock) {
-        if (!commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)) {
+        if (!sendPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)) {
             Logger.w { "Lockdown: Passphrase command was not accepted by the active transport" }
             return@synchronized false
         }
@@ -257,13 +259,44 @@ class LockdownCoordinatorImpl(
     }
 
     override fun lockNow(): Boolean = synchronized(lock) {
-        val dispatched = commandSender.sendLockNow()
+        val dispatched = sendLockdown(LockdownAuth.Builder().also { it.lock_now = true }.build())
         if (dispatched) {
             wasLockNow = true
         } else {
             Logger.w { "Lockdown: Lock Now command was not accepted by the active transport" }
         }
         dispatched
+    }
+
+    private fun sendPassphrase(
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean = false,
+    ): Boolean {
+        val validUntilEpoch =
+            if (hours > 0) {
+                (nowMillis / TimeConstants.MS_PER_SEC + hours.toLong() * TimeConstants.SECONDS_PER_HOUR).toInt()
+            } else {
+                0
+            }
+        val auth =
+            LockdownAuth.Builder()
+                .also { wb ->
+                    wb.passphrase = passphrase.encodeToByteArray().toByteString()
+                    wb.boots_remaining = boots.coerceAtLeast(0)
+                    wb.valid_until_epoch = validUntilEpoch
+                    wb.max_session_seconds = maxSessionSeconds.coerceAtLeast(0)
+                    wb.disable = disable
+                }
+                .build()
+        return sendLockdown(auth)
+    }
+
+    private fun sendLockdown(auth: LockdownAuth): Boolean {
+        val session = radioInterfaceService.activeSession.value ?: return false
+        return radioInterfaceService.tryLockdown(session, auth)
     }
 
     private fun resetTransientState() {
