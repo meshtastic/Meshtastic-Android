@@ -1155,6 +1155,12 @@
     <string name="lora_config">LoRa</string>
     <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="lora_config_changes">LoRa Configuration Changes:</string>
+    <string name="lora_config_values_none">None</string>
+    <string name="lora_field_fem_lna_mode">FEM LNA mode</string>
+    <string name="lora_field_frequency_offset">Frequency offset</string>
+    <string name="lora_field_serial_hal_only">Serial HAL only</string>
+    <string name="lora_field_transparent_mode">Transparent mode</string>
+    <string name="lora_field_unrecognized">Other LoRa settings also change</string>
     <string name="lora_preset_custom">Custom</string>
     <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Low Battery</string>

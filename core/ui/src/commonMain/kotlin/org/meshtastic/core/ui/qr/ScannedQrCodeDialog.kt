@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -44,18 +45,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.schemaLabelRes
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.add
@@ -65,17 +68,18 @@ import org.meshtastic.core.resources.channel_already_on_radio
 import org.meshtastic.core.resources.channel_slots_full
 import org.meshtastic.core.resources.channel_slots_used
 import org.meshtastic.core.resources.disabled
+import org.meshtastic.core.resources.downlink_enabled
 import org.meshtastic.core.resources.enabled
 import org.meshtastic.core.resources.lora_config_change_value
 import org.meshtastic.core.resources.lora_config_changes
+import org.meshtastic.core.resources.lora_config_values_none
 import org.meshtastic.core.resources.new_channel_rcvd
+import org.meshtastic.core.resources.position_enabled
+import org.meshtastic.core.resources.precise_location
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
-import org.meshtastic.core.resources.schema_lora_hop_limit
-import org.meshtastic.core.resources.schema_lora_modem_preset
-import org.meshtastic.core.resources.schema_lora_region
-import org.meshtastic.core.resources.schema_lora_use_preset
 import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.resources.uplink_enabled
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.getChannelPreviewForAdd
@@ -132,22 +136,8 @@ fun ScannedQrCodeDialog(
     val channelSet =
         remember(shouldReplace, channels, incoming, addPreview.settings) {
             if (shouldReplace) {
-                // When replacing, apply the incoming LoRa configuration but preserve certain
-                // locally safe fields such as MQTT flags and TX power. This prevents QR codes
-                // from unintentionally overriding device-specific power limits (e.g. E22 caps).
-                incoming
-                    .newBuilder()
-                    .also { wb ->
-                        wb.lora_config =
-                            incoming.lora_config
-                                ?.newBuilder()
-                                ?.also { wb ->
-                                    wb.config_ok_to_mqtt = channels.lora_config?.config_ok_to_mqtt ?: false
-                                    wb.tx_power = channels.lora_config?.tx_power ?: 0
-                                }
-                                ?.build()
-                    }
-                    .build()
+                // Keeps the device's own MQTT consent and TX power; loraChanges describes this exact config.
+                incoming.forReplace(channels.lora_config)
             } else {
                 channels.newBuilder().also { wb -> wb.settings = addPreview.settings }.build()
             }
@@ -191,36 +181,14 @@ fun ScannedQrCodeDialog(
                 .build()
         }
 
-    // Compute LoRa configuration changes when in replace mode
+    // Every LoRa field that differs from what channelSet will write, derived from that same config.
     val loraChanges =
-        remember(shouldReplace, channels, incoming) {
-            if (shouldReplace && incoming.lora_config != null) {
-                val current = channels.lora_config
-                val new = incoming.lora_config
-                buildList {
-                    if (current?.hop_limit != new?.hop_limit) {
-                        add(LoraConfigChange(Res.string.schema_lora_hop_limit, current?.hop_limit, new?.hop_limit))
-                    }
-                    if (current?.region != new?.region) {
-                        add(LoraConfigChange(Res.string.schema_lora_region, current?.region, new?.region))
-                    }
-                    if (current?.modem_preset != new?.modem_preset) {
-                        add(
-                            LoraConfigChange(
-                                Res.string.schema_lora_modem_preset,
-                                current?.modem_preset,
-                                new?.modem_preset,
-                            ),
-                        )
-                    }
-                    if (current?.use_preset != new?.use_preset) {
-                        add(LoraConfigChange(Res.string.schema_lora_use_preset, current?.use_preset, new?.use_preset))
-                    }
-                }
-            } else {
-                emptyList()
-            }
+        remember(shouldReplace, channels, channelSet) {
+            val applied = channelSet.lora_config
+            if (shouldReplace && applied != null) loraConfigChanges(channels.lora_config, applied) else emptyList()
         }
+
+    val onWireSettings = remember(channelSet.settings) { channelSet.settings.withOnWirePrecision() }
 
     Dialog(
         onDismissRequest = { onDismiss() },
@@ -279,6 +247,7 @@ fun ScannedQrCodeDialog(
                         },
                         channel = channelObj,
                     )
+                    onWireSettings.getOrNull(index)?.let { ChannelSharingLine(channelSharing(it)) }
                 }
 
                 if (!shouldReplace) {
@@ -302,20 +271,30 @@ fun ScannedQrCodeDialog(
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        loraChanges.forEach { change ->
-                            val line =
+                    }
+                    items(loraChanges, contentType = { "loraChange" }) { change ->
+                        val text =
+                            if (change.from == null && change.to == null) {
+                                stringResource(change.label)
+                            } else {
                                 stringResource(
                                     Res.string.lora_config_change_value,
                                     stringResource(change.label),
                                     loraConfigValueText(change.from),
                                     loraConfigValueText(change.to),
                                 )
-                            Text(
-                                text = "• $line",
-                                modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
+                            }
+                        Text(
+                            text = "• $text",
+                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, bottom = 4.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color =
+                            if (change.alertsTransmission) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                Color.Unspecified
+                            },
+                        )
                     }
                 }
 
@@ -427,13 +406,40 @@ private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRa
     }
 }
 
-private data class LoraConfigChange(val label: StringResource, val from: Any?, val to: Any?)
+/** Secondary line under a channel when it shares position or bridges to MQTT, as it will be written. */
+@Composable
+private fun ChannelSharingLine(sharing: ChannelSharing) {
+    if (!sharing.isNotable) return
+    val parts = buildList {
+        if (sharing.uplink) add(stringResource(Res.string.uplink_enabled))
+        if (sharing.downlink) add(stringResource(Res.string.downlink_enabled))
+        if (sharing.positionBits > 0) add(stringResource(Res.string.position_enabled))
+        if (sharing.positionBits >= FULL_PRECISION_BITS) add(stringResource(Res.string.precise_location))
+    }
+    Text(
+        text = parts.joinToString(" • "),
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, bottom = 4.dp),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+private const val FULL_PRECISION_BITS = 32
+private const val FREQUENCY_DECIMALS = 3
 
 @Composable
 private fun loraConfigValueText(value: Any?): String = when (value) {
     null -> stringResource(Res.string.unknown)
+
     is Boolean -> stringResource(if (value) Res.string.enabled else Res.string.disabled)
+
     is Enum<*> -> value.schemaLabelRes()?.let { stringResource(it) } ?: value.name
+
+    is Float -> NumberFormatter.format(value, FREQUENCY_DECIMALS)
+
+    is List<*> ->
+        if (value.isEmpty()) stringResource(Res.string.lora_config_values_none) else value.joinToString(", ")
+
     else -> value.toString()
 }
 

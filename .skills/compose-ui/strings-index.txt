@@ -1104,6 +1104,12 @@ lora
 lora_config
 lora_config_change_value
 lora_config_changes
+lora_config_values_none
+lora_field_fem_lna_mode
+lora_field_frequency_offset
+lora_field_serial_hal_only
+lora_field_transparent_mode
+lora_field_unrecognized
 lora_preset_custom
 lora_preset_region
 low_battery
