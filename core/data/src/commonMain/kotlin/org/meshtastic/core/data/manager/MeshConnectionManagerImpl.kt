@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
@@ -59,6 +60,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -381,23 +383,36 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    private fun activeClient(operation: String): RadioClient =
-        radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession)
+    /** The session's client, while [connectedVersion], when given, still owns the connection. */
+    private fun activeClient(operation: String, connectedVersion: Long? = null): RadioClient {
+        val owned = connectedVersion == null || connectedVersion == serviceRepository.connectionLifecycle.value.version
+        return radioInterfaceService.activeSession.value
+            ?.takeIf { owned }
+            ?.let(radioInterfaceService::clientForSession)
             ?: throw PacketQueueRejectedException(operation)
+    }
 
     /** Sends the phone's fix to our own node with the send builder, so its time and precision survive. */
     private suspend fun sendOwnPosition(pos: Position) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
         val client = activeClient("Position update")
-        try {
-            client.send {
-                data(PortNum.POSITION_APP, pos.encode())
-                to(NodeId(myNum))
-                priority(MeshPacket.Priority.BACKGROUND)
+        val handle =
+            try {
+                client.send {
+                    data(PortNum.POSITION_APP, pos.encode())
+                    to(NodeId(myNum))
+                    priority(MeshPacket.Priority.BACKGROUND)
+                }
+            } catch (e: MeshtasticException) {
+                throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
             }
-        } catch (e: MeshtasticException) {
-            throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
-        }
+        packetHandler.logSent(
+            handle.id.raw,
+            myNum,
+            PortNum.POSITION_APP,
+            pos.encode().toByteString(),
+            priority = MeshPacket.Priority.BACKGROUND,
+        )
         if (radioConfigRepository.localConfigFlow.first().position?.fixed_position != true) {
             nodeManager.handleReceivedPosition(myNum, myNum, pos, nowMillis)
         }
@@ -406,17 +421,28 @@ class MeshConnectionManagerImpl(
     /** Asks our own node for [type] telemetry, only while [connectedVersion] still owns the connection. */
     private suspend fun requestLocalTelemetry(type: TelemetryType, myNodeNum: Int, connectedVersion: Long) {
         val operation = "$type telemetry request"
-        if (serviceRepository.connectionLifecycle.value.version != connectedVersion) {
-            throw PacketQueueRejectedException(operation)
-        }
-        val telemetry = activeClient(operation).telemetry
+        val telemetry = activeClient(operation, connectedVersion).telemetry
+        val local = type == TelemetryType.LOCAL_STATS
+        val variant =
+            Telemetry.Builder()
+                .also { wb ->
+                    if (local) {
+                        wb.local_stats = LocalStats.Builder().build()
+                    } else {
+                        wb.device_metrics = DeviceMetrics.Builder().build()
+                    }
+                }
+                .build()
+        // TelemetryApi does not expose the wire ID it allocated.
+        packetHandler.logSent(0, myNodeNum, PortNum.TELEMETRY_APP, variant.encode().toByteString(), true, myNodeNum)
         val result =
-            if (type == TelemetryType.LOCAL_STATS) {
-                telemetry.requestLocalStats()
-            } else {
-                telemetry.requestDevice(NodeId(myNodeNum))
+            try {
+                if (local) telemetry.requestLocalStats() else telemetry.requestDevice(NodeId(myNodeNum))
+            } catch (e: MeshtasticException) {
+                throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
             }
-        if (result !is AdminResult.Success) Logger.w { "$operation was not answered: $result" }
+        // An unanswered request retries like a refused one, within the same attempt cap.
+        if (result !is AdminResult.Success) throw PacketQueueRejectedException(operation)
     }
 
     private fun ownsPostHandshakeRequests(myNodeNum: Int, connectedVersion: Long): Boolean =

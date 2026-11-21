@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -42,10 +43,20 @@ interface PacketHandler {
     suspend fun sendData(p: DataPacket)
 
     /**
-     * Records a request the SDK sent to [to] on [port] under [requestId] in the mesh log, which the request logs and
-     * reply matching read.
+     * Records a packet the SDK sent for the app in the mesh log, as an outgoing row under the local node: the debug
+     * panel, the local position log and the request logs with their reply matching read these rows. [id] is the wire ID
+     * when the sender exposes it, else 0.
      */
-    fun logRequest(requestId: Int, to: Int, port: PortNum)
+    @Suppress("LongParameterList")
+    fun logSent(
+        id: Int,
+        to: Int,
+        port: PortNum,
+        payload: ByteString = ByteString.EMPTY,
+        wantResponse: Boolean = false,
+        dest: Int = 0,
+        priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
+    )
 
     /**
      * Adds a mesh packet to the queue for sending.

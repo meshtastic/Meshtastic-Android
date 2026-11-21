@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -72,6 +73,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.RadioClient
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -445,6 +447,44 @@ class MeshConnectionManagerImplTest {
         assertEquals(MeshPacket.Priority.BACKGROUND, sent.priority)
         assertEquals(fix, Position.ADAPTER.decode(checkNotNull(sent.decoded).payload))
         verify { nodeManager.handleReceivedPosition(123, 123, fix, any()) }
+        verify {
+            packetHandler.logSent(
+                sent.id,
+                123,
+                PortNum.POSITION_APP,
+                fix.encode().toByteString(),
+                false,
+                0,
+                MeshPacket.Priority.BACKGROUND,
+            )
+        }
+        sdk.client.disconnect()
+    }
+
+    @Test
+    fun `an unanswered post-handshake telemetry request is sent again`() = runTest {
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        every { nodeManager.getMyNodeInfo() } returns null
+        val sdk = sdkClientFixture(123)
+        sessionClient = { sdk.client }
+        manager = createManager(backgroundScope)
+        // Let the manager's transport-state bridge publish its initial Disconnected first.
+        runCurrent()
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        manager.onNodeDbReady()
+        runCurrent()
+        // Past the SDK's 30 s RPC timeout and the first admission retry delay.
+        advanceTimeBy(31_000 + MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(1).inWholeMilliseconds)
+        runCurrent()
+
+        val localStatsRequests =
+            sdk.transport.outboundPackets().count { packet ->
+                packet.decoded?.portnum == PortNum.TELEMETRY_APP &&
+                    Telemetry.ADAPTER.decode(checkNotNull(packet.decoded).payload).local_stats != null
+            }
+        assertEquals(2, localStatsRequests)
         sdk.client.disconnect()
     }
 

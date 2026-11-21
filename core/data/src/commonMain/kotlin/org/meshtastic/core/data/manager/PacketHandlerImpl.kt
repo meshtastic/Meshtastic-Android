@@ -148,18 +148,28 @@ class PacketHandlerImpl(
         }
     }
 
-    override fun logRequest(requestId: Int, to: Int, port: PortNum) = logPacket(
+    override fun logSent(
+        id: Int,
+        to: Int,
+        port: PortNum,
+        payload: ByteString,
+        wantResponse: Boolean,
+        dest: Int,
+        priority: MeshPacket.Priority,
+    ) = logPacket(
         MeshPacket.Builder()
             .also { wb ->
-                wb.id = requestId
+                wb.id = id
                 wb.from = nodeManager.myNodeNum.value ?: 0
                 wb.to = to
+                wb.priority = priority
                 wb.decoded =
                     Data.Builder()
                         .also { data ->
                             data.portnum = port
-                            data.want_response = true
-                            data.dest = to
+                            data.payload = payload
+                            data.want_response = wantResponse
+                            data.dest = dest
                         }
                         .build()
             }
