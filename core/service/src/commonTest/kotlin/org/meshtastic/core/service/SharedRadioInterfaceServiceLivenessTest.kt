@@ -72,6 +72,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -1809,6 +1810,93 @@ class SharedRadioInterfaceServiceLivenessTest {
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)
+        }
+    }
+
+    private fun createPhoneApiService(callbacks: MutableList<RadioInterfaceService>): SharedRadioInterfaceService {
+        val service = createConnectedService("t192.0.2.1", startConnected = false)
+        every { transportFactory.createTransport(any(), any()) } calls
+            { args ->
+                callbacks += args.arg<RadioInterfaceService>(1)
+                object : RadioTransport by FakeRadioTransport() {
+                    override val managesPhoneApi = true
+                }
+            }
+        service.connect()
+        testDispatcher.scheduler.runCurrent()
+        return service
+    }
+
+    @Test
+    fun `PhoneAPI recovery drains old leases before starting a fresh session`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        val first = assertNotNull(service.activeSession.value)
+        val release = CompletableDeferred<Unit>()
+        try {
+            callbacks.single().onConnect()
+            val write = async { service.runWithSessionLease(first) { release.await() } }
+            testDispatcher.scheduler.runCurrent()
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(2_000L)
+            assertFalse(service.isSessionActive(first))
+            assertEquals(first, service.activeSession.value)
+            assertEquals(1, callbacks.size)
+
+            release.complete(Unit)
+            assertTrue(write.await())
+            assertNull(service.activeSession.value)
+            advanceTimeBy(1_001L)
+            val replacement = assertNotNull(service.activeSession.value)
+            assertTrue(replacement.generation > first.generation)
+            assertEquals(first.address, replacement.address)
+            assertEquals(2, callbacks.size)
+
+            callbacks.first().onPhoneApiSessionEnded(recoverable = false)
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(replacement, service.activeSession.value)
+        } finally {
+            release.complete(Unit)
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `PhoneAPI connection failures back off and explicit disconnect cancels recovery`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(1_001L)
+            assertEquals(2, callbacks.size)
+
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(1_001L)
+            assertEquals(2, callbacks.size)
+            advanceTimeBy(1_000L)
+            assertEquals(3, callbacks.size)
+
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            service.disconnect()
+            advanceTimeBy(5_000L)
+            assertEquals(3, callbacks.size)
+            assertNull(service.activeSession.value)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `terminal PhoneAPI session end retires the transport without reconnecting`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            callbacks.single().onPhoneApiSessionEnded(recoverable = false)
+            advanceTimeBy(60_000L)
+            assertNull(service.activeSession.value)
+            assertEquals(1, callbacks.size)
+        } finally {
+            service.disconnect()
         }
     }
 

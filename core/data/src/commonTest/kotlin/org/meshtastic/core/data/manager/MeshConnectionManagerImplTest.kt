@@ -215,6 +215,23 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
+    fun `protocol-managed transport leaves handshake to its backend`() = runTest(testDispatcher) {
+        every { radioInterfaceService.transportManagesPhoneApi } returns true
+        manager = createManager(backgroundScope)
+
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+
+        verify(exactly(0)) { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) }
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+
+        applyConnectionState(ConnectionState.Connected)
+        radioConnectionState.value = ConnectionState.Disconnected
+        runCurrent()
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+    }
+
+    @Test
     fun `Connected state sends pre-handshake heartbeat before config request`() = runTest(testDispatcher) {
         val sentPackets = mutableListOf<org.meshtastic.proto.ToRadio>()
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } calls

@@ -138,6 +138,10 @@ interface RadioInterfaceService :
      */
     val connectionState: StateFlow<ConnectionState>
 
+    /** Whether the active transport runs the PhoneAPI handshake and heartbeat itself. */
+    val transportManagesPhoneApi: Boolean
+        get() = false
+
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 

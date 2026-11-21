@@ -21,9 +21,9 @@ import org.meshtastic.core.model.TransportStatus
 /**
  * Narrow callback interface for transport → service communication.
  *
- * Transport implementations ([RadioTransport]) need only these three methods to report lifecycle events and deliver
- * data. This replaces the previous pattern of passing the full [RadioInterfaceService] to transport constructors,
- * decoupling transports from the service layer.
+ * Transport implementations ([RadioTransport]) use this interface to report lifecycle events and deliver data. This
+ * replaces the previous pattern of passing the full [RadioInterfaceService] to transport constructors, decoupling
+ * transports from the service layer.
  */
 interface RadioTransportCallback {
     /** Called when the transport has successfully established a connection. */
@@ -39,6 +39,13 @@ interface RadioTransportCallback {
      *   user-facing text.
      */
     fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null, reason: TransportDisconnectReason? = null)
+
+    /**
+     * Retires a transport that owns the PhoneAPI session. A recoverable end can start a new transport for the same
+     * selection once the old session's work has drained. Invoke this after closing the underlying SDK client.
+     */
+    fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String? = null) =
+        onDisconnect(isPermanent = !recoverable, errorMessage = errorMessage)
 
     /** Called when the transport has received raw data from the radio. */
     fun handleFromRadio(bytes: ByteArray)
