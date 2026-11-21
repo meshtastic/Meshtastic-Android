@@ -25,7 +25,6 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.serial.WebSerialPortRegistry
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -33,10 +32,10 @@ import org.meshtastic.core.repository.RadioTransportFactory
 
 /**
  * wasmJs (browser) implementation of [RadioTransportFactory]. BLE is handled entirely by [BaseRadioTransportFactory]
- * via `core:ble`'s Web Bluetooth actuals. Mock/Replay are commonMain-portable and created directly here, same as every
- * other platform. Serial/USB is backed by the Web Serial API via [WasmJsSerialTransport] and [WebSerialPortRegistry].
- * Network is firmware's WebSocket phone API, which [BaseRadioTransportFactory] opens. Raw TCP has no browser equivalent
- * and fails loudly rather than silently degrading: browsers cannot open raw sockets.
+ * via `core:ble`'s Web Bluetooth actuals. Mock/Replay dispatch lives in the base, with replay falling back to mock.
+ * Serial/USB is backed by the Web Serial API via [WasmJsSerialTransport] and [WebSerialPortRegistry]. Network is
+ * firmware's WebSocket phone API, which [BaseRadioTransportFactory] opens. Raw TCP has no browser equivalent and fails
+ * loudly rather than silently degrading: browsers cannot open raw sockets.
  */
 @Single(binds = [RadioTransportFactory::class])
 class WasmJsRadioTransportFactory(
@@ -60,39 +59,21 @@ class WasmJsRadioTransportFactory(
     // No bundled capture asset ships on web (no context.assets equivalent).
     override val isReplayTransportAvailable: Boolean = false
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
-        val rest = address.substring(1)
-
-        return when (interfaceId) {
-            InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
-
-            InterfaceId.REPLAY -> {
-                Logger.w { "Replay device selected but no capture asset ships on web — falling back to mock" }
-                MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
-            }
-
-            InterfaceId.TCP ->
-                error(
-                    "TCP transport is not supported on web: browsers cannot open raw sockets " +
-                        "(permanent sandbox limitation)",
-                )
-
-            InterfaceId.SERIAL ->
-                WasmJsSerialTransport(
-                    portId = rest,
-                    registry = serialPortRegistry,
-                    callback = service,
-                    scope = service.serviceScope,
-                )
-
-            InterfaceId.NOP,
-            null,
-            -> NopRadioTransport(rest)
-
-            InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
-
-            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
-        }
+    override fun createReplayTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        Logger.w { "Replay device selected but no capture asset ships on web — falling back to mock" }
+        return super.createReplayTransport(address, service)
     }
+
+    override fun createTcpTransport(service: RadioInterfaceService, rest: String): RadioTransport = error(
+        "TCP transport is not supported on web: browsers cannot open raw sockets " +
+            "(permanent sandbox limitation)",
+    )
+
+    override fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        WasmJsSerialTransport(
+            portId = rest,
+            registry = serialPortRegistry,
+            callback = service,
+            scope = service.serviceScope,
+        )
 }

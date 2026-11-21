@@ -30,7 +30,7 @@ import org.meshtastic.core.repository.RadioTransportFactory
 
 /**
  * Common base class for platform [RadioTransportFactory] implementations. Handles KMP-friendly transports (BLE) while
- * delegating platform-specific ones (like TCP, USB/Serial and Mocks) to the abstract [createPlatformTransport].
+ * dispatching the rest on its [InterfaceId] prefix to hooks (TCP, serial, replay, NOP) that platforms override.
  */
 abstract class BaseRadioTransportFactory(
     protected val scanner: BleScanner,
@@ -113,6 +113,48 @@ abstract class BaseRadioTransportFactory(
         return transport
     }
 
-    /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
-    protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport
+    /**
+     * Dispatches an address that is not BLE or WebSocket on its [InterfaceId] prefix. Platforms override the `create*`
+     * hooks for what is their own rather than this function.
+     */
+    protected open fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
+
+        return when (interfaceId) {
+            InterfaceId.MOCK -> createMockTransport(service, address.substring(1))
+
+            InterfaceId.REPLAY -> createReplayTransport(address, service)
+
+            InterfaceId.TCP -> createTcpTransport(service, address.substring(1))
+
+            InterfaceId.SERIAL -> createSerialTransport(service, address.substring(1))
+
+            InterfaceId.NOP,
+            null,
+            -> createNopTransport(address)
+
+            InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
+
+            InterfaceId.WEBSOCKET -> error("WebSocket addresses should be handled by BaseRadioTransportFactory")
+        }
+    }
+
+    /** The synthetic Demo Mode radio, commonMain-portable and identical on every platform. */
+    protected fun createMockTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+
+    /** `r` address ([address] is the full address). Defaults to the mock, for platforms with no capture to replay. */
+    protected open fun createReplayTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        createMockTransport(service, address.substring(1))
+
+    /** `t` address. The base has no socket; platforms that open one override this, and the rest refuse. */
+    protected open fun createTcpTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        error("TCP transport is not supported on this platform")
+
+    /** `s` address. Platforms with a serial or USB stack override this. */
+    protected open fun createSerialTransport(service: RadioInterfaceService, rest: String): RadioTransport =
+        error("Serial transport is not supported on this platform")
+
+    /** `n` address, or one with no known prefix ([address] is the full address). Defaults to an inert transport. */
+    protected open fun createNopTransport(address: String): RadioTransport = NopRadioTransport(address.substring(1))
 }
