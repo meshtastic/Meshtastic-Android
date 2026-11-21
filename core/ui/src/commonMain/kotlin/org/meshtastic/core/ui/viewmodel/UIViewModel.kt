@@ -49,6 +49,7 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.asDeviceVersion
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.util.MESHTASTIC_HOST
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.navigation.DeepLinkRouter
@@ -402,7 +403,9 @@ internal fun CommonUri.toSanitizedImportSummary(): String {
     // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
     // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
     val schemeLength = scheme?.length ?: 0
-    return "rawLength=${toString().length} schemeLength=$schemeLength host=$host " +
+    val meshtasticHost = host?.removePrefix("www.").equals(MESHTASTIC_HOST, ignoreCase = true)
+    return "rawLength=${toString().length} schemeLength=$schemeLength " +
+        "meshtasticHost=$meshtasticHost hostLength=${host?.length ?: 0} " +
         "pathSegmentCount=${pathSegments.size} hasFragment=$hasFragment " +
         "fragmentLength=$fragmentLength queryParameterCount=$queryParameterCount"
 }

@@ -60,6 +60,22 @@ class UIViewModelImportSummaryTest {
     }
 
     @Test
+    fun sanitized_import_summary_omits_a_host_that_is_not_meshtastic() {
+        val summary = CommonUri.parse("https://alice%40example.com/").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("meshtasticHost=false"))
+        assertFalse(summary.contains("alice"))
+        assertFalse(summary.contains("example.com"))
+    }
+
+    @Test
+    fun sanitized_import_summary_flags_a_meshtastic_host() {
+        val summary = CommonUri.parse("https://www.meshtastic.org/e/").toSanitizedImportSummary()
+
+        assertTrue(summary.contains("meshtasticHost=true"))
+    }
+
+    @Test
     fun sanitized_import_summary_handles_opaque_scheme_only_uri() {
         val summary = CommonUri.parse("foo:bar").toSanitizedImportSummary()
 
