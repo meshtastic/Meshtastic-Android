@@ -117,26 +117,20 @@ class CommandSenderImpl(
      * PKI because relay nodes need to read and/or modify the inner payload (e.g. traceroute appends each hop's node
      * number). These requests fall back to the node's heard-on channel.
      */
-    private fun getAdminChannelIndex(toNum: Int): Int {
+    private fun getAdminChannelIndex(toNum: Int, adminChannelIndex: Int?): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
         return when {
             myNum == toNum -> 0
-
             myNode?.hasPKC == true && destNode?.hasPKC == true -> NodeAddress.PKC_CHANNEL_INDEX
-
-            else ->
-                channelSet.value.settings
-                    .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
-                    .coerceAtLeast(0)
+            else -> adminChannelIndex ?: 0
         }
     }
 
-    private fun adminChannelIndexOrNull(): Int? = channelSet.value.settings
-        .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
-        .takeIf { it >= 0 }
+    private fun ChannelSet.adminChannelIndexOrNull(): Int? =
+        settings.indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }.takeIf { it >= 0 }
 
     /**
      * Returns the heard-on channel for a non-admin request to [toNum]. Does NOT use PKI — protocol-level requests need
@@ -636,12 +630,15 @@ class CommandSenderImpl(
         id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         wantResponse: Boolean = false,
         adminMessage: AdminMessage,
-    ): MeshPacket =
-        buildMeshPacket(
+    ): MeshPacket {
+        // One snapshot: the channel the packet goes out on and the admin index its reply is judged against must
+        // come from the same channel set, which a collector replaces concurrently.
+        val adminChannelIndex = channelSet.value.adminChannelIndexOrNull()
+        return buildMeshPacket(
             to = to,
             id = id,
             wantAck = true,
-            channel = getAdminChannelIndex(to),
+            channel = getAdminChannelIndex(to, adminChannelIndex),
             priority = MeshPacket.Priority.RELIABLE,
             decoded =
             Data.Builder()
@@ -652,7 +649,8 @@ class CommandSenderImpl(
                 }
                 .build(),
         )
-            .also { adminRequestRegistry.register(it.id, to, adminChannelIndexOrNull()) }
+            .also { adminRequestRegistry.register(it.id, to, adminChannelIndex) }
+    }
 
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL
