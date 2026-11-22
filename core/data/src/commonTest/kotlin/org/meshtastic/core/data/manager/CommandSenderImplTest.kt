@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -27,6 +28,9 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -54,6 +58,7 @@ import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
@@ -276,6 +281,69 @@ class CommandSenderImplTest {
 
         assertTrue(adminRequestRegistry.consume(packets.single().id))
         assertFalse(adminRequestRegistry.consume(packets.single().id))
+    }
+
+    @Test
+    fun sendAdmin_bindsTheOutstandingRequestToItsDestination() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
+
+        commandSender.sendAdmin(DEST_NODE, requestId = 0, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
+
+        assertEquals(DEST_NODE, adminRequestRegistry.find(packets.single().id)?.destNum)
+    }
+
+    @Test
+    fun sendAdminImmediate_recordsTheAdminIndexOfTheChannelItChose() {
+        fun channelsWithAdminAt(adminIndex: Int) = ChannelSet.Builder()
+            .also { wb ->
+                wb.settings =
+                    List(6) { index ->
+                        ChannelSettings.Builder()
+                            .also { wb -> wb.name = if (index == adminIndex) "admin" else "channel$index" }
+                            .build()
+                    }
+            }
+            .build()
+        val channels = MutableStateFlow(channelsWithAdminAt(3))
+        every { radioConfigRepository.channelSetFlow } returns channels
+        // The admin channel moves between the first and later reads of the node number during one send.
+        var nodeNumReads = 0
+        every { nodeManager.myNodeNum } calls
+            {
+                if (++nodeNumReads >= 2) channels.value = channelsWithAdminAt(5)
+                MutableStateFlow<Int?>(MY_NODE_NUM)
+            }
+        // Unconfined so the channel update lands inline; cancelled below because the sender's collector never ends.
+        val senderScope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val sender =
+                CommandSenderImpl(
+                    packetHandler = packetHandler,
+                    nodeManager = nodeManager,
+                    radioConfigRepository = radioConfigRepository,
+                    tracerouteHandler = tracerouteHandler,
+                    neighborInfoHandler = neighborInfoHandler,
+                    sessionManager = sessionManager,
+                    adminRequestRegistry = adminRequestRegistry,
+                    connectionStateProvider = connectionStateProvider,
+                    scope = senderScope.asServiceScope(),
+                )
+            val packets = mutableListOf<ToRadio>()
+            every { packetHandler.sendToRadio(capture(packets)) } returns Unit
+
+            sender.sendAdminImmediate(DEST_NODE) {
+                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+            }
+
+            val packet = requireNotNull(packets.single().packet)
+            assertEquals(3, packet.channel)
+            assertEquals(3, adminRequestRegistry.find(packet.id)?.adminChannelIndex)
+        } finally {
+            senderScope.cancel()
+        }
     }
 
     @Test

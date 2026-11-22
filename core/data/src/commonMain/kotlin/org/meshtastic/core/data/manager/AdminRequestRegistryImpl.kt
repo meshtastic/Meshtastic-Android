@@ -20,23 +20,30 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AdminRequestRegistry
+import org.meshtastic.core.repository.OutstandingAdminRequest
 
 @Single
 class AdminRequestRegistryImpl : AdminRequestRegistry {
     // Oldest first. Bounded so a request the radio never answers cannot grow the set forever.
-    private val outstanding = atomic<List<Int>>(emptyList())
+    private val outstanding = atomic<List<OutstandingAdminRequest>>(emptyList())
 
-    override fun register(requestId: Int) {
+    override fun register(requestId: Int, destNum: Int, adminChannelIndex: Int?) {
         if (requestId == 0) return
-        outstanding.update { ids -> (ids - requestId + requestId).takeLast(MAX_OUTSTANDING) }
+        val request = OutstandingAdminRequest(requestId, destNum, adminChannelIndex)
+        outstanding.update { requests ->
+            (requests.filterNot { it.requestId == requestId } + request).takeLast(MAX_OUTSTANDING)
+        }
     }
+
+    override fun find(requestId: Int): OutstandingAdminRequest? =
+        if (requestId == 0) null else outstanding.value.firstOrNull { it.requestId == requestId }
 
     override fun consume(requestId: Int): Boolean {
         if (requestId == 0) return false
         var found = false
-        outstanding.update { ids ->
-            found = requestId in ids
-            if (found) ids - requestId else ids
+        outstanding.update { requests ->
+            found = requests.any { it.requestId == requestId }
+            if (found) requests.filterNot { it.requestId == requestId } else requests
         }
         return found
     }
