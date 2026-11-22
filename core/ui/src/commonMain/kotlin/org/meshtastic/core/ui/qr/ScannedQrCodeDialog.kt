@@ -368,10 +368,7 @@ private fun ImportModeSelector(
 /** Each thing a channel shares is its own statement, so each can be translated and read on its own. */
 @Composable
 private fun ChannelSharingStatements(sharing: ChannelSharing) {
-    Column(
-        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (sharing.uplink) SharingStatement(MeshtasticIcons.CloudUpload, Res.string.channel_import_uplink)
         if (sharing.downlink) SharingStatement(MeshtasticIcons.CloudDownload, Res.string.channel_import_downlink)
         when (sharing.position) {

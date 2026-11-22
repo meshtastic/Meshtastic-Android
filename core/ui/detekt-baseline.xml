@@ -85,6 +85,7 @@
     <ID>PreviewPublic:BitwisePreference.kt:@Preview(showBackground = true) @Composable fun BitwisePreferencePreview</ID>
     <ID>PreviewPublic:ChannelInfo.kt:@PreviewLightDark @Composable fun ChannelInfoPreview</ID>
     <ID>PreviewPublic:ChannelItem.kt:@Preview @Composable fun ChannelItemPreview</ID>
+    <ID>PreviewPublic:ChannelSelection.kt:@Preview @Composable fun ChannelSelectionPreview</ID>
     <ID>PreviewPublic:DistanceInfo.kt:@PreviewLightDark @Composable fun DistanceInfoPreview</ID>
     <ID>PreviewPublic:DropDownPreference.kt:@Preview(showBackground = true) @Composable fun DropDownPreferencePreview</ID>
     <ID>PreviewPublic:EditIPv4Preference.kt:@Preview(showBackground = true) @Composable fun EditIPv4PreferencePreview</ID>

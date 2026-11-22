@@ -19,7 +19,7 @@ package org.meshtastic.core.ui.qr
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.model.loraBandwidthKilohertz
+import org.meshtastic.core.model.loraBandwidthMegahertz
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
@@ -129,6 +129,7 @@ private class LoraFieldSpec(
 
 private const val OFFSET_DECIMALS = 6
 private const val BANDWIDTH_DECIMALS = 3
+private const val KILOHERTZ_PER_MEGAHERTZ = 1000f
 private val CODING_RATE_RANGE = 4..8
 
 private fun LoRaConfig.hasFrequencyOverride() = override_frequency != 0f
@@ -169,7 +170,7 @@ private val loraFieldSpecs: List<LoraFieldSpec> =
                 if (it.use_preset || it.bandwidth == 0) {
                     LoraValue.Default
                 } else {
-                    LoraValue.Kilohertz(trimmedNumber(loraBandwidthKilohertz(it.bandwidth)))
+                    LoraValue.Kilohertz(trimmedNumber(loraBandwidthMegahertz(it.bandwidth) * KILOHERTZ_PER_MEGAHERTZ))
                 }
             },
         ),
