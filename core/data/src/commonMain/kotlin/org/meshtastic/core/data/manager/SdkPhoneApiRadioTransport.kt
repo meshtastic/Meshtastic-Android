@@ -51,6 +51,8 @@ import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.LogLevel
+import org.meshtastic.sdk.LogSink
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
@@ -111,6 +113,7 @@ internal class SdkPhoneApiRadioTransport(
                 RadioClient.Builder()
                     .transport(transport)
                     .storage(InMemoryStorageProvider())
+                    .logger(sdkLogSink)
                     .coroutineContext(service.serviceScope.coroutineContext)
                     .autoSyncTimeOnConnect(false)
                     .sessionReceive()
@@ -250,5 +253,18 @@ internal class SdkPhoneApiRadioTransport(
             run = null
             lockdownCoordinator.value.onDisconnect()
         }
+    }
+}
+
+/** Routes the SDK engine's log lines into the app's log at the same severity. */
+private val sdkLogSink = LogSink { level, tag, message, cause ->
+    val logger = Logger.withTag("SDK/$tag")
+    when (level) {
+        LogLevel.VERBOSE -> logger.v(cause) { message }
+        LogLevel.DEBUG -> logger.d(cause) { message }
+        LogLevel.INFO -> logger.i(cause) { message }
+        LogLevel.WARN -> logger.w(cause) { message }
+        LogLevel.ERROR -> logger.e(cause) { message }
+        LogLevel.NONE -> Unit
     }
 }
