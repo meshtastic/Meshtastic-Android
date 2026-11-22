@@ -40,6 +40,10 @@ Nothing connects until the user chooses. Without an address the screen lists eve
 
 The BLE connection stays open after provisioning, so the user can retry or pick another network; it is released when the user taps **Cancel** or leaves the screen. The flow is reached from the Android and Desktop settings screens and settings search (`WifiProvisionRoute`, registered by `wifiProvisionGraph()`).
 
+### Protocol Source
+
+Replies are decoded against what the device service writes, not the nymea README: `WirelessService::createResponse` and the `command*` methods in `libnymea-networkmanager/bluetooth/wirelessservice.cpp`, identical in `nymea/libnymea-networkmanager` and `mPWRD-OS/libnymea-networkmanager`. The mPWRD-OS image installs the `nymea-networkmanager` package (`mPWRD-OS` `extensions/provisioning/nymea-networkmanager.sh`). Every reply carries integer `c` and `r`, GetNetworks always carries a list, and each entry always carries string `e` and `m` and integer `s` (percent) and `p` (0 or 1), so a reply or entry without them is rejected. The service has no command 2 (a hidden network is `"h": true` on Connect; it answers command 2 with Connect and InvalidCommand), and numbers error 5 as wireless disabled and 6 as networking disabled.
+
 ### Key Classes
 
 - `WifiProvisionViewModel.kt`: MVI state machine with 9 phases, device list ordering and SSID deduplication.

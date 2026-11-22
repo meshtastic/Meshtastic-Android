@@ -37,7 +37,10 @@ import kotlinx.serialization.json.intOrNull
  * All messages are compact JSON objects terminated with a newline (`\n`) and chunked into ≤20-byte BLE
  * notification/write packets.
  *
- * Reference: https://github.com/nymea/nymea-networkmanager#bluetooth-gatt-profile
+ * Reference: https://github.com/nymea/nymea-networkmanager#bluetooth-gatt-profile. The reply shapes below are those the
+ * service actually writes, `WirelessService::createResponse` and the `command*` methods in
+ * libnymea-networkmanager/bluetooth/wirelessservice.cpp (nymea, and the identical mPWRD-OS fork); the README differs
+ * from it on the hidden-connect command and on error codes 5 and 6.
  */
 
 // ---------------------------------------------------------------------------
@@ -122,9 +125,15 @@ internal data class NymeaNetworkEntry(
     @SerialName("e") val ssid: String,
     /** BSSID / MAC address (nymea key: `m`). */
     @SerialName("m") val bssid: String = "",
-    /** Signal strength (nymea key: `s`); required, since a missing reading is not a reading of 0. */
+    /**
+     * Signal strength in percent, 0 to 100 (nymea key: `s`). The service always writes it as an integer, so it is
+     * required: a missing reading is not a reading of 0.
+     */
     @SerialName("s") @Serializable(with = StrictIntSerializer::class) val signalStrength: Int,
-    /** 0 = open, 1 = protected (nymea key: `p`); required, since a missing flag must not read as an open network. */
+    /**
+     * 0 = open, 1 = protected (nymea key: `p`). The service always writes it as the integer 0 or 1, so it is required:
+     * a missing flag must not read as an open network.
+     */
     @SerialName("p") @Serializable(with = StrictIntSerializer::class) val protection: Int,
 )
 

@@ -16,11 +16,17 @@
  */
 package org.meshtastic.feature.wifiprovision.domain
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
@@ -36,6 +42,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.Uuid
 
 /**
  * Tests for [NymeaWifiService] covering BLE connect, network scanning, provisioning, and error handling. Uses
@@ -637,8 +646,9 @@ class NymeaWifiServiceTest {
                 2 to "Invalid parameter",
                 3 to "NetworkManager not available",
                 4 to "Wireless adapter not available",
-                5 to "Networking disabled",
-                6 to "Wireless disabled",
+                // The service's enum: 5 is WirelessNotEnabled and 6 NetworkingNotEnabled (wirelessservice.h).
+                5 to "Wireless disabled",
+                6 to "Networking disabled",
                 7 to "Unknown error",
             )
 
@@ -666,5 +676,87 @@ class NymeaWifiServiceTest {
         service.close()
 
         assertTrue(connection.disconnectCalls >= 1, "Should call BLE disconnect")
+    }
+
+    // -----------------------------------------------------------------------
+    // What the device service writes
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `a visible connect ignores a reply that carries the hidden connect code`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":2,"r":0}""")
+        val result = service.provision("Net", "pass")
+
+        assertEquals(NO_RESPONSE_CODE, assertIs<ProvisionResult.Failure>(result).errorCode)
+    }
+
+    @Test
+    fun `a hidden connect answered the way the service answers an unknown command fails with invalid command`() =
+        runTest {
+            val connection = FakeBleConnection()
+            val (service, scanner) = createService(connection = connection)
+            connectService(service, scanner)
+
+            emitResponse(connection, """{"c":1,"r":1}""")
+            val result = service.provision("Net", "pass", hidden = true)
+
+            val failure = assertIs<ProvisionResult.Failure>(result)
+            assertEquals(1, failure.errorCode)
+            assertTrue(failure.message.contains("Invalid command"))
+        }
+
+    @Test
+    fun `service discovery that times out is a connect failure and not a cancellation`() = runTest {
+        val connection = ProfileTimeoutConnection(FakeBleConnection(), timeOutFromStart = true)
+        val service = NymeaWifiService(FakeBleScanner(), FixedFactory(connection), Dispatchers.Unconfined)
+
+        val result = service.connect(FakeBleDevice(address))
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `a command write that times out fails the command and ends the session instead of cancelling the caller`() =
+        runTest {
+            val fake = FakeBleConnection()
+            val connection = ProfileTimeoutConnection(fake, timeOutFromStart = false)
+            val scanner = FakeBleScanner()
+            val service = NymeaWifiService(scanner, FixedFactory(connection), Dispatchers.Unconfined)
+            scanner.emitDevice(FakeBleDevice(address))
+            assertTrue(service.connect(address).isSuccess)
+            connection.timeOut = true
+
+            val scan = service.scanNetworks()
+            connection.timeOut = false
+            val writesBefore = fake.service.writes.size
+            val retry = service.scanNetworks()
+
+            assertIs<DeviceResponseTimeoutException>(scan.exceptionOrNull())
+            assertIs<DeviceResponseTimeoutException>(retry.exceptionOrNull())
+            assertEquals(writesBefore, fake.service.writes.size)
+        }
+
+    /** A connection whose `profile` gives up the way core:ble's does, with `withTimeout`, once [timeOut] is set. */
+    private class ProfileTimeoutConnection(private val delegate: FakeBleConnection, timeOutFromStart: Boolean) :
+        BleConnection by delegate {
+        var timeOut: Boolean = timeOutFromStart
+
+        override suspend fun <T> profile(
+            serviceUuid: Uuid,
+            timeout: Duration,
+            setup: suspend CoroutineScope.(BleService) -> T,
+        ): T = if (timeOut) {
+            withTimeout(1.milliseconds) { awaitCancellation() }
+        } else {
+            delegate.profile(serviceUuid, timeout, setup)
+        }
+    }
+
+    private class FixedFactory(private val connection: BleConnection) : BleConnectionFactory {
+        override fun create(scope: CoroutineScope, tag: String): BleConnection = connection
     }
 }

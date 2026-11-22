@@ -21,6 +21,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -151,30 +152,35 @@ class NymeaWifiService(
 
         Logger.i { "$TAG: Connected. Discovering wireless service…" }
 
-        bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
-            val subscribed = CompletableDeferred<Unit>()
+        try {
+            bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
+                val subscribed = CompletableDeferred<Unit>()
 
-            service
-                .observe(responseChar)
-                .onEach { bytes ->
-                    val message = reassembler.feed(bytes)
-                    if (message != null) {
-                        Logger.d { "$TAG: ← response (${message.length} chars)" }
-                        responseChannel.trySend(message)
+                service
+                    .observe(responseChar)
+                    .onEach { bytes ->
+                        val message = reassembler.feed(bytes)
+                        if (message != null) {
+                            Logger.d { "$TAG: ← response (${message.length} chars)" }
+                            responseChannel.trySend(message)
+                        }
+                        if (!subscribed.isCompleted) subscribed.complete(Unit)
                     }
-                    if (!subscribed.isCompleted) subscribed.complete(Unit)
-                }
-                .catch { e ->
-                    Logger.e(e) { "$TAG: Error in response characteristic subscription" }
-                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                }
-                .launchIn(this)
+                    .catch { e ->
+                        Logger.e(e) { "$TAG: Error in response characteristic subscription" }
+                        if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
+                    }
+                    .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE)
-            if (!subscribed.isCompleted) subscribed.complete(Unit)
-            subscribed.await()
+                delay(SUBSCRIPTION_SETTLE)
+                if (!subscribed.isCompleted) subscribed.complete(Unit)
+                subscribed.await()
 
-            Logger.i { "$TAG: Wireless service ready" }
+                Logger.i { "$TAG: Wireless service ready" }
+            }
+        } catch (e: TimeoutCancellationException) {
+            // profile() bounds service discovery with withTimeout, which is a failure here and not a cancellation.
+            throw IllegalStateException("Timed out waiting for the wireless service", e)
         }
 
         return deviceName
@@ -234,8 +240,11 @@ class NymeaWifiService(
         return safeCatching {
             exchangeLock.withLock {
                 sendCommand(cmd, json)
-                // Either connect code: a device may echo the visible command's code for a hidden network.
-                val response = decodeReply<NymeaResponse>(waitForResponse(CMD_CONNECT, CMD_CONNECT_HIDDEN))
+                // The service writes code 1 in every reply to a connect, and answers an unknown command such as 2
+                // with code 1 and InvalidCommand. Code 2 is accepted only for a hidden request, as the README has it.
+                val reply =
+                    if (hidden) waitForResponse(CMD_CONNECT, CMD_CONNECT_HIDDEN) else waitForResponse(CMD_CONNECT)
+                val response = decodeReply<NymeaResponse>(reply)
                 if (response.responseCode == RESPONSE_SUCCESS) {
                     val ipAddress =
                         response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
@@ -280,10 +289,17 @@ class NymeaWifiService(
         if (unsynchronized) throw DeviceResponseTimeoutException()
         Logger.d { "$TAG: → command=$command" }
         val packets = NymeaPacketCodec.encode(json)
-        bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
-            for (packet in packets) {
-                service.write(commanderChar, packet, BleWriteType.WITH_RESPONSE)
+        try {
+            bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
+                for (packet in packets) {
+                    service.write(commanderChar, packet, BleWriteType.WITH_RESPONSE)
+                }
             }
+        } catch (e: TimeoutCancellationException) {
+            // profile() bounds itself with withTimeout. Part of the command may have been written, so the session is
+            // as unusable as after a missed reply.
+            unsynchronized = true
+            throw DeviceResponseTimeoutException(e)
         }
     }
 
@@ -370,4 +386,5 @@ class MalformedReplyException(cause: Throwable? = null) :
     IllegalStateException("Unexpected reply from the device", cause)
 
 /** The connected device sent no answer to a command in time. */
-class DeviceResponseTimeoutException : IllegalStateException("No response from the device")
+class DeviceResponseTimeoutException(cause: Throwable? = null) :
+    IllegalStateException("No response from the device", cause)
