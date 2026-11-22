@@ -526,8 +526,11 @@ class SharedRadioInterfaceService(
     // again: a recovery restart would take the slot back from the client that now holds it.
     @Volatile private var awaitingUserConnect = false
 
-    /** Backoff for consecutive PhoneAPI connection failures. Guarded by [transportMutex]. */
-    private var phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+    /**
+     * Backoff for consecutive PhoneAPI connection failures; null starts from the link's first retry delay. Guarded by
+     * [transportMutex].
+     */
+    private var phoneApiRetryDelay: Long? = null
 
     private val gattCacheInvalidationRequested = atomic(false)
 
@@ -549,6 +552,9 @@ class SharedRadioInterfaceService(
         /** How often [revokeTransportSession] reports a lease drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
         private const val PHONE_API_INITIAL_RETRY_MS = 1_000L
+
+        /** Firmware frees its GATT session only seconds after a link drops, so a BLE retry waits for that first. */
+        private const val BLE_INITIAL_RETRY_MS = 3_000L
         private const val PHONE_API_MAX_RETRY_MS = 30_000L
     }
 
@@ -708,7 +714,7 @@ class SharedRadioInterfaceService(
                         stopTransportLocked(notifyPermanent = false)
                     }
                 }
-                phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+                phoneApiRetryDelay = null
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -723,7 +729,7 @@ class SharedRadioInterfaceService(
             // Tear the gate down BEFORE stopTransportLocked() so a concurrent state-listener
             // emission arriving while we wait for the mutex cannot re-start the transport.
             connectionRequested = false
-            phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+            phoneApiRetryDelay = null
             gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
         }
@@ -788,7 +794,7 @@ class SharedRadioInterfaceService(
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
-                if (linkWasUp) phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+                if (linkWasUp) phoneApiRetryDelay = null
                 if (!recoverable) connectionRequested = false
 
                 ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
@@ -799,7 +805,11 @@ class SharedRadioInterfaceService(
                 )
                 if (!connectionRequested) return@launch
 
-                phoneApiRetryDelay.also { phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS) }
+                val initialRetry =
+                    if (interfaceId == InterfaceId.BLUETOOTH) BLE_INITIAL_RETRY_MS else PHONE_API_INITIAL_RETRY_MS
+                (phoneApiRetryDelay ?: initialRetry).also {
+                    phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS)
+                }
             }
 
             delay(retryDelay)
@@ -883,7 +893,7 @@ class SharedRadioInterfaceService(
                 // transport when an address was actually selected.
                 connectionRequested = sanitized != null
                 awaitingUserConnect = false
-                phoneApiRetryDelay = PHONE_API_INITIAL_RETRY_MS
+                phoneApiRetryDelay = null
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }

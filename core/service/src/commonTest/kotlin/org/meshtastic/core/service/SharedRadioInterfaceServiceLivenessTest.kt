@@ -1412,6 +1412,23 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `a BLE retry after a drop waits for the radio to release its GATT session`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            callbacks.single().onConnect()
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            // BleReconnectPolicy.DEFAULT_SETTLE_DELAY on main: 3 s before every BLE connect.
+            advanceTimeBy(2_999L)
+            assertEquals(1, callbacks.size)
+            advanceTimeBy(2L)
+            assertEquals(2, callbacks.size)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
     fun `terminal PhoneAPI session end retires the transport without reconnecting`() = runTest(testDispatcher) {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks)
@@ -2057,7 +2074,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             testDispatcher.scheduler.runCurrent()
             assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
 
-            advanceTimeBy(1_000L)
+            advanceTimeBy(3_000L)
             testDispatcher.scheduler.runCurrent()
 
             assertEquals(2, callbacks.size)
