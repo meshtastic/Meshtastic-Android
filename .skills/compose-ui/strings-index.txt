@@ -36,7 +36,6 @@ adc_voltage
 ### ADD ###
 add
 add_a_note
-add_channels_description
 add_custom_tile_source
 add_favorite
 add_layer
@@ -202,6 +201,16 @@ channel_7
 channel_8
 channel_already_on_radio
 channel_features
+channel_import_add_description
+channel_import_confirm_add
+channel_import_confirm_replace
+channel_import_downlink
+channel_import_mode_label
+channel_import_position_approximate
+channel_import_position_precise
+channel_import_replace_description
+channel_import_title
+channel_import_uplink
 channel_invalid
 channel_name
 channel_slots_full
@@ -866,6 +875,7 @@ fr_HT
 free_memory
 free_memory_description
 freq
+frequency_value_mhz
 gas_resistance
 generate_qr_code
 ### GEOFENCE ###
@@ -1101,17 +1111,24 @@ long_name
 longitude
 ### LORA ###
 lora
+lora_change_spoken
+lora_change_values
+lora_changes_alert_description
+lora_changes_alert_heading
+lora_changes_heading
 lora_config
-lora_config_change_value
-lora_config_changes
-lora_config_values_none
+lora_fem_lna_auto
+lora_fem_lna_not_present
 lora_field_fem_lna_mode
 lora_field_frequency_offset
+lora_field_modem_preset
 lora_field_serial_hal_only
 lora_field_transparent_mode
 lora_field_unrecognized
 lora_preset_custom
 lora_preset_region
+lora_value_none
+lora_value_not_used
 low_battery
 low_battery_message
 low_battery_title
@@ -1490,7 +1507,6 @@ neighbor_mean_snr_description
 network
 network_layer_url_hint
 network_scan_unavailable
-new_channel_rcvd
 new_messages_below
 new_node_seen
 new_nodes
@@ -1867,7 +1883,6 @@ remove_layer
 remove_node_text
 remove_nodes_text
 replace
-replace_channels_and_settings_description
 reply
 replying_to
 report
