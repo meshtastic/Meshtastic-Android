@@ -16,9 +16,17 @@
  */
 package org.meshtastic.feature.wifiprovision.domain
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
@@ -26,6 +34,7 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.NO_RESPONSE_CODE
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import kotlin.test.AfterTest
@@ -33,6 +42,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.Uuid
 
 /**
  * Tests for [NymeaWifiService] covering BLE connect, network scanning, provisioning, and error handling. Uses
@@ -67,7 +79,7 @@ class NymeaWifiServiceTest {
         deviceName: String? = "mpwrd-nm-1234",
     ): Result<String> {
         scanner.emitDevice(FakeBleDevice(address, name = deviceName))
-        return service.connect()
+        return service.connect(address)
     }
 
     private fun emitResponse(connection: FakeBleConnection, json: String) {
@@ -101,9 +113,71 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
 
         scanner.emitDevice(FakeBleDevice(address))
-        val result = service.connect()
+        val result = service.connect(address)
 
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `connect to an address skips an earlier advertiser with another address`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "other"))
+        scanner.emitDevice(FakeBleDevice(address, name = "target"))
+        val result = service.connect(address)
+
+        assertEquals("target", result.getOrThrow())
+        assertEquals(address, connection.device?.address)
+        assertEquals(address, service.deviceAddress)
+    }
+
+    @Test
+    fun `connect to an address that never advertises fails instead of cancelling the caller`() = runTest {
+        val (service, scanner) = createService()
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "other"))
+
+        val result = service.connect(address)
+
+        assertIs<DeviceNotFoundException>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `connect to a MAC reaches a device that reports a BlueZ path`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        val path = "/org/bluez/hci0/dev_AA_BB_CC_DD_EE_FF"
+
+        scanner.emitDevice(FakeBleDevice(path, name = "linux"))
+        val result = service.connect(address)
+
+        assertEquals("linux", result.getOrThrow())
+        assertEquals(path, connection.device?.address)
+    }
+
+    @Test
+    fun `connect without an address connects nothing where the app scans itself`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice(address))
+        val result = service.connect(address = null)
+
+        assertTrue(result.isFailure)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `connect to a chosen device connects that device and not an advertiser seen first`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "first seen"))
+        val result = service.connect(FakeBleDevice(address, name = "chosen"))
+
+        assertEquals("chosen", result.getOrThrow())
+        assertEquals(address, connection.device?.address)
+        assertEquals(1, connection.connectAndAwaitCalls)
     }
 
     @Test
@@ -113,7 +187,7 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
 
         scanner.emitDevice(FakeBleDevice(address))
-        val result = service.connect()
+        val result = service.connect(address)
 
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull()?.message?.contains("Bluetooth off") == true)
@@ -248,6 +322,234 @@ class NymeaWifiServiceTest {
     }
 
     @Test
+    fun `provision succeeds without an IP when the connection lookup gets no answer`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":0}""")
+        val result = service.provision("MyNet", "password")
+
+        assertEquals(ProvisionResult.Success(ipAddress = null), result)
+    }
+
+    @Test
+    fun `provision fails with the no response code when the device never answers`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = service.provision("MyNet", "password")
+
+        assertEquals(NO_RESPONSE_CODE, assertIs<ProvisionResult.Failure>(result).errorCode)
+    }
+
+    @Test
+    fun `scanNetworks fails with a response timeout when the device never answers`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = service.scanNetworks()
+
+        assertIs<DeviceResponseTimeoutException>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `a closed service sends no command`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+        service.close()
+        val writesBefore = connection.service.writes.size
+
+        val scan = service.scanNetworks()
+        val provision = service.provision("Net", "pass")
+
+        assertTrue(scan.isFailure)
+        assertIs<ProvisionResult.Failure>(provision)
+        assertEquals(writesBefore, connection.service.writes.size)
+    }
+
+    @Test
+    fun `a closed service opens no connection`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, _) = createService(connection = connection)
+        service.close()
+
+        val result = service.connect(FakeBleDevice(address))
+
+        assertTrue(result.isFailure)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a connect reply without a status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a quoted status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":"0"}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a fractional status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":0.5}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a null status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":null}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a scan reply without a status is a scan failure and not an empty list`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[]}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
+    fun `a network list reply without a list is a failure and not no networks`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
+    fun `a network list reply with an empty list is no networks`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[]}""")
+
+        assertEquals(emptyList(), service.scanNetworks().getOrThrow())
+    }
+
+    @Test
+    fun `a network without a protection flag fails the reply and is not listed as open`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[{"e":"Net","m":"01","s":70}]}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
+    fun `a reply for another command is skipped and the right one still completes in the deadline`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+
+        assertEquals(3, assertIs<ProvisionResult.Failure>(result.await()).errorCode)
+    }
+
+    @Test
+    fun `a malformed message is skipped and the next reply still completes`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """}{ not json""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+
+        assertEquals(3, assertIs<ProvisionResult.Failure>(result.await()).errorCode)
+    }
+
+    @Test
+    fun `the connection lookup cannot take the credentials reply for its own`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """{"c":1,"r":0}""")
+        runCurrent()
+        emitResponse(connection, """{"c":1,"r":0}""")
+        emitResponse(connection, """{"c":5,"r":0,"p":{"i":"10.0.0.7"}}""")
+
+        assertEquals(ProvisionResult.Success(ipAddress = "10.0.0.7"), result.await())
+    }
+
+    @Test
+    fun `after a scan times out a late scan reply cannot make provision succeed`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        assertIs<DeviceResponseTimeoutException>(service.scanNetworks().exceptionOrNull())
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+        val result = service.provision("Net", "pass")
+
+        assertIs<ProvisionResult.Failure>(result)
+    }
+
+    @Test
+    fun `after a timeout no later command is sent on the session`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        assertIs<DeviceResponseTimeoutException>(service.scanNetworks().exceptionOrNull())
+        val writesBefore = connection.service.writes.size
+        val retry = async { service.scanNetworks() }
+        runCurrent()
+        emitResponse(connection, """{"c":4,"r":0}""")
+
+        assertIs<DeviceResponseTimeoutException>(retry.await().exceptionOrNull())
+        assertEquals(writesBefore, connection.service.writes.size)
+    }
+
+    @Test
     fun `provision returns Failure on non-zero response code`() = runTest {
         val connection = FakeBleConnection()
         val (service, scanner) = createService(connection = connection)
@@ -344,8 +646,9 @@ class NymeaWifiServiceTest {
                 2 to "Invalid parameter",
                 3 to "NetworkManager not available",
                 4 to "Wireless adapter not available",
-                5 to "Networking disabled",
-                6 to "Wireless disabled",
+                // The service's enum: 5 is WirelessNotEnabled and 6 NetworkingNotEnabled (wirelessservice.h).
+                5 to "Wireless disabled",
+                6 to "Networking disabled",
                 7 to "Unknown error",
             )
 
@@ -373,5 +676,87 @@ class NymeaWifiServiceTest {
         service.close()
 
         assertTrue(connection.disconnectCalls >= 1, "Should call BLE disconnect")
+    }
+
+    // -----------------------------------------------------------------------
+    // What the device service writes
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `a visible connect ignores a reply that carries the hidden connect code`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":2,"r":0}""")
+        val result = service.provision("Net", "pass")
+
+        assertEquals(NO_RESPONSE_CODE, assertIs<ProvisionResult.Failure>(result).errorCode)
+    }
+
+    @Test
+    fun `a hidden connect answered the way the service answers an unknown command fails with invalid command`() =
+        runTest {
+            val connection = FakeBleConnection()
+            val (service, scanner) = createService(connection = connection)
+            connectService(service, scanner)
+
+            emitResponse(connection, """{"c":1,"r":1}""")
+            val result = service.provision("Net", "pass", hidden = true)
+
+            val failure = assertIs<ProvisionResult.Failure>(result)
+            assertEquals(1, failure.errorCode)
+            assertTrue(failure.message.contains("Invalid command"))
+        }
+
+    @Test
+    fun `service discovery that times out is a connect failure and not a cancellation`() = runTest {
+        val connection = ProfileTimeoutConnection(FakeBleConnection(), timeOutFromStart = true)
+        val service = NymeaWifiService(FakeBleScanner(), FixedFactory(connection), Dispatchers.Unconfined)
+
+        val result = service.connect(FakeBleDevice(address))
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `a command write that times out fails the command and ends the session instead of cancelling the caller`() =
+        runTest {
+            val fake = FakeBleConnection()
+            val connection = ProfileTimeoutConnection(fake, timeOutFromStart = false)
+            val scanner = FakeBleScanner()
+            val service = NymeaWifiService(scanner, FixedFactory(connection), Dispatchers.Unconfined)
+            scanner.emitDevice(FakeBleDevice(address))
+            assertTrue(service.connect(address).isSuccess)
+            connection.timeOut = true
+
+            val scan = service.scanNetworks()
+            connection.timeOut = false
+            val writesBefore = fake.service.writes.size
+            val retry = service.scanNetworks()
+
+            assertIs<DeviceResponseTimeoutException>(scan.exceptionOrNull())
+            assertIs<DeviceResponseTimeoutException>(retry.exceptionOrNull())
+            assertEquals(writesBefore, fake.service.writes.size)
+        }
+
+    /** A connection whose `profile` gives up the way core:ble's does, with `withTimeout`, once [timeOut] is set. */
+    private class ProfileTimeoutConnection(private val delegate: FakeBleConnection, timeOutFromStart: Boolean) :
+        BleConnection by delegate {
+        var timeOut: Boolean = timeOutFromStart
+
+        override suspend fun <T> profile(
+            serviceUuid: Uuid,
+            timeout: Duration,
+            setup: suspend CoroutineScope.(BleService) -> T,
+        ): T = if (timeOut) {
+            withTimeout(1.milliseconds) { awaitCancellation() }
+        } else {
+            delegate.profile(serviceUuid, timeout, setup)
+        }
+    }
+
+    private class FixedFactory(private val connection: BleConnection) : BleConnectionFactory {
+        override fun create(scope: CoroutineScope, tag: String): BleConnection = connection
     }
 }

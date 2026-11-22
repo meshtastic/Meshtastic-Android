@@ -67,6 +67,20 @@ internal object NymeaBleConstants {
     /** Scan + connect timeout. */
     val SCAN_TIMEOUT = 10.seconds
 
+    /**
+     * How long a new attempt waits for the previous connection to finish closing before it goes ahead anyway. Closing
+     * is bounded by Kable's `disconnectTimeout`, 5 seconds by default (`PeripheralBuilder`, which core:ble does not
+     * override), plus joining the cancelled coroutines and releasing the peripheral; 8 seconds covers that with margin.
+     * Kable's btleplug peripheral on desktop applies no disconnect timeout, so there this is the only bound.
+     */
+    val RELEASE_TIMEOUT = 8.seconds
+
+    /** How long the device list collects advertisers before it offers a rescan. */
+    val DISCOVERY_WINDOW = 8.seconds
+
+    /** `ProvisionResult.Failure.errorCode` for a command the device never answered; nymea's own codes are 0 to 6. */
+    const val NO_RESPONSE_CODE = -2
+
     /** Maximum time to wait for a command response. */
     val RESPONSE_TIMEOUT = 15.seconds
 
@@ -85,7 +99,11 @@ internal object NymeaBleConstants {
     /** Connect to a network using SSID + password. */
     const val CMD_CONNECT = 1
 
-    /** Connect to a hidden network using SSID + password. */
+    /**
+     * Connect to a hidden network using SSID + password. This is the nymea README's command 2, but the service the
+     * mPWRD-OS image installs has no command 2: it answers it with the Connect code and InvalidCommand, and takes a
+     * hidden network as `"h": true` in the Connect parameters.
+     */
     const val CMD_CONNECT_HIDDEN = 2
 
     /** Trigger a fresh WiFi scan. */
@@ -101,8 +119,11 @@ internal object NymeaBleConstants {
     const val RESPONSE_INVALID_PARAMETER = 2
     const val RESPONSE_NETWORK_MANAGER_UNAVAILABLE = 3
     const val RESPONSE_WIRELESS_UNAVAILABLE = 4
-    const val RESPONSE_NETWORKING_DISABLED = 5
-    const val RESPONSE_WIRELESS_DISABLED = 6
+
+    // 5 and 6 follow the service's WirelessServiceResponse enum (bluetooth/wirelessservice.h), not the nymea README,
+    // which lists them the other way round; checkWirelessErrors() sends 6 when networking is off.
+    const val RESPONSE_WIRELESS_DISABLED = 5
+    const val RESPONSE_NETWORKING_DISABLED = 6
     const val RESPONSE_UNKNOWN = 7
     // endregion
 }
