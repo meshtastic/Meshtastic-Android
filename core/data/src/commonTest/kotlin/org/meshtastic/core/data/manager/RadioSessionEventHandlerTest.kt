@@ -98,17 +98,25 @@ class RadioSessionEventHandlerTest {
 
     @Test
     fun `a refused announcement without a 32-byte key leaves the node alone`() = runTest {
-        val harness = Harness(backgroundScope)
-        harness.holdNodeWithKey(heldKey)
+        val unusable =
+            listOf(
+                ByteString.EMPTY,
+                ByteArray(Node.PUBLIC_KEY_SIZE - 1) { 0x22 }.toByteString(),
+                ByteArray(Node.PUBLIC_KEY_SIZE + 1) { 0x22 }.toByteString(),
+            )
+        for (offered in unusable) {
+            val harness = Harness(backgroundScope)
+            harness.holdNodeWithKey(heldKey)
 
-        harness.handler.handle(
-            MeshEvent.SecurityWarning.PublicKeyMismatch(NodeId(REMOTE), ByteString.EMPTY),
-            harness.session,
-        )
+            harness.handler.handle(
+                MeshEvent.SecurityWarning.PublicKeyMismatch(NodeId(REMOTE), offered),
+                harness.session,
+            )
 
-        val node = harness.nodeManager.nodeDBbyNodeNum.getValue(REMOTE)
-        assertTrue(node.keyMatch)
-        assertNull(node.newPublicKey)
+            val node = harness.nodeManager.nodeDBbyNodeNum.getValue(REMOTE)
+            assertTrue(node.keyMatch, "a ${offered.size}-byte offer flagged the node")
+            assertNull(node.newPublicKey, "a ${offered.size}-byte offer was kept for comparison")
+        }
     }
 
     @Test

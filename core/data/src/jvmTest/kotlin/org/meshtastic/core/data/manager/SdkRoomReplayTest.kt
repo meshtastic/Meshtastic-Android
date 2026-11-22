@@ -26,6 +26,7 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +57,7 @@ import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
@@ -120,6 +122,9 @@ class SdkRoomReplayTest {
                     listOf(TEXT),
                 )
             assertEquals(expected, sdkIngress.result())
+            assertTrue(sdkIngress.dataHandlerSessions.isNotEmpty(), "packets reach the data handler")
+            assertTrue(sdkIngress.dataHandlerSessions.all { it == session })
+            assertTrue(sdkIngress.receiveActivityReports > 0, "packets light the receive activity indicator")
         } finally {
             sdk.close()
         }
@@ -149,6 +154,8 @@ class SdkRoomReplayTest {
             releasePacket.complete(Unit)
             delivery.join()
 
+            assertEquals(emptyList(), ingress.dataHandlerSessions, "the stale packet reached the data handler")
+            assertEquals(0, ingress.receiveActivityReports, "the stale packet lit the receive activity indicator")
             assertTrue(previousDb.packetDao().getAllPacketsSnapshot().isEmpty())
             assertEquals(emptyList(), ingress.result().messages)
             assertEquals(emptyList(), ingress.result().notifications)
@@ -238,6 +245,10 @@ class SdkRoomReplayTest {
         private val nodeManager =
             NodeManagerImpl(FakeNodeRepository(), notificationManager, radio, scope.asServiceScope())
         private val notifications = mutableListOf<String>()
+        val dataHandlerSessions = mutableListOf<RadioSessionContext>()
+        var receiveActivityReports = 0
+            private set
+
         val notified = CompletableDeferred<Unit>()
         val peerChanged = CompletableDeferred<Unit>()
         private val projection: RadioSessionProjection
@@ -291,10 +302,12 @@ class SdkRoomReplayTest {
                     notificationManager,
                     configFlowManager = lazy { configFlowManager },
                     eventHandler = lazy { eventHandler },
+                    onReceivedData = { dataHandlerSessions += it },
                 )
         }
 
         private fun bindSessionAdmission() {
+            every { radio.reportReceiveActivity() } calls { receiveActivityReports++ }
             every { radio.isSessionActive(any()) } calls { selectedSession.value == it.args[0] }
             everySuspend { radio.runWhileSessionActive(any(), any(), any()) } calls
                 {
@@ -557,6 +570,7 @@ internal fun createRoomReplayProjection(
     notificationManager: MeshNotificationManager,
     configFlowManager: Lazy<MeshConfigFlowManagerImpl> = lazy { error("config install is not under test") },
     eventHandler: Lazy<RadioSessionEventHandler> = lazy { error("session events are not under test") },
+    onReceivedData: (RadioSessionContext) -> Unit = {},
 ): RadioSessionProjection {
     val packetRepository = PacketRepositoryImpl(db, dispatchers)
     val logPrefs = mock<MeshLogPrefs>(MockMode.autofill)
@@ -596,11 +610,24 @@ internal fun createRoomReplayProjection(
             activeConversationTracker = ActiveConversationTracker(),
             scope = serviceScope,
         )
+    val recordingData =
+        object : MeshDataHandler by data {
+            override fun handleReceivedData(
+                packet: MeshPacket,
+                myNodeNum: Int,
+                session: RadioSessionContext,
+                logUuid: String?,
+                logInsertJob: Job?,
+            ) {
+                onReceivedData(session)
+                data.handleReceivedData(packet, myNodeNum, session, logUuid, logInsertJob)
+            }
+        }
     return radioSessionProjection(
         nodeManager,
         radio,
         scope,
-        dataHandler = data,
+        dataHandler = recordingData,
         meshLogRepository = logs,
         serviceStateWriter = mock(MockMode.autofill),
         configFlowManager = configFlowManager,

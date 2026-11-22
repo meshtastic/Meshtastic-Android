@@ -71,8 +71,10 @@ class McpToolMappingTest {
         val broadcast = log(from = PEER, to = NodeAddress.NODENUM_BROADCAST, payload = device)
         val earlier = log(from = PEER, to = MY_NUM, payload = device, receivedDate = SINCE - 1)
         val reply = log(from = PEER, to = MY_NUM, payload = device)
+        val toAnotherNode = log(from = PEER, to = OTHER, payload = device)
 
         assertFalse(isMcpReply(broadcast, McpRequestKind.TELEMETRY, null, SINCE, MY_NUM))
+        assertFalse(isMcpReply(toAnotherNode, McpRequestKind.TELEMETRY, null, SINCE, MY_NUM))
         assertFalse(isMcpReply(earlier, McpRequestKind.TELEMETRY, null, SINCE, MY_NUM))
         assertTrue(isMcpReply(reply, McpRequestKind.TELEMETRY, null, SINCE, MY_NUM))
     }
@@ -91,6 +93,7 @@ class McpToolMappingTest {
         val values = buildJsonObject {
             put("lora.region", "US")
             put("owner.long_name", "Bench")
+            put("lora.tx_power", 20)
         }
 
         val writes = planMcpConfigWrites(values, HELD)
@@ -98,8 +101,8 @@ class McpToolMappingTest {
         assertEquals(listOf("lora", "owner"), writes.map { it.section })
         val lora = writes[0].toConfig().lora!!
         assertEquals(Config.LoRaConfig.RegionCode.US, lora.region)
+        assertEquals(20, lora.tx_power)
         assertEquals(HELD_LORA.hop_limit, lora.hop_limit)
-        assertEquals(HELD_LORA.tx_power, lora.tx_power)
         assertEquals(HELD_LORA.use_preset, lora.use_preset)
         val owner = writes[1].updated as User
         assertEquals("Bench", owner.long_name)
@@ -156,6 +159,8 @@ class McpToolMappingTest {
         assertEquals(listOf("0!aabbccdd", "8!aabbccdd"), matchMcpContactKeys(keys, "!aabbccdd"))
         assertEquals(listOf("0^all", "1^all"), matchMcpContactKeys(keys, "^all"))
         assertEquals(listOf("1^all"), matchMcpContactKeys(keys, "1^all"))
+        // A contact key is one channel digit plus the whole id, so a fragment of an id names no conversation.
+        assertEquals(emptyList(), matchMcpContactKeys(keys, "ccdd"))
     }
 
     @Test
@@ -212,6 +217,7 @@ class McpToolMappingTest {
         const val MY_NUM = 0x1A2B3C4D
         const val MY_ID = "!1a2b3c4d"
         const val PEER = 0x0BADF00D
+        const val OTHER = 0x0C0FFEE0
         const val SINCE = 1_700_000_000_000L
 
         val HELD_LORA: Config.LoRaConfig =

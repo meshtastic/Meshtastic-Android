@@ -50,11 +50,13 @@ class DesktopSdkTransportSelectionTest {
         assertSame(transport, factory.createTransport("wws://127.0.0.1:4404", service))
         assertSame(transport, factory.createTransport("s/dev/tty.usbmodem1", service))
         assertSame(transport, factory.createTransport("!AA:BB:CC:DD:EE:FF", service))
+        assertSame(transport, factory.createTransport("xAA:BB:CC:DD:EE:FF", service))
         assertEquals(
             listOf(
                 InterfaceId.TCP to "127.0.0.1:4403",
                 InterfaceId.WEBSOCKET to "ws://127.0.0.1:4404/api/v1/ws",
                 InterfaceId.SERIAL to "/dev/tty.usbmodem1",
+                InterfaceId.BLUETOOTH to "AA:BB:CC:DD:EE:FF",
                 InterfaceId.BLUETOOTH to "AA:BB:CC:DD:EE:FF",
             ),
             requested,

@@ -21,6 +21,7 @@ import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -55,6 +56,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.meshtastic.proto.Position as ProtoPosition
+import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 
 class QueryControllerImplTest {
     /** Records the request timers started, as (request ID, destination). */
@@ -94,8 +96,13 @@ class QueryControllerImplTest {
         fun sent(port: PortNum): MeshPacket = transport.outboundPackets().single { it.decoded?.portnum == port }
     }
 
-    private suspend fun TestScope.fixture(ownUser: User? = OWN_USER, connect: Boolean = true): Fixture {
-        val transport = FakeRadioTransport(TransportIdentity("fake:query"), autoHandshake = true, nodeNum = LOCAL)
+    private suspend fun TestScope.fixture(
+        ownUser: User? = OWN_USER,
+        connect: Boolean = true,
+        handshake: Boolean = true,
+        ownStoredPosition: ProtoPosition = ProtoPosition.Builder().build(),
+    ): Fixture {
+        val transport = FakeRadioTransport(TransportIdentity("fake:query"), autoHandshake = handshake, nodeNum = LOCAL)
         val client =
             RadioClient.Builder()
                 .transport(transport)
@@ -133,7 +140,11 @@ class QueryControllerImplTest {
             mock<NodeManager>().also {
                 every { it.myNodeNum } returns MutableStateFlow(LOCAL)
                 every { it.nodeDBbyNodeNum } returns
-                    (ownUser?.let { user -> mapOf(LOCAL to Node(num = LOCAL, user = user)) } ?: emptyMap())
+                    (
+                        ownUser?.let { user ->
+                            mapOf(LOCAL to Node(num = LOCAL, user = user, position = ownStoredPosition))
+                        } ?: emptyMap()
+                        )
             }
         val uiPrefs = FakeUiPrefs()
         val packetHandler = FakePacketHandler()
@@ -163,6 +174,8 @@ class QueryControllerImplTest {
     fun `a position request shares our fix when we have one and location sharing is on`() = runTest {
         val fixture = fixture()
         fixture.uiPrefs.setShouldProvideNodeLocation(LOCAL, true)
+        // The setting is ours to share with everyone; the peer's own entry must not decide it.
+        fixture.uiPrefs.setShouldProvideNodeLocation(PEER, false)
 
         fixture.controller.requestPosition(PEER, Position(latitude = 51.5, longitude = -0.125, altitude = 20))
         runCurrent()
@@ -195,7 +208,7 @@ class QueryControllerImplTest {
 
     @Test
     fun `a position request without location sharing carries only the time`() = runTest {
-        val fixture = fixture()
+        val fixture = fixture(ownStoredPosition = STORED_POSITION)
         fixture.uiPrefs.setShouldProvideNodeLocation(LOCAL, false)
 
         fixture.controller.requestPosition(PEER, Position(latitude = 51.5, longitude = -0.125, altitude = 20))
@@ -306,7 +319,11 @@ class QueryControllerImplTest {
 
     @Test
     fun `a client that has not finished its handshake refuses requests before starting a timer or log row`() = runTest {
-        val fixture = fixture(connect = false)
+        val fixture = fixture(connect = false, handshake = false)
+        backgroundScope.launch { fixture.client.connect() }
+        runCurrent()
+        val state = fixture.client.connection.value
+        assertTrue(state is SdkConnectionState.Connecting || state is SdkConnectionState.Configuring, "$state")
 
         assertFailsWith<PacketQueueRejectedException> { fixture.controller.requestTraceroute(PEER) }
         assertFailsWith<PacketQueueRejectedException> { fixture.controller.requestNeighborInfo(PEER) }
@@ -317,6 +334,7 @@ class QueryControllerImplTest {
         assertTrue(fixture.timers.traceroutes.isEmpty())
         assertTrue(fixture.timers.neighborInfo.isEmpty())
         assertTrue(fixture.packetHandler.loggedRows.isEmpty())
+        fixture.client.disconnect()
     }
 
     @Test
@@ -398,6 +416,14 @@ class QueryControllerImplTest {
 
         /** After the SDK's default 30 s RPC timeout, well inside `REMOTE_READ_TIMEOUT`. */
         const val LATE_NAK_MS = 60_000L
+
+        val STORED_POSITION: ProtoPosition =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 401_000_000
+                    wb.longitude_i = -749_000_000
+                }
+                .build()
         val OWN_USER: User =
             User.Builder()
                 .also { wb ->

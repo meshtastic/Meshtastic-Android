@@ -29,6 +29,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
@@ -96,6 +97,7 @@ import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.sdk.transport.tcp.TcpTransport
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -171,6 +173,10 @@ class SdkTcpRoomTest {
                 ingress.createSdkTransport(service, port)
             }
         ingress = RoomIngress(scope, lifecycle.lifecycle, dispatchers, databases, radio, passphraseStore)
+        val lockdownHistory = CopyOnWriteArrayList<LockdownState>()
+        scope.launch(Dispatchers.Unconfined, start = CoroutineStart.UNDISPATCHED) {
+            ingress.lockdownState.collect { lockdownHistory += it }
+        }
         try {
             withTimeout(10.seconds) {
                 databases.switchActiveDatabase(address)
@@ -183,6 +189,12 @@ class SdkTcpRoomTest {
                 }
                 ingress.appConnection.first { it == ConnectionState.Connected }
                 assertEquals(LockdownState.Unlocked, ingress.lockdownState.value)
+                if (autoUnlock) {
+                    assertTrue(
+                        lockdownHistory.none { it is LockdownState.Locked },
+                        "auto-unlock showed $lockdownHistory",
+                    )
+                }
                 assertEquals(listOf(SdkRoomReplayTest.file), ingress.files.first())
                 assertEquals(SdkRoomReplayTest.regionPresets, ingress.regionPresets.first())
                 val readySession = assertNotNull(radio.activeSession.value)
