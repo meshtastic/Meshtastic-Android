@@ -451,6 +451,17 @@ class ChannelImportSummaryTest {
     }
 
     @Test
+    fun a_row_after_a_deselected_one_is_described_by_its_own_settings() {
+        val key = ByteArray(32) { 3 }.toByteString()
+        fun private(uplink: Boolean) = sharingSettings(0, uplink = uplink).newBuilder().also { it.psk = key }.build()
+        val settings = listOf(private(uplink = false), private(uplink = true), private(uplink = false))
+
+        val sharing = importedChannelSharing(settings, listOf(false, true, true))
+
+        assertEquals(listOf(false, true, false), sharing.map { it.uplink })
+    }
+
+    @Test
     fun an_unselected_row_shows_what_selecting_it_would_write() {
         val privateChannel =
             sharingSettings(precisionBits = 32)

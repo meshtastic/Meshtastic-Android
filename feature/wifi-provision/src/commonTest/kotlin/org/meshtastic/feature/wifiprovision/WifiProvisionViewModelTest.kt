@@ -628,6 +628,46 @@ class WifiProvisionViewModelTest {
     }
 
     @Test
+    fun `a retry waits for every connection still closing and not only the oldest`() = runTest {
+        // The first close outlasts the release timeout, so the second connection opens while it is still closing; the
+        // third attempt then has two closes in flight and the newer one finishes last.
+        val first = FakeBleConnection()
+        val second = FakeBleConnection()
+        val third = FakeBleConnection()
+        val firstClose = RELEASE_TIMEOUT + 2.seconds
+        val secondClose = 5.seconds
+        val connections =
+            ArrayDeque<BleConnection>(
+                listOf(SlowCloseConnection(first, firstClose), SlowCloseConnection(second, secondClose), third),
+            )
+        val retrying =
+            createViewModel(
+                object : BleConnectionFactory {
+                    override fun create(scope: CoroutineScope, tag: String): BleConnection = connections.removeFirst()
+                },
+            )
+        scanner.emitDevice(chosen)
+        retrying.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        retrying.connectToDevice(chosen.address)
+        advanceTimeBy(RELEASE_TIMEOUT.inWholeMilliseconds + 1)
+        runCurrent()
+        assertEquals(1, second.connectAndAwaitCalls)
+
+        retrying.connectToDevice(chosen.address)
+        advanceTimeBy((firstClose - RELEASE_TIMEOUT).inWholeMilliseconds + 1)
+        runCurrent()
+        assertEquals(1, first.disconnectCalls)
+        assertEquals(0, third.connectAndAwaitCalls)
+
+        advanceTimeBy(secondClose.inWholeMilliseconds)
+        runCurrent()
+
+        assertEquals(1, third.connectAndAwaitCalls)
+    }
+
+    @Test
     fun `a connection whose close fails neither crashes nor stops the retry`() = runTest {
         val uncaught = mutableListOf<Throwable>()
         val applicationScope =
