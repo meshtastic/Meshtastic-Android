@@ -19,15 +19,11 @@ package org.meshtastic.feature.wifiprovision
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
@@ -36,6 +32,7 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.NO_RESPONSE_CODE
+import org.meshtastic.feature.wifiprovision.domain.ConnectionSession
 import org.meshtastic.feature.wifiprovision.domain.DeviceDiscovery
 import org.meshtastic.feature.wifiprovision.domain.DeviceNotFoundException
 import org.meshtastic.feature.wifiprovision.domain.DeviceResponseTimeoutException
@@ -153,7 +150,7 @@ class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
     private val dispatchers: CoroutineDispatchers,
-    private val applicationScope: ApplicationCoroutineScope,
+    applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
     /**
@@ -169,13 +166,18 @@ class WifiProvisionViewModel(
 
     private val discovery = DeviceDiscovery(bleScanner)
 
-    /** Lazily-created service; replaced by [connectToDevice], closed by [disconnect] and [onCleared]. */
-    private var service: NymeaWifiService? = null
+    /**
+     * Every coroutine the screen starts runs in [session], which [disconnect], [onCleared] and each new attempt cancel
+     * as a whole, so no scan, connect or request outlives the connection it belongs to.
+     */
+    private val session = ConnectionSession(viewModelScope, applicationScope)
 
-    private var connectJob: Job? = null
-
-    /** The scan feeding the device list, or the name lookup behind the confirmation. */
-    private var scanJob: Job? = null
+    /** The state after a device went quiet: the connection is dropped and the screen offers a retry. */
+    private val notRespondingState =
+        initialState.copy(
+            phase = WifiProvisionUiState.Phase.Idle,
+            error = WifiProvisionError.DeviceNotResponding,
+        )
 
     // region Public actions (called from UI)
 
@@ -202,7 +204,7 @@ class WifiProvisionViewModel(
                         pendingName = null,
                     )
                 }
-                scanJob = viewModelScope.launch {
+                session.restart().launch {
                     safeCatching { discovery.advertisedName(address) }
                         .onSuccess { name ->
                             _uiState.update {
@@ -263,16 +265,11 @@ class WifiProvisionViewModel(
     }
 
     private fun beginDiscovery(linkIgnored: Boolean) {
-        val previousScan = scanJob
-        val previousJob = connectJob
-        val previousService = service
-        service = null
         discovery.clear()
         _uiState.value =
             initialState.copy(phase = WifiProvisionUiState.Phase.Discovering, linkAddressIgnored = linkIgnored)
-        scanJob = viewModelScope.launch {
-            previousScan?.cancelAndJoin()
-            release(previousJob, previousService)
+        session.restart().launch {
+            session.releaseReplaced()
             safeCatching { discovery.scan { devices -> _uiState.update { it.copy(devices = devices) } } }
                 .onSuccess { _uiState.update { state -> state.copy(phase = WifiProvisionUiState.Phase.DeviceList) } }
                 .onFailure { e ->
@@ -288,8 +285,6 @@ class WifiProvisionViewModel(
     }
 
     private fun launchConnect(connect: suspend (NymeaWifiService) -> Result<String>) {
-        scanJob?.cancel()
-        scanJob = null
         _uiState.update {
             it.copy(
                 phase = WifiProvisionUiState.Phase.ConnectingBle,
@@ -300,13 +295,9 @@ class WifiProvisionViewModel(
             )
         }
 
-        val previousJob = connectJob
-        val previousService = service
         val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
-        service = nymeaService
-
-        connectJob = viewModelScope.launch {
-            release(previousJob, previousService)
+        session.restart(nymeaService).launch {
+            session.releaseReplaced()
 
             connect(nymeaService)
                 .onSuccess { deviceName ->
@@ -345,8 +336,8 @@ class WifiProvisionViewModel(
 
     /** Called when the user confirms they want to scan networks after device discovery. */
     fun scanNetworks() {
-        val nymeaService = service ?: return
-        viewModelScope.launch {
+        val nymeaService = session.service ?: return
+        session.scope.launch {
             _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }
 
             nymeaService
@@ -358,15 +349,16 @@ class WifiProvisionViewModel(
                 }
                 .onFailure { e ->
                     Logger.e(e) { "$TAG: scanNetworks failed" }
+                    if (e is DeviceResponseTimeoutException) {
+                        // A late reply could answer the next command, so this connection is done.
+                        session.end()
+                        _uiState.value = notRespondingState
+                        return@onFailure
+                    }
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
-                            error =
-                            if (e is DeviceResponseTimeoutException) {
-                                WifiProvisionError.DeviceNotResponding
-                            } else {
-                                WifiProvisionError.ScanFailed(e.message ?: "Unknown error")
-                            },
+                            error = WifiProvisionError.ScanFailed(e.message ?: "Unknown error"),
                         )
                     }
                 }
@@ -381,7 +373,7 @@ class WifiProvisionViewModel(
      */
     fun provisionWifi(ssid: String, password: String, hidden: Boolean = false) {
         if (ssid.isBlank()) return
-        val nymeaService = service ?: return
+        val nymeaService = session.service ?: return
 
         _uiState.update {
             it.copy(
@@ -392,7 +384,7 @@ class WifiProvisionViewModel(
             )
         }
 
-        viewModelScope.launch {
+        session.scope.launch {
             when (val result = nymeaService.provision(ssid, password, hidden)) {
                 is ProvisionResult.Success -> {
                     Logger.i { "$TAG: Provisioned successfully" }
@@ -407,16 +399,16 @@ class WifiProvisionViewModel(
 
                 is ProvisionResult.Failure -> {
                     Logger.w { "$TAG: Provision failed: ${result.message}" }
+                    if (result.errorCode == NO_RESPONSE_CODE) {
+                        session.end()
+                        _uiState.value = notRespondingState
+                        return@launch
+                    }
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
                             provisionStatus = WifiProvisionUiState.ProvisionStatus.Failed,
-                            error =
-                            if (result.errorCode == NO_RESPONSE_CODE) {
-                                WifiProvisionError.DeviceNotResponding
-                            } else {
-                                WifiProvisionError.ProvisionFailed(result.message)
-                            },
+                            error = WifiProvisionError.ProvisionFailed(result.message),
                         )
                     }
                 }
@@ -426,28 +418,18 @@ class WifiProvisionViewModel(
 
     /** Cancel any scan or pending confirmation, close any active BLE connection and return to the initial state. */
     fun disconnect() {
-        val nymeaService = service
-        service = null
-        scanJob?.cancel()
-        scanJob = null
-        // A connect still scanning must end quietly, not report a failure for a screen the user has left.
-        connectJob?.cancel()
-        connectJob = null
+        // Ending the session first means nothing still in flight can write after the reset, which is the final state.
+        session.end()
         discovery.clear()
-        // Reset first: a pending confirmation must not stay answerable while the connection closes.
         _uiState.value = initialState
-        viewModelScope.launch { nymeaService?.close() }
     }
 
     // endregion
 
     override fun onCleared() {
         super.onCleared()
-        val job = connectJob
-        val nymeaService = service
-        service = null
-        // viewModelScope is already cancelled here, and the peripheral is only released by close().
-        applicationScope.launch { release(job, nymeaService) }
+        // viewModelScope is already cancelled; the session closes its service from the application scope.
+        session.end()
     }
 
     companion object {
@@ -461,16 +443,5 @@ class WifiProvisionViewModel(
             .groupBy { it.ssid }
             .map { (_, entries) -> entries.maxBy { it.signalStrength } }
             .sortedByDescending { it.signalStrength }
-    }
-}
-
-/**
- * Waits out [job] so a peripheral it was still installing belongs to [nymeaService] before that closes. Runs
- * non-cancellable so a caller cancelled mid-release still closes the service.
- */
-private suspend fun release(job: Job?, nymeaService: NymeaWifiService?) {
-    withContext(NonCancellable) {
-        job?.cancelAndJoin()
-        nymeaService?.close()
     }
 }

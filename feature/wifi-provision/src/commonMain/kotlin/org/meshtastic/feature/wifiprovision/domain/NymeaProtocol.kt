@@ -68,6 +68,9 @@ internal data class NymeaConnectCommand(
 // Responses (device → app)
 // ---------------------------------------------------------------------------
 
+/** Only the command code of a reply, which every reply echoes whatever its payload (an object, a list or none). */
+@Serializable internal data class NymeaReplyHeader(@SerialName("c") val command: Int = -1)
+
 /** Generic response — present in every reply from the device. */
 @Serializable
 internal data class NymeaResponse(

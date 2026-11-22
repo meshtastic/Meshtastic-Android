@@ -517,20 +517,22 @@ class WifiProvisionViewModelTest {
     }
 
     @Test
-    fun `a device that never answers the network scan ends in the not responding error`() = runTest {
-        scanner.emitDevice(chosen)
-        viewModel.connectToDevice(chosen.address)
-        advanceUntilIdle()
+    fun `a device that never answers the network scan drops the connection and shows the not responding error`() =
+        runTest {
+            scanner.emitDevice(chosen)
+            viewModel.connectToDevice(chosen.address)
+            advanceUntilIdle()
 
-        viewModel.scanNetworks()
-        advanceUntilIdle()
+            viewModel.scanNetworks()
+            advanceUntilIdle()
 
-        assertEquals(Phase.Connected, viewModel.uiState.value.phase)
-        assertEquals(WifiProvisionError.DeviceNotResponding, viewModel.uiState.value.error)
-    }
+            assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+            assertEquals(WifiProvisionError.DeviceNotResponding, viewModel.uiState.value.error)
+            assertEquals(1, connection.disconnectCalls)
+        }
 
     @Test
-    fun `a device that never answers the credentials ends in the failed state with the not responding error`() =
+    fun `a device that never answers the credentials drops the connection and shows the not responding error`() =
         runTest {
             scanner.emitDevice(chosen)
             viewModel.connectToDevice(chosen.address)
@@ -539,10 +541,57 @@ class WifiProvisionViewModelTest {
             viewModel.provisionWifi("Net", "pass")
             advanceUntilIdle()
 
-            assertEquals(Phase.Connected, viewModel.uiState.value.phase)
-            assertEquals(ProvisionStatus.Failed, viewModel.uiState.value.provisionStatus)
+            assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+            assertEquals(ProvisionStatus.Idle, viewModel.uiState.value.provisionStatus)
             assertEquals(WifiProvisionError.DeviceNotResponding, viewModel.uiState.value.error)
+            assertEquals(1, connection.disconnectCalls)
         }
+
+    @Test
+    fun `disconnecting during a network scan leaves the reset state after every timer has run`() = runTest {
+        scanner.emitDevice(chosen)
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        viewModel.scanNetworks()
+        runCurrent()
+        assertEquals(Phase.LoadingNetworks, viewModel.uiState.value.phase)
+        viewModel.disconnect()
+        advanceUntilIdle()
+
+        assertEquals(WifiProvisionUiState(), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `disconnecting during provisioning leaves the reset state after every timer has run`() = runTest {
+        scanner.emitDevice(chosen)
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        viewModel.provisionWifi("Net", "pass")
+        runCurrent()
+        assertEquals(Phase.Provisioning, viewModel.uiState.value.phase)
+        viewModel.disconnect()
+        advanceUntilIdle()
+
+        assertEquals(WifiProvisionUiState(), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `a new connection after disconnecting mid operation works`() = runTest {
+        scanner.emitDevice(chosen)
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+        viewModel.scanNetworks()
+        runCurrent()
+        viewModel.disconnect()
+        advanceUntilIdle()
+
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+    }
 
     @Test
     fun `a link address a platform cannot look up falls back to the list and connects nothing`() = runTest {

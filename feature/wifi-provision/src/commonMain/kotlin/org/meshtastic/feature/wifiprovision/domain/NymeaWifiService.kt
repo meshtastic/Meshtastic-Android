@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -83,6 +85,15 @@ class NymeaWifiService(
     /** Unbounded channel — the observer coroutine feeds complete JSON strings here. */
     private val responseChannel = Channel<String>(Channel.UNLIMITED)
     private val reassembler = NymeaPacketCodec.Reassembler()
+
+    /** One command in flight at a time: replies carry only the command code, so overlapping exchanges could mix. */
+    private val exchangeLock = Mutex()
+
+    /**
+     * Set when a command went unanswered. The device may still send that reply, and nothing in it says which command it
+     * answers, so every later command on this session fails; a new connection starts clean.
+     */
+    private var unsynchronized = false
 
     // region Public API
 
@@ -170,27 +181,29 @@ class NymeaWifiService(
      * Sends: CMD_SCAN (4), waits for ack, then CMD_GET_NETWORKS (0).
      */
     suspend fun scanNetworks(): Result<List<WifiNetwork>> = safeCatching {
-        // Trigger scan
-        sendCommand(CMD_SCAN, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
-        val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
-        if (scanAck.responseCode != RESPONSE_SUCCESS) {
-            error("Scan command failed: ${nymeaErrorMessage(scanAck.responseCode)}")
-        }
+        exchangeLock.withLock {
+            // Trigger scan
+            sendCommand(CMD_SCAN, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
+            val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(CMD_SCAN))
+            if (scanAck.responseCode != RESPONSE_SUCCESS) {
+                error("Scan command failed: ${nymeaErrorMessage(scanAck.responseCode)}")
+            }
 
-        // Fetch results
-        sendCommand(CMD_GET_NETWORKS, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_NETWORKS)))
-        val networksResponse = NymeaJson.decodeFromString<NymeaNetworksResponse>(waitForResponse())
-        if (networksResponse.responseCode != RESPONSE_SUCCESS) {
-            error("GetNetworks failed: ${nymeaErrorMessage(networksResponse.responseCode)}")
-        }
+            // Fetch results
+            sendCommand(CMD_GET_NETWORKS, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_NETWORKS)))
+            val networksResponse = NymeaJson.decodeFromString<NymeaNetworksResponse>(waitForResponse(CMD_GET_NETWORKS))
+            if (networksResponse.responseCode != RESPONSE_SUCCESS) {
+                error("GetNetworks failed: ${nymeaErrorMessage(networksResponse.responseCode)}")
+            }
 
-        networksResponse.networks.map { entry ->
-            WifiNetwork(
-                ssid = entry.ssid,
-                bssid = entry.bssid,
-                signalStrength = entry.signalStrength,
-                isProtected = entry.protection != 0,
-            )
+            networksResponse.networks.map { entry ->
+                WifiNetwork(
+                    ssid = entry.ssid,
+                    bssid = entry.bssid,
+                    signalStrength = entry.signalStrength,
+                    isProtected = entry.protection != 0,
+                )
+            }
         }
     }
 
@@ -212,14 +225,18 @@ class NymeaWifiService(
             )
 
         return safeCatching {
-            sendCommand(cmd, json)
-            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
-            if (response.responseCode == RESPONSE_SUCCESS) {
-                val ipAddress =
-                    response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
-                ProvisionResult.Success(ipAddress = ipAddress)
-            } else {
-                ProvisionResult.Failure(response.responseCode, nymeaErrorMessage(response.responseCode))
+            exchangeLock.withLock {
+                sendCommand(cmd, json)
+                // Either connect code: a device may echo the visible command's code for a hidden network.
+                val response =
+                    NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(CMD_CONNECT, CMD_CONNECT_HIDDEN))
+                if (response.responseCode == RESPONSE_SUCCESS) {
+                    val ipAddress =
+                        response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
+                    ProvisionResult.Success(ipAddress = ipAddress)
+                } else {
+                    ProvisionResult.Failure(response.responseCode, nymeaErrorMessage(response.responseCode))
+                }
             }
         }
             .getOrElse { e ->
@@ -251,6 +268,8 @@ class NymeaWifiService(
      * and password lengths.
      */
     private suspend fun sendCommand(command: Int, json: String) {
+        // After a missed reply the next one may be the late one; every command would be unanswerable by its own reply.
+        if (unsynchronized) throw DeviceResponseTimeoutException()
         Logger.d { "$TAG: → command=$command" }
         val packets = NymeaPacketCodec.encode(json)
         bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
@@ -261,11 +280,35 @@ class NymeaWifiService(
     }
 
     /**
-     * Wait up to [timeout] for a complete JSON response from the notification channel, failing with a
-     * [DeviceResponseTimeoutException] rather than the cancellation `withTimeout` throws.
+     * Wait up to [timeout] for the reply to a command, which echoes its code, so a reply with any other code is not
+     * this command's and is skipped within the same deadline. A timeout fails with a [DeviceResponseTimeoutException]
+     * rather than the cancellation `withTimeout` throws, and ends the session's usefulness: the late reply may still
+     * arrive, and the protocol has no request id to tell it from the reply to the next command with the same code.
      */
-    private suspend fun waitForResponse(timeout: Duration = RESPONSE_TIMEOUT): String =
-        withTimeoutOrNull(timeout) { responseChannel.receive() } ?: throw DeviceResponseTimeoutException()
+    private suspend fun waitForResponse(vararg expected: Int, timeout: Duration = RESPONSE_TIMEOUT): String {
+        val reply =
+            withTimeoutOrNull(timeout) {
+                var found: String? = null
+                while (found == null) {
+                    val message = responseChannel.receive()
+                    val command = safeCatching {
+                        NymeaJson.decodeFromString<NymeaReplyHeader>(message).command
+                    }
+                        .getOrNull()
+                    if (command != null && command in expected) {
+                        found = message
+                    } else {
+                        Logger.d { "$TAG: skipped a reply for command=$command, waiting for ${expected.toList()}" }
+                    }
+                }
+                found
+            }
+        if (reply == null) {
+            unsynchronized = true
+            throw DeviceResponseTimeoutException()
+        }
+        return reply
+    }
 
     /**
      * Best-effort query for current connection info (`CMD_GET_CONNECTION`), returning the reported IP address.
@@ -274,7 +317,10 @@ class NymeaWifiService(
      */
     private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
         sendCommand(CMD_GET_CONNECTION, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-        val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        val response =
+            NymeaJson.decodeFromString<NymeaResponse>(
+                waitForResponse(CMD_GET_CONNECTION, timeout = CONNECTION_INFO_TIMEOUT),
+            )
         if (response.responseCode == RESPONSE_SUCCESS) {
             response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
         } else {

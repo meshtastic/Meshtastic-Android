@@ -18,6 +18,8 @@ package org.meshtastic.feature.wifiprovision.domain
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.testing.CapturingLogWriter
@@ -342,6 +344,80 @@ class NymeaWifiServiceTest {
         val result = service.scanNetworks()
 
         assertIs<DeviceResponseTimeoutException>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `a reply for another command is skipped and the right one still completes in the deadline`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+
+        assertEquals(3, assertIs<ProvisionResult.Failure>(result.await()).errorCode)
+    }
+
+    @Test
+    fun `a malformed message is skipped and the next reply still completes`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """}{ not json""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+
+        assertEquals(3, assertIs<ProvisionResult.Failure>(result.await()).errorCode)
+    }
+
+    @Test
+    fun `the connection lookup cannot take the credentials reply for its own`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = async { service.provision("Net", "pass") }
+        runCurrent()
+        emitResponse(connection, """{"c":1,"r":0}""")
+        runCurrent()
+        emitResponse(connection, """{"c":1,"r":0}""")
+        emitResponse(connection, """{"c":5,"r":0,"p":{"i":"10.0.0.7"}}""")
+
+        assertEquals(ProvisionResult.Success(ipAddress = "10.0.0.7"), result.await())
+    }
+
+    @Test
+    fun `after a scan times out a late scan reply cannot make provision succeed`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        assertIs<DeviceResponseTimeoutException>(service.scanNetworks().exceptionOrNull())
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":3}""")
+        val result = service.provision("Net", "pass")
+
+        assertIs<ProvisionResult.Failure>(result)
+    }
+
+    @Test
+    fun `after a timeout no later command is sent on the session`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        assertIs<DeviceResponseTimeoutException>(service.scanNetworks().exceptionOrNull())
+        val writesBefore = connection.service.writes.size
+        val retry = async { service.scanNetworks() }
+        runCurrent()
+        emitResponse(connection, """{"c":4,"r":0}""")
+
+        assertIs<DeviceResponseTimeoutException>(retry.await().exceptionOrNull())
+        assertEquals(writesBefore, connection.service.writes.size)
     }
 
     @Test
