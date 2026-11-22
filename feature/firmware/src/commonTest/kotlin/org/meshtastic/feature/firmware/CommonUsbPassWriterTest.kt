@@ -49,7 +49,7 @@ abstract class CommonUsbPassWriterTest {
             {
               "manifestVersion": 1,
               "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
-              "otafixBase": "https://example.invalid/otafix",
+              "otafixBase": "https://github.com/meshtastic/nRF52_Bootloader/releases/download/0.9.2-OTAFIX2.3-BP1.5",
               "erase": {
                 "nrf52": {
                   "6.1.1": { "fileName": "nrf_erase2.uf2", "sha256": "00", "expectedFirstTargetAddress": 155648 }

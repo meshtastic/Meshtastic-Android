@@ -242,7 +242,7 @@ class UsbMaintenanceGateTest {
                 """
                 {
                   "otafixReleaseTag": "../../../evil",
-                  "otafixBase": "https://example.invalid/releases",
+                  "otafixBase": "https://github.com/meshtastic/nRF52_Bootloader/releases/download/2.6.1",
                   "otafixByBoardId": {
                     "rak4631": { "otafixBoardSlug": "rak4631", "sha256": "00" }
                   }
@@ -504,6 +504,38 @@ class UsbMaintenanceGateTest {
             assertEquals(expectedFileName, image.fileName, "$boardId: wrong release filename")
             assertEquals(expectedSha256, image.sha256, "$boardId: wrong digest")
         }
+    }
+
+    @Test
+    fun `a bootloader base off the release repository yields no image`() {
+        val tag = testManifest.otafixReleaseTag
+        val release = "github.com/meshtastic/nRF52_Bootloader/releases/download/$tag"
+        listOf(
+            "http://$release",
+            "https://example.invalid/nRF52_Bootloader/releases/download/$tag",
+            "https://github.com/meshtastic/other-repo/releases/download/$tag",
+            "https://github.com.example.invalid/meshtastic/nRF52_Bootloader/releases/download/$tag",
+            "https://meshtastic@example.invalid/$release",
+            "https://github.com@example.invalid/meshtastic/nRF52_Bootloader/releases/download/$tag",
+            "https://$release/",
+            "https://$release/extra",
+            "",
+        )
+            .forEach { base ->
+                val manifest = testManifest.copy(otafixBase = base)
+                assertNull(otafixUf2ForBoardId(manifest, "WisBlock-RAK4631-Board"), "image resolved for base '$base'")
+            }
+    }
+
+    @Test
+    fun `the release repository base still composes the asset url`() {
+        val tag = testManifest.otafixReleaseTag
+        val image = assertNotNull(otafixUf2ForBoardId(testManifest, "WisBlock-RAK4631-Board"))
+
+        assertEquals(
+            "https://github.com/meshtastic/nRF52_Bootloader/releases/download/$tag/${image.fileName}",
+            image.url,
+        )
     }
 
     @Test
