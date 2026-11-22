@@ -386,9 +386,7 @@ class MeshConnectionManagerImpl(
     /** The session's client, while [connectedVersion], when given, still owns the connection. */
     private fun activeClient(operation: String, connectedVersion: Long? = null): RadioClient {
         val owned = connectedVersion == null || connectedVersion == serviceRepository.connectionLifecycle.value.version
-        return radioInterfaceService.activeSession.value
-            ?.takeIf { owned }
-            ?.let(radioInterfaceService::clientForSession)
+        return radioInterfaceService.activeSession.value?.takeIf { owned }?.let(radioInterfaceService::clientForSession)
             ?: throw PacketQueueRejectedException(operation)
     }
 

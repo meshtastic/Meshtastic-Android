@@ -307,6 +307,34 @@ class QueryControllerImplTest {
     }
 
     @Test
+    fun `a remote telemetry NAK after the default RPC timeout still reports`() = runTest {
+        val fixture = fixture()
+        val request = fixture.controller.requestTelemetry(PEER, TelemetryType.DEVICE)
+        runCurrent()
+
+        advanceTimeBy(LATE_NAK_MS)
+        fixture.transport.injectRoutingError(fixture.sent(PortNum.TELEMETRY_APP).id, Routing.Error.NO_RESPONSE, PEER)
+        runCurrent()
+
+        assertEquals(Routing.Error.NO_RESPONSE.value, request.awaitRoutingError())
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a remote traceroute NAK after the default RPC timeout still reports`() = runTest {
+        val fixture = fixture()
+        val request = fixture.controller.requestTraceroute(PEER)
+        runCurrent()
+
+        advanceTimeBy(LATE_NAK_MS)
+        fixture.transport.injectRoutingError(checkNotNull(request.requestId), Routing.Error.NO_RESPONSE, PEER)
+        runCurrent()
+
+        assertEquals(Routing.Error.NO_RESPONSE.value, request.awaitRoutingError())
+        fixture.client.disconnect()
+    }
+
+    @Test
     fun `our radio giving up on a traceroute reports MAX_RETRANSMIT`() = runTest {
         val fixture = fixture()
         val request = fixture.controller.requestTraceroute(PEER)
@@ -328,6 +356,9 @@ class QueryControllerImplTest {
     private companion object {
         /** Past both the SDK's default RPC timeout and `REMOTE_READ_TIMEOUT`. */
         const val RPC_DEADLINE_MS = 151_000L
+
+        /** After the SDK's default 30 s RPC timeout, well inside `REMOTE_READ_TIMEOUT`. */
+        const val LATE_NAK_MS = 60_000L
         val OWN_USER: User =
             User.Builder()
                 .also { wb ->

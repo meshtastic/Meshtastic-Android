@@ -53,6 +53,8 @@ import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.MessageHandle
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.RoutingApi
+import org.meshtastic.sdk.TelemetryApi
 import org.meshtastic.sdk.channelFor
 import org.meshtastic.sdk.requestPaxcount
 import org.meshtastic.sdk.requestPositionOnHeardChannel
@@ -185,7 +187,10 @@ internal class QueryControllerImpl(
         val client = requireClient("Traceroute request")
         val requestId = packetHandler.generatePacketId()
         tracerouteHandler.recordStartTime(requestId, destNum)
-        val request = rpc(client, requestId) { routing.traceRoute(NodeId(destNum), requestId = requestId) }
+        val request =
+            rpc(client, requestId) {
+                routingFor(isLocal(destNum)).traceRoute(NodeId(destNum), requestId = requestId)
+            }
         packetHandler.logSent(requestId, destNum, PortNum.TRACEROUTE_APP, wantResponse = true, dest = destNum)
         return request
     }
@@ -201,8 +206,10 @@ internal class QueryControllerImpl(
                 requestPaxcount(node)
             }
         }
+        val local = isLocal(destNum)
         val request =
             rpc("Telemetry request") {
+                val telemetry = telemetryFor(local)
                 when (type) {
                     TelemetryType.LOCAL_STATS -> telemetry.requestLocalStats(node)
                     TelemetryType.DEVICE -> telemetry.requestDevice(node)
@@ -222,11 +229,21 @@ internal class QueryControllerImpl(
         val client = requireClient("Neighbor-info request")
         val requestId = packetHandler.generatePacketId()
         neighborInfoHandler.recordStartTime(requestId)
-        val request = rpc(client, requestId) { routing.requestNeighborInfo(NodeId(destNum), requestId = requestId) }
+        val request =
+            rpc(client, requestId) {
+                routingFor(isLocal(destNum)).requestNeighborInfo(NodeId(destNum), requestId = requestId)
+            }
         packetHandler.logSent(requestId, destNum, PortNum.NEIGHBORINFO_APP, wantResponse = true, dest = destNum)
         return request
     }
 }
+
+/** A request to another node waits [REMOTE_READ_TIMEOUT], so a NAK after a multi-hop retransmit still settles it. */
+private fun RadioClient.routingFor(local: Boolean): RoutingApi =
+    if (local) routing else routing.withRpcTimeout(REMOTE_READ_TIMEOUT)
+
+private fun RadioClient.telemetryFor(local: Boolean): TelemetryApi =
+    if (local) telemetry else telemetry.withRpcTimeout(REMOTE_READ_TIMEOUT)
 
 /** The empty variant [type] names, as TelemetryApi sends it. */
 private fun telemetryRequest(type: TelemetryType): ByteString = Telemetry.Builder()
