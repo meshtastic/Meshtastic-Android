@@ -23,6 +23,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetrics
@@ -108,6 +109,37 @@ class McpToolMappingTest {
         assertEquals("Bench", owner.long_name)
         assertEquals(HELD_OWNER.short_name, owner.short_name)
         assertEquals(HELD_OWNER.hw_model, owner.hw_model)
+    }
+
+    @Test
+    fun `set_config stays local without dest or for our own id and refuses a malformed dest`() {
+        assertEquals(McpConfigDest.Local, parseMcpConfigDest(null, MY_NUM))
+        assertEquals(McpConfigDest.Local, parseMcpConfigDest(MY_ID, MY_NUM))
+        assertEquals(McpConfigDest.Remote(PEER), parseMcpConfigDest("!0badf00d", MY_NUM))
+        listOf("!abc", "^all", "0badf00d").forEach { raw ->
+            assertFailsWith<McpFieldException>(raw) { parseMcpConfigDest(raw, MY_NUM) }
+        }
+    }
+
+    @Test
+    fun `a remote section is read with the admin config type that names it`() {
+        assertEquals(McpSectionKind.CONFIG, mcpSectionKind("lora"))
+        assertEquals(McpSectionKind.MODULE, mcpSectionKind("external_notification"))
+        assertEquals(McpSectionKind.OWNER, mcpSectionKind(OWNER_SECTION))
+        assertNull(mcpSectionKind("lroa"))
+        mapOf(
+            "device" to AdminMessage.ConfigType.DEVICE_CONFIG,
+            "lora" to AdminMessage.ConfigType.LORA_CONFIG,
+            "security" to AdminMessage.ConfigType.SECURITY_CONFIG,
+        )
+            .forEach { (section, type) -> assertEquals(type.value, mcpSectionType(McpSectionKind.CONFIG, section)) }
+        mapOf(
+            "mqtt" to AdminMessage.ModuleConfigType.MQTT_CONFIG,
+            "external_notification" to AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG,
+            "canned_message" to AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG,
+            "mesh_beacon" to AdminMessage.ModuleConfigType.MESHBEACON_CONFIG,
+        )
+            .forEach { (section, type) -> assertEquals(type.value, mcpSectionType(McpSectionKind.MODULE, section)) }
     }
 
     @Test
