@@ -131,6 +131,7 @@
     <!-- LOG -->
     <string name="logs">Jounal</string>
     <!-- LORA -->
+    <string name="lora_value_none">Pa gen</string>
     <!-- MAP -->
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>

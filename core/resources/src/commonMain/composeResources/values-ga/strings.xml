@@ -135,6 +135,7 @@
     <!-- LOG -->
     <string name="logs">Lógáil</string>
     <!-- LORA -->
+    <string name="lora_value_none">Ní dhéanfaidh sé</string>
     <!-- MAP -->
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>

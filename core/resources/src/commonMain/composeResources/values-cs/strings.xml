@@ -961,6 +961,8 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_modem_preset">Předvolba modemu</string>
+    <string name="lora_value_none">Žádný</string>
     <string name="low_battery">Nízký stav baterie</string>
     <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%)</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
@@ -1847,20 +1849,18 @@
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Dostupné sítě</string>
     <string name="wifi_provision_connect_failed">Nelze se připojit: %1$s</string>
     <string name="wifi_provision_description">Nastavit přihlašovací údaje k Wi-Fi v zařízení mPWRD-OS přes Bluetooth.</string>
     <string name="wifi_provision_device_found">Zařízení nalezeno</string>
     <string name="wifi_provision_device_found_detail">Připraveno prohledávat Wi-Fi sítě.</string>
     <string name="wifi_provision_hidden_network">Skrytá síť</string>
     <string name="wifi_provision_mpwrd_disclaimer">Více informací o projektu mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Zařízení nenalezena</string>
     <string name="wifi_provision_no_networks">Žádná síť nebyla nalezena</string>
     <string name="wifi_provision_scan_failed">Nepodařilo se prohledat Wi-Fi sítě: %1$s</string>
-    <string name="wifi_provision_scan_networks">Vyhledat sítě</string>
     <string name="wifi_provision_scanning_ble">Vyhledávání zařízení…</string>
     <string name="wifi_provision_scanning_wifi">Vyhledávání…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Název sítě (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Zadejte nebo vyberte síť</string>
     <string name="wifi_provision_status_failed">Nepodařilo se použít nastavení Wi-Fi</string>
     <string name="wifi_provision_success_description">Vaše zařízení mPWRD-OS se připojilo k Wi-Fi síti.</string>

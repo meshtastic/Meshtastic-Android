@@ -247,6 +247,9 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">Otomatik</string>
+    <string name="lora_field_modem_preset">Modem Ön Ayarı</string>
+    <string name="lora_value_none">Yok</string>
     <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%)</string>
     <string name="low_battery_title">Düşük pil: %1$s</string>
     <string name="lux">Lüks</string>

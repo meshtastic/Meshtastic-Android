@@ -551,6 +551,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Жоден</string>
     <string name="low_battery">Низький заряд батареї</string>
     <string name="low_battery_message">Вузол %1$s має низький заряд батареї (%2$d%)</string>
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
@@ -1133,15 +1134,13 @@
     <string name="widget_telemetry_title">Телеметрія</string>
     <!-- WIFI -->
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Доступні мережі</string>
     <string name="wifi_provision_hidden_network">Прихована мережа</string>
     <string name="wifi_provision_mpwrd_disclaimer">Дізнайтесь більше про проєкт mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Пристрої не знайдено</string>
     <string name="wifi_provision_no_networks">Не знайдено жодної мережі</string>
-    <string name="wifi_provision_scan_networks">Сканувати мережі</string>
     <string name="wifi_provision_scanning_ble">Пошук пристрою…</string>
     <string name="wifi_provision_scanning_wifi">Сканування…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Назва мережі (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Введіть або оберіть мережу</string>
     <string name="wifi_provision_success_done">Готово</string>
     <string name="wifi_provision_success_ip_address">Адреса IP</string>

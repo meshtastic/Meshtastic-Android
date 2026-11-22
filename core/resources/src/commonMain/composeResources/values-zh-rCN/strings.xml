@@ -842,6 +842,10 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">自动</string>
+    <string name="lora_field_frequency_offset">频率偏移(MHz</string>
+    <string name="lora_field_modem_preset">调制解调器预设</string>
+    <string name="lora_value_none">无</string>
     <string name="low_battery">电池电量低</string>
     <string name="low_battery_message">节点 %1$s 电量低(%2$d%)</string>
     <string name="low_battery_title">电池电量低: %1$s</string>
@@ -1587,18 +1591,16 @@
     <string name="widget_telemetry_title">遥测传感器</string>
     <!-- WIFI -->
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
-    <string name="wifi_provision_available_networks">可用网络</string>
     <string name="wifi_provision_connect_failed">无法连接: %1$s</string>
     <string name="wifi_provision_description">通过蓝牙将 Wi-Fi 凭证预置/配置到你的 mPWRD-OS 设备中。</string>
     <string name="wifi_provision_device_found">已发现设备</string>
     <string name="wifi_provision_hidden_network">隐藏网络</string>
     <string name="wifi_provision_mpwrd_disclaimer">了解更多关于 mPWRD-OS 项目\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">未发现任何设备</string>
     <string name="wifi_provision_no_networks">未发现网络</string>
-    <string name="wifi_provision_scan_networks">扫描网络</string>
     <string name="wifi_provision_scanning_ble">正在搜索设备…</string>
     <string name="wifi_provision_scanning_wifi">正在扫描…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">网络名称(SSID)</string>
     <string name="wifi_provision_ssid_placeholder">输入或选择一个网络</string>
     <string name="wifi_provision_success_description">您的 mPWRD-OS 设备已经加入 Wi-Fi 网络。</string>
     <string name="wifi_provision_success_device_connected">设备已连接</string>

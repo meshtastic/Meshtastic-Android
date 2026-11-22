@@ -830,6 +830,9 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_frequency_offset">周波数オフセット</string>
+    <string name="lora_field_modem_preset">モデムプリセット</string>
+    <string name="lora_value_none">なし</string>
     <string name="low_battery">バッテリー残量低下</string>
     <string name="low_battery_message">ノード %1$s のバッテリー残量が少なくなっています (%2$d%)</string>
     <string name="low_battery_title">バッテリー低残量: %1$s</string>
@@ -1564,18 +1567,16 @@
     <string name="widget_telemetry_title">テレメトリ</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS の Wi-Fi プロビジョニング</string>
-    <string name="wifi_provision_available_networks">利用可能なネットワーク</string>
     <string name="wifi_provision_connect_failed">接続できませんでした：%1$s</string>
     <string name="wifi_provision_description">mPWRD-OS デバイスに Bluetooth 経由で Wi-Fi 認証情報をプロビジョニングします。</string>
     <string name="wifi_provision_device_found">デバイスが見つかりました</string>
     <string name="wifi_provision_hidden_network">非表示のネットワーク</string>
     <string name="wifi_provision_mpwrd_disclaimer">mPWRD-OS プロジェクトの詳細はこちら\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">デバイスが見つかりません</string>
     <string name="wifi_provision_no_networks">ネットワークが見つかりません</string>
-    <string name="wifi_provision_scan_networks">ネットワークをスキャン</string>
     <string name="wifi_provision_scanning_ble">デバイスを検索しています…</string>
     <string name="wifi_provision_scanning_wifi">スキャンしています…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">ネットワーク名（SSID）</string>
     <string name="wifi_provision_ssid_placeholder">ネットワークを入力または選択</string>
     <string name="wifi_provision_success_description">mPWRD-OS デバイスが Wi-Fi ネットワークに接続しました。</string>
     <string name="wifi_provision_success_device_connected">デバイスが接続されました</string>

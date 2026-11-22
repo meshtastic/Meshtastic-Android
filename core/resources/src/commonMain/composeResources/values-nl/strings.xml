@@ -200,6 +200,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Geen</string>
     <string name="low_battery_title">Batterij bijna leeg: %1$s</string>
     <string name="lux">Lux</string>
     <string name="manual_position_request">Handmatige positieaanvraag vereist</string>
