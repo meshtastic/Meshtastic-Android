@@ -49,6 +49,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.MessageHandle
 import org.meshtastic.sdk.NodeId
@@ -57,14 +58,13 @@ import org.meshtastic.sdk.RoutingApi
 import org.meshtastic.sdk.TelemetryApi
 import org.meshtastic.sdk.channelFor
 import org.meshtastic.sdk.requestPaxcount
-import org.meshtastic.sdk.requestPositionOnHeardChannel
 import org.meshtastic.proto.Position as ProtoPosition
 import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 
 /**
  * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, `RoutingApi`, the request
- * helpers and the admin metadata read. Traceroute and neighbor-info requests go out under an ID from [packetHandler],
- * which logs them where the request logs read them and times the reply.
+ * helpers and the admin metadata read. Traceroute, neighbor-info, position and user-info requests go out under an ID
+ * from [packetHandler], which logs them where the request logs read them, and settle on the reply or routing error.
  */
 @Suppress("LongParameterList")
 internal class QueryControllerImpl(
@@ -157,30 +157,29 @@ internal class QueryControllerImpl(
                     wb.time = (nowMillis / TimeConstants.MS_PER_SEC).toInt()
                 }
                 .build()
-        return send(
-            "Position request",
-            log = { id ->
-                val payload = shared.encode().toByteString()
-                packetHandler.logSent(id, destNum, PortNum.POSITION_APP, payload, true, priority = BACKGROUND)
-            },
-        ) {
-            requestPositionOnHeardChannel(NodeId(destNum), shared)
-        }
+        val client = requireClient("Position request")
+        val node = NodeId(destNum)
+        val channel = client.remoteChannel(node, "Position request")
+        val requestId = packetHandler.generatePacketId()
+        val request =
+            rpc(client, requestId) { routingFor(local = false).requestPosition(node, channel, shared, requestId) }
+        val payload = shared.encode().toByteString()
+        packetHandler.logSent(requestId, destNum, PortNum.POSITION_APP, payload, true, priority = BACKGROUND)
+        return request
     }
 
     override suspend fun requestUserInfo(destNum: Int): NodeRequest {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("User-info request")
         if (destNum == myNum) return NodeRequest.NONE
-        val user = nodeManager.nodeDBbyNodeNum[myNum]?.user ?: throw LocalNodeUnavailableException("User-info request")
+        val client = requireClient("User-info request")
+        // The SDK sends its own record of our user, so that is the one checked and logged.
+        val user = client.ownNode.value?.user ?: throw LocalNodeUnavailableException("User-info request")
         val node = NodeId(destNum)
-        return send(
-            "User-info request",
-            log = { id ->
-                packetHandler.logSent(id, destNum, PortNum.NODEINFO_APP, user.encode().toByteString(), true)
-            },
-        ) {
-            requestNodeInfo(node, channelFor(node), user)
-        }
+        val channel = client.remoteChannel(node, "User-info request")
+        val requestId = packetHandler.generatePacketId()
+        val request = rpc(client, requestId) { routingFor(local = false).requestNodeInfo(node, channel, requestId) }
+        packetHandler.logSent(requestId, destNum, PortNum.NODEINFO_APP, user.encode().toByteString(), true)
+        return request
     }
 
     override suspend fun requestTraceroute(destNum: Int): NodeRequest {
@@ -235,6 +234,19 @@ internal class QueryControllerImpl(
             }
         packetHandler.logSent(requestId, destNum, PortNum.NEIGHBORINFO_APP, wantResponse = true, dest = destNum)
         return request
+    }
+}
+
+/**
+ * The channel [node] was last heard on, for a request to it. The SDK refuses a request addressed to the node it knows
+ * as ours, and one sent while it is not connected; both read as the session refusing admission.
+ */
+private suspend fun RadioClient.remoteChannel(node: NodeId, operation: String): ChannelIndex {
+    if (ownNode.value?.num == node.raw) throw PacketQueueRejectedException(operation)
+    return try {
+        channelFor(node)
+    } catch (e: MeshtasticException) {
+        throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
     }
 }
 

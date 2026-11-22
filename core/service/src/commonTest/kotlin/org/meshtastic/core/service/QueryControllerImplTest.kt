@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
@@ -37,6 +38,7 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
@@ -102,6 +104,25 @@ class QueryControllerImplTest {
                 .autoSyncTimeOnConnect(false)
                 .build()
         if (connect) client.connect()
+        if (connect && ownUser != null) {
+            // Our own node info, as firmware broadcasts it, so the SDK knows the user it sends with a request.
+            transport.injectPacket(
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.from = LOCAL
+                        wb.to = BROADCAST
+                        wb.decoded =
+                            Data.Builder()
+                                .also { db ->
+                                    db.portnum = PortNum.NODEINFO_APP
+                                    db.payload = User.ADAPTER.encode(ownUser).toByteString()
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+            runCurrent()
+        }
         val radio =
             FakeRadioInterfaceService(backgroundScope).apply {
                 setDeviceAddress("tselected")
@@ -151,6 +172,24 @@ class QueryControllerImplTest {
         assertEquals(-1_250_000, shared.longitude_i)
         assertEquals(20, shared.altitude)
         assertTrue(shared.time > 0)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a position request the destination ACKs and then NAKs as unanswered reports NO_RESPONSE`() = runTest {
+        val fixture = fixture()
+
+        val request = fixture.controller.requestPosition(PEER, Position(latitude = 0.0, longitude = 0.0, altitude = 0))
+        runCurrent()
+        val sent = fixture.sent(PortNum.POSITION_APP)
+        // Firmware's ReliableRouter ACKs the request, then MeshModule::callModules NAKs it when no module replied.
+        fixture.transport.injectRoutingAck(sent.id, fromNode = PEER)
+        runCurrent()
+        fixture.transport.injectRoutingError(sent.id, Routing.Error.NO_RESPONSE, fromNode = PEER)
+        runCurrent()
+
+        assertEquals(sent.id, request.requestId)
+        assertEquals(Routing.Error.NO_RESPONSE.value, request.awaitRoutingError())
         fixture.client.disconnect()
     }
 
@@ -370,5 +409,6 @@ class QueryControllerImplTest {
 
         const val LOCAL = 100
         const val PEER = 200
+        const val BROADCAST = -1
     }
 }
