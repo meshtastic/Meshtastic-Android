@@ -491,6 +491,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Niciunul</string>
     <string name="low_battery">Baterie descarcata </string>
     <string name="low_battery_message">Nodul %1$s are bateria descărcată (%2$d%)</string>
     <string name="low_battery_title">Baterie descărcată: %1$s</string>
@@ -1007,17 +1008,14 @@
     <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Rețele disponibile</string>
     <string name="wifi_provision_connect_failed">Nu se poate conecta: %1$s</string>
     <string name="wifi_provision_description">Furnizați acreditări Wi-Fi pentru dispozitivul mPWRD-OS prin Bluetooth.</string>
     <string name="wifi_provision_device_found">Dispozitiv gasit</string>
     <string name="wifi_provision_mpwrd_disclaimer">Aflați mai multe despre proiectul mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Nu au fost găsite rețele</string>
-    <string name="wifi_provision_scan_networks">Scanare pentru reţele</string>
     <string name="wifi_provision_scanning_ble">Căutare dispozitive</string>
     <string name="wifi_provision_scanning_wifi">Scanare…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Nume rețea (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Introdu sau selecteaza o retea</string>
     <string name="wifi_provision_success_done">Gata</string>
     <string name="wifi_provision_success_ip_address">Adresa IP</string>

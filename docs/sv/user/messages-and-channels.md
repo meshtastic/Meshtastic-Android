@@ -56,7 +56,12 @@ On the **Channels** screen, tap **Share Channels** to show a QR code and a link 
 - **Replace** overwrites every channel on their node with yours and applies your LoRa settings.
 - **Add** keeps their channels and LoRa settings and appends yours.
 
-To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. For an Add code, the app lists the incoming channels so you can select the ones you want and shows how many of your node's channel slots are in use. If the selection doesn't fit, a line says how many channels to uncheck. Unchecking a channel that is already on your node removes it.
+To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. The **Import channels** dialog lists the incoming channels. A code made with **Replace** opens with **Replace** selected, a code made with **Add** offers only **Add**, and the **Replace** and **Add** control only picks the mode: nothing changes on your node until you tap **Replace channels** or **Add channels**. A channel that forwards messages to or from MQTT, or shares your location, says so on its row.
+
+- **Replace** removes the channels on your node, then lists every LoRa setting that will change. Changes to sending and receiving, such as turning transmit off, come first in their own group.
+- **Add** lets you select the incoming channels you want and shows how many of your node's channel slots are in use. If the selection doesn't fit, a line says how many channels to uncheck. Unchecking a channel that is already on your node removes it.
+
+The title and the **Cancel** and confirm buttons stay in view while the list scrolls.
 
 ### Archived Channels
 

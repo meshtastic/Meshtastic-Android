@@ -1,7 +1,7 @@
 ---
 title: Verbindungen
 nav_order: 2
-last_updated: 2026-11-20
+last_updated: 2026-11-21
 description: Connect your phone, desktop or browser to a Meshtastic node over Bluetooth, USB, TCP/IP or WebSocket.
 aliases:
   - bluetooth
@@ -154,11 +154,11 @@ Network discovery uses mDNS, which only works when both your phone and the node 
 
 **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol. It does not configure Wi-Fi on an ordinary Meshtastic node. It is available on Android, desktop and web.
 
-1. Open the screen and wait while the app finds the device over Bluetooth.
-2. Tap **Scan for Networks**, then pick a network from **Available Networks**, or turn on **Hidden network** and type the name into **Network Name (SSID)**.
-3. Enter the **Password** and tap **Apply**.
-
-When the device joins the network, the screen shows **Device Connected** with its **IP Address** (**IP unavailable** when it didn't report one), and a **Complete Device Setup** card with the default sign-in and an **Open SSH Client** button. Melden Sie sich über SSH an, um den Standardnamen und das Standardpasswort zu ändern.
+1. Open the screen and wait while the app searches over Bluetooth, then tap your device in the list. Each row shows the device's name and signal strength, and its Bluetooth address where the platform reports one (Android, and desktop on Linux). On macOS, iOS and in the browser the platform hides the address, so choose by name. Tap **Scan again** if the device is not listed. In a browser, **Choose device** opens the browser's own list.
+2. A link that names a device by address shows that address and **Connect** and **Cancel** buttons first. Compare the address with the one on the device, then tap **Connect**. Where the platform does not report addresses, the link can't be used: the screen says so and you choose the device yourself.
+3. Tap **Scan for networks**, then pick a network from **Available networks**, or turn on **Hidden network** and type the name into **Network name (SSID)**.
+4. Enter the **Password** and tap **Apply**.
+   When the device joins the network, the screen shows **Device Connected** with its **IP Address** (**IP unavailable** when it didn't report one), and a **Complete Device Setup** card with the default sign-in and an **Open SSH Client** button. Melden Sie sich über SSH an, um den Standardnamen und das Standardpasswort zu ändern.
 
 If the scan reports **No networks found** or fails outright, move the phone closer to the device and scan again. If **Failed to apply Wi-Fi configuration** comes back, check the password and try again.
 

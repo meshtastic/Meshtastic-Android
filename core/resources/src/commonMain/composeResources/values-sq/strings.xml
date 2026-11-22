@@ -136,6 +136,7 @@
     <!-- LOG -->
     <string name="logs">Loget</string>
     <!-- LORA -->
+    <string name="lora_value_none">Asnjë</string>
     <!-- MAP -->
     <string name="map_cache_manager">Menaxheri i Cache</string>
     <string name="map_cache_size">Madhësia e aktuale e cache</string>

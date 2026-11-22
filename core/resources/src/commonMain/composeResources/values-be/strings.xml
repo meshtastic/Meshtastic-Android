@@ -147,6 +147,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Нічога</string>
     <string name="lux">Люкс</string>
     <!-- MAP -->
     <string name="map_filter_all_roles">Усе</string>

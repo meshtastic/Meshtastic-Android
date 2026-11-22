@@ -929,6 +929,10 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">Automaattinen</string>
+    <string name="lora_field_frequency_offset">Taajuuspoikkeama</string>
+    <string name="lora_field_modem_preset">Modeemin esiasetus</string>
+    <string name="lora_value_none">ei mitään</string>
     <string name="low_battery">Akku lähes tyhjä</string>
     <string name="low_battery_message">Laitteen %1$s akun varaus on alhainen (%2$d%)</string>
     <string name="low_battery_title">Akku vähissä: %1$s</string>
@@ -1801,21 +1805,19 @@
     <string name="wifi_config">WiFi-asetukset</string>
     <string name="wifi_devices">WiFi-määritys mPWRD-OS:lle</string>
     <string name="wifi_ip">WiFI-verkon IP-osoite:</string>
-    <string name="wifi_provision_available_networks">Saatavilla olevat verkot</string>
     <string name="wifi_provision_connect_failed">Yhteyden muodostaminen epäonnistui: %1$s</string>
     <string name="wifi_provision_description">Siirrä WiFi-tunnukset mPWRD-OS-laitteeseen Bluetoothin kautta.</string>
     <string name="wifi_provision_device_found">Laite löytyi</string>
     <string name="wifi_provision_device_found_detail">Valmis etsimään WiFi-verkkoja.</string>
     <string name="wifi_provision_hidden_network">Piilotettu verkko</string>
     <string name="wifi_provision_mpwrd_disclaimer">Lue lisää mPWRD-OS-projektista\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Laitteita ei löytynyt</string>
     <string name="wifi_provision_no_networks">Verkkoja ei löytynyt</string>
     <string name="wifi_provision_scan_failed">WiFi-verkkojen haku epäonnistui: %1$s</string>
-    <string name="wifi_provision_scan_networks">Etsi verkkoja</string>
     <string name="wifi_provision_scanning_ble">Etsitään laitetta…</string>
     <string name="wifi_provision_scanning_wifi">Etsitään…</string>
     <string name="wifi_provision_sending_credentials">Otetaan WiFi-asetuksia käyttöön…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Verkon nimi (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Syötä tai valitse verkko</string>
     <string name="wifi_provision_status_applied">WiFi määritettiin onnistuneesti!</string>
     <string name="wifi_provision_status_failed">WiFi-asetusten käyttöönotto epäonnistui</string>

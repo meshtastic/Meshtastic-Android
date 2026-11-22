@@ -134,6 +134,7 @@
     <!-- LORA -->
     <string name="lora">إعدادات لورا</string>
     <string name="lora_config">إعدادات لورا</string>
+    <string name="lora_value_none">لا يوجد</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>
     <!-- MAP -->
     <string name="map_filter_display_title">إعدادات الشاشة</string>

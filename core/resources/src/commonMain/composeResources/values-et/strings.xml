@@ -909,6 +909,9 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_frequency_offset">Sagedusnihe</string>
+    <string name="lora_field_modem_preset">Modemi vaikesäte</string>
+    <string name="lora_value_none">Puudub</string>
     <string name="low_battery">Madal akutase</string>
     <string name="low_battery_message">Sõlmel %1$s on madal aku pinge (%2$d%)</string>
     <string name="low_battery_title">Madal akupinge: %1$s</string>
@@ -1749,18 +1752,16 @@
     <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
-    <string name="wifi_provision_available_networks">Saada olevad võrgud</string>
     <string name="wifi_provision_connect_failed">Ühenduse loomine ebaõnnestus: %1$s</string>
     <string name="wifi_provision_description">Anna mPWRD-OS-seadmele Sinihamba kaudu WiFi mandaadid.</string>
     <string name="wifi_provision_device_found">Seade leitud</string>
     <string name="wifi_provision_hidden_network">Peidetud võrk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Lisateavet mPWRD-OS projekti kohta leiate aadressilt\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Ühtegi seadet ei leitud</string>
     <string name="wifi_provision_no_networks">Võrke ei leitud</string>
-    <string name="wifi_provision_scan_networks">Võrkude otsimine</string>
     <string name="wifi_provision_scanning_ble">Seadme otsimine…</string>
     <string name="wifi_provision_scanning_wifi">Otsin…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Võrgu nimi (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Sisesta või vali võrk</string>
     <string name="wifi_provision_success_description">Sinu mPWRD-OS seade on WiFi-võrguga ühendatud.</string>
     <string name="wifi_provision_success_device_connected">Seade ühendatud</string>
