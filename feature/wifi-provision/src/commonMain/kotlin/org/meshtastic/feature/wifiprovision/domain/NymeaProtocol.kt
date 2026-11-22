@@ -155,7 +155,7 @@ internal data class NymeaConnectionInfo(
     @SerialName("e") val ssid: String = "",
     /** BSSID / MAC address (nymea key: `m`). */
     @SerialName("m") val bssid: String = "",
-    /** Signal strength in dBm (nymea key: `s`). */
+    /** Signal strength in percent (nymea key: `s`). */
     @SerialName("s") val signalStrength: Int = 0,
     /** 0 = open, 1 = protected (nymea key: `p`). */
     @SerialName("p") val protection: Int = 0,
