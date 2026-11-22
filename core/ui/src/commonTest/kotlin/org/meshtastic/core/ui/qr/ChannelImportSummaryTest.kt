@@ -427,6 +427,45 @@ class ChannelImportSummaryTest {
     }
 
     @Test
+    fun deselecting_the_primary_describes_the_rows_after_it_by_the_key_they_then_inherit() {
+        // A channel with no key of its own takes the first written channel's key, and precision is capped only on a
+        // publicly decryptable key (Channel.usesPublicKey).
+        val publicPrimary = sharingSettings(precisionBits = 32, psk = 1)
+        val privateChannel =
+            sharingSettings(precisionBits = 32)
+                .newBuilder()
+                .also { it.psk = ByteArray(32) { 3 }.toByteString() }
+                .build()
+        val inheriting =
+            sharingSettings(precisionBits = 32).newBuilder().also { it.psk = ByteArray(0).toByteString() }.build()
+        val settings = listOf(publicPrimary, privateChannel, inheriting)
+
+        assertEquals(
+            PositionSharing.Approximate,
+            importedChannelSharing(settings, listOf(true, true, true))[2].position,
+        )
+        assertEquals(
+            PositionSharing.Precise,
+            importedChannelSharing(settings, listOf(false, true, true))[2].position,
+        )
+    }
+
+    @Test
+    fun an_unselected_row_shows_what_selecting_it_would_write() {
+        val privateChannel =
+            sharingSettings(precisionBits = 32)
+                .newBuilder()
+                .also { it.psk = ByteArray(32) { 3 }.toByteString() }
+                .build()
+        val settings = listOf(privateChannel, sharingSettings(0, uplink = true))
+
+        val sharing = importedChannelSharing(settings, listOf(true, false))
+
+        assertEquals(PositionSharing.Precise, sharing[0].position)
+        assertTrue(sharing[1].uplink)
+    }
+
+    @Test
     fun uplink_and_downlink_are_reported_per_channel() {
         val sharing =
             importedChannelSharing(listOf(sharingSettings(0, uplink = true), sharingSettings(0, downlink = true)))

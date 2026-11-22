@@ -78,7 +78,11 @@ fun ChannelItem(
         Column(modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (selection == null) {
-                    AssistChip(onClick = onClick, label = { Text(text = "$index", color = fontColor) })
+                    AssistChip(
+                        onClick = onClick,
+                        enabled = enabled,
+                        label = { Text(text = "$index", color = fontColor) },
+                    )
                 } else {
                     ChannelIndexBadge(index = index, color = fontColor)
                 }

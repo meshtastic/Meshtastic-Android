@@ -316,6 +316,17 @@ internal data class ChannelSharing(val uplink: Boolean, val downlink: Boolean, v
 internal fun importedChannelSharing(settings: List<ChannelSettings>): List<ChannelSharing> =
     settings.withOnWirePrecision().map(::channelSharing)
 
+/**
+ * The sharing each row is written with given which rows are [selected]. The precision cap depends on the first channel
+ * written, so deselecting the primary changes the rows after it. An unselected row shows what selecting it would write.
+ */
+internal fun importedChannelSharing(settings: List<ChannelSettings>, selected: List<Boolean>): List<ChannelSharing> =
+    settings.indices.map { row ->
+        val written = settings.filterIndexed { index, _ -> index == row || selected.getOrNull(index) == true }
+        val position = (0 until row).count { selected.getOrNull(it) == true }
+        channelSharing(written.withOnWirePrecision()[position])
+    }
+
 private fun channelSharing(onWire: ChannelSettings): ChannelSharing {
     val bits = onWire.module_settings?.position_precision ?: 0
     return ChannelSharing(

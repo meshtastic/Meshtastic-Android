@@ -215,7 +215,10 @@ fun ScannedQrCodeDialog(
             if (shouldReplace && applied != null) loraConfigChanges(channels.lora_config, applied) else emptyList()
         }
 
-    val sharing = remember(channelSet.settings) { importedChannelSharing(channelSet.settings) }
+    // Follows the selection: the precision cap depends on which channel is written first.
+    val writtenSelection =
+        channelSet.settings.indices.map { (!shouldReplace && it == 0) || channelSelections.getOrNull(it) == true }
+    val sharing = importedChannelSharing(channelSet.settings, writtenSelection)
 
     AlertDialog(
         onDismissRequest = onDismiss,

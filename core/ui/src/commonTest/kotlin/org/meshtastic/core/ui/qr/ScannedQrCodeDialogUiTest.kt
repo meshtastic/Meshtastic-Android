@@ -39,6 +39,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -245,5 +246,30 @@ class ScannedQrCodeDialogUiTest {
 
         onNode(hasText("Changes to sending and receiving") and isHeading()).assertIsDisplayed()
         onNode(hasContentDescription("Transmit Enabled, from Enabled to Disabled")).assertIsDisplayed()
+    }
+
+    @Test
+    fun deselecting_the_primary_updates_the_location_sharing_of_a_channel_that_inherits_its_key() = runComposeUiTest {
+        // "Guest" has no key of its own: it takes the first written channel's key, and precision is capped only on a
+        // publicly decryptable one.
+        val team = channel("Team", 0).newBuilder().also { it.psk = ByteArray(32) { 3 }.toByteString() }.build()
+        val guest =
+            channel("Guest", 0)
+                .newBuilder()
+                .also {
+                    it.psk = ByteArray(0).toByteString()
+                    it.module_settings = ModuleSettings.Builder().also { m -> m.position_precision = 32 }.build()
+                }
+                .build()
+        val incoming = link.newBuilder().also { it.settings = listOf(channel("Plaza", 1), team, guest) }.build()
+        show(incoming = incoming, calls = Calls())
+
+        onNode(hasText("Shares your approximate location")).assertExists()
+        onNode(hasText("Shares your precise location")).assertDoesNotExist()
+
+        onNode(hasText("Plaza")).performClick()
+
+        onNode(hasText("Shares your precise location")).assertExists()
+        onNode(hasText("Shares your approximate location")).assertDoesNotExist()
     }
 }
