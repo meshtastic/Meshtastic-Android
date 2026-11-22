@@ -182,7 +182,6 @@
     <string name="name">Ime</string>
     <string name="navigate_back">Pojdi nazaj</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Vključi neznane</string>

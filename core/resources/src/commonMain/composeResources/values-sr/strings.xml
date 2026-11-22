@@ -296,7 +296,6 @@
     <string name="navigate_back">Иди назад</string>
     <!-- NEIGHBOR -->
     <string name="network">Мрежа</string>
-    <string name="new_channel_rcvd">Примљен нови линк канала</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Укључи непознато</string>

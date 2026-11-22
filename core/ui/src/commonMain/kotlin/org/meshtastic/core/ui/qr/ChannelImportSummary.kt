@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.qr
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.loraBandwidthKilohertz
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.resources.Res
@@ -48,6 +49,8 @@ import org.meshtastic.core.resources.schema_lora_sx126x_rx_boosted_gain
 import org.meshtastic.core.resources.schema_lora_tx_enabled
 import org.meshtastic.core.resources.schema_lora_tx_power
 import org.meshtastic.core.resources.schema_lora_use_preset
+import org.meshtastic.core.ui.component.PRECISE_POSITION_BITS
+import org.meshtastic.core.ui.util.formatFrequencyMhz
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
@@ -124,31 +127,11 @@ private class LoraFieldSpec(
     val affectsTransmission: (to: LoraValue) -> Boolean = { false },
 )
 
-private const val FREQUENCY_DECIMALS = 3
 private const val OFFSET_DECIMALS = 6
 private const val BANDWIDTH_DECIMALS = 3
 private val CODING_RATE_RANGE = 4..8
 
 private fun LoRaConfig.hasFrequencyOverride() = override_frequency != 0f
-
-/** Firmware's `bwCodeToKHz` (`MeshRadio.h`): a handful of wire codes stand for fractional bandwidths. */
-@Suppress("MagicNumber") // wire codes and the kHz they stand for, as firmware defines them
-private val BANDWIDTH_KHZ_BY_CODE =
-    mapOf(
-        8 to 7.8f,
-        10 to 10.4f,
-        16 to 15.6f,
-        21 to 20.8f,
-        31 to 31.25f,
-        42 to 41.7f,
-        62 to 62.5f,
-        200 to 203.125f,
-        400 to 406.25f,
-        800 to 812.5f,
-        1600 to 1625f,
-    )
-
-private fun bandwidthKilohertz(code: Int): Float = BANDWIDTH_KHZ_BY_CODE[code] ?: code.toFloat()
 
 private fun trimmedNumber(value: Float): String =
     NumberFormatter.formatInvariant(value, BANDWIDTH_DECIMALS).trimEnd('0').trimEnd('.')
@@ -186,7 +169,7 @@ private val loraFieldSpecs: List<LoraFieldSpec> =
                 if (it.use_preset || it.bandwidth == 0) {
                     LoraValue.Default
                 } else {
-                    LoraValue.Kilohertz(trimmedNumber(bandwidthKilohertz(it.bandwidth)))
+                    LoraValue.Kilohertz(trimmedNumber(loraBandwidthKilohertz(it.bandwidth)))
                 }
             },
         ),
@@ -247,7 +230,7 @@ private val loraFieldSpecs: List<LoraFieldSpec> =
             Res.string.schema_lora_override_frequency,
             {
                 if (it.hasFrequencyOverride()) {
-                    LoraValue.Megahertz(NumberFormatter.formatInvariant(it.override_frequency, FREQUENCY_DECIMALS))
+                    LoraValue.Megahertz(formatFrequencyMhz(it.override_frequency))
                 } else {
                     LoraValue.Auto
                 }
@@ -328,8 +311,6 @@ internal data class ChannelSharing(val uplink: Boolean, val downlink: Boolean, v
         get() = uplink || downlink || position != PositionSharing.None
 }
 
-private const val FULL_PRECISION_BITS = 32
-
 /** The sharing each imported channel is written with, after the position precision cap the import applies. */
 internal fun importedChannelSharing(settings: List<ChannelSettings>): List<ChannelSharing> =
     settings.withOnWirePrecision().map(::channelSharing)
@@ -341,7 +322,7 @@ private fun channelSharing(onWire: ChannelSettings): ChannelSharing {
         downlink = onWire.downlink_enabled,
         position =
         when {
-            bits >= FULL_PRECISION_BITS -> PositionSharing.Precise
+            bits >= PRECISE_POSITION_BITS -> PositionSharing.Precise
             bits > 0 -> PositionSharing.Approximate
             else -> PositionSharing.None
         },

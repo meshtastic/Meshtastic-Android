@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.ui.component.PRECISE_POSITION_BITS
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -44,7 +45,6 @@ private fun sharingChannel(name: String, key: Byte) = namedChannel(name, key)
     }
     .build()
 
-private const val PRECISE_POSITION_BITS = 32
 private const val KEY_BYTES = 32
 private const val SAMPLE_NODE_NUM = 0x12345678
 private const val SAMPLE_FREQUENCY_MHZ = 915.5f

@@ -180,7 +180,6 @@
     <string name="name">Navn</string>
     <string name="navigate_back">Gå tilbake</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Inkluder ukjent</string>

@@ -179,7 +179,6 @@
     <string name="name">Pavadinimas</string>
     <string name="navigate_back">Grįžti atgal</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Įtraukti nežinomus</string>

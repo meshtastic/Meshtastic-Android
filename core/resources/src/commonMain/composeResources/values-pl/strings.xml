@@ -452,7 +452,6 @@
     <string name="neighbor_info">Informacje o sąsiadze</string>
     <string name="neighbor_info_config">Konfiguracja Info o sąsiedzie</string>
     <string name="network">Sieć</string>
-    <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
     <string name="new_messages_below">Nowe wiadomości poniżej</string>
     <string name="new_node_seen">Wykryto nowy węzeł: %1$s</string>
     <string name="new_nodes">Nowe węzły</string>

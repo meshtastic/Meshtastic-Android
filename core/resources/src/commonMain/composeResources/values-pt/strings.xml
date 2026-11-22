@@ -50,7 +50,6 @@
     <!-- ADD -->
     <string name="add">Adicionar</string>
     <string name="add_a_note">Adicionar uma nota privada…</string>
-    <string name="add_channels_description">Os seguintes canais foram encontrados no código QR. Selecione os que deseja adicionar ao seu dispositivo. Os canais existentes serão preservados.</string>
     <string name="add_custom_tile_source">Adicionar fonte de mosaicos de rede</string>
     <string name="add_favorite">Adicionar aos favoritos</string>
     <string name="add_layer">Adicionar Camada</string>
@@ -713,7 +712,6 @@
     <string name="neighbor_info">Informações da vizinhança</string>
     <string name="neighbor_info_config">Configuração de informações dos vizinhos</string>
     <string name="network">Rede</string>
-    <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_ignored">Está a visualizar nós ignorados,\nPrima para regressar à lista de nós.</string>

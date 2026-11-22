@@ -596,7 +596,6 @@
     <string name="neighbor_info">Informații vecin</string>
     <string name="neighbor_info_config">Configurare informații vecin</string>
     <string name="network">Rețea</string>
-    <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
     <string name="new_messages_below">Mesaje noi mai jos</string>
     <string name="new_node_seen">Nod nou găsit: %1$s</string>
     <string name="new_nodes">Noduri Noi</string>
@@ -773,7 +772,6 @@
     <string name="remove_layer">Elimină strat</string>
     <string name="remove_node_text">Acest nod va fi eliminat din listă până când nodul dvs. va primi din nou date de la acesta.</string>
     <string name="replace">Înlocuire</string>
-    <string name="replace_channels_and_settings_description">Acest cod QR conţine o configuraţie completă. Aceasta va REPLACE canalele existente şi setările radio existente. Toate canalele existente vor fi eliminate.</string>
     <string name="reply">Răspunde</string>
     <string name="replying_to">Răspunde la %1$s</string>
     <string name="report">Raportare</string>

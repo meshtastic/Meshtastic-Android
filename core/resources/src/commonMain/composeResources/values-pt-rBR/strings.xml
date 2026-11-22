@@ -411,7 +411,6 @@
     <string name="neighbor_info">Informações do Vizinho</string>
     <string name="neighbor_info_config">Configuração de Inform. do Vizinho</string>
     <string name="network">Rede</string>
-    <string name="new_channel_rcvd">Novo link de canal recebido</string>
     <string name="new_node_seen">Novo Nó Visto: %1$s</string>
     <string name="new_nodes">Novos Nós</string>
     <string name="next">Avançar</string>

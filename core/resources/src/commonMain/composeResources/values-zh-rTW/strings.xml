@@ -48,7 +48,6 @@
     <!-- ADD -->
     <string name="add">新增</string>
     <string name="add_a_note">新增私人備註…</string>
-    <string name="add_channels_description">在 QR Code 中找到以下頻道。請選擇您想新增至裝置的頻道，現有頻道將予以保留。</string>
     <string name="add_custom_tile_source">加入自定義圖磚來源</string>
     <string name="add_favorite">新增至我的最愛</string>
     <string name="add_layer">添加圖層</string>
@@ -857,7 +856,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="neighbor_info_config">鄰居資訊配置</string>
     <string name="neighbor_info_received">已接收</string>
     <string name="network">網路</string>
-    <string name="new_channel_rcvd">收到新的頻道 URL</string>
     <string name="new_messages_below">下方有新的訊息</string>
     <string name="new_node_seen">發現新節點： %1$s</string>
     <string name="new_nodes">新的節點</string>
@@ -1077,7 +1075,6 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="remove_layer">移除圖層</string>
     <string name="remove_node_text">該節點將從您的列表中移除，直到您的節點再次收到來自該節點的數據。</string>
     <string name="replace">替換</string>
-    <string name="replace_channels_and_settings_description">此 QR Code 包含完整的設定檔，這將會覆寫您目前的頻道和無線電設定，所有頻道都會被刪除。</string>
     <string name="reply">回覆</string>
     <string name="replying_to">回覆 %1$s</string>
     <string name="report">報告</string>

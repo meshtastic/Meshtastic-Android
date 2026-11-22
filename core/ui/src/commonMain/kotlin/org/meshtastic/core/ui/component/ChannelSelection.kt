@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.Channel
 
+/** A [ChannelItem] that is one checkbox: tapping anywhere on the row toggles it. */
 @Composable
 fun ChannelSelection(
     index: Int,
@@ -32,8 +33,15 @@ fun ChannelSelection(
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
     channel: Channel,
-) = ChannelItem(index = index, title = title, enabled = enabled) {
+    supportingContent: (@Composable () -> Unit)? = null,
+) = ChannelItem(
+    index = index,
+    title = title,
+    enabled = enabled,
+    selection = ChannelItemSelection(selected = isSelected, onSelectedChange = onSelected),
+    supportingContent = supportingContent,
+) {
     SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
-    Checkbox(enabled = enabled, checked = isSelected, onCheckedChange = onSelected)
+    Checkbox(enabled = enabled, checked = isSelected, onCheckedChange = null)
 }

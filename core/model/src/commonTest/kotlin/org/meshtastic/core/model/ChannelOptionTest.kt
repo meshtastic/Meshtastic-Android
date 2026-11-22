@@ -117,6 +117,31 @@ class ChannelOptionTest {
         assertEquals(manual, manual.normalizeCodingRateOverride())
     }
 
+    // Expected values are firmware's bwCodeToKHz table (MeshRadio.h): the eleven special codes, and the code itself
+    // for any other bandwidth.
+    @Test
+    fun a_bandwidth_code_maps_to_the_kilohertz_firmware_runs_at() {
+        val firmware =
+            mapOf(
+                8 to 7.8f,
+                10 to 10.4f,
+                16 to 15.6f,
+                21 to 20.8f,
+                31 to 31.25f,
+                42 to 41.7f,
+                62 to 62.5f,
+                200 to 203.125f,
+                400 to 406.25f,
+                800 to 812.5f,
+                1600 to 1625f,
+            )
+        for ((code, kilohertz) in firmware) {
+            assertEquals(kilohertz, loraBandwidthKilohertz(code), "bandwidth code $code")
+        }
+        assertEquals(250f, loraBandwidthKilohertz(250))
+        assertEquals(125f, loraBandwidthKilohertz(125))
+    }
+
     private fun presetConfig(preset: ModemPreset, codingRate: Int) = LoRaConfig.Builder()
         .also { wb ->
             wb.use_preset = true

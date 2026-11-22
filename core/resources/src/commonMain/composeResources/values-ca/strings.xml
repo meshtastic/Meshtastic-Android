@@ -155,7 +155,6 @@
     <string name="mute_notifications">Silenciar notificacions</string>
     <string name="name">Nom</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_ignored">Estàs veient nodes ignorats, \n Prem per tornar al llistat de nodes</string>

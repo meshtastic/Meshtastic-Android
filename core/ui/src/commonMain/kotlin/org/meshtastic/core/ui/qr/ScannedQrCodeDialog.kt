@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.ui.qr
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,13 +27,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -54,19 +49,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -108,7 +99,7 @@ import org.meshtastic.core.resources.lora_value_none
 import org.meshtastic.core.resources.lora_value_not_used
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.slot_auto
-import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.icon.CloudDownload
 import org.meshtastic.core.ui.icon.CloudUpload
 import org.meshtastic.core.ui.icon.LocationOn
@@ -264,7 +255,8 @@ fun ScannedQrCodeDialog(
 
                     channelSet.settings.forEachIndexed { index, channel ->
                         val isPrimary = index == 0
-                        ChannelImportCard(
+                        val channelSharing = sharing.getOrNull(index)?.takeIf { it.isNotable }
+                        ChannelSelection(
                             index = index,
                             title = channel.name.ifEmpty { modemPresetName },
                             // Primary is always kept. In ADD mode existing secondaries become deselectable so the user
@@ -272,13 +264,13 @@ fun ScannedQrCodeDialog(
                             // prior all-selectable behavior.
                             enabled = if (shouldReplace) true else !isPrimary,
                             isSelected = if (!shouldReplace && isPrimary) true else channelSelections[index],
-                            onSelectionChange = {
+                            onSelected = {
                                 if (it || selectedChannelSet.settings.size > 1) {
                                     channelSelections[index] = it
                                 }
                             },
                             channel = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig),
-                            sharing = sharing.getOrNull(index),
+                            supportingContent = channelSharing?.let { { ChannelSharingStatements(it) } },
                         )
                     }
 
@@ -373,68 +365,13 @@ private fun ImportModeSelector(
     }
 }
 
-/** One incoming channel: its name and lock, the checkbox, and what it will share or forward once imported. */
-@Composable
-private fun ChannelImportCard(
-    index: Int,
-    title: String,
-    enabled: Boolean,
-    isSelected: Boolean,
-    onSelectionChange: (Boolean) -> Unit,
-    channel: Channel,
-    sharing: ChannelSharing?,
-) {
-    val fontColor = if (index == 0) MaterialTheme.colorScheme.primary else Color.Unspecified
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier =
-            Modifier.fillMaxWidth()
-                .toggleable(
-                    value = isSelected,
-                    enabled = enabled,
-                    role = Role.Checkbox,
-                    onValueChange = onSelectionChange,
-                )
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    shape = AssistChipDefaults.shape,
-                    color = Color.Transparent,
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
-                ) {
-                    Text(
-                        text = "$index",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = fontColor,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = title,
-                    modifier = Modifier.weight(1f),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    color = fontColor,
-                )
-                SecurityIcon(channel)
-                Spacer(modifier = Modifier.width(10.dp))
-                Checkbox(checked = isSelected, onCheckedChange = null, enabled = enabled)
-            }
-            if (sharing?.isNotable == true) {
-                ChannelSharingStatements(sharing)
-            }
-        }
-    }
-}
-
 /** Each thing a channel shares is its own statement, so each can be translated and read on its own. */
 @Composable
 private fun ChannelSharingStatements(sharing: ChannelSharing) {
-    Column(modifier = Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         if (sharing.uplink) SharingStatement(MeshtasticIcons.CloudUpload, Res.string.channel_import_uplink)
         if (sharing.downlink) SharingStatement(MeshtasticIcons.CloudDownload, Res.string.channel_import_downlink)
         when (sharing.position) {
