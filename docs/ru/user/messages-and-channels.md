@@ -1,7 +1,7 @@
 ---
 title: Сообщения и каналы
 nav_order: 3
-last_updated: 2026-11-20
+last_updated: 2026-11-21
 description: Отправляйте и получайте сообщения, управляйте каналами, настраивайте шифрование, ищите по перепискам, а также используйте быстрый чат, реакции и действия с сообщениями.
 aliases:
   - channels
@@ -133,7 +133,7 @@ control whether they are offered at all.
 
 Tap the status under any message you sent to open its delivery details. For a failed message, or a direct message marked **Relayed, not confirmed by recipient**, choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 
-The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded.
+The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded, when the acknowledgment came straight back from the recipient, or when it arrived over MQTT.
 
 ### Ошибки доставки
 
@@ -227,6 +227,7 @@ Formatting is carried as literal characters on the mesh, the same bytes the Appl
 - Реакции появляются под пузырьком сообщения
 - Несколько пользователей могут отреагировать на одно и то же сообщение
 - Реагируйте на свои сообщения или сообщения других
+- Tap a reaction badge to see who reacted. A received reaction names the node that relayed it, and the delivery details of your own reaction name the relay the same way a sent message does
 
 ![Значки реакций-эмодзи, отображаемые под сообщением](../../assets/screenshots/messages_reaction.png)
 
@@ -257,7 +258,9 @@ Touch & hold or double-tap a message to open the quick reaction bar, then tap **
 sheet — that is where reactions live. Beneath it, **Signed · verified** appears on a message whose
 signature your node checked against the sender's key, and **Delivery proven**, **Delivery proof
 failed**, or **Delivery proof unchecked** appears when the acknowledgment for your message carried
-a delivery proof. The message's timestamp and delivery status follow, then these actions:
+a delivery proof. The message's timestamp and delivery status follow, and for a received message
+the node that relayed it to you, such as **Relayed by Ridge (0x5A)**. No relay shows for a message
+heard directly from its sender or one that came in over MQTT. Then these actions:
 
 - **Ответить** — процитировать сообщение в твоём ответе
 - **Copy** — copy the message text to the clipboard
