@@ -17,13 +17,32 @@
 package org.meshtastic.core.repository
 
 /**
- * Packet ids of the admin requests this app has sent and not yet seen answered. An inbound admin response is
- * authoritative only when its `request_id` consumes one of these: the firmware forwards every decoded `ADMIN_APP`
- * packet addressed to the node, and `from` is an unauthenticated header field.
+ * An admin request this app sent and has not seen answered.
+ *
+ * @property requestId The packet id of the request.
+ * @property destNum The node the request was addressed to.
+ * @property adminChannelIndex The index of the legacy `admin` channel when the request was sent, or null when there was
+ *   none.
+ */
+data class OutstandingAdminRequest(val requestId: Int, val destNum: Int, val adminChannelIndex: Int?) {
+    /** True when a response from [from] belongs to this request and, for a remote node, is authenticated. */
+    fun acceptsResponseFrom(from: Int, myNodeNum: Int?, pkiEncrypted: Boolean, channel: Int): Boolean =
+        from == destNum && (destNum == myNodeNum || pkiEncrypted || isOnAdminChannel(channel))
+
+    private fun isOnAdminChannel(channel: Int): Boolean = adminChannelIndex != null && channel == adminChannelIndex
+}
+
+/**
+ * Admin requests this app has sent and not yet seen answered. An inbound admin response is authoritative only when it
+ * answers one of these from the node it was addressed to: the firmware forwards every decoded `ADMIN_APP` packet
+ * addressed to the node, and `from` is an unauthenticated header field.
  */
 interface AdminRequestRegistry {
-    /** Records the packet id of an admin request about to be sent. */
-    fun register(requestId: Int)
+    /** Records an admin request about to be sent to [destNum]. */
+    fun register(requestId: Int, destNum: Int, adminChannelIndex: Int?)
+
+    /** Returns the outstanding request with [requestId] without forgetting it, or null. */
+    fun find(requestId: Int): OutstandingAdminRequest?
 
     /** Returns true and forgets [requestId] when it names an outstanding request; false otherwise. */
     fun consume(requestId: Int): Boolean
