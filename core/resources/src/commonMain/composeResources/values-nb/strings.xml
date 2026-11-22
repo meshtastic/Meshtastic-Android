@@ -135,6 +135,7 @@
     <!-- LOG -->
     <string name="logs">Logger</string>
     <!-- LORA -->
+    <string name="lora_value_none">Ingen</string>
     <!-- MAP -->
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_cache_size">Nåværende størrelse for mellomlager</string>

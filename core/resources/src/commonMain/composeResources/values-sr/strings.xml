@@ -227,6 +227,7 @@
     <!-- LORA -->
     <string name="lora">LoRA</string>
     <string name="lora_config">LoRA</string>
+    <string name="lora_value_none">Ништа</string>
     <string name="low_battery_message">Чвор %1$s има низак ниво батерије (%2$d%)</string>
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <!-- MAP -->

@@ -661,6 +661,10 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">自動</string>
+    <string name="lora_field_frequency_offset">頻率偏移量</string>
+    <string name="lora_field_modem_preset">數據機預設值 (Modem Preset)</string>
+    <string name="lora_value_none">無</string>
     <string name="low_battery">電量不足</string>
     <string name="low_battery_message">節點 %1$s 電量過低 (%2$d%)</string>
     <string name="low_battery_title">低電量：%1$s</string>
@@ -1347,18 +1351,16 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="widget_telemetry_title">遙測</string>
     <!-- WIFI -->
     <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
-    <string name="wifi_provision_available_networks">可用的網路</string>
     <string name="wifi_provision_connect_failed">無法連接：%1$s</string>
     <string name="wifi_provision_description">透過藍牙為您的 mPWRD-OS 裝置設定 Wi-Fi 憑證。</string>
     <string name="wifi_provision_device_found">找到裝置</string>
     <string name="wifi_provision_hidden_network">隱藏網路</string>
     <string name="wifi_provision_mpwrd_disclaimer">進一步了解 mPWRD-OS 專案\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">找不到裝置</string>
     <string name="wifi_provision_no_networks">找不到網路</string>
-    <string name="wifi_provision_scan_networks">搜尋網路</string>
     <string name="wifi_provision_scanning_ble">正在搜尋裝置…</string>
     <string name="wifi_provision_scanning_wifi">正在搜尋…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">網路名稱（SSID）</string>
     <string name="wifi_provision_ssid_placeholder">手動輸入或選擇一個網路</string>
     <string name="wifi_provision_success_description">您的 mPWRD-OS 裝置已加入 Wi-Fi 網路。</string>
     <string name="wifi_provision_success_device_connected">裝置已連線</string>

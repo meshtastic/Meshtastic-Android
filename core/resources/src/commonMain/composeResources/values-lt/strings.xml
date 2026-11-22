@@ -134,6 +134,7 @@
     <!-- LOG -->
     <string name="logs">Log`ai</string>
     <!-- LORA -->
+    <string name="lora_value_none">Nėra</string>
     <!-- MAP -->
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_cache_size">Dabartinis talpyklos dydis</string>
