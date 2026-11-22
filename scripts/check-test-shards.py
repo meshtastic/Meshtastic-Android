@@ -46,7 +46,9 @@ def main() -> None:
     settings = (REPO_ROOT / 'settings.gradle.kts').read_text()
     check = (REPO_ROOT / '.github/workflows/reusable-check.yml').read_text()
 
-    modules = set(re.findall(r'"(:[^"]+)"', settings))
+    # Only include(...) calls name modules; other quoted paths (the optional SDK substitution) are not ours.
+    includes = '\n'.join(re.findall(r'include\((.*?)\)', settings, re.S))
+    modules = set(re.findall(r'"(:[^"]+)"', includes))
 
     shards = check.split('# ── Sharded Unit Tests')[1].split('# ── Android Build')[0]
     # A commented-out task runs nothing, so it must not count as coverage.
