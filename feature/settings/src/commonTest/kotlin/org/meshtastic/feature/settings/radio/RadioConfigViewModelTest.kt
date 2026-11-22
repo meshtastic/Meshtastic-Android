@@ -47,6 +47,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.setMain
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
@@ -620,6 +621,75 @@ class RadioConfigViewModelTest {
             state.responseState is ResponseState.Loading,
             "expected Loading, got ${state.responseState} (isLocal=${state.isLocal}, route='${state.route}')",
         )
+    }
+
+    /**
+     * Sends a remote save while the admin channel sits at index 2, then moves the admin channel to index 4 before any
+     * reply arrives.
+     */
+    private fun TestScope.remoteSaveThenMoveAdminChannel(): MutableSharedFlow<MeshPacket> {
+        nodeRepository.setNodes(
+            listOf(
+                Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build()),
+                Node(num = 200, user = User.Builder().also { wb -> wb.id = "!200" }.build()),
+            ),
+        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        val channels = MutableStateFlow(channelSetWithAdminAt(2))
+        every { radioConfigRepository.channelSetFlow } returns channels
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(79)
+                79
+            }
+        viewModel = createViewModel(destNum = 200, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        runCurrent()
+        viewModel.setConfig(
+            Config.Builder()
+                .also { wb ->
+                    wb.lora =
+                        Config.LoRaConfig.Builder().also { wb -> wb.region = Config.LoRaConfig.RegionCode.US }.build()
+                }
+                .build(),
+        )
+        runCurrent()
+        channels.value = channelSetWithAdminAt(4)
+        runCurrent()
+        return packetFlow
+    }
+
+    private fun channelSetWithAdminAt(adminIndex: Int) = ChannelSet.Builder()
+        .also { wb ->
+            wb.settings =
+                List(5) { index ->
+                    ChannelSettings.Builder()
+                        .also { wb -> wb.name = if (index == adminIndex) "admin" else "channel$index" }
+                        .build()
+                }
+        }
+        .build()
+
+    @Test
+    fun `remote reply on the admin channel the request was sent under is accepted after the admin channel moves`() =
+        runTest {
+            val packetFlow = remoteSaveThenMoveAdminChannel()
+
+            packetFlow.emit(remoteMetadataReply(requestId = 79, from = 200, channel = 2))
+            runCurrent()
+
+            assertEquals("2.9.0", viewModel.radioConfigState.value.metadata?.firmware_version)
+        }
+
+    @Test
+    fun `remote reply on a channel that became the admin channel after the request was sent is ignored`() = runTest {
+        val packetFlow = remoteSaveThenMoveAdminChannel()
+
+        packetFlow.emit(remoteMetadataReply(requestId = 79, from = 200, channel = 4))
+        runCurrent()
+
+        assertNull(viewModel.radioConfigState.value.metadata)
     }
 
     @Test
@@ -2212,6 +2282,69 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `late remote read keeps the admin channel it was sent under after the admin channel moves`() = runTest {
+        val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
+        val remoteNode =
+            Node(
+                num = 456,
+                user = User.Builder().also { wb -> wb.id = "!456" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
+            )
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val channels = MutableStateFlow(channelSetWithAdminAt(2))
+        val owner =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!456"
+                    wb.long_name = "Late"
+                }
+                .build()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { radioConfigRepository.channelSetFlow } returns channels
+        everySuspend { radioConfigUseCase.getOwner(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        runCurrent()
+
+        viewModel.loadConfigRoute(ConfigRoute.USER)
+        runCurrent()
+        advanceTimeBy(30_001)
+        runCurrent()
+        channels.value = channelSetWithAdminAt(4)
+        runCurrent()
+
+        packetFlow.emit(
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.channel = 2
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ADMIN_APP
+                                wb.request_id = 42
+                                wb.payload =
+                                    AdminMessage.Builder()
+                                        .also { wb -> wb.get_owner_response = owner }
+                                        .build()
+                                        .encode()
+                                        .toByteString()
+                            }
+                            .build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        assertEquals(owner, viewModel.radioConfigState.value.userConfig)
+    }
+
+    @Test
     fun `late remote read routing ack cannot complete a newer save`() = runTest {
         val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
         val remoteNode = Node(num = 456, user = User.Builder().also { wb -> wb.id = "!456" }.build())
@@ -3040,6 +3173,30 @@ class RadioConfigViewModelTest {
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
 @Suppress("UNCHECKED_CAST")
 private fun List<Any?>.onRequestIdArg(): (Int) -> Unit = last() as (Int) -> Unit
+
+/** A non-PKI ADMIN_APP device metadata reply for [requestId] from node [from], received on [channel]. */
+private fun remoteMetadataReply(requestId: Int, from: Int, channel: Int) = MeshPacket.Builder()
+    .also { wb ->
+        wb.from = from
+        wb.channel = channel
+        wb.decoded =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = PortNum.ADMIN_APP
+                    wb.request_id = requestId
+                    wb.payload =
+                        AdminMessage.Builder()
+                            .also { wb ->
+                                wb.get_device_metadata_response =
+                                    DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.9.0" }.build()
+                            }
+                            .build()
+                            .encode()
+                            .toByteString()
+                }
+                .build()
+    }
+    .build()
 
 /** A real ROUTING_APP ack for [requestId] as the radio would deliver it, sent by node [from]. */
 private fun routingAck(requestId: Int, from: Int) = MeshPacket.Builder()

@@ -19,6 +19,7 @@ package org.meshtastic.core.domain.usecase.settings
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.getStringResFrom
+import org.meshtastic.core.repository.OutstandingAdminRequest
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -70,7 +71,8 @@ open class ProcessRadioResponseUseCase {
      * @param destNum The node number that the response is expected from.
      * @param requestIds The set of active request IDs.
      * @param myNodeNum The connected node, whose responses never leave the local link.
-     * @param adminChannelIndex The index of the legacy `admin` channel, or null when there is none.
+     * @param adminChannelIndex The index of the legacy `admin` channel when the request was sent, or null when there
+     *   was none.
      * @return A [RadioResponseResult] if the packet matches a request, or null otherwise.
      */
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongParameterList")
@@ -119,15 +121,14 @@ open class ProcessRadioResponseUseCase {
         // `from` and `request_id` travel in the clear, so a remote response is only as trustworthy as its
         // encryption: PKI, or the admin channel's PSK when the request went out on it. Dropping it, rather than
         // reporting an error, keeps the request id live for the genuine response.
-        val isRemote = destNum != myNodeNum
-        val legacyAdmin = adminChannelIndex != null && packet.channel == adminChannelIndex
+        val request = OutstandingAdminRequest(data.request_id, destNum, adminChannelIndex)
         return when {
             destNum != packet.from ->
                 RadioResponseResult.Error(
                     UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."),
                 )
 
-            isRemote && !packet.pki_encrypted && !legacyAdmin -> {
+            !request.acceptsResponseFrom(packet.from, myNodeNum, packet.pki_encrypted, packet.channel) -> {
                 Logger.w { "Ignored unauthenticated admin response from ${packet.from.toUInt()}" }
                 null
             }

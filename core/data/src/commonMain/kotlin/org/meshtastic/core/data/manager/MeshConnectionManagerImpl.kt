@@ -606,6 +606,9 @@ class MeshConnectionManagerImpl(
     }
 
     override fun onMyNodeInfoReceived(myNodeNum: Int) {
+        // A handshake restart drops the radio's pending requests, and a renumbered radio no longer answers to the
+        // old node number, so nothing registered before this point can be answered.
+        adminRequestRegistry.clearAll()
         // Set device time as early as possible: MyNodeInfo is the first Stage 1 frame, so this
         // lands before the firmware flushes its queued packet backlog and lets it stamp those
         // packets with a corrected clock (firmware #11274). A single small write ahead of the
