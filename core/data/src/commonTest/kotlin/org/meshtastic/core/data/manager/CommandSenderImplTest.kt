@@ -30,6 +30,7 @@ import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -315,28 +316,34 @@ class CommandSenderImplTest {
                 if (++nodeNumReads >= 2) channels.value = channelsWithAdminAt(5)
                 MutableStateFlow<Int?>(MY_NODE_NUM)
             }
-        val sender =
-            CommandSenderImpl(
-                packetHandler = packetHandler,
-                nodeManager = nodeManager,
-                radioConfigRepository = radioConfigRepository,
-                tracerouteHandler = tracerouteHandler,
-                neighborInfoHandler = neighborInfoHandler,
-                sessionManager = sessionManager,
-                adminRequestRegistry = adminRequestRegistry,
-                connectionStateProvider = connectionStateProvider,
-                scope = CoroutineScope(Dispatchers.Unconfined).asServiceScope(),
-            )
-        val packets = mutableListOf<ToRadio>()
-        every { packetHandler.sendToRadio(capture(packets)) } returns Unit
+        // Unconfined so the channel update lands inline; cancelled below because the sender's collector never ends.
+        val senderScope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val sender =
+                CommandSenderImpl(
+                    packetHandler = packetHandler,
+                    nodeManager = nodeManager,
+                    radioConfigRepository = radioConfigRepository,
+                    tracerouteHandler = tracerouteHandler,
+                    neighborInfoHandler = neighborInfoHandler,
+                    sessionManager = sessionManager,
+                    adminRequestRegistry = adminRequestRegistry,
+                    connectionStateProvider = connectionStateProvider,
+                    scope = senderScope.asServiceScope(),
+                )
+            val packets = mutableListOf<ToRadio>()
+            every { packetHandler.sendToRadio(capture(packets)) } returns Unit
 
-        sender.sendAdminImmediate(DEST_NODE) {
-            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+            sender.sendAdminImmediate(DEST_NODE) {
+                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+            }
+
+            val packet = requireNotNull(packets.single().packet)
+            assertEquals(3, packet.channel)
+            assertEquals(3, adminRequestRegistry.find(packet.id)?.adminChannelIndex)
+        } finally {
+            senderScope.cancel()
         }
-
-        val packet = requireNotNull(packets.single().packet)
-        assertEquals(3, packet.channel)
-        assertEquals(3, adminRequestRegistry.find(packet.id)?.adminChannelIndex)
     }
 
     @Test
