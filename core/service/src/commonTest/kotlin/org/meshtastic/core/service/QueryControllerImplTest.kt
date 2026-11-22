@@ -402,7 +402,7 @@ class QueryControllerImplTest {
             Routing.Error.MAX_RETRANSMIT,
             fromNode = LOCAL,
         )
-        // The SDK holds our own radio's MAX_RETRANSMIT for a remote node until the RPC deadline.
+        // A traceroute has no expected sender, so the SDK settles on our radio's MAX_RETRANSMIT without holding it.
         advanceTimeBy(RPC_DEADLINE_MS)
         runCurrent()
 
