@@ -23,11 +23,13 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -50,7 +52,15 @@ class SdkPhoneApiRadioTransportTest {
                 setDeviceAddress("tcp:sdk")
                 connect()
             }
-        val radio: RadioInterfaceService = fake
+
+        /** Each `recoverable` the transport reported when its session ended. */
+        val ends = mutableListOf<Boolean>()
+        val radio: RadioInterfaceService =
+            object : RadioInterfaceService by fake {
+                override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?) {
+                    ends += recoverable
+                }
+            }
         private val nodeManager =
             NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
         val transport =
@@ -89,12 +99,42 @@ class SdkPhoneApiRadioTransportTest {
         }
     }
 
+    @Test
+    fun `a receive overflow during the handshake ends the session for a retry`() = runTest {
+        val harness = Harness(backgroundScope, FakeRadioTransport(TransportIdentity("fake:overflow")))
+        try {
+            harness.transport.start()
+            advanceTimeBy(HANDSHAKE_START_MS)
+            harness.sendMyInfo()
+            // Mesh traffic interleaved with the config dump outgrows what the SDK holds until Ready.
+            repeat(EARLY_PACKETS) { id ->
+                harness.link.injectPacket(
+                    MeshPacket.Builder()
+                        .also {
+                            it.id = id + 1
+                            it.from = PEER
+                            it.to = NodeAddress.NODENUM_BROADCAST
+                            it.decoded = Data.Builder().also { d -> d.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                        }
+                        .build(),
+                )
+            }
+            runCurrent()
+
+            assertEquals(listOf(true), harness.ends)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
     private fun MeshPacket.admin(): AdminMessage? =
         decoded?.takeIf { it.portnum == PortNum.ADMIN_APP }?.let { AdminMessage.ADAPTER.decode(it.payload) }
 
     private companion object {
         const val NODE = 0x1A2B3C4D
+        const val PEER = 0x0BADF00D
         const val HANDSHAKE_START_MS = 1_000L
+        const val EARLY_PACKETS = 200
         const val CLOCK_TOLERANCE_S = 60L
     }
 }
