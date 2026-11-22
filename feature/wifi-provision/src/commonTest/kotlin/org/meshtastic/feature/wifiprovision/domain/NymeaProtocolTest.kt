@@ -164,6 +164,20 @@ class NymeaProtocolTest {
     }
 
     @Test
+    fun `a network without a protection flag does not decode`() {
+        assertFailsWith<SerializationException> {
+            NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0,"p":[{"e":"Minimal","s":70}]}""")
+        }
+    }
+
+    @Test
+    fun `a network without a signal does not decode`() {
+        assertFailsWith<SerializationException> {
+            NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0,"p":[{"e":"Minimal","p":1}]}""")
+        }
+    }
+
+    @Test
     fun `a response without a status does not decode`() {
         assertFailsWith<SerializationException> { NymeaJson.decodeFromString<NymeaResponse>("""{"c":1}""") }
     }
