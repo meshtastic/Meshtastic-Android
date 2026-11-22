@@ -92,6 +92,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.util.formatFrequencyMhz
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
@@ -496,11 +497,6 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
     }
 }
-
-/** [mhz] as the override frequency field shows it: fixed three decimals, a dot separator, no grouping. */
-internal fun formatFrequencyMhz(mhz: Float): String = NumberFormatter.formatInvariant(mhz, FREQUENCY_DECIMALS)
-
-private const val FREQUENCY_DECIMALS = 3
 
 /** The fields the Advanced card holds; every other LoRa field is on the Options card. */
 internal val LORA_ADVANCED_FIELDS =

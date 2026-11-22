@@ -52,8 +52,10 @@ private val parser = MarkdownParser(GFMFlavourDescriptor(), false, CancellationT
 
 // The String overload of buildMarkdownTreeFromString is deprecated in favour of the CharSequence one, and
 // Kotlin picks the more specific String overload unless the argument is widened here.
-private fun parseOrNull(source: String): ASTNode? =
-    runCatching { parser.buildMarkdownTreeFromString(source as CharSequence) }.getOrNull()
+private fun parseOrNull(source: String): ASTNode? = runCatching {
+    parser.buildMarkdownTreeFromString(source as CharSequence)
+}
+    .getOrNull()
 
 /**
  * Style spans over the RAW [source] (delimiters kept in place) for live in-field styling. Unlike [parseInlineMarkdown]
@@ -179,7 +181,13 @@ private class InlineMarkdownVisitor(private val source: String) {
             if (node.children.isEmpty()) emitRaw(node, styles) else node.children.forEach { visit(it, styles) }
             return
         }
-        val url = source.substring(destination.startOffset, destination.endOffset)
+        val url = openableLinkTarget(source.substring(destination.startOffset, destination.endOffset))
+        val label = source.substring(linkText.startOffset + 1, maxOf(linkText.startOffset + 1, linkText.endOffset - 1))
+        if (url == null || labelNamesDifferentHost(label, url)) {
+            // Not an openable web/mail target, or a label naming another site: show the raw markdown.
+            node.children.forEach { child -> visit(child, styles) }
+            return
+        }
         val start = out.length
         linkText.children.forEach { child ->
             // LINK_TEXT wraps its content in `[` … `]`; drop the brackets, keep (and style) the label.

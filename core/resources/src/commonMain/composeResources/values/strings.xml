@@ -57,7 +57,6 @@
     <!-- ADD -->
     <string name="add">Add</string>
     <string name="add_a_note">Add a private note…</string>
-    <string name="add_channels_description">The following channels were found in the QR code. Select the ones you would like to add to your device. Existing channels will be preserved.</string>
     <string name="add_custom_tile_source">Add Network Tile Source</string>
     <string name="add_favorite">Add to favorites</string>
     <string name="add_layer">Add Layer</string>
@@ -232,6 +231,16 @@
         <item quantity="other">%1$d channels in this link are already on your radio and were left out.</item>
     </plurals>
     <string name="channel_features">Channel Features</string>
+    <string name="channel_import_add_description">Adds the selected channels to your radio. Channels already on your radio stay as they are.</string>
+    <string name="channel_import_confirm_add">Add channels</string>
+    <string name="channel_import_confirm_replace">Replace channels</string>
+    <string name="channel_import_downlink">Accepts messages from MQTT on this channel</string>
+    <string name="channel_import_mode_label">Import mode</string>
+    <string name="channel_import_position_approximate">Shares your approximate location</string>
+    <string name="channel_import_position_precise">Shares your precise location</string>
+    <string name="channel_import_replace_description">Removes the channels on your radio and applies the channels and LoRa settings below.</string>
+    <string name="channel_import_title">Import channels</string>
+    <string name="channel_import_uplink">Forwards this channel's messages to MQTT</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="channel_name">Channel Name</string>
     <plurals name="channel_slots_full">
@@ -911,6 +920,7 @@
     <string name="free_memory">Free memory</string>
     <string name="free_memory_description">Available system memory in bytes</string>
     <string name="freq">Freq</string>
+    <string name="frequency_value_mhz">%1$s MHz</string>
     <string name="gas_resistance">Gas Resistance</string>
     <string name="generate_qr_code">Generate QR Code</string>
     <!-- GEOFENCE -->
@@ -1152,11 +1162,24 @@
     <string name="longitude">Longitude</string>
     <!-- LORA -->
     <string name="lora">LoRa</string>
+    <string name="lora_change_spoken">%1$s, from %2$s to %3$s</string>
+    <string name="lora_change_values">%1$s → %2$s</string>
+    <string name="lora_changes_alert_description">These can stop your radio from transmitting, lift its duty cycle limit, or make it ignore nodes.</string>
+    <string name="lora_changes_alert_heading">Changes to sending and receiving</string>
+    <string name="lora_changes_heading">LoRa settings that change</string>
     <string name="lora_config">LoRa</string>
-    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
-    <string name="lora_config_changes">LoRa Configuration Changes:</string>
+    <string name="lora_fem_lna_auto">Automatic</string>
+    <string name="lora_fem_lna_not_present">Not present</string>
+    <string name="lora_field_fem_lna_mode">FEM LNA Mode</string>
+    <string name="lora_field_frequency_offset">Frequency Offset</string>
+    <string name="lora_field_modem_preset">Modem Preset</string>
+    <string name="lora_field_serial_hal_only">Serial HAL Only</string>
+    <string name="lora_field_transparent_mode">Transparent Mode</string>
+    <string name="lora_field_unrecognized">Other LoRa settings also change</string>
     <string name="lora_preset_custom">Custom</string>
     <string name="lora_preset_region">%1$s · %2$s</string>
+    <string name="lora_value_none">None</string>
+    <string name="lora_value_not_used">Not used</string>
     <string name="low_battery">Low Battery</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>
     <string name="low_battery_title">Low battery: %1$s</string>
@@ -1538,7 +1561,6 @@
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
     <string name="network_scan_unavailable">A browser can't scan the network. Add a radio by its address.</string>
-    <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="new_messages_below">New messages below</string>
     <string name="new_node_seen">New Node Seen: %1$s</string>
     <string name="new_nodes">New Nodes</string>
@@ -1936,7 +1958,6 @@
         <item quantity="other">%1$d nodes will be removed from your list until your node receives data from them again.</item>
     </plurals>
     <string name="replace">Replace</string>
-    <string name="replace_channels_and_settings_description">This QR code contains a complete configuration. This will REPLACE your existing channels and radio settings. All existing channels will be removed.</string>
     <string name="reply">Reply</string>
     <string name="replying_to">Replying to %1$s</string>
     <string name="report">Report</string>
@@ -2448,23 +2469,35 @@
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
-    <string name="wifi_provision_available_networks">Available Networks</string>
+    <string name="wifi_provision_available_networks">Available networks</string>
     <string name="wifi_provision_choose_device">Choose device</string>
     <string name="wifi_provision_choose_device_detail">Your browser lists the nearby devices that offer Wi-Fi setup. Pick yours to continue.</string>
+    <string name="wifi_provision_confirm_compare">Compare the address with the Bluetooth address printed on the device or shown in its Bluetooth settings.</string>
+    <string name="wifi_provision_confirm_consequence">The Wi-Fi network you choose next, including its password, is sent to this device.</string>
+    <string name="wifi_provision_confirm_title">Set up Wi-Fi on this device?</string>
+    <string name="wifi_provision_confirm_title_named">Set up Wi-Fi on %1$s?</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>
     <string name="wifi_provision_device_found_detail">Ready to scan for Wi-Fi networks.</string>
+    <string name="wifi_provision_device_not_found">Couldn't find the device. Make sure it is powered on and within range, then try again.</string>
     <string name="wifi_provision_hidden_network">Hidden network</string>
+    <string name="wifi_provision_link_unsupported">This link names a device by hardware address, which this app can't look up here. Choose the device from the list instead.</string>
     <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">No devices found</string>
+    <string name="wifi_provision_no_devices_detail">Make sure the device is powered on and within range, then scan again.</string>
     <string name="wifi_provision_no_networks">No networks found</string>
+    <string name="wifi_provision_no_response">The device didn't respond. Move closer to it and try again.</string>
+    <string name="wifi_provision_pick_device">Choose the device to set up. The Wi-Fi password is sent to the device you pick.</string>
+    <string name="wifi_provision_rescan">Scan again</string>
     <string name="wifi_provision_scan_failed">Failed to scan for Wi-Fi networks: %1$s</string>
-    <string name="wifi_provision_scan_networks">Scan for Networks</string>
+    <string name="wifi_provision_scan_networks">Scan for networks</string>
     <string name="wifi_provision_scanning_ble">Searching for device…</string>
     <string name="wifi_provision_scanning_wifi">Scanning…</string>
     <string name="wifi_provision_sending_credentials">Applying Wi-Fi configuration…</string>
+    <string name="wifi_provision_signal_dbm">Signal strength %1$d dBm</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Network Name (SSID)</string>
+    <string name="wifi_provision_ssid_label">Network name (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
     <string name="wifi_provision_status_applied">Wi-Fi configured successfully!</string>
     <string name="wifi_provision_status_failed">Failed to apply Wi-Fi configuration</string>

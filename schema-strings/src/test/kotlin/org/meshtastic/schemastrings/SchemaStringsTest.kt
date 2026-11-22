@@ -83,6 +83,15 @@ class SchemaStringsTest {
     }
 
     @Test
+    fun `the Kotlin notice for a branch snapshot pin fits the line limit and reads back`() {
+        val pin = "2.8.2-b-feat-ble-mesh-protocol-flags-long-name.51-g76b0f8a-SNAPSHOT"
+        val notice = EnumLabelsKt.notice(pin)
+
+        assertTrue(notice.lines().all { it.length <= 120 }, notice)
+        assertEquals(pin, SchemaStringsSync.recordedPin(notice))
+    }
+
+    @Test
     fun `rendering escapes markup and leaves quotes bare`() {
         val xml = StringsXml.render("<?xml?>\n", mapOf("a" to StringsXml.escape("Tom's <b> & \"c\"")), notice = null)
 

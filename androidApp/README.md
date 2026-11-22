@@ -55,6 +55,7 @@ graph TB
   :androidApp -.-> :core:ui
   :androidApp -.-> :core:barcode
   :androidApp -.-> :core:takserver
+  :androidApp -.-> :appShell
   :androidApp -.-> :feature:intro
   :androidApp -.-> :feature:messaging
   :androidApp -.-> :feature:connections

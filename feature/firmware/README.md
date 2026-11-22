@@ -123,7 +123,7 @@ A node that reports its bootloader (`DeviceMetadata.bootloader_version`, decoded
 
 - `FirmwareUpdateManager.kt` / `DefaultFirmwareUpdateManager.kt`: Top-level orchestrator that routes an update to a handler by connection type and architecture.
 - `FirmwareUpdateViewModel.kt`: UI state management (MVI pattern) for the firmware update screen.
-- `FirmwareRetriever.kt`: Handles downloading and extracting firmware assets (ZIP/BIN/UF2) with manifest-based ESP32 resolution.
+- `FirmwareRetriever.kt`: Handles downloading and extracting firmware assets (ZIP/BIN/UF2) with manifest-based ESP32 resolution. An ESP32 image that fails its `.mt.json` size or md5 check is deleted and the retrieval fails with no fallback; the filename fallbacks apply only when no manifest, no `app0` entry, or no downloadable image exists. Bootloader images resolve only against `https://github.com/meshtastic/nRF52_Bootloader/releases/download/<tag>` (`isBootloaderReleaseBase`), and any single download stops and is deleted past `MAX_FIRMWARE_ZIP_BYTES`.
 - `Esp32OtaUpdateHandler.kt`: Orchestrates the Unified OTA flow for ESP32 devices.
 - `WifiOtaTransport.kt`: Implements the TCP transport logic for ESP32 OTA.
 - `BleOtaTransport.kt`: Implements the BLE transport logic for ESP32 OTA using Kable.

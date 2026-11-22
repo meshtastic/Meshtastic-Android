@@ -138,7 +138,6 @@
     <!-- MUTE -->
     <string name="name">Heiti</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="nodedb_reset">Endurræsa NodeDB</string>

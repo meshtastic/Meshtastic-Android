@@ -200,15 +200,16 @@ class RadioSessionProjection(
                 .also { wb -> wb.rx_time = event.packet.rxTimeOrNull() ?: nowSeconds.toInt() }
                 .build()
         val decoded = packet.decoded ?: return
+        val loggedPacket = packet.redactedForLog()
         val log =
             MeshLog(
                 uuid = Uuid.random().toString(),
                 message_type = TYPE_PACKET,
                 received_date = nowMillis,
-                raw_message = packet.toString(),
+                raw_message = loggedPacket.toString(),
                 fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
-                fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
+                fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
             )
         val logJob = insertMeshLog(log, session)
         launchSessionBound(session, "mesh-packet emission") { serviceStateWriter.emitMeshPacket(packet) }
@@ -288,10 +289,12 @@ class RadioSessionProjection(
 
     private fun logEvent(event: MeshEvent, session: RadioSessionContext) {
         when (event) {
-            is MeshEvent.Notification ->
-                logFromRadio(session, TYPE_CLIENT_NOTIFICATION, event.notification.toString()) {
-                    it.clientNotification = event.notification
+            is MeshEvent.Notification -> {
+                val notification = event.notification.redactedForLog()
+                logFromRadio(session, TYPE_CLIENT_NOTIFICATION, notification.toString()) {
+                    it.clientNotification = notification
                 }
+            }
 
             is MeshEvent.FileInfoReceived ->
                 logFromRadio(session, TYPE_FILE_INFO, event.info.toString()) { it.fileInfo = event.info }
@@ -308,30 +311,38 @@ class RadioSessionProjection(
     /** Logs the sections of [bundle] that differ from the last logged bundle; after Ready, that is all of them. */
     private fun logConfigChanges(session: RadioSessionContext, bundle: ConfigBundle) {
         val previous = loggedConfig.getAndSet(bundle)
-        (bundle.configs - previous?.configs.orEmpty().toSet()).forEach { config ->
+        (bundle.configs - previous?.configs.orEmpty().toSet()).forEach { changed ->
+            val config = changed.redactedForLog()
             logFromRadio(session, TYPE_CONFIG, config.toOneLineString()) { it.config = config }
         }
-        (bundle.moduleConfigs - previous?.moduleConfigs.orEmpty().toSet()).forEach { moduleConfig ->
+        (bundle.moduleConfigs - previous?.moduleConfigs.orEmpty().toSet()).forEach { changed ->
+            val moduleConfig = changed.redactedForLog()
             logFromRadio(session, TYPE_MODULE_CONFIG, moduleConfig.toOneLineString()) { it.moduleConfig = moduleConfig }
         }
         bundle.deviceUIConfig
             ?.takeIf { it != previous?.deviceUIConfig }
+            ?.redactedForLog()
             ?.let { ui ->
                 logFromRadio(session, TYPE_DEVICE_UI_CONFIG, ui.toString()) { it.deviceuiConfig = ui }
             }
     }
 
     private fun logChannels(session: RadioSessionContext, channels: List<org.meshtastic.proto.Channel>) {
-        channels.forEach { channel ->
-            logFromRadio(session, TYPE_CHANNEL, channel.toOneLineString()) { it.channel = channel }
-        }
+        channels
+            .map { it.redactedForLog() }
+            .forEach { channel ->
+                logFromRadio(session, TYPE_CHANNEL, channel.toOneLineString()) { it.channel = channel }
+            }
     }
 
     private fun logNodes(session: RadioSessionContext, nodes: Collection<NodeInfo>) {
         nodes.forEach { node -> logFromRadio(session, TYPE_NODE_INFO, node.toPIIString()) { it.node_info = node } }
     }
 
-    /** MeshLog rows keep their persisted [FromRadio] shape, which the debug view and history queries read. */
+    /**
+     * MeshLog rows keep their persisted [FromRadio] shape, which the debug view and history queries read. A
+     * credential-bearing message arrives as its `redactedForLog` copy, in both [message] and the frame.
+     */
     private fun logFromRadio(
         session: RadioSessionContext,
         type: String,

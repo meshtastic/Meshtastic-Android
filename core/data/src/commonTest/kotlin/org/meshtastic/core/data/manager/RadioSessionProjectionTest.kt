@@ -38,17 +38,22 @@ import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.ConfigBundle
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -63,6 +68,7 @@ class RadioSessionProjectionTest {
         val session: RadioSessionContext = checkNotNull(radio.activeSession.value)
         val nodeRepository = FakeNodeRepository()
         val logs = FakeMeshLogRepository()
+        val radioConfig = FakeRadioConfigRepository()
         val nodeManager =
             NodeManagerImpl(nodeRepository, mock(MockMode.autofill), radio, scope.asServiceScope()).apply {
                 setMyNodeNum(LOCAL)
@@ -73,7 +79,7 @@ class RadioSessionProjectionTest {
             MeshConfigFlowManagerImpl(
                 nodeManager = nodeManager,
                 nodeRepository = nodeRepository,
-                radioConfigRepository = FakeRadioConfigRepository(),
+                radioConfigRepository = radioConfig,
                 serviceStateWriter = FakeServiceRepository(),
                 analytics = mock(MockMode.autofill),
                 packetHandler = FakePacketHandler(),
@@ -207,6 +213,61 @@ class RadioSessionProjectionTest {
         assertEquals(2, harness.radio.receiveActivityReports)
     }
 
+    @Test
+    fun `a config change is logged without the bluetooth pin while the radio config keeps it`() = runTest {
+        val harness = Harness(backgroundScope)
+        val bluetooth =
+            Config.Builder()
+                .also { c ->
+                    c.bluetooth =
+                        Config.BluetoothConfig.Builder()
+                            .also { b ->
+                                b.enabled = true
+                                b.fixed_pin = SECRET_PIN
+                            }
+                            .build()
+                }
+                .build()
+        val bundle =
+            ConfigBundle(
+                myInfo = MyNodeInfo.Builder().also { it.my_node_num = LOCAL }.build(),
+                metadata = DeviceMetadata.Builder().build(),
+                configs = listOf(bluetooth),
+                moduleConfigs = emptyList(),
+            )
+
+        harness.projection.project(RadioSessionEvent.ConfigChanged(SDK_SESSION, sequence = 1, bundle), harness.session)
+        runCurrent()
+
+        val row = harness.logs.currentLogs.single { it.message_type == "Config" }
+        assertEquals(0, row.fromRadio.config?.bluetooth?.fixed_pin)
+        assertFalse(row.raw_message.contains(SECRET_PIN.toString()))
+        assertEquals(SECRET_PIN, harness.radioConfig.lastSetLocalConfig?.bluetooth?.fixed_pin)
+    }
+
+    @Test
+    fun `a received admin packet is logged with its passkey cleared and reaches the data handler intact`() = runTest {
+        val handled = mutableListOf<MeshPacket>()
+        val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
+        every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
+            { args ->
+                handled += args.arg<MeshPacket>(0)
+            }
+        val harness = Harness(backgroundScope, dataHandler)
+        val secret = ByteArray(32) { 0x7A }.toByteString()
+        val adminPayload =
+            AdminMessage.ADAPTER.encodeByteString(AdminMessage.Builder().also { it.session_passkey = secret }.build())
+
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 3, port = PortNum.ADMIN_APP, payload = adminPayload))
+        runCurrent()
+
+        val row = harness.logs.currentLogs.single { it.message_type == "Packet" }
+        val loggedAdmin = AdminMessage.ADAPTER.decode(checkNotNull(row.fromRadio.packet?.decoded).payload)
+        assertEquals(ByteString.EMPTY, loggedAdmin.session_passkey)
+        assertFalse(row.raw_message.contains(secret.hex()))
+        assertEquals(listOf(adminPayload), handled.map { it.decoded?.payload })
+    }
+
     @Suppress("LongParameterList")
     private fun loraPacket(
         hopStart: Int,
@@ -244,5 +305,6 @@ class RadioSessionProjectionTest {
         const val MQTT_PEER = 0x2002
         const val RELAYED_PEER = 0x2003
         const val SDK_SESSION = 1L
+        const val SECRET_PIN = 424242
     }
 }

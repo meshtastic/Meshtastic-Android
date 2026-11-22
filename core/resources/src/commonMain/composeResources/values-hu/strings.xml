@@ -439,7 +439,6 @@
     <string name="neighbor_info">Szomszéd-információ</string>
     <string name="neighbor_info_config">Szomszéd-információ beállításai</string>
     <string name="network">Hálózat</string>
-    <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="new_messages_below">Új üzenetek lent</string>
     <string name="new_node_seen">Új csomópont észlelve: %1$s</string>
     <string name="new_nodes">Új csomópontok</string>

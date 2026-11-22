@@ -49,8 +49,10 @@ import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
@@ -333,6 +335,38 @@ class PacketHandlerImplTest {
         fixture.client.disconnect()
     }
 
+    @Test
+    fun `an outgoing admin packet is logged with its passkey cleared while the radio gets the original`() = runTest {
+        val fixture = fixture()
+        val secret = ByteArray(32) { 0x7A }.toByteString()
+        val adminPayload =
+            AdminMessage.ADAPTER.encodeByteString(AdminMessage.Builder().also { it.session_passkey = secret }.build())
+        val outgoing =
+            packet(321)
+                .newBuilder()
+                .also {
+                    it.decoded =
+                        Data.Builder()
+                            .also { data ->
+                                data.portnum = PortNum.ADMIN_APP
+                                data.payload = adminPayload
+                            }
+                            .build()
+                }
+                .build()
+
+        assertTrue(fixture.handler.sendToRadio(outgoing))
+        runCurrent()
+
+        val row = fixture.logs.currentLogs.single { it.message_type == "Packet" }
+        val loggedAdmin = AdminMessage.ADAPTER.decode(checkNotNull(row.fromRadio.packet?.decoded).payload)
+        assertEquals(ByteString.EMPTY, loggedAdmin.session_passkey)
+        assertFalse(row.raw_message.contains(secret.hex()))
+        val sent = fixture.transport.outboundPackets().single { it.id == 321 }
+        assertEquals(secret, AdminMessage.ADAPTER.decode(checkNotNull(sent.decoded).payload).session_passkey)
+        fixture.client.disconnect()
+    }
+
     private suspend fun TestScope.fixture(): Fixture {
         val transport =
             FakeRadioTransport(TransportIdentity("fake:outgoing"), autoHandshake = true, nodeNum = LOCAL_NODE)
@@ -363,16 +397,17 @@ class PacketHandlerImplTest {
             {
                 PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
             }
+        val logs = FakeMeshLogRepository()
         val handler =
             PacketHandlerImpl(
                 lazy { repository },
                 radioService,
-                lazy { mock(MockMode.autofill) },
+                lazy { logs },
                 service,
                 nodeManager(),
                 backgroundScope.asServiceScope(),
             )
-        return Fixture(handler, repository, service, radio, transport, client)
+        return Fixture(handler, repository, service, radio, transport, client, logs)
     }
 
     private class Fixture(
@@ -382,6 +417,7 @@ class PacketHandlerImplTest {
         val radio: FakeRadioInterfaceService,
         val transport: FakeRadioTransport,
         val client: RadioClient,
+        val logs: FakeMeshLogRepository,
     ) {
         fun queueStatus(id: Int, result: Int) {
             val status =

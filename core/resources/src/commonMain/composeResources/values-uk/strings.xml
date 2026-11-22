@@ -673,7 +673,6 @@
     <string name="neighbor_info">Інформація про сусідів</string>
     <string name="neighbor_info_config">Налаштування інформації про сусідів</string>
     <string name="network">Мережа</string>
-    <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
     <string name="new_messages_below">Нові повідомлення нище</string>
     <string name="new_node_seen">Виявлено новий вузол: %1$s</string>
     <string name="new_nodes">Нові Вузли</string>

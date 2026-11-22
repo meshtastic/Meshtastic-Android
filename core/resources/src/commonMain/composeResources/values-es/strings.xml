@@ -452,7 +452,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="neighbor_info">Información de Vecinos</string>
     <string name="neighbor_info_config">Configuración de Información de Vecinos</string>
     <string name="network">Conexión Red</string>
-    <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
     <string name="new_messages_below">Nuevos mensajes abajo</string>
     <string name="new_node_seen">Visto nuevo nodo: %1$s</string>
     <string name="new_nodes">Nuevos nodos</string>

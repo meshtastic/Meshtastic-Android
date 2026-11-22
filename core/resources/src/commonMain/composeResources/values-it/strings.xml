@@ -48,7 +48,6 @@
     <!-- ADD -->
     <string name="add">Aggiungere</string>
     <string name="add_a_note">Aggiungi una nota privata…</string>
-    <string name="add_channels_description">I seguenti canali sono stati trovati nel codice QR. Selezionare quelli che si desidera aggiungere al dispositivo. I canali esistenti saranno mantenuti.</string>
     <string name="add_custom_tile_source">Aggiungi Sorgente Tile</string>
     <string name="add_favorite">Aggiungi ai preferiti</string>
     <string name="add_layer">Aggiungi livello</string>
@@ -997,7 +996,6 @@
     <string name="neighbor_info">Informazioni Vicinato</string>
     <string name="neighbor_info_config">Configurazione Info Nodi Vicini</string>
     <string name="network">Rete</string>
-    <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
     <string name="new_messages_below">Nuovi messaggi sotto</string>
     <string name="new_node_seen">Nuovo Nodo Rilevato: %1$s</string>
     <string name="new_nodes">Nuovi nodi</string>
@@ -1244,7 +1242,6 @@
     <string name="remove_layer">Rimuovi livello</string>
     <string name="remove_node_text">Questo nodo verrà rimosso dalla tua lista fino a quando il tuo nodo non riceverà di nuovo dei dati.</string>
     <string name="replace">Sostituisci</string>
-    <string name="replace_channels_and_settings_description">Questo codice QR contiene una configurazione completa. Questo SOSTITUIRÀ i canali e le impostazioni radio esistenti. Tutti i canali esistenti verranno rimossi.</string>
     <string name="reply">Rispondi</string>
     <string name="replying_to">Rispondendo a %1$s</string>
     <string name="report">Invia Segnalazione</string>

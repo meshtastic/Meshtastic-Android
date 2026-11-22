@@ -149,7 +149,6 @@
     <!-- MUTE -->
     <string name="name">שם</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">כלול לא ידועים</string>

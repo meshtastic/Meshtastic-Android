@@ -50,7 +50,6 @@
     <!-- ADD -->
     <string name="add">Přidat</string>
     <string name="add_a_note">Přidat soukromou poznámku…</string>
-    <string name="add_channels_description">QR kód obsahuje následující kanály. Vyberte ty, které chcete přidat do zařízení. Stávající kanály zůstanou zachovány.</string>
     <string name="add_favorite">Přidat do oblíbených</string>
     <string name="add_layer">Přidat vrstvu</string>
     <string name="add_network_device">Přidat</string>
@@ -1180,7 +1179,6 @@
     <string name="neighbor_info">Informace o sousedech</string>
     <string name="neighbor_info_config">Nastavení informace o sousedech</string>
     <string name="network">Síť</string>
-    <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
     <string name="new_messages_below">Nové zprávy</string>
     <string name="new_node_seen">Nově objevený uzel: %1$s</string>
     <string name="new_nodes">Nové uzly</string>
@@ -1489,7 +1487,6 @@
     <string name="remove_layer">Odebrat vrstvu</string>
     <string name="remove_node_text">Tento uzel bude odstraněn z vašeho seznamu, dokud z něj váš uzel znovu neobdrží data.</string>
     <string name="replace">Nahradit</string>
-    <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <string name="reply">Odpovědět</string>
     <string name="replying_to">Odpověď na %1$s</string>
     <string name="report">Odeslat chybové hlášení</string>

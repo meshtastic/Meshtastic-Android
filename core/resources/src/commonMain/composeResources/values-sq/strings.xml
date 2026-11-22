@@ -181,7 +181,6 @@
     <string name="name">Emri</string>
     <string name="navigate_back">Kthehu pas</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Përfshi të panjohurat</string>

@@ -18,7 +18,9 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.database.ensureOwnerOnlyFile
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.StoredSecurityKeys
 import java.io.File
@@ -33,7 +35,7 @@ import javax.crypto.SecretKey
 @Suppress("TooGenericExceptionCaught")
 class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : SecurityKeyBackupStore {
 
-    private val storeDir: File by lazy { File(dataDir, STORE_DIR).also { it.mkdirs() } }
+    private val storeDir: File by lazy { File(dataDir, STORE_DIR).also(::createOwnerOnlyDirectories) }
 
     private val cipher by lazy { DesktopKeystoreCipher(storeDir, KEY_ALIAS, KEYSTORE_PASSWORD) }
 
@@ -77,7 +79,9 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
         val key = masterKey ?: error("SecurityKeyBackup: Cannot save keys - keystore unavailable")
         val nameLine = longName?.let { "\n$it" }.orEmpty()
         val plaintext = "$timestamp\n$publicKeyBase64\n$privateKeyBase64$nameLine".encodeToByteArray()
-        entryFile(nodeNum).writeBytes(cipher.encrypt(key, plaintext))
+        val entry = entryFile(nodeNum)
+        ensureOwnerOnlyFile(entry)
+        entry.writeBytes(cipher.encrypt(key, plaintext))
     }
 
     override fun delete(nodeNum: Int) {

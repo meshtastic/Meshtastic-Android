@@ -32,4 +32,12 @@ interface BleScanner {
     /** True where a scan is a device chooser the user already picked from, so the device it emits is the selection. */
     val picksDevice: Boolean
         get() = false
+
+    /**
+     * True where [BleDevice.address] is a hardware (MAC) address the user can compare with a label or another device
+     * list, and where a MAC from outside the app can match a scanned device. False where it is an identifier only this
+     * host and app understand, such as a CoreBluetooth UUID or a browser device id.
+     */
+    val addressIsHardware: Boolean
+        get() = true
 }

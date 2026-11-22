@@ -18,6 +18,7 @@ package org.meshtastic.feature.settings.radio.component
 
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.RegionPresetConstraint
+import org.meshtastic.core.ui.util.formatFrequencyMhz
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.test.Test

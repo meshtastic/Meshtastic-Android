@@ -25,6 +25,7 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.ChannelInfoPreview
 import org.meshtastic.core.ui.component.ChannelItemPreview
+import org.meshtastic.core.ui.component.ChannelSelectionPreview
 import org.meshtastic.core.ui.component.DistanceInfoPreview
 import org.meshtastic.core.ui.component.HopsInfoPreview
 import org.meshtastic.core.ui.component.LastHeardInfoPreview
@@ -43,6 +44,13 @@ import org.meshtastic.core.ui.theme.AppThemePreviewWrapper
 @Composable
 fun ScreenshotChannelItem() {
     ChannelItemPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotChannelSelection() {
+    ChannelSelectionPreview()
 }
 
 @PreviewTest

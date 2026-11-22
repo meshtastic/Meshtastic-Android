@@ -70,7 +70,8 @@ internal fun shareOrElse(text: String, subject: String, fallback: () -> Unit) {
 actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = rememberOpenMapInBrowser()
 
 /** Web — opens the URL in a new browser tab via `window.open`, so the running app's own tab/state is left intact. */
-@Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { url -> window.open(url, "_blank", "") }
+@Composable
+actual fun rememberOpenUrl(): (url: String) -> Unit = { url -> window.open(url, "_blank", "noopener,noreferrer") }
 
 /** Chromium's save picker where it exists, otherwise the write becomes a browser download. See [launchSaveFile]. */
 @Composable

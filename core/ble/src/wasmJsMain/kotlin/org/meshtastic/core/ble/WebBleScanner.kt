@@ -53,6 +53,9 @@ import kotlin.uuid.Uuid
 class WebBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     override val picksDevice: Boolean = true
 
+    // A Web Bluetooth device id is opaque to the page and unrelated to the MAC.
+    override val addressIsHardware: Boolean = false
+
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
         val peripheral = if (address != null) grantedPeripheral(address) else pick(serviceUuid)
         if (peripheral != null) emit(peripheral.toBleDevice())
