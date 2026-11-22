@@ -70,6 +70,7 @@ import org.meshtastic.feature.settings.radio.component.DeviceConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.DisplayConfigScreen
 import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
+import org.meshtastic.feature.settings.radio.component.LocalConfigTargetPioEnv
 import org.meshtastic.feature.settings.radio.component.MQTTConfigScreen
 import org.meshtastic.feature.settings.radio.component.MeshBeaconConfigScreen
 import org.meshtastic.feature.settings.radio.component.NeighborInfoConfigScreen
@@ -83,6 +84,7 @@ import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommo
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
+import org.meshtastic.feature.settings.radio.component.TransportConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import org.meshtastic.feature.settings.radio.setup.RadioSetupScreen
 import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
@@ -352,6 +354,9 @@ fun EntryProviderScope<NavKey>.settingsGraph(
                 ConfigRoute.NETWORK ->
                     NetworkConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
+                ConfigRoute.TRANSPORTS ->
+                    TransportConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+
                 ConfigRoute.DISPLAY ->
                     DisplayConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
@@ -501,7 +506,11 @@ fun <R : Route> EntryProviderScope<NavKey>.configComposable(
         // connect-time repository snapshot, so their route refresh stays non-blocking and does not flash a 0% overlay.
         remember(viewModel, routeInfo) { viewModel.ensureLoadingForRemote().let { true } }
         LaunchedEffect(viewModel, routeInfo) { viewModel.loadConfigRoute(routeInfo) }
-        CompositionLocalProvider(LocalSettingsFieldFocus provides koinInject<SettingsFieldFocus>()) {
+        val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+        CompositionLocalProvider(
+            LocalSettingsFieldFocus provides koinInject<SettingsFieldFocus>(),
+            LocalConfigTargetPioEnv provides state.pioEnv,
+        ) {
             content(viewModel)
         }
     }

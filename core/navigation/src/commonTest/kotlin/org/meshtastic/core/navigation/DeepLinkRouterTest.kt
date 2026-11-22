@@ -431,6 +431,7 @@ class DeepLinkRouterTest {
                 "position" to SettingsRoute.Position,
                 "power" to SettingsRoute.Power,
                 "network" to SettingsRoute.Network,
+                "transports" to SettingsRoute.Transports,
                 "display" to SettingsRoute.Display,
                 "lora" to SettingsRoute.LoRa,
                 "bluetooth" to SettingsRoute.Bluetooth,

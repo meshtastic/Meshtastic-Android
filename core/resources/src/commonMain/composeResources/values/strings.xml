@@ -2391,6 +2391,7 @@
     <string name="transport_tcp">TCP</string>
     <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
+    <string name="transports">Transports</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="turbidity">Turbidity</string>
     <string name="twenty_four_hours">24H</string>

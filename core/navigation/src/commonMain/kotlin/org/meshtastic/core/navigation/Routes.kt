@@ -144,6 +144,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object Network : SettingsRoute
 
+    @Serializable data object Transports : SettingsRoute
+
     @Serializable data object Display : SettingsRoute
 
     @Serializable data object LoRa : SettingsRoute

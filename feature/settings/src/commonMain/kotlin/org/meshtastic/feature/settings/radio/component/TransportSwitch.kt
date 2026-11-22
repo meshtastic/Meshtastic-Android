@@ -16,10 +16,9 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.TransportConfig.Transport
 
-/** One switch on the Network screen: a [Transport] the node can run and whether `transport.enabled` lists it. */
+/** One switch on the Transports screen: a [Transport] the node can run and whether `transport.enabled` lists it. */
 internal data class TransportSwitch(val transport: Transport, val checked: Boolean)
 
 /**
@@ -36,18 +35,4 @@ internal fun toggleTransport(current: List<Transport>, transport: Transport, on:
     !on -> current.filterNot { it == transport }
     transport in current -> current
     else -> current + transport
-}
-
-/**
- * The sections a Network save writes: only the ones that changed, transport first. Firmware schedules a reboot on
- * either write, so both go out before it happens.
- */
-internal fun networkSaveConfigs(
-    network: Config.NetworkConfig,
-    savedNetwork: Config.NetworkConfig,
-    transport: Config.TransportConfig,
-    savedTransport: Config.TransportConfig,
-): List<Config> = buildList {
-    if (transport != savedTransport) add(Config.Builder().also { it.transport = transport }.build())
-    if (network != savedNetwork) add(Config.Builder().also { it.network = network }.build())
 }

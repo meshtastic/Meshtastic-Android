@@ -28,6 +28,7 @@ import org.meshtastic.core.resources.display
 import org.meshtastic.core.resources.ic_bluetooth
 import org.meshtastic.core.resources.ic_cell_tower
 import org.meshtastic.core.resources.ic_display_settings
+import org.meshtastic.core.resources.ic_hub
 import org.meshtastic.core.resources.ic_list
 import org.meshtastic.core.resources.ic_location_on
 import org.meshtastic.core.resources.ic_person
@@ -40,6 +41,7 @@ import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.security
+import org.meshtastic.core.resources.transports
 import org.meshtastic.core.resources.user
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.DeviceMetadata
@@ -75,6 +77,12 @@ enum class ConfigRoute(
         AdminMessage.ConfigType.NETWORK_CONFIG.value,
         hasReadFanOut = true,
     ),
+    TRANSPORTS(
+        Res.string.transports,
+        SettingsRoute.Transports,
+        Res.drawable.ic_hub,
+        AdminMessage.ConfigType.TRANSPORT_CONFIG.value,
+    ),
     DISPLAY(
         Res.string.display,
         SettingsRoute.Display,
@@ -105,6 +113,9 @@ enum class ConfigRoute(
     companion object {
         private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
+                // Firmware that lists no transports predates the section and never answers its get.
+                it == TRANSPORTS -> metadata?.supported_transports.orEmpty().isNotEmpty()
+
                 metadata == null -> true
 
                 // Include all routes if metadata is null

@@ -42,6 +42,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,12 +78,17 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.radio.forTarget
 import org.meshtastic.feature.settings.search.FieldFocusRequest
 import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
 
 /** The local radio's settings open read-only while disconnected; remote-admin screens never show the prompt. */
 internal val RadioConfigState.connectPromptVisible: Boolean
     get() = !connected && isLocal
+
+/** `pio_env` of the directly connected node the settings screens write to, or null for a remote one. */
+@Suppress("CompositionLocalAllowlist")
+val LocalConfigTargetPioEnv = compositionLocalOf<String?> { null }
 
 @Suppress("LongMethod")
 @Composable
@@ -104,6 +110,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     content: LazyListScope.() -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val targetReboot = rebootBehavior.forTarget(LocalConfigTargetPioEnv.current)
 
     Box(modifier = modifier) {
         Scaffold(
@@ -216,7 +223,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                                         onDiscard()
                                     },
                                     positiveText =
-                                    if (rebootBehavior == RebootBehavior.ALWAYS) {
+                                    if (targetReboot == RebootBehavior.ALWAYS) {
                                         stringResource(Res.string.save_and_restart)
                                     } else {
                                         stringResource(Res.string.save_changes)
@@ -240,7 +247,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             PacketResponseStateDialog(
                 state = responseState,
                 onDismiss = onDismissPacketResponse,
-                rebootBehavior = rebootBehavior,
+                rebootBehavior = targetReboot,
             )
         }
     }

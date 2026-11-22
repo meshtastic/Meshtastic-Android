@@ -30,23 +30,19 @@ Only one connection is active at a time. Selecting a radio stops the node; selec
 
 A bearer is one medium the node carries packets over. Switch each one on or off; the node stays up with whatever is enabled, and a bearer that is off releases its radio or socket.
 
-Bearers that firmware also has are switched under **Settings → Network configuration**, with the same switches a radio shows, or on the **This device** card in the Connect tab. Both write the same setting, so either place shows the other's change:
-
-| Switch | What it does |
-| --- | --- |
-| **UDP broadcasting** | Reaches every Meshtastic node on the same Wi-Fi or wired network, including radios with UDP enabled and `meshtasticd`. |
-| **BLE Broadcast** | Carries packets in Bluetooth advertisements. Works between phones and desktops, and with radios running firmware that carries it. |
-| **BLE GATT Peer** | Connects to nearby nodes over Bluetooth as a mesh peer, in both directions. |
-
-**LoRa** follows the LoRa region, as on a radio, and has no switch on the card: set a region under **Settings → LoRa configuration** with a supported LoRa stick plugged in and the node is on the air. With no region set, the stick is idle in both directions, and the card's LoRa row reads **Region unset** once a stick is ready. Transmit power is held low because the stick is powered by the device.
-
-Bearers that only this device has are switched only on the **This device** card:
+Switch bearers under **Settings → Transports**, which lists one switch per bearer this device can run, or on the **This device** card in the Connect tab. Both write the same setting, so either place shows the other's change, and a change applies at once with no restart:
 
 | Switch | What it does | Needs |
 | --- | --- | --- |
+| **LoRa** | Reaches LoRa radios through a supported LoRa stick. | A stick and a LoRa region |
+| **UDP broadcasting** | Reaches every Meshtastic node on the same Wi-Fi or wired network, including radios with UDP enabled and `meshtasticd`. | Local network access |
+| **BLE Broadcast** | Carries packets in Bluetooth advertisements. Works between phones and desktops, and with radios running firmware that carries it. | Bluetooth permission |
+| **BLE GATT Peer** | Connects to nearby nodes over Bluetooth as a mesh peer, in both directions. | Bluetooth permission |
 | **Wi-Fi Aware** | Phone to phone over Wi-Fi with no network and no Bluetooth. Android only. Does not run while the phone is a hotspot. | Nearby devices permission |
 | **Audio** | Packets as sound, to anything in earshot. Keeps the microphone open while on. | Microphone permission |
 | **Video** | Packets as QR codes on screen, read by another device's camera. Runs only while the app is open. | Camera permission |
+
+A bearer this device cannot run gets no switch. Set the LoRa region under **Settings → LoRa configuration**; with no region set the stick is idle in both directions, and the card's LoRa row reads **Region unset** once a stick is ready. Transmit power is held low because the stick is powered by the device.
 
 The card shows every bearer with its state. A bearer that is on but not running says why: a permission to grant, a stick not attached, or a medium this device lacks. Tap **Grant** where one is offered.
 

@@ -27,7 +27,6 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
-import dev.mokkery.verify.VerifyMode.Companion.order
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -167,7 +166,7 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `NETWORK route reads the transport config when the node lists transports`() = runTest {
+    fun `TRANSPORTS route reads the transport section`() = runTest {
         val metadata =
             DeviceMetadata.Builder()
                 .also { wb -> wb.supported_transports = listOf(Config.TransportConfig.Transport.TRANSPORT_LORA) }
@@ -176,21 +175,19 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
 
-        viewModel.setResponseStateLoading(ConfigRoute.NETWORK)
+        viewModel.setResponseStateLoading(ConfigRoute.TRANSPORTS)
         advanceUntilIdle()
 
-        verifySuspend { radioConfigUseCase.getConfig(123, AdminMessage.ConfigType.NETWORK_CONFIG.value, any()) }
         verifySuspend { radioConfigUseCase.getConfig(123, AdminMessage.ConfigType.TRANSPORT_CONFIG.value, any()) }
     }
 
     @Test
-    fun `NETWORK route skips the transport config when the node lists no transports`() = runTest {
-        val node =
-            Node(
-                num = 123,
-                user = User.Builder().also { wb -> wb.id = "!123" }.build(),
-                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.8.2" }.build(),
-            )
+    fun `NETWORK route leaves the transport section to its own screen`() = runTest {
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb -> wb.supported_transports = listOf(Config.TransportConfig.Transport.TRANSPORT_LORA) }
+                .build()
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build(), metadata = metadata)
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
 
@@ -204,36 +201,22 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `setConfigs writes each section in order and keeps both in the form state`() = runTest {
+    fun `a transport save replaces the one in the form state`() = runTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
-        val transport =
-            Config.Builder()
-                .also { wb ->
-                    wb.transport =
-                        Config.TransportConfig.Builder()
-                            .also { tb -> tb.enabled = listOf(Config.TransportConfig.Transport.TRANSPORT_LORA) }
-                            .build()
-                }
-                .build()
-        val network =
-            Config.Builder()
-                .also { wb ->
-                    wb.network = Config.NetworkConfig.Builder().also { nb -> nb.wifi_enabled = true }.build()
-                }
-                .build()
+        fun transport(vararg enabled: Config.TransportConfig.Transport) =
+            Config.TransportConfig.Builder().also { tb -> tb.enabled = enabled.toList() }.build()
+        val earlier = transport(Config.TransportConfig.Transport.TRANSPORT_BLE_GATT)
+        val saved = transport(Config.TransportConfig.Transport.TRANSPORT_LORA)
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
-        viewModel.setConfigs(listOf(transport, network))
+        viewModel.setConfig(Config.Builder().also { wb -> wb.transport = earlier }.build())
+        advanceUntilIdle()
+        viewModel.setConfig(Config.Builder().also { wb -> wb.transport = saved }.build())
         advanceUntilIdle()
 
-        assertEquals(transport.transport, viewModel.radioConfigState.value.radioConfig.transport)
-        assertEquals(network.network, viewModel.radioConfigState.value.radioConfig.network)
-        verifySuspend(order) {
-            radioConfigUseCase.setConfig(123, transport, any())
-            radioConfigUseCase.setConfig(123, network, any())
-        }
+        assertEquals(saved, viewModel.radioConfigState.value.radioConfig.transport)
     }
 
     @Test
@@ -3099,6 +3082,28 @@ class RadioConfigViewModelTest {
             ModuleConfig.Builder()
                 .also { wb ->
                     wb.mesh_beacon = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_message = "hi" }.build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        assertFalse(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `local save to a node-kmp node does not open the restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123, pioEnv = "node-kmp"))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setConfig(
+            Config.Builder()
+                .also { wb ->
+                    wb.network = Config.NetworkConfig.Builder().also { wb -> wb.wifi_enabled = true }.build()
                 }
                 .build(),
         )

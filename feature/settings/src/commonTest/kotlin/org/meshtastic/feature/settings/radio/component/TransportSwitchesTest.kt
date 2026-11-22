@@ -16,15 +16,11 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.TransportConfig.Transport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TransportSwitchesTest {
-
-    private fun transportConfig(vararg enabled: Transport) =
-        Config.TransportConfig.Builder().also { it.enabled = enabled.toList() }.build()
 
     @Test
     fun `each supported transport gets one switch in enum number order`() {
@@ -121,40 +117,6 @@ class TransportSwitchesTest {
         assertEquals(
             listOf(Transport.TRANSPORT_LORA, Transport.TRANSPORT_AUDIO, Transport.TRANSPORT_MULTICAST_UDP),
             toggleTransport(current, Transport.TRANSPORT_MULTICAST_UDP, on = true),
-        )
-    }
-
-    @Test
-    fun `a save writes only the section that changed`() {
-        val network = Config.NetworkConfig.Builder().build()
-        val editedNetwork = network.newBuilder().also { it.wifi_enabled = true }.build()
-        val transport = transportConfig(Transport.TRANSPORT_LORA)
-        val editedTransport = transportConfig(Transport.TRANSPORT_LORA, Transport.TRANSPORT_MULTICAST_UDP)
-
-        assertEquals(
-            listOf(Config.Builder().also { it.network = editedNetwork }.build()),
-            networkSaveConfigs(editedNetwork, network, transport, transport),
-        )
-        assertEquals(
-            listOf(Config.Builder().also { it.transport = editedTransport }.build()),
-            networkSaveConfigs(network, network, editedTransport, transport),
-        )
-        assertEquals(emptyList(), networkSaveConfigs(network, network, transport, transport))
-    }
-
-    @Test
-    fun `a save with both sections changed writes transport then network`() {
-        val network = Config.NetworkConfig.Builder().build()
-        val editedNetwork = network.newBuilder().also { it.wifi_enabled = true }.build()
-        val transport = transportConfig(Transport.TRANSPORT_LORA)
-        val editedTransport = transportConfig()
-
-        assertEquals(
-            listOf(
-                Config.Builder().also { it.transport = editedTransport }.build(),
-                Config.Builder().also { it.network = editedNetwork }.build(),
-            ),
-            networkSaveConfigs(editedNetwork, network, editedTransport, transport),
         )
     }
 }

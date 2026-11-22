@@ -82,6 +82,7 @@ class NavigationConfigTest {
             SettingsRoute.Position,
             SettingsRoute.Power,
             SettingsRoute.Network,
+            SettingsRoute.Transports,
             SettingsRoute.Display,
             SettingsRoute.LoRa,
             SettingsRoute.Bluetooth,

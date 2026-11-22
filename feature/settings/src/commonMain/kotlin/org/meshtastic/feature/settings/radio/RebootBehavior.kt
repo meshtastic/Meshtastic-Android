@@ -34,3 +34,10 @@ enum class RebootBehavior {
     /** Applied live — no reboot, no warning. */
     NEVER,
 }
+
+/** `MyNodeInfo.pio_env` of a meshtastic-node-kmp node, which applies every save as a state change. */
+internal const val NODE_KMP_PIO_ENV: String = "node-kmp"
+
+/** This behavior on the directly connected node reporting [pioEnv]; a node-kmp node never restarts for a save. */
+internal fun RebootBehavior.forTarget(pioEnv: String?): RebootBehavior =
+    if (pioEnv == NODE_KMP_PIO_ENV) RebootBehavior.NEVER else this
