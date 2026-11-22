@@ -26,26 +26,26 @@ import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
 
 /** The answer to one radio configuration request, as the settings screens consume it. */
-sealed class RadioResponseResult {
-    data class Metadata(val metadata: DeviceMetadata) : RadioResponseResult()
+sealed interface RadioResponseResult {
+    data class Metadata(val metadata: DeviceMetadata) : RadioResponseResult
 
-    data class ChannelResponse(val channel: Channel) : RadioResponseResult()
+    data class ChannelResponse(val channel: Channel) : RadioResponseResult
 
-    data class Owner(val user: User) : RadioResponseResult()
+    data class Owner(val user: User) : RadioResponseResult
 
-    data class ConfigResponse(val config: org.meshtastic.proto.Config) : RadioResponseResult()
+    data class ConfigResponse(val config: org.meshtastic.proto.Config) : RadioResponseResult
 
-    data class ModuleConfigResponse(val config: org.meshtastic.proto.ModuleConfig) : RadioResponseResult()
+    data class ModuleConfigResponse(val config: org.meshtastic.proto.ModuleConfig) : RadioResponseResult
 
-    data class CannedMessages(val messages: String) : RadioResponseResult()
+    data class CannedMessages(val messages: String) : RadioResponseResult
 
-    data class Ringtone(val ringtone: String) : RadioResponseResult()
+    data class Ringtone(val ringtone: String) : RadioResponseResult
 
-    data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult()
+    data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult
 
-    data class Error(val message: UiText, val routingError: Routing.Error? = null) : RadioResponseResult()
+    data class Error(val message: UiText, val routingError: Routing.Error? = null) : RadioResponseResult
 
-    data object Success : RadioResponseResult()
+    data object Success : RadioResponseResult
 }
 
 /**

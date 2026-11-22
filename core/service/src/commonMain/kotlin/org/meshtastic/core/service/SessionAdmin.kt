@@ -25,6 +25,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.RadioClient
 
 /** Runs admin commands on the local node through the active radio session's SDK admin API. */
 internal class SessionAdmin(private val radio: RadioInterfaceService, private val scope: CoroutineScope) {
@@ -61,6 +62,9 @@ internal class SessionAdmin(private val radio: RadioInterfaceService, private va
      */
     suspend fun <T> await(operation: String, command: suspend AdminApi.() -> AdminResult<T>): AdminResult<T> =
         runCommand(requireAdmin(operation), command)
+
+    /** The active session's SDK client, or null when no radio session is active. */
+    fun activeClient(): RadioClient? = radio.activeSession.value?.let(radio::clientForSession)
 
     private fun requireAdmin(operation: String): AdminApi =
         radio.activeSession.value?.let(radio::adminForSession) ?: throw PacketQueueRejectedException(operation)

@@ -35,7 +35,6 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RemoteShell
 import org.meshtastic.proto.SharedContact
@@ -53,7 +52,6 @@ import org.meshtastic.sdk.RadioClient
  */
 internal class MessagingControllerImpl(
     private val packetHandler: PacketHandler,
-    private val radio: RadioInterfaceService,
     private val sessionAdmin: SessionAdmin,
     private val nodeManager: NodeManager,
     private val nodeRepository: NodeRepository,
@@ -78,7 +76,7 @@ internal class MessagingControllerImpl(
         }
     }
 
-    private fun activeClient(): RadioClient? = radio.activeSession.value?.let(radio::clientForSession)
+    private fun activeClient(): RadioClient? = sessionAdmin.activeClient()
 
     override fun newRemoteShellSessionId(): Int? = activeClient()?.remoteShell?.newSessionId()
 

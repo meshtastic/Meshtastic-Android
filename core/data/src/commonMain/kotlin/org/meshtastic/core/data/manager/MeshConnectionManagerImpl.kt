@@ -563,9 +563,6 @@ class MeshConnectionManagerImpl(
             return POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY * (1 shl exponent)
         }
 
-        /** Total-cap multiple: a stage may re-arm for at most this many budgets before the guard must fire. */
-        private const val STAGE_GUARD_TOTAL_CAP_FACTOR = 10
-
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
         private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"
         private const val EVENT_NUM_NODES = "num_nodes"

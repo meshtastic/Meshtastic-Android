@@ -980,6 +980,7 @@ class SharedRadioInterfaceService(
             try {
                 stopTransportLocked(notifyPermanent = false)
             } catch (closeFailure: Exception) {
+                if (closeFailure is CancellationException) currentCoroutineContext().ensureActive()
                 failure.addSuppressed(closeFailure)
             }
             _connectionState.value = connectionStateBeforeStart

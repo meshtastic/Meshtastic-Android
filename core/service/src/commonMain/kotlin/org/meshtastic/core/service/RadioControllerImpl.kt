@@ -150,7 +150,6 @@ class RadioControllerImpl(
     ),
     MessagingController by MessagingControllerImpl(
         packetHandler,
-        radioInterfaceService,
         SessionAdmin(radioInterfaceService, scope),
         nodeManager,
         nodeRepository,

@@ -35,8 +35,8 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.network)
             implementation(libs.meshtastic.protobufs)
-            implementation("org.meshtastic:sdk-transport-ble")
-            implementation("org.meshtastic:sdk-transport-websocket")
+            implementation(libs.meshtastic.sdk.transport.ble)
+            implementation(libs.meshtastic.sdk.transport.websocket)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
@@ -56,14 +56,14 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
-            implementation("org.meshtastic:sdk-transport-tcp")
-            implementation("org.meshtastic:sdk-transport-serial")
+            implementation(libs.meshtastic.sdk.transport.tcp)
+            implementation(libs.meshtastic.sdk.transport.serial)
             implementation(libs.kable.core)
         }
         getByName("jvmMain").dependencies {
             implementation(libs.kable.core)
-            implementation("org.meshtastic:sdk-transport-tcp")
-            implementation("org.meshtastic:sdk-transport-serial")
+            implementation(libs.meshtastic.sdk.transport.tcp)
+            implementation(libs.meshtastic.sdk.transport.serial)
         }
         findByName("wasmJsMain")?.dependencies {
             implementation(projects.core.ble)
@@ -72,7 +72,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation("org.meshtastic:sdk-testing")
+            implementation(libs.meshtastic.sdk.testing)
         }
 
         getByName("jvmTest").dependencies {
