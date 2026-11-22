@@ -26,33 +26,29 @@ import io.ktor.server.engine.embeddedServer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
-import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import org.koin.compose.koinInject
+import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
@@ -73,6 +69,9 @@ fun DesktopMcpLifecycle() {
     val nodeRepository = koinInject<NodeRepository>()
     val packetRepository = koinInject<PacketRepository>()
     val sendMessageUseCase = koinInject<SendMessageUseCase>()
+    val meshLogRepository = koinInject<MeshLogRepository>()
+    val radioConfigRepository = koinInject<RadioConfigRepository>()
+    val radioConfigUseCase = koinInject<RadioConfigUseCase>()
     val server = remember {
         DesktopMcpServer(
             serviceRepository,
@@ -81,6 +80,12 @@ fun DesktopMcpLifecycle() {
             nodeRepository,
             packetRepository,
             sendMessageUseCase,
+            extraTools =
+            listOf(
+                McpRequestTool(radioController, serviceRepository, nodeRepository, meshLogRepository),
+                McpConfigTool(radioConfigUseCase, radioConfigRepository, nodeRepository, serviceRepository),
+                McpMessagesTool(packetRepository, nodeRepository),
+            ),
         )
     }
     DisposableEffect(port) {
@@ -101,6 +106,7 @@ class DesktopMcpServer(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val sendMessageUseCase: SendMessageUseCase,
+    private val extraTools: List<McpToolGroup> = emptyList(),
 ) {
     private var engine: EmbeddedServer<*, *>? = null
 
@@ -124,6 +130,7 @@ class DesktopMcpServer(
         addConnectTool()
         addNodesTool()
         addSendTextTool()
+        extraTools.forEach { it.register(this) }
     }
 
     private fun Server.addConnectionStateTool() {
@@ -132,7 +139,7 @@ class DesktopMcpServer(
             description = "The app's radio connection state, selected device address and local node.",
             toolAnnotations = ToolAnnotations(readOnlyHint = true),
         ) {
-            json(connectionStateJson())
+            toolJson(connectionStateJson())
         }
     }
 
@@ -152,16 +159,16 @@ class DesktopMcpServer(
                 required = listOf("address"),
             ),
         ) { request ->
-            val raw = request.arguments.string("address") ?: return@addTool error("address is required")
+            val raw = request.arguments.stringArg("address") ?: return@addTool toolError("address is required")
             val address = normalizeMcpAddress(raw)
-            val wait = (request.arguments.int("wait_seconds") ?: DEFAULT_CONNECT_WAIT_S).seconds
+            val wait = (request.arguments.intArg("wait_seconds") ?: DEFAULT_CONNECT_WAIT_S).seconds
             val started = TimeSource.Monotonic.markNow()
             radioController.setDeviceAddress(address)
             val reached =
                 withTimeoutOrNull(wait) {
                     serviceRepository.connectionState.first { it == ConnectionState.Connected }
                 }
-            json(
+            toolJson(
                 buildJsonObject {
                     put("requested", address)
                     put("connected", reached != null)
@@ -180,10 +187,10 @@ class DesktopMcpServer(
             ToolSchema(properties = buildJsonObject { putJsonObject("limit") { put("type", "integer") } }),
             toolAnnotations = ToolAnnotations(readOnlyHint = true),
         ) { request ->
-            val limit = request.arguments.int("limit") ?: DEFAULT_NODE_LIMIT
+            val limit = request.arguments.intArg("limit") ?: DEFAULT_NODE_LIMIT
             val myNum = nodeRepository.myNodeInfo.value?.myNodeNum
             val all = nodeRepository.nodeDBbyNum.value.values.sortedByDescending { it.lastHeard }
-            json(
+            toolJson(
                 buildJsonObject {
                     put("total", all.size)
                     put(
@@ -232,22 +239,22 @@ class DesktopMcpServer(
                 required = listOf("text"),
             ),
         ) { request ->
-            val text = request.arguments.string("text") ?: return@addTool error("text is required")
+            val text = request.arguments.stringArg("text") ?: return@addTool toolError("text is required")
             if (serviceRepository.connectionState.value != ConnectionState.Connected) {
-                return@addTool error("not connected")
+                return@addTool toolError("not connected")
             }
-            val channel = request.arguments.int("channel") ?: 0
+            val channel = request.arguments.intArg("channel") ?: 0
             // A contact key carries the channel as one digit, so 8 or more would be read as a different channel.
             val maxChannel = NodeAddress.PKC_CHANNEL_INDEX - 1
-            if (channel !in 0..maxChannel) return@addTool error("channel must be 0..$maxChannel")
-            val contactKey = contactKeyFor(request.arguments.string("to"), channel)
+            if (channel !in 0..maxChannel) return@addTool toolError("channel must be 0..$maxChannel")
+            val contactKey = contactKeyFor(request.arguments.stringArg("to"), channel)
             val device = radioInterfaceService.getDeviceAddress()
             when (val outcome = sendMessageUseCase(text = text, contactKey = contactKey)) {
-                SendMessageOutcome.Refused -> error("refused for $contactKey")
+                SendMessageOutcome.Refused -> toolError("refused for $contactKey")
 
                 is SendMessageOutcome.Queued -> {
-                    val wait = (request.arguments.int("wait_seconds") ?: DEFAULT_SEND_WAIT_S).seconds
-                    json(awaitStatus(outcome.packetId, contactKey, device, wait))
+                    val wait = (request.arguments.intArg("wait_seconds") ?: DEFAULT_SEND_WAIT_S).seconds
+                    toolJson(awaitStatus(outcome.packetId, contactKey, device, wait))
                 }
             }
         }
@@ -324,15 +331,6 @@ class DesktopMcpServer(
 }
 
 private const val MAX_PORT = 65_535
-
-private fun json(obj: JsonElement) = CallToolResult(content = listOf(TextContent(text = obj.toString())))
-
-private fun error(message: String) = CallToolResult(content = listOf(TextContent(text = message)), isError = true)
-
-private fun JsonObject?.string(key: String): String? =
-    this?.get(key)?.takeUnless { it is JsonNull }?.jsonPrimitive?.contentOrNull
-
-private fun JsonObject?.int(key: String): Int? = this?.get(key)?.takeUnless { it is JsonNull }?.jsonPrimitive?.intOrNull
 
 /** A TCP port from [value], or null when it is absent, not a number or out of range. */
 internal fun parseMcpPort(value: String?): Int? = value?.trim()?.toIntOrNull()?.takeIf { it in 1..MAX_PORT }
