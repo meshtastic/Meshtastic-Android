@@ -179,7 +179,6 @@
     <string name="name">Ονομα</string>
     <!-- NEIGHBOR -->
     <string name="network">Δίκτυο</string>
-    <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_placeholder">Φίλτρο</string>

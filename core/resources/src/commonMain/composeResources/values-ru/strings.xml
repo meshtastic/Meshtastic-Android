@@ -59,7 +59,6 @@
     <!-- ADD -->
     <string name="add">Добавить</string>
     <string name="add_a_note">Добавить личную заметку…</string>
-    <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выбери те, которые хочешь добавить на свое устройство. Существующие каналы будут сохранены.</string>
     <string name="add_custom_tile_source">Добавить источник сетевых плиток</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="add_layer">Добавить слой</string>
@@ -1146,8 +1145,6 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
-    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
-    <string name="lora_config_changes">Изменения настроек LoRa:</string>
     <string name="lora_preset_custom">Пользовательский</string>
     <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Низкий заряд батареи</string>
@@ -1524,7 +1521,6 @@
     <string name="neighbor_mean_snr">Среднее значение SNR соседа</string>
     <string name="neighbor_mean_snr_description">Средний уровень шума, при котором эта нода слышит сообщения своих соседей.</string>
     <string name="network">Сеть</string>
-    <string name="new_channel_rcvd">Получен URL нового канала</string>
     <string name="new_messages_below">Новые сообщения ниже</string>
     <string name="new_node_seen">Найдена новая нода: %1$s</string>
     <string name="new_nodes">Новые ноды</string>
@@ -1925,7 +1921,6 @@
         <item quantity="other">%1$d ноды будут удалены из твоего списка до тех пор, пока твоя нода снова не получит от них данные.</item>
     </plurals>
     <string name="replace">Заменить</string>
-    <string name="replace_channels_and_settings_description">Этот QR-код содержит полную конфигурацию. Это заменит ваши существующие каналы и настройки радио. Все существующие каналы будут удалены.</string>
     <string name="reply">Ответить</string>
     <string name="replying_to">Ответить %1$s</string>
     <string name="report">Отчет</string>

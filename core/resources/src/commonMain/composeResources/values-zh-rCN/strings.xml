@@ -51,7 +51,6 @@
     <!-- ADD -->
     <string name="add">新增</string>
     <string name="add_a_note">添加便笺…</string>
-    <string name="add_channels_description">在二维码中发现了以下频道请选择您想要添加到设备中的频道现有的频道将被保留。</string>
     <string name="add_custom_tile_source">添加网络瓷块源</string>
     <string name="add_favorite">添加至收藏</string>
     <string name="add_layer">添加图层</string>
@@ -1013,7 +1012,6 @@
     <string name="neighbor_info">邻居信息</string>
     <string name="neighbor_info_config">邻居信息设置</string>
     <string name="network">网络</string>
-    <string name="new_channel_rcvd">收到新的频道 URL</string>
     <string name="new_messages_below">新消息</string>
     <string name="new_node_seen">新节点: %1$s</string>
     <string name="new_nodes">新节点</string>
@@ -1257,7 +1255,6 @@
     <string name="remove_layer">移除图层</string>
     <string name="remove_node_text">此节点将从您的列表中删除，直到您的节点再次收到它的数据。</string>
     <string name="replace">替换</string>
-    <string name="replace_channels_and_settings_description">此二维码包含了完整配置，将替换您现有的频道和无线电设置，所有现有的频道将被删除。</string>
     <string name="reply">回复</string>
     <string name="replying_to">回复给 %1$s</string>
     <string name="report">报告</string>

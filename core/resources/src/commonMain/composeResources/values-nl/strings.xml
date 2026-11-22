@@ -258,7 +258,6 @@
     <string name="navigate_back">Ga terug</string>
     <!-- NEIGHBOR -->
     <string name="network">Netwerk</string>
-    <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Include onbekend</string>

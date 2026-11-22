@@ -86,7 +86,8 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 
-private const val PRECISE_POSITION_BITS = 32
+/** `position_precision` of a channel that shares the full position rather than a reduced one. */
+internal const val PRECISE_POSITION_BITS = 32
 
 /**
  * Represents the various visual states of the security icon as an enum. Each enum constant encapsulates the icon,

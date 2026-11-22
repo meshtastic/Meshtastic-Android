@@ -48,7 +48,6 @@
     <!-- ADD -->
     <string name="add">Добавяне</string>
     <string name="add_a_note">Добавяне на лична бележка...</string>
-    <string name="add_channels_description">Следните канали бяха открити в QR кода. Изберете тези, които искате да добавите към устройството си. Съществуващите канали ще бъдат запазени.</string>
     <string name="add_favorite">Добавяне към любими</string>
     <string name="add_layer">Добавяне на слой</string>
     <string name="add_local_mbtiles_file">Добавяне на локален MBTiles файл</string>
@@ -700,7 +699,6 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
-    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Изтощена батерия</string>
     <string name="low_battery_message">%1$sВъзела %1$s има слаба батерия (%2$d%)</string>
@@ -885,7 +883,6 @@
     <!-- NEIGHBOR -->
     <string name="neighbor_count">Съседи</string>
     <string name="network">Мрежа</string>
-    <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>
     <string name="new_node_seen">Видян нов възел: %1$s</string>
     <string name="new_nodes">Нови възли</string>
@@ -1128,7 +1125,6 @@
     <string name="remove_layer">Премахване на слой</string>
     <string name="remove_node_text">Този възел ще бъде премахнат от вашия списък, докато вашият възел не получи данни от него отново.</string>
     <string name="replace">Замяна</string>
-    <string name="replace_channels_and_settings_description">Този QR код съдържа пълна конфигурация. Той ще ЗАМЕНИ съществуващите ви канали и настройки на радиото. Всички съществуващи канали ще бъдат премахнати.</string>
     <string name="reply">Отговор</string>
     <string name="replying_to">Отговор на %1$s</string>
     <string name="report">Докладвай</string>

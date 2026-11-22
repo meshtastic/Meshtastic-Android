@@ -23,6 +23,17 @@ import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.math.round
 
+/** The bandwidth in MHz that a manual `LoRaConfig.bandwidth` wire code stands for in the slot math. */
+fun loraBandwidthMegahertz(code: Int): Float = when (code) {
+    31 -> .03125f
+    62 -> .0625f
+    200 -> .203125f
+    400 -> .40625f
+    800 -> .8125f
+    1600 -> 1.6250f
+    else -> code / 1000f
+}
+
 /**
  * djb2 over the name's UTF-8 bytes, matching firmware `RadioInterface.cpp` `hash()`; hashing UTF-16 chars gives a
  * different slot for any non-ASCII name.
@@ -58,15 +69,7 @@ val ModemPreset?.snrLimit: Float
 private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
     modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
 } else {
-    when (bandwidth) {
-        31 -> .03125f
-        62 -> .0625f
-        200 -> .203125f
-        400 -> .40625f
-        800 -> .8125f
-        1600 -> 1.6250f
-        else -> bandwidth / 1000f
-    }
+    loraBandwidthMegahertz(bandwidth)
 }
 
 /**

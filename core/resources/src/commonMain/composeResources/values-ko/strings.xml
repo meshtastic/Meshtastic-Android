@@ -305,7 +305,6 @@
     <string name="neighbor_info">이웃 정보</string>
     <string name="neighbor_info_config">이웃 정보 설정</string>
     <string name="network">네트워크</string>
-    <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">미확인 노드 포함</string>

@@ -51,7 +51,6 @@
     <!-- ADD -->
     <string name="add">追加</string>
     <string name="add_a_note">プライベートメモを追加…</string>
-    <string name="add_channels_description">QRコードから次のチャンネルが見つかりました。デバイスに追加したいチャンネルを選択してください。既存のチャンネルは保持されます。</string>
     <string name="add_custom_tile_source">ネットワークタイルのソースを追加</string>
     <string name="add_favorite">お気に入りに追加</string>
     <string name="add_layer">レイヤーを追加</string>
@@ -997,7 +996,6 @@
     <string name="neighbor_info">隣接ノード情報</string>
     <string name="neighbor_info_config">近隣ノード情報  (Neighbor Info) の設定</string>
     <string name="network">ネットワーク</string>
-    <string name="new_channel_rcvd">新しいチャンネルURLを受信しました</string>
     <string name="new_messages_below">下に新着メッセージ</string>
     <string name="new_node_seen">新しいノードを検出：%1$s</string>
     <string name="new_nodes">新しいノード</string>
@@ -1242,7 +1240,6 @@
     <string name="remove_layer">レイヤーを削除</string>
     <string name="remove_node_text">このノードから再びデータを受信するまで、このノードはリストに表示されなくなります。</string>
     <string name="replace">置き換え</string>
-    <string name="replace_channels_and_settings_description">この QR コードには完全な設定が含まれています。既存のチャンネルと無線設定を置き換えます。既存のチャンネルはすべて削除されます。</string>
     <string name="reply">返信</string>
     <string name="replying_to">%1$s に返信中</string>
     <string name="report">報告</string>
