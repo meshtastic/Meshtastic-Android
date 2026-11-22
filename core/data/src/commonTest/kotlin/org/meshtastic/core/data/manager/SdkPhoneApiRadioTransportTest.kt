@@ -55,10 +55,18 @@ class SdkPhoneApiRadioTransportTest {
 
         /** Each `recoverable` the transport reported when its session ended. */
         val ends = mutableListOf<Boolean>()
+
+        /** Each `handshakeTimedOut` the transport reported when its session ended. */
+        val timeouts = mutableListOf<Boolean>()
         val radio: RadioInterfaceService =
             object : RadioInterfaceService by fake {
-                override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?) {
+                override fun onPhoneApiSessionEnded(
+                    recoverable: Boolean,
+                    errorMessage: String?,
+                    handshakeTimedOut: Boolean,
+                ) {
                     ends += recoverable
+                    timeouts += handshakeTimedOut
                 }
             }
         private val nodeManager =
@@ -122,6 +130,21 @@ class SdkPhoneApiRadioTransportTest {
             runCurrent()
 
             assertEquals(listOf(true), harness.ends)
+            assertEquals(listOf(false), harness.timeouts)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    @Test
+    fun `a radio that never answers the handshake reports a handshake timeout`() = runTest {
+        val harness = Harness(backgroundScope, FakeRadioTransport(TransportIdentity("fake:silent")))
+        try {
+            harness.transport.start()
+            advanceTimeBy(SILENT_RADIO_MS)
+
+            assertEquals(listOf(true), harness.ends)
+            assertEquals(listOf(true), harness.timeouts)
         } finally {
             harness.transport.close()
         }
@@ -135,6 +158,7 @@ class SdkPhoneApiRadioTransportTest {
         const val PEER = 0x0BADF00D
         const val HANDSHAKE_START_MS = 1_000L
         const val EARLY_PACKETS = 200
+        const val SILENT_RADIO_MS = 10 * 60 * 1_000L
         const val CLOCK_TOLERANCE_S = 60L
     }
 }

@@ -86,6 +86,7 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.error_recovery_exhausted
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.core.resources.websocket_connect_failed
@@ -188,6 +189,7 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource
     TransportDisconnectReason.WebSocketTlsFailed -> Res.string.websocket_tls_failed
     TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
     TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
+    TransportDisconnectReason.HandshakeRecoveryExhausted -> Res.string.error_recovery_exhausted
 }
 
 private val LINK_UP_PHASES =
@@ -526,6 +528,9 @@ class SharedRadioInterfaceService(
     // again: a recovery restart would take the slot back from the client that now holds it.
     @Volatile private var awaitingUserConnect = false
 
+    /** Consecutive PhoneAPI sessions whose handshake timed out. Guarded by [transportMutex]. */
+    private var handshakeTimeouts = 0
+
     /**
      * Backoff for consecutive PhoneAPI connection failures; null starts from the link's first retry delay. Guarded by
      * [transportMutex].
@@ -552,6 +557,9 @@ class SharedRadioInterfaceService(
         /** How often [revokeTransportSession] reports a lease drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
         private const val PHONE_API_INITIAL_RETRY_MS = 1_000L
+
+        /** Restarting the handshake crashes some firmware, so a radio that keeps timing out is left to the user. */
+        private const val MAX_HANDSHAKE_RECOVERIES = 3
 
         /** Firmware frees its GATT session only seconds after a link drops, so a BLE retry waits for that first. */
         private const val BLE_INITIAL_RETRY_MS = 3_000L
@@ -715,6 +723,7 @@ class SharedRadioInterfaceService(
                     }
                 }
                 phoneApiRetryDelay = null
+                handshakeTimeouts = 0
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -730,6 +739,7 @@ class SharedRadioInterfaceService(
             // emission arriving while we wait for the mutex cannot re-start the transport.
             connectionRequested = false
             phoneApiRetryDelay = null
+            handshakeTimeouts = 0
             gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
         }
@@ -787,21 +797,38 @@ class SharedRadioInterfaceService(
         }
     }
 
-    private fun retirePhoneApiSession(session: RadioTransportSession, recoverable: Boolean, errorMessage: String?) {
+    private fun retirePhoneApiSession(
+        session: RadioTransportSession,
+        recoverable: Boolean,
+        errorMessage: String?,
+        handshakeTimedOut: Boolean,
+    ) {
         val interfaceId = DeviceAddress.parse(session.address)?.interfaceId
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
         processLifecycle.coroutineScope.launch {
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
-                if (linkWasUp) phoneApiRetryDelay = null
-                if (!recoverable) connectionRequested = false
+                if (linkWasUp) {
+                    phoneApiRetryDelay = null
+                    handshakeTimeouts = 0
+                }
+                if (handshakeTimedOut) handshakeTimeouts++
+                val recoveryExhausted = handshakeTimeouts > MAX_HANDSHAKE_RECOVERIES
+                if (recoveryExhausted) {
+                    Logger.w { "PhoneAPI handshake recovery exhausted after $MAX_HANDSHAKE_RECOVERIES restarts" }
+                    handshakeTimeouts = 0
+                }
+                if (!recoverable || recoveryExhausted) connectionRequested = false
 
                 ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
                 onDisconnect(
                     isPermanent =
-                    !recoverable || (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
-                    errorMessage = errorMessage,
+                    !recoverable ||
+                        recoveryExhausted ||
+                        (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
+                    errorMessage = errorMessage.takeUnless { recoveryExhausted },
+                    reason = TransportDisconnectReason.HandshakeRecoveryExhausted.takeIf { recoveryExhausted },
                 )
                 if (!connectionRequested) return@launch
 
@@ -894,6 +921,7 @@ class SharedRadioInterfaceService(
                 connectionRequested = sanitized != null
                 awaitingUserConnect = false
                 phoneApiRetryDelay = null
+                handshakeTimeouts = 0
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }
@@ -1189,8 +1217,8 @@ class SharedRadioInterfaceService(
             }
         }
 
-        override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?) {
-            retirePhoneApiSession(session, recoverable, errorMessage)
+        override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?, handshakeTimedOut: Boolean) {
+            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut)
         }
 
         override fun onStatus(status: TransportStatus) {

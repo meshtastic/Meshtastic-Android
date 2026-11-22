@@ -103,6 +103,7 @@ internal class SdkPhoneApiRadioTransport(
 
     private suspend fun runPhoneApiSession() {
         var recoverable = true
+        var handshakeTimedOut = false
         var ble: BleTransport? = null
         try {
             service.onStatus(TransportStatus(TransportPhase.Connecting))
@@ -126,6 +127,7 @@ internal class SdkPhoneApiRadioTransport(
         } catch (failure: MeshtasticException.Transport) {
             reportSessionFailure(failure)
         } catch (failure: MeshtasticException.HandshakeTimeout) {
+            handshakeTimedOut = true
             reportSessionFailure(failure)
         } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
             recoverable = false
@@ -141,7 +143,7 @@ internal class SdkPhoneApiRadioTransport(
                 }
             }
         }
-        service.onPhoneApiSessionEnded(recoverable)
+        service.onPhoneApiSessionEnded(recoverable, handshakeTimedOut = handshakeTimedOut)
     }
 
     private fun reportSessionFailure(failure: Exception) {

@@ -1429,6 +1429,39 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `handshake recovery stops after three restarts until the user connects again`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            // MeshConnectionManagerImpl on main: MAX_CONSECUTIVE_RECOVERY_FAILURES = 3.
+            repeat(3) { restart ->
+                callbacks.last().onPhoneApiSessionEnded(recoverable = true, handshakeTimedOut = true)
+                advanceTimeBy(60_000L)
+                assertEquals(restart + 2, callbacks.size)
+            }
+            val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
+
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true, handshakeTimedOut = true)
+            advanceTimeBy(60_000L)
+
+            assertEquals(4, callbacks.size)
+            assertNull(service.activeSession.value)
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
+
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(5, callbacks.size)
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true, handshakeTimedOut = true)
+            advanceTimeBy(60_000L)
+            assertEquals(6, callbacks.size)
+            // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
+            assertEquals(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted), error.await())
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
     fun `terminal PhoneAPI session end retires the transport without reconnecting`() = runTest(testDispatcher) {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks)
