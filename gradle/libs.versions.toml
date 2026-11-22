@@ -120,6 +120,7 @@ jmdns = "3.6.5"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.10.0"
+meshtastic-sdk = "0.2.1-SNAPSHOT"
 meshtastic-protobufs = "2.8.3"
 
 # Gradle Plugins
@@ -394,6 +395,12 @@ dbus-java-transport-native-unixsocket = { module = "com.github.hypfvieh:dbus-jav
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
+meshtastic-sdk-core = { module = "org.meshtastic:sdk-core", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-testing = { module = "org.meshtastic:sdk-testing", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-ble = { module = "org.meshtastic:sdk-transport-ble", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-serial = { module = "org.meshtastic:sdk-transport-serial", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-tcp = { module = "org.meshtastic:sdk-transport-tcp", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-websocket = { module = "org.meshtastic:sdk-transport-websocket", version.ref = "meshtastic-sdk" }
 
 # Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
 meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
