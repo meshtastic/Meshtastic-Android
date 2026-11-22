@@ -138,9 +138,15 @@ private fun DataInputStream.unlock(output: OutputStream, passphrase: String) {
     output.sendEnvelope(FromRadio.Builder().also { it.my_info = node }.build())
     output.sendEnvelope(FromRadio.Builder().also { it.config_complete_id = config.want_config_id }.build())
     output.sendLockdownState(LockdownStatus.State.LOCKED)
-    val packet = checkNotNull(request().packet)
-    assertEquals(node.my_node_num, packet.to)
-    val admin = AdminMessage.ADAPTER.decode(checkNotNull(packet.decoded).payload)
+
+    fun admin(): AdminMessage {
+        val packet = checkNotNull(request().packet)
+        assertEquals(node.my_node_num, packet.to)
+        return AdminMessage.ADAPTER.decode(checkNotNull(packet.decoded).payload)
+    }
+
+    // The client sets the clock as soon as my_info arrives, so that write can precede the passphrase.
+    val admin = admin().let { if (it.set_time_only != null) admin() else it }
     assertEquals(passphrase, admin.lockdown_auth?.passphrase?.utf8())
     output.sendLockdownState(LockdownStatus.State.UNLOCKED)
 }

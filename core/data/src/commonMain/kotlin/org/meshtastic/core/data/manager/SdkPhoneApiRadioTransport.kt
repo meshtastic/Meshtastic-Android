@@ -115,7 +115,6 @@ internal class SdkPhoneApiRadioTransport(
                     .storage(InMemoryStorageProvider())
                     .logger(sdkLogSink)
                     .coroutineContext(service.serviceScope.coroutineContext)
-                    .autoSyncTimeOnConnect(false)
                     .sessionReceive()
                     .build()
             currentClient.value = client
