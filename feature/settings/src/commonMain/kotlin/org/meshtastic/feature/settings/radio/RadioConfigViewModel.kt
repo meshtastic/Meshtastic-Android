@@ -75,7 +75,6 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
@@ -189,7 +188,6 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
-    private val connectionManager: MeshConnectionManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 

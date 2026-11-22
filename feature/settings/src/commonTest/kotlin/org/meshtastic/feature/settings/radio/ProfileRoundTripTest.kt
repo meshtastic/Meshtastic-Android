@@ -143,7 +143,6 @@ class ProfileRoundTripTest {
                 securityKeyBackupStore = securityKeyBackupStore,
                 snackbarManager = snackbarManager,
                 nodeRestartTracker = nodeRestartTracker,
-                connectionManager = mock(MockMode.autofill),
             )
     }
 

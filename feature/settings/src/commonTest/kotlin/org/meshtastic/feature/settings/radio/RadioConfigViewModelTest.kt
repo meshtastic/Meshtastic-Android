@@ -66,7 +66,6 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -368,7 +367,6 @@ class RadioConfigViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
-    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val trackerScope = CoroutineScope(SupervisorJob())
     private val nodeRestartTracker = NodeRestartTracker(trackerScope)
 
@@ -470,7 +468,6 @@ class RadioConfigViewModelTest {
             securityKeyBackupStore = securityKeyBackupStore,
             snackbarManager = snackbarManager,
             nodeRestartTracker = nodeRestartTracker,
-            connectionManager = connectionManager,
             installProfileUseCase = installProfileUseCase,
             radioConfigUseCase = radioConfigUseCase,
             adminActionsUseCase = adminActionsUseCase,
