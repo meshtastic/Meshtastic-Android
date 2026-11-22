@@ -12,6 +12,7 @@
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun DeviceListOpaqueIdentifiersPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun DeviceListPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun DeviceListScanningPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun DeviceNotFoundPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun MpwrdDisclaimerBannerPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun NetworkRowPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ProvisionStatusCardSuccessPreview</ID>

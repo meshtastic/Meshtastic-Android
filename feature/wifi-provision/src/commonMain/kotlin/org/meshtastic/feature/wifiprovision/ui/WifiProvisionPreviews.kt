@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
@@ -165,6 +166,13 @@ fun ConfirmDevicePreview() {
 @Composable
 private fun ConfirmDeviceUnnamedPreview() {
     WifiProvisionScreenPreview(WifiProvisionUiState(phase = Phase.ConfirmDevice, pendingAddress = "AA:BB:CC:DD:EE:01"))
+}
+
+/** The step a failed connect leaves: what happened, what to do, and a retry. */
+@PreviewLightDark
+@Composable
+fun DeviceNotFoundPreview() {
+    WifiProvisionScreenPreview(WifiProvisionUiState(error = WifiProvisionError.DeviceNotFound))
 }
 
 /** A platform whose device identifiers are not MACs: no address to compare, and a link's address is set aside. */

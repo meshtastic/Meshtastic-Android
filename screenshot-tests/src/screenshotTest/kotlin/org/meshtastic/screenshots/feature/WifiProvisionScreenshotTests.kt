@@ -30,6 +30,7 @@ import org.meshtastic.feature.wifiprovision.ui.DeviceListEmptyPreview
 import org.meshtastic.feature.wifiprovision.ui.DeviceListOpaqueIdentifiersPreview
 import org.meshtastic.feature.wifiprovision.ui.DeviceListPreview
 import org.meshtastic.feature.wifiprovision.ui.DeviceListScanningPreview
+import org.meshtastic.feature.wifiprovision.ui.DeviceNotFoundPreview
 import org.meshtastic.feature.wifiprovision.ui.MpwrdDisclaimerBannerPreview
 import org.meshtastic.feature.wifiprovision.ui.NetworkRowPreview
 import org.meshtastic.feature.wifiprovision.ui.ProvisionStatusCardSuccessPreview
@@ -188,6 +189,13 @@ fun ScreenshotDeviceFoundWide() {
 @Composable
 fun ScreenshotDeviceFoundLargeFont() {
     DeviceFoundPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotDeviceNotFound() {
+    DeviceNotFoundPreview()
 }
 
 @PreviewTest

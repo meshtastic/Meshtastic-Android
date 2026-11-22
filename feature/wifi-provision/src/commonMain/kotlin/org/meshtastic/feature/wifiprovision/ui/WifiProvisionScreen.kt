@@ -132,12 +132,14 @@ import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
+import org.meshtastic.core.resources.wifi_provision_device_not_found
 import org.meshtastic.core.resources.wifi_provision_hidden_network
 import org.meshtastic.core.resources.wifi_provision_link_unsupported
 import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
 import org.meshtastic.core.resources.wifi_provision_no_devices
 import org.meshtastic.core.resources.wifi_provision_no_devices_detail
 import org.meshtastic.core.resources.wifi_provision_no_networks
+import org.meshtastic.core.resources.wifi_provision_no_response
 import org.meshtastic.core.resources.wifi_provision_pick_device
 import org.meshtastic.core.resources.wifi_provision_rescan
 import org.meshtastic.core.resources.wifi_provision_scan_failed
@@ -204,17 +206,7 @@ fun WifiProvisionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val errorMessage =
-        uiState.error?.let { error ->
-            when (error) {
-                is WifiProvisionError.ConnectFailed ->
-                    stringResource(Res.string.wifi_provision_connect_failed, error.detail)
-
-                is WifiProvisionError.ScanFailed -> stringResource(Res.string.wifi_provision_scan_failed, error.detail)
-
-                is WifiProvisionError.ProvisionFailed -> error.detail
-            }
-        }
+    val errorMessage = uiState.error?.message()
 
     LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
     // Nothing connects on arrival: an address waits for the user's Connect, the app lists what it finds and waits for a
@@ -244,6 +236,16 @@ fun WifiProvisionScreen(
             ),
         ),
     )
+}
+
+/** The text the user reads for [this]: what happened and what to do, from string resources rather than exceptions. */
+@Composable
+private fun WifiProvisionError.message(): String = when (this) {
+    WifiProvisionError.DeviceNotFound -> stringResource(Res.string.wifi_provision_device_not_found)
+    WifiProvisionError.DeviceNotResponding -> stringResource(Res.string.wifi_provision_no_response)
+    is WifiProvisionError.ConnectFailed -> stringResource(Res.string.wifi_provision_connect_failed, detail)
+    is WifiProvisionError.ScanFailed -> stringResource(Res.string.wifi_provision_scan_failed, detail)
+    is WifiProvisionError.ProvisionFailed -> detail
 }
 
 /** What choosing a device can ask of its ViewModel: the browser's chooser, a listed row, a rescan, a confirmation. */
@@ -338,7 +340,7 @@ internal fun WifiProvisionScreenContent(
 
                         ScreenKey.ConnectingBle ->
                             ScanningBleContent(
-                                error = uiState.error as? WifiProvisionError.ConnectFailed,
+                                errorMessage = uiState.error?.message(),
                                 onRetry = actions.choice.onRetry,
                             )
 
@@ -455,9 +457,9 @@ private val Phase.isLoading: Boolean
 
 /** BLE scanning spinner — shown while searching for a device. */
 @Composable
-internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null, onRetry: () -> Unit = {}) {
+internal fun ScanningBleContent(errorMessage: String? = null, onRetry: () -> Unit = {}) {
     CenteredStatusContent {
-        if (error != null) {
+        if (errorMessage != null) {
             Icon(
                 MeshtasticIcons.Bluetooth,
                 contentDescription = null,
@@ -466,7 +468,7 @@ internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null,
             )
             Spacer(Modifier.height(24.dp))
             Text(
-                stringResource(Res.string.wifi_provision_connect_failed, error.detail),
+                errorMessage,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,

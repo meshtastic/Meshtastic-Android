@@ -35,7 +35,10 @@ import org.meshtastic.core.ble.normalizeBleAddress
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.NO_RESPONSE_CODE
 import org.meshtastic.feature.wifiprovision.domain.DeviceDiscovery
+import org.meshtastic.feature.wifiprovision.domain.DeviceNotFoundException
+import org.meshtastic.feature.wifiprovision.domain.DeviceResponseTimeoutException
 import org.meshtastic.feature.wifiprovision.domain.NoDevicePickedException
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.DiscoveredDevice
@@ -117,17 +120,20 @@ data class WifiProvisionUiState(
  * locale-specific text.
  */
 sealed interface WifiProvisionError {
-    /** Detail message from the underlying exception (language-agnostic, typically from the BLE stack). */
-    val detail: String
+    /** The device to connect to did not advertise in time. */
+    data object DeviceNotFound : WifiProvisionError
 
-    /** BLE connection to the provisioning device failed. */
-    data class ConnectFailed(override val detail: String) : WifiProvisionError
+    /** The connected device did not answer a command in time. */
+    data object DeviceNotResponding : WifiProvisionError
 
-    /** WiFi network scan on the device failed. */
-    data class ScanFailed(override val detail: String) : WifiProvisionError
+    /** BLE connection to the provisioning device failed; [detail] is the underlying exception's message. */
+    data class ConnectFailed(val detail: String) : WifiProvisionError
 
-    /** Sending WiFi credentials to the device failed. */
-    data class ProvisionFailed(override val detail: String) : WifiProvisionError
+    /** WiFi network scan on the device failed; [detail] is the underlying exception's message. */
+    data class ScanFailed(val detail: String) : WifiProvisionError
+
+    /** Sending WiFi credentials to the device failed; [detail] is the device's or exception's message. */
+    data class ProvisionFailed(val detail: String) : WifiProvisionError
 }
 
 // ---------------------------------------------------------------------------
@@ -325,7 +331,12 @@ class WifiProvisionViewModel(
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Idle,
-                            error = WifiProvisionError.ConnectFailed(e.message ?: "Unknown error"),
+                            error =
+                            if (e is DeviceNotFoundException) {
+                                WifiProvisionError.DeviceNotFound
+                            } else {
+                                WifiProvisionError.ConnectFailed(e.message ?: "Unknown error")
+                            },
                         )
                     }
                 }
@@ -350,7 +361,12 @@ class WifiProvisionViewModel(
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
-                            error = WifiProvisionError.ScanFailed(e.message ?: "Unknown error"),
+                            error =
+                            if (e is DeviceResponseTimeoutException) {
+                                WifiProvisionError.DeviceNotResponding
+                            } else {
+                                WifiProvisionError.ScanFailed(e.message ?: "Unknown error")
+                            },
                         )
                     }
                 }
@@ -395,7 +411,12 @@ class WifiProvisionViewModel(
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
                             provisionStatus = WifiProvisionUiState.ProvisionStatus.Failed,
-                            error = WifiProvisionError.ProvisionFailed(result.message),
+                            error =
+                            if (result.errorCode == NO_RESPONSE_CODE) {
+                                WifiProvisionError.DeviceNotResponding
+                            } else {
+                                WifiProvisionError.ProvisionFailed(result.message)
+                            },
                         )
                     }
                 }
@@ -409,6 +430,9 @@ class WifiProvisionViewModel(
         service = null
         scanJob?.cancel()
         scanJob = null
+        // A connect still scanning must end quietly, not report a failure for a screen the user has left.
+        connectJob?.cancel()
+        connectJob = null
         discovery.clear()
         // Reset first: a pending confirmation must not stay answerable while the connection closes.
         _uiState.value = initialState

@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -40,6 +41,7 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
 import kotlin.test.AfterTest
@@ -483,6 +485,64 @@ class WifiProvisionViewModelTest {
         assertNull(viewModel.uiState.value.pendingAddress)
         assertEquals(0, connection.connectAndAwaitCalls)
     }
+
+    @Test
+    fun `a connect to an address that never advertises ends in the not found state at the scan timeout`() = runTest {
+        scanner.emitDevice(firstSeen)
+
+        viewModel.connectToDevice(chosen.address)
+        advanceTimeBy(SCAN_TIMEOUT.inWholeMilliseconds - 1)
+        runCurrent()
+        assertEquals(Phase.ConnectingBle, viewModel.uiState.value.phase)
+
+        advanceTimeBy(2)
+        runCurrent()
+
+        assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+        assertEquals(WifiProvisionError.DeviceNotFound, viewModel.uiState.value.error)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `cancelling while a connect is still scanning surfaces no error`() = runTest {
+        scanner.emitDevice(firstSeen)
+
+        viewModel.connectToDevice(chosen.address)
+        runCurrent()
+        viewModel.disconnect()
+        advanceUntilIdle()
+
+        assertEquals(Phase.Idle, viewModel.uiState.value.phase)
+        assertNull(viewModel.uiState.value.error)
+    }
+
+    @Test
+    fun `a device that never answers the network scan ends in the not responding error`() = runTest {
+        scanner.emitDevice(chosen)
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        viewModel.scanNetworks()
+        advanceUntilIdle()
+
+        assertEquals(Phase.Connected, viewModel.uiState.value.phase)
+        assertEquals(WifiProvisionError.DeviceNotResponding, viewModel.uiState.value.error)
+    }
+
+    @Test
+    fun `a device that never answers the credentials ends in the failed state with the not responding error`() =
+        runTest {
+            scanner.emitDevice(chosen)
+            viewModel.connectToDevice(chosen.address)
+            advanceUntilIdle()
+
+            viewModel.provisionWifi("Net", "pass")
+            advanceUntilIdle()
+
+            assertEquals(Phase.Connected, viewModel.uiState.value.phase)
+            assertEquals(ProvisionStatus.Failed, viewModel.uiState.value.provisionStatus)
+            assertEquals(WifiProvisionError.DeviceNotResponding, viewModel.uiState.value.error)
+        }
 
     @Test
     fun `a link address a platform cannot look up falls back to the list and connects nothing`() = runTest {

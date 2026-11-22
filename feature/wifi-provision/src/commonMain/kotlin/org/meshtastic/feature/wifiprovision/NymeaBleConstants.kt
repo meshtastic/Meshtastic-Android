@@ -70,6 +70,9 @@ internal object NymeaBleConstants {
     /** How long the device list collects advertisers before it offers a rescan. */
     val DISCOVERY_WINDOW = 8.seconds
 
+    /** `ProvisionResult.Failure.errorCode` for a command the device never answered; nymea's own codes are 0 to 6. */
+    const val NO_RESPONSE_CODE = -2
+
     /** Maximum time to wait for a command response. */
     val RESPONSE_TIMEOUT = 15.seconds
 

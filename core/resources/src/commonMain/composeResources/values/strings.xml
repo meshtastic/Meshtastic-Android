@@ -2459,12 +2459,14 @@
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>
     <string name="wifi_provision_device_found_detail">Ready to scan for Wi-Fi networks.</string>
+    <string name="wifi_provision_device_not_found">Couldn't find the device. Make sure it is powered on and within range, then try again.</string>
     <string name="wifi_provision_hidden_network">Hidden network</string>
     <string name="wifi_provision_link_unsupported">This link names a device by hardware address, which this app can't look up here. Choose the device from the list instead.</string>
     <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_devices">No devices found</string>
     <string name="wifi_provision_no_devices_detail">Make sure the device is powered on and within range, then scan again.</string>
     <string name="wifi_provision_no_networks">No networks found</string>
+    <string name="wifi_provision_no_response">The device didn't respond. Move closer to it and try again.</string>
     <string name="wifi_provision_pick_device">Choose the device to set up. The Wi-Fi password is sent to the device you pick.</string>
     <string name="wifi_provision_rescan">Scan again</string>
     <string name="wifi_provision_scan_failed">Failed to scan for Wi-Fi networks: %1$s</string>

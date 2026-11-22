@@ -26,6 +26,7 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.NO_RESPONSE_CODE
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import kotlin.test.AfterTest
@@ -118,6 +119,16 @@ class NymeaWifiServiceTest {
         assertEquals("target", result.getOrThrow())
         assertEquals(address, connection.device?.address)
         assertEquals(address, service.deviceAddress)
+    }
+
+    @Test
+    fun `connect to an address that never advertises fails instead of cancelling the caller`() = runTest {
+        val (service, scanner) = createService()
+        scanner.emitDevice(FakeBleDevice("11:22:33:44:55:66", name = "other"))
+
+        val result = service.connect(address)
+
+        assertIs<DeviceNotFoundException>(result.exceptionOrNull())
     }
 
     @Test
@@ -297,6 +308,40 @@ class NymeaWifiServiceTest {
 
         val success = assertIs<ProvisionResult.Success>(result)
         assertEquals("10.10.10.62", success.ipAddress)
+    }
+
+    @Test
+    fun `provision succeeds without an IP when the connection lookup gets no answer`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":0}""")
+        val result = service.provision("MyNet", "password")
+
+        assertEquals(ProvisionResult.Success(ipAddress = null), result)
+    }
+
+    @Test
+    fun `provision fails with the no response code when the device never answers`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = service.provision("MyNet", "password")
+
+        assertEquals(NO_RESPONSE_CODE, assertIs<ProvisionResult.Failure>(result).errorCode)
+    }
+
+    @Test
+    fun `scanNetworks fails with a response timeout when the device never answers`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        val result = service.scanNetworks()
+
+        assertIs<DeviceResponseTimeoutException>(result.exceptionOrNull())
     }
 
     @Test

@@ -25,11 +25,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -47,6 +46,7 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_NETWORKS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.NO_RESPONSE_CODE
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
@@ -97,9 +97,9 @@ class NymeaWifiService(
      * then calls [connect] with the [BleDevice] picked.
      *
      * @param address The MAC address to connect to, or null where [BleScanner.picksDevice] is true.
-     * @return The device's advertised name on success, or a [NoDevicePickedException] failure when the scanner is a
-     *   device chooser the user dismissed.
-     * @throws IllegalStateException if the device is not found within [SCAN_TIMEOUT].
+     * @return The device's advertised name on success; a [NoDevicePickedException] failure when the scanner is a device
+     *   chooser the user dismissed; a [DeviceNotFoundException] failure when the device does not advertise within
+     *   [SCAN_TIMEOUT]. Cancelling the caller still cancels: only the timeout is converted to a failure.
      */
     suspend fun connect(address: String?): Result<String> = safeCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=${address.anonymize()})…" }
@@ -111,7 +111,10 @@ class NymeaWifiService(
                 scan.firstOrNull() ?: throw NoDevicePickedException()
             } else {
                 val wanted = requireNotNull(address) { "A device must be chosen before connecting" }
-                withTimeout(SCAN_TIMEOUT) { scan.first { bleAddressesMatch(it.address, wanted) } }
+                // A timeout is the device not being there, a failure; withTimeout would throw a CancellationException,
+                // which neither safeCatching nor the caller's failure handling treats as one.
+                withTimeoutOrNull(SCAN_TIMEOUT) { scan.firstOrNull { bleAddressesMatch(it.address, wanted) } }
+                    ?: throw DeviceNotFoundException()
             }
 
         openConnection(device)
@@ -221,7 +224,10 @@ class NymeaWifiService(
         }
             .getOrElse { e ->
                 Logger.e(e) { "$TAG: Provision failed" }
-                ProvisionResult.Failure(-1, e.message ?: "Unknown error")
+                ProvisionResult.Failure(
+                    if (e is DeviceResponseTimeoutException) NO_RESPONSE_CODE else -1,
+                    e.message ?: "Unknown error",
+                )
             }
     }
 
@@ -254,9 +260,12 @@ class NymeaWifiService(
         }
     }
 
-    /** Wait up to [RESPONSE_TIMEOUT] for a complete JSON response from the notification channel. */
+    /**
+     * Wait up to [timeout] for a complete JSON response from the notification channel, failing with a
+     * [DeviceResponseTimeoutException] rather than the cancellation `withTimeout` throws.
+     */
     private suspend fun waitForResponse(timeout: Duration = RESPONSE_TIMEOUT): String =
-        withTimeout(timeout) { responseChannel.receive() }
+        withTimeoutOrNull(timeout) { responseChannel.receive() } ?: throw DeviceResponseTimeoutException()
 
     /**
      * Best-effort query for current connection info (`CMD_GET_CONNECTION`), returning the reported IP address.
@@ -293,3 +302,9 @@ class NymeaWifiService(
 
 /** The device chooser closed without a pick, which is the user backing out rather than a failure. */
 class NoDevicePickedException : IllegalStateException("No device was picked")
+
+/** The device to connect to did not advertise within the scan window. */
+class DeviceNotFoundException : IllegalStateException("Device not found")
+
+/** The connected device sent no answer to a command in time. */
+class DeviceResponseTimeoutException : IllegalStateException("No response from the device")
