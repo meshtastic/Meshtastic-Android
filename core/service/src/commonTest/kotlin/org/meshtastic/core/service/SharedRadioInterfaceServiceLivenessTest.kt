@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -1459,6 +1460,52 @@ class SharedRadioInterfaceServiceLivenessTest {
         } finally {
             service.disconnect()
         }
+    }
+
+    @Test
+    fun `a user connect mid streak starts a fresh run of handshake restarts`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            repeat(2) { timeOut(callbacks) }
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(3, callbacks.size)
+
+            // Three more restarts are allowed, as main reset its count when the user re-selected the node.
+            repeat(3) { restart ->
+                timeOut(callbacks)
+                assertEquals(restart + 4, callbacks.size)
+            }
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a session that reaches Ready starts a fresh run of handshake restarts`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            repeat(2) { timeOut(callbacks) }
+            callbacks.last().onConnect()
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(60_000L)
+            assertEquals(4, callbacks.size)
+
+            // Main reset its count on a completed handshake.
+            repeat(3) { restart ->
+                timeOut(callbacks)
+                assertEquals(restart + 5, callbacks.size)
+            }
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    private fun TestScope.timeOut(callbacks: List<RadioInterfaceService>) {
+        callbacks.last().onPhoneApiSessionEnded(recoverable = true, handshakeTimedOut = true)
+        advanceTimeBy(60_000L)
     }
 
     @Test
