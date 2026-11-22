@@ -36,7 +36,7 @@ The Meshtastic GATT service as flows: `fromRadio`, `logRadio` and `sendToRadio`,
 
 ## Integration
 
-The `:core:ble` module is used by `BleRadioTransport` in [`:core:network`](../network/README.md) to implement the `RadioTransport` contract for Bluetooth devices.
+The SDK's BLE transport runs the link; `:core:ble` supplies discovery, bonding and host permission state, and [`:core:network`](../network/README.md) selects the transport for an `x` address.
 
 ## Usage
 

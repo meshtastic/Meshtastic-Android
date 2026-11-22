@@ -2,15 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>NoNameShadowing:HeartbeatSender.kt:HeartbeatSender$wb</ID>
     <ID>NoNameShadowing:MockRadioTransport.kt:MockRadioTransport$wb</ID>
-    <ID>NoNameShadowing:TcpTransport.kt:TcpTransport$wb</ID>
     <ID>UnusedPrivateProperty:AndroidNetworkMonitor.kt:AndroidNetworkMonitor$private val connectivityManager: ConnectivityManager</ID>
     <ID>UnusedPrivateProperty:AndroidRadioTransportFactory.kt:AndroidRadioTransportFactory$private val buildConfigProvider: BuildConfigProvider</ID>
     <ID>UnusedPrivateProperty:AndroidServiceDiscovery.kt:AndroidServiceDiscovery$private val nsdManager: NsdManager</ID>
-    <ID>UnusedPrivateProperty:BleRadioTransport.kt:BleRadioTransport$private val connectionFactory: BleConnectionFactory</ID>
-    <ID>UnusedPrivateProperty:BleRadioTransport.kt:BleRadioTransport$private val scanner: BleScanner</ID>
-    <ID>UnusedPrivateProperty:BleRadioTransport.kt:BleRadioTransport$private val scope: CoroutineScope</ID>
     <ID>UnusedPrivateProperty:JvmServiceDiscovery.kt:JvmServiceDiscovery$private val dispatchers: CoroutineDispatchers</ID>
     <ID>UnusedPrivateProperty:MockRadioTransport.kt:MockRadioTransport$private val scope: CoroutineScope</ID>
     <ID>UnusedPrivateProperty:ReplayRadioTransport.kt:ReplayRadioTransport$private val scope: CoroutineScope</ID>

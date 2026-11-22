@@ -16,14 +16,7 @@
     <ID>AbstractClassCanBeInterface:MeshConfigFlowManagerImpl.kt:MeshConfigFlowManagerImpl.HandshakeState$HandshakeState</ID>
     <ID>AbstractClassCanBeInterface:RateLimiter.kt:RateLimitResult$RateLimitResult</ID>
     <ID>LongParameterList:AiFunctionProviderImpl.kt:AiFunctionProviderImpl</ID>
-    <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0x8000</ID>
-    <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0xFF</ID>
-    <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0xFFFF</ID>
-    <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$8</ID>
-    <ID>NoNameShadowing:CommandSenderImpl.kt:CommandSenderImpl$wb</ID>
-    <ID>NoNameShadowing:DataLayerHeartbeatSender.kt:DataLayerHeartbeatSender$wb</ID>
     <ID>NoNameShadowing:HistoryManagerImpl.kt:HistoryManagerImpl$wb</ID>
-    <ID>NoNameShadowing:XModemManagerImpl.kt:XModemManagerImpl$wb</ID>
     <ID>UnusedPrivateProperty:BootloaderOtaQuirksRepositoryImpl.kt:BootloaderOtaQuirksRepositoryImpl$private val dispatchers: CoroutineDispatchers</ID>
     <ID>UnusedPrivateProperty:DeviceHardwareRepositoryImpl.kt:DeviceHardwareRepositoryImpl$private val deviceLinkRepository: DeviceLinkRepository</ID>
     <ID>UnusedPrivateProperty:DeviceHardwareRepositoryImpl.kt:DeviceHardwareRepositoryImpl$private val remoteDataSource: DeviceHardwareRemoteDataSource</ID>

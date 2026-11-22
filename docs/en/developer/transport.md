@@ -2,7 +2,7 @@
 title: Transport
 parent: Developer Guide
 nav_order: 5
-last_updated: 2026-11-20
+last_updated: 2026-11-21
 description: The BLE, USB serial, TCP and WebSocket transports behind the RadioTransport abstraction — which module owns each, and how to add a new one.
 aliases:
   - ble
@@ -38,7 +38,7 @@ update.
 
 ## USB Serial
 
-**Module:** `core:network`  
+**Module:** `meshtastic-sdk:transport-serial`  
 **Platforms:** Android (OTG), Desktop, Web (Web Serial)
 
 Serial communication over USB:
@@ -98,9 +98,12 @@ on the Settings app-version row) unlocks the demo transports mid-session, and th
 to notice. Every consumer must read that one flow — the visibility path and the `isAddressValid`
 admission path have to agree, or the demo entry appears and then refuses to connect.
 
-`BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it creates
-`BleRadioTransport` for BLE addresses and `WebSocketRadioTransport` for WebSocket ones, admits each address type in `isAddressValid`, and dispatches every other
-address in `createPlatformTransport`: mock and no-device itself, and replay, TCP and serial through hooks a platform overrides. `NonWebRadioTransportFactory` (`nonWebMain`) supplies raw TCP for Android and Desktop. On hardware without Bluetooth LE it refuses BLE
+`BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it admits each
+address type in `isAddressValid` and dispatches on the prefix. BLE and WebSocket go to the
+platform's `createBleTransport` and `createWebSocketTransport`; mock and no-device it builds itself
+from the virtual radios, and replay, TCP and serial go through hooks a platform overrides. Every
+hook returns a session over the SDK transport for that link (`AndroidSdkTransportFactory`,
+`DesktopSdkTransportFactory`, `WebSdkRadioTransportFactory`). On hardware without Bluetooth LE it refuses BLE
 addresses, and the Android factory refuses serial addresses on hardware with no USB host, so a saved
 address restored onto such a device is kept but never armed.
 
@@ -127,7 +130,7 @@ writes `Connected` once the handshake completes. UI code observes this state, ne
 
 ## Adding a New Transport
 
-1. Implement `RadioTransport` interface
-2. Give it an `InterfaceId` prefix, admit it in `isAddressValid`, and create it in the platform's `createPlatformTransport`
+1. Add the link to the SDK as a transport module; the SDK owns framing and the PhoneAPI session
+2. Give it an `InterfaceId` prefix, admit it in `isAddressValid`, and open an SDK session over it in the platform's `createPlatformTransport`
 3. Add connection UI in `feature:connections`
 4. Update DI bindings for the platform
