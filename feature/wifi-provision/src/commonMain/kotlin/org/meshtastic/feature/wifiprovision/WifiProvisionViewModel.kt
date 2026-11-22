@@ -205,6 +205,7 @@ class WifiProvisionViewModel(
                     )
                 }
                 session.restart().launch {
+                    session.awaitRelease()
                     safeCatching { discovery.advertisedName(address) }
                         .onSuccess { name ->
                             _uiState.update {
@@ -244,6 +245,9 @@ class WifiProvisionViewModel(
 
     /** Connect to the listed device with [address], which the user tapped. */
     fun connectToDiscovered(address: String) {
+        // Only from the list: a late tap on a stale row must not restart a connection that is already under way.
+        val phase = _uiState.value.phase
+        if (phase != WifiProvisionUiState.Phase.Discovering && phase != WifiProvisionUiState.Phase.DeviceList) return
         val device = discovery.deviceFor(address) ?: return
         launchConnect { it.connect(device) }
     }
@@ -269,7 +273,7 @@ class WifiProvisionViewModel(
         _uiState.value =
             initialState.copy(phase = WifiProvisionUiState.Phase.Discovering, linkAddressIgnored = linkIgnored)
         session.restart().launch {
-            session.releaseReplaced()
+            session.awaitRelease()
             safeCatching { discovery.scan { devices -> _uiState.update { it.copy(devices = devices) } } }
                 .onSuccess { _uiState.update { state -> state.copy(phase = WifiProvisionUiState.Phase.DeviceList) } }
                 .onFailure { e ->
@@ -297,7 +301,7 @@ class WifiProvisionViewModel(
 
         val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
         session.restart(nymeaService).launch {
-            session.releaseReplaced()
+            session.awaitRelease()
 
             connect(nymeaService)
                 .onSuccess { deviceName ->
@@ -336,6 +340,9 @@ class WifiProvisionViewModel(
 
     /** Called when the user confirms they want to scan networks after device discovery. */
     fun scanNetworks() {
+        // Only once connected, and not while another request is running: a second tap must not send a second scan.
+        val phase = _uiState.value.phase
+        if (phase != WifiProvisionUiState.Phase.DeviceFound && phase != WifiProvisionUiState.Phase.Connected) return
         val nymeaService = session.service ?: return
         session.scope.launch {
             _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }
@@ -372,7 +379,8 @@ class WifiProvisionViewModel(
      * @param password The network password (empty string for open networks).
      */
     fun provisionWifi(ssid: String, password: String, hidden: Boolean = false) {
-        if (ssid.isBlank()) return
+        // Connected only: a second tap while the first is in flight must not send the credentials twice.
+        if (ssid.isBlank() || _uiState.value.phase != WifiProvisionUiState.Phase.Connected) return
         val nymeaService = session.service ?: return
 
         _uiState.update {

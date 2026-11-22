@@ -17,13 +17,17 @@
 package org.meshtastic.feature.wifiprovision
 
 import androidx.lifecycle.ViewModelStore
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -34,6 +38,7 @@ import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeBleConnection
@@ -41,6 +46,8 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RELEASE_TIMEOUT
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
@@ -53,6 +60,8 @@ import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 /**
@@ -534,9 +543,7 @@ class WifiProvisionViewModelTest {
     @Test
     fun `a device that never answers the credentials drops the connection and shows the not responding error`() =
         runTest {
-            scanner.emitDevice(chosen)
-            viewModel.connectToDevice(chosen.address)
-            advanceUntilIdle()
+            connectAndLoadNetworks()
 
             viewModel.provisionWifi("Net", "pass")
             advanceUntilIdle()
@@ -564,9 +571,7 @@ class WifiProvisionViewModelTest {
 
     @Test
     fun `disconnecting during provisioning leaves the reset state after every timer has run`() = runTest {
-        scanner.emitDevice(chosen)
-        viewModel.connectToDevice(chosen.address)
-        advanceUntilIdle()
+        connectAndLoadNetworks()
 
         viewModel.provisionWifi("Net", "pass")
         runCurrent()
@@ -575,6 +580,120 @@ class WifiProvisionViewModelTest {
         advanceUntilIdle()
 
         assertEquals(WifiProvisionUiState(), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `a retry starts no connection until the previous one has finished closing`() = runTest {
+        val retrying =
+            createViewModel(FixedBleConnectionFactory(SlowCloseConnection(connection, closeDelay = 3.seconds)))
+        scanner.emitDevice(chosen)
+        retrying.connectToDevice(chosen.address)
+        advanceUntilIdle()
+        retrying.scanNetworks()
+        advanceTimeBy(RESPONSE_TIMEOUT.inWholeMilliseconds + 1)
+        runCurrent()
+        assertEquals(Phase.Idle, retrying.uiState.value.phase)
+        assertEquals(1, connection.connectAndAwaitCalls)
+
+        retrying.connectToDevice(chosen.address)
+        runCurrent()
+        assertEquals(1, connection.connectAndAwaitCalls)
+        advanceTimeBy(2.seconds.inWholeMilliseconds)
+        runCurrent()
+        assertEquals(1, connection.connectAndAwaitCalls)
+        advanceTimeBy(2.seconds.inWholeMilliseconds)
+        runCurrent()
+
+        assertEquals(2, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a retry goes ahead once the previous connection has been closing for the release timeout`() = runTest {
+        val retrying = createViewModel(FixedBleConnectionFactory(SlowCloseConnection(connection, closeDelay = 1.hours)))
+        scanner.emitDevice(chosen)
+        retrying.connectToDevice(chosen.address)
+        advanceUntilIdle()
+        retrying.scanNetworks()
+        advanceTimeBy(RESPONSE_TIMEOUT.inWholeMilliseconds + 1)
+        runCurrent()
+
+        retrying.connectToDevice(chosen.address)
+        advanceTimeBy(RELEASE_TIMEOUT.inWholeMilliseconds - 1)
+        runCurrent()
+        assertEquals(1, connection.connectAndAwaitCalls)
+        advanceTimeBy(2)
+        runCurrent()
+
+        assertEquals(2, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a connection whose close fails neither crashes nor stops the retry`() = runTest {
+        val uncaught = mutableListOf<Throwable>()
+        val applicationScope =
+            object :
+                ApplicationCoroutineScope,
+                CoroutineScope by CoroutineScope(
+                    SupervisorJob() + testDispatcher + CoroutineExceptionHandler { _, e -> uncaught += e },
+                ) {}
+        val retrying =
+            WifiProvisionViewModel(
+                bleScanner = scanner,
+                bleConnectionFactory =
+                FixedBleConnectionFactory(
+                    SlowCloseConnection(
+                        connection,
+                        closeDelay = 1.seconds,
+                        closeFailure = IllegalStateException("x"),
+                    ),
+                ),
+                dispatchers =
+                CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                applicationScope = applicationScope,
+            )
+        scanner.emitDevice(chosen)
+        retrying.connectToDevice(chosen.address)
+        advanceUntilIdle()
+        retrying.scanNetworks()
+        advanceTimeBy(RESPONSE_TIMEOUT.inWholeMilliseconds + 1)
+        runCurrent()
+
+        retrying.connectToDevice(chosen.address)
+        advanceUntilIdle()
+
+        assertEquals(2, connection.connectAndAwaitCalls)
+        assertEquals(Phase.DeviceFound, retrying.uiState.value.phase)
+        assertTrue(uncaught.isEmpty(), "close failure escaped: $uncaught")
+    }
+
+    @Test
+    fun `a second Apply while the credentials are in flight sends nothing more`() = runTest {
+        connectAndLoadNetworks()
+
+        viewModel.provisionWifi("Net", "pass")
+        runCurrent()
+        val written = connection.service.writes.size
+        viewModel.provisionWifi("Net", "pass")
+        emitNymeaResponse("""{"c":1,"r":0,"p":{"i":"10.0.0.7"}}""")
+        advanceUntilIdle()
+
+        assertEquals(written, connection.service.writes.size)
+        assertEquals(ProvisionStatus.Success, viewModel.uiState.value.provisionStatus)
+    }
+
+    @Test
+    fun `a tap on a listed device after a connection has started is ignored`() = runTest {
+        scanner.emitDevice(firstSeen)
+        scanner.emitDevice(chosen)
+        viewModel.open(null)
+        runCurrent()
+
+        viewModel.connectToDiscovered(chosen.address)
+        viewModel.connectToDiscovered(firstSeen.address)
+        advanceUntilIdle()
+
+        assertEquals(chosen.address, connection.device?.address)
+        assertEquals(1, connection.connectAndAwaitCalls)
     }
 
     @Test
@@ -733,6 +852,23 @@ class WifiProvisionViewModelTest {
         override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flowOf(picked)
     }
 
+    /** Shares one [connection] across every service, whose [disconnect] takes [closeDelay] and then [closeFailure]. */
+    private class SlowCloseConnection(
+        private val connection: FakeBleConnection,
+        private val closeDelay: Duration,
+        private val closeFailure: Exception? = null,
+    ) : BleConnection by connection {
+        override suspend fun disconnect() {
+            delay(closeDelay)
+            connection.disconnect()
+            closeFailure?.let { throw it }
+        }
+    }
+
+    private class FixedBleConnectionFactory(private val connection: BleConnection) : BleConnectionFactory {
+        override fun create(scope: CoroutineScope, tag: String): BleConnection = connection
+    }
+
     /** Hands out a fresh [FakeBleConnection] per [create], so each service's connection can be checked on its own. */
     private class RecordingBleConnectionFactory : BleConnectionFactory {
         val created = mutableListOf<FakeBleConnection>()
@@ -747,5 +883,17 @@ class WifiProvisionViewModelTest {
      */
     private fun emitNymeaResponse(json: String) {
         connection.service.emitNotification(COMMANDER_RESPONSE_UUID, (json + "\n").encodeToByteArray())
+    }
+
+    /** Connects to [chosen] and loads an empty network list, which is where credentials can be sent from. */
+    private fun TestScope.connectAndLoadNetworks() {
+        scanner.emitDevice(chosen)
+        viewModel.connectToDevice(chosen.address)
+        advanceUntilIdle()
+        emitNymeaResponse("""{"c":4,"r":0}""")
+        emitNymeaResponse("""{"c":0,"r":0,"p":[]}""")
+        viewModel.scanNetworks()
+        advanceUntilIdle()
+        assertEquals(Phase.Connected, viewModel.uiState.value.phase)
     }
 }

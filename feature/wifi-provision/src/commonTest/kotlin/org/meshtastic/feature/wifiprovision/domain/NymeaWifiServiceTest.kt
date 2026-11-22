@@ -347,6 +347,126 @@ class NymeaWifiServiceTest {
     }
 
     @Test
+    fun `a closed service sends no command`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+        service.close()
+        val writesBefore = connection.service.writes.size
+
+        val scan = service.scanNetworks()
+        val provision = service.provision("Net", "pass")
+
+        assertTrue(scan.isFailure)
+        assertIs<ProvisionResult.Failure>(provision)
+        assertEquals(writesBefore, connection.service.writes.size)
+    }
+
+    @Test
+    fun `a closed service opens no connection`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, _) = createService(connection = connection)
+        service.close()
+
+        val result = service.connect(FakeBleDevice(address))
+
+        assertTrue(result.isFailure)
+        assertEquals(0, connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a connect reply without a status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a quoted status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":"0"}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a fractional status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":0.5}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a connect reply with a null status is a failure and not a success`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":null}""")
+
+        assertIs<ProvisionResult.Failure>(service.provision("Net", "pass"))
+    }
+
+    @Test
+    fun `a scan reply without a status is a scan failure and not an empty list`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[]}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
+    fun `a network list reply without a list is a failure and not no networks`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
+    fun `a network list reply with an empty list is no networks`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[]}""")
+
+        assertEquals(emptyList(), service.scanNetworks().getOrThrow())
+    }
+
+    @Test
+    fun `a network without a protection flag fails the reply and is not listed as open`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":4,"r":0}""")
+        emitResponse(connection, """{"c":0,"r":0,"p":[{"e":"Net","m":"01","s":70}]}""")
+
+        assertIs<MalformedReplyException>(service.scanNetworks().exceptionOrNull())
+    }
+
+    @Test
     fun `a reply for another command is skipped and the right one still completes in the deadline`() = runTest {
         val connection = FakeBleConnection()
         val (service, scanner) = createService(connection = connection)

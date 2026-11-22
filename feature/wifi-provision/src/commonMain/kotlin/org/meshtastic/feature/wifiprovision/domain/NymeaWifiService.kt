@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.SerializationException
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -95,6 +96,9 @@ class NymeaWifiService(
      */
     private var unsynchronized = false
 
+    /** Set by [close]: a closed service sends nothing and opens no connection, whoever still holds it. */
+    private var closed = false
+
     // region Public API
 
     /** Address of the device [connect] last connected to, or null before a connection. */
@@ -135,6 +139,7 @@ class NymeaWifiService(
     suspend fun connect(device: BleDevice): Result<String> = safeCatching { openConnection(device) }
 
     private suspend fun openConnection(device: BleDevice): String {
+        check(!closed) { "The connection is closed" }
         val deviceName = device.name ?: device.address
         Logger.i { "$TAG: Connecting to device @ ${device.address.anonymize()}" }
         deviceAddress = device.address
@@ -184,19 +189,21 @@ class NymeaWifiService(
         exchangeLock.withLock {
             // Trigger scan
             sendCommand(CMD_SCAN, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
-            val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(CMD_SCAN))
+            val scanAck = decodeReply<NymeaResponse>(waitForResponse(CMD_SCAN))
             if (scanAck.responseCode != RESPONSE_SUCCESS) {
                 error("Scan command failed: ${nymeaErrorMessage(scanAck.responseCode)}")
             }
 
             // Fetch results
             sendCommand(CMD_GET_NETWORKS, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_NETWORKS)))
-            val networksResponse = NymeaJson.decodeFromString<NymeaNetworksResponse>(waitForResponse(CMD_GET_NETWORKS))
+            val networksResponse = decodeReply<NymeaNetworksResponse>(waitForResponse(CMD_GET_NETWORKS))
             if (networksResponse.responseCode != RESPONSE_SUCCESS) {
                 error("GetNetworks failed: ${nymeaErrorMessage(networksResponse.responseCode)}")
             }
 
-            networksResponse.networks.map { entry ->
+            // A success with no list is a bad reply; an empty list (`[]`) is the device saying there are none.
+            val networks = networksResponse.networks ?: throw MalformedReplyException()
+            networks.map { entry ->
                 WifiNetwork(
                     ssid = entry.ssid,
                     bssid = entry.bssid,
@@ -228,8 +235,7 @@ class NymeaWifiService(
             exchangeLock.withLock {
                 sendCommand(cmd, json)
                 // Either connect code: a device may echo the visible command's code for a hidden network.
-                val response =
-                    NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(CMD_CONNECT, CMD_CONNECT_HIDDEN))
+                val response = decodeReply<NymeaResponse>(waitForResponse(CMD_CONNECT, CMD_CONNECT_HIDDEN))
                 if (response.responseCode == RESPONSE_SUCCESS) {
                     val ipAddress =
                         response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
@@ -250,6 +256,7 @@ class NymeaWifiService(
 
     /** Disconnect, which releases the BLE peripheral, then cancel the service scope. */
     suspend fun close() {
+        closed = true
         try {
             bleConnection.disconnect()
         } finally {
@@ -268,6 +275,7 @@ class NymeaWifiService(
      * and password lengths.
      */
     private suspend fun sendCommand(command: Int, json: String) {
+        check(!closed) { "The connection is closed" }
         // After a missed reply the next one may be the late one; every command would be unanswerable by its own reply.
         if (unsynchronized) throw DeviceResponseTimeoutException()
         Logger.d { "$TAG: → command=$command" }
@@ -317,10 +325,8 @@ class NymeaWifiService(
      */
     private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
         sendCommand(CMD_GET_CONNECTION, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-        val response =
-            NymeaJson.decodeFromString<NymeaResponse>(
-                waitForResponse(CMD_GET_CONNECTION, timeout = CONNECTION_INFO_TIMEOUT),
-            )
+        val reply = waitForResponse(CMD_GET_CONNECTION, timeout = CONNECTION_INFO_TIMEOUT)
+        val response = decodeReply<NymeaResponse>(reply)
         if (response.responseCode == RESPONSE_SUCCESS) {
             response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
         } else {
@@ -328,6 +334,13 @@ class NymeaWifiService(
         }
     }
         .getOrNull()
+
+    /** Decodes a reply, turning a missing, null or wrongly typed field into a [MalformedReplyException]. */
+    private inline fun <reified T> decodeReply(raw: String): T = try {
+        NymeaJson.decodeFromString<T>(raw)
+    } catch (e: SerializationException) {
+        throw MalformedReplyException(e)
+    }
 
     private fun nymeaErrorMessage(code: Int): String = when (code) {
         NymeaBleConstants.RESPONSE_INVALID_COMMAND -> "Invalid command"
@@ -351,6 +364,10 @@ class NoDevicePickedException : IllegalStateException("No device was picked")
 
 /** The device to connect to did not advertise within the scan window. */
 class DeviceNotFoundException : IllegalStateException("Device not found")
+
+/** A reply decoded as neither success nor a device error, such as one with no status. */
+class MalformedReplyException(cause: Throwable? = null) :
+    IllegalStateException("Unexpected reply from the device", cause)
 
 /** The connected device sent no answer to a command in time. */
 class DeviceResponseTimeoutException : IllegalStateException("No response from the device")
