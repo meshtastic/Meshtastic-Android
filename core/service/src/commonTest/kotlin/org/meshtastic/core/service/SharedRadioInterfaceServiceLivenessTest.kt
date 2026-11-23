@@ -106,6 +106,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         // USB tests leave serialDeviceKeys non-empty; reset before each test so non-USB
         // tests start from the documented empty default.
         serialDeviceKeys.value = emptySet()
+        serialPortProbe = { null }
         bluetoothRepository.setBluetoothEnabled(true)
     }
 
@@ -150,7 +151,12 @@ class SharedRadioInterfaceServiceLivenessTest {
     private val serialDevicePresence: SerialDevicePresence =
         object : SerialDevicePresence {
             override val deviceKeys: StateFlow<Set<String>> = serialDeviceKeys.asStateFlow()
+
+            override fun portExists(key: String): Boolean? = serialPortProbe(key)
         }
+
+    /** Desktop's on-demand port probe; null, as on Android and web, defers to [serialDeviceKeys]. */
+    private var serialPortProbe: (String) -> Boolean? = { null }
 
     private val networkRepository: NetworkRepository = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
@@ -1348,6 +1354,32 @@ class SharedRadioInterfaceServiceLivenessTest {
             advanceTimeBy(2_000L)
             assertEquals(2, callbacks.size)
             assertEquals(ConnectionState.Connected, service.connectionState.value)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `desktop serial keeps retrying until the rebooted radio port comes back`() = runTest(testDispatcher) {
+        var portPresent = true
+        // The desktop picker stores jSerialComm's system port name, and desktop publishes no presence keys.
+        serialPortProbe = { key -> key == "ttyUSB0" && portPresent }
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service =
+            createPhoneApiService(callbacks, address = "sttyUSB0", networkAvailability = MutableStateFlow(false))
+        val initialSession = assertNotNull(service.activeSession.value)
+        try {
+            callbacks.single().onConnect()
+            portPresent = false
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(10_000L)
+            assertEquals(1, callbacks.size, "no session opens while the port is gone")
+
+            portPresent = true
+            // Past the 30 s retry ceiling.
+            advanceTimeBy(30_001L)
+            assertEquals(2, callbacks.size)
+            assertTrue(assertNotNull(service.activeSession.value).generation > initialSession.generation)
         } finally {
             service.disconnect()
         }

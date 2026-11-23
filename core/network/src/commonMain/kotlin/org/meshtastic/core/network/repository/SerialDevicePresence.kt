@@ -28,7 +28,8 @@ import kotlinx.coroutines.flow.StateFlow
  * previously-selected serial device has been unplugged and replugged, so the transport can be brought back without
  * manual re-selection.
  *
- * Platforms without hot-plug observation (e.g. JVM/Desktop jSerialComm) return a perpetually-empty set.
+ * Platforms without hot-plug observation (e.g. JVM/Desktop jSerialComm) return a perpetually-empty set and answer
+ * [portExists] instead.
  */
 interface SerialDevicePresence {
     /**
@@ -38,4 +39,10 @@ interface SerialDevicePresence {
      * the underlying [StateFlow] semantics so collectors do not observe redundant emissions.
      */
     val deviceKeys: StateFlow<Set<String>>
+
+    /**
+     * Whether the port [key] names exists now, probed on demand by platforms that cannot publish [deviceKeys]; null
+     * where [deviceKeys] already answers that.
+     */
+    fun portExists(key: String): Boolean? = null
 }

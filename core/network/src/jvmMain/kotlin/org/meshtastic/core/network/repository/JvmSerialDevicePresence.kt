@@ -20,15 +20,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.network.availableSerialPortNames
 
 /**
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
- * Desktop serial does not currently publish a hot-plug device set, so this implementation reports a perpetually-empty
- * set. Transport recovery on replug is therefore a no-op on JVM until/unless jSerialComm enumeration is exposed as a
- * flow.
+ * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty and [portExists] asks jSerialComm for the
+ * system port name a desktop selection stores (`sttyUSB0`, `sCOM3`).
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
     override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow<Set<String>>(emptySet()).asStateFlow()
+
+    override fun portExists(key: String): Boolean = key in availableSerialPortNames()
 }

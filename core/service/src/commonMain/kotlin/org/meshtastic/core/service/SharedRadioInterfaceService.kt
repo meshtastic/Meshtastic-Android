@@ -831,36 +831,55 @@ class SharedRadioInterfaceService(
                     reason = TransportDisconnectReason.HandshakeRecoveryExhausted.takeIf { recoveryExhausted },
                 )
                 if (!connectionRequested) return@launch
-
-                val initialRetry =
-                    if (interfaceId == InterfaceId.BLUETOOTH) BLE_INITIAL_RETRY_MS else PHONE_API_INITIAL_RETRY_MS
-                (phoneApiRetryDelay ?: initialRetry).also {
-                    phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS)
-                }
+                nextPhoneApiRetryDelay(interfaceId)
             }
+            retryPhoneApiSession(session, interfaceId, retryDelay)
+        }
+    }
 
-            delay(retryDelay)
+    /** The link's current PhoneAPI retry delay, doubling the next one. Guarded by [transportMutex]. */
+    private fun nextPhoneApiRetryDelay(interfaceId: InterfaceId?): Long {
+        val initialRetry =
+            if (interfaceId == InterfaceId.BLUETOOTH) BLE_INITIAL_RETRY_MS else PHONE_API_INITIAL_RETRY_MS
+        return (phoneApiRetryDelay ?: initialRetry).also {
+            phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS)
+        }
+    }
+
+    @Suppress("ReturnCount")
+    private suspend fun retryPhoneApiSession(session: RadioTransportSession, interfaceId: InterfaceId?, delayMs: Long) {
+        var wait = delayMs
+        while (true) {
+            delay(wait)
             // Network and USB presence observers can restart a link once its environment is ready.
-            if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) return@launch
-            transportMutex.withLock {
-                if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return@withLock
-                if (radioOperationLock.suppressesTransport) return@withLock
-                if (interfaceId == InterfaceId.SERIAL) {
-                    val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
-                    // Legacy selections are bus paths. Let the USB factory try its single-device
-                    // resolution for those addresses even if the presence keys use VID/PID.
-                    if (!presence.present && presence.key?.startsWith("/dev/") != true) return@withLock
-                }
-                if (
-                    connectionRequested &&
-                    radioTransport == null &&
-                    sessionGenerationCounter.value == session.generation &&
-                    getDeviceAddress() == session.address
-                ) {
+            if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) return
+            wait =
+                transportMutex.withLock {
+                    val stillOwed =
+                        connectionRequested &&
+                            radioTransport == null &&
+                            sessionGenerationCounter.value == session.generation &&
+                            getDeviceAddress() == session.address
+                    if (!stillOwed) return
+                    if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return
+                    if (radioOperationLock.suppressesTransport) return
+                    if (interfaceId == InterfaceId.SERIAL) {
+                        val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
+                        when (presence.key?.let(serialDevicePresence::portExists)) {
+                            // A rebooting radio re-enumerates, and no presence observer reports its port coming back.
+                            false -> return@withLock nextPhoneApiRetryDelay(interfaceId)
+
+                            true -> Unit
+
+                            // Legacy selections are bus paths. Let the USB factory try its single-device
+                            // resolution for those addresses even if the presence keys use VID/PID.
+                            null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return
+                        }
+                    }
                     Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }
                     ignoreExceptionSuspend { startTransportLocked() }
+                    return
                 }
-            }
         }
     }
 
