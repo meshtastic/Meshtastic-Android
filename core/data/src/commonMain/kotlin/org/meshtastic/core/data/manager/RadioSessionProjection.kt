@@ -30,6 +30,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.isNodeDbReplay
 import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLineString
@@ -180,10 +181,14 @@ class RadioSessionProjection(
     private fun handlePacket(event: RadioSessionEvent.Packet, session: RadioSessionContext) {
         radioInterfaceService.reportReceiveActivity()
         val myNodeNum = nodeManager.myNodeNum.value ?: return
+        // A node DB replay keeps its absent rx_time; the phone's clock would make a never-heard node heard now.
         val packet =
             event.packet
                 .newBuilder()
-                .also { wb -> wb.rx_time = event.packet.rxTimeOrNull() ?: nowSeconds.toInt() }
+                .also { wb ->
+                    wb.rx_time =
+                        event.packet.rxTimeOrNull() ?: nowSeconds.toInt().takeUnless { event.packet.isNodeDbReplay() }
+                }
                 .build()
         val decoded = packet.decoded ?: return
         val loggedPacket = packet.redactedForLog()
@@ -216,8 +221,9 @@ class RadioSessionProjection(
      */
     private fun applyPacketLinkMetrics(node: Node, packet: MeshPacket, decoded: Data): Node {
         val viaMqtt = packet.via_mqtt
-        val updateRadioMetrics = packet.hop_start == packet.hop_limit && packet.isLora() && !viaMqtt
-        // Stored packets firmware replays after a NodeDB dump are marked LoRa but carry no rx_rssi.
+        // A node DB replay's rx_snr is the radio's stored reading, measured earlier and maybe on other settings.
+        val updateRadioMetrics =
+            packet.hop_start == packet.hop_limit && packet.isLora() && !viaMqtt && !packet.isNodeDbReplay()
         val heardOverOurRadio = packet.rx_rssi != null && !viaMqtt
         // Range test packets go out with zero hops, so the sender is heard directly whatever hop_start says.
         val hopsAway =

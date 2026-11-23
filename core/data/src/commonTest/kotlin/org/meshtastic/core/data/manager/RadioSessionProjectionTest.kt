@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshDataHandler
@@ -53,6 +54,7 @@ import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.Waypoint
@@ -182,6 +184,94 @@ class RadioSessionProjectionTest {
 
         assertNull(harness.nodeManager.nodeDBbyNodeNum[REMOTE])
         assertNull(harness.nodeRepository.nodeDBbyNum.value[REMOTE])
+    }
+
+    /**
+     * Shaped like firmware's `PhoneAPI::makeReplay*Packet` for a node whose `last_heard` is not a wall-clock epoch and
+     * whose hop count is unknown: LoRa, no `rx_rssi`, no `rx_time`, `hop_start` and `hop_limit` both 0, and the stored
+     * `snr`, which is 0 for a node never measured.
+     */
+    private fun neverHeardReplayFrom(from: Int) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = 1
+            wb.from = from
+            wb.to = LOCAL
+            wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+            wb.rx_snr = 0f
+            wb.decoded =
+                Data.Builder()
+                    .also { d ->
+                        d.portnum = PortNum.TELEMETRY_APP
+                        d.payload = ByteString.EMPTY
+                    }
+                    .build()
+        }
+        .build()
+
+    private fun capturingDataHandler(handled: MutableList<MeshPacket>) = mock<MeshDataHandler>(MockMode.autofill).also {
+        every { it.handleReceivedData(any(), any(), any(), any(), any()) } calls
+            { args ->
+                handled += args.arg<MeshPacket>(0)
+            }
+    }
+
+    @Test
+    fun `a node DB replay of a never-heard node reaches the handlers with no arrival time and stays unmeasured`() =
+        runTest {
+            val handled = mutableListOf<MeshPacket>()
+            val harness = Harness(backgroundScope, capturingDataHandler(handled))
+            harness.nodeManager.installNodeInfo(NodeInfo.Builder().also { it.num = REMOTE }.build())
+
+            harness.packet(neverHeardReplayFrom(REMOTE))
+            runCurrent()
+
+            assertNull(handled.single().rx_time, "telemetry and position handlers must not see the phone's clock")
+            val node = checkNotNull(harness.nodeManager.nodeDBbyNodeNum[REMOTE])
+            assertNull(node.snrOrNull, "a replayed snr is the radio's stored value, not a reception")
+            assertEquals(-1, node.hopsAway, "hop_start 0 without a bitfield is unknown, not direct")
+        }
+
+    @Test
+    fun `a node DB replay of a known direct neighbor keeps its heard time and hops without writing its stored snr`() =
+        runTest {
+            val handled = mutableListOf<MeshPacket>()
+            val harness = Harness(backgroundScope, capturingDataHandler(handled))
+            harness.nodeManager.installNodeInfo(NodeInfo.Builder().also { it.num = REMOTE }.build())
+            val lastHeard = nowSeconds.toInt() - 3_600
+            // PhoneAPI::makeReplay*Packet for a node with a wall-clock last_heard and hops_away 0: rx_time is
+            // last_heard, hop_start == hop_limit == the configured hop limit, rx_snr is the stored reading, no rx_rssi.
+            val replay =
+                neverHeardReplayFrom(REMOTE)
+                    .newBuilder()
+                    .also { wb ->
+                        wb.rx_time = lastHeard
+                        wb.hop_start = 3
+                        wb.hop_limit = 3
+                        wb.rx_snr = 6.25f
+                    }
+                    .build()
+
+            harness.packet(replay)
+            runCurrent()
+
+            val node = checkNotNull(harness.nodeManager.nodeDBbyNodeNum[REMOTE])
+            assertEquals(0, node.hopsAway)
+            assertNull(node.snrOrNull, "a stored snr was measured earlier, maybe on other settings")
+            assertEquals(lastHeard, handled.single().rx_time)
+        }
+
+    @Test
+    fun `a live direct packet records a 0 dB snr and 0 hops as readings`() = runTest {
+        val harness = Harness(backgroundScope)
+        harness.nodeManager.installNodeInfo(NodeInfo.Builder().also { it.num = REMOTE }.build())
+
+        harness.packet(loraPacket(hopStart = 3, hopLimit = 3, rssi = -80, snr = 0f))
+        runCurrent()
+
+        val node = checkNotNull(harness.nodeManager.nodeDBbyNodeNum[REMOTE])
+        assertEquals(0f, node.snrOrNull)
+        assertEquals(-80, node.rssiOrNull)
+        assertEquals(0, node.hopsAway)
     }
 
     @Test
