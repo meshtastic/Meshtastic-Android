@@ -140,7 +140,8 @@ private fun DataInputStream.unlock(output: OutputStream, passphrase: String) {
     output.sendLockdownState(LockdownStatus.State.LOCKED)
 
     fun admin(): AdminMessage {
-        val packet = checkNotNull(request().packet)
+        // The SDK keeps a locked link alive with heartbeats, which firmware takes at any time.
+        val packet = checkNotNull(generateSequence { request() }.first { it.heartbeat == null }.packet)
         assertEquals(node.my_node_num, packet.to)
         return AdminMessage.ADAPTER.decode(checkNotNull(packet.decoded).payload)
     }
