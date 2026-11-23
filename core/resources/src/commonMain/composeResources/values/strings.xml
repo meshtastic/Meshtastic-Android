@@ -246,6 +246,7 @@
     <string name="channel_import_replace_description">Removes the channels on your radio and applies the channels and LoRa settings below.</string>
     <string name="channel_import_title">Import channels</string>
     <string name="channel_import_uplink">Forwards this channel's messages to MQTT</string>
+    <string name="channel_import_waiting_for_radio">Your radio's channels haven't loaded yet. Add is available once they do.</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="channel_name">Channel Name</string>
     <plurals name="channel_slots_full">

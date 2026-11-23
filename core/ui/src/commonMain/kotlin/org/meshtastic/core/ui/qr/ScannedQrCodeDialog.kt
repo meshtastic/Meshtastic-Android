@@ -84,6 +84,7 @@ import org.meshtastic.core.resources.channel_import_removes_existing
 import org.meshtastic.core.resources.channel_import_replace_description
 import org.meshtastic.core.resources.channel_import_title
 import org.meshtastic.core.resources.channel_import_uplink
+import org.meshtastic.core.resources.channel_import_waiting_for_radio
 import org.meshtastic.core.resources.channel_slots_full
 import org.meshtastic.core.resources.channel_slots_uncheck_new
 import org.meshtastic.core.resources.channel_slots_used
@@ -170,11 +171,25 @@ fun ScannedQrCodeDialog(
                 // Keeps the device's own MQTT consent and TX power; loraChanges describes this exact config.
                 incoming.forReplace(channels.lora_config)
             } else {
-                channels.newBuilder().also { wb -> wb.settings = addPreview.settings }.build()
+                // Add never carries LoRa, so the import cannot retune the radio whatever its cached config says.
+                channels
+                    .newBuilder()
+                    .also { wb ->
+                        wb.settings = addPreview.settings
+                        wb.lora_config = null
+                    }
+                    .build()
             }
         }
 
-    val modemPresetName = Channel(loraConfig = channelSet.lora_config ?: Channel.default.loraConfig).name
+    // The LoRa config the rows are named and keyed under: the link's for Replace, the radio's own for Add.
+    val displayLora =
+        (if (shouldReplace) channelSet.lora_config else channels.lora_config) ?: Channel.default.loraConfig
+    val modemPresetName = Channel(loraConfig = displayLora).name
+
+    // An empty set means the radio's channels have not arrived; Add would then write the link's channels as the whole
+    // set, so it waits.
+    val radioChannelsLoaded = channels.settings.isNotEmpty()
 
     /* Holds selections made by the user */
     val channelSelections =
@@ -190,7 +205,7 @@ fun ScannedQrCodeDialog(
 
     // Add keeps the radio's channels: the primary always, and every existing secondary unless the radio is full, where
     // one may be dropped to make room (Apple FR-017 "replace a secondary, never the primary").
-    val existingCount = channels.settings.size
+    val existingCount = addPreview.existingCount
     fun isLocked(index: Int): Boolean =
         !shouldReplace && (index == 0 || (index < existingCount && !addPreview.canDropExisting))
 
@@ -264,7 +279,7 @@ fun ScannedQrCodeDialog(
                                     channelSelections[index] = it
                                 }
                             },
-                            channel = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig),
+                            channel = Channel(channel, displayLora),
                             supportingContent =
                             if (nameConflict || channelSharing != null) {
                                 {
@@ -279,7 +294,13 @@ fun ScannedQrCodeDialog(
                         )
                     }
 
-                    if (!shouldReplace) {
+                    if (!shouldReplace && !radioChannelsLoaded) {
+                        Text(
+                            text = stringResource(Res.string.channel_import_waiting_for_radio),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else if (!shouldReplace) {
                         val incomingLeftOut =
                             (existingCount until channelSelections.size).any { !channelSelections[it] }
                         AddCapacitySummary(
@@ -321,7 +342,9 @@ fun ScannedQrCodeDialog(
                     onDismiss()
                     onConfirm(selectedChannelSet)
                 },
-                enabled = selectedChannelSet.settings.size in 1..effectiveMaxChannels,
+                enabled =
+                (shouldReplace || radioChannelsLoaded) &&
+                    selectedChannelSet.settings.size in 1..effectiveMaxChannels,
                 colors =
                 ButtonDefaults.textButtonColors(
                     contentColor =

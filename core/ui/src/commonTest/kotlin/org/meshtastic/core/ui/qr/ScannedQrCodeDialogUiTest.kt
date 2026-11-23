@@ -34,15 +34,22 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.withOnWirePrecision
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -200,8 +207,64 @@ class ScannedQrCodeDialogUiTest {
 
         val imported = calls.confirmed.single()
         assertEquals(onRadio.settings + link.settings, imported.settings)
-        assertEquals(onRadio.lora_config, imported.lora_config)
+        // Add carries no LoRa config, so importChannelSet has nothing to retune with.
+        assertNull(imported.lora_config)
         assertEquals(1, calls.dismissed)
+    }
+
+    @Test
+    fun an_add_import_issues_no_lora_write_even_when_the_cached_lora_settings_disagree() {
+        val calls = Calls()
+        runComposeUiTest {
+            show(calls = calls)
+            onNode(radioButton and hasText("Add")).performClick()
+            onNodeWithText("Add channels").performClick()
+        }
+
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        radioConfigRepository.setChannelSet(onRadio)
+        // The local config cache lags the channel set's LoRa: a carried LoRa config would differ and be written.
+        radioConfigRepository.setLocalConfigDirect(
+            LocalConfig.Builder().also { it.lora = lora { hop_limit = 7 } }.build(),
+        )
+        runTest { importChannelSet(calls.confirmed.single(), radioController, radioConfigRepository) }
+
+        assertTrue(radioController.localConfigs.isEmpty())
+        assertEquals(
+            (onRadio.settings + link.settings).withOnWirePrecision(),
+            radioConfigRepository.currentChannelSet.settings,
+        )
+    }
+
+    @Test
+    fun add_waits_for_the_radio_channels_before_it_can_import() = runComposeUiTest {
+        val calls = Calls()
+        show(incoming = channelsOnly(channel("Field", 5)), channels = ChannelSet.Builder().build(), calls = calls)
+
+        onNodeWithText("Your radio's channels haven't loaded yet. Add is available once they do.").assertIsDisplayed()
+        onNodeWithText("Add channels").assertIsNotEnabled()
+        onNodeWithText("Add channels").performClick()
+
+        assertTrue(calls.confirmed.isEmpty())
+    }
+
+    @Test
+    fun add_counts_slots_without_the_blank_and_duplicate_entries_the_write_drops() = runComposeUiTest {
+        val calls = Calls()
+        val padded =
+            onRadio
+                .newBuilder()
+                .also { it.settings = onRadio.settings + ChannelSettings.Builder().build() + channel("Team", 2) }
+                .build()
+        // Three entries on a three-slot radio, but only two are real, so Field fits without removing anything.
+        show(incoming = channelsOnly(channel("Field", 5)), channels = padded, maxChannels = 3, calls = calls)
+
+        onNodeWithText("3 of 3 channel slots in use").assertIsDisplayed()
+        onNode(hasText("Team")).assertIsNotEnabled()
+        onNodeWithText("Add channels").performClick()
+
+        assertEquals(onRadio.settings + channel("Team", 2) + channel("Field", 5), calls.confirmed.single().settings)
     }
 
     @Test

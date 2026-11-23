@@ -634,8 +634,39 @@ class ProtoExtensionsTest {
                 maxChannels = 8,
             )
 
-        assertEquals(listOf(primary, blankSlot, cleartextPreset), preview.settings)
+        // The blank slot is padding the write drops, so it is not listed as one of the radio's channels.
+        assertEquals(listOf(primary, cleartextPreset), preview.settings)
         assertEquals(0, preview.alreadyOnRadio)
+    }
+
+    @Test
+    fun preview_lists_the_radio_channels_as_the_write_leaves_them() {
+        fun named(name: String, key: Byte) = ChannelSettings.Builder()
+            .also { wb ->
+                wb.name = name
+                wb.psk = byteArrayOf(key).toByteString()
+            }
+            .build()
+        val primary = named("Base", 1)
+        val team = named("Team", 2)
+        val blankSlot = ChannelSettings.Builder().build()
+        val lora = ModelChannel.default.loraConfig
+
+        // Four slots on paper, but the blank one and the repeat of Team are not written, so the radio has room.
+        val preview =
+            getChannelPreviewForAdd(
+                existing = listOf(primary, blankSlot, team, team),
+                incoming = listOf(named("Field", 5)),
+                loraConfig = lora,
+                maxChannels = 4,
+            )
+
+        assertEquals(listOf(primary, team, named("Field", 5)), preview.settings)
+        assertEquals(2, preview.existingCount)
+        assertEquals(listOf(true, true, true), preview.selections)
+        assertFalse(preview.canDropExisting)
+        // What the dialog shows is exactly what importChannelSet will write.
+        assertEquals(preview.settings, normalizeReplacementSettings(preview.settings, lora))
     }
 
     @Test

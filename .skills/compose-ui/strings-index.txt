@@ -213,6 +213,7 @@ channel_import_removes_existing
 channel_import_replace_description
 channel_import_title
 channel_import_uplink
+channel_import_waiting_for_radio
 channel_invalid
 channel_name
 channel_slots_full

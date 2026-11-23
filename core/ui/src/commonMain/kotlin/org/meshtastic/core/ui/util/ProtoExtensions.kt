@@ -28,6 +28,7 @@ import org.meshtastic.core.model.util.ChannelIdentity
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.channelIdentity
 import org.meshtastic.core.model.util.isChannelPlaceholder
+import org.meshtastic.core.model.util.normalizeReplacementSettings
 import org.meshtastic.core.model.util.toChannelReplacementPlan
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
@@ -172,10 +173,13 @@ suspend fun importChannelSet(
  * unique incoming channel whose effective name matches a channel on the radio (so its key differs) is a name conflict:
  * Add would put two channels of that name on the radio, so it is listed in [ChannelAddPreview.nameConflicts].
  *
- * Existing channels are kept unless the radio is full and the link has a channel it does not have yet; only then may
- * the user drop an existing secondary to make room ([ChannelAddPreview.canDropExisting]).
+ * The radio's channels are listed as the write will leave them: [normalizeReplacementSettings], the same step
+ * [importChannelSet] runs, drops blank placeholder secondaries and duplicates and compacts the rest, so slot counts and
+ * [ChannelAddPreview.existingCount] describe what is written. Those channels are kept unless the radio is full and the
+ * link has a channel it does not have yet; only then may the user drop an existing secondary to make room
+ * ([ChannelAddPreview.canDropExisting]).
  *
- * @param existing The current [ChannelSettings] list on the radio. Always shown, always selected.
+ * @param existing The current [ChannelSettings] list on the radio, before normalization.
  * @param incoming The imported [ChannelSettings] list. Duplicates omitted; uniques appended in order.
  * @param loraConfig The current [Config.LoRaConfig], used to resolve effective channel identity.
  * @param maxChannels Firmware channel limit. Unique incoming selections stop when this is reached.
@@ -187,17 +191,14 @@ fun getChannelPreviewForAdd(
     loraConfig: Config.LoRaConfig,
     maxChannels: Int,
 ): ChannelAddPreview {
-    // A blank secondary is an empty slot, not a channel, so it must not shadow an incoming cleartext preset channel.
-    val onRadio =
-        existing
-            .filterIndexed { index, settings -> index == 0 || !settings.isChannelPlaceholder() }
-            .map { it.channelIdentity(loraConfig) }
-            .toSet()
+    // Normalization drops blank secondaries, so an empty slot cannot shadow an incoming cleartext preset channel.
+    val kept = normalizeReplacementSettings(existing, loraConfig)
+    val onRadio = kept.map { it.channelIdentity(loraConfig) }.toSet()
     val onRadioNames = onRadio.mapTo(mutableSetOf()) { it.name }
     val seen = onRadio.toMutableSet()
-    val previewSettings = existing.toMutableList()
-    val previewSelections = MutableList(existing.size) { true }
-    var remaining = (maxChannels - existing.size).coerceAtLeast(0)
+    val previewSettings = kept.toMutableList()
+    val previewSelections = MutableList(kept.size) { true }
+    var remaining = (maxChannels - kept.size).coerceAtLeast(0)
     val alreadyOnRadio = mutableSetOf<ChannelIdentity>()
     val nameConflicts = mutableSetOf<Int>()
     for (channel in incoming) {
@@ -219,19 +220,22 @@ fun getChannelPreviewForAdd(
         selections = previewSelections,
         alreadyOnRadio = alreadyOnRadio.size,
         nameConflicts = nameConflicts,
-        canDropExisting = existing.size >= maxChannels && previewSettings.size > existing.size,
+        existingCount = kept.size,
+        canDropExisting = kept.size >= maxChannels && previewSettings.size > kept.size,
     )
 }
 
 /**
  * Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched), how
  * many incoming channels were left out because the radio already has them, which [settings] indices share a name with a
- * channel on the radio, and whether the user may drop an existing secondary to make room.
+ * channel on the radio, how many leading [settings] are the radio's own channels, and whether the user may drop one of
+ * them to make room.
  */
 data class ChannelAddPreview(
     val settings: List<ChannelSettings>,
     val selections: List<Boolean>,
     val alreadyOnRadio: Int = 0,
     val nameConflicts: Set<Int> = emptySet(),
+    val existingCount: Int = 0,
     val canDropExisting: Boolean = false,
 )
