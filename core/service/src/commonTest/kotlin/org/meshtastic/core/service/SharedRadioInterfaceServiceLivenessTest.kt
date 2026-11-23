@@ -1493,6 +1493,34 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `a session that drops soon after Ready keeps the backoff growing`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(1_001L)
+            assertEquals(2, callbacks.size)
+
+            // A radio that crashes after config: Ready, then gone before main's 30 s network threshold.
+            callbacks.last().onConnect()
+            advanceTimeBy(29_000L)
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(1_001L)
+            assertEquals(2, callbacks.size, "a short session reset the backoff")
+            advanceTimeBy(1_000L)
+            assertEquals(3, callbacks.size)
+
+            callbacks.last().onConnect()
+            advanceTimeBy(30_001L)
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(1_001L)
+            assertEquals(4, callbacks.size, "a stable session kept the backoff")
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
     fun `a BLE retry after a drop waits for the radio to release its GATT session`() = runTest(testDispatcher) {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")

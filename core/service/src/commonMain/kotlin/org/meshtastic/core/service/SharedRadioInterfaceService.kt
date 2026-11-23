@@ -551,6 +551,9 @@ class SharedRadioInterfaceService(
     /** PhoneAPI sessions that failed since the last stable one. Guarded by [transportMutex]. */
     private var phoneApiFailureStreak = 0
 
+    /** The generation whose link stayed up past [minStableMillis]; set by a timer the transport's scope owns. */
+    @Volatile private var stableGeneration: Long? = null
+
     /**
      * The reason last shown for a retried PhoneAPI failure, so a retry that fails the same way stays quiet. Guarded by
      * [transportMutex].
@@ -586,6 +589,14 @@ class SharedRadioInterfaceService(
 
         /** Firmware frees its GATT session only seconds after a link drops, so a BLE retry waits for that first. */
         private const val BLE_INITIAL_RETRY_MS = 3_000L
+
+        // Main's BleReconnectPolicy.DEFAULT_MIN_STABLE_CONNECTION and ReconnectBackoff.SHORT_SESSION_THRESHOLD_MS.
+        private const val BLE_MIN_STABLE_MS = 5_000L
+        private const val MIN_STABLE_MS = 30_000L
+
+        /** How long a link must stay up after Ready before its end resets the backoff. */
+        private fun minStableMillis(interfaceId: InterfaceId?): Long =
+            if (interfaceId == InterfaceId.BLUETOOTH) BLE_MIN_STABLE_MS else MIN_STABLE_MS
         private const val PHONE_API_MAX_RETRY_MS = 30_000L
     }
 
@@ -840,11 +851,15 @@ class SharedRadioInterfaceService(
                 val failure =
                     _transportStatus.value?.lastFailure?.takeUnless { linkWasUp && it.kind == TransportFailureKind.Unknown }
                         ?: TransportFailure(TransportFailureKind.LinkLost).takeIf { linkWasUp }
-                // A session that reached Ready and ended without overflowing was stable.
-                if (linkWasUp && !receiveOverflowed) {
-                    phoneApiRetryDelay = null
+                // A completed handshake ends the restart run, as main's did. Only a link that also stayed up past
+                // main's minimum resets the backoff, so a radio that crashes after config is not redialed at once.
+                val handshakeCompleted = linkWasUp && !receiveOverflowed
+                if (handshakeCompleted) {
                     retryReason = null
                     recoveryRestarts = 0
+                }
+                if (handshakeCompleted && stableGeneration == session.generation) {
+                    phoneApiRetryDelay = null
                     phoneApiFailureStreak = 0
                 } else {
                     phoneApiFailureStreak++
@@ -1228,7 +1243,15 @@ class SharedRadioInterfaceService(
         // launching a coroutine. The async launch pattern introduced a window where a concurrent
         // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
         // in Connected while the transport was actually disconnected.
-        linkedGeneration = activeTransportSession?.generation
+        val session = activeTransportSession
+        linkedGeneration = session?.generation
+        if (session != null) {
+            val minStable = minStableMillis(DeviceAddress.parse(session.address)?.interfaceId)
+            _serviceScope.launch {
+                delay(minStable)
+                stableGeneration = session.generation
+            }
+        }
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
             _connectionState.value = ConnectionState.Connected
