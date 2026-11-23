@@ -42,7 +42,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
@@ -67,7 +66,6 @@ class MeshConfigFlowManagerImplTest {
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
-    private val packetHandler = FakePacketHandler()
     private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
@@ -148,7 +146,6 @@ class MeshConfigFlowManagerImplTest {
                 radioConfigRepository = radioConfigRepository,
                 serviceStateWriter = serviceRepository,
                 analytics = analytics,
-                packetHandler = packetHandler,
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radioInterfaceService,
                 scope = testScope.asServiceScope(),

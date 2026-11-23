@@ -327,7 +327,6 @@ class SdkTcpRoomTest {
                 config,
                 state,
                 mock(MockMode.autofill),
-                mock(MockMode.autofill),
                 FakeNotificationPrefs(),
                 radio,
                 serviceScope,
@@ -337,7 +336,6 @@ class SdkTcpRoomTest {
             PacketHandlerImpl(
                 lazy { outboundRepository },
                 radio,
-                lazy { mock(MockMode.autofill) },
                 state,
                 nodeManager,
                 serviceScope,

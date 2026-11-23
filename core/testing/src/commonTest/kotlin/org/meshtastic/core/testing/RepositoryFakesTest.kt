@@ -303,11 +303,9 @@ class RepositoryFakesTest {
     fun `FakePacketHandler rejects data packets without a port number before assigning an id`() = runTest {
         val sender = FakePacketHandler()
         val packet = DataPacket(bytes = null, dataType = 0)
-        val nextPacketId = sender.currentPacketId
-
         assertFailsWith<IllegalArgumentException> { sender.sendData(packet) }
         assertEquals(0, packet.id)
-        assertEquals(nextPacketId, sender.currentPacketId)
+        assertEquals(1, sender.generatePacketId())
         assertTrue(sender.sentPackets.isEmpty())
     }
 

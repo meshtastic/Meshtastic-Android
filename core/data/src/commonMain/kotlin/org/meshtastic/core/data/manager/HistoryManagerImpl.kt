@@ -17,20 +17,15 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.StoreAndForward
 import org.meshtastic.sdk.MeshtasticException
 
 @Single
@@ -38,7 +33,6 @@ class HistoryManagerImpl(
     private val meshPrefs: MeshPrefs,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateProvider: ConnectionStateProvider,
-    private val packetHandler: PacketHandler,
 ) : HistoryManager {
 
     companion object {
@@ -83,48 +77,20 @@ class HistoryManagerImpl(
                 "lastRequest=$lastRequest window=$window max=$max",
         )
 
-        sendHistoryRequest(expectedConnectionVersion, myNodeNum, lastRequest, window, max)
+        sendHistoryRequest(expectedConnectionVersion, lastRequest, window, max)
     }
 
     /** Asks our own node for its history, only while [expectedConnectionVersion] still owns the connection. */
-    private fun sendHistoryRequest(
-        expectedConnectionVersion: Long,
-        myNodeNum: Int,
-        lastRequest: Int,
-        window: Int,
-        max: Int,
-    ) {
+    private fun sendHistoryRequest(expectedConnectionVersion: Long, lastRequest: Int, window: Int, max: Int) {
         val client =
             radioInterfaceService.activeSession.value
                 ?.takeIf { connectionStateProvider.connectionLifecycle.value.version == expectedConnectionVersion }
                 ?.let(radioInterfaceService::clientForSession) ?: throw PacketQueueRejectedException("History replay")
-        val handle =
-            try {
-                client.storeForward.requestLocalHistory(lastRequest, window, max)
-            } catch (e: MeshtasticException) {
-                throw PacketQueueRejectedException("History replay").apply { addSuppressed(e) }
-            }
-        val request =
-            StoreAndForward.Builder()
-                .also { wb ->
-                    wb.rr = StoreAndForward.RequestResponse.CLIENT_HISTORY
-                    wb.history =
-                        StoreAndForward.History.Builder()
-                            .also { history ->
-                                history.last_request = lastRequest.coerceAtLeast(0)
-                                history.window = window.coerceAtLeast(0)
-                                history.history_messages = max.coerceAtLeast(0)
-                            }
-                            .build()
-                }
-                .build()
-        packetHandler.logSent(
-            handle.id.raw,
-            myNodeNum,
-            PortNum.STORE_FORWARD_APP,
-            request.encode().toByteString(),
-            priority = MeshPacket.Priority.BACKGROUND,
-        )
+        try {
+            client.storeForward.requestLocalHistory(lastRequest, window, max)
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("History replay").apply { addSuppressed(e) }
+        }
     }
 
     override fun updateStoreForwardLastRequest(source: String, lastRequest: Int, transport: String) {

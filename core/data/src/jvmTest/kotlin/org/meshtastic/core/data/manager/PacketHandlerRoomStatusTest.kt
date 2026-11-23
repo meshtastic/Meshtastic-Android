@@ -45,7 +45,6 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.FromRadio
@@ -151,7 +150,6 @@ class PacketHandlerRoomStatusTest {
             PacketHandlerImpl(
                 lazy { repository },
                 radioService,
-                lazy { FakeMeshLogRepository() },
                 FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) },
                 nodeManager,
                 backgroundScope.asServiceScope(),

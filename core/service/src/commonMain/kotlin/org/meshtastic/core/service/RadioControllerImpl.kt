@@ -165,7 +165,6 @@ class RadioControllerImpl(
     ),
     QueryController by QueryControllerImpl(
         radioInterfaceService,
-        packetHandler,
         tracerouteHandler,
         neighborInfoHandler,
         nodeManager,

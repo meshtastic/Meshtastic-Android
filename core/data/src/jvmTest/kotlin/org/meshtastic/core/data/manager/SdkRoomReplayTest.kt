@@ -67,7 +67,6 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
-import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
@@ -274,7 +273,6 @@ class SdkRoomReplayTest {
                     radioConfigRepository = config,
                     serviceStateWriter = mock(MockMode.autofill),
                     analytics = mock(MockMode.autofill),
-                    packetHandler = FakePacketHandler(),
                     notificationPrefs = FakeNotificationPrefs(),
                     radioInterfaceService = radio,
                     scope = scope.asServiceScope(),

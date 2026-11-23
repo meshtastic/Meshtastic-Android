@@ -19,8 +19,6 @@ package org.meshtastic.core.service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
-import okio.ByteString
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
@@ -29,7 +27,6 @@ import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRequest
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
@@ -38,16 +35,6 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.repository.toNodeRequest
-import org.meshtastic.proto.AirQualityMetrics
-import org.meshtastic.proto.DeviceMetrics
-import org.meshtastic.proto.EnvironmentMetrics
-import org.meshtastic.proto.HostMetrics
-import org.meshtastic.proto.LocalStats
-import org.meshtastic.proto.MeshPacket.Priority.BACKGROUND
-import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.PowerMetrics
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.MeshtasticException
@@ -64,12 +51,12 @@ import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 /**
  * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, `RoutingApi`, the request
  * helpers and the admin metadata read. Traceroute, neighbor-info, position and user-info requests go out under an ID
- * from [packetHandler], which logs them where the request logs read them, and settle on the reply or routing error.
+ * the client draws with `nextPacketId()`, and settle on the reply or routing error. The session's outbound packet log
+ * records every request as written.
  */
 @Suppress("LongParameterList")
 internal class QueryControllerImpl(
     private val radio: RadioInterfaceService,
-    private val packetHandler: PacketHandler,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
@@ -87,15 +74,8 @@ internal class QueryControllerImpl(
             it.connection.value == SdkConnectionState.Connected
         } ?: throw PacketQueueRejectedException(operation)
 
-    /**
-     * Sends through [client]'s request helper and logs what went out; an SDK refusal reads as the session refusing
-     * admission.
-     */
-    private suspend fun send(
-        operation: String,
-        log: (id: Int) -> Unit,
-        request: suspend RadioClient.() -> MessageHandle,
-    ): NodeRequest {
+    /** Sends through the client's request helper; an SDK refusal reads as the session refusing admission. */
+    private suspend fun send(operation: String, request: suspend RadioClient.() -> MessageHandle): NodeRequest {
         val client = requireClient(operation)
         val handle =
             try {
@@ -106,7 +86,6 @@ internal class QueryControllerImpl(
                 // The SDK refuses a request addressed to the node it knows as ours.
                 throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
             }
-        log(handle.id.raw)
         return handle.toNodeRequest()
     }
 
@@ -160,80 +139,58 @@ internal class QueryControllerImpl(
         val client = requireClient("Position request")
         val node = NodeId(destNum)
         val channel = client.remoteChannel(node, "Position request")
-        val requestId = packetHandler.generatePacketId()
-        val request =
-            rpc(client, requestId) { routingFor(local = false).requestPosition(node, channel, shared, requestId) }
-        val payload = shared.encode().toByteString()
-        packetHandler.logSent(requestId, destNum, PortNum.POSITION_APP, payload, true, priority = BACKGROUND)
-        return request
+        val requestId = client.nextPacketId().raw
+        return rpc(client, requestId) { routingFor(local = false).requestPosition(node, channel, shared, requestId) }
     }
 
     override suspend fun requestUserInfo(destNum: Int): NodeRequest {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("User-info request")
         if (destNum == myNum) return NodeRequest.NONE
         val client = requireClient("User-info request")
-        // The SDK sends its own record of our user, so that is the one checked and logged.
-        val user = client.ownNode.value?.user ?: throw LocalNodeUnavailableException("User-info request")
+        // The SDK sends its own record of our user, so that is the one checked.
+        if (client.ownNode.value?.user == null) throw LocalNodeUnavailableException("User-info request")
         val node = NodeId(destNum)
         val channel = client.remoteChannel(node, "User-info request")
-        val requestId = packetHandler.generatePacketId()
-        val request = rpc(client, requestId) { routingFor(local = false).requestNodeInfo(node, channel, requestId) }
-        packetHandler.logSent(requestId, destNum, PortNum.NODEINFO_APP, user.encode().toByteString(), true)
-        return request
+        val requestId = client.nextPacketId().raw
+        return rpc(client, requestId) { routingFor(local = false).requestNodeInfo(node, channel, requestId) }
     }
 
     override suspend fun requestTraceroute(destNum: Int): NodeRequest {
         val client = requireClient("Traceroute request")
-        val requestId = packetHandler.generatePacketId()
+        val requestId = client.nextPacketId().raw
         tracerouteHandler.recordStartTime(requestId, destNum)
-        val request =
-            rpc(client, requestId) {
-                routingFor(isLocal(destNum)).traceRoute(NodeId(destNum), requestId = requestId)
-            }
-        packetHandler.logSent(requestId, destNum, PortNum.TRACEROUTE_APP, wantResponse = true, dest = destNum)
-        return request
+        return rpc(client, requestId) {
+            routingFor(isLocal(destNum)).traceRoute(NodeId(destNum), requestId = requestId)
+        }
     }
 
     override suspend fun requestTelemetry(destNum: Int, type: TelemetryType): NodeRequest {
         val node = NodeId(destNum)
         if (type == TelemetryType.PAX) {
-            val paxcount = Paxcount.Builder().build().encode().toByteString()
-            return send(
-                "Paxcount request",
-                log = { id -> packetHandler.logSent(id, destNum, PortNum.PAXCOUNTER_APP, paxcount, true, destNum) },
-            ) {
-                requestPaxcount(node)
-            }
+            return send("Paxcount request") { requestPaxcount(node) }
         }
         val local = isLocal(destNum)
-        val request =
-            rpc("Telemetry request") {
-                val telemetry = telemetryFor(local)
-                when (type) {
-                    TelemetryType.LOCAL_STATS -> telemetry.requestLocalStats(node)
-                    TelemetryType.DEVICE -> telemetry.requestDevice(node)
-                    TelemetryType.ENVIRONMENT -> telemetry.requestEnvironment(node)
-                    TelemetryType.AIR_QUALITY -> telemetry.requestAirQuality(node)
-                    TelemetryType.POWER -> telemetry.requestPower(node)
-                    TelemetryType.HOST -> telemetry.requestHost(node)
-                    TelemetryType.PAX -> error("Paxcount is not a telemetry variant")
-                }
+        return rpc("Telemetry request") {
+            val telemetry = telemetryFor(local)
+            when (type) {
+                TelemetryType.LOCAL_STATS -> telemetry.requestLocalStats(node)
+                TelemetryType.DEVICE -> telemetry.requestDevice(node)
+                TelemetryType.ENVIRONMENT -> telemetry.requestEnvironment(node)
+                TelemetryType.AIR_QUALITY -> telemetry.requestAirQuality(node)
+                TelemetryType.POWER -> telemetry.requestPower(node)
+                TelemetryType.HOST -> telemetry.requestHost(node)
+                TelemetryType.PAX -> error("Paxcount is not a telemetry variant")
             }
-        // TelemetryApi does not expose the wire ID it allocated.
-        packetHandler.logSent(0, destNum, PortNum.TELEMETRY_APP, telemetryRequest(type), true, destNum)
-        return request
+        }
     }
 
     override suspend fun requestNeighborInfo(destNum: Int): NodeRequest {
         val client = requireClient("Neighbor-info request")
-        val requestId = packetHandler.generatePacketId()
+        val requestId = client.nextPacketId().raw
         neighborInfoHandler.recordStartTime(requestId)
-        val request =
-            rpc(client, requestId) {
-                routingFor(isLocal(destNum)).requestNeighborInfo(NodeId(destNum), requestId = requestId)
-            }
-        packetHandler.logSent(requestId, destNum, PortNum.NEIGHBORINFO_APP, wantResponse = true, dest = destNum)
-        return request
+        return rpc(client, requestId) {
+            routingFor(isLocal(destNum)).requestNeighborInfo(NodeId(destNum), requestId = requestId)
+        }
     }
 }
 
@@ -256,20 +213,3 @@ private fun RadioClient.routingFor(local: Boolean): RoutingApi =
 
 private fun RadioClient.telemetryFor(local: Boolean): TelemetryApi =
     if (local) telemetry else telemetry.withRpcTimeout(REMOTE_READ_TIMEOUT)
-
-/** The empty variant [type] names, as TelemetryApi sends it. */
-private fun telemetryRequest(type: TelemetryType): ByteString = Telemetry.Builder()
-    .also { wb ->
-        when (type) {
-            TelemetryType.DEVICE -> wb.device_metrics = DeviceMetrics.Builder().build()
-            TelemetryType.ENVIRONMENT -> wb.environment_metrics = EnvironmentMetrics.Builder().build()
-            TelemetryType.AIR_QUALITY -> wb.air_quality_metrics = AirQualityMetrics.Builder().build()
-            TelemetryType.POWER -> wb.power_metrics = PowerMetrics.Builder().build()
-            TelemetryType.LOCAL_STATS -> wb.local_stats = LocalStats.Builder().build()
-            TelemetryType.HOST -> wb.host_metrics = HostMetrics.Builder().build()
-            TelemetryType.PAX -> Unit
-        }
-    }
-    .build()
-    .encode()
-    .toByteString()

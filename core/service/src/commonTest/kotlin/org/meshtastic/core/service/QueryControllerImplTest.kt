@@ -36,7 +36,6 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TracerouteHandler
-import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.proto.Data
@@ -89,7 +88,6 @@ class QueryControllerImplTest {
         val client: RadioClient,
         val radio: FakeRadioInterfaceService,
         val uiPrefs: FakeUiPrefs,
-        val packetHandler: FakePacketHandler,
         val timers: RecordingRequestTimers,
         val controller: QueryControllerImpl,
     ) {
@@ -147,11 +145,9 @@ class QueryControllerImplTest {
                         )
             }
         val uiPrefs = FakeUiPrefs()
-        val packetHandler = FakePacketHandler()
         val timers = RecordingRequestTimers()
-        val controller =
-            QueryControllerImpl(radio, packetHandler, timers, timers, nodeManager, uiPrefs, backgroundScope)
-        return Fixture(transport, client, radio, uiPrefs, packetHandler, timers, controller)
+        val controller = QueryControllerImpl(radio, timers, timers, nodeManager, uiPrefs, backgroundScope)
+        return Fixture(transport, client, radio, uiPrefs, timers, controller)
     }
 
     @Test
@@ -238,7 +234,7 @@ class QueryControllerImplTest {
     }
 
     @Test
-    fun `a traceroute goes out on the traceroute port under the ID its timer and log row use`() = runTest {
+    fun `a traceroute goes out on the traceroute port under the ID its timer uses`() = runTest {
         val fixture = fixture()
 
         val request = fixture.controller.requestTraceroute(PEER)
@@ -251,10 +247,6 @@ class QueryControllerImplTest {
         assertEquals(PEER, sent.decoded?.dest)
         assertEquals(sent.id, request.requestId)
         assertEquals(listOf(sent.id to PEER), fixture.timers.traceroutes)
-        val row = fixture.packetHandler.loggedRows.single()
-        assertEquals(listOf(sent.id, PEER, PEER), listOf(row.id, row.to, row.dest))
-        assertEquals(PortNum.TRACEROUTE_APP, row.port)
-        assertTrue(row.wantResponse)
         fixture.client.disconnect()
     }
 
@@ -276,19 +268,18 @@ class QueryControllerImplTest {
     }
 
     @Test
-    fun `a traceroute without a radio session starts no timer and logs nothing`() = runTest {
+    fun `a traceroute without a radio session starts no timer`() = runTest {
         val fixture = fixture()
         fixture.radio.disconnect()
 
         assertFailsWith<PacketQueueRejectedException> { fixture.controller.requestTraceroute(PEER) }
 
         assertTrue(fixture.timers.traceroutes.isEmpty())
-        assertTrue(fixture.packetHandler.loggedRows.isEmpty())
         fixture.client.disconnect()
     }
 
     @Test
-    fun `a remote neighbor request names its destination under the ID its timer and log row use`() = runTest {
+    fun `a remote neighbor request names its destination under the ID its timer uses`() = runTest {
         val fixture = fixture()
 
         fixture.controller.requestNeighborInfo(PEER)
@@ -299,9 +290,6 @@ class QueryControllerImplTest {
         assertEquals(PEER, sent.decoded?.dest)
         assertTrue(sent.want_ack)
         assertEquals(listOf(sent.id), fixture.timers.neighborInfo)
-        val row = fixture.packetHandler.loggedRows.single()
-        assertEquals(listOf(sent.id, PEER, PEER), listOf(row.id, row.to, row.dest))
-        assertEquals(PortNum.NEIGHBORINFO_APP, row.port)
         fixture.client.disconnect()
     }
 
@@ -318,7 +306,7 @@ class QueryControllerImplTest {
     }
 
     @Test
-    fun `a client that has not finished its handshake refuses requests before starting a timer or log row`() = runTest {
+    fun `a client that has not finished its handshake refuses requests before starting a timer`() = runTest {
         val fixture = fixture(connect = false, handshake = false)
         backgroundScope.launch { fixture.client.connect() }
         runCurrent()
@@ -333,12 +321,11 @@ class QueryControllerImplTest {
 
         assertTrue(fixture.timers.traceroutes.isEmpty())
         assertTrue(fixture.timers.neighborInfo.isEmpty())
-        assertTrue(fixture.packetHandler.loggedRows.isEmpty())
         fixture.client.disconnect()
     }
 
     @Test
-    fun `a user-info request carries our user and leaves a request row under its wire ID`() = runTest {
+    fun `a user-info request carries our user`() = runTest {
         val fixture = fixture()
 
         fixture.controller.requestUserInfo(PEER)
@@ -347,9 +334,6 @@ class QueryControllerImplTest {
         val sent = fixture.sent(PortNum.NODEINFO_APP)
         assertEquals(OWN_USER, User.ADAPTER.decode(checkNotNull(sent.decoded).payload))
         assertEquals(true, sent.decoded?.want_response)
-        val row = fixture.packetHandler.loggedRows.single()
-        assertEquals(listOf(sent.id, PEER), listOf(row.id, row.to))
-        assertEquals(PortNum.NODEINFO_APP, row.port)
         fixture.client.disconnect()
     }
 

@@ -37,7 +37,6 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -493,17 +492,6 @@ class MeshConnectionManagerImplTest {
         assertEquals(MeshPacket.Priority.BACKGROUND, sent.priority)
         assertEquals(fix, Position.ADAPTER.decode(checkNotNull(sent.decoded).payload))
         verify { nodeManager.handleReceivedPosition(123, 123, fix, any()) }
-        verify {
-            packetHandler.logSent(
-                sent.id,
-                123,
-                PortNum.POSITION_APP,
-                fix.encode().toByteString(),
-                false,
-                0,
-                MeshPacket.Priority.BACKGROUND,
-            )
-        }
         sdk.client.disconnect()
     }
 

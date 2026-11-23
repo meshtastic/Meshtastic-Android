@@ -16,10 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.PacedMessageHandle
 
 /**
@@ -27,10 +25,10 @@ import org.meshtastic.sdk.PacedMessageHandle
  * row.
  */
 interface PacketHandler {
-    /** The last packet ID [generatePacketId] handed out. */
-    val currentPacketId: Long
-
-    /** Generates a fresh non-zero packet ID, so a durable row and its wire packet share one identity. */
+    /**
+     * A fresh non-zero packet ID from the active session's SDK client, which numbers its own sends and RPCs from the
+     * same counter, so a durable row and its wire packet share one identity.
+     */
     fun generatePacketId(): Int
 
     /**
@@ -40,22 +38,6 @@ interface PacketHandler {
      * of treating a normal return as successful admission.
      */
     suspend fun sendData(p: DataPacket)
-
-    /**
-     * Records a packet the SDK sent for the app in the mesh log, as an outgoing row under the local node: the debug
-     * panel, the local position log and the request logs with their reply matching read these rows. [id] is the wire ID
-     * when the sender exposes it, else 0.
-     */
-    @Suppress("LongParameterList")
-    fun logSent(
-        id: Int,
-        to: Int,
-        port: PortNum,
-        payload: ByteString = ByteString.EMPTY,
-        wantResponse: Boolean = false,
-        dest: Int = 0,
-        priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
-    )
 
     /**
      * Adds a mesh packet to the queue for sending.

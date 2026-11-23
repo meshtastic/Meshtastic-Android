@@ -218,6 +218,7 @@ internal class SdkPhoneApiRadioTransport(
     private suspend fun collectSideFlows(client: RadioClient) = coroutineScope {
         val projection = projection.value
         launch { client.deviceLogs.collect { projection.onDeviceLog(it, session) } }
+        launch { client.outboundPackets.collect { projection.onOutboundPacket(it, session) } }
         launch { client.displayFrames.collect { projection.onDisplayFrame(it, session) } }
         launch { client.displayPalette.filterNotNull().collect { projection.onDisplayPalette(it, session) } }
         launch {

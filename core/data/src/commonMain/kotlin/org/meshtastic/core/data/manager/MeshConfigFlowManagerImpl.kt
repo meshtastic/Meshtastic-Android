@@ -29,7 +29,6 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -54,7 +53,6 @@ class MeshConfigFlowManagerImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceStateWriter: ServiceStateWriter,
     private val analytics: PlatformAnalytics,
-    private val packetHandler: PacketHandler,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
@@ -269,7 +267,8 @@ class MeshConfigFlowManagerImpl(
                 firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
                 couldUpdate = false,
                 shouldUpdate = false,
-                currentPacketId = packetHandler.currentPacketId and 0xffffffffL,
+                // Nothing reads this column; the SDK client numbers packets.
+                currentPacketId = 0L,
                 messageTimeoutMsec = 300000,
                 minAppVersion = min_app_version,
                 maxChannels = 8,

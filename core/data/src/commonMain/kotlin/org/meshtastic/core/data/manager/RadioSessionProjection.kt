@@ -153,6 +153,28 @@ class RadioSessionProjection(
         logFromRadio(session, TYPE_LOG_RECORD, record.toString()) { it.log_record = record }
     }
 
+    /**
+     * Logs a packet the SDK queued for the radio as an outgoing row under the local node, with the ID and fields the
+     * SDK wrote: the debug panel, the local position log and the request logs with their reply matching read these
+     * rows.
+     */
+    fun onOutboundPacket(packet: MeshPacket, session: RadioSessionContext) {
+        val decoded = packet.decoded ?: return
+        val loggedPacket = packet.redactedForLog()
+        insertMeshLog(
+            MeshLog(
+                uuid = Uuid.random().toString(),
+                message_type = TYPE_PACKET,
+                received_date = nowMillis,
+                raw_message = loggedPacket.toString(),
+                fromNum = MeshLog.NODE_NUM_LOCAL,
+                portNum = decoded.portnum.value,
+                fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
+            ),
+            session,
+        )
+    }
+
     fun onDisplayFrame(frame: DisplayMirrorFrame, session: RadioSessionContext) {
         radioInterfaceService.runIfSessionActive(session) { displayMirrorManager.value.handleFrame(frame) }
     }

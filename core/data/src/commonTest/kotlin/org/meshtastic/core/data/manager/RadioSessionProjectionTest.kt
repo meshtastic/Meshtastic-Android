@@ -40,7 +40,6 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
-import org.meshtastic.core.testing.FakePacketHandler
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -102,7 +101,6 @@ class RadioSessionProjectionTest {
                 radioConfigRepository = radioConfig,
                 serviceStateWriter = FakeServiceRepository(),
                 analytics = mock(MockMode.autofill),
-                packetHandler = FakePacketHandler(),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,
                 scope = scope.asServiceScope(),
@@ -445,6 +443,38 @@ class RadioSessionProjectionTest {
         assertEquals(ByteString.EMPTY, loggedAdmin.session_passkey)
         assertFalse(row.raw_message.contains(secret.hex()))
         assertEquals(listOf(adminPayload), handled.map { it.decoded?.payload })
+    }
+
+    @Test
+    fun `a packet the SDK queued is logged as our outgoing row with its passkey cleared`() = runTest {
+        val harness = Harness(backgroundScope)
+        val secret = ByteArray(32) { 0x7A }.toByteString()
+        val adminPayload =
+            AdminMessage.ADAPTER.encodeByteString(AdminMessage.Builder().also { it.session_passkey = secret }.build())
+        val queued =
+            loraPacket(hopStart = 3, hopLimit = 3, port = PortNum.ADMIN_APP, payload = adminPayload, from = LOCAL)
+                .newBuilder()
+                .also {
+                    it.id = 321
+                    it.to = REMOTE
+                }
+                .build()
+
+        harness.projection.onOutboundPacket(queued, harness.session)
+        runCurrent()
+
+        // The request logs read outgoing rows under the local node and match replies by the packet's id and to.
+        val row = harness.logs.currentLogs.single { it.message_type == "Packet" }
+        assertEquals(MeshLog.NODE_NUM_LOCAL, row.fromNum)
+        assertEquals(PortNum.ADMIN_APP.value, row.portNum)
+        val logged = checkNotNull(row.fromRadio.packet)
+        assertEquals(321, logged.id)
+        assertEquals(REMOTE, logged.to)
+        assertEquals(
+            ByteString.EMPTY,
+            AdminMessage.ADAPTER.decode(checkNotNull(logged.decoded).payload).session_passkey,
+        )
+        assertFalse(row.raw_message.contains(secret.hex()))
     }
 
     private fun lora(preset: Config.LoRaConfig.ModemPreset) = Config.Builder()

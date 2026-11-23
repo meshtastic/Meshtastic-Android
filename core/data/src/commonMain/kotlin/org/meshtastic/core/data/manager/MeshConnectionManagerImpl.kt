@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
@@ -63,7 +62,6 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -418,23 +416,15 @@ class MeshConnectionManagerImpl(
     private suspend fun sendOwnPosition(pos: Position) {
         val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
         val client = activeClient("Position update")
-        val handle =
-            try {
-                client.send {
-                    data(PortNum.POSITION_APP, pos.encode())
-                    to(NodeId(myNum))
-                    priority(MeshPacket.Priority.BACKGROUND)
-                }
-            } catch (e: MeshtasticException) {
-                throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
+        try {
+            client.send {
+                data(PortNum.POSITION_APP, pos.encode())
+                to(NodeId(myNum))
+                priority(MeshPacket.Priority.BACKGROUND)
             }
-        packetHandler.logSent(
-            handle.id.raw,
-            myNum,
-            PortNum.POSITION_APP,
-            pos.encode().toByteString(),
-            priority = MeshPacket.Priority.BACKGROUND,
-        )
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
+        }
         if (radioConfigRepository.localConfigFlow.first().position?.fixed_position != true) {
             nodeManager.handleReceivedPosition(myNum, myNum, pos, nowMillis)
         }
@@ -445,18 +435,6 @@ class MeshConnectionManagerImpl(
         val operation = "$type telemetry request"
         val telemetry = activeClient(operation, connectedVersion).telemetry
         val local = type == TelemetryType.LOCAL_STATS
-        val variant =
-            Telemetry.Builder()
-                .also { wb ->
-                    if (local) {
-                        wb.local_stats = LocalStats.Builder().build()
-                    } else {
-                        wb.device_metrics = DeviceMetrics.Builder().build()
-                    }
-                }
-                .build()
-        // TelemetryApi does not expose the wire ID it allocated.
-        packetHandler.logSent(0, myNodeNum, PortNum.TELEMETRY_APP, variant.encode().toByteString(), true, myNodeNum)
         val result =
             try {
                 if (local) telemetry.requestLocalStats() else telemetry.requestDevice(NodeId(myNodeNum))

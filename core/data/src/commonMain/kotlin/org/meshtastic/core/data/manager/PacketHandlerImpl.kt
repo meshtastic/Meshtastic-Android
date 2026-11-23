@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -33,13 +32,10 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.isWithinSizeLimit
-import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.repository.ConnectionStateProvider
-import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -50,28 +46,25 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
-import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.QueueReceipt
+import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.SendFailure
 import org.meshtastic.sdk.SendOutcome
-import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
 @Single
 class PacketHandlerImpl(
     private val packetRepository: Lazy<PacketRepository>,
     private val radioInterfaceService: RadioInterfaceService,
-    private val meshLogRepository: Lazy<MeshLogRepository>,
     private val connectionStateProvider: ConnectionStateProvider,
     private val nodeManager: NodeManager,
     private val scope: ServiceScope,
@@ -94,23 +87,15 @@ class PacketHandlerImpl(
          */
         internal val REARM_GRACE = 30.seconds
 
-        private const val PACKET_ID_MASK = 0xffffffffL
-        private const val PACKET_ID_SHIFT_BITS = 32
-
         /** Firmware's `HOP_RELIABLE`, used when the radio's LoRa config sets no hop limit. */
         private const val DEFAULT_HOP_LIMIT = 3
     }
 
-    private val packetIdCounter = atomic(Random(nowMillis).nextLong().absoluteValue)
+    private fun activeClient(): RadioClient? =
+        radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession)
 
-    override val currentPacketId: Long
-        get() = packetIdCounter.value
-
-    override fun generatePacketId(): Int {
-        val numPacketIds = ((1L shl PACKET_ID_SHIFT_BITS) - 1)
-        val next = packetIdCounter.incrementAndGet() and PACKET_ID_MASK
-        return ((next % numPacketIds) + 1L).toInt()
-    }
+    // With no client the ID names no wire packet, so any non-zero value serves.
+    override fun generatePacketId(): Int = activeClient()?.nextPacketId()?.raw ?: Random.nextInt(1, Int.MAX_VALUE)
 
     private enum class StatusPersistence {
         DATA_PACKET,
@@ -127,51 +112,6 @@ class PacketHandlerImpl(
 
     private val timeoutMutex = Mutex()
     private val sendAckTimeoutJobs = mutableMapOf<PersistedStatusTarget, Job>()
-
-    private fun logPacket(packet: MeshPacket) {
-        if (packet.decoded != null) {
-            val loggedPacket = packet.redactedForLog()
-            val packetToSave =
-                MeshLog(
-                    uuid = Uuid.random().toString(),
-                    message_type = "Packet",
-                    received_date = nowMillis,
-                    raw_message = loggedPacket.toString(),
-                    fromNum = MeshLog.NODE_NUM_LOCAL,
-                    portNum = packet.decoded?.portnum?.value ?: 0,
-                    fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
-                )
-            insertMeshLog(packetToSave)
-        }
-    }
-
-    override fun logSent(
-        id: Int,
-        to: Int,
-        port: PortNum,
-        payload: ByteString,
-        wantResponse: Boolean,
-        dest: Int,
-        priority: MeshPacket.Priority,
-    ) = logPacket(
-        MeshPacket.Builder()
-            .also { wb ->
-                wb.id = id
-                wb.from = nodeManager.myNodeNum.value ?: 0
-                wb.to = to
-                wb.priority = priority
-                wb.decoded =
-                    Data.Builder()
-                        .also { data ->
-                            data.portnum = port
-                            data.payload = payload
-                            data.want_response = wantResponse
-                            data.dest = dest
-                        }
-                        .build()
-            }
-            .build(),
-    )
 
     override suspend fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
@@ -200,12 +140,12 @@ class PacketHandlerImpl(
     }
 
     /**
-     * The wire form of [p] under its persisted ID. The SDK's send builder assigns its own ID and carries no reply,
-     * emoji or PKI fields, so the durable send path builds the packet the SDK's paced queue then owns.
+     * The wire form of [p] under its persisted ID. The SDK's send builder builds only inside the SDK's own send, and
+     * the session's paced send takes a [MeshPacket], so the durable path builds the packet the SDK's paced queue then
+     * owns.
      */
     private fun meshPacketFor(p: DataPacket, data: Data): MeshPacket? {
-        val client =
-            radioInterfaceService.activeSession.value?.let(radioInterfaceService::clientForSession) ?: return null
+        val client = activeClient() ?: return null
         val to = resolveNodeNum(NodeAddress.fromString(p.to))
         val pki = p.channel == NodeAddress.PKC_CHANNEL_INDEX
         // Firmware raises a zero hop limit only on a want_ack packet, so a zero would go out unrelayed.
@@ -275,7 +215,6 @@ class PacketHandlerImpl(
             projectStatus(session, packet, MessageStatus.ERROR)
             return
         }
-        logPacket(packet)
         projectStatus(session, packet, MessageStatus.ENROUTE)
 
         when (handle.awaitQueueReceipt()) {
@@ -397,16 +336,6 @@ class PacketHandlerImpl(
             data.isReaction() -> StatusPersistence.REACTION
             data.portnum.value in PERSISTED_DATA_PORT_NUMBERS -> StatusPersistence.DATA_PACKET
             else -> null
-        }
-    }
-
-    private fun insertMeshLog(packetToSave: MeshLog) {
-        scope.handledLaunch {
-            Logger.d {
-                "insert: ${packetToSave.message_type} = " +
-                    "${packetToSave.raw_message.toOneLineString()} from=${packetToSave.fromNum}"
-            }
-            meshLogRepository.value.insert(packetToSave)
         }
     }
 }

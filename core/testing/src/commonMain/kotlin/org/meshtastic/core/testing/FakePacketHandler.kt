@@ -16,14 +16,12 @@
  */
 package org.meshtastic.core.testing
 
-import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.PacedMessageHandle
 
 /** Recording [PacketHandler] for tests that send data packets without a radio session. */
@@ -40,33 +38,15 @@ class FakePacketHandler :
     /** Thrown by [sendData] after it marks the packet [MessageStatus.ERROR], when set. */
     var sendDataFailure: PacketQueueRejectedException? = null
 
-    /** One outgoing mesh-log row [logSent] wrote. */
-    data class SentRow(
-        val id: Int,
-        val to: Int,
-        val port: PortNum,
-        val payload: ByteString,
-        val wantResponse: Boolean,
-        val dest: Int,
-        val priority: MeshPacket.Priority,
-    )
-
-    /** Rows [logSent] wrote, in order. */
-    val loggedRows = mutableListOf<SentRow>()
-
     private var nextPacketId = 1
 
     init {
         registerResetAction {
             mutableSentPackets.clear()
-            loggedRows.clear()
             nextPacketId = 1
             sendDataFailure = null
         }
     }
-
-    override val currentPacketId: Long
-        get() = nextPacketId.toLong()
 
     override fun generatePacketId(): Int = nextPacketId++
 
@@ -80,18 +60,6 @@ class FakePacketHandler :
         p.status = MessageStatus.QUEUED
         p.time = nowMillis
         mutableSentPackets += p.snapshot()
-    }
-
-    override fun logSent(
-        id: Int,
-        to: Int,
-        port: PortNum,
-        payload: ByteString,
-        wantResponse: Boolean,
-        dest: Int,
-        priority: MeshPacket.Priority,
-    ) {
-        loggedRows += SentRow(id, to, port, payload, wantResponse, dest, priority)
     }
 
     private fun DataPacket.snapshot(): DataPacket = copy().also { it.errorMessage = errorMessage }
