@@ -46,10 +46,11 @@ class SharedTextRoutingTest {
     }
 
     private fun share(text: String): MainActivity {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
+        val intent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
         val activity = Robolectric.buildActivity(MainActivity::class.java, intent).create().get()
         shadowOf(Looper.getMainLooper()).idle()
         return activity
