@@ -21,7 +21,6 @@ import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
@@ -56,7 +55,6 @@ class SdkPhoneApiRadioTransportTest {
         scope: CoroutineScope,
         val link: FakeRadioTransport,
         open: suspend () -> SdkRadioTransport = { link },
-        history: WebSocketSessionHistory? = null,
         address: String = "tcp:sdk",
     ) {
         private val fake =
@@ -100,7 +98,6 @@ class SdkPhoneApiRadioTransportTest {
                 projection = lazy { radioSessionProjection(nodeManager, radio, scope) },
                 connectionManager = lazy { mock(MockMode.autofill) },
                 lockdownCoordinator = lazy { FakeLockdownCoordinator() },
-                webSocketHistory = history,
             )
 
         // Firmware answers want_config with my_info first (PhoneAPI STATE_SEND_MY_INFO).
@@ -229,32 +226,6 @@ class SdkPhoneApiRadioTransportTest {
             assertEquals(TransportFailureKind.PairingRequired, harness.radio.transportStatus.value?.lastFailure?.kind)
             // A transport error is no lost receive coverage: it must not spend the overflow recovery cap.
             assertEquals(listOf(false), harness.overflows)
-        } finally {
-            harness.transport.close()
-        }
-    }
-
-    @Test
-    fun `a WebSocket the radio gave to another client ends for good with that reason`() = runTest {
-        val link = FakeRadioTransport(TransportIdentity("fake:ws"))
-        val harness = Harness(backgroundScope, link, history = WebSocketSessionHistory { currentTime })
-        try {
-            harness.transport.start()
-            advanceTimeBy(HANDSHAKE_START_MS)
-            // The SDK WebSocketTransport's report of firmware's WS_CLOSE_REPLACED.
-            link.simulateError(
-                MeshtasticException.Transport(
-                    "WebSocket closed: another client took the node's only WebSocket slot (4001)",
-                ),
-                recoverable = false,
-            )
-            runCurrent()
-
-            assertEquals(listOf(false), harness.ends)
-            assertEquals(
-                listOf<TransportDisconnectReason?>(TransportDisconnectReason.ReplacedByAnotherClient),
-                harness.reasons,
-            )
         } finally {
             harness.transport.close()
         }

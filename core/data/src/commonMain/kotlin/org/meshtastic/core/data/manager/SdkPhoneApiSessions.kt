@@ -50,7 +50,7 @@ internal class SdkPhoneApiSessions(
     )
 
     fun webSocket(url: String, service: RadioInterfaceService): RadioTransport {
-        val history = webSocketHistories.getOrPut(url) { WebSocketSessionHistory() }
+        val history = webSocketHistories.getOrPut(url) { WebSocketSessionHistory(url) }
         return open(service, history) {
             history.beforeConnect()
             WebSocketTransport(url)

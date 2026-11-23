@@ -20,6 +20,7 @@ import kotlinx.coroutines.delay
 import org.meshtastic.core.model.util.WEBSOCKET_API_PATH
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.sdk.TransportState
+import org.meshtastic.sdk.transport.websocket.WebSocketTransportException
 import kotlin.time.TimeSource
 
 /** How a PhoneAPI session ended: whether a retry may help, and what to tell the user. */
@@ -29,11 +30,11 @@ internal data class SessionEnd(val recoverable: Boolean, val reason: TransportDi
  * The state the SDK's WebSocketTransport keeps across connects on one instance, kept here across the fresh transport
  * each app retry builds. ESP32 firmware drops a displaced client without a close frame, so five sessions in a row that
  * open and drop that way within 30 s mean another client holds the radio's one slot. A 1013 close (the radio is out of
- * heap) holds the next connect for 30 s.
- *
- * The SDK reports the close code and connect failure only in its error message, so [onEnded] reads that text.
+ * heap) holds the next connect for 30 s. [url] is the endpoint dialed, where a 404 at firmware's own path means the
+ * firmware predates the WebSocket phone API.
  */
-internal class WebSocketSessionHistory(private val clockMs: () -> Long = monotonicMs()) {
+internal class WebSocketSessionHistory(url: String, private val clockMs: () -> Long = monotonicMs()) {
+    private val firmwareEndpoint = url.isFirmwareEndpoint()
     private var quickDrops = 0
     private var retryNotBeforeMs: Long? = null
     private var openedAtMs: Long? = null
@@ -54,17 +55,17 @@ internal class WebSocketSessionHistory(private val clockMs: () -> Long = monoton
     fun onEnded(error: TransportState.Error?): SessionEnd {
         val now = clockMs()
         val opened = openedAtMs.also { openedAtMs = null }
-        val text = error?.cause?.message.orEmpty()
-        retryNotBeforeMs = if (CLOSE_TRY_AGAIN_LATER in text) now + TRY_AGAIN_FLOOR_MS else null
+        val cause = error?.cause as? WebSocketTransportException
+        retryNotBeforeMs = if (cause?.closeCode == CLOSE_TRY_AGAIN_LATER) now + TRY_AGAIN_FLOOR_MS else null
         if (opened != null) {
-            val noCloseFrame = DROPPED_WITHOUT_CLOSE in text || CLOSED_ABNORMALLY in text
-            val quick = error?.recoverable != false && noCloseFrame && now - opened < SHORT_SESSION_MS
+            val noCloseFrame = cause != null && (cause.closeCode == null || cause.closeCode == CLOSED_ABNORMALLY)
+            val quick = noCloseFrame && error.recoverable && now - opened < SHORT_SESSION_MS
             quickDrops = if (quick) quickDrops + 1 else 0
         }
         return when {
-            opened == null -> SessionEnd(error?.recoverable ?: true, error?.let { connectFailure(text) })
+            opened == null -> SessionEnd(error?.recoverable ?: true, error?.let { connectFailure(it, cause) })
 
-            error?.recoverable == false -> SessionEnd(recoverable = false, reason = closeReason(text))
+            error?.recoverable == false -> SessionEnd(recoverable = false, reason = cause?.closeReason())
 
             quickDrops >= MAX_QUICK_DROPS -> {
                 quickDrops = 0
@@ -75,42 +76,41 @@ internal class WebSocketSessionHistory(private val clockMs: () -> Long = monoton
         }
     }
 
-    private fun closeReason(text: String): TransportDisconnectReason? = when {
-        CLOSE_REPLACED in text -> TransportDisconnectReason.ReplacedByAnotherClient
-        CLOSE_TOO_BIG in text -> TransportDisconnectReason.WebSocketMessageTooBig
-        SDK_SLOT_CONTESTED in text -> TransportDisconnectReason.WebSocketSlotContested
+    private fun WebSocketTransportException.closeReason(): TransportDisconnectReason? = when {
+        slotContested -> TransportDisconnectReason.WebSocketSlotContested
+        closeCode == CLOSE_REPLACED -> TransportDisconnectReason.ReplacedByAnotherClient
+        closeCode == CLOSE_TOO_BIG -> TransportDisconnectReason.WebSocketMessageTooBig
         else -> null
     }
 
-    private fun connectFailure(text: String): TransportDisconnectReason {
-        val status = UPGRADE_STATUS.find(text)?.groupValues?.get(1)
-        return when {
-            status == HTTP_NOT_FOUND && text.endsWith(" at $WEBSOCKET_API_PATH") ->
-                TransportDisconnectReason.WebSocketNotSupported
+    private fun connectFailure(error: TransportState.Error, cause: WebSocketTransportException?) = when {
+        cause?.httpStatus == HTTP_NOT_FOUND && firmwareEndpoint -> TransportDisconnectReason.WebSocketNotSupported
 
-            status != null -> TransportDisconnectReason.WebSocketHandshakeRejected
+        cause?.httpStatus != null -> TransportDisconnectReason.WebSocketHandshakeRejected
 
-            text.startsWith(TLS_UNTRUSTED) -> TransportDisconnectReason.WebSocketTlsFailed
+        // The exception has no field for an untrusted certificate; its message is the only sign.
+        error.cause.message.orEmpty().startsWith(TLS_UNTRUSTED) -> TransportDisconnectReason.WebSocketTlsFailed
 
-            else -> TransportDisconnectReason.WebSocketConnectFailed
-        }
+        else -> TransportDisconnectReason.WebSocketConnectFailed
     }
 
     private companion object {
         const val SHORT_SESSION_MS = 30_000L
         const val TRY_AGAIN_FLOOR_MS = 30_000L
         const val MAX_QUICK_DROPS = 5
-        const val HTTP_NOT_FOUND = "404"
+        const val HTTP_NOT_FOUND = 404
 
-        // The SDK's WebSocketTransport messages, which name firmware's close codes in parentheses.
-        const val CLOSE_REPLACED = "(4001)"
-        const val CLOSE_TOO_BIG = "(1009)"
-        const val CLOSE_TRY_AGAIN_LATER = "(1013)"
-        const val CLOSED_ABNORMALLY = "(1006"
-        const val DROPPED_WITHOUT_CLOSE = "dropped without a close frame"
-        const val SDK_SLOT_CONTESTED = "times in a row right after opening"
+        // Firmware's WebSocket close codes; 1006 is the code a client reports for a drop with no close frame.
+        const val CLOSE_REPLACED = 4001
+        const val CLOSE_TOO_BIG = 1009
+        const val CLOSE_TRY_AGAIN_LATER = 1013
+        const val CLOSED_ABNORMALLY = 1006
         const val TLS_UNTRUSTED = "TLS certificate for"
-        val UPGRADE_STATUS = Regex("""upgrade refused by \S+ with HTTP (\d{3})""")
+
+        fun String.isFirmwareEndpoint(): Boolean {
+            val path = substringAfter("://").substringBefore('?').substringAfter('/', "")
+            return path.isEmpty() || "/$path" == WEBSOCKET_API_PATH
+        }
 
         fun monotonicMs(): () -> Long {
             val origin = TimeSource.Monotonic.markNow()
