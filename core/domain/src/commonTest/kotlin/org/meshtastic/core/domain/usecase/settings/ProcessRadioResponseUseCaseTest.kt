@@ -305,12 +305,17 @@ class ProcessRadioResponseUseCaseTest {
 
     // ---------- Remote admin transport ----------
 
-    private fun remoteAdminResponse(pkiEncrypted: Boolean, channel: Int = 0): MeshPacket {
+    private fun remoteAdminResponse(
+        pkiEncrypted: Boolean,
+        channel: Int = 0,
+        xeddsaSigned: Boolean = false,
+    ): MeshPacket {
         val adminMsg = AdminMessage.Builder().also { wb -> wb.get_owner_response = User.Builder().build() }.build()
         return MeshPacket.Builder()
             .also { wb ->
                 wb.from = REMOTE_NODE
                 wb.pki_encrypted = pkiEncrypted
+                wb.xeddsa_signed = xeddsaSigned
                 wb.channel = channel
                 wb.decoded =
                     Data.Builder()
@@ -349,6 +354,13 @@ class ProcessRadioResponseUseCaseTest {
     @Test
     fun `remote admin response on the admin channel is accepted`() {
         val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false, channel = 2), adminChannelIndex = 2)
+
+        assertIs<RadioResponseResult.Owner>(result)
+    }
+
+    @Test
+    fun `plaintext remote admin response whose signature the radio verified is accepted`() {
+        val result = invokeRemote(remoteAdminResponse(pkiEncrypted = false, xeddsaSigned = true))
 
         assertIs<RadioResponseResult.Owner>(result)
     }

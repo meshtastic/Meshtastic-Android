@@ -76,6 +76,7 @@ class AdminPacketHandlerImplTest {
         requestId: Int = SENT_REQUEST_ID,
         pkiEncrypted: Boolean = from != myNodeNum,
         channel: Int = 0,
+        xeddsaSigned: Boolean = false,
     ): MeshPacket {
         if (requestId == SENT_REQUEST_ID) adminRequestRegistry.register(requestId, from, ADMIN_CHANNEL_INDEX)
         val payload = adminMessage.encode().toByteString()
@@ -83,6 +84,7 @@ class AdminPacketHandlerImplTest {
             .also { wb ->
                 wb.from = from
                 wb.pki_encrypted = pkiEncrypted
+                wb.xeddsa_signed = xeddsaSigned
                 wb.channel = channel
                 wb.decoded =
                     Data.Builder()
@@ -211,6 +213,17 @@ class AdminPacketHandlerImplTest {
         handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = 0))
 
         verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+    }
+
+    @Test
+    fun `plaintext remote response whose signature the radio verified is handled`() {
+        val passkey = ByteString.of(5, 5, 5, 5)
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, adminChannelIndex = null)
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, xeddsaSigned = true))
+
+        verify { sessionManager.recordSession(REMOTE_NODE, passkey) }
     }
 
     @Test

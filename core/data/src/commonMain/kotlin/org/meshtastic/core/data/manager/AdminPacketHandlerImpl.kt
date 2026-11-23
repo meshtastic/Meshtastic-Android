@@ -87,7 +87,14 @@ class AdminPacketHandlerImpl(
     /** Consumes the outstanding request [requestId] when [packet] answers it authentically; otherwise leaves it. */
     private fun consumeMatchingRequest(packet: MeshPacket, requestId: Int, myNodeNum: Int): Boolean {
         val request = adminRequestRegistry.find(requestId)
-        val accepted = request?.acceptsResponseFrom(packet.from, myNodeNum, packet.pki_encrypted, packet.channel)
+        val accepted =
+            request?.acceptsResponseFrom(
+                packet.from,
+                myNodeNum,
+                packet.pki_encrypted,
+                packet.xeddsa_signed,
+                packet.channel,
+            )
         if (request == null) {
             Logger.w { "Ignoring admin message from=${packet.from} with no outstanding request id=$requestId" }
         } else if (accepted != true) {
