@@ -47,6 +47,7 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -218,6 +219,28 @@ class MeshConfigFlowManagerImplTest {
             }
         assertTrue(manager.installRadioSnapshot(activeSession, snapshot()))
         assertEquals(listOf("install", "migrate", "ready"), callOrder)
+    }
+
+    @Test
+    fun `SDK snapshot applies the local node status before installing the node list`() = testScope.runTest {
+        // Main applied each handshake module config's statusmessage to the local node (MeshConfigHandlerImpl).
+        val status =
+            ModuleConfig.Builder()
+                .also { it.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { s -> s.node_status = "On duty" }.build() }
+                .build()
+        val callOrder = mutableListOf<String>()
+        everySuspend { nodeManager.updateNodeStatusAndPersist(any(), any()) } calls
+            { call ->
+                callOrder.add("status ${call.args[0]} ${call.args[1]}")
+            }
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls
+            {
+                callOrder.add("install")
+                emptyList()
+            }
+
+        assertTrue(manager.installRadioSnapshot(activeSession, snapshot().copy(moduleConfigs = listOf(status))))
+        assertEquals(listOf("status $myNodeNum On duty", "install"), callOrder)
     }
 
     @Test

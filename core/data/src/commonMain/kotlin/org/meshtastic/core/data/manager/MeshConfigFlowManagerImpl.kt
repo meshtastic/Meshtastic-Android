@@ -118,6 +118,10 @@ class MeshConfigFlowManagerImpl(
                 snapshot.regionPresets?.let { setLoraRegionPresetMap(it) }
             }
             snapshot.metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
+            // Before the node install, which persists the local node with its status.
+            snapshot.moduleConfigs
+                .firstNotNullOfOrNull { it.statusmessage }
+                ?.let { status -> nodeManager.updateNodeStatusAndPersist(info.myNodeNum, status.node_status) }
             ready =
                 installNodeDatabase(session, info, snapshot.nodes, isRefresh = false) &&
                 runForSession(session) { installedSnapshot.value = InstalledSnapshot(session, info) }
