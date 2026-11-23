@@ -23,6 +23,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
@@ -90,6 +91,7 @@ class ScannedQrCodeDialogUiTest {
     private fun androidx.compose.ui.test.ComposeUiTest.show(
         incoming: ChannelSet = link,
         channels: ChannelSet = onRadio,
+        maxChannels: Int = DEFAULT_MAX_CHANNELS,
         calls: Calls,
     ) = setContent {
         AppTheme {
@@ -97,9 +99,55 @@ class ScannedQrCodeDialogUiTest {
                 channels = channels,
                 incoming = incoming,
                 onDismiss = { calls.dismissed++ },
+                maxChannels = maxChannels,
                 onConfirm = { calls.confirmed += it },
             )
         }
+    }
+
+    private fun channelsOnly(vararg settings: ChannelSettings) =
+        ChannelSet.Builder().also { it.settings = settings.toList() }.build()
+
+    private val radioWithSecondary =
+        onRadio.newBuilder().also { it.settings = onRadio.settings + channel("Team", 2) }.build()
+
+    @Test
+    fun add_keeps_an_existing_secondary_on_a_radio_with_free_slots() = runComposeUiTest {
+        val calls = Calls()
+        show(incoming = channelsOnly(channel("Field", 5)), channels = radioWithSecondary, calls = calls)
+
+        onNode(hasText("Team")).assertIsNotEnabled()
+        onNode(hasText("Team")).performClick()
+        onNodeWithText("Add channels").performClick()
+
+        assertEquals(radioWithSecondary.settings + channel("Field", 5), calls.confirmed.single().settings)
+    }
+
+    @Test
+    fun add_on_a_full_radio_warns_before_dropping_an_existing_channel_for_a_new_one() = runComposeUiTest {
+        val calls = Calls()
+        show(
+            incoming = channelsOnly(channel("Field", 5)),
+            channels = radioWithSecondary,
+            maxChannels = 2,
+            calls = calls,
+        )
+
+        onNodeWithText("1 channel already on your radio will be removed.").assertDoesNotExist()
+
+        onNode(hasText("Team")).performClick()
+        onNode(hasText("Field")).performClick()
+
+        onNodeWithText("1 channel already on your radio will be removed.").assertIsDisplayed()
+        onNodeWithText("Add channels").performClick()
+        assertEquals(onRadio.settings + channel("Field", 5), calls.confirmed.single().settings)
+    }
+
+    @Test
+    fun add_flags_a_new_channel_named_like_one_on_the_radio() = runComposeUiTest {
+        show(incoming = channelsOnly(channel("Team", 9)), channels = radioWithSecondary, calls = Calls())
+
+        onNodeWithText("Your radio has a channel with this name and a different key").assertIsDisplayed()
     }
 
     @Test

@@ -665,7 +665,7 @@ class ProtoExtensionsTest {
     }
 
     @Test
-    fun preview_same_name_different_psk_remains_visible() {
+    fun preview_same_name_different_psk_remains_visible_and_is_flagged_as_a_name_conflict() {
         val existingChan =
             ChannelSettings.Builder()
                 .also { wb ->
@@ -691,6 +691,49 @@ class ProtoExtensionsTest {
 
         assertEquals(2, preview.settings.size)
         assertTrue(preview.selections[1])
+        // design#128: Add must show a duplicate-name conflict rather than append a second "A" silently.
+        assertEquals(setOf(1), preview.nameConflicts)
+    }
+
+    @Test
+    fun preview_flags_a_name_conflict_on_the_effective_preset_name() {
+        // An unnamed channel on a LongFast radio is "LongFast", so an incoming "LongFast" with its own key collides.
+        val loraConfig = ModelChannel.default.loraConfig
+        val existingChan = ChannelSettings.Builder().also { wb -> wb.psk = byteArrayOf(1).toByteString() }.build()
+        val incomingChan =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "LongFast"
+                    wb.psk = ByteArray(32) { 7 }.toByteString()
+                }
+                .build()
+
+        val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
+
+        assertEquals(setOf(1), preview.nameConflicts)
+    }
+
+    @Test
+    fun preview_keeps_existing_channels_when_the_radio_has_a_free_slot() {
+        val existing = (1..7).map { ChannelSettings.Builder().also { wb -> wb.name = "Ch$it" }.build() }
+        val incoming = listOf("New1", "New2").map { ChannelSettings.Builder().also { wb -> wb.name = it }.build() }
+
+        val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
+
+        assertFalse(preview.canDropExisting)
+    }
+
+    @Test
+    fun preview_lets_an_existing_secondary_go_only_when_the_radio_is_full_and_the_link_has_a_new_channel() {
+        val existing = (1..8).map { ChannelSettings.Builder().also { wb -> wb.name = "Ch$it" }.build() }
+        val newChannel = listOf(ChannelSettings.Builder().also { wb -> wb.name = "New" }.build())
+
+        val full = getChannelPreviewForAdd(existing, newChannel, ModelChannel.default.loraConfig, maxChannels = 8)
+        val nothingNew =
+            getChannelPreviewForAdd(existing, listOf(existing[3]), ModelChannel.default.loraConfig, maxChannels = 8)
+
+        assertTrue(full.canDropExisting)
+        assertFalse(nothingNew.canDropExisting)
     }
 
     @Test
@@ -721,6 +764,7 @@ class ProtoExtensionsTest {
 
         assertEquals(2, preview.settings.size)
         assertTrue(preview.selections[1])
+        assertTrue(preview.nameConflicts.isEmpty())
     }
 
     @Test

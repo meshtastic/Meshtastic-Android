@@ -27,6 +27,8 @@ import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.ui.qr.reportingChannelUpdateFailure
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -39,6 +41,7 @@ class ChannelViewModel(
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val analytics: PlatformAnalytics,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     val connectionState = radioController.connectionState
@@ -74,21 +77,29 @@ class ChannelViewModel(
      *
      * Accepts any string that [CommonUri.parse] can handle (e.g. the result of `android.net.Uri.toString()`).
      */
-    fun requestChannelUrl(url: String, onError: () -> Unit) =
-        runCatching { _requestChannelSet.value = CommonUri.parse(url).toChannelSet() }
-            .onFailure { ex ->
-                Logger.e(ex) { "Channel url error" }
-                onError()
-            }
+    fun requestChannelUrl(url: String, onError: () -> Unit) = runCatching {
+        _requestChannelSet.value = CommonUri.parse(url).toChannelSet()
+    }
+        .onFailure { ex ->
+            Logger.e(ex) { "Channel url error" }
+            onError()
+        }
 
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
     }
 
-    /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        importChannelSet(channelSet, radioController, radioConfigRepository)
-        analytics.trackAction("channel_update", mapOf("num_channels" to channelSet.settings.size))
+    /**
+     * Set the radio config (also updates our saved copy in preferences). A failure is reported with a snackbar that
+     * offers to retry the same write.
+     */
+    fun setChannels(channelSet: ChannelSet) {
+        safeLaunch(tag = "setChannels") {
+            snackbarManager.reportingChannelUpdateFailure(retry = { setChannels(channelSet) }) {
+                importChannelSet(channelSet, radioController, radioConfigRepository)
+            }
+            analytics.trackAction("channel_update", mapOf("num_channels" to channelSet.settings.size))
+        }
     }
 
     // Set the radio config (also updates our saved copy in preferences)

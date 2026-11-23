@@ -100,11 +100,11 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
  *
  * Reads the current LoRa config and channel set from [radioConfigRepository]'s flows (avoiding the StateFlow
  * placeholder window) and builds the shared authoritative replacement plan. The edit-settings transaction defers disk
- * persistence, radio reload/reconfiguration, and reboot until the closing commit, so channels + LoRa land in a single
- * reboot with no per-slot reconfigure to pace against. (Firmware still writes each `set_channel` into its in-memory
- * channel table as it arrives — the transaction is not a full staging of channel state — but the expensive
- * persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors `InstallProfileUseCase` and is
- * why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
+ * persistence and radio reload/reconfiguration until the closing commit, so channels + LoRa apply together with no
+ * per-slot reconfigure to pace against. Firmware applies channel and LoRa changes live without rebooting, so an import
+ * never reboots the radio. (Firmware still writes each `set_channel` into its in-memory channel table as it arrives —
+ * the transaction is not a full staging of channel state — but the expensive persist/reload path runs once at commit.)
+ * Writing LoRa inside the same session mirrors `InstallProfileUseCase`: the begin/commit boundary is the settle.
  *
  * The local caches are commit-shaped: transactional channel writes deliberately do not mirror per slot (see
  * `AdminControllerImpl.EditSettingsSession.setChannel`), while transactional `setConfig` stages its LoRa projection
@@ -168,7 +168,12 @@ suspend fun importChannelSet(
  * default while firmware channel capacity remains; unique channels beyond [maxChannels] stay visible but unchecked.
  *
  * Semantic identity is resolved via the [Channel] domain model so preset/default channels match correctly across modem
- * presets: empty names resolve to the preset display name, and 1-byte PSK markers expand to the full default key.
+ * presets: empty names resolve to the preset display name, and 1-byte PSK markers expand to the full default key. A
+ * unique incoming channel whose effective name matches a channel on the radio (so its key differs) is a name conflict:
+ * Add would put two channels of that name on the radio, so it is listed in [ChannelAddPreview.nameConflicts].
+ *
+ * Existing channels are kept unless the radio is full and the link has a channel it does not have yet; only then may
+ * the user drop an existing secondary to make room ([ChannelAddPreview.canDropExisting]).
  *
  * @param existing The current [ChannelSettings] list on the radio. Always shown, always selected.
  * @param incoming The imported [ChannelSettings] list. Duplicates omitted; uniques appended in order.
@@ -188,16 +193,19 @@ fun getChannelPreviewForAdd(
             .filterIndexed { index, settings -> index == 0 || !settings.isChannelPlaceholder() }
             .map { it.channelIdentity(loraConfig) }
             .toSet()
+    val onRadioNames = onRadio.mapTo(mutableSetOf()) { it.name }
     val seen = onRadio.toMutableSet()
     val previewSettings = existing.toMutableList()
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
     val alreadyOnRadio = mutableSetOf<ChannelIdentity>()
+    val nameConflicts = mutableSetOf<Int>()
     for (channel in incoming) {
         val shouldShow = !channel.isChannelPlaceholder()
         val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
         // Omit blank placeholders and semantic duplicates entirely — they are not shown to the user.
         if (identity != null && seen.add(identity)) {
+            if (identity.name in onRadioNames) nameConflicts += previewSettings.size
             previewSettings += channel
             val shouldSelect = remaining > 0
             previewSelections += shouldSelect
@@ -210,15 +218,20 @@ fun getChannelPreviewForAdd(
         settings = previewSettings,
         selections = previewSelections,
         alreadyOnRadio = alreadyOnRadio.size,
+        nameConflicts = nameConflicts,
+        canDropExisting = existing.size >= maxChannels && previewSettings.size > existing.size,
     )
 }
 
 /**
- * Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched), and how
- * many incoming channels were left out because the radio already has them.
+ * Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched), how
+ * many incoming channels were left out because the radio already has them, which [settings] indices share a name with a
+ * channel on the radio, and whether the user may drop an existing secondary to make room.
  */
 data class ChannelAddPreview(
     val settings: List<ChannelSettings>,
     val selections: List<Boolean>,
     val alreadyOnRadio: Int = 0,
+    val nameConflicts: Set<Int> = emptySet(),
+    val canDropExisting: Boolean = false,
 )

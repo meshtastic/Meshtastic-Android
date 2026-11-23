@@ -231,13 +231,18 @@
         <item quantity="other">%1$d channels in this link are already on your radio and were left out.</item>
     </plurals>
     <string name="channel_features">Channel Features</string>
-    <string name="channel_import_add_description">Adds the selected channels to your radio. Channels already on your radio stay as they are.</string>
+    <string name="channel_import_add_description">Adds the selected channels to your radio and keeps its LoRa settings. Channels already on your radio stay, unless the radio is full and you uncheck one.</string>
     <string name="channel_import_confirm_add">Add channels</string>
     <string name="channel_import_confirm_replace">Replace channels</string>
     <string name="channel_import_downlink">Accepts messages from MQTT on this channel</string>
     <string name="channel_import_mode_label">Import mode</string>
+    <string name="channel_import_name_conflict">Your radio has a channel with this name and a different key</string>
     <string name="channel_import_position_approximate">Shares your approximate location</string>
     <string name="channel_import_position_precise">Shares your precise location</string>
+    <plurals name="channel_import_removes_existing">
+        <item quantity="one">%1$d channel already on your radio will be removed.</item>
+        <item quantity="other">%1$d channels already on your radio will be removed.</item>
+    </plurals>
     <string name="channel_import_replace_description">Removes the channels on your radio and applies the channels and LoRa settings below.</string>
     <string name="channel_import_title">Import channels</string>
     <string name="channel_import_uplink">Forwards this channel's messages to MQTT</string>
@@ -247,7 +252,12 @@
         <item quantity="one">Your radio holds %2$d channels. Uncheck %1$d channel to make room. Unchecking a channel already on your radio removes it.</item>
         <item quantity="other">Your radio holds %2$d channels. Uncheck %1$d channels to make room. Unchecking a channel already on your radio removes it.</item>
     </plurals>
+    <plurals name="channel_slots_uncheck_new">
+        <item quantity="one">Your radio holds %2$d channels. Uncheck %1$d new channel to make room.</item>
+        <item quantity="other">Your radio holds %2$d channels. Uncheck %1$d new channels to make room.</item>
+    </plurals>
     <string name="channel_slots_used">%1$d of %2$d channel slots in use</string>
+    <string name="channel_update_failed">Couldn't update the channels on your radio.</string>
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>

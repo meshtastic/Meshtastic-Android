@@ -71,7 +71,6 @@ import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.are_you_sure_change_default
 import org.meshtastic.core.resources.cancel
-import org.meshtastic.core.resources.cant_change_no_radio
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.edit
 import org.meshtastic.core.resources.modem_preset
@@ -180,23 +179,7 @@ fun ChannelScreen(
     val scope = rememberCoroutineScope()
     val showToast = rememberShowToastResource()
 
-    // Send new channel settings to the device
-    @Suppress("TooGenericExceptionCaught")
-    fun installSettings(newChannelSet: ChannelSet) {
-        // Try to change the radio, if it fails, tell the user why and throw away their edits
-        try {
-            viewModel.setChannels(newChannelSet)
-            // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
-        } catch (ex: Exception) {
-            Logger.e(ex) { "ignoring channel problem" }
-
-            channelSet = channels // Throw away user edits
-
-            // Tell the user to try again
-            scope.launch { showToast(Res.string.cant_change_no_radio) }
-        }
-    }
-
+    // The write runs in the view model, which reports a failure itself; a success updates channels and the QR code.
     fun installSettings(newChannel: ChannelSettings, newLoRaConfig: Config.LoRaConfig) {
         val newSet =
             ChannelSet.Builder()
@@ -205,7 +188,7 @@ fun ChannelScreen(
                     wb.lora_config = newLoRaConfig
                 }
                 .build()
-        installSettings(newSet)
+        viewModel.setChannels(newSet)
     }
 
     if (showResetDialog) {
