@@ -79,12 +79,14 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.MeshEvent
+import org.meshtastic.sdk.MessageId
+import org.meshtastic.sdk.NodeId
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -572,48 +574,25 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    private fun routingPacket(
+    private fun routingReport(
         error: Routing.Error,
-        ackProofStatus: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
-        hopStart: Int = 0,
-        hopLimit: Int = 0,
-        relayNode: Int = 0,
-        viaMqtt: Boolean = false,
-    ): MeshPacket {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.ack_proof_status = ackProofStatus
-                    wb.hop_start = hopStart
-                    wb.hop_limit = hopLimit
-                    wb.relay_node = relayNode
-                    wb.via_mqtt = viaMqtt
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        every { dataMapper.toDataPacket(packet) } returns
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
+        ackProof: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+        relayNode: Int? = null,
+    ): MeshEvent.RoutingReport {
         every { nodeManager.toNodeID(456) } returns "!remote"
-        return packet
+        return MeshEvent.RoutingReport(
+            requestId = MessageId(99),
+            from = NodeId(456),
+            error = error,
+            fromLocalRadio = false,
+            relayNode = relayNode,
+            ackProof = ackProof,
+        )
     }
 
     @Test
     fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
     }
 
@@ -633,46 +612,25 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
         assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updates.single().ackProofStatus)
     }
 
-    private suspend fun TestScope.ackRelayFor(packet: MeshPacket): Int? {
+    @Test
+    fun `the relay a routing report names is recorded on the packet it settles`() = testScope.runTest {
         val updates = mutableListOf<DataPacket>()
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
-        handler.handleReceivedData(packet, 123)
+
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE, relayNode = 0x5A), session)
         advanceUntilIdle()
-        return updates.single().relayNode
-    }
 
-    @Test
-    fun `an ack heard straight from the destination names no relay`() = testScope.runTest {
-        // Firmware stamps the transmitter's byte on send, so a direct ack's byte is the destination's own.
-        assertNull(ackRelayFor(routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 3, relayNode = 0xC8)))
-    }
-
-    @Test
-    fun `an ack relayed on its way back names its relay`() = testScope.runTest {
-        val relayed = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A)
-        assertEquals(0x5A, ackRelayFor(relayed))
-    }
-
-    @Test
-    fun `an implicit ack keeps the relayer it overheard`() = testScope.runTest {
-        // ReliableRouter builds it locally with hop_start 0 and copies the rebroadcast's relay byte.
-        assertEquals(0x5A, ackRelayFor(routingPacket(Routing.Error.NONE, relayNode = 0x5A)))
-    }
-
-    @Test
-    fun `an ack from MQTT names no relay`() = testScope.runTest {
-        val fromMqtt = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A, viaMqtt = true)
-        assertNull(ackRelayFor(fromMqtt))
+        assertEquals(0x5A, updates.single().relayNode)
     }
 
     @Test
@@ -681,9 +639,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -697,7 +655,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.MAX_RETRANSMIT), session)
         advanceUntilIdle()
 
         assertTrue(updates.isEmpty())
@@ -710,7 +668,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.PKI_UNKNOWN_PUBKEY), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.PKI_UNKNOWN_PUBKEY), session)
         advanceUntilIdle()
 
         assertEquals(MessageStatus.ERROR, updates.single().status)
@@ -722,7 +680,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.MAX_RETRANSMIT), session)
         advanceUntilIdle()
 
         assertEquals(MessageStatus.ERROR, updates.single().status)
@@ -735,7 +693,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket(proven))
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         assertEquals(proven, updates.single().ackProofStatus)
@@ -748,9 +706,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(forged)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -779,9 +737,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction())
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -797,7 +755,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction(proven))
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         assertEquals(proven, updates.single().ackProofStatus)
@@ -810,9 +768,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(forged)
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -824,39 +782,15 @@ class MeshDataHandlerTest {
     @Test
     fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
         // NO_ROUTE keeps this ownership test independent of errors that also raise localized UI warnings.
-        handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NO_ROUTE), session)
         advanceUntilIdle()
     }
 
     @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
         everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
 
-        handler.handleReceivedData(packet, 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }

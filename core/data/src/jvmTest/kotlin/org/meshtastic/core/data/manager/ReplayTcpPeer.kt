@@ -25,10 +25,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.Buffer
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LockdownStatus
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.Frame
 import org.meshtastic.sdk.WireFraming
@@ -41,11 +45,18 @@ import java.net.SocketException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 
-/** Exposes the scripted PhoneAPI fixture as a TCP peer for the SDK's production transport. */
+/** The relay byte on the ACK [withReplayTcpPeer] returns from its remote ACK node. */
+internal const val REMOTE_ACK_RELAY = 0x5A
+
+/**
+ * Exposes the scripted PhoneAPI fixture as a TCP peer for the SDK's production transport. A packet sent to
+ * [remoteAckNode] is accepted into the radio's queue and acknowledged by that node over one relay.
+ */
 internal suspend fun withReplayTcpPeer(
     lockdownPassphrase: String? = null,
     rebootBeforeConfig: Boolean = false,
     localDeliveryPacketId: Int? = null,
+    remoteAckNode: Int? = null,
     exercise: suspend (port: Int) -> Unit,
 ) = coroutineScope {
     ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { server ->
@@ -102,6 +113,8 @@ internal suspend fun withReplayTcpPeer(
                                             }
                                             .build()
                                     output.sendEnvelope(FromRadio.Builder().also { it.queueStatus = receipt }.build())
+                                } else if (remoteAckNode != null && packet?.to == remoteAckNode) {
+                                    output.sendRemoteAck(packet, remoteAckNode)
                                 } else {
                                     scripted.send(frame)
                                 }
@@ -150,6 +163,39 @@ private fun DataInputStream.unlock(output: OutputStream, passphrase: String) {
     val admin = admin().let { if (it.set_time_only != null) admin() else it }
     assertEquals(passphrase, admin.lockdown_auth?.passphrase?.utf8())
     output.sendLockdownState(LockdownStatus.State.UNLOCKED)
+}
+
+/** Firmware's queue receipt for [sent] (res 0 is ERRNO_OK), then [node]'s ACK as ReliableRouter returns it. */
+private fun OutputStream.sendRemoteAck(sent: MeshPacket, node: Int) {
+    val receipt =
+        QueueStatus.Builder()
+            .also {
+                it.mesh_packet_id = sent.id
+                it.res = 0
+            }
+            .build()
+    sendEnvelope(FromRadio.Builder().also { it.queueStatus = receipt }.build())
+    val ack = Routing.Builder().also { it.error_reason = Routing.Error.NONE }.build()
+    val packet =
+        MeshPacket.Builder()
+            .also {
+                it.id = sent.id + 1
+                it.from = node
+                it.to = SdkRoomReplayTest.LOCAL_NODE
+                it.hop_start = 3
+                it.hop_limit = 2
+                it.relay_node = REMOTE_ACK_RELAY
+                it.decoded =
+                    Data.Builder()
+                        .also { data ->
+                            data.portnum = PortNum.ROUTING_APP
+                            data.payload = ack.encodeByteString()
+                            data.request_id = sent.id
+                        }
+                        .build()
+            }
+            .build()
+    sendEnvelope(FromRadio.Builder().also { it.packet = packet }.build())
 }
 
 private fun OutputStream.sendLockdownState(state: LockdownStatus.State) {

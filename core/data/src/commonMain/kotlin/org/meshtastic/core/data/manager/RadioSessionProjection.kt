@@ -139,7 +139,10 @@ class RadioSessionProjection(
                 runForSession(session, "event") {
                     refreshLocalNodeLastHeard(session)
                     logEvent(event.event, session)
-                    eventHandler.value.handle(event.event, session)
+                    when (val meshEvent = event.event) {
+                        is MeshEvent.RoutingReport -> dataHandler.value.handleRoutingReport(meshEvent, session)
+                        else -> eventHandler.value.handle(meshEvent, session)
+                    }
                 }
 
             is RadioSessionEvent.Lockdown,

@@ -19,6 +19,7 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.Job
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.MeshEvent
 
 /** Interface for handling incoming mesh data packets and routing them to the appropriate handlers. */
 interface MeshDataHandler {
@@ -38,6 +39,14 @@ interface MeshDataHandler {
         logUuid: String? = null,
         logInsertJob: Job? = null,
     )
+
+    /**
+     * Settles the stored message or reaction a routing ACK or NAK names, from the SDK's report of it.
+     *
+     * @param report The SDK's reading of the `ROUTING_APP` packet.
+     * @param session The transport session that delivered it.
+     */
+    fun handleRoutingReport(report: MeshEvent.RoutingReport, session: RadioSessionContext)
 
     /**
      * Persists a data packet in the history and triggers notifications if necessary.

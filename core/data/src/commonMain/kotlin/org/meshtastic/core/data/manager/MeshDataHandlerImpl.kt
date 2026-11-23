@@ -80,6 +80,7 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.MeshEvent
 
 /**
  * Implementation of [MeshDataHandler] that decodes and routes incoming mesh data packets.
@@ -173,9 +174,8 @@ class MeshDataHandlerImpl(
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob, session)
             }
 
-            PortNum.ROUTING_APP -> {
-                handleRouting(packet, session)
-            }
+            // Settled from the SDK's RoutingReport, which follows this packet on the session stream.
+            PortNum.ROUTING_APP -> Unit
 
             PortNum.PAXCOUNTER_APP -> {
                 handlePaxCounter(packet, session)
@@ -343,46 +343,24 @@ class MeshDataHandlerImpl(
         rememberDataPacket(dataPacket, myNodeNum, session = session)
     }
 
-    /**
-     * The relay an ack names, or null when its byte is only the acking node's own: an ack heard over the air with no
-     * hops used carries the transmitter's byte, and one from MQTT a node across the bridge. An implicit ack is built
-     * locally with `hop_start` 0 from an overheard rebroadcast, so it keeps the relayer's byte.
-     */
-    private fun ackRelayNode(packet: MeshPacket): Int? {
-        val heardDirect = packet.hop_start != 0 && packet.hop_limit == packet.hop_start
-        return packet.relay_node.takeUnless { heardDirect || packet.via_mqtt == true }
-    }
-
-    private fun handleRouting(packet: MeshPacket, session: RadioSessionContext) {
-        val payload = packet.decoded?.payload ?: return
-        val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
-        if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
+    override fun handleRoutingReport(report: MeshEvent.RoutingReport, session: RadioSessionContext) {
+        if (report.error == Routing.Error.DUTY_CYCLE_LIMIT) {
             radioInterfaceService.launchSessionWork(scope, session) {
                 serviceStateWriter.setErrorMessage(getStringSuspend(Res.string.error_duty_cycle), Severity.Warn)
             }
         }
-        handleAckNak(
-            packet.decoded?.request_id ?: 0,
-            packet.from,
-            r.error_reason?.value ?: 0,
-            ackRelayNode(packet),
-            session,
-            ackProofStatus = packet.ack_proof_status.value,
-        )
+        handleAckNak(report, session)
     }
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    private fun handleAckNak(
-        requestId: Int,
-        fromNum: Int,
-        routingError: Int,
-        relayNode: Int?,
-        session: RadioSessionContext,
-        ackProofStatus: Int = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value,
-    ) {
-        val fromId = nodeManager.toNodeID(fromNum)
+    private fun handleAckNak(report: MeshEvent.RoutingReport, session: RadioSessionContext) {
+        val requestId = report.requestId.raw
+        val routingError = report.error.value
+        val relayNode = report.relayNode
+        val ackProofStatus = report.ackProof.value
+        val fromId = nodeManager.toNodeID(report.from.raw)
         radioInterfaceService.launchSessionWork(scope, session) {
-            val isAck = routingError == Routing.Error.NONE.value
+            val isAck = report.isAck
             val absentAckProof = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value
             val provenAckProof = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
             val allPackets = packetRepository.value.findPacketsWithId(requestId)

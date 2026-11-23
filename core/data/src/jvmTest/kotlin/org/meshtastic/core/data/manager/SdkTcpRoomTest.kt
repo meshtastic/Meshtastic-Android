@@ -46,6 +46,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
+import okio.ByteString.Companion.encodeUtf8
 import okio.FileSystem
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
@@ -70,6 +71,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
@@ -148,11 +150,19 @@ class SdkTcpRoomTest {
         }
     }
 
+    @Test
+    fun sdkTcpRemoteAckSettlesRoomRowAndLogsTheSentPacket() = runBlocking {
+        withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE, remoteAckNode = REMOTE_NODE) { port ->
+            exerciseLockdown(port, autoUnlock = true, verifyRemoteAck = true)
+        }
+    }
+
     private suspend fun exerciseLockdown(
         port: Int,
         autoUnlock: Boolean,
         expectRestart: Boolean = false,
         verifyLocalDelivery: Boolean = false,
+        verifyRemoteAck: Boolean = false,
     ) {
         Dispatchers.setMain(Dispatchers.Unconfined)
         val job = SupervisorJob()
@@ -208,6 +218,22 @@ class SdkTcpRoomTest {
                     assertEquals(SdkRoomReplayTest.LOCAL_NODE, db.nodeInfoDao().getMyNodeEntity()?.myNodeNum)
                 }
                 if (verifyLocalDelivery) ingress.assertLocalDelivery(LOCAL_DELIVERY_PACKET_ID)
+                if (verifyRemoteAck) {
+                    val packetId = ingress.assertRemoteAck(REMOTE_NODE)
+                    // The SDK's outbound stream is what writes the sent row, under the local node.
+                    var sent: MeshPacket? = null
+                    while (sent == null) {
+                        sent = databases.withReadDb { db ->
+                            db.meshLogDao().getAllLogsSnapshot().firstNotNullOfOrNull { log ->
+                                log.fromRadio.packet?.takeIf { log.fromNum == 0 && it.id == packetId }
+                            }
+                        }
+                        if (sent == null) delay(10.milliseconds)
+                    }
+                    assertEquals(REMOTE_NODE, sent.to)
+                    assertEquals(PortNum.TEXT_MESSAGE_APP, sent.decoded?.portnum)
+                    assertEquals(REPLY_ID, sent.decoded?.reply_id)
+                }
                 radio.disconnect()
                 assertEquals(LockdownState.None, ingress.lockdownState.value)
             }
@@ -373,6 +399,37 @@ class SdkTcpRoomTest {
             while (outboundRepository.getPacketByPersistedId(id)?.status != MessageStatus.DELIVERED) {
                 delay(10.milliseconds)
             }
+        }
+
+        /** Sends a reply to [remote] from a stored row and returns its ID once the remote ACK has settled the row. */
+        suspend fun assertRemoteAck(remote: Int): Int {
+            val packetId = outgoing.generatePacketId()
+            val remoteId = NodeAddress.numToDefaultId(remote)
+            val packet =
+                DataPacket(
+                    from = SdkRoomReplayTest.LOCAL_ID,
+                    to = remoteId,
+                    bytes = "hi".encodeUtf8(),
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
+                    id = packetId,
+                    status = MessageStatus.QUEUED,
+                    replyId = REPLY_ID,
+                    wantAck = true,
+                )
+            val id =
+                outboundRepository.savePacket(
+                    myNodeNum = SdkRoomReplayTest.LOCAL_NODE,
+                    contactKey = "0$remoteId",
+                    packet = packet,
+                    receivedTime = 0,
+                )
+            outgoing.sendData(packet)
+            // An ACK from the addressed node is a delivery, and the relay that carried it back is recorded.
+            while (outboundRepository.getPacketByPersistedId(id)?.status != MessageStatus.RECEIVED) {
+                delay(10.milliseconds)
+            }
+            assertEquals(REMOTE_ACK_RELAY, outboundRepository.getPacketByPersistedId(id)?.relayNode)
+            return packetId
         }
 
         private val projection =
@@ -550,5 +607,7 @@ class SdkTcpRoomTest {
     private companion object {
         const val TEST_PASSPHRASE = "example"
         const val LOCAL_DELIVERY_PACKET_ID = 7123
+        const val REMOTE_NODE = 0x0BADF00D
+        const val REPLY_ID = 77
     }
 }
