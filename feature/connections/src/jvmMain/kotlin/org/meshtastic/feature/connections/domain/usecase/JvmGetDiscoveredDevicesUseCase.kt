@@ -18,6 +18,7 @@ package org.meshtastic.feature.connections.domain.usecase
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -38,5 +39,12 @@ class JvmGetDiscoveredDevicesUseCase(
     recentAddressesDataSource: RecentAddressesSource,
     nodeRepository: NodeRepository,
     databaseManager: DatabaseManager,
+    nodeManager: NodeManager,
     usbScanner: UsbScanner? = null,
-) : CommonGetDiscoveredDevicesUseCase(recentAddressesDataSource, nodeRepository, databaseManager, usbScanner)
+) : CommonGetDiscoveredDevicesUseCase(
+    recentAddressesDataSource,
+    nodeRepository,
+    databaseManager,
+    nodeManager,
+    usbScanner,
+)

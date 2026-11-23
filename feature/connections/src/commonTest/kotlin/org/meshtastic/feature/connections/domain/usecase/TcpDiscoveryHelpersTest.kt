@@ -18,10 +18,10 @@ package org.meshtastic.feature.connections.domain.usecase
 
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import io.kotest.matchers.shouldBe
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.testing.TestDataFactory
@@ -32,6 +32,7 @@ import kotlin.test.assertNull
 
 /** Unit tests for the shared TCP discovery helper functions. */
 class TcpDiscoveryHelpersTest {
+    private val noNums = LocalNodeNums(recorded = emptyMap(), live = null)
 
     @Test
     fun `processTcpServices maps services to DeviceListEntry with shortname and id`() {
@@ -149,7 +150,7 @@ class TcpDiscoveryHelpersTest {
             )
         val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("t192.168.1.50") } returns true }
 
-        val result = matchDiscoveredTcpNodes(entries, nodeDb, resolved, databaseManager)
+        val result = matchDiscoveredTcpNodes(entries, nodeDb, resolved, databaseManager, noNums)
 
         result.size shouldBe 1
         assertNotNull(result[0].node)
@@ -172,7 +173,7 @@ class TcpDiscoveryHelpersTest {
             )
         val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("t192.168.1.50") } returns false }
 
-        val result = matchDiscoveredTcpNodes(entries, nodeDb, resolved, databaseManager)
+        val result = matchDiscoveredTcpNodes(entries, nodeDb, resolved, databaseManager, noNums)
 
         result.size shouldBe 1
         assertNull(result[0].node)
@@ -182,9 +183,7 @@ class TcpDiscoveryHelpersTest {
     fun `buildRecentTcpEntries filters out discovered addresses`() {
         val recentAddresses = listOf(RecentAddress("t192.168.1.50", "NodeA"), RecentAddress("t192.168.1.51", "NodeB"))
         val discoveredAddresses = setOf("t192.168.1.50")
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
-
-        val result = buildRecentTcpEntries(recentAddresses, discoveredAddresses, emptyMap(), databaseManager)
+        val result = buildRecentTcpEntries(recentAddresses, discoveredAddresses, emptyMap(), noNums)
 
         result.size shouldBe 1
         result[0].name shouldBe "NodeB"
@@ -201,66 +200,31 @@ class TcpDiscoveryHelpersTest {
                 RecentAddress("t192.168.1.50", "NodeA"),
                 RecentAddress("t192.168.1.51", "NodeB"),
             )
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
-
-        val result = buildRecentTcpEntries(recentAddresses, emptySet(), emptyMap(), databaseManager)
+        val result = buildRecentTcpEntries(recentAddresses, emptySet(), emptyMap(), noNums)
 
         result.map { it.fullAddress } shouldBe listOf("t192.168.1.50", "t192.168.1.51")
     }
 
     @Test
-    fun `buildRecentTcpEntries matches node by suffix`() {
-        val node = TestDataFactory.createTestNode(num = 1, userId = "!test1234")
-        val recentAddresses = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("tMeshtastic_1234") } returns true }
+    fun `buildRecentTcpEntries labels only the radio recorded for the address not one matching its name suffix`() {
+        // SD7T_964e is the radio's name; ptzm's id also ends in 964e (issue #8228).
+        val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d")
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e")
+        val recentAddresses =
+            listOf(RecentAddress("t192.168.1.50", "SD7T_964e"), RecentAddress("t192.168.1.51", "Unknown_964e"))
+        val nums = LocalNodeNums(recorded = mapOf(normalizeAddress("t192.168.1.50") to sd7t.num), live = null)
 
-        val result = buildRecentTcpEntries(recentAddresses, emptySet(), mapOf(1 to node), databaseManager)
+        val result = buildRecentTcpEntries(recentAddresses, emptySet(), mapOf(sd7t.num to sd7t, ptzm.num to ptzm), nums)
 
-        result.size shouldBe 1
-        assertNotNull(result[0].node)
-        result[0].node?.user?.id shouldBe "!test1234"
+        result.associate { it.fullAddress to it.node } shouldBe mapOf("t192.168.1.50" to sd7t, "t192.168.1.51" to null)
     }
 
     @Test
     fun `buildRecentTcpEntries results are sorted by name`() {
         val recentAddresses = listOf(RecentAddress("t10.0.0.2", "Zebra"), RecentAddress("t10.0.0.1", "Alpha"))
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
-
-        val result = buildRecentTcpEntries(recentAddresses, emptySet(), emptyMap(), databaseManager)
+        val result = buildRecentTcpEntries(recentAddresses, emptySet(), emptyMap(), noNums)
 
         result[0].name shouldBe "Alpha"
         result[1].name shouldBe "Zebra"
-    }
-
-    @Test
-    fun `findNodeByNameSuffix returns null when no database`() {
-        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
-
-        val result = findNodeByNameSuffix("Device_1234", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `findNodeByNameSuffix matches by last underscore segment`() {
-        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("s/dev/ttyUSB0") } returns true }
-
-        val result = findNodeByNameSuffix("Device_1234", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
-
-        assertNotNull(result)
-        result.user.id shouldBe "!abcd1234"
-    }
-
-    @Test
-    fun `findNodeByNameSuffix returns null when suffix is too short`() {
-        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
-        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("s/dev/ttyUSB0") } returns true }
-
-        val result = findNodeByNameSuffix("Device_ab", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
-
-        // "ab" is only 2 chars, below the minimum SUFFIX_LENGTH of 4
-        assertNull(result)
     }
 }

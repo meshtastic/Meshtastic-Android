@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -939,6 +940,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 val nodeKey = nodeDbPrefKey(nodeNum)
                 val prefs = datastore.data.first()
                 val claimed = resolveDbClaim(prefs, deviceKey, nodeKey)
+                val localNodeNumKey = localNodeNumPrefKey(address)
+                if (prefs[localNodeNumKey] != nodeNum) {
+                    datastore.edit {
+                        ensureAssociationActive()
+                        it[localNodeNumKey] = nodeNum
+                    }
+                }
                 suspend fun writeClaims(dbName: String) = datastore.edit {
                     ensureAssociationActive()
                     deviceKey?.let { key -> it[key] = dbName }
@@ -1947,6 +1955,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * Returns true if a database exists for the given device address. Android Room stores DB files without an
      * extension; JVM/iOS append `.db`. We check both to stay platform-agnostic.
      */
+    override val localNodeNums: Flow<Map<String, Int>> = datastore.data.map(::localNodeNumsFrom).distinctUntilChanged()
+
     override fun hasDatabaseFor(address: String?): Boolean {
         if (address.isNullOrBlank() || address == "n") return false
         val dbName = buildDbName(address)

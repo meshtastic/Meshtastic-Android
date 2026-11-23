@@ -48,6 +48,10 @@ object DatabaseConstants {
     const val PENDING_DESTINATION_DB_FOR_PREFIX: String = "pending_destination_db_for:"
     const val RETIRED_DB_NAMES_KEY: String = "retired_db_names"
 
+    // Maps a normalized transport address to the my_node_num its radio last reported, so the connection list can
+    // label each radio with its own node.
+    const val LOCAL_NODE_NUM_FOR_PREFIX: String = "local_node_num_for:"
+
     // Display/truncation and hash sizing for DB names
     const val DB_NAME_HASH_LEN: Int = 10
     const val DB_NAME_SEPARATOR_LEN: Int = 1
@@ -109,8 +113,9 @@ internal fun selectEvictionVictims(
     lastUsedMsByDb: Map<String, Long>,
     protectedDbNames: Set<String> = emptySet(),
 ): List<String> {
-    val deviceDbNames =
-        dbNames.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
+    val deviceDbNames = dbNames.filterNot {
+        it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME
+    }
     val victims =
         if (limit < 1 || deviceDbNames.size <= limit) {
             emptyList()

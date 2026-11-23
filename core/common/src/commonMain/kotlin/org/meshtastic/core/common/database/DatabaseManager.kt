@@ -16,7 +16,9 @@
  */
 package org.meshtastic.core.common.database
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 /** Interface for managing database instances and cache limits. */
 interface DatabaseManager {
@@ -56,4 +58,13 @@ interface DatabaseManager {
 
     /** Returns true if a database exists for the given device address. */
     fun hasDatabaseFor(address: String?): Boolean
+
+    /**
+     * The local node number (`MyNodeInfo.my_node_num`) each transport address reported in its last associated
+     * handshake, keyed by [org.meshtastic.core.common.util.normalizeAddress]. Firmware 2.8 derives the number from the
+     * public key, so neither the MAC nor the advertised name identifies a radio's node; this record does. An
+     * implementation that keeps no per-address record emits an empty map.
+     */
+    val localNodeNums: Flow<Map<String, Int>>
+        get() = flowOf(emptyMap())
 }

@@ -19,15 +19,17 @@ package org.meshtastic.feature.connections.domain.usecase
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.testing.FakeDatabaseManager
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.connections.data.RecentAddressesSource
@@ -42,20 +44,23 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     private lateinit var useCase: CommonGetDiscoveredDevicesUseCase
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var recentAddressesDataSource: RecentAddressesSource
-    private lateinit var databaseManager: DatabaseManager
+    private lateinit var databaseManager: FakeDatabaseManager
+    private val identityFlow = MutableStateFlow<ConnectionIdentity?>(null)
+    private val nodeManager: NodeManager = mock { every { connectionIdentity } returns identityFlow }
     private val recentAddressesFlow = MutableStateFlow<List<RecentAddress>>(emptyList())
     private val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())
 
     private fun setUp() {
         nodeRepository = FakeNodeRepository()
         recentAddressesDataSource = mock { every { recentAddresses } returns recentAddressesFlow }
-        databaseManager = mock { every { hasDatabaseFor(any()) } returns false }
+        databaseManager = FakeDatabaseManager()
 
         useCase =
             CommonGetDiscoveredDevicesUseCase(
                 recentAddressesDataSource = recentAddressesDataSource,
                 nodeRepository = nodeRepository,
                 databaseManager = databaseManager,
+                nodeManager = nodeManager,
             )
     }
 
@@ -130,26 +135,37 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     }
 
     @Test
-    fun testNodeMatchingWithSuffix() = runTest {
+    fun `recent radio shows the node it reported at association and never a node matching its name suffix`() = runTest {
         setUp()
-        val testNode = TestDataFactory.createTestNode(num = 1, userId = "!test1234", longName = "Test Node")
-        nodeRepository.setNodes(listOf(testNode))
-
-        databaseManager = mock { every { hasDatabaseFor("tMeshtastic_1234") } returns true }
-        useCase =
-            CommonGetDiscoveredDevicesUseCase(
-                recentAddressesDataSource = recentAddressesDataSource,
-                nodeRepository = nodeRepository,
-                databaseManager = databaseManager,
-            )
-
-        recentAddressesFlow.value = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
+        // Issue #8228: the radio advertises SD7T_964e; on firmware 2.8 its node number is crc32 of its key, while
+        // another node on the mesh, ptzm, has an id ending in 964e.
+        val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d", longName = "SD7T")
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e", longName = "ptzm")
+        nodeRepository.setNodes(listOf(sd7t, ptzm))
+        recentAddressesFlow.value = listOf(RecentAddress("t192.168.1.50", "SD7T_964e"))
 
         useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
-            val result = awaitItem()
-            result.recentTcpDevices.size shouldBe 1
-            assertNotNull(result.recentTcpDevices[0].node, "Node should be matched by suffix")
-            result.recentTcpDevices[0].node?.user?.id shouldBe testNode.user.id
+            awaitItem().recentTcpDevices.single().node shouldBe null
+
+            databaseManager.switchActiveDatabase("t192.168.1.50")
+            databaseManager.associateDevice("t192.168.1.50", sd7t.num, deviceId = null) { true }
+
+            awaitItem().recentTcpDevices.single().node shouldBe sd7t
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `discovered radio announcing no id shows the node recorded for its address`() = runTest {
+        setUp()
+        val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d")
+        nodeRepository.setNodes(listOf(sd7t))
+        databaseManager.localNodeNumsFlow.value = mapOf(normalizeAddress("t192.168.1.50") to sd7t.num)
+        resolvedServicesFlow.value =
+            listOf(DiscoveredService(name = "Meshtastic", hostAddress = "192.168.1.50", port = 4403, txt = emptyMap()))
+
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
+            awaitItem().discoveredTcpDevices.single().node shouldBe sd7t
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -216,13 +232,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val testNode = TestDataFactory.createTestNode(num = 1, userId = "!1234", longName = "Mesh")
         nodeRepository.setNodes(listOf(testNode))
 
-        databaseManager = mock { every { hasDatabaseFor("t192.168.1.50") } returns true }
-        useCase =
-            CommonGetDiscoveredDevicesUseCase(
-                recentAddressesDataSource = recentAddressesDataSource,
-                nodeRepository = nodeRepository,
-                databaseManager = databaseManager,
-            )
+        databaseManager.existingDatabases += "t192.168.1.50"
 
         resolvedServicesFlow.value =
             listOf(

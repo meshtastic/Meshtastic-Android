@@ -17,8 +17,10 @@
 package org.meshtastic.core.database
 
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.common.util.normalizeAddress
 
 // DatabaseManager.associateDevice's Preferences helpers, kept out of commonMain because Preferences has no wasmJs
 // variant.
@@ -43,3 +45,16 @@ internal fun resolveDbClaim(
     deviceKey: Preferences.Key<String>?,
     nodeKey: Preferences.Key<String>,
 ): String? = deviceKey?.let { prefs[it] } ?: prefs[nodeKey]
+
+/** Datastore key holding the local node number the radio at [address] reported in its last associated handshake. */
+internal fun localNodeNumPrefKey(address: String): Preferences.Key<Int> =
+    intPreferencesKey("${DatabaseConstants.LOCAL_NODE_NUM_FOR_PREFIX}${normalizeAddress(address)}")
+
+/** Every recorded local node number, keyed by normalized transport address. */
+internal fun localNodeNumsFrom(prefs: Preferences): Map<String, Int> = prefs
+    .asMap()
+    .mapNotNull { (key, value) ->
+        val address = key.name.removePrefix(DatabaseConstants.LOCAL_NODE_NUM_FOR_PREFIX)
+        if (address == key.name || value !is Int) null else address to value
+    }
+    .toMap()
