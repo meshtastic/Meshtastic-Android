@@ -19,13 +19,11 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.Position
@@ -64,11 +62,11 @@ internal fun editSettingsFailureMessage(result: AdminResult<*>): String =
  * [AdminController] implementation: local/remote configuration, channels, owner, device lifecycle, and the
  * [editSettings] transaction.
  *
- * Focused collaborator of [RadioControllerImpl]. Every command runs on the active session's SDK admin API; standalone
- * writes may update local caches optimistically. The [editSettings] transaction runs on the active session's SDK admin
- * API and stages its local projections until the SDK reports the commit applied, so failed edits cannot publish
- * settings the device did not commit. The device remains the source of truth and re-sends its full config on every
- * connection.
+ * Focused collaborator of [RadioControllerImpl]. Every command runs on the active session's SDK admin API. An
+ * acknowledged write to the local node reaches the app's caches through the SDK session events (`ConfigChanged`,
+ * `ChannelsChanged`, `NodeChanged`), so this class projects only what the SDK does not report: a remote node's owner,
+ * ham mode, and fixed positions. The [editSettings] transaction stages those projections until the SDK reports the
+ * commit applied, so a failed edit cannot publish settings the device did not commit.
  */
 @Suppress("TooManyFunctions")
 internal class AdminControllerImpl(
@@ -77,7 +75,6 @@ internal class AdminControllerImpl(
     private val radio: RadioInterfaceService,
     private val sessionAdmin: SessionAdmin,
     private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
-    private val scope: CoroutineScope,
 ) : AdminController {
 
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
@@ -108,8 +105,11 @@ internal class AdminControllerImpl(
 
     // ── Owner ───────────────────────────────────────────────────────────────
 
-    override suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit> =
-        onNode(destNum) { setOwner(user) }.onSuccess { nodeManager.handleReceivedUser(destNum, user) }
+    override suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit> {
+        val local = isLocal(destNum)
+        return onNode(destNum) { setOwner(user) }
+            .onSuccess { if (!local) nodeManager.handleReceivedUser(destNum, user) }
+    }
 
     override suspend fun getOwner(destNum: Int): AdminResult<User> = onNode(destNum, read = true) { getOwner() }
 
@@ -158,7 +158,6 @@ internal class AdminControllerImpl(
         ) {
             setConfig(config)
         }
-        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
     override fun setDisplayMirror(enabled: Boolean) {
@@ -199,10 +198,7 @@ internal class AdminControllerImpl(
         if (!isLocal(destNum)) return onNode(destNum) { setConfig(config) }
         val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
         return onNode(destNum) { setConfig(config) }
-            .onSuccess {
-                if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite()
-                scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-            }
+            .onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
     override suspend fun getConfig(destNum: Int, configType: Int): AdminResult<Config> {
@@ -212,12 +208,6 @@ internal class AdminControllerImpl(
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): AdminResult<Unit> =
         onNode(destNum) { setModuleConfig(config) }
-            .onSuccess {
-                if (isLocal(destNum)) {
-                    config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
-                    scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-                }
-            }
 
     override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): AdminResult<ModuleConfig> {
         val type =
@@ -238,17 +228,13 @@ internal class AdminControllerImpl(
         ) {
             setChannel(channel)
         }
-        scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
     }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel): AdminResult<Unit> {
         if (!isLocal(destNum)) return onNode(destNum) { setChannel(channel) }
         val movesSlot = heardOnCurrentLoraRefresher.movesSlot(channel)
         return onNode(destNum) { setChannel(channel) }
-            .onSuccess {
-                if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite()
-                scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
-            }
+            .onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
     override suspend fun getChannel(destNum: Int, index: Int): AdminResult<Channel> =
@@ -333,9 +319,10 @@ internal class AdminControllerImpl(
 
     /**
      * Runs [block] in the active session's SDK `editSettings`, addressed with `forNode` unless [destNum] is the local
-     * node. The SDK owns begin, commit and the commit-on-cancellation rule. Staged projections are applied only once it
-     * reports the commit applied, and only while the same session still owns the database; a local BLE commit drops the
-     * link, and the next session's config download carries the committed values instead.
+     * node. The SDK owns begin, commit and the commit-on-cancellation rule, and reports a local commit's config and
+     * owner as session events. The projections the SDK does not report are applied only once it reports the commit
+     * applied, and only while the same session still owns the database; a local BLE commit drops the link, and the next
+     * session's config download carries the committed values instead.
      */
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
@@ -356,7 +343,7 @@ internal class AdminControllerImpl(
         editSettings(localNodeNum, block)
     }
 
-    /** Forwards [AdminEditScope] writes to the SDK transaction and stages their local projections. */
+    /** Forwards [AdminEditScope] writes to the SDK transaction and stages the projections the SDK does not report. */
     private inner class EditSettingsScope(
         private val edit: AdminEdit,
         private val destNum: Int,
@@ -365,23 +352,12 @@ internal class AdminControllerImpl(
     ) : AdminEditScope {
         override suspend fun setOwner(user: User) {
             edit.setOwner(user)
-            projections.stage { nodeManager.handleReceivedUser(destNum, user) }
+            if (!isLocalDestination) projections.stage { nodeManager.handleReceivedUser(destNum, user) }
         }
 
-        override suspend fun setConfig(config: Config) {
-            edit.setConfig(config)
-            if (isLocalDestination) projections.stage { radioConfigRepository.setLocalConfig(config) }
-        }
+        override suspend fun setConfig(config: Config) = edit.setConfig(config)
 
-        override suspend fun setModuleConfig(config: ModuleConfig) {
-            edit.setModuleConfig(config)
-            if (isLocalDestination) {
-                projections.stage {
-                    config.statusmessage?.let { status -> nodeManager.updateNodeStatus(destNum, status.node_status) }
-                    radioConfigRepository.setLocalModuleConfig(config)
-                }
-            }
-        }
+        override suspend fun setModuleConfig(config: ModuleConfig) = edit.setModuleConfig(config)
 
         // Unlike one-shot writes, a transaction can replace several slots. This scope cannot infer the complete target
         // set, so the operation adding channel writes must reconcile that set after the transaction; mirroring slots

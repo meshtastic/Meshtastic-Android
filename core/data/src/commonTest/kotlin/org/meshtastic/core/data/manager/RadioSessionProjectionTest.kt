@@ -22,6 +22,9 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
@@ -43,19 +46,30 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ConfigBundle
+import org.meshtastic.sdk.Frame
+import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
+import org.meshtastic.sdk.TransportIdentity
+import org.meshtastic.sdk.WireFraming
+import org.meshtastic.sdk.testing.FakeRadioTransport
+import org.meshtastic.sdk.testing.toFrame
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.meshtastic.sdk.RadioTransport as SdkRadioTransport
 
 class RadioSessionProjectionTest {
 
@@ -247,6 +261,38 @@ class RadioSessionProjectionTest {
     }
 
     @Test
+    fun `an acknowledged local config write reaches the radio config through the SDK session`() = runTest {
+        val harness = Harness(backgroundScope)
+        val link = FakeRadioTransport(TransportIdentity("fake:config"), autoHandshake = true, nodeNum = LOCAL)
+        val client =
+            RadioClient.Builder()
+                .transport(ConfigDownloadTransport(link, lora(Config.LoRaConfig.ModemPreset.LONG_FAST)))
+                .storage(InMemoryStorageProvider())
+                .coroutineContext(backgroundScope.coroutineContext)
+                .autoSyncTimeOnConnect(false)
+                .sessionReceive()
+                .build()
+        val events = checkNotNull(client.sessionEvents)
+        backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            events.collect { if (it !is RadioSessionEvent.Ready) harness.projection.project(it, harness.session) }
+        }
+        client.connect()
+        runCurrent()
+        assertNull(harness.radioConfig.lastSetLocalConfig)
+
+        val written = lora(Config.LoRaConfig.ModemPreset.MEDIUM_FAST)
+        val write = async { client.admin.setConfig(written) }
+        runCurrent()
+        val request = link.outboundPackets().last { it.admin()?.set_config != null }
+        link.injectRoutingAck(request.id, fromNode = LOCAL)
+        assertTrue(write.await() is AdminResult.Success)
+        runCurrent()
+
+        assertEquals(written, harness.radioConfig.lastSetLocalConfig)
+        client.disconnect()
+    }
+
+    @Test
     fun `a received admin packet is logged with its passkey cleared and reaches the data handler intact`() = runTest {
         val handled = mutableListOf<MeshPacket>()
         val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
@@ -267,6 +313,38 @@ class RadioSessionProjectionTest {
         assertEquals(ByteString.EMPTY, loggedAdmin.session_passkey)
         assertFalse(row.raw_message.contains(secret.hex()))
         assertEquals(listOf(adminPayload), handled.map { it.decoded?.payload })
+    }
+
+    private fun lora(preset: Config.LoRaConfig.ModemPreset) = Config.Builder()
+        .also { c ->
+            c.lora =
+                Config.LoRaConfig.Builder()
+                    .also {
+                        it.use_preset = true
+                        it.modem_preset = preset
+                    }
+                    .build()
+        }
+        .build()
+
+    private fun MeshPacket.admin(): AdminMessage? =
+        decoded?.takeIf { it.portnum == PortNum.ADMIN_APP }?.let { AdminMessage.ADAPTER.decode(it.payload) }
+
+    /** Sends [config] in the config download ahead of my_info; the SDK's fake transport downloads no config. */
+    private class ConfigDownloadTransport(private val link: FakeRadioTransport, private val config: Config) :
+        SdkRadioTransport by link {
+        private var configSent = false
+
+        override suspend fun send(frame: Frame) {
+            val bytes = frame.bytes.toByteArray()
+            val wantsConfig =
+                ToRadio.ADAPTER.decode(bytes.copyOfRange(WireFraming.HEADER_SIZE, bytes.size)).want_config_id != null
+            if (wantsConfig && !configSent) {
+                configSent = true
+                link.injectFrame(FromRadio.Builder().also { it.config = config }.build().toFrame())
+            }
+            link.send(frame)
+        }
     }
 
     @Suppress("LongParameterList")

@@ -104,7 +104,6 @@ class HeardOnCurrentLoraRefresherTest {
             radioOperationLock = radioOperationLock,
             scope = backgroundScope,
         ),
-        scope = backgroundScope,
     )
 
     private fun lora(build: Config.LoRaConfig.Builder.() -> Unit) =

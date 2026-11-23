@@ -93,7 +93,7 @@ internal suspend fun restoreLocalConfigurationIfOwned(
  * Rather than implementing every command itself, this class **assembles** four focused collaborators — one per
  * sub-interface — and delegates to them via Kotlin interface delegation, mirroring the SDK's layered API design
  * ([AdminController] → `AdminApi`, [MessagingController] → `RadioClient.send*`, [NodeController]/[QueryController] →
- * `AdminApi`/`TelemetryApi`/`RoutingApi`). When the SDK is adopted, each collaborator becomes a thin adapter and this
+ * `AdminApi`/`TelemetryApi`/`RoutingApi`). Each collaborator is a thin adapter over the session's SDK client, and this
  * class is the seam where they are wired together.
  *
  * Only the cross-cutting concerns that don't belong to any single sub-interface live here directly: connection-state
@@ -146,7 +146,6 @@ class RadioControllerImpl(
             radioOperationLock = radioOperationLock,
             scope = scope,
         ),
-        scope = scope,
     ),
     MessagingController by MessagingControllerImpl(
         packetHandler,

@@ -1195,16 +1195,12 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun editSettingsAppliesStagedLocalProjectionsOnlyAfterTheCommit() = runTest {
+    fun editLocalSettingsLeavesConfigAndOwnerToTheSdkAndProjectsTheFixedPositionAfterTheCommit() = runTest {
         val admin = recordingAdmin()
         val controller = editController(backgroundScope, admin)
         val fixedPosition = Position(latitude = 47.6, longitude = -122.3, altitude = 42)
         admin.beforeCommit = {
-            verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
-            verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
             verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
-            verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
-            verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
         }
 
         controller.editLocalSettings {
@@ -1216,30 +1212,28 @@ class RadioControllerImplTest {
         advanceUntilIdle()
 
         assertEquals(1, admin.commits)
-        verify(exactly(1)) { nodeManager.handleReceivedUser(1234, committedOwner, any(), any(), any()) }
-        verify(exactly(1)) { nodeManager.updateNodeStatus(1234, "Ready") }
         verify(exactly(1)) { nodeManager.handleReceivedPosition(1234, 1234, any(), any(), any()) }
-        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(deviceConfig) }
-        verifySuspend(exactly(1)) { radioConfigRepository.setLocalModuleConfig(statusModuleConfig) }
+        // The SDK reports the committed local config, module config and owner as session events.
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
     }
 
     @Test
-    fun editSettingsRetainsInterleavedStagedLocalProjections() = runTest {
+    fun editSettingsRetainsInterleavedStagedProjections() = runTest {
         val controller = editController(backgroundScope, recordingAdmin())
 
-        controller.editLocalSettings {
+        controller.editSettings(destNum = 99) {
             coroutineScope {
                 launch { setOwner(committedOwner) }
-                launch { setConfig(deviceConfig) }
-                launch { setModuleConfig(statusModuleConfig) }
+                launch { setFixedPosition(Position(latitude = 47.6, longitude = -122.3, altitude = 42)) }
             }
         }
         advanceUntilIdle()
 
-        verify(exactly(1)) { nodeManager.handleReceivedUser(1234, committedOwner, any(), any(), any()) }
-        verify(exactly(1)) { nodeManager.updateNodeStatus(1234, "Ready") }
-        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(deviceConfig) }
-        verifySuspend(exactly(1)) { radioConfigRepository.setLocalModuleConfig(statusModuleConfig) }
+        verify(exactly(1)) { nodeManager.handleReceivedUser(99, committedOwner, any(), any(), any()) }
+        verify(exactly(1)) { nodeManager.handleReceivedPosition(99, 1234, any(), any(), any()) }
     }
 
     @Test
@@ -1273,18 +1267,18 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun editSettingsContinuesLocalProjectionsAfterOneFails() = runTest {
+    fun editSettingsContinuesProjectionsAfterOneFails() = runTest {
         val controller = editController(backgroundScope, recordingAdmin())
         every { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) } throws
             IllegalStateException("projection failed")
 
-        controller.editLocalSettings {
+        controller.editSettings(destNum = 99) {
             setOwner(committedOwner)
-            setConfig(deviceConfig)
+            setFixedPosition(Position(latitude = 47.6, longitude = -122.3, altitude = 42))
         }
         advanceUntilIdle()
 
-        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(deviceConfig) }
+        verify(exactly(1)) { nodeManager.handleReceivedPosition(99, 1234, any(), any(), any()) }
     }
 
     @Test
@@ -1354,11 +1348,11 @@ class RadioControllerImplTest {
         val controller = editController(backgroundScope, admin, activeSession = activeSession)
         admin.beforeCommit = { activeSession.value = null }
 
-        controller.editLocalSettings { setConfig(deviceConfig) }
+        controller.editLocalSettings { setFixedPosition(Position(latitude = 47.6, longitude = -122.3, altitude = 42)) }
         advanceUntilIdle()
 
         assertEquals(1, admin.commits)
-        verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
     }
 
     @Test
