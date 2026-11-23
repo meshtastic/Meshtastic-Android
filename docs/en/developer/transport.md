@@ -54,7 +54,7 @@ the granted browser streams and feeds the shared SDK frame assembler.
 
 **Module:** `meshtastic-sdk:transport-tcp`
 
-**Platforms:** Android, Desktop
+**Platforms:** Android, Desktop (a browser opens no raw sockets, so the web uses WebSocket instead)
 
 Network-based transport for Wi-Fi-enabled nodes:
 - TCP socket connection to the node's IP address
@@ -108,8 +108,8 @@ addresses, and the Android factory refuses serial addresses on hardware with no 
 address restored onto such a device is kept but never armed.
 
 Platform-specific implementations:
-- **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
-- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE + USB + TCP; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
+- **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP + WebSocket; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
+- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE + USB + TCP + WebSocket; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
 - **iOS:** The app has no iOS radio transport or `RadioTransportFactory`, and no iOS app ships
 
