@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1546,7 +1548,8 @@ class SharedRadioInterfaceServiceLivenessTest {
         val service = createPhoneApiService(callbacks)
         try {
             val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
-            callbacks.single()
+            callbacks
+                .single()
                 .onPhoneApiSessionEnded(recoverable = false, reason = TransportDisconnectReason.FirmwareTooOld)
             advanceTimeBy(60_000L)
 
@@ -1554,6 +1557,40 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(ConnectionState.Disconnected, service.connectionState.value)
             // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
             assertEquals(connectionErrorText(TransportDisconnectReason.FirmwareTooOld), error.await())
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a retry that fails the same way does not repeat its message`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            val shown = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.take(2).toList() }
+            // Main's WebSocket loop showed one message per kind of failure, not one per retry.
+            repeat(3) {
+                callbacks
+                    .last()
+                    .onPhoneApiSessionEnded(
+                        recoverable = true,
+                        reason = TransportDisconnectReason.WebSocketConnectFailed,
+                    )
+                advanceTimeBy(60_000L)
+            }
+            callbacks
+                .last()
+                .onPhoneApiSessionEnded(recoverable = true, reason = TransportDisconnectReason.WebSocketTlsFailed)
+            advanceTimeBy(60_000L)
+
+            assertEquals(5, callbacks.size)
+            assertEquals(
+                listOf(
+                    connectionErrorText(TransportDisconnectReason.WebSocketConnectFailed),
+                    connectionErrorText(TransportDisconnectReason.WebSocketTlsFailed),
+                ),
+                shown.await(),
+            )
         } finally {
             service.disconnect()
         }

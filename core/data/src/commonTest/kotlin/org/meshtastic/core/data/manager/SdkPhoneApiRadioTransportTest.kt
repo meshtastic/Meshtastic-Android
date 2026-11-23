@@ -20,6 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
@@ -53,6 +54,7 @@ class SdkPhoneApiRadioTransportTest {
         scope: CoroutineScope,
         val link: FakeRadioTransport,
         open: suspend () -> SdkRadioTransport = { link },
+        history: WebSocketSessionHistory? = null,
     ) {
         private val fake =
             FakeRadioInterfaceService(scope).apply {
@@ -90,6 +92,7 @@ class SdkPhoneApiRadioTransportTest {
                 projection = lazy { radioSessionProjection(nodeManager, radio, scope) },
                 connectionManager = lazy { mock(MockMode.autofill) },
                 lockdownCoordinator = lazy { FakeLockdownCoordinator() },
+                webSocketHistory = history,
             )
 
         // Firmware answers want_config with my_info first (PhoneAPI STATE_SEND_MY_INFO).
@@ -166,7 +169,11 @@ class SdkPhoneApiRadioTransportTest {
     fun `firmware the SDK refuses as too old ends the session for good with its own reason`() = runTest {
         val link = FakeRadioTransport(TransportIdentity("fake:old"))
         val harness =
-            Harness(backgroundScope, link) { throw MeshtasticException.FirmwareTooOld(required = 30, present = 22) }
+            Harness(
+                backgroundScope,
+                link,
+                open = { throw MeshtasticException.FirmwareTooOld(required = 30, present = 22) },
+            )
         try {
             harness.transport.start()
             runCurrent()
@@ -182,13 +189,39 @@ class SdkPhoneApiRadioTransportTest {
     fun `an unexpected failure opening the link leaves the session to the retry`() = runTest {
         val link = FakeRadioTransport(TransportIdentity("fake:vanished"))
         // A serial port that disappeared between the retry's check and the open.
-        val harness = Harness(backgroundScope, link) { throw IllegalStateException("port is gone") }
+        val harness = Harness(backgroundScope, link, open = { throw IllegalStateException("port is gone") })
         try {
             harness.transport.start()
             runCurrent()
 
             assertEquals(listOf(true), harness.ends)
             assertEquals(listOf<TransportDisconnectReason?>(null), harness.reasons)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    @Test
+    fun `a WebSocket the radio gave to another client ends for good with that reason`() = runTest {
+        val link = FakeRadioTransport(TransportIdentity("fake:ws"))
+        val harness = Harness(backgroundScope, link, history = WebSocketSessionHistory { currentTime })
+        try {
+            harness.transport.start()
+            advanceTimeBy(HANDSHAKE_START_MS)
+            // The SDK WebSocketTransport's report of firmware's WS_CLOSE_REPLACED.
+            link.simulateError(
+                MeshtasticException.Transport(
+                    "WebSocket closed: another client took the node's only WebSocket slot (4001)",
+                ),
+                recoverable = false,
+            )
+            runCurrent()
+
+            assertEquals(listOf(false), harness.ends)
+            assertEquals(
+                listOf<TransportDisconnectReason?>(TransportDisconnectReason.ReplacedByAnotherClient),
+                harness.reasons,
+            )
         } finally {
             harness.transport.close()
         }

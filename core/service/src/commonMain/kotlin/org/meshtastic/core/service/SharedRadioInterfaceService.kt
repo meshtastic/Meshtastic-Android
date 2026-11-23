@@ -539,6 +539,12 @@ class SharedRadioInterfaceService(
      */
     private var phoneApiRetryDelay: Long? = null
 
+    /**
+     * The reason last shown for a retried PhoneAPI failure, so a retry that fails the same way stays quiet. Guarded by
+     * [transportMutex].
+     */
+    private var retryReason: TransportDisconnectReason? = null
+
     private val gattCacheInvalidationRequested = atomic(false)
 
     /** Prevents concurrent transport restarts from stacking. */
@@ -725,6 +731,7 @@ class SharedRadioInterfaceService(
                     }
                 }
                 phoneApiRetryDelay = null
+                retryReason = null
                 handshakeTimeouts = 0
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
@@ -741,6 +748,7 @@ class SharedRadioInterfaceService(
             // emission arriving while we wait for the mutex cannot re-start the transport.
             connectionRequested = false
             phoneApiRetryDelay = null
+            retryReason = null
             handshakeTimeouts = 0
             gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
@@ -814,6 +822,7 @@ class SharedRadioInterfaceService(
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
                 if (linkWasUp) {
                     phoneApiRetryDelay = null
+                    retryReason = null
                     handshakeTimeouts = 0
                 }
                 if (handshakeTimedOut) handshakeTimeouts++
@@ -823,6 +832,13 @@ class SharedRadioInterfaceService(
                     handshakeTimeouts = 0
                 }
                 if (!recoverable || recoveryExhausted) connectionRequested = false
+                val shownReason =
+                    when {
+                        recoveryExhausted -> TransportDisconnectReason.HandshakeRecoveryExhausted
+                        recoverable && reason == retryReason -> null
+                        else -> reason
+                    }
+                if (recoverable && reason != null) retryReason = reason
 
                 ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
                 onDisconnect(
@@ -831,7 +847,7 @@ class SharedRadioInterfaceService(
                         recoveryExhausted ||
                         (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
                     errorMessage = errorMessage.takeUnless { recoveryExhausted },
-                    reason = if (recoveryExhausted) TransportDisconnectReason.HandshakeRecoveryExhausted else reason,
+                    reason = shownReason,
                 )
                 if (!connectionRequested) return@launch
                 nextPhoneApiRetryDelay(interfaceId)
@@ -856,33 +872,32 @@ class SharedRadioInterfaceService(
             delay(wait)
             // Network and USB presence observers can restart a link once its environment is ready.
             if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) return
-            wait =
-                transportMutex.withLock {
-                    val stillOwed =
-                        connectionRequested &&
-                            radioTransport == null &&
-                            sessionGenerationCounter.value == session.generation &&
-                            getDeviceAddress() == session.address
-                    if (!stillOwed) return
-                    if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return
-                    if (radioOperationLock.suppressesTransport) return
-                    if (interfaceId == InterfaceId.SERIAL) {
-                        val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
-                        when (presence.key?.let(serialDevicePresence::portExists)) {
-                            // A rebooting radio re-enumerates, and no presence observer reports its port coming back.
-                            false -> return@withLock nextPhoneApiRetryDelay(interfaceId)
+            wait = transportMutex.withLock {
+                val stillOwed =
+                    connectionRequested &&
+                        radioTransport == null &&
+                        sessionGenerationCounter.value == session.generation &&
+                        getDeviceAddress() == session.address
+                if (!stillOwed) return
+                if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return
+                if (radioOperationLock.suppressesTransport) return
+                if (interfaceId == InterfaceId.SERIAL) {
+                    val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
+                    when (presence.key?.let(serialDevicePresence::portExists)) {
+                        // A rebooting radio re-enumerates, and no presence observer reports its port coming back.
+                        false -> return@withLock nextPhoneApiRetryDelay(interfaceId)
 
-                            true -> Unit
+                        true -> Unit
 
-                            // Legacy selections are bus paths. Let the USB factory try its single-device
-                            // resolution for those addresses even if the presence keys use VID/PID.
-                            null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return
-                        }
+                        // Legacy selections are bus paths. Let the USB factory try its single-device
+                        // resolution for those addresses even if the presence keys use VID/PID.
+                        null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return
                     }
-                    Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }
-                    ignoreExceptionSuspend { startTransportLocked() }
-                    return
                 }
+                Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }
+                ignoreExceptionSuspend { startTransportLocked() }
+                return
+            }
         }
     }
 
@@ -943,6 +958,7 @@ class SharedRadioInterfaceService(
                 connectionRequested = sanitized != null
                 awaitingUserConnect = false
                 phoneApiRetryDelay = null
+                retryReason = null
                 handshakeTimeouts = 0
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false

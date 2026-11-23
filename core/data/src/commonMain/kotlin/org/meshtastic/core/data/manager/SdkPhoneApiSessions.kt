@@ -33,11 +33,29 @@ internal class SdkPhoneApiSessions(
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
 ) : VirtualRadioSessionFactory {
-    fun open(service: RadioInterfaceService, transport: suspend () -> SdkRadioTransport): RadioTransport =
-        SdkPhoneApiRadioTransport(transport, service, projection, connectionManager, lockdownCoordinator)
+    /** Per URL, because each retry builds a fresh SDK transport. The service creates transports under one lock. */
+    private val webSocketHistories = mutableMapOf<String, WebSocketSessionHistory>()
 
-    fun webSocket(url: String, service: RadioInterfaceService): RadioTransport =
-        open(service) { WebSocketTransport(url) }
+    fun open(
+        service: RadioInterfaceService,
+        webSocketHistory: WebSocketSessionHistory? = null,
+        transport: suspend () -> SdkRadioTransport,
+    ): RadioTransport = SdkPhoneApiRadioTransport(
+        transport,
+        service,
+        projection,
+        connectionManager,
+        lockdownCoordinator,
+        webSocketHistory,
+    )
+
+    fun webSocket(url: String, service: RadioInterfaceService): RadioTransport {
+        val history = webSocketHistories.getOrPut(url) { WebSocketSessionHistory() }
+        return open(service, history) {
+            history.beforeConnect()
+            WebSocketTransport(url)
+        }
+    }
 
     override fun demo(address: String, service: RadioInterfaceService): RadioTransport =
         open(service) { MockRadioTransport(service.serviceScope, address) }

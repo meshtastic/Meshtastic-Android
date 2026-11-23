@@ -71,6 +71,7 @@ internal class SdkPhoneApiRadioTransport(
     private val projection: Lazy<RadioSessionProjection>,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val lockdownCoordinator: Lazy<LockdownCoordinator>,
+    private val webSocketHistory: WebSocketSessionHistory? = null,
 ) : RadioTransport {
 
     private val currentClient = MutableStateFlow<RadioClient?>(null)
@@ -105,10 +106,13 @@ internal class SdkPhoneApiRadioTransport(
         var handshakeTimedOut = false
         var reason: TransportDisconnectReason? = null
         var ble: BleTransport? = null
+        var link: WebSocketWatch? = null
         try {
             service.onStatus(TransportStatus(TransportPhase.Connecting))
-            val transport = openTransport()
-            ble = transport as? BleTransport
+            val opened = openTransport()
+            ble = opened as? BleTransport
+            link = webSocketHistory?.let { WebSocketWatch(opened, it) }
+            val transport = link ?: opened
             val client =
                 RadioClient.Builder()
                     .transport(transport)
@@ -138,6 +142,11 @@ internal class SdkPhoneApiRadioTransport(
             // A vanished serial port or a session the service retired mid-install; the retry backs off.
             reportSessionFailure(failure)
         } finally {
+            // Read before disconnect() resets the transport's state.
+            link?.end()?.let { end ->
+                recoverable = recoverable && end.recoverable
+                reason = reason ?: end.reason
+            }
             val client = currentClient.value
             currentClient.value = null
             withContext(NonCancellable) {
@@ -258,4 +267,25 @@ internal class SdkPhoneApiRadioTransport(
             lockdownCoordinator.value.onDisconnect()
         }
     }
+}
+
+/**
+ * Feeds [history] when the socket opens, and keeps the transport's last error, which the SDK's own teardown would
+ * otherwise reset through [disconnect] before the session's end is classified.
+ */
+private class WebSocketWatch(private val delegate: SdkRadioTransport, private val history: WebSocketSessionHistory) :
+    SdkRadioTransport by delegate {
+    private var lastError: TransportState.Error? = null
+
+    override suspend fun connect() {
+        delegate.connect()
+        history.onOpened()
+    }
+
+    override suspend fun disconnect() {
+        (delegate.state.value as? TransportState.Error)?.let { lastError = it }
+        delegate.disconnect()
+    }
+
+    fun end(): SessionEnd = history.onEnded(delegate.state.value as? TransportState.Error ?: lastError)
 }
