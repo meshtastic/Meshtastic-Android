@@ -70,6 +70,26 @@ class SdkLogBridgeTest {
     }
 
     @Test
+    fun `a lowercase BLE identity is anonymized too`() {
+        sdkLogSink.log(LogLevel.INFO, "Engine", "BLE link up (aa:bb:cc:dd:ee:f1)", null)
+
+        assertEquals("BLE link up (...:f1)", lines.single().message)
+    }
+
+    @Test
+    fun `an IPv6 host and a bare host name are anonymized while LAN ones stay whole`() {
+        sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:2001:db8:4::1:4403)", null)
+        sdkLogSink.log(LogLevel.WARN, "Engine", "Transport error: Unable to resolve host node.example.com", null)
+        sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:fe80::1:4403)", null)
+        sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:meshtastic.local:4403)", null)
+
+        val messages = lines.map { it.message }
+        assertTrue(messages.none { "2001:db8" in it || "node.example" in it }, "$messages")
+        assertEquals("Connect requested (transport=tcp:fe80::1:4403)", messages[2])
+        assertEquals("Connect requested (transport=tcp:meshtastic.local:4403)", messages[3])
+    }
+
+    @Test
     fun `a public host is anonymized while a LAN address stays whole`() {
         sdkLogSink.log(LogLevel.WARN, "Engine", "could not reach node.example.com:4403: refused", null)
         sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:203.0.113.9:4403)", null)
@@ -94,5 +114,17 @@ class SdkLogBridgeTest {
 
         assertEquals("Dropped FromRadio{…}", lines.single().message)
         assertFalse(lines.single().message.contains("meet"))
+    }
+
+    @Test
+    fun `a dump that spans lines is cut at its type`() {
+        sdkLogSink.log(
+            LogLevel.WARN,
+            "Engine",
+            "Dropped Data{portnum=TEXT_MESSAGE_APP,\npayload=[text=meet at 5]}",
+            null,
+        )
+
+        assertEquals("Dropped Data{…}", lines.single().message)
     }
 }

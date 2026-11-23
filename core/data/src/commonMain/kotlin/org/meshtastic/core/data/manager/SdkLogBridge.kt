@@ -52,7 +52,9 @@ internal fun scrubSdkLogLine(message: String, cause: Throwable? = null): String 
             .replace(MAC_ADDRESS) { it.value.anonymize }
             .replace(URL_HOST) { "${it.groupValues[1]}${it.groupValues[2].anonymizePublicHost()}" }
             .replace(DNS_HOST_PORT) { it.value.anonymizePublicHost() }
+            .replace(DNS_HOST) { it.value.anonymizePublicHost() }
             .replace(IPV4_HOST) { it.value.anonymizePublicHost() }
+            .replace(IPV6_CANDIDATE, ::scrubIpv6)
     return if (cause == null) scrubbed else "$scrubbed (${cause::class.simpleName})"
 }
 
@@ -64,5 +66,22 @@ private val MAC_ADDRESS = Regex("""\b[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}\b""")
 private val URL_HOST = Regex("""\b([a-z][a-z0-9+.-]*://)([^\s/:?#]+)""")
 
 private val DNS_HOST_PORT = Regex("""\b[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+:\d{1,5}\b""")
+
+/** A lowercase DNS name with no port, as a resolver failure names it. The SDK lowercases the hosts it reports. */
+private val DNS_HOST = Regex("""\b(?:[a-z0-9-]+\.)+[a-z]{2,24}\b""")
+
+/** Hex groups joined by colons, as an IPv6 literal with or without a port; [scrubIpv6] keeps only real addresses. */
+private val IPV6_CANDIDATE = Regex("""\[?\b(?:[0-9A-Fa-f]{1,4})?(?::(?:[0-9A-Fa-f]{1,4})?){2,8}\]?""")
+
+/** A full IPv6 address has seven colons and a compressed one has `::`; fewer is a time or a ratio. */
+private const val IPV6_MIN_COLONS = 5
+
+private fun scrubIpv6(match: MatchResult): String {
+    val value = match.value
+    if ("::" !in value && value.count { it == ':' } < IPV6_MIN_COLONS) return value
+    // `tcp:2001:db8::1:4403` matches from the identity's own colon; keep that separator.
+    val lead = if (value.startsWith(':') && !value.startsWith("::")) ":" else ""
+    return lead + value.removePrefix(lead).anonymizePublicHost()
+}
 
 private val IPV4_HOST = Regex("""\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?::\d{1,5})?\b""")
