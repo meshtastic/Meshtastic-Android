@@ -24,6 +24,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.testing.FakeDatabaseManager
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -205,6 +206,47 @@ class TcpDiscoveryHelpersTest {
             matchDiscoveredTcpNodes(entries, mapOf(sd7t.num to sd7t, ptzm.num to ptzm), resolved, databaseManager, nums)
 
         result.associate { it.fullAddress to it.node } shouldBe mapOf("t192.168.1.50" to ptzm, "t192.168.1.51" to null)
+    }
+
+    @Test
+    fun `matchDiscoveredTcpNodes labels the connected radio with the live node over the id it announces`() {
+        // The radio at .50 still announces ptzm's id, but its live handshake reports SD7T as its own node.
+        val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d")
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e")
+        val entries = listOf(DeviceListEntry.Tcp("ptzm_964e", "t192.168.1.50"))
+        val resolved =
+            listOf(DiscoveredService("ptzm", "192.168.1.50", 4403, mapOf("id" to "!5e6f964e".encodeToByteArray())))
+        val databaseManager = FakeDatabaseManager().apply { existingDatabases += "t192.168.1.50" }
+        val nums =
+            LocalNodeNums(
+                recorded = emptyMap(),
+                live = ConnectionIdentity(1L, "t192.168.1.50", sd7t.num, deviceId = null),
+            )
+
+        val result =
+            matchDiscoveredTcpNodes(entries, mapOf(sd7t.num to sd7t, ptzm.num to ptzm), resolved, databaseManager, nums)
+
+        result.single().node shouldBe sd7t
+    }
+
+    @Test
+    fun `matchDiscoveredTcpNodes shows no node for the connected radio while its live node is not in the node db`() {
+        // Connected to SD7T, whose own NodeInfo has not arrived yet; ptzm's announced id must not stand in for it.
+        val sd7tNum = 0x1A2B3C4D
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e")
+        val entries = listOf(DeviceListEntry.Tcp("ptzm_964e", "t192.168.1.50"))
+        val resolved =
+            listOf(DiscoveredService("ptzm", "192.168.1.50", 4403, mapOf("id" to "!5e6f964e".encodeToByteArray())))
+        val databaseManager = FakeDatabaseManager().apply { existingDatabases += "t192.168.1.50" }
+        val nums =
+            LocalNodeNums(
+                recorded = emptyMap(),
+                live = ConnectionIdentity(1L, "t192.168.1.50", sd7tNum, deviceId = null),
+            )
+
+        val result = matchDiscoveredTcpNodes(entries, mapOf(ptzm.num to ptzm), resolved, databaseManager, nums)
+
+        result.single().node shouldBe null
     }
 
     @Test
