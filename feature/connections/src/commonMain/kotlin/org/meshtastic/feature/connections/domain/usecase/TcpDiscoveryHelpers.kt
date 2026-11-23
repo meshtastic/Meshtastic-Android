@@ -81,8 +81,10 @@ internal fun matchDiscoveredTcpNodes(
 
             else -> null
         }
-    val matchingNode = nums.live(entry.fullAddress)?.let(nodeDb::get) ?: identified
-    entry.copy(node = matchingNode)
+    // A connected radio is its live node or, until that node's NodeInfo arrives, no node: any other match names a
+    // different radio.
+    val live = nums.live(entry.fullAddress)
+    entry.copy(node = if (live != null) nodeDb[live] else identified)
 }
 
 /**

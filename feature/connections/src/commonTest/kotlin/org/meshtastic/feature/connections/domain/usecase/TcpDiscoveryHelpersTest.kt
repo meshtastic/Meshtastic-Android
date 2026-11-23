@@ -230,6 +230,26 @@ class TcpDiscoveryHelpersTest {
     }
 
     @Test
+    fun `matchDiscoveredTcpNodes shows no node for the connected radio while its live node is not in the node db`() {
+        // Connected to SD7T, whose own NodeInfo has not arrived yet; ptzm's announced id must not stand in for it.
+        val sd7tNum = 0x1A2B3C4D
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e")
+        val entries = listOf(DeviceListEntry.Tcp("ptzm_964e", "t192.168.1.50"))
+        val resolved =
+            listOf(DiscoveredService("ptzm", "192.168.1.50", 4403, mapOf("id" to "!5e6f964e".encodeToByteArray())))
+        val databaseManager = FakeDatabaseManager().apply { existingDatabases += "t192.168.1.50" }
+        val nums =
+            LocalNodeNums(
+                recorded = emptyMap(),
+                live = ConnectionIdentity(1L, "t192.168.1.50", sd7tNum, deviceId = null),
+            )
+
+        val result = matchDiscoveredTcpNodes(entries, mapOf(ptzm.num to ptzm), resolved, databaseManager, nums)
+
+        result.single().node shouldBe null
+    }
+
+    @Test
     fun `buildRecentTcpEntries filters out discovered addresses`() {
         val recentAddresses = listOf(RecentAddress("t192.168.1.50", "NodeA"), RecentAddress("t192.168.1.51", "NodeB"))
         val discoveredAddresses = setOf("t192.168.1.50")
