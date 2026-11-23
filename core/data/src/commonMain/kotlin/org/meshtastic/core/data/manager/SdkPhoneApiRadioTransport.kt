@@ -104,6 +104,7 @@ internal class SdkPhoneApiRadioTransport(
     private suspend fun runPhoneApiSession() {
         var recoverable = true
         var handshakeTimedOut = false
+        var receiveOverflowed = false
         var reason: TransportDisconnectReason? = null
         var ble: BleTransport? = null
         var link: WebSocketWatch? = null
@@ -128,6 +129,7 @@ internal class SdkPhoneApiRadioTransport(
         } catch (overflow: RadioSessionOverflowException) {
             // A fresh session re-reads the radio, so the lost events cost one reconnect, not the connection.
             Logger.w(overflow) { "SDK PhoneAPI lost receive coverage in app session ${session.generation}" }
+            receiveOverflowed = true
         } catch (failure: MeshtasticException.Transport) {
             reportSessionFailure(failure)
         } catch (failure: MeshtasticException.HandshakeTimeout) {
@@ -157,7 +159,12 @@ internal class SdkPhoneApiRadioTransport(
                 }
             }
         }
-        service.onPhoneApiSessionEnded(recoverable, handshakeTimedOut = handshakeTimedOut, reason = reason)
+        service.onPhoneApiSessionEnded(
+            recoverable,
+            handshakeTimedOut = handshakeTimedOut,
+            reason = reason,
+            receiveOverflowed = receiveOverflowed,
+        )
     }
 
     private fun reportSessionFailure(failure: Exception) {

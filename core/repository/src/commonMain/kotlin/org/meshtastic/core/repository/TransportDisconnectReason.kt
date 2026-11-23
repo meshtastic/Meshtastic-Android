@@ -42,7 +42,10 @@ enum class TransportDisconnectReason {
     /** The WebSocket kept dropping right after opening without a close frame, the sign of two clients taking turns. */
     WebSocketSlotContested,
 
-    /** The handshake timed out after every restart the service allows, so the radio waits for the user to connect. */
+    /**
+     * The handshake timed out, or the receive queue overflowed, after every restart the service allows, so the radio
+     * waits for the user to connect.
+     */
     HandshakeRecoveryExhausted,
 
     /** The radio's firmware is older than the SDK supports, so the session was refused until the radio is updated. */

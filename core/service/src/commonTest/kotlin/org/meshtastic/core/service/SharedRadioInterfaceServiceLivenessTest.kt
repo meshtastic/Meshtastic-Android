@@ -1497,6 +1497,35 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `receive overflow recovery stops after three restarts even though each session reached Ready`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createPhoneApiService(callbacks)
+            try {
+                // MeshConnectionManagerImpl on main: MAX_CONSECUTIVE_RECOVERY_FAILURES = 3.
+                repeat(3) { restart ->
+                    callbacks.last().onConnect()
+                    callbacks.last().onPhoneApiSessionEnded(recoverable = true, receiveOverflowed = true)
+                    advanceTimeBy(60_000L)
+                    assertEquals(restart + 2, callbacks.size)
+                }
+                val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
+
+                callbacks.last().onConnect()
+                callbacks.last().onPhoneApiSessionEnded(recoverable = true, receiveOverflowed = true)
+                advanceTimeBy(60_000L)
+
+                assertEquals(4, callbacks.size)
+                assertNull(service.activeSession.value)
+                assertEquals(ConnectionState.Disconnected, service.connectionState.value)
+                // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
+                assertEquals(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted), error.await())
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    @Test
     fun `a user connect mid streak starts a fresh run of handshake restarts`() = runTest(testDispatcher) {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks)

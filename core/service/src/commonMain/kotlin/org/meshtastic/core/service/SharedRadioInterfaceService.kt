@@ -530,8 +530,10 @@ class SharedRadioInterfaceService(
     // again: a recovery restart would take the slot back from the client that now holds it.
     @Volatile private var awaitingUserConnect = false
 
-    /** Consecutive PhoneAPI sessions whose handshake timed out. Guarded by [transportMutex]. */
-    private var handshakeTimeouts = 0
+    /**
+     * Consecutive PhoneAPI sessions whose handshake timed out or whose receive overflowed. Guarded by [transportMutex].
+     */
+    private var recoveryRestarts = 0
 
     /**
      * Backoff for consecutive PhoneAPI connection failures; null starts from the link's first retry delay. Guarded by
@@ -566,8 +568,11 @@ class SharedRadioInterfaceService(
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
         private const val PHONE_API_INITIAL_RETRY_MS = 1_000L
 
-        /** Restarting the handshake crashes some firmware, so a radio that keeps timing out is left to the user. */
-        private const val MAX_HANDSHAKE_RECOVERIES = 3
+        /**
+         * Restarting the handshake crashes some firmware, and a burst that overflows every session will overflow the
+         * next, so a radio that keeps failing either way is left to the user.
+         */
+        private const val MAX_RECOVERY_RESTARTS = 3
 
         /** Firmware frees its GATT session only seconds after a link drops, so a BLE retry waits for that first. */
         private const val BLE_INITIAL_RETRY_MS = 3_000L
@@ -732,7 +737,7 @@ class SharedRadioInterfaceService(
                 }
                 phoneApiRetryDelay = null
                 retryReason = null
-                handshakeTimeouts = 0
+                recoveryRestarts = 0
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -749,7 +754,7 @@ class SharedRadioInterfaceService(
             connectionRequested = false
             phoneApiRetryDelay = null
             retryReason = null
-            handshakeTimeouts = 0
+            recoveryRestarts = 0
             gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
         }
@@ -813,6 +818,7 @@ class SharedRadioInterfaceService(
         errorMessage: String?,
         handshakeTimedOut: Boolean,
         reason: TransportDisconnectReason?,
+        receiveOverflowed: Boolean,
     ) {
         val interfaceId = DeviceAddress.parse(session.address)?.interfaceId
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
@@ -820,16 +826,17 @@ class SharedRadioInterfaceService(
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
-                if (linkWasUp) {
+                // A session that reached Ready and ended without overflowing was stable.
+                if (linkWasUp && !receiveOverflowed) {
                     phoneApiRetryDelay = null
                     retryReason = null
-                    handshakeTimeouts = 0
+                    recoveryRestarts = 0
                 }
-                if (handshakeTimedOut) handshakeTimeouts++
-                val recoveryExhausted = handshakeTimeouts > MAX_HANDSHAKE_RECOVERIES
+                if (handshakeTimedOut || receiveOverflowed) recoveryRestarts++
+                val recoveryExhausted = recoveryRestarts > MAX_RECOVERY_RESTARTS
                 if (recoveryExhausted) {
-                    Logger.w { "PhoneAPI handshake recovery exhausted after $MAX_HANDSHAKE_RECOVERIES restarts" }
-                    handshakeTimeouts = 0
+                    Logger.w { "PhoneAPI recovery exhausted after $MAX_RECOVERY_RESTARTS restarts" }
+                    recoveryRestarts = 0
                 }
                 if (!recoverable || recoveryExhausted) connectionRequested = false
                 val shownReason =
@@ -959,7 +966,7 @@ class SharedRadioInterfaceService(
                 awaitingUserConnect = false
                 phoneApiRetryDelay = null
                 retryReason = null
-                handshakeTimeouts = 0
+                recoveryRestarts = 0
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }
@@ -1260,8 +1267,9 @@ class SharedRadioInterfaceService(
             errorMessage: String?,
             handshakeTimedOut: Boolean,
             reason: TransportDisconnectReason?,
+            receiveOverflowed: Boolean,
         ) {
-            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut, reason)
+            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut, reason, receiveOverflowed)
         }
 
         override fun onStatus(status: TransportStatus) {

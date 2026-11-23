@@ -68,6 +68,9 @@ class SdkPhoneApiRadioTransportTest {
         /** Each `handshakeTimedOut` the transport reported when its session ended. */
         val timeouts = mutableListOf<Boolean>()
 
+        /** Each `receiveOverflowed` the transport reported when its session ended. */
+        val overflows = mutableListOf<Boolean>()
+
         /** Each `reason` the transport reported when its session ended. */
         val reasons = mutableListOf<TransportDisconnectReason?>()
         val radio: RadioInterfaceService =
@@ -77,7 +80,9 @@ class SdkPhoneApiRadioTransportTest {
                     errorMessage: String?,
                     handshakeTimedOut: Boolean,
                     reason: TransportDisconnectReason?,
+                    receiveOverflowed: Boolean,
                 ) {
+                    overflows += receiveOverflowed
                     ends += recoverable
                     timeouts += handshakeTimedOut
                     reasons += reason
@@ -146,6 +151,7 @@ class SdkPhoneApiRadioTransportTest {
 
             assertEquals(listOf(true), harness.ends)
             assertEquals(listOf(false), harness.timeouts)
+            assertEquals(listOf(true), harness.overflows)
         } finally {
             harness.transport.close()
         }
