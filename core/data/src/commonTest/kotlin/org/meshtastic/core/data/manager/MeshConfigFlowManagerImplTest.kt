@@ -226,7 +226,10 @@ class MeshConfigFlowManagerImplTest {
         // Main applied each handshake module config's statusmessage to the local node (MeshConfigHandlerImpl).
         val status =
             ModuleConfig.Builder()
-                .also { it.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { s -> s.node_status = "On duty" }.build() }
+                .also {
+                    it.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { s -> s.node_status = "On duty" }.build()
+                }
                 .build()
         val callOrder = mutableListOf<String>()
         everySuspend { nodeManager.updateNodeStatusAndPersist(any(), any()) } calls

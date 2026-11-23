@@ -597,6 +597,7 @@ class SharedRadioInterfaceService(
         /** How long a link must stay up after Ready before its end resets the backoff. */
         private fun minStableMillis(interfaceId: InterfaceId?): Long =
             if (interfaceId == InterfaceId.BLUETOOTH) BLE_MIN_STABLE_MS else MIN_STABLE_MS
+
         private const val PHONE_API_MAX_RETRY_MS = 30_000L
     }
 
@@ -847,10 +848,11 @@ class SharedRadioInterfaceService(
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
-                // Read before the stop clears it. A link that came up and dropped reads as lost, as main's BLE retry did.
+                // Read before the stop clears it. A link that came up and dropped reads as lost, as on main.
                 val failure =
-                    _transportStatus.value?.lastFailure?.takeUnless { linkWasUp && it.kind == TransportFailureKind.Unknown }
-                        ?: TransportFailure(TransportFailureKind.LinkLost).takeIf { linkWasUp }
+                    _transportStatus.value?.lastFailure?.takeUnless {
+                        linkWasUp && it.kind == TransportFailureKind.Unknown
+                    } ?: TransportFailure(TransportFailureKind.LinkLost).takeIf { linkWasUp }
                 // A completed handshake ends the restart run, as main's did. Only a link that also stayed up past
                 // main's minimum resets the backoff, so a radio that crashes after config is not redialed at once.
                 val handshakeCompleted = linkWasUp && !receiveOverflowed
@@ -948,7 +950,8 @@ class SharedRadioInterfaceService(
 
                         // Legacy selections are bus paths. Let the USB factory try its single-device
                         // resolution for those addresses even if the presence keys use VID/PID.
-                        null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return dropRetryStatus()
+                        null ->
+                            if (!presence.present && presence.key?.startsWith("/dev/") != true) return dropRetryStatus()
                     }
                 }
                 Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }

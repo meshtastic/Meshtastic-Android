@@ -3678,7 +3678,8 @@ class NodeManagerImplTest {
 
     @Test
     fun `a node the radio re-adds from a packet keeps the mute and channel and signing the app holds`() {
-        // Firmware clears an evicted node's bitfield (NodeDB.cpp), and the SDK builds the re-heard node from the packet.
+        // Firmware clears an evicted node's bitfield (NodeDB.cpp), and the SDK builds the re-heard node from the
+        // packet.
         nodeManager.updateNode(LIVE_NODE) {
             it.copy(user = liveUser(LIVE_NODE), isMuted = true, channel = 2, signsPackets = true)
         }

@@ -134,7 +134,11 @@ class MeshConnectionManagerImpl(
             .distinctUntilChanged()
             .onEach { handshaking ->
                 safeCatching {
-                    if (handshaking) onHandshakeStarted() else onRadioConnectionState(radioInterfaceService.connectionState.value)
+                    if (handshaking) {
+                        onHandshakeStarted()
+                    } else {
+                        onRadioConnectionState(radioInterfaceService.connectionState.value)
+                    }
                 }
                     .onFailure { Logger.e(it) { "Handshake state bridge failed; collector kept alive" } }
             }

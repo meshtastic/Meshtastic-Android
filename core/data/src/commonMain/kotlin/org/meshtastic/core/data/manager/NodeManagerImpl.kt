@@ -908,7 +908,8 @@ class NodeManagerImpl(
                 } ?: node.position
         return node.copy(
             position = position,
-            channel = if (!keepLocalState && (changed == null || NodeField.Other in changed)) info.channel else node.channel,
+            channel =
+            if (!keepLocalState && (changed == null || NodeField.Other in changed)) info.channel else node.channel,
             heardOnCurrentLora = node.heardOnCurrentLora || !reportsHeard || info.heard_on_current_lora,
             lastHeard = maxOf(node.lastHeard, clampTimestampToNow(info.last_heard)),
             deviceMetrics = info.device_metrics ?: node.deviceMetrics,
@@ -917,7 +918,12 @@ class NodeManagerImpl(
             isIgnored = flags.ignored ?: node.isIgnored,
             isMuted = flags.muted ?: node.isMuted,
             // A live merge never learns the signing bit, so only an add carrying firmware's word may clear it.
-            signsPackets = if (changed == null && !keepLocalState) info.has_xeddsa_signed else node.signsPackets || info.has_xeddsa_signed,
+            signsPackets =
+            if (changed == null && !keepLocalState) {
+                info.has_xeddsa_signed
+            } else {
+                node.signsPackets || info.has_xeddsa_signed
+            },
             manuallyVerified = node.manuallyVerified || info.is_key_manually_verified,
         )
     }

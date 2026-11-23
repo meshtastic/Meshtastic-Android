@@ -1447,33 +1447,32 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
-    fun `a failed attempt waits to retry with its failure until the next handshake starts`() =
-        runTest(testDispatcher) {
-            val callbacks = mutableListOf<RadioInterfaceService>()
-            val service = createPhoneApiService(callbacks)
-            val refused = TransportFailure(TransportFailureKind.ConnectFailed)
-            try {
-                callbacks.single().onStatus(TransportStatus(TransportPhase.Connecting, refused))
-                callbacks.single().onPhoneApiSessionEnded(recoverable = true)
-                testDispatcher.scheduler.runCurrent()
+    fun `a failed attempt waits to retry with its failure until the next handshake starts`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        val refused = TransportFailure(TransportFailureKind.ConnectFailed)
+        try {
+            callbacks.single().onStatus(TransportStatus(TransportPhase.Connecting, refused))
+            callbacks.single().onPhoneApiSessionEnded(recoverable = true)
+            testDispatcher.scheduler.runCurrent()
 
-                val waiting = assertNotNull(service.transportStatus.value)
-                assertEquals(TransportPhase.WaitingToRetry, waiting.phase)
-                assertEquals(refused, waiting.lastFailure)
-                // Main's BleReconnectPolicy: the first failure of a streak schedules attempt 2.
-                assertEquals(2, waiting.nextAttempt)
-                assertNotNull(waiting.retryAtMillis)
+            val waiting = assertNotNull(service.transportStatus.value)
+            assertEquals(TransportPhase.WaitingToRetry, waiting.phase)
+            assertEquals(refused, waiting.lastFailure)
+            // Main's BleReconnectPolicy: the first failure of a streak schedules attempt 2.
+            assertEquals(2, waiting.nextAttempt)
+            assertNotNull(waiting.retryAtMillis)
 
-                advanceTimeBy(1_001L)
-                assertEquals(2, callbacks.size)
-                callbacks.last().onStatus(TransportStatus(TransportPhase.Connecting))
-                assertEquals(TransportStatus(TransportPhase.Connecting, refused), service.transportStatus.value)
-                callbacks.last().onStatus(TransportStatus(TransportPhase.HandshakeConfig))
-                assertEquals(TransportStatus(TransportPhase.HandshakeConfig), service.transportStatus.value)
-            } finally {
-                service.disconnect()
-            }
+            advanceTimeBy(1_001L)
+            assertEquals(2, callbacks.size)
+            callbacks.last().onStatus(TransportStatus(TransportPhase.Connecting))
+            assertEquals(TransportStatus(TransportPhase.Connecting, refused), service.transportStatus.value)
+            callbacks.last().onStatus(TransportStatus(TransportPhase.HandshakeConfig))
+            assertEquals(TransportStatus(TransportPhase.HandshakeConfig), service.transportStatus.value)
+        } finally {
+            service.disconnect()
         }
+    }
 
     @Test
     fun `a link that came up and dropped waits to retry as lost`() = runTest(testDispatcher) {
