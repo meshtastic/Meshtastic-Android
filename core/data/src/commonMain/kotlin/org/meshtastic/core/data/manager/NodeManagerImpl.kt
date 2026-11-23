@@ -901,8 +901,9 @@ class NodeManagerImpl(
             info.position
                 ?.takeIf { changed == null || NodeField.Position in changed }
                 ?.let { incoming ->
-                    val timed =
-                        incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(incoming.time) }.build()
+                    // An untimed fix takes the packet's receive time, which the SDK put in last_heard.
+                    val time = incoming.time.takeIf { it != 0 } ?: info.last_heard
+                    val timed = incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(time) }.build()
                     preservingKnownPrecision(timed, node.position)
                 } ?: node.position
         return node.copy(

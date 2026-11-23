@@ -3597,6 +3597,27 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `a live position without a time takes the packet receive time`() {
+        // Main stamped an untimed position with the packet's rx time; the SDK carries it as last_heard.
+        val untimed =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 375_000_000
+                    wb.longitude_i = -1_220_000_000
+                }
+                .build()
+        nodeManager.installNodeInfo(sdkNode())
+
+        nodeManager.applySessionNode(
+            sdkNode(position = untimed, lastHeard = 2_000),
+            setOf(NodeField.Position, NodeField.LastSeen),
+            liveSession,
+        )
+
+        assertEquals(2_000, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).position.time)
+    }
+
+    @Test
     fun `a node the user removed stays gone until the radio confirms the removal`() {
         admitLeases(liveSession)
         enableDbWrites()
