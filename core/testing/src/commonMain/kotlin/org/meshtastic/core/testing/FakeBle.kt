@@ -423,6 +423,11 @@ class FakeBluetoothRepository :
         _state.value = _state.value.copy(hasPermissions = hasPermissions)
     }
 
+    /** Replaces the devices the OS reports as already paired, in the order the platform returns them. */
+    fun setBondedDevices(devices: List<BleDevice>) {
+        _state.value = _state.value.copy(bondedDevices = devices)
+    }
+
     /**
      * The outcome [FakeBluetoothRepository.bond] produces. [Fail] and [Security] both simply throw their wrapped error;
      * the distinct cases exist only to document caller intent (via [failBondWith] vs [failBondWithSecurityException])
