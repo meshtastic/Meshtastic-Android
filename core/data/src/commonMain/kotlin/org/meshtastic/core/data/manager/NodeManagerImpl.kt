@@ -823,18 +823,25 @@ class NodeManagerImpl(
         if (changed != null && info.num in nodeState.value.pendingRemovals) return
         if (changed == null) nodeState.update { it.copy(pendingRemovals = it.pendingRemovals.removing(info.num)) }
         val user = info.user
-        val heldUnknown = nodeState.value.index.byNum[info.num]?.isUnknownUser != false
+        val held = nodeState.value.index.byNum[info.num]
+        val heldUnknown = held?.isUnknownUser != false
+        // The SDK builds a node it first hears in a packet with default flags, channel 0 and no signing bit, as
+        // firmware does after evicting it; only firmware's NodeDB sets those, so a node the app holds keeps its own.
+        val keepLocalState = changed == null && held != null && !info.carriesFirmwareFlags()
         val userChanged = changed == null || NodeField.User in changed || NodeField.Name in changed
         if (user != null && (userChanged || heldUnknown)) {
             handleReceivedUser(info.num, sanitizeReceivedUser(user, info.via_mqtt), info.channel, session = session)
         }
-        val flags = reportedFlagChanges(info, changed)
+        val flags = reportedFlagChanges(info, changed).takeUnless { keepLocalState } ?: ReportedFlagChanges()
         if (flags.favorite == false) cancelLowBatteryIfUnfavorited(info)
         val reportsHeard = reportsHeardOnCurrentLora.value
         updateNodeAndSchedulePersistence(info.num, info.channel, session) { node ->
-            applySessionNodeFields(node, info, changed, flags, reportsHeard)
+            applySessionNodeFields(node, info, changed, flags, reportsHeard, keepLocalState)
         }
     }
+
+    private fun ProtoNodeInfo.carriesFirmwareFlags(): Boolean =
+        is_favorite || is_ignored || is_muted || is_key_manually_verified || has_xeddsa_signed
 
     override fun applySessionNodeRemoved(nodeNum: Int) {
         nodeState.update { state ->
@@ -888,6 +895,7 @@ class NodeManagerImpl(
         changed: Set<NodeField>?,
         flags: ReportedFlagChanges,
         reportsHeard: Boolean,
+        keepLocalState: Boolean,
     ): Node {
         val position =
             info.position
@@ -899,7 +907,7 @@ class NodeManagerImpl(
                 } ?: node.position
         return node.copy(
             position = position,
-            channel = if (changed == null || NodeField.Other in changed) info.channel else node.channel,
+            channel = if (!keepLocalState && (changed == null || NodeField.Other in changed)) info.channel else node.channel,
             heardOnCurrentLora = node.heardOnCurrentLora || !reportsHeard || info.heard_on_current_lora,
             lastHeard = maxOf(node.lastHeard, clampTimestampToNow(info.last_heard)),
             deviceMetrics = info.device_metrics ?: node.deviceMetrics,
@@ -907,7 +915,8 @@ class NodeManagerImpl(
             isFavorite = flags.favorite ?: node.isFavorite,
             isIgnored = flags.ignored ?: node.isIgnored,
             isMuted = flags.muted ?: node.isMuted,
-            signsPackets = info.has_xeddsa_signed,
+            // A live merge never learns the signing bit, so only an add carrying firmware's word may clear it.
+            signsPackets = if (changed == null && !keepLocalState) info.has_xeddsa_signed else node.signsPackets || info.has_xeddsa_signed,
             manuallyVerified = node.manuallyVerified || info.is_key_manually_verified,
         )
     }

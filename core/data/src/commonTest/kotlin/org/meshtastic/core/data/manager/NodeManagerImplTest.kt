@@ -3655,6 +3655,34 @@ class NodeManagerImplTest {
         assertEquals("Ridge repeater", node.notes)
     }
 
+    @Test
+    fun `a node the radio re-adds from a packet keeps the mute and channel and signing the app holds`() {
+        // Firmware clears an evicted node's bitfield (NodeDB.cpp), and the SDK builds the re-heard node from the packet.
+        nodeManager.updateNode(LIVE_NODE) {
+            it.copy(user = liveUser(LIVE_NODE), isMuted = true, channel = 2, signsPackets = true)
+        }
+
+        nodeManager.applySessionNode(sdkNode(user = null, lastHeard = 2_000), changed = null, liveSession)
+        nodeManager.applySessionNode(sdkNode(user = null, lastHeard = 3_000), setOf(NodeField.LastSeen), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertEquals(3_000, node.lastHeard)
+        assertTrue(node.isMuted)
+        assertEquals(2, node.channel)
+        assertTrue(node.signsPackets)
+    }
+
+    @Test
+    fun `a node the radio re-adds with firmware's flags takes them`() {
+        nodeManager.updateNode(LIVE_NODE) { it.copy(user = liveUser(LIVE_NODE)) }
+        // The SDK's set_ignored write creates an unknown node with only is_ignored set.
+        val ignored = sdkNode(user = null).newBuilder().also { it.is_ignored = true }.build()
+
+        nodeManager.applySessionNode(ignored, changed = null, liveSession)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).isIgnored)
+    }
+
     private companion object {
         const val LIVE_NODE = 0x2468
     }
