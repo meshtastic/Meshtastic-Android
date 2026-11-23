@@ -2497,15 +2497,25 @@ class SharedRadioInterfaceServiceLivenessTest {
         val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
         try {
             failPhoneApiSessions(callbacks, 6)
+            assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
             service.disconnect()
             service.connect()
             testDispatcher.scheduler.runCurrent()
             assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "a user connect kept the old streak")
-
             failPhoneApiSessions(callbacks, 6)
+            assertTrue(
+                callbacks.last().consumeGattCacheRefreshOnConnect(),
+                "a user connect did not re-arm the refresh",
+            )
+
             service.setDeviceAddress("x11:22:33:44:55:66")
             testDispatcher.scheduler.runCurrent()
             assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "a device switch kept the old streak")
+            failPhoneApiSessions(callbacks, 6)
+            assertTrue(
+                callbacks.last().consumeGattCacheRefreshOnConnect(),
+                "a device switch did not re-arm the refresh",
+            )
         } finally {
             service.disconnect()
         }
