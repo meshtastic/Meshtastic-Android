@@ -187,8 +187,8 @@ fun ScannedQrCodeDialog(
         (if (shouldReplace) channelSet.lora_config else channels.lora_config) ?: Channel.default.loraConfig
     val modemPresetName = Channel(loraConfig = displayLora).name
 
-    // An empty set means the radio's channels have not arrived; Add would then write the link's channels as the whole
-    // set, so it waits.
+    // An empty set means the radio's channels have not arrived. Add would then write only the link's channels, and
+    // Replace would lose the radio's TX power and MQTT consent, so both wait.
     val radioChannelsLoaded = channels.settings.isNotEmpty()
 
     /* Holds selections made by the user */
@@ -294,7 +294,7 @@ fun ScannedQrCodeDialog(
                         )
                     }
 
-                    if (!shouldReplace && !radioChannelsLoaded) {
+                    if (!radioChannelsLoaded) {
                         Text(
                             text = stringResource(Res.string.channel_import_waiting_for_radio),
                             style = MaterialTheme.typography.bodyLarge,
@@ -313,7 +313,8 @@ fun ScannedQrCodeDialog(
                         )
                     }
 
-                    if (shouldReplace && loraChanges.isNotEmpty()) {
+                    // Until the radio's LoRa config is known, any list of changes would be measured against nothing.
+                    if (shouldReplace && radioChannelsLoaded && loraChanges.isNotEmpty()) {
                         LoraChangesSection(loraChanges)
                     }
                 }
@@ -342,9 +343,7 @@ fun ScannedQrCodeDialog(
                     onDismiss()
                     onConfirm(selectedChannelSet)
                 },
-                enabled =
-                (shouldReplace || radioChannelsLoaded) &&
-                    selectedChannelSet.settings.size in 1..effectiveMaxChannels,
+                enabled = radioChannelsLoaded && selectedChannelSet.settings.size in 1..effectiveMaxChannels,
                 colors =
                 ButtonDefaults.textButtonColors(
                     contentColor =

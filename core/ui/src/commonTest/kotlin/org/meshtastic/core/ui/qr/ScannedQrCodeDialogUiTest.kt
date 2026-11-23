@@ -242,9 +242,22 @@ class ScannedQrCodeDialogUiTest {
         val calls = Calls()
         show(incoming = channelsOnly(channel("Field", 5)), channels = ChannelSet.Builder().build(), calls = calls)
 
-        onNodeWithText("Your radio's channels haven't loaded yet. Add is available once they do.").assertIsDisplayed()
+        onNodeWithText("Your radio's channels haven't loaded yet. You can import once they do.").assertIsDisplayed()
         onNodeWithText("Add channels").assertIsNotEnabled()
         onNodeWithText("Add channels").performClick()
+
+        assertTrue(calls.confirmed.isEmpty())
+    }
+
+    @Test
+    fun replace_waits_for_the_radio_channels_before_it_can_import() = runComposeUiTest {
+        // Without the radio's LoRa config, Replace cannot keep its TX power and MQTT consent.
+        val calls = Calls()
+        show(channels = ChannelSet.Builder().build(), calls = calls)
+
+        onNodeWithText("Your radio's channels haven't loaded yet. You can import once they do.").assertIsDisplayed()
+        onNodeWithText("Replace channels").assertIsNotEnabled()
+        onNodeWithText("Replace channels").performClick()
 
         assertTrue(calls.confirmed.isEmpty())
     }
