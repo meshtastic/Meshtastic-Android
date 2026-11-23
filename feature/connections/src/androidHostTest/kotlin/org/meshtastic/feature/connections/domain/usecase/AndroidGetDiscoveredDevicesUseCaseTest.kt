@@ -128,6 +128,21 @@ class AndroidGetDiscoveredDevicesUseCaseTest {
         }
     }
 
+    @Test
+    fun `connected TCP radio whose own node has not arrived shows no node not the node it announces`() = runTest {
+        // Handshake done, the radio's own NodeInfo not yet in the node DB; it still announces ptzm's id over mDNS.
+        val ownNum = 0x0BADF00D
+        databaseManager.existingDatabases += "t192.168.1.50"
+        identityFlow.value = ConnectionIdentity(1L, "t192.168.1.50", ownNum, deviceId = null)
+        resolved.value =
+            listOf(DiscoveredService("ptzm", "192.168.1.50", 4403, mapOf("id" to "!5e6f964e".encodeToByteArray())))
+
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolved).test {
+            expectMostRecentItem().discoveredTcpDevices.single().node shouldBe null
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     /**
      * A real [UsbRepository] (final and cross-module, so it cannot be mocked) on a DESTROYED lifecycle: its scan never
      * starts, so [UsbRepository.serialDevices] holds its initial empty map.
