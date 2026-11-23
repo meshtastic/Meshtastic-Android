@@ -38,7 +38,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 ## 4. Hierarchy & Source-Set Conventions
 - **Hierarchy template first:** Prefer Kotlin's default hierarchy template and convention plugins over manual `dependsOn(...)` graphs. Manual source-set wiring should be reserved for cases the template cannot model.
 - **`expect`/`actual` restraint:** Prefer interfaces + DI for platform capabilities; use `expect`/`actual` for small unavoidable platform primitives. Avoid broad expect/actual class hierarchies when an interface-based boundary is sufficient.
-- **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract to `commonMain`. Examples: `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BaseRadioTransportFactory`.
+- **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract to `commonMain`. Examples: `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BaseRadioLinks`.
 
 ## 5. Dependency Catalog Aliases
 - **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`. `commonMain` takes an `androidx-*` alias only where AndroidX publishes the artifact as KMP itself: `androidx-navigation3-runtime`, DataStore, Room, SQLite bundled and Paging.

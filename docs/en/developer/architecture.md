@@ -45,7 +45,6 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- `DesktopRadioTransportFactory`, which picks the transport for an address. The SDK's BLE, TCP, serial and WebSocket transports run the link, opened through `core:network`'s `DesktopSdkTransportFactory`
 
 ### `webApp/` — Web Application
 
@@ -53,7 +52,7 @@ The browser (Kotlin/Wasm) entry point, opt-in with `-Pmeshtastic.web=true`; see 
 - `ComposeViewport` into `index.html`'s `webApp` element, with a service worker (`sw.js`) for notifications and offline reloads and a PWA manifest
 - Web-specific DI (`WebKoinModule`, whose `includes` mirror `DesktopKoinModule`'s)
 - The Room database on SQLite's OPFS SAH pool, held by one tab at a time
-- `WasmJsRadioTransportFactory` in `core:network`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
+- `WebRadioLinks` in `core:data`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
 
 ### `appShell/` — Shared Main Screen
 
@@ -101,7 +100,7 @@ Shared infrastructure used by all features:
 | `core:ui` | Shared Compose components, icons, theme |
 | `core:resources` | Shared string resources |
 | `core:model` | Domain models |
-| `core:data` | Repository implementations, data sources and managers |
+| `core:data` | Repository implementations, data sources and managers; each platform's `RadioLinks`, which build the selected radio's SDK client |
 | `core:domain` | Use cases / business logic |
 | `core:database` | Room KMP database |
 | `core:datastore` | DataStore preferences |

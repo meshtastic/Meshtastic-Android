@@ -72,7 +72,6 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 |---|---|
 | `Main.kt` | App entry point: Koin bootstrap, Compose Desktop window and tray, theme and locale application, update check |
 | `ui/DesktopMainScreen.kt` | The shared `MeshtasticMainScreen`, padded for the window's bottom edge |
-| `radio/DesktopRadioTransportFactory.kt` | Picks the transport for an address: the SDK's TCP, serial, BLE and WebSocket transports, or the demo radio |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |
 | `UpdateChecker.kt` | Compares the running version with GitHub's latest production release |

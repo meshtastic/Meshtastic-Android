@@ -3,7 +3,7 @@ title: Transport
 parent: Developer Guide
 nav_order: 5
 last_updated: 2026-11-23
-description: The BLE, USB serial, TCP and WebSocket transports behind the RadioTransport abstraction — which module owns each, and how to add a new one.
+description: The BLE, USB serial, TCP and WebSocket transports behind the RadioLinks abstraction — which module owns each, and how to add a new one.
 aliases:
   - ble
   - serial
@@ -18,13 +18,13 @@ The app talks to the node over four transports (BLE, USB serial, TCP and WebSock
 
 ## Transport Abstraction
 
-The app’s platform factories select links and handle host permissions. The shared session in
-`core:data` runs one SDK client for the admitted generation and installs the radio snapshot in
-Room. The SDK owns the wire handshake, heartbeat and goodbye. Demo and replay simulate the radio
-side of that same protocol.
+The app's platform `RadioLinks` build one SDK `RadioClient` for the selected radio and handle host
+permissions. The SDK client owns connecting, the wire handshake, heartbeat, backoff and reconnecting.
+The session pipeline in `core:data` writes each SDK session's snapshot and packets into Room. Demo and
+replay simulate the radio side of that same protocol.
 
 Every transport address starts with a one-character `InterfaceId`: `x` BLE (`!` is accepted too), `s`
-serial, `t` TCP, `w` WebSocket (a `ws://` or `wss://` URL), `m` mock, `r` replay, and `n` for no device selected. `RadioTransportFactory.isAddressValid` checks that prefix
+serial, `t` TCP, `w` WebSocket (a `ws://` or `wss://` URL), `m` mock, `r` replay, and `n` for no device selected. `RadioLinks.isAddressValid` checks that prefix
 before a connection is attempted.
 
 ## Bluetooth Low Energy (BLE)
@@ -71,68 +71,77 @@ Network-based transport for Wi-Fi-enabled nodes:
 
 Firmware's WebSocket phone API carries one binary `ToRadio` or `FromRadio` per message at `/api/v1/ws`, for one client at a time. Addresses are `ws://` or `wss://` URLs, and an empty path becomes `/api/v1/ws` (`WebSocketUrl.kt`). Released firmware does not serve it yet. In a browser it is the only network transport.
 
-The shared SDK session uses the same WebSocket factory on Android, desktop and Web. The app’s session service handles reselecting the link after a recoverable disconnect.
+Android, desktop and Web share one WebSocket link. The SDK keeps the quick-drop history that detects a contested slot, and stops with `ConnectionState.Failed` on a close that only the user's next connect should undo (4001 replaced by another client, 1009 message too big, a contested slot).
 
-## Transport Factory
+## Radio Links
 
-The `RadioTransportFactory` interface abstracts transport creation:
+The `RadioLinks` interface (`core:repository`) admits addresses and builds the selected radio's client:
 
 ```kotlin
-interface RadioTransportFactory {
+interface RadioLinks {
     val supportedDeviceTypes: List<DeviceType>
 
-    /** Whether the virtual demo transports (`m` mock / `r` replay) may be offered and bound right now. */
+    /** Whether the virtual demo radios (`m` mock / `r` replay) may be offered and opened right now. */
     val mockTransportEnabled: StateFlow<Boolean>
 
     /** Whether this build ships a packet capture to replay, rather than degrading to plain mock. */
     val isReplayTransportAvailable: Boolean
 
-    fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
     fun isAddressValid(address: String?): Boolean
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
+    fun open(address: String, scope: CoroutineScope): RadioLink?
 }
 ```
 
 `mockTransportEnabled` is a flow, not a one-shot check: the Android Demo Mode gesture (five taps
-on the Settings app-version row) unlocks the demo transports mid-session, and the device list has
+on the Settings app-version row) unlocks the demo radios mid-session, and the device list has
 to notice. Every consumer must read that one flow — the visibility path and the `isAddressValid`
 admission path have to agree, or the demo entry appears and then refuses to connect.
 
-`BaseRadioTransportFactory` (`core:network`, `commonMain`) holds the shared half: it admits each
-address type in `isAddressValid` and dispatches on the prefix. BLE and WebSocket go to the
-platform's `createBleTransport` and `createWebSocketTransport`; mock and no-device it builds itself
-from the virtual radios, and replay, TCP and serial go through hooks a platform overrides. Every
-hook returns a session over the SDK transport for that link (`AndroidSdkTransportFactory`,
-`DesktopSdkTransportFactory`, `WebSdkRadioTransportFactory`). On hardware without Bluetooth LE it refuses BLE
-addresses, and the Android factory refuses serial addresses on hardware with no USB host, so a saved
-address restored onto such a device is kept but never armed.
+`BaseRadioLinks` (`core:data`, `commonMain`) admits each address type and dispatches on the prefix.
+Each link builds its client with `RadioClient.Builder.transport(identity, provider)` and the reconnect
+schedule in `radioReconnectConfig`: a first retry after 1 s (3 s on BLE, which waits for firmware to
+free its GATT session), backoff capped at 30 s, a link counted stable after 30 s (5 s on BLE), and three
+handshake restarts in a row before the client stops. The provider the SDK calls before each attempt
+decides what that attempt opens:
 
-Platform-specific implementations:
-- **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP + WebSocket; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
-- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE + USB + TCP + WebSocket; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
-- **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
-- **iOS:** The app has no iOS radio transport or `RadioTransportFactory`, and no iOS app ships
+- BLE returns one `BleTransport`, built with `BleResilience` (bond first, auto-connect fallback, stale-cache refresh and a refresh after six failures in a row), and waits for Bluetooth to be on
+- TCP and WebSocket return one transport; a TCP retry waits for a network
+- Android USB serial opens the port afresh each attempt, since a rebooting radio re-enumerates, and waits for the device and for Android's permission, asking for it once
+- Desktop serial waits for the port to exist, then opens it afresh
+- Web Bluetooth and Web Serial open the device the user already granted
+- Mock and replay build a fresh virtual radio each attempt
 
+An `n` or unknown prefix opens nothing. On hardware without Bluetooth LE BLE addresses are refused, and
+Android refuses serial addresses on hardware with no USB host, so a saved address restored onto such a
+device is kept but never armed.
+
+Platform implementations, all in `core:data`:
+- **Android:** `AndroidRadioLinks` (`androidMain`) supports BLE + USB + TCP + WebSocket; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
+- **Desktop:** `DesktopRadioLinks` (`jvmMain`) supports BLE + USB + TCP + WebSocket; Demo Mode is a debug-build feature, and an `r` address opens the plain mock
+- **Web:** `WebRadioLinks` (`wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
+- **iOS:** The app has no iOS radio links, and no iOS app ships
 
 ## Connection Lifecycle
 
-1. **Discovery** — Find available nodes (BLE scan / USB detect / mDNS or a manually entered TCP address or WebSocket URL)
-2. **Connection** — Establish link to selected node
-3. **Handshake** — Exchange node info and configuration
-4. **Active** — Normal message exchange
-5. **Disconnection** — Clean teardown or error recovery
+`SharedRadioInterfaceService` (`core:service`) holds the selected radio's link. It connects and
+disconnects the client, and calls `retryNow()` to end a backoff early when Bluetooth, the network or the
+selected USB device comes back. A firmware-maintenance `RadioOperation` closes the link and its end
+reopens it. A post-update GATT refresh goes to the next BLE link through `refreshGattCacheOnNextConnect()`.
 
-The app-level state is `ConnectionState` (`Disconnected`, `Connecting`, `Connected`, `DeviceSleep`), read
-through `ConnectionStateProvider`. `MeshConnectionManager` writes `Connecting`, `DeviceSleep` and
-`Disconnected` as it reconciles transport events with handshake progress, and `MeshConfigFlowManager`
-writes `Connected` once the handshake completes. UI code observes this state, never
-`RadioInterfaceService.connectionState`. `DeviceSleep` is the SDK's `ConnectionState.DeviceSleeping`, which
-the SDK reports when a power-saving node drops its BLE link by design; `SharedRadioInterfaceService` maps it,
-and keeps it through redials until the SDK's wake bound passes. Any other drop is `Disconnected`.
+Every SDK session becomes an app session, with a generation that keys the session leases database writes
+hold; teardown drains those leases before the next session is admitted.
+
+UI code observes `ConnectionStateProvider.connectionState`, which is the SDK's own `ConnectionState`:
+`Connecting` and `Configuring` while a session comes up, `Connected`, `Reconnecting` with its cause and
+the time of the next attempt, `DeviceSleeping` when a power-saving node drops its BLE link by design,
+`Failed` once the client stops trying, and `Disconnecting` then `Disconnected` after the user disconnects.
+The service publishes the client's states, except `Connected`, which `MeshConfigFlowManager` publishes once
+the session's config and nodes are installed in Room.
 
 ## Adding a New Transport
 
 1. Add the link to the SDK as a transport module; the SDK owns framing and the PhoneAPI session
-2. Give it an `InterfaceId` prefix, admit it in `isAddressValid`, and open an SDK session over it in the platform's `createPlatformTransport`
+2. Give it an `InterfaceId` prefix, admit it in `isAddressValid`, and open a link over it in `BaseRadioLinks.open` with a provider for each attempt
 3. Add connection UI in `feature:connections`
 4. Update DI bindings for the platform
