@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-11-20
+last_updated: 2026-11-23
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -118,6 +118,18 @@ The generated profile is merged into `androidApp/src/main/generated/baselineProf
 > ℹ️ **Note:** The journey covers cold start only (launch → first frame), because the harness connects to no node. Post-connection screens (node list, map, message thread) aren't AOT-compiled.
 
 Extending the journey past cold start needs the harness to connect to a node, the way `:store-screenshots` connects to Demo Mode's showcase mesh.
+
+### SDK session tests
+
+`core:data`'s JVM tests drive the [meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk) session the app runs on every link. They replay the two-stage PhoneAPI handshake and use a loopback TCP peer to check the session stream, the Room snapshot, the NodeDB refresh and stale-session rejection. `SdkTcpRoomTest` can run its snapshot test against a real radio: set `MESHTASTIC_SDK_TCP_HOST` (and `MESHTASTIC_SDK_TCP_PORT`, 4403 by default) and add `--rerun --no-build-cache` so Gradle does not replay a cached result.
+
+To build against a local SDK checkout instead of the published artifacts, pass `-PmeshtasticSdkCheckout`; `settings.gradle.kts` then substitutes the checkout's modules for the `org.meshtastic:sdk-*` dependencies:
+
+```shell
+./gradlew :core:data:jvmTest :androidApp:assembleFdroidDebug \
+  -PmeshtasticSdkCheckout=/absolute/path/to/meshtastic-sdk \
+  -Dorg.gradle.isolated-projects=false --no-configuration-cache
+```
 
 ## Test organization
 

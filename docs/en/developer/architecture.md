@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-11-20
+last_updated: 2026-11-23
 description: How the Android, Desktop and web apps split into androidApp/desktopApp/webApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
@@ -45,7 +45,7 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- `DesktopRadioTransportFactory`, which wires up the transports. The transports themselves are shared code in `core:network`: BLE built on `core:ble`'s primitives, TCP, and the jSerialComm-based `SerialTransport` in `core:network`'s `jvmMain`
+- `DesktopRadioTransportFactory`, which picks the transport for an address. The SDK's BLE, TCP, serial and WebSocket transports run the link, opened through `core:network`'s `DesktopSdkTransportFactory`
 
 ### `webApp/` — Web Application
 
@@ -190,10 +190,11 @@ focused sub-interfaces so callers can depend on just the slice they need:
 `RadioControllerImpl` (`core:service`) is the in-process composition root for all targets
 (Desktop, iOS, single-process Android). It assembles the four sub-controllers via Kotlin interface
 delegation and adds the cross-cutting concerns (connection state, packet-id, location,
-device-address switching). Commands are direct suspend calls; admin writes are fire-and-forget
-because the device is the source of truth (local persistence is an optimistic cache). The layered
-shape mirrors the [meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk)
-`AdminApi`/`TelemetryApi` design to ease a future SDK migration.
+device-address switching). Commands are direct suspend calls on the active session's
+[meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk) client, whose `AdminApi`/`TelemetryApi`
+layering the controllers mirror. An acknowledged local admin write reaches the app's repositories through
+the SDK session events (`ConfigChanged`, `ChannelsChanged`, `NodeChanged`); the device remains the source
+of truth and reports its full config on every connection.
 
 ## Service Repository
 

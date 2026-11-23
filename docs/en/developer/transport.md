@@ -2,7 +2,7 @@
 title: Transport
 parent: Developer Guide
 nav_order: 5
-last_updated: 2026-11-21
+last_updated: 2026-11-23
 description: The BLE, USB serial, TCP and WebSocket transports behind the RadioTransport abstraction — which module owns each, and how to add a new one.
 aliases:
   - ble
@@ -54,7 +54,7 @@ the granted browser streams and feeds the shared SDK frame assembler.
 
 **Module:** `meshtastic-sdk:transport-tcp`
 
-**Platforms:** Android, Desktop (iOS: code compiles, but there's no iOS app target or `RadioTransportFactory` — see [Transport Factory](#transport-factory))
+**Platforms:** Android, Desktop
 
 Network-based transport for Wi-Fi-enabled nodes:
 - TCP socket connection to the node's IP address
@@ -109,9 +109,9 @@ address restored onto such a device is kept but never armed.
 
 Platform-specific implementations:
 - **Android:** `AndroidRadioTransportFactory` (`core:network`, `androidMain`) supports BLE + USB + TCP; Demo Mode is on in debug builds and Firebase Test Lab, and in release builds once hidden features are unlocked
-- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE (Kable) + USB + TCP; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
+- **Desktop:** `DesktopRadioTransportFactory` (`desktopApp`) supports BLE + USB + TCP; Demo Mode is a debug-build feature, and an `r` address opens the plain mock, and an `n` or unknown prefix opens the no-op transport like every other platform
 - **Web:** `WasmJsRadioTransportFactory` (`core:network`, `wasmJsMain`) supports BLE (Kable over Web Bluetooth) + USB (Web Serial) + WebSocket. It refuses raw TCP addresses (`isRawTcpSupported = false`), since a browser opens no sockets, so its Network pane takes WebSocket addresses only
-- **iOS:** Code compiles for BLE and TCP, but no `RadioTransportFactory` implementation exists and no iOS app ships
+- **iOS:** The app has no iOS radio transport or `RadioTransportFactory`, and no iOS app ships
 
 
 ## Connection Lifecycle

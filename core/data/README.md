@@ -13,8 +13,8 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 - **`FirmwareReleaseRepositoryImpl`** / **`DeviceHardwareRepositoryImpl`**: Firmware releases and the hardware list, served by `staleWhileRevalidateFlow` from the local data sources and bundled assets in `datasource/`, refreshed from the `:core:network` remote data sources.
 
 ### 2. Manager implementations (`manager/`)
-- **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and the config handshake.
-- **`SessionManagerImpl`**: Per-node remote-admin passkey store.
+- **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and installing the SDK handshake snapshot. Remote-admin session passkeys live in the SDK's admin session.
+- **`SdkPhoneApiRadioTransport`** / **`SdkPhoneApiSessions`**: One SDK `RadioClient` per app transport generation, opened over the SDK transport the platform factory picks.
 - **`RadioSessionProjection`** / **`RadioSessionEventHandler`**: Project the SDK's typed session events into Room and the repositories: the Ready snapshot, packets, node, config and channel changes, and events such as client notifications and the MQTT proxy. Packets reach `MeshDataHandlerImpl` and its per-port handlers (`TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others).
 - **`PacketHandlerImpl`**: Data packets (messages, reactions, waypoints, alerts, TAK) and app-built requests through the SDK's paced send under their persisted IDs, with the Room delivery projection; it also generates packet IDs.
 - **`NodeManagerImpl`**, **`MqttManagerImpl`**: The in-memory node database and the MQTT proxy.

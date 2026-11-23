@@ -128,8 +128,8 @@ Most modules have their own README with details on their responsibilities, API s
 | [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
 | [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
 | [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
-| [core/ble](core/ble/README.md) | Multiplatform BLE transport (Kable) |
-| [core/network](core/network/README.md) | Internet comms: firmware metadata, map tiles, radio transports |
+| [core/ble](core/ble/README.md) | Multiplatform BLE scanning, bonding and connections (Kable) |
+| [core/network](core/network/README.md) | Internet comms: firmware metadata, MQTT, radio transport selection |
 | [core/data](core/data/README.md) | Repository layer — orchestrates DB, network, and service data |
 | [core/database](core/database/README.md) | Room KMP local persistence |
 | [core/datastore](core/datastore/README.md) | DataStore preferences |

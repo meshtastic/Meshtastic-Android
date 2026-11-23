@@ -9,7 +9,7 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 ## Key Responsibilities
 
 - Define the reactive data contracts between the long-running mesh service and all feature/UI layers
-- Declare the raw hardware I/O interface (`RadioTransport`)
+- Declare the per-link transport contract (`RadioTransport`) over the SDK PhoneAPI session
 - Provide the mesh node database interface (`NodeRepository`)
 - Expose the active radio session's SDK admin API and per-node admin session status (`RadioInterfaceService.adminForSession`, `adminSessionStatus`)
 - Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
@@ -73,30 +73,27 @@ The module has no platform source sets. Platform implementations such as the And
 
 ### `RadioTransport`
 
-Raw hardware I/O contract for all physical transports (BLE, USB, TCP, Mock).
+One radio link (BLE, USB, TCP, WebSocket, demo) and the SDK PhoneAPI session that runs over it. Every member but
+`close` has a default, so the inert transports (`NopRadioTransport`, the USB-unavailable placeholder) override nothing
+else.
 
 ```kotlin
 interface RadioTransport {
-    fun handleSendToRadio(p: ByteArray): Boolean
+    val admin: AdminApi?            // the session's SDK admin API
+    val client: RadioClient?        // the session's SDK client
+    fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus>
+    fun sendPaced(packet: MeshPacket): PacedMessageHandle?
+    fun tryLockdown(auth: LockdownAuth): Boolean
+    fun requestNodeDbRefresh(): Boolean
+    suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean
     fun start() {}
-    fun keepAlive() {}
     suspend fun close()
 }
 ```
 
-`handleSendToRadio` reports synchronous admission only: `true` means the transport accepted the bytes for asynchronous
-handoff, not that the device received them. `false` means the transport is unavailable, closed, or unable to schedule
-the handoff; delivery confirmation is a separate protocol concern.
-
-`RadioTransportWriter` (`RadioInterfaceService.kt`) is the service-facing half of the same admission contract. `trySendToRadio` must likewise return
-promptly and reports only whether the active transport accepted the bytes for asynchronous delivery.
-
-```kotlin
-interface RadioTransportWriter {
-    fun sendToRadio(bytes: ByteArray)
-    fun trySendToRadio(bytes: ByteArray): Boolean
-}
-```
+`RadioInterfaceService` admits work to the active transport under a per-session gate: `sendPaced`, `tryLockdown` and
+`deliverMqttProxy` run only while their session still owns the link, and teardown drains an admitted handoff before it
+closes the transport.
 
 ### `ServiceRepository`
 
