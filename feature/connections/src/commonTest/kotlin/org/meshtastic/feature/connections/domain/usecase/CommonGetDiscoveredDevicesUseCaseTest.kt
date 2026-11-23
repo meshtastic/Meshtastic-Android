@@ -34,6 +34,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.feature.connections.model.UsbDeviceData
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -142,6 +143,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d", longName = "SD7T")
         val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e", longName = "ptzm")
         nodeRepository.setNodes(listOf(sd7t, ptzm))
+        databaseManager.existingDatabases += "t192.168.1.50"
         recentAddressesFlow.value = listOf(RecentAddress("t192.168.1.50", "SD7T_964e"))
 
         useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
@@ -166,6 +168,40 @@ class CommonGetDiscoveredDevicesUseCaseTest {
 
         useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             awaitItem().discoveredTcpDevices.single().node shouldBe sd7t
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `serial port reused by another radio shows only the live node never the one recorded for the port`() = runTest {
+        setUp()
+        // A desktop serial address is the port name, so the radio last connected on it need not be the one there now.
+        val first = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d", longName = "First")
+        val second = TestDataFactory.createTestNode(num = 0x0A0B0C0D, userId = "!0a0b0c0d", longName = "Second")
+        nodeRepository.setNodes(listOf(first, second))
+        val port = "s/dev/ttyUSB0"
+        databaseManager.existingDatabases += port
+        databaseManager.localNodeNumsFlow.value = mapOf(normalizeAddress(port) to first.num)
+        val usbScanner =
+            object : UsbScanner {
+                override fun scanUsbDevices() =
+                    flowOf(listOf(DeviceListEntry.Usb(object : UsbDeviceData {}, "/dev/ttyUSB0", port, bonded = true)))
+            }
+        useCase =
+            CommonGetDiscoveredDevicesUseCase(
+                recentAddressesDataSource = recentAddressesDataSource,
+                nodeRepository = nodeRepository,
+                databaseManager = databaseManager,
+                nodeManager = nodeManager,
+                usbScanner = usbScanner,
+            )
+
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
+            awaitItem().usbDevices.single().node shouldBe null
+
+            identityFlow.value = ConnectionIdentity(2L, port, second.num, deviceId = null)
+
+            awaitItem().usbDevices.single().node shouldBe second
             cancelAndIgnoreRemainingEvents()
         }
     }

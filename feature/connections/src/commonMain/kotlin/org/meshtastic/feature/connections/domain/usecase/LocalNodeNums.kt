@@ -43,8 +43,13 @@ internal class LocalNodeNums(private val recorded: Map<String, Int>, private val
 internal fun localNodeNums(databaseManager: DatabaseManager, nodeManager: NodeManager): Flow<LocalNodeNums> =
     combine(databaseManager.localNodeNums, nodeManager.connectionIdentity, ::LocalNodeNums)
 
-/** Labels each entry with the node that is that radio, or none. */
+/**
+ * Labels each entry with the node that is that radio, or none. A serial address names a port or a USB vendor and
+ * product id, not a radio, so a serial entry takes only the live session's node: a recorded number may belong to
+ * another radio that used the same port.
+ */
 internal fun List<DeviceListEntry>.withLocalNodes(nodeDb: Map<Int, Node>, nums: LocalNodeNums): List<DeviceListEntry> =
     map { entry ->
-        entry.copy(node = nums.forAddress(entry.fullAddress)?.let(nodeDb::get))
+        val num = if (entry is DeviceListEntry.Usb) nums.live(entry.fullAddress) else nums.forAddress(entry.fullAddress)
+        entry.copy(node = num?.let(nodeDb::get))
     }

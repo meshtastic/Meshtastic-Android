@@ -59,8 +59,9 @@ internal fun processTcpServices(
 }
 
 /**
- * Labels each discovered TCP entry with the node that is that radio: the live session's node when it is connected, then
- * the full node id the radio announces in its mDNS TXT record, then the node number it reported at its last handshake.
+ * Labels each discovered TCP entry with the node that is that radio: the live session's node when it is connected, else
+ * the node whose id the radio announces in its mDNS TXT record. Only a radio that announces no id falls back to the
+ * node number it reported at its last handshake, since the address may now belong to another radio.
  */
 internal fun matchDiscoveredTcpNodes(
     entries: List<DeviceListEntry.Tcp>,
@@ -69,20 +70,18 @@ internal fun matchDiscoveredTcpNodes(
     databaseManager: DatabaseManager,
     nums: LocalNodeNums,
 ): List<DeviceListEntry.Tcp> = entries.map { entry ->
-    val announced =
-        if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-            val resolvedService = resolvedServices.find { "t${it.toAddressString()}" == entry.fullAddress }
-            val deviceId = resolvedService?.txt?.get("id")?.decodeToString()
-            nodeDb.values.find { node ->
-                node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
-            }
-        } else {
-            null
+    val resolvedService = resolvedServices.find { "t${it.toAddressString()}" == entry.fullAddress }
+    val deviceId = resolvedService?.txt?.get("id")?.decodeToString()
+    val identified =
+        when {
+            deviceId == null -> nums.recorded(entry.fullAddress)?.let(nodeDb::get)
+
+            databaseManager.hasDatabaseFor(entry.fullAddress) ->
+                nodeDb.values.find { node -> node.user.id == deviceId || node.user.id == "!$deviceId" }
+
+            else -> null
         }
-    val matchingNode =
-        nums.live(entry.fullAddress)?.let(nodeDb::get)
-            ?: announced
-            ?: nums.recorded(entry.fullAddress)?.let(nodeDb::get)
+    val matchingNode = nums.live(entry.fullAddress)?.let(nodeDb::get) ?: identified
     entry.copy(node = matchingNode)
 }
 

@@ -24,6 +24,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.testing.FakeDatabaseManager
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import kotlin.test.Test
@@ -177,6 +178,33 @@ class TcpDiscoveryHelpersTest {
 
         result.size shouldBe 1
         assertNull(result[0].node)
+    }
+
+    @Test
+    fun `matchDiscoveredTcpNodes labels a radio announcing an id only by that id never by the recorded number`() {
+        // Both addresses last reported SD7T, but the radios there now announce other ids.
+        val sd7t = TestDataFactory.createTestNode(num = 0x1A2B3C4D, userId = "!1a2b3c4d")
+        val ptzm = TestDataFactory.createTestNode(num = 0x5E6F964E, userId = "!5e6f964e")
+        val entries =
+            listOf(DeviceListEntry.Tcp("ptzm_964e", "t192.168.1.50"), DeviceListEntry.Tcp("New_0c0d", "t192.168.1.51"))
+        val resolved =
+            listOf(
+                DiscoveredService("ptzm", "192.168.1.50", 4403, mapOf("id" to "!5e6f964e".encodeToByteArray())),
+                DiscoveredService("New", "192.168.1.51", 4403, mapOf("id" to "!0a0b0c0d".encodeToByteArray())),
+            )
+        val databaseManager =
+            FakeDatabaseManager().apply { existingDatabases += setOf("t192.168.1.50", "t192.168.1.51") }
+        val nums =
+            LocalNodeNums(
+                recorded =
+                mapOf(normalizeAddress("t192.168.1.50") to sd7t.num, normalizeAddress("t192.168.1.51") to sd7t.num),
+                live = null,
+            )
+
+        val result =
+            matchDiscoveredTcpNodes(entries, mapOf(sd7t.num to sd7t, ptzm.num to ptzm), resolved, databaseManager, nums)
+
+        result.associate { it.fullAddress to it.node } shouldBe mapOf("t192.168.1.50" to ptzm, "t192.168.1.51" to null)
     }
 
     @Test
