@@ -56,20 +56,23 @@ internal class WebSocketSessionHistory(private val clockMs: () -> Long = monoton
         val opened = openedAtMs.also { openedAtMs = null }
         val text = error?.cause?.message.orEmpty()
         retryNotBeforeMs = if (CLOSE_TRY_AGAIN_LATER in text) now + TRY_AGAIN_FLOOR_MS else null
-        if (opened == null) {
-            return SessionEnd(error?.recoverable ?: true, error?.let { connectFailure(text) })
+        if (opened != null) {
+            val noCloseFrame = DROPPED_WITHOUT_CLOSE in text || CLOSED_ABNORMALLY in text
+            val quick = error?.recoverable != false && noCloseFrame && now - opened < SHORT_SESSION_MS
+            quickDrops = if (quick) quickDrops + 1 else 0
         }
-        if (error?.recoverable == false) {
-            quickDrops = 0
-            return SessionEnd(recoverable = false, reason = closeReason(text))
+        return when {
+            opened == null -> SessionEnd(error?.recoverable ?: true, error?.let { connectFailure(text) })
+
+            error?.recoverable == false -> SessionEnd(recoverable = false, reason = closeReason(text))
+
+            quickDrops >= MAX_QUICK_DROPS -> {
+                quickDrops = 0
+                SessionEnd(recoverable = false, reason = TransportDisconnectReason.WebSocketSlotContested)
+            }
+
+            else -> SessionEnd(recoverable = true)
         }
-        val noCloseFrame = DROPPED_WITHOUT_CLOSE in text || CLOSED_ABNORMALLY in text
-        quickDrops = if (noCloseFrame && now - opened < SHORT_SESSION_MS) quickDrops + 1 else 0
-        if (quickDrops >= MAX_QUICK_DROPS) {
-            quickDrops = 0
-            return SessionEnd(recoverable = false, reason = TransportDisconnectReason.WebSocketSlotContested)
-        }
-        return SessionEnd(recoverable = true)
     }
 
     private fun closeReason(text: String): TransportDisconnectReason? = when {

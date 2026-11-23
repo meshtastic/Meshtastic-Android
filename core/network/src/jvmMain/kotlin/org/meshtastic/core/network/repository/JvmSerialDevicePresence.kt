@@ -25,8 +25,8 @@ import org.meshtastic.core.network.availableSerialPortNames
 /**
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
- * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty and [portExists] asks jSerialComm for the
- * system port name a desktop selection stores (`sttyUSB0`, `sCOM3`).
+ * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty and [portExists] asks jSerialComm for
+ * the system port name a desktop selection stores (`sttyUSB0`, `sCOM3`).
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
