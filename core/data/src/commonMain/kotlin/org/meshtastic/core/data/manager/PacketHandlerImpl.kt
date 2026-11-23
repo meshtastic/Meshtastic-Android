@@ -219,6 +219,8 @@ class PacketHandlerImpl(
                 ?: DEFAULT_HOP_LIMIT
         return MeshPacket.Builder()
             .also { wb ->
+                // The stored row's sender is our node; queue receipts find it by from, to and ID.
+                wb.from = nodeManager.myNodeNum.value ?: 0
                 wb.to = to
                 wb.id = p.id
                 wb.want_ack = p.wantAck

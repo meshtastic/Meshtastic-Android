@@ -393,9 +393,11 @@ class PacketHandlerImplTest {
         val repository = mock<PacketRepository>(MockMode.autofill)
         everySuspend { repository.getEnroutePackets() } returns emptyList()
         everySuspend { repository.getEnrouteReactions() } returns emptyList()
+        // Like PacketDao's outgoing match, a packet from another sender finds no stored row.
         everySuspend { repository.applyOutgoingQueueStatus(any(), any()) } calls
-            {
+            { args ->
                 PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
+                    .takeIf { args.arg<MeshPacket>(0).from == LOCAL_NODE }
             }
         val logs = FakeMeshLogRepository()
         val handler =
