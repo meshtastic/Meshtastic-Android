@@ -94,6 +94,7 @@ class PacketHandlerImplTest {
         val outgoing = packet(301, destination = LOCAL_NODE)
         assertTrue(fixture.handler.sendToRadio(outgoing))
         runCurrent()
+        verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.DELIVERED) }
         fixture.queueStatus(301, result = 35)
         runCurrent()
 

@@ -24,7 +24,9 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
@@ -42,6 +44,8 @@ import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
@@ -263,10 +267,53 @@ class RadioSessionProjectionTest {
     @Test
     fun `an acknowledged local config write reaches the radio config through the SDK session`() = runTest {
         val harness = Harness(backgroundScope)
-        val link = FakeRadioTransport(TransportIdentity("fake:config"), autoHandshake = true, nodeNum = LOCAL)
+        val (link, client) = sdkSession(harness, handshakeConfig = lora(Config.LoRaConfig.ModemPreset.LONG_FAST))
+        assertEquals(lora(Config.LoRaConfig.ModemPreset.LONG_FAST), harness.radioConfig.lastSetLocalConfig)
+
+        val written = lora(Config.LoRaConfig.ModemPreset.MEDIUM_FAST)
+        val write = async { client.admin.setConfig(written) }
+        runCurrent()
+        link.injectRoutingAck(link.outboundPackets().last { it.admin()?.set_config != null }.id, fromNode = LOCAL)
+        assertTrue(write.await() is AdminResult.Success)
+        runCurrent()
+
+        assertEquals(written, harness.radioConfig.lastSetLocalConfig)
+        client.disconnect()
+    }
+
+    @Test
+    fun `an acknowledged local channel write reaches the radio config through the SDK session`() = runTest {
+        val harness = Harness(backgroundScope)
+        val (link, client) = sdkSession(harness, handshakeConfig = lora(Config.LoRaConfig.ModemPreset.LONG_FAST))
+        val settings = ChannelSettings.Builder().also { it.name = "Away" }.build()
+        val channel =
+            Channel.Builder()
+                .also {
+                    it.index = 1
+                    it.role = Channel.Role.SECONDARY
+                    it.settings = settings
+                }
+                .build()
+
+        val write = async { client.admin.setChannel(channel) }
+        runCurrent()
+        link.injectRoutingAck(link.outboundPackets().last { it.admin()?.set_channel != null }.id, fromNode = LOCAL)
+        assertTrue(write.await() is AdminResult.Success)
+        runCurrent()
+
+        assertEquals(settings, harness.radioConfig.channelSetFlow.first().settings.getOrNull(1))
+        client.disconnect()
+    }
+
+    /** A real SDK client handshaken over a scripted link, its session events projected the way the app does. */
+    private suspend fun TestScope.sdkSession(
+        harness: Harness,
+        handshakeConfig: Config,
+    ): Pair<FakeRadioTransport, RadioClient> {
+        val link = FakeRadioTransport(TransportIdentity("fake:session"), autoHandshake = true, nodeNum = LOCAL)
         val client =
             RadioClient.Builder()
-                .transport(ConfigDownloadTransport(link, lora(Config.LoRaConfig.ModemPreset.LONG_FAST)))
+                .transport(ConfigDownloadTransport(link, handshakeConfig))
                 .storage(InMemoryStorageProvider())
                 .coroutineContext(backgroundScope.coroutineContext)
                 .autoSyncTimeOnConnect(false)
@@ -274,22 +321,17 @@ class RadioSessionProjectionTest {
                 .build()
         val events = checkNotNull(client.sessionEvents)
         backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            events.collect { if (it !is RadioSessionEvent.Ready) harness.projection.project(it, harness.session) }
+            events.collect { event ->
+                if (event is RadioSessionEvent.Ready) {
+                    harness.projection.installReady(event, harness.session)
+                } else {
+                    harness.projection.project(event, harness.session)
+                }
+            }
         }
         client.connect()
         runCurrent()
-        assertNull(harness.radioConfig.lastSetLocalConfig)
-
-        val written = lora(Config.LoRaConfig.ModemPreset.MEDIUM_FAST)
-        val write = async { client.admin.setConfig(written) }
-        runCurrent()
-        val request = link.outboundPackets().last { it.admin()?.set_config != null }
-        link.injectRoutingAck(request.id, fromNode = LOCAL)
-        assertTrue(write.await() is AdminResult.Success)
-        runCurrent()
-
-        assertEquals(written, harness.radioConfig.lastSetLocalConfig)
-        client.disconnect()
+        return link to client
     }
 
     @Test

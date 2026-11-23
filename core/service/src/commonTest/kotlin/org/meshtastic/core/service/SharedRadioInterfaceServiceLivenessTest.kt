@@ -658,6 +658,36 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `lockdown is refused while teardown drains and after disconnect`() = runTest(testDispatcher) {
+        val service =
+            createConnectedService(
+                address = "xAA:BB:CC:DD:EE:FF",
+                transportProvider = {
+                    object : RadioTransport {
+                        override fun tryLockdown(auth: LockdownAuth): Boolean = true
+
+                        override suspend fun close() = Unit
+                    }
+                },
+            )
+        val session = requireNotNull(service.activeSession.value)
+        val auth = LockdownAuth.Builder().build()
+        val release = CompletableDeferred<Unit>()
+        launch { service.runWithSessionLease(session) { release.await() } }
+        testDispatcher.scheduler.runCurrent()
+        assertTrue(service.tryLockdown(session, auth))
+
+        val teardown = launch { service.disconnect() }
+        testDispatcher.scheduler.runCurrent()
+        assertFalse(teardown.isCompleted, "teardown must wait for the held lease")
+        assertFalse(service.tryLockdown(session, auth), "a draining session must admit no new handoff")
+
+        release.complete(Unit)
+        teardown.join()
+        assertFalse(service.tryLockdown(session, auth))
+    }
+
+    @Test
     fun `transport status clears on explicit disconnect and on a device switch and ignores a stale transport`() =
         runTest(testDispatcher) {
             val callbacks = mutableListOf<RadioInterfaceService>()
