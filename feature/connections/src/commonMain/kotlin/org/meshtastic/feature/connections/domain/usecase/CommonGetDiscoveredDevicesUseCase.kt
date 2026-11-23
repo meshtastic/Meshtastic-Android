@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
@@ -42,6 +43,7 @@ open class CommonGetDiscoveredDevicesUseCase(
     private val recentAddressesDataSource: RecentAddressesSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
+    private val nodeManager: NodeManager,
     private val usbScanner: UsbScanner? = null,
 ) : GetDiscoveredDevicesUseCase {
 
@@ -53,24 +55,25 @@ open class CommonGetDiscoveredDevicesUseCase(
         val nodeDb = nodeRepository.nodeDBbyNum
         val usbFlow = usbScanner?.scanUsbDevices() ?: flowOf(emptyList())
 
-        return combine(nodeDb, resolvedList, recentAddressesDataSource.recentAddresses, usbFlow) {
-                db,
-                resolved,
-                recentList,
-                usbList,
-            ->
+        return combine(
+            nodeDb,
+            resolvedList,
+            recentAddressesDataSource.recentAddresses,
+            usbFlow,
+            localNodeNums(databaseManager, nodeManager),
+        ) { db, resolved, recentList, usbList, nums ->
             val defaultName = safeCatchingAll { getStringSuspend(Res.string.meshtastic) }.getOrDefault("Meshtastic")
             val processedTcp = processTcpServices(resolved, recentList, defaultName)
             val discoveredTcpAddresses = processedTcp.mapTo(mutableSetOf()) { it.fullAddress }
 
-            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
-            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
+            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager, nums)
+            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, nums)
 
             DiscoveredDevices(
                 discoveredTcpDevices = discoveredTcpForUi,
                 recentTcpDevices = recentTcpForUi,
-                usbDevices = usbList,
-                virtualDevices = virtualDeviceEntries(showMock, showReplay),
+                usbDevices = usbList.withLocalNodes(db, nums),
+                virtualDevices = virtualDeviceEntries(showMock, showReplay).withLocalNodes(db, nums),
             )
         }
     }
