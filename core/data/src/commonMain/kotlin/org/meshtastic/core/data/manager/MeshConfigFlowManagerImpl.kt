@@ -36,31 +36,15 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.LoRaRegionPresetMap
-import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
+import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
-
-/** The state downloaded by a backend that owns its own handshake. */
-internal data class RadioHandshakeSnapshot(
-    val myInfo: ProtoMyNodeInfo,
-    val metadata: DeviceMetadata?,
-    val channels: List<Channel>,
-    val configs: List<Config>,
-    val moduleConfigs: List<ModuleConfig>,
-    val deviceUiConfig: DeviceUIConfig?,
-    val nodes: List<NodeInfo>,
-    val files: List<FileInfo> = emptyList(),
-    val regionPresets: LoRaRegionPresetMap? = null,
-)
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @Single
@@ -91,42 +75,46 @@ class MeshConfigFlowManagerImpl(
     private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
 
     /**
-     * Installs a complete snapshot under the app's current session lease. The backend owns protocol startup and should
-     * wait for this call to return true before delivering retained packets.
+     * Installs the SDK handshake snapshot under the app's current session lease. The session waits for this call to
+     * return true before delivering retained packets.
      */
-    internal suspend fun installRadioSnapshot(session: RadioSessionContext, snapshot: RadioHandshakeSnapshot): Boolean {
-        val info = buildMyNodeInfo(snapshot.myInfo, snapshot.metadata) ?: return false
-        var ready = false
+    internal suspend fun installRadioSnapshot(session: RadioSessionContext, ready: RadioSessionEvent.Ready): Boolean {
+        val myInfo = checkNotNull(ready.myInfo)
+        val bundle = ready.configBundle
+        val metadata = bundle?.metadata
+        val info = buildMyNodeInfo(myInfo, metadata) ?: return false
+        var installed = false
         runWhileForSession(session, "radio snapshot install") {
             val admitted =
                 runForSession(session) {
                     nodeManager.setNodeDbReady(false)
                     nodeManager.setAllowNodeDbWrites(false)
-                    publishMyNodeIdentity(snapshot.myInfo, session)
-                    nodeManager.setFirmwareVersion(snapshot.metadata?.firmware_version, session)
+                    publishMyNodeIdentity(myInfo, session)
+                    nodeManager.setFirmwareVersion(metadata?.firmware_version, session)
                 }
             if (!admitted) return@runWhileForSession
 
             clearHandshakeConfig { isActiveSession(session) }
             if (!isActiveSession(session)) return@runWhileForSession
+            val moduleConfigs = bundle?.moduleConfigs.orEmpty()
             with(radioConfigRepository) {
-                snapshot.channels.forEach { updateChannelSettings(it) }
-                snapshot.configs.forEach { setLocalConfig(it) }
-                snapshot.moduleConfigs.forEach { setLocalModuleConfig(it) }
-                snapshot.deviceUiConfig?.let { setDeviceUIConfig(it) }
-                snapshot.files.forEach { addFileInfo(it) }
-                snapshot.regionPresets?.let { setLoraRegionPresetMap(it) }
+                ready.channels.orEmpty().forEach { updateChannelSettings(it) }
+                bundle?.configs.orEmpty().forEach { setLocalConfig(it) }
+                moduleConfigs.forEach { setLocalModuleConfig(it) }
+                bundle?.deviceUIConfig?.let { setDeviceUIConfig(it) }
+                ready.files.forEach { addFileInfo(it) }
+                ready.regionPresets?.let { setLoraRegionPresetMap(it) }
             }
-            snapshot.metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
+            metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
             // Before the node install, which persists the local node with its status.
-            snapshot.moduleConfigs
+            moduleConfigs
                 .firstNotNullOfOrNull { it.statusmessage }
                 ?.let { status -> nodeManager.updateNodeStatusAndPersist(info.myNodeNum, status.node_status) }
-            ready =
-                installNodeDatabase(session, info, snapshot.nodes, isRefresh = false) &&
+            installed =
+                installNodeDatabase(session, info, ready.nodes.values.toList(), isRefresh = false) &&
                 runForSession(session) { installedSnapshot.value = InstalledSnapshot(session, info) }
         }
-        return ready
+        return installed
     }
 
     /** Applies a complete nodes-only SDK download under the same session lease as the initial snapshot. */

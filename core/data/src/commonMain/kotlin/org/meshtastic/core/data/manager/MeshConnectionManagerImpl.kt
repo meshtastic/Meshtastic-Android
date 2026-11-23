@@ -127,7 +127,7 @@ class MeshConnectionManagerImpl(
             }
             .launchIn(scope)
 
-        // The SDK reports the link up only at Ready, so its handshake phases stand in for main's link-up Connecting.
+        // The SDK reports the link up only at Ready, so its handshake phases present the app state as Connecting.
         // A handshake that ends short of Ready hands the state back to the link, which may not have changed.
         radioInterfaceService.transportStatus
             .map { it?.phase in HANDSHAKE_PHASES }
@@ -254,7 +254,7 @@ class MeshConnectionManagerImpl(
             true
         }
 
-    /** Shows the handshake as Connecting until the snapshot install publishes Connected, as main's link-up did. */
+    /** Shows the handshake as Connecting until the snapshot install publishes Connected. */
     private suspend fun onHandshakeStarted() = connectionMutex.withLock {
         val current = serviceRepository.connectionState.value
         if (current == ConnectionState.Connected || current == ConnectionState.Connecting) return@withLock
@@ -337,11 +337,6 @@ class MeshConnectionManagerImpl(
                 }
             }
         }
-    }
-
-    override suspend fun refreshRadioIdentity() {
-        val session = radioInterfaceService.activeSession.value ?: return
-        radioInterfaceService.restartTransport(expectedSession = session)
     }
 
     override suspend fun onNodeDbReady() {
@@ -565,9 +560,6 @@ class MeshConnectionManagerImpl(
     }
 
     companion object {
-        // Hoisted constant — used on every meaningful handshake packet via
-        // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
-
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
 
         private val HANDSHAKE_PHASES = setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes)
@@ -577,13 +569,6 @@ class MeshConnectionManagerImpl(
         // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
         private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
 
-        /**
-         * Delay between the pre-handshake heartbeat and the want_config_id send.
-         *
-         * Ensures the heartbeat BLE write completes and the firmware's NimBLE callback context is warmed up before the
-         * config request arrives. 100ms is well above observed ESP32 task scheduling latency (~10–50ms) while adding
-         * negligible connection latency.
-         */
         internal const val MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS = 8
         private val POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY = 1.seconds
         private const val POST_HANDSHAKE_ADMISSION_MAX_BACKOFF_EXPONENT = 3

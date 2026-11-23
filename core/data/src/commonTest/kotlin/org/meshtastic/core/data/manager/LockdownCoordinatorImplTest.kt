@@ -74,8 +74,6 @@ class LockdownCoordinatorImplTest {
 
         override fun onRadioConfigLoaded() = Unit
 
-        override suspend fun refreshRadioIdentity() = Unit
-
         override suspend fun onNodeDbReady() = Unit
 
         override fun updateTelemetry(t: Telemetry) = Unit

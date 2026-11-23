@@ -49,6 +49,9 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
+import org.meshtastic.sdk.ConfigBundle
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -152,14 +155,25 @@ class MeshConfigFlowManagerImplTest {
             )
     }
 
-    private fun snapshot(nodes: List<NodeInfo> = emptyList()) = RadioHandshakeSnapshot(
+    private fun snapshot(
+        nodes: List<NodeInfo> = emptyList(),
+        moduleConfigs: List<ModuleConfig> = emptyList(),
+        files: List<FileInfo> = emptyList(),
+        regionPresets: LoRaRegionPresetMap? = null,
+    ) = RadioSessionEvent.Ready(
+        sessionId = 1L,
         myInfo = protoMyNodeInfo,
-        metadata = metadata,
+        configBundle =
+        ConfigBundle(
+            myInfo = protoMyNodeInfo,
+            metadata = metadata,
+            configs = emptyList(),
+            moduleConfigs = moduleConfigs,
+        ),
         channels = emptyList(),
-        configs = emptyList(),
-        moduleConfigs = emptyList(),
-        deviceUiConfig = null,
-        nodes = nodes,
+        nodes = nodes.associateBy { NodeId(it.num) },
+        files = files,
+        regionPresets = regionPresets,
     )
 
     @Test
@@ -195,9 +209,7 @@ class MeshConfigFlowManagerImplTest {
                 calls.add("install presets")
             }
 
-        assertTrue(
-            manager.installRadioSnapshot(activeSession, snapshot().copy(files = listOf(file), regionPresets = presets)),
-        )
+        assertTrue(manager.installRadioSnapshot(activeSession, snapshot(files = listOf(file), regionPresets = presets)))
         assertEquals(listOf("clear files", "clear presets", "install file", "install presets"), calls)
     }
 
@@ -223,7 +235,6 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `SDK snapshot applies the local node status before installing the node list`() = testScope.runTest {
-        // Main applied each handshake module config's statusmessage to the local node (MeshConfigHandlerImpl).
         val status =
             ModuleConfig.Builder()
                 .also {
@@ -242,7 +253,7 @@ class MeshConfigFlowManagerImplTest {
                 emptyList()
             }
 
-        assertTrue(manager.installRadioSnapshot(activeSession, snapshot().copy(moduleConfigs = listOf(status))))
+        assertTrue(manager.installRadioSnapshot(activeSession, snapshot(moduleConfigs = listOf(status))))
         assertEquals(listOf("status $myNodeNum On duty", "install"), callOrder)
     }
 

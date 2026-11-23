@@ -251,15 +251,6 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `identity refresh restarts the current SDK session`() = runTest(testDispatcher) {
-        val session = RadioSessionContext(1, "tnode")
-        every { radioInterfaceService.activeSession } returns MutableStateFlow(session)
-        manager = createManager(backgroundScope)
-        manager.refreshRadioIdentity()
-        verifySuspend { radioInterfaceService.restartTransport(session) }
-    }
-
-    @Test
     fun `Disconnected state stops services`() = runTest(testDispatcher) {
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         manager = createManager(backgroundScope)

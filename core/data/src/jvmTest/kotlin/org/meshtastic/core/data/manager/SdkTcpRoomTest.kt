@@ -419,21 +419,9 @@ class SdkTcpRoomTest {
         }
 
         suspend fun installSnapshot(session: RadioSessionContext, ready: RadioSessionEvent.Ready): Boolean {
-            val config = ready.configBundle
-            return installer.installRadioSnapshot(
-                session,
-                RadioHandshakeSnapshot(
-                    myInfo = assertNotNull(ready.myInfo),
-                    metadata = config?.metadata,
-                    channels = assertNotNull(ready.channels),
-                    configs = config?.configs.orEmpty(),
-                    moduleConfigs = config?.moduleConfigs.orEmpty(),
-                    deviceUiConfig = config?.deviceUIConfig,
-                    nodes = ready.nodes.values.toList(),
-                    files = ready.files,
-                    regionPresets = ready.regionPresets,
-                ),
-            )
+            assertNotNull(ready.myInfo)
+            assertNotNull(ready.channels)
+            return installer.installRadioSnapshot(session, ready)
         }
 
         suspend fun connect(

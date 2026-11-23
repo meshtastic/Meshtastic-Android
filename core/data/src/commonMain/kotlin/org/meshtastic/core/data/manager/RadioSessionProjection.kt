@@ -87,21 +87,7 @@ class RadioSessionProjection(
     suspend fun installReady(event: RadioSessionEvent.Ready, session: RadioSessionContext): Boolean {
         val myInfo = checkNotNull(event.myInfo)
         val config = event.configBundle
-        val installed =
-            configFlowManager.value.installRadioSnapshot(
-                session,
-                RadioHandshakeSnapshot(
-                    myInfo = myInfo,
-                    metadata = config?.metadata,
-                    channels = event.channels.orEmpty(),
-                    configs = config?.configs.orEmpty(),
-                    moduleConfigs = config?.moduleConfigs.orEmpty(),
-                    deviceUiConfig = config?.deviceUIConfig,
-                    nodes = event.nodes.values.toList(),
-                    files = event.files,
-                    regionPresets = event.regionPresets,
-                ),
-            )
+        val installed = configFlowManager.value.installRadioSnapshot(session, event)
         if (installed) {
             logFromRadio(session, MeshLog.TYPE_MY_INFO, myInfo.toOneLineString()) { it.my_info = myInfo }
             loggedConfig.value = null

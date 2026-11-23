@@ -26,9 +26,6 @@ interface MeshConnectionManager {
     /** Called when the node database is ready and fully populated. */
     suspend fun onNodeDbReady()
 
-    /** Starts a fresh SDK session after the attached radio changes its node number. */
-    suspend fun refreshRadioIdentity()
-
     /** Updates the telemetry information for the local node. */
     fun updateTelemetry(t: Telemetry)
 
