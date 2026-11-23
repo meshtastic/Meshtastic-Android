@@ -166,14 +166,18 @@ internal class SdkRadioLink(
                 current.value = opened
             }
             val session = current.value ?: return@collect
-            when (event) {
-                is RadioSessionEvent.Lockdown ->
-                    host.runWithSessionLease(session) { pipeline.lockdown.handleLockdownStatus(event.status) }
+            // Nothing restarts this collector, so one event the app fails to write must not end the session's stream.
+            safeCatching {
+                when (event) {
+                    is RadioSessionEvent.Lockdown ->
+                        host.runWithSessionLease(session) { pipeline.lockdown.handleLockdownStatus(event.status) }
 
-                is RadioSessionEvent.Ready -> install(event, session, host)
+                    is RadioSessionEvent.Ready -> install(event, session, host)
 
-                else -> pipeline.sessionProjection.project(event, session)
+                    else -> pipeline.sessionProjection.project(event, session)
+                }
             }
+                .onFailure { Logger.e(it) { "Writing SDK session event ${event::class.simpleName} failed" } }
         }
     }
 

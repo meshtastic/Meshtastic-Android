@@ -30,6 +30,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -125,6 +126,9 @@ private class ActiveLink(val address: String, val link: RadioLink, val scope: Co
     @Volatile var closing = false
 
     var connect: Job? = null
+
+    /** The link's session pipeline; teardown waits for it so the last session's end is written before it returns. */
+    var pipeline: Job? = null
 
     /** Whether this link has reached [ConnectionState.Connected]; failures before that name a connect problem. */
     @Volatile var connected = false
@@ -501,16 +505,16 @@ class SharedRadioInterfaceService(
 
     /** Opens the selected radio's link and starts its client. Must be called under [linkMutex]. */
     private fun openLinkLocked() {
-        if (activeLink.value != null) return
-        if (radioOperationLock.suppressesTransport) {
-            Logger.d { "Not opening a link while a radio operation holds the port" }
-            return
-        }
         val address = getBondedDeviceAddress()
-        if (address == null) {
-            Logger.d { "No valid address to connect to" }
-            return
+        when {
+            activeLink.value != null -> Unit
+            radioOperationLock.suppressesTransport -> Logger.d { "No link while an operation holds the port" }
+            address == null -> Logger.d { "No valid address to connect to" }
+            else -> openLink(address)
         }
+    }
+
+    private fun openLink(address: String) {
         val scope = CoroutineScope(dispatchers.io + SupervisorJob())
         val link = safeCatching {
             links.open(address, scope)
@@ -525,7 +529,7 @@ class SharedRadioInterfaceService(
         val active = ActiveLink(address, link, scope)
         synchronized(stateLock) { activeLink.value = active }
         Logger.i { "Opened the link for ${address.anonymize}" }
-        scope.launch { link.run(LinkHost(active)) }
+        active.pipeline = scope.launch { link.run(LinkHost(active)) }
         link.connection.onEach { onLinkState(active, it) }.launchIn(scope)
         active.connect = scope.launch {
             // With auto-reconnect on, connect() returns at the first Connected and throws only on Failed, which
@@ -541,6 +545,7 @@ class SharedRadioInterfaceService(
         revokeTransportSession(synchronized(sessionCallbackLock) { activeTransportSession })
         try {
             active.link.disconnect()
+            active.pipeline?.cancelAndJoin()
         } finally {
             synchronized(stateLock) {
                 activeLink.value = null
@@ -619,7 +624,7 @@ class SharedRadioInterfaceService(
                 val state = active?.link?.connection?.value
                 val stopped =
                     state is ConnectionState.Failed ||
-                        (state is ConnectionState.Disconnected && active?.connect?.isCompleted == true)
+                        (state is ConnectionState.Disconnected && active.connect?.isCompleted == true)
                 when {
                     active == null -> openLinkLocked()
 
