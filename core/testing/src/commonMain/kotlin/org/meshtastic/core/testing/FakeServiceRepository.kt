@@ -64,13 +64,6 @@ class FakeServiceRepository : ServiceRepository {
         _errorMessage.value = null
     }
 
-    private val _connectionProgress = MutableStateFlow<String?>(null)
-    override val connectionProgress: StateFlow<String?> = _connectionProgress
-
-    override fun setConnectionProgress(text: String) {
-        _connectionProgress.value = text
-    }
-
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
     override val meshPacketFlow: Flow<MeshPacket> = _meshPacketFlow.asFlow()
 

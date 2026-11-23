@@ -302,7 +302,6 @@ class DesktopMcpServer(
         return buildJsonObject {
             put("state", serviceRepository.connectionState.value.toString())
             put("address", radioInterfaceService.getDeviceAddress())
-            put("progress", serviceRepository.connectionProgress.value)
             put("my_node_num", my?.myNodeNum?.toUInt()?.toLong())
             put("my_id", ours?.user?.id)
             put("my_long", ours?.user?.long_name)

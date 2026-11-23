@@ -64,7 +64,6 @@ import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.node_restarting
-import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -86,7 +85,6 @@ fun MeshtasticNavigationSuite(
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
     val nodeRestartExpected by uiViewModel.nodeRestartExpected.collectAsStateWithLifecycle()
-    val watchdogReconnectInFlight by uiViewModel.watchdogReconnectInFlight.collectAsStateWithLifecycle()
     val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
@@ -115,7 +113,6 @@ fun MeshtasticNavigationSuite(
                             isSelected = isSelected,
                             connectionState = connectionState,
                             nodeRestartExpected = nodeRestartExpected,
-                            watchdogReconnectInFlight = watchdogReconnectInFlight,
                             unreadMessageCount = unreadMessageCount,
                             selectedDevice = selectedDevice,
                             meshActivityFlow = uiViewModel.meshActivity,
@@ -199,16 +196,13 @@ private fun NavigationIconContent(
     selectedDevice: String?,
     meshActivityFlow: Flow<MeshActivity>,
     nodeRestartExpected: Boolean = false,
-    watchdogReconnectInFlight: Boolean = false,
 ) {
     val isConnectionsRoute = destination == TopLevelDestination.Connect
     // An expected node restart (reboot-applying config save) presents as an in-progress state, not a scary
-    // red disconnect: the icon borrows the Connecting treatment and the tooltip says "Restarting". A
-    // watchdog-forced handshake recovery gets the same treatment with a "Reconnecting…" tooltip.
+    // red disconnect: the icon borrows the Connecting treatment and the tooltip says "Restarting".
     val restarting = nodeRestartExpected && connectionState != ConnectionState.Connected
-    val reconnecting = watchdogReconnectInFlight && !restarting
     val presentedState =
-        if ((restarting || reconnecting) && connectionState == ConnectionState.Disconnected) {
+        if (restarting && connectionState == ConnectionState.Disconnected) {
             ConnectionState.Connecting
         } else {
             connectionState
@@ -220,7 +214,7 @@ private fun NavigationIconContent(
             PlainTooltip {
                 Text(
                     if (isConnectionsRoute) {
-                        connectionTooltipLabel(restarting, reconnecting, connectionState)
+                        connectionTooltipLabel(restarting, connectionState)
                     } else {
                         stringResource(destination.label)
                     },
@@ -266,13 +260,8 @@ private fun NavigationIconContent(
 }
 
 @Composable
-private fun connectionTooltipLabel(
-    restarting: Boolean,
-    reconnecting: Boolean,
-    connectionState: ConnectionState,
-): String = when {
+private fun connectionTooltipLabel(restarting: Boolean, connectionState: ConnectionState): String = when {
     restarting -> stringResource(Res.string.node_restarting)
-    reconnecting -> stringResource(Res.string.reconnecting)
     connectionState == ConnectionState.Connected -> stringResource(Res.string.connected)
     connectionState == ConnectionState.Connecting -> stringResource(Res.string.connecting)
     connectionState == ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)

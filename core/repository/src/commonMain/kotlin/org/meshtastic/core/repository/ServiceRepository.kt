@@ -109,20 +109,6 @@ interface ServiceRepository :
     override fun clearErrorMessage()
 
     /**
-     * Reactive flow of connection progress messages.
-     *
-     * Used during the handshake and config loading phase to provide status updates to the user.
-     */
-    val connectionProgress: StateFlow<String?>
-
-    /**
-     * Sets the connection progress message.
-     *
-     * @param text The progress description (e.g., "Downloading Node DB...").
-     */
-    override fun setConnectionProgress(text: String)
-
-    /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
      *
      * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation may be
@@ -165,19 +151,6 @@ interface ServiceRepository :
 
     /** Clears the current neighbor info response. */
     override fun clearNeighborInfoResponse()
-
-    companion object {
-        /**
-         * The cross-module contract for the WiFi/TCP handshake-watchdog recovery progress signal.
-         *
-         * [MeshConnectionManager] writes this exact literal to [connectionProgress] immediately before its recovery
-         * sibling transitions the transport to [ConnectionState.Disconnected], and `ConnectionsViewModel` (and its
-         * tests) compare incoming progress against it to surface `RECONNECTING` UI state instead of a final-feeling
-         * `NOT_CONNECTED`. The literal text and the U+2026 HORIZONTAL ELLIPSIS character MUST match exactly across both
-         * writers and readers — centralizing it here removes the prior cross-module string-contract hazard.
-         */
-        const val RECONNECTING_PROGRESS_TEXT = "Reconnecting\u2026"
-    }
 
     /** Reactive flow of the current lockdown authentication state. */
     val lockdownState: StateFlow<LockdownState>

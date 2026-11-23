@@ -208,18 +208,6 @@ open class ScannerViewModel(
      */
     val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
 
-    // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
-    private val _connectionProgressText = MutableStateFlow<String?>(null)
-
-    /**
-     * Transient, fine-grained status text emitted during connect/bonding (e.g. "Bonding…", "Requesting config…").
-     * Nullable because `serviceRepository.connectionProgress` does not emit during steady-state.
-     *
-     * Persistent "Not connected / Connecting / Connected" copy is derived separately in
-     * `ConnectionsViewModel.connectionStatus` so the UI can choose `progress ?: status`.
-     */
-    val connectionProgressText: StateFlow<String?> = _connectionProgressText.asStateFlow()
-
     /** What the selected device's transport is doing and why it last failed; shown on the connecting card. */
     val transportStatus: StateFlow<TransportStatus?>
         get() = radioInterfaceService.transportStatus
@@ -299,7 +287,6 @@ open class ScannerViewModel(
         // Sampled once, unlike [showMockTransport]: whether the replay capture ships is fixed when the build is
         // assembled, so there is nothing for it to react to.
         _showReplayTransport.value = radioInterfaceService.isReplayTransportAvailable
-        serviceRepository.connectionProgress.onEach { _connectionProgressText.value = it }.launchIn(viewModelScope)
         serviceRepository.connectionState
             .onEach { state ->
                 if (state is ConnectionState.Connected) {

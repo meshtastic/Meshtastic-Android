@@ -60,9 +60,8 @@ import org.meshtastic.proto.LocalConfig
 
 /**
  * Derived, UI-friendly summary of the device connection lifecycle. Combines [ServiceRepository.connectionState] with
- * the [ServiceRepository.RECONNECTING_PROGRESS_TEXT] handshake-recovery signal and expected-restart state.
- * Configuration health is modeled separately so region, lockdown, and managed-mode policy cannot leak into the
- * connection label.
+ * the expected-restart state. Configuration health is modeled separately so region, lockdown, and managed-mode policy
+ * cannot leak into the connection label.
  */
 enum class ConnectionStatus {
     /** No device has been selected or we are otherwise disconnected. */
@@ -72,8 +71,8 @@ enum class ConnectionStatus {
     CONNECTING,
 
     /**
-     * Transport is recovering from a WiFi/TCP handshake stall (the watchdog tore the link down and is bringing it back
-     * up). Distinct from [NOT_CONNECTED] so the UI can show an in-progress recovery instead of a final failure.
+     * The link dropped and is being brought back up on its own. Distinct from [NOT_CONNECTED] so the UI can show an
+     * in-progress recovery instead of a final failure. Nothing reports it yet.
      */
     RECONNECTING,
 
@@ -194,18 +193,9 @@ class ConnectionsViewModel(
     /**
      * Single source of truth for the UI's connection lifecycle label. Kept independent from configuration state so
      * region, lockdown, and managed-mode changes cannot rewrite a transient connection label.
-     *
-     * The [ConnectionStatus.RECONNECTING] case is signalled by the WiFi/TCP handshake watchdog writing
-     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] to [ServiceRepository.connectionProgress] immediately before its
-     * recovery sibling transitions to [ConnectionState.Disconnected]. See
-     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] for the cross-track contract.
      */
     val connectionStatus: StateFlow<ConnectionStatus> =
-        combine(connectionState, serviceRepository.connectionProgress, nodeRestartTracker.restartExpected) {
-                state,
-                progress,
-                restartExpected,
-            ->
+        combine(connectionState, nodeRestartTracker.restartExpected) { state, restartExpected ->
             when (state) {
                 is ConnectionState.Connected -> ConnectionStatus.CONNECTED
 
@@ -216,11 +206,7 @@ class ConnectionsViewModel(
                     if (restartExpected) ConnectionStatus.RESTARTING else ConnectionStatus.CONNECTING
 
                 ConnectionState.Disconnected ->
-                    when {
-                        restartExpected -> ConnectionStatus.RESTARTING
-                        progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT -> ConnectionStatus.RECONNECTING
-                        else -> ConnectionStatus.NOT_CONNECTED
-                    }
+                    if (restartExpected) ConnectionStatus.RESTARTING else ConnectionStatus.NOT_CONNECTED
 
                 ConnectionState.DeviceSleep -> ConnectionStatus.CONNECTED_SLEEPING
             }

@@ -267,7 +267,6 @@ fun ConnectionsScreen(
     onConfigNavigate: (Route) -> Unit,
     onConnectCode: ((String) -> Unit)? = null,
 ) {
-    val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
@@ -573,7 +572,6 @@ fun ConnectionsScreen(
                                     usbDevices = usbDevices,
                                     virtualDevices = virtualDevices,
                                     connectionStatus = connectionStatus,
-                                    connectionProgress = connectionProgress,
                                     transportStatus = transportStatus,
                                     onClickDisconnect = { scanModel.disconnect() },
                                 )
@@ -1017,7 +1015,6 @@ private fun ConnectingDeviceContent(
     usbDevices: List<DeviceListEntry>,
     virtualDevices: List<DeviceListEntry>,
     connectionStatus: ConnectionStatus,
-    connectionProgress: String?,
     transportStatus: TransportStatus?,
     onClickDisconnect: () -> Unit,
 ) {
@@ -1037,7 +1034,6 @@ private fun ConnectingDeviceContent(
         deviceName = name,
         deviceAddress = address,
         connectionStatus = connectionStatus,
-        connectionProgress = connectionProgress,
         transportStatus = transportStatus,
         onClickDisconnect = onClickDisconnect,
     )

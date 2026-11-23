@@ -43,7 +43,6 @@ class ServiceRepositoryImplTest {
         assertEquals(ConnectionEpochs(), repository.connectionEpochs.value)
         assertNull(repository.clientNotification.value)
         assertNull(repository.errorMessage.value)
-        assertNull(repository.connectionProgress.value)
         assertNull(repository.tracerouteResponse.value)
         assertNull(repository.neighborInfoResponse.value)
 

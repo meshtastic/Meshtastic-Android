@@ -69,10 +69,10 @@ fun ConnectingDeviceInfo(
     deviceName: String,
     deviceAddress: String,
     connectionStatus: ConnectionStatus,
-    connectionProgress: String?,
     transportStatus: TransportStatus?,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
+    connectionProgress: String? = null,
 ) {
     val now by
         produceState(nowMillis, transportStatus) {

@@ -105,7 +105,6 @@ val bleAutoScan: StateFlow<Boolean>
 val networkAutoScan: StateFlow<Boolean>
 
 // Connection
-val connectionProgressText: StateFlow<String?>
 val selectedAddressFlow: StateFlow<String?>
 val pendingRecovery: StateFlow<PendingFirmwareRecovery?>   // drives the firmware recovery banner
 

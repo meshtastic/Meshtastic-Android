@@ -77,16 +77,6 @@ open class ServiceRepositoryImpl : ServiceRepository {
         _errorMessage.value = null
     }
 
-    private val _connectionProgress = MutableStateFlow<String?>(null)
-    override val connectionProgress: StateFlow<String?>
-        get() = _connectionProgress
-
-    override fun setConnectionProgress(text: String) {
-        if (connectionState.value != ConnectionState.Connected) {
-            _connectionProgress.value = text
-        }
-    }
-
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
     override val meshPacketFlow: Flow<MeshPacket>
         get() = _meshPacketFlow.asFlow()

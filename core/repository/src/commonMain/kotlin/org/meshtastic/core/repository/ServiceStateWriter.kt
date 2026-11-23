@@ -45,9 +45,6 @@ interface ServiceStateWriter {
     /** Clears the current error message. */
     fun clearErrorMessage()
 
-    /** Sets the connection progress message. */
-    fun setConnectionProgress(text: String)
-
     /** Emits a mesh packet into the shared flow. */
     suspend fun emitMeshPacket(packet: MeshPacket)
 

@@ -125,7 +125,7 @@ interface ServiceStateWriter {
     suspend fun emitMeshPacket(packet: MeshPacket)
     fun setTracerouteResponse(value: TracerouteResponse?)
     fun setNeighborInfoResponse(value: String?)
-    // …setters/clearers for error, progress, notification
+    // …setters/clearers for error and notification
 }
 
 interface ServiceRepository :
@@ -135,7 +135,6 @@ interface ServiceRepository :
     ServiceStateWriter {
     val clientNotification: StateFlow<ClientNotification?>
     val errorMessage: StateFlow<String?>
-    val connectionProgress: StateFlow<String?>
     val meshPacketFlow: Flow<MeshPacket>
     // …plus lockdown state, lockdown token info and sessionAuthorized, with their setters
 }

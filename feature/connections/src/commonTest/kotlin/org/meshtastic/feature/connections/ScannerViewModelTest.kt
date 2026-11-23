@@ -90,7 +90,6 @@ class ScannerViewModelTest {
         harness = ScannerViewModelHarness()
         Dispatchers.setMain(harness.testDispatcher)
 
-        serviceRepository.setConnectionProgress("")
         baseDevicesFlow.value = DiscoveredDevices()
         resolvedServicesFlow.value = emptyList()
 
@@ -165,16 +164,6 @@ class ScannerViewModelTest {
                 harness.discoveryRequests,
                 "re-locking must re-query it again",
             )
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `connectionProgressText reflects connectionProgress`() = runTest {
-        viewModel.connectionProgressText.test {
-            assertEquals("", awaitItem())
-            serviceRepository.setConnectionProgress("Connecting...")
-            assertEquals("Connecting...", awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
