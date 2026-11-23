@@ -253,6 +253,12 @@ interface RadioInterfaceService :
      */
     fun consumeGattCacheInvalidationRequest(): Boolean
 
+    /**
+     * Whether the BLE link that just connected should refresh Android's GATT cache: the post-OTA request, or a long BLE
+     * failure streak suspected of a stale cache. Called once per link, after it connects; consumes either trigger.
+     */
+    fun consumeGattCacheRefreshOnConnect(): Boolean = consumeGattCacheInvalidationRequest()
+
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
 

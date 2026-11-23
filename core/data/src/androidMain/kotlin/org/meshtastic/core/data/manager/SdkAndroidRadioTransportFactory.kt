@@ -45,7 +45,7 @@ internal class SdkAndroidRadioTransportFactory(
         BleTransport(
             address = address.uppercase(),
             resilience = BleResilience(bondFirst = true, autoConnectFallback = true, refreshStaleGattCache = true),
-            refreshGattCacheOnConnect = service::consumeGattCacheInvalidationRequest,
+            refreshGattCacheOnConnect = service::consumeGattCacheRefreshOnConnect,
             builderAction = {},
         )
     }

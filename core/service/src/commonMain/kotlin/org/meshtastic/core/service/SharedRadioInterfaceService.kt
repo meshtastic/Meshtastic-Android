@@ -548,8 +548,14 @@ class SharedRadioInterfaceService(
      */
     private var phoneApiRetryDelay: Long? = null
 
-    /** PhoneAPI sessions that failed since the last stable one. Guarded by [transportMutex]. */
-    private var phoneApiFailureStreak = 0
+    /**
+     * PhoneAPI sessions that failed since the last stable one or the last user connect. Written under [transportMutex];
+     * a BLE link reads it from its connect callback.
+     */
+    @Volatile private var phoneApiFailureStreak = 0
+
+    /** Main's stale-cache refresh rule, fed by [phoneApiFailureStreak]. Guarded by [sessionCallbackLock]. */
+    private val gattCacheInvalidationGate = GattCacheInvalidationGate()
 
     /** The generation whose link stayed up past [minStableMillis]; set by a timer the transport's scope owns. */
     @Volatile private var stableGeneration: Long? = null
@@ -760,6 +766,7 @@ class SharedRadioInterfaceService(
                 phoneApiRetryDelay = null
                 retryReason = null
                 recoveryRestarts = 0
+                endPhoneApiFailureStreak()
                 // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
                 // start path already rolls back partial session state; contain the failure here so it does not become
                 // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
@@ -862,7 +869,7 @@ class SharedRadioInterfaceService(
                 }
                 if (handshakeCompleted && stableGeneration == session.generation) {
                     phoneApiRetryDelay = null
-                    phoneApiFailureStreak = 0
+                    endPhoneApiFailureStreak()
                 } else {
                     phoneApiFailureStreak++
                 }
@@ -973,6 +980,23 @@ class SharedRadioInterfaceService(
 
     override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
 
+    /** Resets the failure streak and re-arms its cache refresh. Guarded by [transportMutex]. */
+    private fun endPhoneApiFailureStreak() {
+        phoneApiFailureStreak = 0
+        synchronized(sessionCallbackLock) { gattCacheInvalidationGate.onFailureStreakEnded() }
+    }
+
+    /** Consumes the streak's one stale-cache refresh once it is due. Guarded by [sessionCallbackLock]. */
+    private fun consumeStaleGattCacheRefresh(): Boolean {
+        // The SDK cannot report whether the platform refresh took, so asking for it spends the allowance.
+        val due = gattCacheInvalidationGate.shouldInvalidateOnAttempt(phoneApiFailureStreak)
+        if (due) {
+            Logger.i { "Refreshing the GATT cache after $phoneApiFailureStreak consecutive BLE failures" }
+            gattCacheInvalidationGate.onCacheInvalidated()
+        }
+        return due
+    }
+
     override val mockTransportEnabled: StateFlow<Boolean>
         get() = transportFactory.mockTransportEnabled
 
@@ -1025,6 +1049,7 @@ class SharedRadioInterfaceService(
                 phoneApiRetryDelay = null
                 retryReason = null
                 recoveryRestarts = 0
+                endPhoneApiFailureStreak()
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
                     gattCacheInvalidationRequested.value = false
                 }
@@ -1311,6 +1336,17 @@ class SharedRadioInterfaceService(
                 requested = this@SharedRadioInterfaceService.consumeGattCacheInvalidationRequest()
             }
             return requested
+        }
+
+        override fun consumeGattCacheRefreshOnConnect(): Boolean {
+            var refresh = false
+            runIfTransportSessionActive(session) {
+                // Read the one-shot post-OTA flag first so a due stale-cache refresh cannot leave it set.
+                val postOta = this@SharedRadioInterfaceService.consumeGattCacheInvalidationRequest()
+                val isBle = DeviceAddress.parse(session.address)?.interfaceId == InterfaceId.BLUETOOTH
+                refresh = (isBle && consumeStaleGattCacheRefresh()) || postOta
+            }
+            return refresh
         }
 
         override fun onConnect() {

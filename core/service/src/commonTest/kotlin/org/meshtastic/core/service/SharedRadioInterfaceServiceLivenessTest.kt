@@ -2422,6 +2422,126 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    // ─── Stale GATT cache refresh: main's GattCacheInvalidationGate (threshold 6, once per streak) ───
+
+    /** Ends the current session as a recoverable failure [times] times, letting each retry start the next session. */
+    private fun TestScope.failPhoneApiSessions(callbacks: List<RadioInterfaceService>, times: Int) {
+        repeat(times) {
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(60_000L)
+        }
+    }
+
+    @Test
+    fun `a BLE link refreshes the GATT cache after six consecutive failures but not after five`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+            try {
+                failPhoneApiSessions(callbacks, 5)
+                assertEquals(6, callbacks.size)
+                assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "five failures are an ordinary gap")
+
+                failPhoneApiSessions(callbacks, 1)
+                assertEquals(7, callbacks.size)
+                assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect(), "six failures suspect a stale cache")
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    @Test
+    fun `a BLE failure streak refreshes the GATT cache only once`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            failPhoneApiSessions(callbacks, 6)
+            assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
+
+            failPhoneApiSessions(callbacks, 1)
+            assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "a refresh that did not help repeated")
+            failPhoneApiSessions(callbacks, 3)
+            assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "the streak's refresh came back")
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a stable BLE session re-arms the GATT cache refresh for the next streak`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            failPhoneApiSessions(callbacks, 6)
+            assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
+
+            // Ready, then up past main's 5 s BLE stability threshold: the streak ends.
+            callbacks.last().onConnect()
+            advanceTimeBy(5_001L)
+            failPhoneApiSessions(callbacks, 1)
+            assertFalse(
+                callbacks.last().consumeGattCacheRefreshOnConnect(),
+                "a new streak starts below the threshold",
+            )
+
+            failPhoneApiSessions(callbacks, 6)
+            assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect(), "a fresh streak earns a fresh refresh")
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a user connect or device switch starts a fresh BLE failure streak`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            failPhoneApiSessions(callbacks, 6)
+            service.disconnect()
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "a user connect kept the old streak")
+
+            failPhoneApiSessions(callbacks, 6)
+            service.setDeviceAddress("x11:22:33:44:55:66")
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect(), "a device switch kept the old streak")
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a non-BLE failure streak never refreshes the GATT cache`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            failPhoneApiSessions(callbacks, 6)
+            assertEquals(7, callbacks.size)
+            assertFalse(callbacks.last().consumeGattCacheRefreshOnConnect())
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a post-OTA request still refreshes and is consumed alongside a due stale-cache refresh`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+            try {
+                service.requestGattCacheInvalidationOnNextConnect()
+                assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
+
+                failPhoneApiSessions(callbacks, 6)
+                service.requestGattCacheInvalidationOnNextConnect()
+                assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
+                assertFalse(service.consumeGattCacheInvalidationRequest(), "the post-OTA flag outlived its refresh")
+            } finally {
+                service.disconnect()
+            }
+        }
+
     /**
      * The one-shot cache-invalidation flag is armed by
      * [SharedRadioInterfaceService.requestGattCacheInvalidationOnNextConnect] and consumed exactly once by
