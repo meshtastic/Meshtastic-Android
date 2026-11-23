@@ -25,8 +25,6 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -41,7 +39,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
@@ -92,66 +89,15 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `strict send waits for the destination after queue acceptance and a relay ACK`() = runTest {
-        val fixture = fixture()
-        val deferred = async { fixture.handler.sendToRadioAndAwaitResult(packet(201)) }
-        runCurrent()
-        fixture.queueStatus(201, result = 0)
-        fixture.transport.injectRoutingAck(201, fromNode = LOCAL_NODE)
-        runCurrent()
-        assertFalse(deferred.isCompleted)
-
-        fixture.transport.injectRoutingAck(201, fromNode = PEER)
-        val result = deferred.await()
-        assertEquals(AwaitedSendStatus.ACCEPTED, result.status)
-        assertTrue(result.dispatched)
-        fixture.client.disconnect()
-    }
-
-    @Test
-    fun `firmware local delivery settles strict sending and the durable row`() = runTest {
+    fun `firmware local delivery settles the durable row as delivered`() = runTest {
         val fixture = fixture()
         val outgoing = packet(301, destination = LOCAL_NODE)
-        val deferred = async { fixture.handler.sendToRadioAndAwaitResult(outgoing) }
+        assertTrue(fixture.handler.sendToRadio(outgoing))
         runCurrent()
         fixture.queueStatus(301, result = 35)
         runCurrent()
 
-        assertEquals(AwaitedSendStatus.ACCEPTED, deferred.await().status)
         verifySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.DELIVERED) }
-        fixture.client.disconnect()
-    }
-
-    @Test
-    fun `queue rejection marks the same persisted identity as failed`() = runTest {
-        val fixture = fixture()
-        val outgoing = packet(401)
-        val deferred = async { fixture.handler.sendToRadioAndAwaitResult(outgoing) }
-        runCurrent()
-        fixture.queueStatus(401, result = 32)
-        runCurrent()
-
-        val result = deferred.await()
-        assertEquals(AwaitedSendStatus.RADIO_REJECTED, result.status)
-        assertTrue(result.dispatched)
-        verifySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
-        fixture.client.disconnect()
-    }
-
-    @Test
-    fun `a missing queue receipt leaves the durable row in flight for a later routing ACK`() = runTest {
-        val fixture = fixture()
-        val outgoing = packet(501)
-        val deferred = async { fixture.handler.sendToRadioAndAwaitResult(outgoing) }
-        runCurrent()
-        fixture.queueStatus(0, result = 0)
-        advanceTimeBy(6.seconds)
-        runCurrent()
-        assertFalse(deferred.isCompleted)
-        verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
-
-        fixture.transport.injectRoutingAck(501, fromNode = PEER)
-        assertEquals(AwaitedSendStatus.ACCEPTED, deferred.await().status)
         fixture.client.disconnect()
     }
 
@@ -183,35 +129,6 @@ class PacketHandlerImplTest {
         runCurrent()
 
         verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
-        fixture.client.disconnect()
-    }
-
-    @Test
-    fun `caller cancellation leaves SDK routing ownership intact`() = runTest {
-        val fixture = fixture()
-        val outgoing = packet(701)
-        val deferred = async { fixture.handler.sendToRadioAndAwaitResult(outgoing) }
-        runCurrent()
-        deferred.cancelAndJoin()
-        assertFalse(fixture.handler.sendToRadio(outgoing))
-        fixture.queueStatus(701, result = 0)
-        fixture.transport.injectRoutingAck(701, fromNode = PEER)
-        runCurrent()
-        assertTrue(fixture.handler.sendToRadio(outgoing))
-        fixture.client.disconnect()
-    }
-
-    @Test
-    fun `connection version is verified before submitting the packet`() = runTest {
-        val fixture = fixture()
-        val version = fixture.service.connectionLifecycle.value.version
-        fixture.service.setConnectionState(ConnectionState.Disconnected)
-        fixture.service.setConnectionState(ConnectionState.Connected)
-
-        val result = fixture.handler.sendToRadioAndAwaitResultForConnection(packet(801), version)
-        assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, result.status)
-        assertFalse(result.dispatched)
-        assertTrue(fixture.sentTextIds().isEmpty())
         fixture.client.disconnect()
     }
 

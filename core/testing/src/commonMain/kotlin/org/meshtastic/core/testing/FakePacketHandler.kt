@@ -20,8 +20,6 @@ import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.repository.AwaitedSendResult
-import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.MeshPacket
@@ -99,14 +97,6 @@ class FakePacketHandler :
     private fun DataPacket.snapshot(): DataPacket = copy().also { it.errorMessage = errorMessage }
 
     override suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle? = null
-
-    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult =
-        AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
-
-    override suspend fun sendToRadioAndAwaitResultForConnection(
-        packet: MeshPacket,
-        expectedConnectionVersion: Long,
-    ): AwaitedSendResult = AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
 
     override fun rearmSendAckTimeouts() = Unit
 }

@@ -38,8 +38,6 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.model.util.toOneLineString
-import org.meshtastic.core.repository.AwaitedSendResult
-import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeManager
@@ -129,8 +127,6 @@ class PacketHandlerImpl(
 
     private val timeoutMutex = Mutex()
     private val sendAckTimeoutJobs = mutableMapOf<PersistedStatusTarget, Job>()
-
-    private data class Submission(val handle: PacedMessageHandle, val departureEpoch: Long)
 
     private fun logPacket(packet: MeshPacket) {
         if (packet.decoded != null) {
@@ -257,74 +253,20 @@ class PacketHandlerImpl(
 
     override suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle? {
         if (packet.id == 0) return null
-        return safeCatching { submit(packet, expectedVersion = null)?.handle?.takeIf { it.awaitAdmission() } }
+        return safeCatching { submit(packet)?.takeIf { it.awaitAdmission() } }
             .onFailure { Logger.w(it) { "SDK send submission failed for packet ${packet.id.toUInt()}" } }
             .getOrNull()
     }
 
-    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult =
-        sendAndAwait(packet, expectedVersion = null)
-
-    override suspend fun sendToRadioAndAwaitResultForConnection(
-        packet: MeshPacket,
-        expectedConnectionVersion: Long,
-    ): AwaitedSendResult = sendAndAwait(packet, expectedConnectionVersion)
-
     @Suppress("ReturnCount")
-    private fun submit(packet: MeshPacket, expectedVersion: Long?): Submission? {
+    private fun submit(packet: MeshPacket): PacedMessageHandle? {
         if (!scope.isActive) return null
         val session = radioInterfaceService.activeSession.value ?: return null
-        val lifecycle = connectionStateProvider.connectionLifecycle.value
-        if (
-            lifecycle.state != ConnectionState.Connected ||
-            (expectedVersion != null && lifecycle.version != expectedVersion)
-        ) {
-            return null
-        }
+        if (connectionStateProvider.connectionLifecycle.value.state != ConnectionState.Connected) return null
 
         val handle = radioInterfaceService.sendPaced(session, packet) ?: return null
         scope.handledLaunch { projectSend(session, packet, handle) }
-        return Submission(handle, lifecycle.epochs.departures)
-    }
-
-    @Suppress("ReturnCount")
-    private suspend fun sendAndAwait(packet: MeshPacket, expectedVersion: Long?): AwaitedSendResult {
-        if (packet.id == 0) return AwaitedSendResult(AwaitedSendStatus.REJECTED)
-        // A strict caller depends on positive routing evidence or a firmware local-loopback receipt.
-        val outbound = if (packet.want_ack) packet else packet.newBuilder().also { it.want_ack = true }.build()
-        val submission =
-            safeCatching { submit(outbound, expectedVersion) }
-                .getOrElse {
-                    Logger.w(it) { "SDK send submission failed for packet ${packet.id.toUInt()}" }
-                    return AwaitedSendResult(AwaitedSendStatus.SEND_FAILED)
-                } ?: return AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
-
-        val handle = submission.handle
-        val dispatched = handle.awaitDispatch()
-        val outcome = handle.message.await()
-        val status =
-            when (outcome) {
-                SendOutcome.Success -> AwaitedSendStatus.ACCEPTED
-
-                is SendOutcome.Failure ->
-                    when (outcome.reason) {
-                        SendFailure.QueueFull,
-                        SendFailure.IdCollision,
-                        -> AwaitedSendStatus.REJECTED
-
-                        SendFailure.Disconnected,
-                        SendFailure.HandshakeFailed,
-                        SendFailure.Cancelled,
-                        -> AwaitedSendStatus.TRANSPORT_STOPPED
-
-                        SendFailure.AckTimeout,
-                        SendFailure.Timeout,
-                        -> AwaitedSendStatus.TIMED_OUT
-
-                        else -> if (dispatched) AwaitedSendStatus.RADIO_REJECTED else AwaitedSendStatus.SEND_FAILED
-                    }
-            }
-        return AwaitedSendResult(status, submission.departureEpoch.takeIf { dispatched })
+        return handle
     }
 
     private suspend fun projectSend(session: RadioSessionContext, packet: MeshPacket, handle: PacedMessageHandle) {

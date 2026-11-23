@@ -20,7 +20,6 @@ import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.QueueStatus
 import org.meshtastic.sdk.PacedMessageHandle
 
 /**
@@ -71,33 +70,6 @@ interface PacketHandler {
 
     /** Queues [packet] as [sendToRadio] does and returns its SDK handle, or null when admission fails. */
     suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle?
-
-    /**
-     * Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.
-     *
-     * A successful [QueueStatus] only means that firmware accepted the packet into its transport queue; it does not
-     * prove that a self-addressed admin command has been processed. This stricter acknowledgement is required when a
-     * later packet depends on that command, such as installing a shared contact before sending the first DM.
-     *
-     * Time spent behind packets already in the FIFO is not part of the response timeout. The timeout begins after an
-     * active transport admits this packet and ends on its routing ACK/NAK or synchronous local-loopback result.
-     *
-     * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
-     *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
-     */
-    suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean = sendToRadioAndAwaitResult(packet).accepted
-
-    /** Detailed form of [sendToRadioAndAwait], including whether an active transport admitted the packet. */
-    suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult
-
-    /**
-     * [sendToRadioAndAwaitResult] admitted only while [expectedConnectionVersion] still owns the connected lifecycle
-     * generation. A stale generation is reported as [AwaitedSendStatus.TRANSPORT_STOPPED] with `dispatched == false`.
-     */
-    suspend fun sendToRadioAndAwaitResultForConnection(
-        packet: MeshPacket,
-        expectedConnectionVersion: Long,
-    ): AwaitedSendResult
 
     /**
      * Re-arms the send-ACK timeout for every persisted packet still awaiting its routing ACK/NAK, so sends orphaned by

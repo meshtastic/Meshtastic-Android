@@ -371,7 +371,7 @@ class SdkTcpRoomTest {
                         it.decoded = Data.Builder().also { data -> data.portnum = port }.build()
                     }
                     .build()
-            assertTrue(outgoing.sendToRadioAndAwaitResult(packet).accepted)
+            assertTrue(outgoing.sendToRadio(packet))
             while (outboundRepository.getPacketByPersistedId(id)?.status != MessageStatus.DELIVERED) {
                 delay(10.milliseconds)
             }
