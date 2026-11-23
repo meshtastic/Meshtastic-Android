@@ -14,112 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("EmptyFunctionBlock", "TooManyFunctions")
+@file:Suppress("EmptyFunctionBlock")
 
 package org.meshtastic.desktop.stub
 
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.Position as ProtoPosition
-
-/**
- * No-op stub implementations for truly platform-specific interfaces.
- *
- * These stubs exist ONLY for interfaces that have no `commonMain` implementation and require Android-specific APIs
- * (BLE/USB transport, notifications, WorkManager, location services, broadcasts, widgets). All other interfaces use
- * real `commonMain` implementations wired through the generated Koin K2 modules.
- *
- * As real desktop implementations become available (e.g., serial transport, TCP transport), they replace individual
- * stubs in [org.meshtastic.desktop.di.DesktopStubsModule].
- */
-private const val TAG = "NoopStub"
-
-private fun logWarn(message: String) {
-    Logger.w(tag = TAG) { message }
-}
-
-// region Transport / Radio Stubs (Android BLE/USB — no commonMain impl)
-
-class NoopRadioInterfaceService : RadioInterfaceService {
-    override val supportedDeviceTypes: List<DeviceType> = emptyList()
-
-    override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
-    override val sessionGeneration: StateFlow<Long> = MutableStateFlow(0L)
-    override val activeSession: StateFlow<RadioSessionContext?> = MutableStateFlow(null)
-
-    override fun isSessionActive(session: RadioSessionContext): Boolean = false
-
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean = false
-
-    override suspend fun runWithSessionLease(
-        session: RadioSessionContext,
-        block: suspend (RadioSessionLease) -> Unit,
-    ): Boolean = false
-
-    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
-
-    override val isReplayTransportAvailable: Boolean = false
-
-    override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>()
-    override val connectionError: Flow<String> = MutableSharedFlow<String>()
-    override val transportStatus: StateFlow<TransportStatus?> = MutableStateFlow(null)
-
-    override fun trySendToRadio(bytes: ByteArray): Boolean {
-        logWarn("NoopRadioInterfaceService.trySendToRadio(${bytes.size} bytes)")
-        return false
-    }
-
-    override fun connect() {
-        logWarn("NoopRadioInterfaceService.connect()")
-    }
-
-    override suspend fun disconnect() {
-        logWarn("NoopRadioInterfaceService.disconnect()")
-    }
-
-    override suspend fun restartTransport(expectedSession: RadioSessionContext?) {
-        logWarn("NoopRadioInterfaceService.restartTransport()")
-    }
-
-    override fun getDeviceAddress(): String? = null
-
-    override fun setDeviceAddress(deviceAddr: String?): Boolean = false
-
-    override fun requestGattCacheInvalidationOnNextConnect() {}
-
-    override fun consumeGattCacheInvalidationRequest(): Boolean = false
-
-    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = ""
-
-    override fun onConnect() {}
-
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {}
-
-    @Suppress("InjectDispatcher")
-    override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-}
-
-// endregion
 
 // region WorkManager / Location Stubs (Android-only)
 

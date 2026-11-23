@@ -135,15 +135,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     /** Every status reported through [onStatus], in order. */
     val reportedStatuses = mutableListOf<TransportStatus>()
 
-    private val _sentToRadio = mutableListOf<ByteArray>()
-
-    /** Thread-safe lifetime history of writes accepted across all admitted fake transport sessions. */
-    val sentToRadio: List<ByteArray>
-        get() = synchronized(sessionAdmissionLock) { _sentToRadio.map { it.copyOf() } }
-
-    /** Set to true to simulate an admitted transport rejecting the byte handoff. */
-    var rejectAdmittedSends: Boolean = false
-
     var connectCalled = false
     var restartTransportCalled: Boolean = false
         private set
@@ -152,21 +143,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     /** No capture asset in tests; flip per-test when exercising replay-gated behaviour. */
     override var isReplayTransportAvailable: Boolean = false
-
-    /**
-     * Records [bytes] only while a transport session is admitted. Tests must select a non-null device address and call
-     * [connect] before sending; attempts outside that lifecycle return false and leave [sentToRadio] unchanged.
-     */
-    override fun trySendToRadio(bytes: ByteArray): Boolean {
-        val admittedSession = admitSessionOperation() ?: return false
-        return try {
-            val accepted = !rejectAdmittedSends
-            if (accepted) synchronized(sessionAdmissionLock) { _sentToRadio.add(bytes.copyOf()) }
-            accepted
-        } finally {
-            releaseSessionOperation(admittedSession)
-        }
-    }
 
     override fun connect() {
         connectCalled = true

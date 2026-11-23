@@ -118,8 +118,6 @@ class AndroidRadioTransportFactory(
 
         override fun start() = service.onDisconnect(isPermanent = reason != null, reason = reason)
 
-        override fun handleSendToRadio(p: ByteArray): Boolean = false
-
         override suspend fun close() = Unit
     }
 

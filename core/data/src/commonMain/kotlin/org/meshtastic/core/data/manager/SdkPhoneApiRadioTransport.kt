@@ -51,7 +51,6 @@ import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.proto.ToRadio
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
 import org.meshtastic.sdk.InMemoryStorageProvider
@@ -261,15 +260,6 @@ internal class SdkPhoneApiRadioTransport(
 
     override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean =
         currentClient.value?.mqttProxy?.deliver(message) == true
-
-    override fun handleSendToRadio(p: ByteArray): Boolean = safeCatching {
-        val frame = ToRadio.ADAPTER.decode(p)
-        frame.want_config_id == null &&
-            frame.heartbeat == null &&
-            frame.disconnect != true &&
-            currentClient.value?.trySendRaw(frame) == true
-    }
-        .getOrDefault(false)
 
     override suspend fun close() = withContext(NonCancellable) {
         val job = run ?: return@withContext

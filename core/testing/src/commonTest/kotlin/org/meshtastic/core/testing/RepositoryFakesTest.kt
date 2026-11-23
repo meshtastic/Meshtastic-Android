@@ -38,7 +38,6 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -325,22 +324,6 @@ class RepositoryFakesTest {
         assertEquals(MessageStatus.ERROR, packet.status)
         assertEquals(123L, packet.time)
         assertTrue(sender.sentPackets.isEmpty())
-    }
-
-    @Test
-    fun `FakeRadioTransport is terminal after close`() = runTest {
-        val transport = FakeRadioTransport()
-        val outbound = byteArrayOf(1, 2, 3)
-
-        assertTrue(transport.handleSendToRadio(outbound))
-        outbound[0] = 9
-        val recorded = transport.sentData.single()
-        recorded[1] = 9
-        transport.close()
-
-        assertFalse(transport.handleSendToRadio(byteArrayOf(4, 5, 6)))
-        assertEquals(1, transport.sentData.size)
-        assertContentEquals(byteArrayOf(1, 2, 3), transport.sentData.single())
     }
 
     @Test

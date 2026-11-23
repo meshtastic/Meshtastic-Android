@@ -69,7 +69,6 @@ class CoroutineScopeConstructionTest {
             "core/service/commonMain/SharedRadioInterfaceService.kt",
             "core/takserver/jvmAndroidMain/TAKClientConnection.kt",
             "desktopApp/main/DesktopPreferencesDataSource.kt",
-            "desktopApp/main/NoopStubs.kt",
             "feature/coverage/commonMain/MapterhornElevation.kt",
             "feature/discovery/commonMain/DiscoveryScanEngine.kt",
             "feature/docs/commonMain/ChirpySessionHolder.kt",

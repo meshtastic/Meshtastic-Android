@@ -22,12 +22,9 @@ import org.meshtastic.core.repository.RadioTransport
  * An intentionally inert [RadioTransport] that silently discards all operations.
  *
  * Used as a safe default when no valid device address is configured or when the requested transport type is
- * unsupported. All method calls are no-ops — it never connects, never sends data, and never signals lifecycle events to
- * the service layer.
+ * unsupported. It never connects, opens no session, and never signals lifecycle events to the service layer.
  */
 class NopRadioTransport(val address: String) : RadioTransport {
-    override fun handleSendToRadio(p: ByteArray): Boolean = false
-
     override suspend fun close() {
         // No-op
     }

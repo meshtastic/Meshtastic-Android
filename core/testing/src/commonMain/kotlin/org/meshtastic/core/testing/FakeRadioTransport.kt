@@ -20,17 +20,9 @@ import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import org.meshtastic.core.repository.RadioTransport
 
-/** A test double for [RadioTransport] that tracks sent data. */
+/** A test double for [RadioTransport] that records its close calls. */
 class FakeRadioTransport : RadioTransport {
     private val lock = SynchronizedObject()
-    private val mutableSentData = mutableListOf<ByteArray>()
-    val sentData: List<ByteArray>
-        get() = synchronized(lock) { mutableSentData.map { it.copyOf() } }
-
-    /** Clears the recorded payload history without changing transport lifecycle state. */
-    fun clearSentData() {
-        synchronized(lock) { mutableSentData.clear() }
-    }
 
     private var closeCalledState = false
     val closeCalled: Boolean
@@ -39,12 +31,6 @@ class FakeRadioTransport : RadioTransport {
     private var closeCountState = 0
     val closeCount: Int
         get() = synchronized(lock) { closeCountState }
-
-    override fun handleSendToRadio(p: ByteArray): Boolean = synchronized(lock) {
-        if (closeCalledState) return@synchronized false
-        mutableSentData.add(p.copyOf())
-        true
-    }
 
     override suspend fun close() {
         synchronized(lock) {

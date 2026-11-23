@@ -73,6 +73,7 @@ import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
+import org.meshtastic.proto.LockdownAuth
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -201,7 +202,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
-    /** Triggers a liveness restart from inside one synchronous send handoff. */
+    /** Triggers a liveness restart from inside one synchronous lockdown handoff. */
     private class ReentrantRestartTransport(private val requestRestart: () -> Unit) : RadioTransport {
         var handoffCompleted = false
             private set
@@ -214,7 +215,7 @@ class SharedRadioInterfaceServiceLivenessTest {
 
         private var restartRequested = false
 
-        override fun handleSendToRadio(p: ByteArray): Boolean {
+        override fun tryLockdown(auth: LockdownAuth): Boolean {
             if (!restartRequested) {
                 restartRequested = true
                 requestRestart()
@@ -612,7 +613,7 @@ class SharedRadioInterfaceServiceLivenessTest {
     // ─── BLE: Liveness timeout triggers recovery ───────────────────────────────────────────────
 
     @Test
-    fun `transport teardown drains a synchronously admitted send before close`() = runTest(testDispatcher) {
+    fun `teardown drains an admitted lockdown handoff before close`() = runTest(testDispatcher) {
         val transports = mutableListOf<RadioTransport>()
         lateinit var service: SharedRadioInterfaceService
         lateinit var initialTransport: ReentrantRestartTransport
@@ -638,7 +639,8 @@ class SharedRadioInterfaceServiceLivenessTest {
         service = createConnectedService("xAA:BB:CC:DD:EE:FF", transportProvider)
         try {
             restartArmed = true
-            val accepted = service.trySendToRadio(byteArrayOf(1, 2, 3))
+            val accepted =
+                service.tryLockdown(requireNotNull(service.activeSession.value), LockdownAuth.Builder().build())
             testDispatcher.scheduler.runCurrent()
 
             assertTrue(accepted)
@@ -649,28 +651,6 @@ class SharedRadioInterfaceServiceLivenessTest {
                 "teardown must wait until the admitted handoff releases its session lease",
             )
             assertEquals(2, transports.size, "the SDK session restart should publish one replacement transport")
-        } finally {
-            service.disconnect()
-            advanceTimeBy(1_000L)
-        }
-    }
-
-    @Test
-    fun `transport rejection is reported to the caller`() = runTest(testDispatcher) {
-        val service =
-            createConnectedService(
-                address = "xAA:BB:CC:DD:EE:FF",
-                transportProvider = {
-                    object : RadioTransport {
-                        override fun handleSendToRadio(p: ByteArray): Boolean = false
-
-                        override suspend fun close() = Unit
-                    }
-                },
-            )
-
-        try {
-            assertFalse(service.trySendToRadio(byteArrayOf(1, 2, 3)))
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)
@@ -761,32 +741,6 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
-    @Test
-    fun `transport admission is closed after disconnect`() = runTest(testDispatcher) {
-        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
-
-        try {
-            service.disconnect()
-            testDispatcher.scheduler.runCurrent()
-            advanceTimeBy(1_000L)
-
-            assertTrue(createdTransports.single().sentData.isEmpty(), "session owns its own goodbye frame")
-            assertFalse(service.trySendToRadio(byteArrayOf(1, 2, 3)))
-        } finally {
-            service.disconnect()
-            advanceTimeBy(1_000L)
-        }
-    }
-
-    // ─── Non-BLE: Liveness does not mutate state ───────────────────────────────────────────────
-
-    // ─── Session handler timeout: the pipeline must not wedge forever ───────────────────────────
-
-    /**
-     * Regression for the 2.8.0 stale-connection wedge: a handler that suspends indefinitely inside
-     * [SharedRadioInterfaceService.runWhileSessionActive] holds the session-operation lane (the whole inbound
-     * pipeline). It must be cancelled at the handler timeout so queued work behind it can run.
-     */
     @Test
     fun `wedged session handler is cancelled at the timeout and the pipeline continues`() = runTest(testDispatcher) {
         val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
@@ -1227,10 +1181,6 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(1, createdTransports.size, "Initial connect should create one transport")
             val initialTransport = createdTransports.first()
 
-            // Lock the sendPoliteDisconnect=false contract: clear any bytes recorded during the
-            // initial connect so sentData reflects only writes performed during restartTransport.
-            initialTransport.clearSentData()
-
             service.restartTransport()
             // sendPoliteDisconnect = false → no 500ms drain inside the cycle. Under
             // UnconfinedTestDispatcher the whole stop/start runs inline; runCurrent is
@@ -1240,10 +1190,6 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(2, createdTransports.size, "restartTransport should create exactly one fresh transport")
             assertTrue(initialTransport.closeCalled, "Old transport must be closed by restartTransport")
             assertEquals(1, initialTransport.closeCount, "Old transport closed exactly once (no double-close)")
-            assertTrue(
-                initialTransport.sentData.isEmpty(),
-                "restartTransport must NOT write any bytes to the old transport",
-            )
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

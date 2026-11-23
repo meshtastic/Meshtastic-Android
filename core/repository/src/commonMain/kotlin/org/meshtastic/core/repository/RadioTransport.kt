@@ -27,10 +27,7 @@ import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 
-/**
- * Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the
- * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
- */
+/** One radio link (BLE, serial, TCP, etc.) and the SDK PhoneAPI session that runs over it. */
 interface RadioTransport {
     val admin: AdminApi?
         get() = null
@@ -52,16 +49,6 @@ interface RadioTransport {
 
     /** Hands a broker message to the radio's MQTT client proxy; false when no session can take it. */
     suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean = false
-
-    /**
-     * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required
-     * synchronous admission checks and enqueue asynchronous I/O internally.
-     *
-     * @return `true` when the transport accepted or scheduled the handoff, or `false` when no send was scheduled.
-     *   Acceptance does not confirm that the bytes reached the radio; protocol acknowledgements provide delivery
-     *   evidence where required.
-     */
-    fun handleSendToRadio(p: ByteArray): Boolean
 
     /**
      * Initializes the transport after construction. Called by the service after publishing the transport.

@@ -200,7 +200,7 @@ internal fun TransportDisconnectReason.toConnectionErrorMessage(): StringResourc
 private val LINK_UP_PHASES =
     setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes, TransportPhase.Connected)
 
-/** A retry's phases carry the failure that caused it until the handshake starts, as main's BLE transport did. */
+/** A retry's phases carry the failure that caused it until the handshake starts. */
 private fun TransportStatus.keepingFailureOf(previous: TransportStatus?): TransportStatus =
     if (lastFailure == null && phase !in LINK_UP_PHASES) copy(lastFailure = previous?.lastFailure) else this
 
@@ -554,7 +554,7 @@ class SharedRadioInterfaceService(
      */
     @Volatile private var phoneApiFailureStreak = 0
 
-    /** Main's stale-cache refresh rule, fed by [phoneApiFailureStreak]. Guarded by [sessionCallbackLock]. */
+    /** The stale-cache refresh rule, fed by [phoneApiFailureStreak]. Guarded by [sessionCallbackLock]. */
     private val gattCacheInvalidationGate = GattCacheInvalidationGate()
 
     /** The generation whose link stayed up past [minStableMillis]; set by a timer the transport's scope owns. */
@@ -596,7 +596,6 @@ class SharedRadioInterfaceService(
         /** Firmware frees its GATT session only seconds after a link drops, so a BLE retry waits for that first. */
         private const val BLE_INITIAL_RETRY_MS = 3_000L
 
-        // Main's BleReconnectPolicy.DEFAULT_MIN_STABLE_CONNECTION and ReconnectBackoff.SHORT_SESSION_THRESHOLD_MS.
         private const val BLE_MIN_STABLE_MS = 5_000L
         private const val MIN_STABLE_MS = 30_000L
 
@@ -855,13 +854,13 @@ class SharedRadioInterfaceService(
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
-                // Read before the stop clears it. A link that came up and dropped reads as lost, as on main.
+                // Read before the stop clears it. A link that came up and dropped reads as lost.
                 val failure =
                     _transportStatus.value?.lastFailure?.takeUnless {
                         linkWasUp && it.kind == TransportFailureKind.Unknown
                     } ?: TransportFailure(TransportFailureKind.LinkLost).takeIf { linkWasUp }
-                // A completed handshake ends the restart run, as main's did. Only a link that also stayed up past
-                // main's minimum resets the backoff, so a radio that crashes after config is not redialed at once.
+                // A completed handshake ends the restart run. Only a link that also stayed up past its minimum stable
+                // time resets the backoff, so a radio that crashes after config is not redialed at once.
                 val handshakeCompleted = linkWasUp && !receiveOverflowed
                 if (handshakeCompleted) {
                     retryReason = null
@@ -1211,26 +1210,7 @@ class SharedRadioInterfaceService(
             else -> false
         }
 
-    override fun trySendToRadio(bytes: ByteArray): Boolean =
-        // Admission and teardown share one session gate. Once accepted, teardown drains the synchronous handoff before
-        // revoking the session; transport implementations still own their asynchronous delivery outcome.
-        when (val admission = admitTransportSend()) {
-            is TransportSendAdmission.Admitted ->
-                sendThroughAdmittedTransport(admission) { it.handleSendToRadio(bytes) }
-
-            TransportSendAdmission.AdmissionClosed,
-            TransportSendAdmission.NoActiveSession,
-            -> {
-                Logger.d { "trySendToRadio: no admitted transport session, dropping ${bytes.size} bytes" }
-                false
-            }
-
-            TransportSendAdmission.NoTransport -> {
-                Logger.w { "trySendToRadio: admitted session has no radio transport, dropping ${bytes.size} bytes" }
-                false
-            }
-        }
-
+    // Admission and teardown share one session gate: teardown drains an admitted handoff before revoking the session.
     private inline fun sendThroughAdmittedTransport(
         admission: TransportSendAdmission.Admitted,
         send: (RadioTransport) -> Boolean,
@@ -1238,11 +1218,11 @@ class SharedRadioInterfaceService(
         val sent = safeCatching {
             send(admission.transport)
         }
-            .onFailure { Logger.w(it) { "trySendToRadio: active transport send failed" } }
+            .onFailure { Logger.w(it) { "Active transport handoff failed" } }
             .getOrDefault(false)
         if (sent) {
             safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
-                .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }
+                .onFailure { Logger.w(it) { "Failed to publish mesh activity" } }
         }
         sent
     } finally {
@@ -1322,11 +1302,11 @@ class SharedRadioInterfaceService(
 
     /**
      * Per-transport-session wrapper around this service. Delegates every [RadioInterfaceService] surface (scope,
-     * address, sendToRadio, etc.) to the enclosing service; [RadioTransportCallback] entry points are gated on the
+     * address, session clients, etc.) to the enclosing service; [RadioTransportCallback] entry points are gated on the
      * captured [session] still being the [activeTransportSession]. Admission and the synchronous callback side effect
      * share [sessionCallbackLock] with teardown, eliminating a check-then-use window. Late callbacks from a torn-down
-     * transport are dropped BEFORE bytes enter the shared received-data channel or connection/config state mutates.
-     * Address is logged with [anonymize] and the session generation only — never the raw address bytes.
+     * transport are dropped before connection or config state mutates. Address is logged with [anonymize] and the
+     * session generation only — never the raw address bytes.
      */
     private inner class SessionBoundRadioInterfaceService(val session: RadioTransportSession) :
         RadioInterfaceService by this@SharedRadioInterfaceService {

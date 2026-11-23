@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -84,34 +83,12 @@ interface RadioSessionAuthority {
         runWithSessionLease(session) { block() }
 }
 
-/** Writes raw protocol frames to the currently admitted transport. */
-interface RadioTransportWriter {
-    /** Sends [bytes] when a transport is available; callers that need admission evidence use [trySendToRadio]. */
-    fun sendToRadio(bytes: ByteArray) {
-        if (!trySendToRadio(bytes)) {
-            Logger.withTag("RadioTransportWriter").w {
-                "sendToRadio dropped ${bytes.size} bytes: no active transport accepted the frame"
-            }
-        }
-    }
-
-    /**
-     * Attempts to dispatch [bytes] to the active transport.
-     *
-     * Implementations must return promptly: enqueue transport work internally instead of blocking for I/O or delivery.
-     *
-     * @return `true` when an active transport accepted the bytes for asynchronous delivery, or `false` when no send
-     *   could be scheduled or confirmed.
-     */
-    fun trySendToRadio(bytes: ByteArray): Boolean
-}
-
 /**
- * Interface for the low-level radio interface that handles raw byte communication.
+ * The selected radio's link and its SDK session: device selection, session admission and the per-session SDK clients.
  *
- * This is the **transport layer** — it manages the raw hardware connection (BLE, TCP, Serial, USB) to a Meshtastic
- * radio. Its [connectionState] reflects whether the physical link is up or down, **before** any handshake or
- * config-loading logic is applied.
+ * This is the **transport layer** — it manages the hardware connection (BLE, TCP, Serial, USB) to a Meshtastic radio.
+ * Its [connectionState] reflects whether the physical link is up or down, **before** any handshake or config-loading
+ * logic is applied.
  *
  * **Important:** UI and feature modules should **never** observe [connectionState] directly. Instead, they should use
  * [ServiceRepository.connectionState], which is the canonical app-level connection state that accounts for handshake
@@ -124,8 +101,7 @@ interface RadioTransportWriter {
 @Suppress("TooManyFunctions")
 interface RadioInterfaceService :
     RadioTransportCallback,
-    RadioSessionAuthority,
-    RadioTransportWriter {
+    RadioSessionAuthority {
     /** Captures the SDK admin API for a single active radio session. */
     fun adminForSession(session: RadioSessionContext): AdminApi? = null
 
@@ -208,29 +184,17 @@ interface RadioInterfaceService :
     suspend fun disconnect()
 
     /**
-     * Silent in-place transport restart for handshake stalls: tears down the active transport and re-establishes it in
-     * place, without touching the connection-request gate or the selected device address.
-     *
-     * Both transport families use this recovery path but with different trigger timings: TCP/USB reach it through the
-     * fast-path watchdog (~12s after the last meaningful handshake packet), while BLE reaches it after the
-     * retry-exhausted path (~30s/60s watchdog plus a ~15s retry window). In both cases the symptom is identical: the
-     * transport itself may still be physically [ConnectionState.Connected] (e.g. a TCP socket whose radio firmware has
-     * stopped responding to `want_config_id`, or a BLE link whose GATT peer has stalled), so flipping app-level state
-     * to [ConnectionState.Disconnected] alone leaves a split-brain: transport Connected + `connectionRequested=true` +
-     * a live `RadioTransport` handle, which then blocks same-node reconnect via [setDeviceAddress]'s fast-path. This
-     * method breaks that deadlock by cycling the transport in place.
+     * Cycles the active transport in place: stops it and starts a replacement for the same selected device, without
+     * touching the connection-request gate or [currentDeviceAddressFlow].
      *
      * Contract:
-     * - Preserves the selected device address (does not modify [currentDeviceAddressFlow]).
-     * - Preserves the `connectionRequested` gate; **MUST NOT** clear it. Safe to call concurrently with an explicit
-     *   [disconnect] — the internal gate check makes it a no-op in that case.
-     * - Safe to call when no transport is running — implementations must no-op.
-     * - Does **NOT** bypass selected-device validation; the replacement transport is built from the same bonded address
-     *   via the normal start path.
-     * - Emits ordinary transport-level transitions through the existing [RadioTransportCallback] surface, so observers
-     *   see the transient [ConnectionState.DeviceSleep] state followed by [ConnectionState.Connected] when the
-     *   replacement transport connects. (No [ConnectionState.Connecting] is emitted at the transport layer — that is an
-     *   app-level state set by [MeshConnectionManager], not a transport callback.)
+     * - A no-op when [expectedSession] is given and no longer owns admission, when no connection is requested, when no
+     *   device is selected, or when no transport is running.
+     * - Safe to call concurrently with an explicit [disconnect]; the internal gate check makes it a no-op then.
+     * - The replacement is built from the same bonded address through the normal start path.
+     * - Observers see the transient [ConnectionState.DeviceSleep] through [RadioTransportCallback], then
+     *   [ConnectionState.Connected] when the replacement connects. [ConnectionState.Connecting] is an app-level state
+     *   set by [MeshConnectionManager], never a transport callback.
      *
      * Suspends until the teardown/restart cycle completes.
      */
