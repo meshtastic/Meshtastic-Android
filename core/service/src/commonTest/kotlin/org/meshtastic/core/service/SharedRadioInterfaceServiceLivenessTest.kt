@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,6 +47,8 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
@@ -64,6 +67,8 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.firmware_too_old
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
@@ -1582,7 +1587,7 @@ class SharedRadioInterfaceServiceLivenessTest {
                     advanceTimeBy(60_000L)
                     assertEquals(restart + 2, callbacks.size)
                 }
-                val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
+                val shown = collectErrors(service)
 
                 callbacks.last().onConnect()
                 callbacks.last().onPhoneApiSessionEnded(recoverable = true, receiveOverflowed = true)
@@ -1591,8 +1596,10 @@ class SharedRadioInterfaceServiceLivenessTest {
                 assertEquals(4, callbacks.size)
                 assertNull(service.activeSession.value)
                 assertEquals(ConnectionState.Disconnected, service.connectionState.value)
-                // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
-                assertEquals(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted), error.await())
+                assertEquals(
+                    listOf(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted)),
+                    shown.settled(1),
+                )
             } finally {
                 service.disconnect()
             }
@@ -1658,11 +1665,54 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(1, callbacks.size)
             assertEquals(ConnectionState.Disconnected, service.connectionState.value)
             // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
-            assertEquals(connectionErrorText(TransportDisconnectReason.FirmwareTooOld), error.await())
+            val text = error.await()
+            assertEquals(connectionErrorText(TransportDisconnectReason.FirmwareTooOld), text)
+            // Without a resource runtime the text falls back to the reason's name, so pin the string it maps to.
+            assertEquals(
+                Res.string.firmware_too_old,
+                TransportDisconnectReason.FirmwareTooOld.toConnectionErrorMessage(),
+            )
         } finally {
             service.disconnect()
         }
     }
+
+    @Test
+    fun `a session that reaches Ready lets the same retry failure show its message again`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            val shown = collectErrors(service)
+            val failed = TransportDisconnectReason.WebSocketConnectFailed
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true, reason = failed)
+            advanceTimeBy(60_000L)
+            callbacks.last().onConnect()
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            advanceTimeBy(60_000L)
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true, reason = failed)
+            advanceTimeBy(60_000L)
+
+            assertEquals(List(2) { connectionErrorText(failed) }, shown.settled(2))
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    /** Every connection error [service] shows, in order. */
+    private fun TestScope.collectErrors(service: SharedRadioInterfaceService): MutableStateFlow<List<String>> {
+        val shown = MutableStateFlow(emptyList<String>())
+        backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            service.connectionError.collect { message -> shown.update { it + message } }
+        }
+        return shown
+    }
+
+    /**
+     * The errors once [count] have arrived, or as they stand after a real-time wait: resource text resolves off the
+     * test dispatcher.
+     */
+    private suspend fun MutableStateFlow<List<String>>.settled(count: Int): List<String> =
+        withContext(Dispatchers.Default) { withTimeoutOrNull(5_000L) { first { it.size >= count } } } ?: value
 
     @Test
     fun `a retry that fails the same way does not repeat its message`() = runTest(testDispatcher) {

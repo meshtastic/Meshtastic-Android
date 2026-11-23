@@ -189,6 +189,8 @@ class SdkPhoneApiRadioTransportTest {
 
             assertEquals(listOf(false), harness.ends)
             assertEquals(listOf<TransportDisconnectReason?>(TransportDisconnectReason.FirmwareTooOld), harness.reasons)
+            // Old firmware is no restart failure: it must not spend the handshake recovery cap.
+            assertEquals(listOf(false), harness.timeouts)
         } finally {
             harness.transport.close()
         }
@@ -225,6 +227,8 @@ class SdkPhoneApiRadioTransportTest {
             runCurrent()
 
             assertEquals(TransportFailureKind.PairingRequired, harness.radio.transportStatus.value?.lastFailure?.kind)
+            // A transport error is no lost receive coverage: it must not spend the overflow recovery cap.
+            assertEquals(listOf(false), harness.overflows)
         } finally {
             harness.transport.close()
         }

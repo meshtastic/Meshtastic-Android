@@ -256,6 +256,7 @@ class PacketHandlerImplTest {
 
         val sent = fixture.transport.outboundPackets().single { it.decoded?.portnum == PortNum.TEXT_MESSAGE_APP }
         assertEquals(901, sent.id)
+        assertEquals(LOCAL_NODE, sent.from)
         assertEquals(PEER, sent.to)
         assertEquals(1, sent.channel)
         assertTrue(sent.want_ack)
@@ -364,6 +365,20 @@ class PacketHandlerImplTest {
         assertFalse(row.raw_message.contains(secret.hex()))
         val sent = fixture.transport.outboundPackets().single { it.id == 321 }
         assertEquals(secret, AdminMessage.ADAPTER.decode(checkNotNull(sent.decoded).payload).session_passkey)
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `a packet the SDK sent is logged as coming from our node`() = runTest {
+        val fixture = fixture()
+
+        fixture.handler.logSent(id = 311, to = PEER, port = PortNum.TRACEROUTE_APP, wantResponse = true, dest = PEER)
+        runCurrent()
+
+        // Request logs match a reply to the outgoing row by its sender and destination.
+        val logged = checkNotNull(fixture.logs.currentLogs.single { it.message_type == "Packet" }.fromRadio.packet)
+        assertEquals(LOCAL_NODE, logged.from)
+        assertEquals(PEER, logged.to)
         fixture.client.disconnect()
     }
 

@@ -184,7 +184,7 @@ internal suspend fun connectionErrorText(reason: TransportDisconnectReason): Str
 }
     .getOrDefault(reason.name)
 
-private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
+internal fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
     TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied
     TransportDisconnectReason.ReplacedByAnotherClient -> Res.string.websocket_replaced_by_another_client
     TransportDisconnectReason.WebSocketConnectFailed -> Res.string.websocket_connect_failed

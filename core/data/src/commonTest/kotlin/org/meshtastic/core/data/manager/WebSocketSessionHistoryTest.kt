@@ -92,6 +92,18 @@ class WebSocketSessionHistoryTest {
     }
 
     @Test
+    fun `a 1013 close waits only for what is left of the 30 s`() = runTest {
+        val history = history()
+        history.onOpened()
+        history.onEnded(error("WebSocket closed: the node is out of memory, try again later (1013)"))
+        testScheduler.advanceTimeBy(12_000L)
+
+        val before = currentTime
+        history.beforeConnect()
+        assertEquals(18_000L, currentTime - before)
+    }
+
+    @Test
     fun `a failed dial names its cause`() = runTest {
         val history = history()
         suspend fun dial(message: String) = history.run {
