@@ -53,6 +53,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.MeshtasticException
@@ -109,6 +110,7 @@ internal class SdkPhoneApiRadioTransport(
         var handshakeTimedOut = false
         var receiveOverflowed = false
         var reason: TransportDisconnectReason? = null
+        var sleeping: DeviceSleeping? = null
         var ble: BleTransport? = null
         var link: WebSocketWatch? = null
         try {
@@ -153,6 +155,8 @@ internal class SdkPhoneApiRadioTransport(
                 reason = reason ?: end.reason
             }
             val client = currentClient.value
+            // With auto-reconnect off the SDK settles on DeviceSleeping when a power-saving radio drops by design.
+            sleeping = client?.connection?.value as? DeviceSleeping
             currentClient.value = null
             withContext(NonCancellable) {
                 try {
@@ -167,6 +171,7 @@ internal class SdkPhoneApiRadioTransport(
             handshakeTimedOut = handshakeTimedOut,
             reason = reason,
             receiveOverflowed = receiveOverflowed,
+            deviceSleeping = sleeping,
         )
     }
 

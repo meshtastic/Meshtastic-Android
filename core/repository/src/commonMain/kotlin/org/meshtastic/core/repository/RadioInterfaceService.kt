@@ -92,8 +92,8 @@ interface RadioSessionAuthority {
  *
  * **Important:** UI and feature modules should **never** observe [connectionState] directly. Instead, they should use
  * [ServiceRepository.connectionState], which is the canonical app-level connection state that accounts for handshake
- * progress, light-sleep policy, and other higher-level concerns. The only legitimate consumer of this transport-level
- * flow is [MeshConnectionManager], which bridges transport state changes into the app-level
+ * progress and other higher-level concerns. The only legitimate consumer of this transport-level flow is
+ * [MeshConnectionManager], which bridges transport state changes into the app-level
  * [ServiceRepository.connectionState].
  *
  * @see ServiceRepository.connectionState
@@ -125,8 +125,8 @@ interface RadioInterfaceService :
      *
      * This flow reflects the raw state of the physical link (BLE, TCP, Serial, USB):
      * - [ConnectionState.Connected] — the transport link is established
-     * - [ConnectionState.Disconnected] — the transport link is down (permanent)
-     * - [ConnectionState.DeviceSleep] — the transport link is down (transient, device sleeping)
+     * - [ConnectionState.Disconnected] — the transport link is down
+     * - [ConnectionState.DeviceSleep] — the SDK judged the drop a power-saving device's sleep, by design
      *
      * **This is NOT the canonical app-level connection state.** The transport may report [ConnectionState.Connected]
      * while the app is still performing the mesh handshake (config + node-info exchange), during which the app-level
@@ -192,7 +192,7 @@ interface RadioInterfaceService :
      *   device is selected, or when no transport is running.
      * - Safe to call concurrently with an explicit [disconnect]; the internal gate check makes it a no-op then.
      * - The replacement is built from the same bonded address through the normal start path.
-     * - Observers see the transient [ConnectionState.DeviceSleep] through [RadioTransportCallback], then
+     * - Observers see a transient [ConnectionState.Disconnected] through [RadioTransportCallback], then
      *   [ConnectionState.Connected] when the replacement connects. [ConnectionState.Connecting] is an app-level state
      *   set by [MeshConnectionManager], never a transport callback.
      *

@@ -61,7 +61,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -104,7 +103,6 @@ class MeshConnectionManagerImpl(
      */
     private val connectionMutex = Mutex()
 
-    private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var postHandshakeRequestsJob: Job? = null
     private val locationRejectionLogged = atomic(false)
@@ -115,12 +113,12 @@ class MeshConnectionManagerImpl(
     init {
         // Bridge transport-level state into the canonical app-level state.
         // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
-        // light-sleep policy and handshake awareness before writing to ServiceRepository.
+        // handshake awareness before writing to ServiceRepository. The SDK decides device sleep.
         // Guarded per-emission: one uncaught throw here would kill the sole bridge collector and
         // permanently freeze the app-level state (a stuck-"Connected" UI no transport event can fix).
         radioInterfaceService.connectionState
             .onEach { state ->
-                safeCatching { onRadioConnectionState(state) }
+                safeCatching { onConnectionChanged(state) }
                     .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
             }
             .launchIn(scope)
@@ -135,7 +133,7 @@ class MeshConnectionManagerImpl(
                     if (handshaking) {
                         onHandshakeStarted()
                     } else {
-                        onRadioConnectionState(radioInterfaceService.connectionState.value)
+                        onConnectionChanged(radioInterfaceService.connectionState.value)
                     }
                 }
                     .onFailure { Logger.e(it) { "Handshake state bridge failed; collector kept alive" } }
@@ -205,59 +203,24 @@ class MeshConnectionManagerImpl(
             .launchIn(scope)
     }
 
-    /**
-     * Bridges a transport-level [ConnectionState] into the canonical app-level state.
-     *
-     * Applies light-sleep policy (power-saving / router role) to decide whether a [ConnectionState.DeviceSleep] event
-     * should be surfaced as sleep or as a full disconnect, then delegates to [onConnectionChanged] for the actual state
-     * transition.
-     */
-    private suspend fun onRadioConnectionState(newState: ConnectionState) {
-        val localConfig = radioConfigRepository.localConfigFlow.first()
-        val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
-        val lsEnabled = localConfig.power?.is_power_saving == true || isRouter
+    /** Applies a transport-level [ConnectionState] to the canonical app-level state. */
+    private suspend fun onConnectionChanged(c: ConnectionState): Boolean = connectionMutex.withLock {
+        val current = serviceRepository.connectionState.value
+        if (current == c) return@withLock false
 
-        val effectiveState =
-            when (newState) {
-                is ConnectionState.Connected -> ConnectionState.Connected
-
-                is ConnectionState.DeviceSleep ->
-                    if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
-
-                is ConnectionState.Connecting -> ConnectionState.Connecting
-
-                is ConnectionState.Disconnected -> ConnectionState.Disconnected
-            }
-        onConnectionChanged(effectiveState)
-    }
-
-    private suspend fun onConnectionChanged(c: ConnectionState, fromState: ConnectionState? = null): Boolean =
-        connectionMutex.withLock {
-            val current = serviceRepository.connectionState.value
-            if (fromState != null && current != fromState) {
-                Logger.d { "Skipping connection transition $current -> $c, expected current state $fromState" }
-                return@withLock false
-            }
-            if (current == c) return@withLock false
-
-            sleepTimeout?.cancel()
-            sleepTimeout = null
-
-            when (c) {
-                is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
-                is ConnectionState.Connected -> Unit
-                is ConnectionState.DeviceSleep -> handleDeviceSleep()
-                is ConnectionState.Disconnected -> handleDisconnected()
-            }
-            true
+        when (c) {
+            is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
+            is ConnectionState.Connected -> Unit
+            is ConnectionState.DeviceSleep -> handleDeviceSleep()
+            is ConnectionState.Disconnected -> handleDisconnected()
         }
+        true
+    }
 
     /** Shows the handshake as Connecting until the snapshot install publishes Connected. */
     private suspend fun onHandshakeStarted() = connectionMutex.withLock {
         val current = serviceRepository.connectionState.value
         if (current == ConnectionState.Connected || current == ConnectionState.Connecting) return@withLock
-        sleepTimeout?.cancel()
-        sleepTimeout = null
         serviceRepository.setConnectionState(ConnectionState.Connecting)
     }
 
@@ -281,18 +244,6 @@ class MeshConnectionManagerImpl(
                 EVENT_CONNECTED_SECONDS,
                 DataPair(EVENT_CONNECTED_SECONDS, duration.milliseconds.toDouble(DurationUnit.SECONDS)),
             )
-        }
-
-        sleepTimeout = scope.handledLaunch {
-            val localConfig = radioConfigRepository.localConfigFlow.first()
-            val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-            // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
-            // leave the UI stuck in DeviceSleep for over an hour.
-            val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
-            Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
-            delay(timeout.seconds)
-            Logger.w { "Device timed out, setting disconnected" }
-            onConnectionChanged(ConnectionState.Disconnected, fromState = ConnectionState.DeviceSleep)
         }
     }
 
@@ -538,14 +489,7 @@ class MeshConnectionManagerImpl(
     }
 
     companion object {
-        private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
-
         private val HANDSHAKE_PHASES = setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes)
-
-        // Maximum time (in seconds) to wait for a sleeping device before declaring it
-        // disconnected, regardless of the device's ls_secs configuration. Without this
-        // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
-        private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
 
         internal const val MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS = 8
         private val POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY = 1.seconds

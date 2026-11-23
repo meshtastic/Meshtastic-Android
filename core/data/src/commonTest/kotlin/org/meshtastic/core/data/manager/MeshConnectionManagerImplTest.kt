@@ -29,8 +29,6 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -68,7 +66,6 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -293,56 +290,15 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `DeviceSleep behavior when power saving is off maps to Disconnected`() = runTest(testDispatcher) {
-        // Power saving disabled + Role CLIENT
-        val config =
-            LocalConfig.Builder()
-                .also { wb ->
-                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = false }.build()
-                    wb.device =
-                        Config.DeviceConfig.Builder()
-                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
-                            .build()
-                }
-                .build()
-        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-
+    fun `a link the SDK reports asleep shows as sleeping whatever the local power config`() = runTest(testDispatcher) {
+        // The default config has power saving off; the SDK, not this config, decides the device sleeps.
         manager = createManager(backgroundScope)
         advanceUntilIdle()
 
         radioConnectionState.value = ConnectionState.DeviceSleep
         advanceUntilIdle()
 
-        assertEquals(
-            ConnectionState.Disconnected,
-            serviceRepository.connectionState.value,
-            "State should be Disconnected when power saving is off",
-        )
-    }
-
-    @Test
-    fun `DeviceSleep behavior when power saving is on stays in DeviceSleep`() = runTest(testDispatcher) {
-        // Power saving enabled
-        val config =
-            LocalConfig.Builder()
-                .also { wb ->
-                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = true }.build()
-                }
-                .build()
-        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-
-        manager = createManager(backgroundScope)
-        advanceUntilIdle()
-
-        radioConnectionState.value = ConnectionState.DeviceSleep
-        advanceUntilIdle()
-
-        assertEquals(
-            ConnectionState.DeviceSleep,
-            serviceRepository.connectionState.value,
-            "State should stay in DeviceSleep when power saving is on",
-        )
+        assertEquals(ConnectionState.DeviceSleep, serviceRepository.connectionState.value)
     }
 
     @Test
@@ -569,63 +525,7 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `DeviceSleep timeout is capped at MAX_SLEEP_TIMEOUT_SECONDS for high ls_secs`() = runTest(testDispatcher) {
-        // Router with ls_secs=3600 — previously this created a 3630s timeout.
-        // With the cap, it should be clamped to 300s.
-        val config =
-            LocalConfig.Builder()
-                .also { wb ->
-                    wb.power =
-                        Config.PowerConfig.Builder()
-                            .also { wb ->
-                                wb.is_power_saving = true
-                                wb.ls_secs = 3600
-                            }
-                            .build()
-                    wb.device =
-                        Config.DeviceConfig.Builder()
-                            .also { wb -> wb.role = Config.DeviceConfig.Role.ROUTER }
-                            .build()
-                }
-                .build()
-        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-
-        manager = createManager(backgroundScope)
-        advanceUntilIdle()
-
-        // Transition to Connected then DeviceSleep
-        radioConnectionState.value = ConnectionState.Connected
-        advanceUntilIdle()
-        radioConnectionState.value = ConnectionState.DeviceSleep
-        advanceUntilIdle()
-
-        assertEquals(
-            ConnectionState.DeviceSleep,
-            serviceRepository.connectionState.value,
-            "Should be in DeviceSleep initially",
-        )
-
-        // Advance 300 seconds (the cap) + 1 second to trigger the timeout.
-        advanceTimeBy(301_000L)
-
-        assertEquals(
-            ConnectionState.Disconnected,
-            serviceRepository.connectionState.value,
-            "Should transition to Disconnected after capped timeout (300s), not the raw 3630s",
-        )
-    }
-
-    @Test
     fun `rapid state transitions are serialized by connectionMutex`() = runTest(testDispatcher) {
-        // Power saving enabled so DeviceSleep is preserved (not mapped to Disconnected)
-        val config =
-            LocalConfig.Builder()
-                .also { wb ->
-                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = true }.build()
-                }
-                .build()
-        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
         // Record every state transition so we can verify ordering
@@ -661,64 +561,5 @@ class MeshConnectionManagerImplTest {
             observed,
             "State transitions should be serialized in order: Connecting -> DeviceSleep -> Disconnected",
         )
-    }
-
-    @Test
-    fun `concurrent sleep-timeout and radio state change are serialized`() {
-        val standardDispatcher = StandardTestDispatcher()
-        runTest(standardDispatcher) {
-            // Power saving enabled with ls_secs=0 so the sleep timeout boundary is just before the
-            // Stage 1 handshake watchdog. That keeps this test isolated to sleep-timeout behavior.
-            val config =
-                LocalConfig.Builder()
-                    .also { wb ->
-                        wb.power =
-                            Config.PowerConfig.Builder()
-                                .also { wb ->
-                                    wb.is_power_saving = true
-                                    wb.ls_secs = 0
-                                }
-                                .build()
-                    }
-                    .build()
-            every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-            every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-
-            val observed = mutableListOf<ConnectionState>()
-            every { serviceRepository.setConnectionState(any()) } calls
-                { call ->
-                    val state = call.arg<ConnectionState>(0)
-                    observed.add(state)
-                    applyConnectionState(state)
-                }
-
-            manager = createManager(backgroundScope)
-            runCurrent()
-
-            // Transition to Connected -> DeviceSleep to start the sleep timer
-            radioConnectionState.value = ConnectionState.Connected
-            runCurrent()
-            radioConnectionState.value = ConnectionState.DeviceSleep
-            runCurrent()
-
-            observed.clear()
-
-            // Before the sleep timeout fires, emit Connected from the radio (simulating device
-            // waking up). Then let the timeout fire. The mutex ensures they don't race.
-            radioConnectionState.value = ConnectionState.Connected
-            runCurrent()
-            // Advance past the sleep timeout (ls_secs=0 + 30s base), but stop before the Stage 1
-            // handshake watchdog fires at roughly 30.1s after the wake-up Connected signal.
-            advanceTimeBy(30_050L)
-            runCurrent()
-
-            // The Connected transition should have cancelled the sleep timeout, so we should
-            // end up in Connecting (from handleConnected), NOT Disconnected (from timeout).
-            assertEquals(
-                ConnectionState.DeviceSleep,
-                serviceRepository.connectionState.value,
-                "The link wake cancels the sleep timeout while snapshot installation is pending",
-            )
-        }
     }
 }

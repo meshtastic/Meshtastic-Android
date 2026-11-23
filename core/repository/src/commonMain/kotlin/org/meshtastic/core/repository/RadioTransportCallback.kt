@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.TransportStatus
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
 
 /**
  * Narrow callback interface for transport → service communication.
@@ -43,8 +44,9 @@ interface RadioTransportCallback {
     /**
      * Retires a transport that owns the PhoneAPI session. A recoverable end can start a new transport for the same
      * selection once the old session's work has drained; [handshakeTimedOut] and [receiveOverflowed] count toward the
-     * cap on consecutive recovery restarts, and [reason] tells the user why. Invoke this after closing the underlying
-     * SDK client.
+     * cap on consecutive recovery restarts, and [reason] tells the user why. [deviceSleeping] is the SDK client's
+     * verdict that a power-saving device dropped the link by design. Invoke this after closing the underlying SDK
+     * client.
      */
     fun onPhoneApiSessionEnded(
         recoverable: Boolean,
@@ -52,6 +54,7 @@ interface RadioTransportCallback {
         handshakeTimedOut: Boolean = false,
         reason: TransportDisconnectReason? = null,
         receiveOverflowed: Boolean = false,
+        deviceSleeping: DeviceSleeping? = null,
     ) = onDisconnect(isPermanent = !recoverable, errorMessage = errorMessage, reason = reason)
 
     /**

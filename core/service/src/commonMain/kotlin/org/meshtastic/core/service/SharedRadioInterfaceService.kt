@@ -105,6 +105,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
@@ -127,7 +128,14 @@ private class SessionOperationState(var admittedOperations: Int = 0, var drainWa
 
 private data class SelectedSerialPresence(val key: String?, val present: Boolean)
 
-private data class UsbRecoverySnapshot(val presence: SelectedSerialPresence, val state: ConnectionState)
+/** The link as USB recovery reads it: a recoverable drop waits for a replug, a permanent stop does not. */
+private enum class LinkState {
+    Up,
+    Lost,
+    Stopped,
+}
+
+private data class UsbRecoverySnapshot(val presence: SelectedSerialPresence, val link: LinkState)
 
 private data class UsbRecoveryTriggerState(
     val key: String? = null,
@@ -151,23 +159,23 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
     return when {
         key == null -> UsbRecoveryTriggerState()
 
-        snapshot.state == ConnectionState.Disconnected -> UsbRecoveryTriggerState(key = key, present = present)
+        snapshot.link == LinkState.Stopped -> UsbRecoveryTriggerState(key = key, present = present)
 
         key != this.key ->
             UsbRecoveryTriggerState(
                 key = key,
                 present = present,
-                armedByAbsence = !present && snapshot.state == ConnectionState.DeviceSleep,
+                armedByAbsence = !present && snapshot.link == LinkState.Lost,
             )
 
         !present ->
             UsbRecoveryTriggerState(
                 key = key,
-                armedByAbsence = armedByAbsence || this.present || snapshot.state == ConnectionState.DeviceSleep,
+                armedByAbsence = armedByAbsence || this.present || snapshot.link == LinkState.Lost,
             )
 
         else -> {
-            val trigger = armedByAbsence && snapshot.state == ConnectionState.DeviceSleep
+            val trigger = armedByAbsence && snapshot.link == LinkState.Lost
             UsbRecoveryTriggerState(
                 key = key,
                 present = true,
@@ -247,6 +255,12 @@ class SharedRadioInterfaceService(
      */
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+
+    /** Serial never sleeps, so USB recovery keys on a recoverable drop rather than on [ConnectionState.DeviceSleep]. */
+    private val linkState = MutableStateFlow(LinkState.Stopped)
+
+    /** When a sleep the SDK reported stops excusing failed redials; null while not asleep. */
+    @Volatile private var sleepWakeByMillis: Long? = null
 
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(radioPrefs.devAddr.value)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
@@ -604,6 +618,7 @@ class SharedRadioInterfaceService(
             if (interfaceId == InterfaceId.BLUETOOTH) BLE_MIN_STABLE_MS else MIN_STABLE_MS
 
         private const val PHONE_API_MAX_RETRY_MS = 30_000L
+        private const val MILLIS_PER_SECOND = 1_000L
     }
 
     private val initLock = Mutex()
@@ -692,11 +707,11 @@ class SharedRadioInterfaceService(
      * Observes selected-SERIAL-device presence and transport state to auto-restart USB serial after replug.
      *
      * Recovery arms only after the selected serial key is observed absent, then fires when that same key is present
-     * while the transport is in [ConnectionState.DeviceSleep]. This prevents normal unplug races from restarting
+     * while the link is [LinkState.Lost] after a recoverable drop. This prevents normal unplug races from restarting
      * against stale presence before UsbRepository removes the key.
      *
-     * Including [_connectionState] closes the race where presence returns before the I/O-death callback flips state to
-     * [ConnectionState.DeviceSleep]. Each physical replug consumes one armed edge, and recovery remains gated by
+     * Including [linkState] closes the race where presence returns before the I/O-death callback marks the link
+     * [LinkState.Lost]. Each physical replug consumes one armed edge, and recovery remains gated by
      * [connectionRequested] and [runningTransportId] so explicit disconnects cannot resurrect a transport.
      */
     private fun observeUsbRecoveryTriggers() {
@@ -704,7 +719,7 @@ class SharedRadioInterfaceService(
             combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
                 .distinctUntilChanged()
 
-        combine(selectedPresence, _connectionState, ::UsbRecoverySnapshot)
+        combine(selectedPresence, linkState, ::UsbRecoverySnapshot)
             .runningFold(UsbRecoveryTriggerState()) { triggerState, snapshot -> triggerState.next(snapshot) }
             .distinctUntilChanged()
             .drop(1)
@@ -733,7 +748,7 @@ class SharedRadioInterfaceService(
                         return@withLock
                     }
                     // A previously-started SERIAL transport that died on unplug is still held in
-                    // radioTransport (the I/O-death path emits DeviceSleep but does not null it). Tear it
+                    // radioTransport (the I/O-death path marks the link lost but does not null it). Tear it
                     // down silently so startTransportLocked() can build a fresh one for the replugged
                     // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
                     // user-facing Disconnected).
@@ -847,6 +862,7 @@ class SharedRadioInterfaceService(
         handshakeTimedOut: Boolean,
         reason: TransportDisconnectReason?,
         receiveOverflowed: Boolean,
+        deviceSleeping: DeviceSleeping?,
     ) {
         val interfaceId = DeviceAddress.parse(session.address)?.interfaceId
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
@@ -888,14 +904,18 @@ class SharedRadioInterfaceService(
                 if (recoverable && reason != null) retryReason = reason
 
                 ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false) }
-                onDisconnect(
-                    isPermanent =
+                val isPermanent =
                     !recoverable ||
                         recoveryExhausted ||
-                        (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
-                    errorMessage = errorMessage.takeUnless { recoveryExhausted },
-                    reason = shownReason,
-                )
+                        (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH)
+                synchronized(sessionCallbackLock) {
+                    publishDisconnected(
+                        isPermanent,
+                        errorMessage.takeUnless { recoveryExhausted },
+                        shownReason,
+                        deviceSleeping,
+                    )
+                }
                 if (!connectionRequested) return@launch
                 nextPhoneApiRetryDelay(interfaceId, failure)
             }
@@ -1260,10 +1280,12 @@ class SharedRadioInterfaceService(
                 stableGeneration = session.generation
             }
         }
+        sleepWakeByMillis = null
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
             _connectionState.value = ConnectionState.Connected
         }
+        linkState.value = LinkState.Up
     }
 
     override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
@@ -1282,7 +1304,12 @@ class SharedRadioInterfaceService(
     }
 
     /** Applies a callback already admitted under [sessionCallbackLock]. */
-    private fun publishDisconnected(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
+    private fun publishDisconnected(
+        isPermanent: Boolean,
+        errorMessage: String?,
+        reason: TransportDisconnectReason?,
+        deviceSleeping: DeviceSleeping? = null,
+    ) {
         if (errorMessage != null || reason != null) {
             processLifecycle.coroutineScope.launch(dispatchers.default) {
                 val message = errorMessage ?: reason?.let { connectionErrorText(it) }
@@ -1293,11 +1320,31 @@ class SharedRadioInterfaceService(
         linkedGeneration = null
         // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.
         if (_transportStatus.value?.phase in LINK_UP_PHASES) _transportStatus.value = null
-        val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
+        val newTargetState = stateAfterDrop(isPermanent, deviceSleeping)
         if (_connectionState.value != newTargetState) {
             Logger.d { "Broadcasting connection state change to $newTargetState" }
             _connectionState.value = newTargetState
         }
+        // After the state: USB recovery can run inline on this write and reads the state as its race defense.
+        linkState.value = if (isPermanent) LinkState.Stopped else LinkState.Lost
+    }
+
+    /**
+     * The one place the SDK's sleep verdict becomes [ConnectionState.DeviceSleep]. A redial that fails before the wake
+     * bound passes keeps the sleep, which the SDK bounds by the wake time plus twice the longest backoff; any other
+     * drop is [ConnectionState.Disconnected].
+     */
+    private fun stateAfterDrop(isPermanent: Boolean, sleeping: DeviceSleeping?): ConnectionState {
+        if (sleeping != null) {
+            sleepWakeByMillis =
+                sleeping.since.toEpochMilliseconds() +
+                sleeping.expectedWakeSeconds * MILLIS_PER_SECOND +
+                2 * PHONE_API_MAX_RETRY_MS
+        }
+        val stillAsleep = _connectionState.value == ConnectionState.DeviceSleep && nowMillis < (sleepWakeByMillis ?: 0L)
+        val asleep = !isPermanent && (sleeping != null || stillAsleep)
+        if (!asleep) sleepWakeByMillis = null
+        return if (asleep) ConnectionState.DeviceSleep else ConnectionState.Disconnected
     }
 
     /**
@@ -1350,8 +1397,17 @@ class SharedRadioInterfaceService(
             handshakeTimedOut: Boolean,
             reason: TransportDisconnectReason?,
             receiveOverflowed: Boolean,
+            deviceSleeping: DeviceSleeping?,
         ) {
-            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut, reason, receiveOverflowed)
+            retirePhoneApiSession(
+                session,
+                recoverable,
+                errorMessage,
+                handshakeTimedOut,
+                reason,
+                receiveOverflowed,
+                deviceSleeping,
+            )
         }
 
         override fun onStatus(status: TransportStatus) {

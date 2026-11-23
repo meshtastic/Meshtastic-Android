@@ -124,9 +124,11 @@ Platform-specific implementations:
 
 The app-level state is `ConnectionState` (`Disconnected`, `Connecting`, `Connected`, `DeviceSleep`), read
 through `ConnectionStateProvider`. `MeshConnectionManager` writes `Connecting`, `DeviceSleep` and
-`Disconnected` as it reconciles transport events with the node's sleep policy, and `MeshConfigFlowManager`
+`Disconnected` as it reconciles transport events with handshake progress, and `MeshConfigFlowManager`
 writes `Connected` once the handshake completes. UI code observes this state, never
-`RadioInterfaceService.connectionState`.
+`RadioInterfaceService.connectionState`. `DeviceSleep` is the SDK's `ConnectionState.DeviceSleeping`, which
+the SDK reports when a power-saving node drops its BLE link by design; `SharedRadioInterfaceService` maps it,
+and keeps it through redials until the SDK's wake bound passes. Any other drop is `Disconnected`.
 
 ## Adding a New Transport
 

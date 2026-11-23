@@ -1376,9 +1376,9 @@ class FirmwareUpdateViewModel(
         //
         // For USB/serial, do NOT force this: a USB node re-enumerates several times through the bootloader over
         // ~20s, so a one-shot setDeviceAddress fires into an enumeration gap, fails ("Serial device not found"),
-        // and lands the transport in Disconnected — which preempts the dedicated USB auto-recovery in
-        // SharedRadioInterfaceService (observeUsbRecoveryTriggers), since that only arms from DeviceSleep. Leaving
-        // the transport in DeviceSleep lets that recovery reconnect the moment the device re-attaches on its new
+        // and stops the link for good — which preempts the dedicated USB auto-recovery in
+        // SharedRadioInterfaceService (observeUsbRecoveryTriggers), since that only arms from a recoverable drop.
+        // Leaving the link in that drop lets the recovery reconnect the moment the device re-attaches on its new
         // (stable-keyed) address. BLE/TCP have no such hot-plug recovery, so they still need the explicit re-address.
         address?.let { fullAddr ->
             if (radioPrefs.isSerial()) {

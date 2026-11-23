@@ -31,6 +31,7 @@ import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -68,6 +69,7 @@ class SdkWebSocketSessionTest {
                         handshakeTimedOut: Boolean,
                         reason: TransportDisconnectReason?,
                         receiveOverflowed: Boolean,
+                        deviceSleeping: DeviceSleeping?,
                     ) {
                         ended.complete(recoverable to reason)
                     }

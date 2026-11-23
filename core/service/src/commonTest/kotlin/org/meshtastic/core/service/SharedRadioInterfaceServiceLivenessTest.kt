@@ -50,6 +50,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.state.RadioOperationLock
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -74,6 +75,7 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
 import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -82,6 +84,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /** Service-level tests for [SharedRadioInterfaceService] liveness detection. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -1319,7 +1322,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             original.onPhoneApiSessionEnded(recoverable = true)
             testDispatcher.scheduler.runCurrent()
 
-            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
             assertNull(service.activeSession.value)
 
             serialDeviceKeys.value = setOf("6790-21972")
@@ -1801,36 +1804,32 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     /**
-     * Regression: [SharedRadioInterfaceService.restartTransport] mirrors BLE liveness silent recovery. It MUST emit a
-     * transient DeviceSleep (via onDisconnect(isPermanent = false)) BEFORE the stop/start cycle so the subsequent
-     * onConnect() produces a real Connected transition (StateFlow is idempotent on same-value — without the DeviceSleep
-     * flip, Connected -> Connected is a no-op and MeshConnectionManager stays stuck on its app-level Disconnected
-     * state). It MUST NOT emit a permanent user-facing Disconnected state — the caller drives app-level state
-     * transitions separately, and surfacing a permanent disconnect for a self-healing cycle would pop a confusing modal
-     * for a transient condition.
+     * Regression: [SharedRadioInterfaceService.restartTransport] mirrors BLE liveness silent recovery. It MUST drop the
+     * link state (via onDisconnect(isPermanent = false)) BEFORE the stop/start cycle so the subsequent onConnect()
+     * produces a real Connected transition (StateFlow is idempotent on same-value — without the flip, Connected ->
+     * Connected is a no-op and MeshConnectionManager stays stuck on its app-level Disconnected state). It MUST NOT
+     * report an error — surfacing a disconnect for a self-healing cycle would pop a confusing modal for a transient
+     * condition.
      */
     @Test
-    fun `restartTransport does not emit permanent Disconnected`() = runTest(testDispatcher) {
+    fun `restartTransport drops the link state without reporting an error`() = runTest(testDispatcher) {
         val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
         try {
             val stateEmissions = mutableListOf<ConnectionState>()
+            val errors = mutableListOf<String>()
             val collectJob = backgroundScope.launch { service.connectionState.collect { stateEmissions.add(it) } }
+            val errorJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
 
             service.restartTransport()
             testDispatcher.scheduler.runCurrent()
 
             collectJob.cancel()
+            errorJob.cancel()
 
-            // The DeviceSleep emission is the intended transport-level transition that lets
-            // MeshConnectionManager observe a real Connected transition on the fresh transport.
-            assertTrue(
-                ConnectionState.DeviceSleep in stateEmissions,
-                "restartTransport must emit transient DeviceSleep so the post-restart onConnect() re-triggers handleConnected() (emitted: $stateEmissions)",
-            )
-            assertFalse(
-                ConnectionState.Disconnected in stateEmissions,
-                "restartTransport must not emit permanent Disconnected state (emitted: $stateEmissions)",
-            )
+            // The drop is the intended transport-level transition that lets MeshConnectionManager observe a real
+            // Connected transition on the fresh transport. Only the SDK's sleep verdict makes a drop DeviceSleep.
+            assertEquals(listOf(ConnectionState.Connected, ConnectionState.Disconnected), stateEmissions.take(2))
+            assertTrue(errors.isEmpty(), "restartTransport must not report an error (reported: $errors)")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)
@@ -1875,8 +1874,6 @@ class SharedRadioInterfaceServiceLivenessTest {
      * when connectivity returns. A stale handshake-stall restart fired in that window MUST be a no-op:
      * - It MUST NOT create a fresh transport via `startTransportLocked()` (that would bypass the recovery listener,
      *   which owns the re-bring-up).
-     * - It MUST NOT emit `DeviceSleep` via `onDisconnect(isPermanent = false)` (the gate returns before that call), so
-     *   the recovery path's later transitions stay meaningful.
      *
      * Counter-assertion: the recovery listener itself MUST still function after the gate fires — toggling
      * `networkAvailable` back to `true` MUST create the second transport, proving the gate did not break the documented
@@ -1916,7 +1913,7 @@ class SharedRadioInterfaceServiceLivenessTest {
 
                 // Stale handshake-stall restart fired in the window where radioTransport == null but
                 // connectionRequested is still true. The new gate must short-circuit AFTER the
-                // isRestarting CAS (inside transportMutex) but BEFORE the onDisconnect(isPermanent=false) DeviceSleep
+                // isRestarting CAS (inside transportMutex) but BEFORE the onDisconnect(isPermanent=false)
                 // emission.
                 service.restartTransport()
                 testDispatcher.scheduler.runCurrent()
@@ -1926,11 +1923,6 @@ class SharedRadioInterfaceServiceLivenessTest {
                     1,
                     createdTransports.size,
                     "restartTransport must be a no-op when radioTransport == null (gate fired)",
-                )
-                assertFalse(
-                    ConnectionState.DeviceSleep in stateEmissions,
-                    "Gated restartTransport must NOT emit DeviceSleep " +
-                        "(returned before onDisconnect(isPermanent=false)); emitted: $stateEmissions",
                 )
 
                 // Environmental recovery: networkAvailable flips back to true. connectionRequested is
@@ -1958,14 +1950,14 @@ class SharedRadioInterfaceServiceLivenessTest {
     //
     // The USB-serial recovery observer (see observeUsbRecoveryTriggers) watches the selected SERIAL device's
     // presence via [SerialDevicePresence.deviceKeys] combined with [currentDeviceAddressFlow] and
-    // [_connectionState]. It arms recovery only after the SELECTED serial key has been observed absent and then
-    // present again; when that armed edge converges with zombie DeviceSleep, it tears down the zombie transport
-    // (left over from the unplug I/O-death path that emits DeviceSleep without nulling radioTransport) and starts a
+    // its link state. It arms recovery only after the SELECTED serial key has been observed absent and then
+    // present again; when that armed edge converges with a zombie link loss, it tears down the zombie transport
+    // (left over from the unplug I/O-death path that marks the link lost without nulling radioTransport) and starts a
     // fresh one — sparing the user a manual re-select.
     //
     // Pipeline (see SharedRadioInterfaceService.observeUsbRecoveryTriggers):
     //   selectedPresence = combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys)
-    //   combine(selectedPresence, _connectionState)
+    //   combine(selectedPresence, linkState)
     //     .runningFold(...)         // arms only after selected key goes absent → present
     //     .filter { triggerRecovery }
     //     .onEach { transportMutex.withLock {
@@ -1980,14 +1972,13 @@ class SharedRadioInterfaceServiceLivenessTest {
     // contract.
 
     /**
-     * Happy path: a SERIAL transport left in zombie DeviceSleep (after an unplug I/O death) is recovered automatically
+     * Happy path: a SERIAL transport left in a zombie link loss (after an unplug I/O death) is recovered automatically
      * when the same USB device is replugged. The observer must call stopTransportLocked + startTransportLocked exactly
      * once, producing exactly one fresh transport and closing the zombie.
      *
      * The zombie state mirrors what `SerialConnectionListener.onDisconnected → onDeviceDisconnect` leaves behind: a
-     * transient DeviceSleep emission WITHOUT nulling radioTransport (the I/O-death path doesn't run
-     * stopTransportLocked). Only the observer's stop/start cycle reaps the zombie and builds a fresh transport for the
-     * replugged device.
+     * recoverable drop WITHOUT nulling radioTransport (the I/O-death path doesn't run stopTransportLocked). Only the
+     * observer's stop/start cycle reaps the zombie and builds a fresh transport for the replugged device.
      */
     @Test
     fun `USB replug of selected serial device restarts transport when zombie`() = runTest(testDispatcher) {
@@ -1997,10 +1988,10 @@ class SharedRadioInterfaceServiceLivenessTest {
             val initialTransport = createdTransports.first()
 
             // Simulate the unplug I/O-death path: SerialConnectionListener.onDisconnected →
-            // onDeviceDisconnect emits a transient DeviceSleep but does NOT null radioTransport
+            // onDeviceDisconnect reports a recoverable drop but does NOT null radioTransport
             // (the zombie state the observer comment specifies it recovers from).
             service.onDisconnect(isPermanent = false)
-            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value, "Precondition: zombie state")
 
             // Replug: serialDevicePresence emits the device's `rest` key (the address minus its 's').
             serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
@@ -2028,7 +2019,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(1, createdTransports.size, "Initial connect should create one transport")
 
             service.onDisconnect(isPermanent = false)
-            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value, "Precondition: zombie state")
 
             // A different physical device — different `rest` key from the selected address.
             serialDeviceKeys.value = setOf("/dev/bus/usb/001/003")
@@ -2074,13 +2065,13 @@ class SharedRadioInterfaceServiceLivenessTest {
 
     /**
      * Regression: the unplug/replug race in which the USB presence signal arrives BEFORE the I/O-death callback has
-     * flipped `_connectionState` to DeviceSleep. The combined trigger now includes `_connectionState` so that the
-     * subsequent Connected → DeviceSleep transition re-emits the flow and fires recovery — without that, the
-     * early-return on Connected swallows the presence emission, the later state transition does not re-emit
-     * (distinctUntilChanged swallows true → true), and the zombie transport never recovers.
+     * marked the link lost. The combined trigger includes the link state so that the subsequent Up → Lost transition
+     * re-emits the flow and fires recovery — without that, the early-return on Connected swallows the presence
+     * emission, the later state transition does not re-emit (distinctUntilChanged swallows true → true), and the zombie
+     * transport never recovers.
      */
     @Test
-    fun `USB replug recovers when presence arrives before DeviceSleep`() = runTest(testDispatcher) {
+    fun `USB replug recovers when presence arrives before the link is lost`() = runTest(testDispatcher) {
         val selectedKey = "/dev/bus/usb/001/002"
         serialDeviceKeys.value = setOf(selectedKey)
         val service = createConnectedService("s$selectedKey")
@@ -2105,13 +2096,13 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(1, createdTransports.size, "Presence while Connected must NOT restart transport")
             assertFalse(createdTransports.first().closeCalled, "Healthy transport must NOT be closed")
 
-            // The I/O-death callback now fires (late) and flips state to DeviceSleep. The combine
+            // The I/O-death callback now fires (late) and marks the link lost. The combine
             // re-emits because state is one of its sources; recovery fires after the state catches up.
             service.onDisconnect(isPermanent = false)
             testDispatcher.scheduler.runCurrent()
             advanceTimeBy(1_000L)
 
-            assertEquals(2, createdTransports.size, "Recovery MUST fire once state catches up to DeviceSleep")
+            assertEquals(2, createdTransports.size, "Recovery MUST fire once the link is marked lost")
             assertTrue(
                 createdTransports.first().closeCalled,
                 "Zombie transport must be closed by stopTransportLocked",
@@ -2149,7 +2140,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(
                 1,
                 createdTransports.size,
-                "Later DeviceSleep with initially-present key must NOT restart transport",
+                "A later link loss with initially-present key must NOT restart transport",
             )
             assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
         } finally {
@@ -2160,7 +2151,7 @@ class SharedRadioInterfaceServiceLivenessTest {
 
     /**
      * Regression: some USB stacks deliver the transport disconnect callback before UsbRepository has emitted the detach
-     * that removes the selected key. A present-at-start key plus DeviceSleep is only "normal unplug in progress", not a
+     * that removes the selected key. A present-at-start key plus a link loss is only "normal unplug in progress", not a
      * replug, so recovery must stay quiet until the observer sees the selected key go absent and then present again.
      */
     @Test
@@ -2181,7 +2172,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(
                 1,
                 createdTransports.size,
-                "DeviceSleep with an already-present key must NOT restart transport",
+                "A link loss with an already-present key must NOT restart transport",
             )
             assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
 
@@ -2326,7 +2317,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(1, createdTransports.size, "Initial connect should create one transport")
 
             service.onDisconnect(isPermanent = false)
-            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value, "Precondition: zombie state")
 
             // First replug: triggers one restart (false → true transition through the pipeline).
             serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
@@ -2368,12 +2359,62 @@ class SharedRadioInterfaceServiceLivenessTest {
             callbacks.single().onConnect()
             callbacks.single().onPhoneApiSessionEnded(recoverable = true)
             testDispatcher.scheduler.runCurrent()
-            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
 
             advanceTimeBy(3_000L)
             testDispatcher.scheduler.runCurrent()
 
             assertEquals(2, callbacks.size)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `a BLE session the SDK ends asleep stays DeviceSleep through a redial inside its wake bound`() =
+        runTest(testDispatcher) {
+            val callbacks = mutableListOf<RadioInterfaceService>()
+            val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+            try {
+                callbacks.single().onConnect()
+                val sleep = DeviceSleeping(Instant.fromEpochMilliseconds(nowMillis), expectedWakeSeconds = 60)
+                callbacks.single().onPhoneApiSessionEnded(recoverable = true, deviceSleeping = sleep)
+                testDispatcher.scheduler.runCurrent()
+                assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+
+                // The radio is still asleep, so the redial finds nothing; that is the sleep, not a lost link.
+                advanceTimeBy(3_000L)
+                testDispatcher.scheduler.runCurrent()
+                callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+                testDispatcher.scheduler.runCurrent()
+
+                assertEquals(2, callbacks.size)
+                assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    @Test
+    fun `a redial that fails after the sleep's wake bound shows Disconnected`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            callbacks.single().onConnect()
+            // Woken 60 s after it slept, plus the SDK's grace of twice the 30 s longest backoff, a minute ago.
+            val since = Instant.fromEpochMilliseconds(nowMillis - (60_000L + 60_000L + 60_000L))
+            callbacks
+                .single()
+                .onPhoneApiSessionEnded(recoverable = true, deviceSleeping = DeviceSleeping(since, 60))
+            testDispatcher.scheduler.runCurrent()
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+
+            advanceTimeBy(3_000L)
+            testDispatcher.scheduler.runCurrent()
+            callbacks.last().onPhoneApiSessionEnded(recoverable = true)
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
         } finally {
             service.disconnect()
         }

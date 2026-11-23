@@ -26,19 +26,28 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeNotificationPrefs
+import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.ConnectionState.DeviceSleeping
+import org.meshtastic.sdk.Frame
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.TransportIdentity
+import org.meshtastic.sdk.WireFraming
 import org.meshtastic.sdk.testing.FakeRadioTransport
 import org.meshtastic.sdk.testing.toFrame
 import kotlin.math.abs
@@ -56,6 +65,7 @@ class SdkPhoneApiRadioTransportTest {
         val link: FakeRadioTransport,
         open: suspend () -> SdkRadioTransport = { link },
         address: String = "tcp:sdk",
+        installsSnapshot: Boolean = false,
     ) {
         private val fake =
             FakeRadioInterfaceService(scope).apply {
@@ -74,6 +84,9 @@ class SdkPhoneApiRadioTransportTest {
 
         /** Each `reason` the transport reported when its session ended. */
         val reasons = mutableListOf<TransportDisconnectReason?>()
+
+        /** Each SDK sleep verdict the transport reported when its session ended. */
+        val sleeps = mutableListOf<DeviceSleeping?>()
         val radio: RadioInterfaceService =
             object : RadioInterfaceService by fake {
                 override fun onPhoneApiSessionEnded(
@@ -82,20 +95,46 @@ class SdkPhoneApiRadioTransportTest {
                     handshakeTimedOut: Boolean,
                     reason: TransportDisconnectReason?,
                     receiveOverflowed: Boolean,
+                    deviceSleeping: DeviceSleeping?,
                 ) {
+                    sleeps += deviceSleeping
                     overflows += receiveOverflowed
                     ends += recoverable
                     timeouts += handshakeTimedOut
                     reasons += reason
                 }
             }
+        private val nodeRepository = FakeNodeRepository()
         private val nodeManager =
-            NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
+            NodeManagerImpl(nodeRepository, mock(MockMode.autofill), radio, scope.asServiceScope())
+        private val configFlowManager =
+            MeshConfigFlowManagerImpl(
+                nodeManager = nodeManager,
+                nodeRepository = nodeRepository,
+                radioConfigRepository = FakeRadioConfigRepository(),
+                serviceStateWriter = FakeServiceRepository(),
+                analytics = mock(MockMode.autofill),
+                notificationPrefs = FakeNotificationPrefs(),
+                radioInterfaceService = radio,
+                scope = scope.asServiceScope(),
+            )
         val transport =
             SdkPhoneApiRadioTransport(
                 openTransport = open,
                 service = radio,
-                projection = lazy { radioSessionProjection(nodeManager, radio, scope) },
+                projection =
+                lazy {
+                    if (installsSnapshot) {
+                        radioSessionProjection(
+                            nodeManager,
+                            radio,
+                            scope,
+                            configFlowManager = lazy { configFlowManager },
+                        )
+                    } else {
+                        radioSessionProjection(nodeManager, radio, scope)
+                    }
+                },
                 connectionManager = lazy { mock(MockMode.autofill) },
                 lockdownCoordinator = lazy { FakeLockdownCoordinator() },
             )
@@ -231,6 +270,53 @@ class SdkPhoneApiRadioTransportTest {
         }
     }
 
+    @Test
+    fun `a power-saving tracker that drops its BLE link ends the session with the SDK's sleep`() = runTest {
+        val link = FakeRadioTransport(TransportIdentity("ble:AA:BB:CC:DD:EE:FF"), autoHandshake = true, nodeNum = NODE)
+        val harness = Harness(backgroundScope, link, open = { TrackerConfigTransport(link) }, installsSnapshot = true)
+        try {
+            harness.transport.start()
+            // The handshake settles over virtual time before the snapshot installs.
+            repeat(READY_POLLS) {
+                if (harness.radio.transportStatus.value?.phase != TransportPhase.Connected) advanceTimeBy(READY_POLL_MS)
+            }
+            assertEquals(TransportPhase.Connected, harness.radio.transportStatus.value?.phase)
+
+            link.simulateError(MeshtasticException.Transport("BLE link lost"), recoverable = true)
+            runCurrent()
+
+            // A tracker with is_power_saving deep-sleeps position_broadcast_secs, firmware's 3600 when that is 0.
+            assertEquals(listOf(3600), harness.sleeps.map { it?.expectedWakeSeconds })
+            assertEquals(listOf(true), harness.ends)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    /** Sends a power-saving tracker's config in the download, as firmware does ahead of config_complete. */
+    private class TrackerConfigTransport(private val link: FakeRadioTransport) : SdkRadioTransport by link {
+        private var configSent = false
+
+        override suspend fun send(frame: Frame) {
+            val bytes = frame.bytes.toByteArray()
+            val wantsConfig =
+                ToRadio.ADAPTER.decode(bytes.copyOfRange(WireFraming.HEADER_SIZE, bytes.size)).want_config_id != null
+            if (wantsConfig && !configSent) {
+                configSent = true
+                val device = Config.DeviceConfig.Builder().also { it.role = Config.DeviceConfig.Role.TRACKER }.build()
+                val power = Config.PowerConfig.Builder().also { it.is_power_saving = true }.build()
+                listOf(
+                    Config.Builder().also { it.device = device }.build(),
+                    Config.Builder().also { it.power = power }.build(),
+                )
+                    .forEach { config ->
+                        link.injectFrame(FromRadio.Builder().also { it.config = config }.build().toFrame())
+                    }
+            }
+            link.send(frame)
+        }
+    }
+
     private fun MeshPacket.admin(): AdminMessage? =
         decoded?.takeIf { it.portnum == PortNum.ADMIN_APP }?.let { AdminMessage.ADAPTER.decode(it.payload) }
 
@@ -238,6 +324,8 @@ class SdkPhoneApiRadioTransportTest {
         const val NODE = 0x1A2B3C4D
         const val PEER = 0x0BADF00D
         const val HANDSHAKE_START_MS = 1_000L
+        const val READY_POLLS = 300
+        const val READY_POLL_MS = 100L
         const val EARLY_PACKETS = 200
         const val SILENT_RADIO_MS = 10 * 60 * 1_000L
         const val CLOCK_TOLERANCE_S = 60L
