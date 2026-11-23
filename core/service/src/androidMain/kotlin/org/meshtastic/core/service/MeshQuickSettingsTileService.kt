@@ -33,10 +33,13 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.connection_failed
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.disconnecting
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.no_device_selected
+import org.meshtastic.core.resources.reconnecting
 
 /**
  * Quick Settings tile for the radio link: shows the connection and connects or disconnects the selected radio. An
@@ -96,7 +99,10 @@ class MeshQuickSettingsTileService :
                     is QuickSettingsTileSubtitle.NodeName -> subtitle.shortName
                     QuickSettingsTileSubtitle.Connected -> getStringSuspend(Res.string.connected)
                     QuickSettingsTileSubtitle.Connecting -> getStringSuspend(Res.string.connecting)
+                    QuickSettingsTileSubtitle.Reconnecting -> getStringSuspend(Res.string.reconnecting)
                     QuickSettingsTileSubtitle.DeviceSleeping -> getStringSuspend(Res.string.device_sleeping)
+                    QuickSettingsTileSubtitle.Disconnecting -> getStringSuspend(Res.string.disconnecting)
+                    QuickSettingsTileSubtitle.Failed -> getStringSuspend(Res.string.connection_failed)
                     QuickSettingsTileSubtitle.Disconnected -> getStringSuspend(Res.string.disconnected)
                     QuickSettingsTileSubtitle.NoDeviceSelected -> getStringSuspend(Res.string.no_device_selected)
                 }

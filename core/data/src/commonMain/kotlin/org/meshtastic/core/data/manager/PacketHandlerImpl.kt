@@ -30,7 +30,6 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -49,6 +48,7 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.QueueReceipt
 import org.meshtastic.sdk.RadioClient

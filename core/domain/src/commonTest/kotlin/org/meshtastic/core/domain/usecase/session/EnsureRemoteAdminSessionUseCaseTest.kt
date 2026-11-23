@@ -32,7 +32,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -41,6 +40,7 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 import kotlin.test.assertEquals

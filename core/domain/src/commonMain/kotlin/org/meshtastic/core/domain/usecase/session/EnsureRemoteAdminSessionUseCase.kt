@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
@@ -35,6 +34,7 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import kotlin.time.Duration.Companion.seconds
 

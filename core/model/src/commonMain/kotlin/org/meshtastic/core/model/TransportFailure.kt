@@ -17,36 +17,6 @@
 package org.meshtastic.core.model
 
 /**
- * What the radio transport is doing and why its last attempt failed, for the connection card.
- *
- * @property phase the step the current connection attempt has reached.
- * @property lastFailure why the most recent attempt failed; kept through the next attempt's phases so the card can say
- *   why it is retrying, and dropped once a handshake starts.
- * @property nextAttempt the 1-based number of the attempt that [retryAtMillis] schedules, or 0 outside
- *   [TransportPhase.WaitingToRetry].
- * @property retryAtMillis epoch milliseconds of the next attempt while [phase] is [TransportPhase.WaitingToRetry].
- */
-data class TransportStatus(
-    val phase: TransportPhase,
-    val lastFailure: TransportFailure? = null,
-    val nextAttempt: Int = 0,
-    val retryAtMillis: Long? = null,
-)
-
-/** The steps of one connection attempt, in the order a transport reaches them. */
-enum class TransportPhase {
-    FindingDevice,
-    Pairing,
-    Connecting,
-    DiscoveringServices,
-    Subscribing,
-    HandshakeConfig,
-    HandshakeNodes,
-    Connected,
-    WaitingToRetry,
-}
-
-/**
  * A classified connection failure.
  *
  * @property detail the platform's own message, for logs; never shown to a user.

@@ -38,7 +38,6 @@ import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
@@ -67,6 +66,7 @@ import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 
 /** Node layout density picker and compact field toggles for the Settings screen. */
 @Composable

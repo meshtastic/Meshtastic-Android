@@ -29,9 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -45,7 +43,7 @@ class ConnectionStateHolderTest {
 
         holder.setConnectionState(ConnectionState.Connected)
         holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(ConnectionState.Connecting)
+        holder.setConnectionState(ConnectionState.Connecting(attempt = 1))
         holder.setConnectionState(ConnectionState.Disconnected)
         holder.setConnectionState(ConnectionState.Connected)
 
@@ -56,7 +54,7 @@ class ConnectionStateHolderTest {
                 departures = 1,
                 completedHandshakes = 2,
                 handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
+                lastDepartureState = ConnectionState.Connecting(attempt = 1),
             ),
             holder.connectionEpochs.value,
         )
@@ -67,14 +65,20 @@ class ConnectionStateHolderTest {
         val holder = ConnectionStateHolder()
 
         holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(ConnectionState.DeviceSleep)
+        holder.setConnectionState(
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+        )
 
         assertEquals(
             ConnectionEpochs(
                 departures = 1,
                 completedHandshakes = 1,
                 handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.DeviceSleep,
+                lastDepartureState =
+                ConnectionState.DeviceSleeping(
+                    kotlin.time.Instant.fromEpochMilliseconds(0),
+                    expectedWakeSeconds = 300,
+                ),
             ),
             holder.connectionEpochs.value,
         )
@@ -85,18 +89,18 @@ class ConnectionStateHolderTest {
         val holder = ConnectionStateHolder()
 
         holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(ConnectionState.Connecting)
+        holder.setConnectionState(ConnectionState.Connecting(attempt = 1))
 
         assertEquals(
             ConnectionLifecycle(
                 version = 2,
-                state = ConnectionState.Connecting,
+                state = ConnectionState.Connecting(attempt = 1),
                 epochs =
                 ConnectionEpochs(
                     departures = 1,
                     completedHandshakes = 1,
                     handshakesAtLastDeparture = 1,
-                    lastDepartureState = ConnectionState.Connecting,
+                    lastDepartureState = ConnectionState.Connecting(attempt = 1),
                 ),
             ),
             holder.connectionLifecycle.value,
@@ -112,7 +116,7 @@ class ConnectionStateHolderTest {
         }
 
         fanOut(ConnectionState.Connected)
-        fanOut(ConnectionState.Connecting)
+        fanOut(ConnectionState.Connecting(attempt = 1))
         fanOut(ConnectionState.Connected)
 
         assertEquals(ConnectionState.Connected, holder.connectionState.value)
@@ -121,7 +125,7 @@ class ConnectionStateHolderTest {
                 departures = 1,
                 completedHandshakes = 2,
                 handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
+                lastDepartureState = ConnectionState.Connecting(attempt = 1),
             ),
             holder.connectionEpochs.value,
         )
@@ -175,8 +179,11 @@ class ConnectionStateHolderTest {
                 List(25) {
                     listOf(
                         ConnectionState.Connected,
-                        ConnectionState.Connecting,
-                        ConnectionState.DeviceSleep,
+                        ConnectionState.Connecting(attempt = 1),
+                        ConnectionState.DeviceSleeping(
+                            kotlin.time.Instant.fromEpochMilliseconds(0),
+                            expectedWakeSeconds = 300,
+                        ),
                         ConnectionState.Disconnected,
                     )
                 }
@@ -211,10 +218,16 @@ class ConnectionStateHolderTest {
         holder.setConnectionState(ConnectionState.Disconnected)
         val epochsBeforeReset = holder.connectionEpochs.value
 
-        holder.reset(state = ConnectionState.DeviceSleep)
+        holder.reset(
+            state =
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+        )
 
         assertEquals(epochsBeforeReset, holder.connectionEpochs.value)
-        assertEquals(ConnectionState.DeviceSleep, holder.connectionState.value)
+        assertEquals(
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+            holder.connectionState.value,
+        )
     }
 
     @Test
@@ -269,7 +282,7 @@ class ConnectionStateHolderTest {
                     departures = 1,
                     completedHandshakes = 1,
                     handshakesAtLastDeparture = 1,
-                    lastDepartureState = ConnectionState.Connecting,
+                    lastDepartureState = ConnectionState.Connecting(attempt = 1),
                 ),
             )
         }
@@ -323,24 +336,36 @@ class ConnectionStateHolderTest {
         val versionBeforeReset = holder.connectionLifecycle.value.version
 
         holder.reset(
-            state = ConnectionState.DeviceSleep,
+            state =
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
             epochs =
             ConnectionEpochs(
                 departures = 7,
                 completedHandshakes = 11,
                 handshakesAtLastDeparture = 10,
-                lastDepartureState = ConnectionState.DeviceSleep,
+                lastDepartureState =
+                ConnectionState.DeviceSleeping(
+                    kotlin.time.Instant.fromEpochMilliseconds(0),
+                    expectedWakeSeconds = 300,
+                ),
             ),
         )
 
         assertEquals(versionBeforeReset + 1, holder.connectionLifecycle.value.version)
-        assertEquals(ConnectionState.DeviceSleep, holder.connectionState.value)
+        assertEquals(
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+            holder.connectionState.value,
+        )
         assertEquals(
             ConnectionEpochs(
                 departures = 7,
                 completedHandshakes = 11,
                 handshakesAtLastDeparture = 10,
-                lastDepartureState = ConnectionState.DeviceSleep,
+                lastDepartureState =
+                ConnectionState.DeviceSleeping(
+                    kotlin.time.Instant.fromEpochMilliseconds(0),
+                    expectedWakeSeconds = 300,
+                ),
             ),
             holder.connectionEpochs.value,
         )

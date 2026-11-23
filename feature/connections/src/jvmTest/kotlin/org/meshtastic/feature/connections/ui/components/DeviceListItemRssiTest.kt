@@ -22,8 +22,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 /**

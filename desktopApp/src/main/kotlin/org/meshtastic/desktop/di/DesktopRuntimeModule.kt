@@ -21,12 +21,9 @@ import io.ktor.client.engine.java.Java
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.installApiDefaults
-import org.meshtastic.core.network.radio.DesktopSdkTransportFactory
-import org.meshtastic.core.network.radio.VirtualRadioSessionFactory
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -38,7 +35,6 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
@@ -52,7 +48,6 @@ import org.meshtastic.desktop.notification.LinuxNotificationSender
 import org.meshtastic.desktop.notification.MacOSNotificationSender
 import org.meshtastic.desktop.notification.NativeNotificationSender
 import org.meshtastic.desktop.notification.WindowsNotificationSender
-import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 
 /**
  * Desktop runtime wiring: the radio stack, notifications and networking the JVM host owns.
@@ -73,13 +68,6 @@ class DesktopRuntimeModule {
         ],
     )
     fun serviceRepository(): ServiceRepository = ServiceRepositoryImpl()
-
-    @Single
-    fun radioTransportFactory(
-        bluetoothRepository: BluetoothRepository,
-        sdkTransportFactory: DesktopSdkTransportFactory,
-        virtual: VirtualRadioSessionFactory,
-    ): RadioTransportFactory = DesktopRadioTransportFactory(bluetoothRepository, sdkTransportFactory, virtual)
 
     /**
      * Only the Linux sender holds a native handle; the others are stateless. `Main.kt` closes it explicitly during

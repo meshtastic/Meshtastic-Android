@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.testing
 
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
@@ -24,6 +23,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
 
 /** Records every notification posted or cancelled. The `accepts*` flags stand in for a platform that declines. */
 @Suppress("TooManyFunctions")

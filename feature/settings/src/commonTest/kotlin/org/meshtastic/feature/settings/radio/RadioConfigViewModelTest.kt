@@ -52,7 +52,6 @@ import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
@@ -102,6 +101,7 @@ import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -396,7 +396,7 @@ class RadioConfigViewModelTest {
 
         stubRequestsUnanswered()
         every { serviceRepository.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
 
         every { mqttManager.mqttConnectionState } returns
             MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)

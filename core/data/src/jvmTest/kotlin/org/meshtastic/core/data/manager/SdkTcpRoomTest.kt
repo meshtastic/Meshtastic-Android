@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -53,6 +54,7 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoWriteDataSource
+import org.meshtastic.core.data.radio.RadioSessionPipeline
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
 import org.meshtastic.core.data.repository.PacketRepositoryImpl
 import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
@@ -68,8 +70,9 @@ import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.datastore.store.Store
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.service.LockdownState
@@ -78,26 +81,29 @@ import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioLink
+import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.RadioSessionHost
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.StoredPassphrase
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.core.service.SharedRadioInterfaceService
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioPrefs
-import org.meshtastic.core.testing.FakeRadioTransport
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
+import org.meshtastic.sdk.TransportIdentity
+import org.meshtastic.sdk.testing.FakeRadioTransport
 import org.meshtastic.sdk.transport.tcp.TcpTransport
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.Test
@@ -136,7 +142,7 @@ class SdkTcpRoomTest {
     @Test
     fun sdkTcpRestartsAfterRebootDuringInitialConfiguration() = runBlocking {
         withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE, rebootBeforeConfig = true) { port ->
-            exerciseLockdown(port, autoUnlock = true, expectRestart = true)
+            exerciseLockdown(port, autoUnlock = true)
         }
     }
 
@@ -160,7 +166,6 @@ class SdkTcpRoomTest {
     private suspend fun exerciseLockdown(
         port: Int,
         autoUnlock: Boolean,
-        expectRestart: Boolean = false,
         verifyLocalDelivery: Boolean = false,
         verifyRemoteAck: Boolean = false,
     ) {
@@ -178,11 +183,9 @@ class SdkTcpRoomTest {
         every { passphraseStore.getPassphrase(address) } returns
             if (autoUnlock) StoredPassphrase(TEST_PASSPHRASE, 5, 0) else null
         lateinit var ingress: RoomIngress
-        val radio =
-            createRadio(lifecycle.lifecycle, dispatchers, address) { service ->
-                ingress.createSdkTransport(service, port)
-            }
-        ingress = RoomIngress(scope, lifecycle.lifecycle, dispatchers, databases, radio, passphraseStore)
+        val state = ServiceRepositoryImpl()
+        val radio = createRadio(lifecycle.lifecycle, dispatchers, address, state) { ingress.tcpLink(port, it) }
+        ingress = RoomIngress(scope, lifecycle.lifecycle, dispatchers, databases, radio, passphraseStore, state)
         val lockdownHistory = CopyOnWriteArrayList<LockdownState>()
         scope.launch(Dispatchers.Unconfined, start = CoroutineStart.UNDISPATCHED) {
             ingress.lockdownState.collect { lockdownHistory += it }
@@ -209,11 +212,9 @@ class SdkTcpRoomTest {
                 assertEquals(SdkRoomReplayTest.regionPresets, ingress.regionPresets.first())
                 val readySession = assertNotNull(radio.activeSession.value)
                 assertEquals(session.address, readySession.address)
-                if (expectRestart) {
-                    assertTrue(readySession.generation > session.generation)
-                } else {
-                    assertEquals(session, readySession)
-                }
+                // A session the radio rebooted out of before any event never reached the app; the client's next one
+                // did.
+                assertEquals(session, readySession)
                 databases.withReadDb { db ->
                     assertEquals(SdkRoomReplayTest.LOCAL_NODE, db.nodeInfoDao().getMyNodeEntity()?.myNodeNum)
                 }
@@ -259,7 +260,7 @@ class SdkTcpRoomTest {
         val lifecycleOwner = TestLifecycleOwner()
         val lifecycle = lifecycleOwner.lifecycle
         val address = "t$host:$port"
-        val radio = createRadio(lifecycle, dispatchers, address)
+        val radio = createRadio(lifecycle, dispatchers, address, ServiceRepositoryImpl()) { SessionOnlyLink() }
         try {
             withTimeout(30.seconds) {
                 databases.switchActiveDatabase(address)
@@ -316,10 +317,10 @@ class SdkTcpRoomTest {
         databases: DatabaseManager,
         private val radio: SharedRadioInterfaceService,
         passphraseStore: LockdownPassphraseStore = mock(MockMode.autofill),
+        private val state: ServiceRepositoryImpl = ServiceRepositoryImpl(),
     ) {
         private val notified = CompletableDeferred<String>()
         private val notifications = mock<MeshNotificationManager>(MockMode.autofill)
-        private val state = ServiceRepositoryImpl()
         private val serviceScope = scope.asServiceScope()
         private val readNodes = SwitchingNodeInfoReadDataSource(databases)
         private val nodeRepository =
@@ -457,13 +458,12 @@ class SdkTcpRoomTest {
                 lazy { connectionManager },
             )
 
-        fun createSdkTransport(service: RadioInterfaceService, port: Int): RadioTransport = SdkPhoneApiRadioTransport(
-            { TcpTransport("127.0.0.1", port) },
-            service,
-            lazy { projection },
-            lazy { connectionManager },
-            lazy { lockdown },
-        )
+        /** The production link: the app's pipeline over an SDK client that owns reconnecting. */
+        fun tcpLink(port: Int, linkScope: CoroutineScope): RadioLink {
+            val transport = TcpTransport("127.0.0.1", port)
+            return RadioSessionPipeline(lazy { projection }, lazy { connectionManager }, lazy { lockdown })
+                .link(transport.identity, ble = false, scope = linkScope, provider = { _, _ -> transport })
+        }
 
         init {
             everySuspend { notifications.updateMessageNotification(any(), any(), any(), any(), any(), any()) } calls
@@ -579,15 +579,25 @@ class SdkTcpRoomTest {
         lifecycle: Lifecycle,
         dispatchers: CoroutineDispatchers,
         address: String,
-        createTransport: (RadioInterfaceService) -> RadioTransport = { FakeRadioTransport() },
+        stateWriter: ServiceStateWriter,
+        openLink: (CoroutineScope) -> RadioLink,
     ): SharedRadioInterfaceService {
         val network = mock<NetworkRepository>(MockMode.autofill)
         every { network.networkAvailable } returns MutableStateFlow(true)
         every { network.resolvedList } returns MutableSharedFlow()
-        val factory = mock<RadioTransportFactory>(MockMode.autofill)
-        every { factory.isAddressValid(any()) } returns true
-        every { factory.mockTransportEnabled } returns MutableStateFlow(false)
-        every { factory.createTransport(any(), any()) } calls { createTransport(it.args[1] as RadioInterfaceService) }
+        val links =
+            object : RadioLinks {
+                override val supportedDeviceTypes = listOf(DeviceType.TCP)
+                override val mockTransportEnabled = MutableStateFlow(false)
+                override val isReplayTransportAvailable = false
+
+                override fun isAddressValid(address: String?): Boolean = address != null
+
+                override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
+                    "${interfaceId.id}$rest"
+
+                override fun open(address: String, scope: CoroutineScope): RadioLink = openLink(scope)
+            }
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
             bluetoothRepository = FakeBluetoothRepository(),
@@ -598,10 +608,29 @@ class SdkTcpRoomTest {
             },
             processLifecycle = lifecycle,
             radioPrefs = FakeRadioPrefs().apply { setDevAddr(address) },
-            transportFactory = factory,
+            links = links,
             analytics = mock(MockMode.autofill),
             radioOperationLock = RadioOperationLock(),
+            serviceStateWriter = stateWriter,
         )
+    }
+
+    /** A link whose pipeline only opens a session, for tests that drive their own SDK client. */
+    private class SessionOnlyLink : RadioLink {
+        override val client: RadioClient =
+            RadioClient.Builder()
+                .transport(FakeRadioTransport(TransportIdentity("fake:session")))
+                .storage(InMemoryStorageProvider())
+                .build()
+
+        override suspend fun connect() = Unit
+
+        override suspend fun disconnect() = Unit
+
+        override suspend fun run(host: RadioSessionHost) {
+            host.openSession()
+            awaitCancellation()
+        }
     }
 
     private companion object {

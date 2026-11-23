@@ -19,8 +19,8 @@ package org.meshtastic.feature.widget
 import android.app.Application
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.sdk.ConnectionState
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test

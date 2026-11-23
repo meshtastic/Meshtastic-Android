@@ -39,7 +39,6 @@ import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.NordicDfu
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.resources.Res
@@ -54,6 +53,7 @@ import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -915,7 +915,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `startBleScan succeeds while Connecting`() = runTest {
-        serviceRepository.setConnectionState(ConnectionState.Connecting)
+        serviceRepository.setConnectionState(ConnectionState.Connecting(attempt = 1))
         testScheduler.advanceUntilIdle()
 
         viewModel.startBleScan()
@@ -925,7 +925,9 @@ class ScannerViewModelTest {
 
     @Test
     fun `startBleScan succeeds while DeviceSleep`() = runTest {
-        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+        serviceRepository.setConnectionState(
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+        )
         testScheduler.advanceUntilIdle()
 
         viewModel.startBleScan()

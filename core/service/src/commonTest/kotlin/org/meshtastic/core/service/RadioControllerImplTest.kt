@@ -44,7 +44,6 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -88,6 +87,7 @@ import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminEdit
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -365,10 +365,10 @@ class RadioControllerImplTest {
         assertSame(serviceRepository.connectionState, controller.connectionState)
         assertSame(serviceRepository.clientNotification, controller.clientNotification)
 
-        serviceRepository.setConnectionState(ConnectionState.Connecting)
+        serviceRepository.setConnectionState(ConnectionState.Connecting(attempt = 1))
         serviceRepository.setClientNotification(notification)
 
-        assertEquals(ConnectionState.Connecting, controller.connectionState.value)
+        assertEquals(ConnectionState.Connecting(attempt = 1), controller.connectionState.value)
         assertSame(notification, controller.clientNotification.value)
 
         controller.clearClientNotification()

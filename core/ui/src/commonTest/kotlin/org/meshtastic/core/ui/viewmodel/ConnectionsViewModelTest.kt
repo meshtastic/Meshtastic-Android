@@ -31,7 +31,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareUpdateDestination
@@ -51,6 +50,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -145,86 +145,6 @@ class ConnectionsViewModelTest {
 
         assertEquals(true, viewModel.hasShownNotPairedWarning.value)
         assertEquals(true, uiPrefs.hasShownNotPairedWarning.value)
-    }
-
-    @Test
-    fun `connection status stays lifecycle-only when region is unset`() = runTest {
-        val configFlow =
-            MutableStateFlow(
-                LocalConfig.Builder()
-                    .also { wb ->
-                        wb.lora =
-                            Config.LoRaConfig.Builder()
-                                .also { wb -> wb.region = Config.LoRaConfig.RegionCode.UNSET }
-                                .build()
-                    }
-                    .build(),
-            )
-        every { radioConfigRepository.localConfigFlow } returns configFlow
-        val vm = newViewModel()
-
-        vm.connectionStatus.test {
-            assertEquals(ConnectionStatus.NOT_CONNECTED, awaitItem())
-
-            serviceRepository.setConnectionState(ConnectionState.Connected)
-            assertEquals(ConnectionStatus.CONNECTED, awaitItem())
-
-            vm.activeNodeInfoReady.test {
-                assertEquals(false, awaitItem())
-
-                nodeRepository.setOurNode(
-                    org.meshtastic.core.model.Node(
-                        num = 2,
-                        user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
-                    ),
-                )
-                connectionIdentity.value =
-                    ConnectionIdentity(sessionGeneration = 2, address = "test", nodeNum = 2, deviceId = null)
-                assertEquals(true, awaitItem())
-
-                // Region and node readiness are configuration-warning inputs, not connection-lifecycle states.
-                assertEquals(ConnectionStatus.CONNECTED, vm.connectionStatus.value)
-                cancelAndIgnoreRemainingEvents()
-            }
-
-            expectNoEvents()
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `same-node reconnect readiness does not rewrite the connecting lifecycle`() = runTest {
-        val vm = newViewModel()
-
-        vm.activeNodeInfoReady.test {
-            assertEquals(false, awaitItem())
-
-            // A cached node whose num matches the fresh session identity can become warning-ready before Connected.
-            nodeRepository.setOurNode(
-                org.meshtastic.core.model.Node(
-                    num = 7,
-                    user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
-                ),
-            )
-            connectionIdentity.value =
-                ConnectionIdentity(sessionGeneration = 3, address = "test", nodeNum = 7, deviceId = null)
-            advanceUntilIdle()
-            assertEquals(true, awaitItem())
-
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        vm.connectionStatus.test {
-            assertEquals(ConnectionStatus.NOT_CONNECTED, awaitItem())
-
-            serviceRepository.setConnectionState(ConnectionState.Connecting)
-            assertEquals(ConnectionStatus.CONNECTING, awaitItem())
-
-            serviceRepository.setConnectionState(ConnectionState.Connected)
-            assertEquals(ConnectionStatus.CONNECTED, awaitItem())
-
-            cancelAndIgnoreRemainingEvents()
-        }
     }
 
     @Test

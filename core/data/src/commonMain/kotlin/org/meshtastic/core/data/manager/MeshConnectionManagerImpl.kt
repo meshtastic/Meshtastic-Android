@@ -23,6 +23,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -36,11 +38,9 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HistoryManager
@@ -67,6 +67,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioClient
@@ -98,8 +99,8 @@ class MeshConnectionManagerImpl(
     private val nodeRestartTracker: NodeRestartTracker,
 ) : MeshConnectionManager {
     /**
-     * Serializes [onConnectionChanged] to prevent TOCTOU races when multiple coroutines emit state transitions
-     * concurrently (e.g. flow collector vs. sleep-timeout coroutine).
+     * Serializes [onLinkPhase] to prevent TOCTOU races when multiple coroutines emit state transitions concurrently
+     * (e.g. flow collector vs. sleep-timeout coroutine).
      */
     private val connectionMutex = Mutex()
 
@@ -111,37 +112,24 @@ class MeshConnectionManagerImpl(
     private var connectionRestored = false
 
     init {
-        // Bridge transport-level state into the canonical app-level state.
-        // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
-        // handshake awareness before writing to ServiceRepository. The SDK decides device sleep.
-        // Guarded per-emission: one uncaught throw here would kill the sole bridge collector and
-        // permanently freeze the app-level state (a stuck-"Connected" UI no transport event can fix).
-        radioInterfaceService.connectionState
-            .onEach { state ->
-                safeCatching { onConnectionChanged(state) }
-                    .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
-            }
-            .launchIn(scope)
-
-        // The SDK reports the link up only at Ready, so its handshake phases present the app state as Connecting.
-        // A handshake that ends short of Ready hands the state back to the link, which may not have changed.
-        radioInterfaceService.transportStatus
-            .map { it?.phase in HANDSHAKE_PHASES }
+        // The radio service publishes the SDK client's state; this ends what a session started when its link goes down.
+        // Guarded per-emission: one uncaught throw here would kill the collector for the rest of the process.
+        serviceRepository.connectionState
+            .map { it.linkPhase() }
             .distinctUntilChanged()
-            .onEach { handshaking ->
-                safeCatching {
-                    if (handshaking) {
-                        onHandshakeStarted()
-                    } else {
-                        onConnectionChanged(radioInterfaceService.connectionState.value)
-                    }
-                }
-                    .onFailure { Logger.e(it) { "Handshake state bridge failed; collector kept alive" } }
+            // The state the process starts in ended no session.
+            .drop(1)
+            .onEach { phase ->
+                safeCatching { onLinkPhase(phase) }
+                    .onFailure { Logger.e(it) { "Connection teardown failed for $phase; collector kept alive" } }
             }
             .launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
-        serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+        serviceRepository.connectionState
+            .distinctUntilChangedBy { it::class }
+            .onEach { updateStatusNotification() }
+            .launchIn(scope)
 
         // An expected node restart ends when the post-reboot config handshake completes.
         serviceRepository.connectionState
@@ -203,25 +191,16 @@ class MeshConnectionManagerImpl(
             .launchIn(scope)
     }
 
-    /** Applies a transport-level [ConnectionState] to the canonical app-level state. */
-    private suspend fun onConnectionChanged(c: ConnectionState): Boolean = connectionMutex.withLock {
-        val current = serviceRepository.connectionState.value
-        if (current == c) return@withLock false
+    private suspend fun onLinkPhase(phase: LinkPhase) = connectionMutex.withLock {
+        when (phase) {
+            LinkPhase.Asleep -> handleDeviceSleep()
 
-        when (c) {
-            is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
-            is ConnectionState.Connected -> Unit
-            is ConnectionState.DeviceSleep -> handleDeviceSleep()
-            is ConnectionState.Disconnected -> handleDisconnected()
+            LinkPhase.Down -> handleDisconnected()
+
+            LinkPhase.Pending,
+            LinkPhase.Up,
+            -> Unit
         }
-        true
-    }
-
-    /** Shows the handshake as Connecting until the snapshot install publishes Connected. */
-    private suspend fun onHandshakeStarted() = connectionMutex.withLock {
-        val current = serviceRepository.connectionState.value
-        if (current == ConnectionState.Connected || current == ConnectionState.Connecting) return@withLock
-        serviceRepository.setConnectionState(ConnectionState.Connecting)
     }
 
     private fun tearDownConnection() {
@@ -233,7 +212,6 @@ class MeshConnectionManagerImpl(
 
     private fun handleDeviceSleep() {
         connectionRestored = true
-        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
         tearDownConnection()
 
         if (connectTimeMsec != 0L) {
@@ -250,7 +228,6 @@ class MeshConnectionManagerImpl(
     private fun handleDisconnected() {
         connectionRestored = false
         connectTimeMsec = 0L
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
         tearDownConnection()
         // A different radio may connect next, and localStats only overwrites on a fresh local_stats telemetry
         // packet - without this, signal-quality rating would silently blend the *previous* radio's noise floor into
@@ -480,8 +457,8 @@ class MeshConnectionManagerImpl(
         // During an expected node restart the disconnect is transient; keep the persistent notification on the
         // connecting presentation instead of flashing "disconnected".
         val presented =
-            if (state == ConnectionState.Disconnected && nodeRestartTracker.restartExpected.value) {
-                ConnectionState.Connecting
+            if (state.linkPhase() == LinkPhase.Down && nodeRestartTracker.restartExpected.value) {
+                ConnectionState.Connecting(attempt = 1)
             } else {
                 state
             }
@@ -489,8 +466,6 @@ class MeshConnectionManagerImpl(
     }
 
     companion object {
-        private val HANDSHAKE_PHASES = setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes)
-
         internal const val MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS = 8
         private val POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY = 1.seconds
         private const val POST_HANDSHAKE_ADMISSION_MAX_BACKOFF_EXPONENT = 3
@@ -510,4 +485,28 @@ class MeshConnectionManagerImpl(
         private const val KEY_NUM_ONLINE = "num_online"
         private const val KEY_RADIO_MODEL = "radio_model"
     }
+}
+
+/** What a connection state means for the work a session started. */
+private enum class LinkPhase {
+    Up,
+    Asleep,
+    Down,
+    Pending,
+}
+
+private fun ConnectionState.linkPhase(): LinkPhase = when (this) {
+    ConnectionState.Connected -> LinkPhase.Up
+
+    is ConnectionState.DeviceSleeping -> LinkPhase.Asleep
+
+    ConnectionState.Disconnected,
+    ConnectionState.Disconnecting,
+    is ConnectionState.Failed,
+    is ConnectionState.Reconnecting,
+    -> LinkPhase.Down
+
+    is ConnectionState.Connecting,
+    is ConnectionState.Configuring,
+    -> LinkPhase.Pending
 }

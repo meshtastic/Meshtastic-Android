@@ -63,7 +63,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Message
@@ -89,8 +88,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.connection_failed
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.disconnecting
 import org.meshtastic.core.resources.discovery_scan_in_progress
 import org.meshtastic.core.resources.firmware_update_available
 import org.meshtastic.core.resources.firmware_update_in_progress
@@ -127,6 +128,7 @@ import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.notification_reaction_to
 import org.meshtastic.core.resources.powered
+import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.you
@@ -134,6 +136,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -525,11 +528,19 @@ class MeshNotificationManagerImpl(
                     is ConnectionState.Connected ->
                         getStringSuspend(Res.string.meshtastic_app_name) + ": " + getStringSuspend(Res.string.connected)
 
-                    is ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
+                    ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
 
-                    is ConnectionState.DeviceSleep -> getStringSuspend(Res.string.device_sleeping)
+                    ConnectionState.Disconnecting -> getStringSuspend(Res.string.disconnecting)
 
-                    is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
+                    is ConnectionState.DeviceSleeping -> getStringSuspend(Res.string.device_sleeping)
+
+                    is ConnectionState.Connecting,
+                    is ConnectionState.Configuring,
+                    -> getStringSuspend(Res.string.connecting)
+
+                    is ConnectionState.Reconnecting -> getStringSuspend(Res.string.reconnecting)
+
+                    is ConnectionState.Failed -> getStringSuspend(Res.string.connection_failed)
                 }
 
         return snapshot.liveUpdate?.let { reading ->

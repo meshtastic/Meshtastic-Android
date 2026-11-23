@@ -36,13 +36,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.connected
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.node_incomplete
@@ -56,6 +51,8 @@ import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalMeshActivity
+import org.meshtastic.core.ui.util.label
+import org.meshtastic.sdk.ConnectionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,16 +113,7 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = {
             PlainTooltip {
-                Text(
-                    stringResource(
-                        when (connectionState) {
-                            ConnectionState.Connected -> Res.string.connected
-                            ConnectionState.Connecting -> Res.string.connecting
-                            ConnectionState.Disconnected -> Res.string.disconnected
-                            ConnectionState.DeviceSleep -> Res.string.device_sleeping
-                        },
-                    ),
-                )
+                Text(stringResource(connectionState.label))
             }
         },
         state = rememberTooltipState(),

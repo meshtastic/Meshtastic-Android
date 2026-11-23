@@ -23,7 +23,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
@@ -41,6 +40,7 @@ import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo

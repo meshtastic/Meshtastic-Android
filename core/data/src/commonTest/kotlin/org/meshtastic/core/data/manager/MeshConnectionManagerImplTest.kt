@@ -36,14 +36,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.TransportFailure
-import org.meshtastic.core.model.TransportFailureKind
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.HistoryManager
@@ -74,6 +69,8 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.RadioClient
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -106,8 +103,6 @@ class MeshConnectionManagerImplTest {
 
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
-    private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    private val transportStatus = MutableStateFlow<TransportStatus?>(null)
     private lateinit var connectionStateHolder: ConnectionStateHolder
     private val localConfigFlow = MutableStateFlow(LocalConfig.Builder().build())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig.Builder().build())
@@ -137,14 +132,10 @@ class MeshConnectionManagerImplTest {
         appWidgetUpdater = mock(MockMode.autofill)
 
         testDispatcher = UnconfinedTestDispatcher()
-        radioConnectionState.value = ConnectionState.Disconnected
-        transportStatus.value = null
         connectionStateHolder = ConnectionStateHolder()
         localConfigFlow.value = LocalConfig.Builder().build()
         moduleConfigFlow.value = LocalModuleConfig.Builder().build()
 
-        every { radioInterfaceService.connectionState } returns radioConnectionState
-        every { radioInterfaceService.transportStatus } returns transportStatus
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { serviceRepository.connectionState } returns connectionStateHolder.connectionState
@@ -191,78 +182,28 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `link connection waits for SDK snapshot readiness`() = runTest(testDispatcher) {
-        manager = createManager(backgroundScope)
-        radioConnectionState.value = ConnectionState.Connected
-        runCurrent()
-        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
-    }
-
-    @Test
-    fun `the SDK handshake shows as connecting until the snapshot is installed`() = runTest(testDispatcher) {
-        manager = createManager(backgroundScope)
-
-        transportStatus.value = TransportStatus(TransportPhase.HandshakeConfig)
-        runCurrent()
-        // Main kept the app state Connecting from link-up until the config load finished.
-        assertEquals(ConnectionState.Connecting, serviceRepository.connectionState.value)
-
-        // MeshConfigFlowManagerImpl publishes Connected once the snapshot is installed.
-        serviceRepository.setConnectionState(ConnectionState.Connected)
-        radioConnectionState.value = ConnectionState.Connected
-        transportStatus.value = TransportStatus(TransportPhase.HandshakeNodes)
-        transportStatus.value = TransportStatus(TransportPhase.Connected)
-        runCurrent()
-        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
-    }
-
-    @Test
-    fun `a handshake phase collected after the snapshot install keeps the app connected`() = runTest(testDispatcher) {
-        manager = createManager(backgroundScope)
-        // The install publishes Connected from the SDK session while the status collector can still lag behind.
-        serviceRepository.setConnectionState(ConnectionState.Connected)
-
-        transportStatus.value = TransportStatus(TransportPhase.HandshakeNodes)
-        runCurrent()
-
-        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
-    }
-
-    @Test
-    fun `a handshake that fails short of Ready falls back to the link state`() = runTest(testDispatcher) {
-        radioConnectionState.value = ConnectionState.DeviceSleep
-        manager = createManager(backgroundScope)
-        runCurrent()
-        val linkState = serviceRepository.connectionState.value
-
-        transportStatus.value = TransportStatus(TransportPhase.HandshakeConfig)
-        runCurrent()
-        assertEquals(ConnectionState.Connecting, serviceRepository.connectionState.value)
-
-        // The link stays DeviceSleep through the retry, so no link state change reports the failure.
-        transportStatus.value =
-            TransportStatus(TransportPhase.WaitingToRetry, TransportFailure(TransportFailureKind.LinkLost))
-        runCurrent()
-        assertEquals(linkState, serviceRepository.connectionState.value)
-    }
-
-    @Test
     fun `Disconnected state stops services`() = runTest(testDispatcher) {
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         manager = createManager(backgroundScope)
-        // The SDK snapshot has already published the app connection.
-        radioConnectionState.value = ConnectionState.Connected
         applyConnectionState(ConnectionState.Connected)
         advanceUntilIdle()
 
-        radioConnectionState.value = ConnectionState.Disconnected
+        applyConnectionState(ConnectionState.Disconnected)
         advanceUntilIdle()
 
-        assertEquals(
-            ConnectionState.Disconnected,
-            serviceRepository.connectionState.value,
-            "State should be Disconnected after radio Disconnected",
-        )
+        verify { locationManager.stop() }
+        verify { mqttManager.stop() }
+    }
+
+    @Test
+    fun `a link that drops into a reconnect stops services`() = runTest(testDispatcher) {
+        manager = createManager(backgroundScope)
+        applyConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        applyConnectionState(ConnectionState.Reconnecting(MeshtasticException.Transport("link lost"), attempt = 1))
+        advanceUntilIdle()
+
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
     }
@@ -274,12 +215,11 @@ class MeshConnectionManagerImplTest {
         // own.
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         manager = createManager(backgroundScope)
-        radioConnectionState.value = ConnectionState.Connected
         applyConnectionState(ConnectionState.Connected)
         advanceUntilIdle()
         nodeRepository.updateLocalStats(LocalStats.Builder().also { wb -> wb.noise_floor = -70 }.build())
 
-        radioConnectionState.value = ConnectionState.Disconnected
+        applyConnectionState(ConnectionState.Disconnected)
         advanceUntilIdle()
 
         assertEquals(
@@ -287,18 +227,6 @@ class MeshConnectionManagerImplTest {
             nodeRepository.localStats.value,
             "Disconnect should reset to \"no reading yet\"",
         )
-    }
-
-    @Test
-    fun `a link the SDK reports asleep shows as sleeping whatever the local power config`() = runTest(testDispatcher) {
-        // The default config has power saving off; the SDK, not this config, decides the device sleeps.
-        manager = createManager(backgroundScope)
-        advanceUntilIdle()
-
-        radioConnectionState.value = ConnectionState.DeviceSleep
-        advanceUntilIdle()
-
-        assertEquals(ConnectionState.DeviceSleep, serviceRepository.connectionState.value)
     }
 
     @Test
@@ -522,44 +450,5 @@ class MeshConnectionManagerImplTest {
         runCurrent()
 
         assertEquals(2 * MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS, clientRequests)
-    }
-
-    @Test
-    fun `rapid state transitions are serialized by connectionMutex`() = runTest(testDispatcher) {
-        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-
-        // Record every state transition so we can verify ordering
-        val observed = mutableListOf<ConnectionState>()
-        every { serviceRepository.setConnectionState(any()) } calls
-            { call ->
-                val state = call.arg<ConnectionState>(0)
-                observed.add(state)
-                applyConnectionState(state)
-            }
-
-        manager = createManager(backgroundScope)
-        advanceUntilIdle()
-
-        // Rapid-fire: Connected -> DeviceSleep -> Disconnected without yielding between them.
-        // Without the Mutex, the intermediate DeviceSleep could be missed or applied out of order.
-        radioConnectionState.value = ConnectionState.Connecting
-        radioConnectionState.value = ConnectionState.DeviceSleep
-        radioConnectionState.value = ConnectionState.Disconnected
-        advanceUntilIdle()
-
-        // Verify final state
-        assertEquals(
-            ConnectionState.Disconnected,
-            serviceRepository.connectionState.value,
-            "Final state should be Disconnected after rapid transitions",
-        )
-
-        // Verify that all intermediate states were observed in correct order.
-        // Confirm the bridge preserved the transport's two intermediate states.
-        assertEquals(
-            listOf(ConnectionState.Connecting, ConnectionState.DeviceSleep, ConnectionState.Disconnected),
-            observed,
-            "State transitions should be serialized in order: Connecting -> DeviceSleep -> Disconnected",
-        )
     }
 }

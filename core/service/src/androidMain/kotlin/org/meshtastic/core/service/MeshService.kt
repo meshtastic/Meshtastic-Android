@@ -42,7 +42,7 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.RadioLinks
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -55,7 +55,7 @@ class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
 
-    private val transportFactory: RadioTransportFactory by inject()
+    private val radioLinks: RadioLinks by inject()
 
     private val connectionManager: MeshConnectionManager by inject()
 
@@ -176,7 +176,7 @@ class MeshService : Service() {
         }
 
         val address = radioInterfaceService.getDeviceAddress()
-        if (isValidDeviceAddress(address) && transportFactory.isAddressValid(address)) {
+        if (isValidDeviceAddress(address) && radioLinks.isAddressValid(address)) {
             // Address is already loaded and valid — proceed normally.
             addressWaitJob?.cancel()
             addressWaitJob = null
@@ -210,7 +210,7 @@ class MeshService : Service() {
                 withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
                     radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
                 }
-            when (serviceStayAliveDecision(resolved, radioOperationLock.isActive, transportFactory::isAddressValid)) {
+            when (serviceStayAliveDecision(resolved, radioOperationLock.isActive, radioLinks::isAddressValid)) {
                 ServiceStayAliveDecision.STAY_FOR_DEVICE -> {
                     Logger.i {
                         "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait"

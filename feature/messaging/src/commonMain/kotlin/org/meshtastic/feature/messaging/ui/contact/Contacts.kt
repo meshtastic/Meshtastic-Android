@@ -79,7 +79,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
@@ -143,6 +142,7 @@ import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration.Companion.days
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")

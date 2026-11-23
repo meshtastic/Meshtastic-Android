@@ -17,10 +17,12 @@
 package org.meshtastic.feature.connections.ui.components
 
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.ble.classifyBleFailure
 import org.meshtastic.core.model.TransportFailureKind
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connected
+import org.meshtastic.core.resources.connected_sleeping
+import org.meshtastic.core.resources.connection_failed
 import org.meshtastic.core.resources.connection_failure_bluetooth_or_location_unavailable
 import org.meshtastic.core.resources.connection_failure_bluetooth_unavailable
 import org.meshtastic.core.resources.connection_failure_connect_failed
@@ -31,21 +33,31 @@ import org.meshtastic.core.resources.connection_failure_pairing_failed
 import org.meshtastic.core.resources.connection_failure_pairing_required
 import org.meshtastic.core.resources.connection_failure_unknown
 import org.meshtastic.core.resources.connection_phase_connecting
-import org.meshtastic.core.resources.connection_phase_discovering_services
-import org.meshtastic.core.resources.connection_phase_finding_device
 import org.meshtastic.core.resources.connection_phase_handshake_config
 import org.meshtastic.core.resources.connection_phase_handshake_nodes
-import org.meshtastic.core.resources.connection_phase_pairing
-import org.meshtastic.core.resources.connection_phase_subscribing
+import org.meshtastic.core.resources.disconnecting
+import org.meshtastic.core.resources.node_restarting
+import org.meshtastic.core.resources.not_connected
+import org.meshtastic.core.resources.reconnecting
+import org.meshtastic.sdk.ConfigPhase
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
+import kotlin.time.Instant
 
 /**
- * What the connecting card says under the device for one [TransportStatus].
+ * What the connecting card says under the device for one [ConnectionState].
  *
- * @property phase the step in progress, or null while [retry] stands in for it.
- * @property retry the countdown to the next attempt while waiting to retry.
+ * @property status what the connection is doing, shown unless [retry] stands in for it.
+ * @property retry the countdown to the next attempt while the client waits out a backoff.
  * @property failure why the last attempt failed, in plain words. The platform's own message stays in the log.
+ * @property canConnect whether the client stopped trying, so only the user connecting again brings it back.
  */
-data class ConnectionStatusDetail(val phase: StringResource?, val retry: RetryCountdown?, val failure: StringResource?)
+data class ConnectionStatusDetail(
+    val status: StringResource,
+    val retry: RetryCountdown?,
+    val failure: StringResource?,
+    val canConnect: Boolean = false,
+)
 
 /** [seconds] until attempt number [attempt] starts. */
 data class RetryCountdown(val seconds: Int, val attempt: Int)
@@ -53,52 +65,80 @@ data class RetryCountdown(val seconds: Int, val attempt: Int)
 private const val MILLIS_PER_SECOND = 1_000L
 
 /**
- * Resolves this status at [nowMillis]; null when there is nothing to add, including once the link is up.
+ * Resolves this state at [now].
  *
+ * @param restartExpected whether the node is applying a change that reboots it, so a drop reads as a restart
+ * @param isBluetooth whether the link is Bluetooth, whose failures name a cause the user can act on
  * @param bluetoothNeedsLocation whether a Bluetooth scan here also needs location services, so an unavailable adapter
  *   names both
  */
-fun TransportStatus?.toConnectionStatusDetail(
-    nowMillis: Long,
+fun ConnectionState.toConnectionStatusDetail(
+    now: Instant,
+    restartExpected: Boolean = false,
+    isBluetooth: Boolean = false,
     bluetoothNeedsLocation: Boolean = false,
-): ConnectionStatusDetail? {
-    if (this == null || phase == TransportPhase.Connected) return null
-    val retry =
-        retryAtMillis
-            ?.takeIf { phase == TransportPhase.WaitingToRetry }
-            ?.let { retryAt ->
-                val remaining = (retryAt - nowMillis).coerceAtLeast(0L)
-                RetryCountdown(
-                    seconds = ((remaining + MILLIS_PER_SECOND - 1) / MILLIS_PER_SECOND).toInt(),
-                    attempt = nextAttempt,
-                )
-            }
-    return ConnectionStatusDetail(
-        phase = phase.label(),
-        retry = retry,
-        failure = lastFailure?.kind?.label(bluetoothNeedsLocation),
-    )
+): ConnectionStatusDetail = when (this) {
+    ConnectionState.Connected -> ConnectionStatusDetail(Res.string.connected, retry = null, failure = null)
+
+    is ConnectionState.Connecting ->
+        ConnectionStatusDetail(
+            if (restartExpected) Res.string.node_restarting else Res.string.connection_phase_connecting,
+            retry = null,
+            failure = null,
+        )
+
+    is ConnectionState.Configuring ->
+        ConnectionStatusDetail(
+            when (phase) {
+                ConfigPhase.Stage1,
+                ConfigPhase.Settling,
+                -> Res.string.connection_phase_handshake_config
+
+                ConfigPhase.Stage2 -> Res.string.connection_phase_handshake_nodes
+            },
+            retry = null,
+            failure = null,
+        )
+
+    is ConnectionState.Reconnecting ->
+        ConnectionStatusDetail(
+            if (restartExpected) Res.string.node_restarting else Res.string.reconnecting,
+            retry =
+            retryAt?.let { at ->
+                val remaining = (at - now).inWholeMilliseconds.coerceAtLeast(0L)
+                RetryCountdown(((remaining + MILLIS_PER_SECOND - 1) / MILLIS_PER_SECOND).toInt(), attempt)
+            },
+            failure = if (restartExpected) null else cause.failureLabel(isBluetooth, bluetoothNeedsLocation),
+        )
+
+    is ConnectionState.DeviceSleeping ->
+        ConnectionStatusDetail(Res.string.connected_sleeping, retry = null, failure = null)
+
+    ConnectionState.Disconnecting -> ConnectionStatusDetail(Res.string.disconnecting, retry = null, failure = null)
+
+    is ConnectionState.Failed ->
+        ConnectionStatusDetail(
+            Res.string.connection_failed,
+            retry = null,
+            failure = cause.failureLabel(isBluetooth, bluetoothNeedsLocation),
+            canConnect = true,
+        )
+
+    ConnectionState.Disconnected ->
+        ConnectionStatusDetail(
+            if (restartExpected) Res.string.node_restarting else Res.string.not_connected,
+            retry = null,
+            failure = null,
+        )
 }
 
-private fun TransportPhase.label(): StringResource? = when (this) {
-    TransportPhase.FindingDevice -> Res.string.connection_phase_finding_device
-
-    TransportPhase.Pairing -> Res.string.connection_phase_pairing
-
-    TransportPhase.Connecting -> Res.string.connection_phase_connecting
-
-    TransportPhase.DiscoveringServices -> Res.string.connection_phase_discovering_services
-
-    TransportPhase.Subscribing -> Res.string.connection_phase_subscribing
-
-    TransportPhase.HandshakeConfig -> Res.string.connection_phase_handshake_config
-
-    TransportPhase.HandshakeNodes -> Res.string.connection_phase_handshake_nodes
-
-    TransportPhase.Connected,
-    TransportPhase.WaitingToRetry,
-    -> null
-}
+/** A Bluetooth failure names its cause; other links say only that the connect failed. */
+private fun MeshtasticException.failureLabel(isBluetooth: Boolean, bluetoothNeedsLocation: Boolean): StringResource =
+    when {
+        this is MeshtasticException.HandshakeTimeout -> Res.string.connection_failure_unknown
+        isBluetooth -> classifyBleFailure().kind.label(bluetoothNeedsLocation)
+        else -> Res.string.connection_failure_connect_failed
+    }
 
 private fun TransportFailureKind.label(bluetoothNeedsLocation: Boolean): StringResource = when (this) {
     TransportFailureKind.OutOfRange -> Res.string.connection_failure_out_of_range

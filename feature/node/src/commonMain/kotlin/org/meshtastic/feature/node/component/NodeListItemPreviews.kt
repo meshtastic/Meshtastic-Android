@@ -28,11 +28,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.sdk.ConnectionState
 
 // ---------------------------------------------------------------------------
 // Sample data for previews

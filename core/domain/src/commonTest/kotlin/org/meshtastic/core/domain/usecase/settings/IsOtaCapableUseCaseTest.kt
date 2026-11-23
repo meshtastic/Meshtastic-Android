@@ -67,7 +67,7 @@ class IsOtaCapableUseCaseTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
         val hw =
@@ -91,7 +91,7 @@ class IsOtaCapableUseCaseTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
         val hw = DeviceHardware(activelySupported = false, hwModel = HardwareModel.TBEAM.value)
@@ -109,7 +109,7 @@ class IsOtaCapableUseCaseTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
         val hw =
@@ -133,7 +133,7 @@ class IsOtaCapableUseCaseTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.UNSET }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
         dev.mokkery.every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(null)
@@ -148,7 +148,7 @@ class IsOtaCapableUseCaseTest {
     fun `invoke returns false when disconnected`() = runTest {
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(Node(num = 123))
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Disconnected)
 
         useCase().test {
             assertFalse(awaitItem())
@@ -160,7 +160,7 @@ class IsOtaCapableUseCaseTest {
     fun `invoke returns false when node is null`() = runTest {
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
 
         useCase().test {
             assertFalse(awaitItem())
@@ -173,7 +173,7 @@ class IsOtaCapableUseCaseTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+            MutableStateFlow(org.meshtastic.sdk.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("mqtt://example.com")
 
         useCase().test {

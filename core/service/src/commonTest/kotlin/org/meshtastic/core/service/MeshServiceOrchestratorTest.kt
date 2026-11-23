@@ -35,7 +35,6 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
@@ -78,7 +77,6 @@ class MeshServiceOrchestratorTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun createOrchestrator(
         connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
-        connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected),
         // A valid default address lets every start() proceed through the new
         // wait-for-valid-address -> DB switch -> connect ordering without per-test boilerplate.
         // Tests that need a different initial address (or no address) override it explicitly.
@@ -94,7 +92,6 @@ class MeshServiceOrchestratorTest {
         localNetworkAccess: LocalNetworkAccess = LocalNetworkAccess { true },
     ): MeshServiceOrchestrator {
         every { radioInterfaceService.connectionError } returns connectionError
-        every { radioInterfaceService.connectionState } returns connectionState
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { radioInterfaceService.sessionGeneration } returns sessionGeneration
         every { radioInterfaceService.activeSession } returns activeSession
@@ -339,37 +336,6 @@ class MeshServiceOrchestratorTest {
         verifySuspend { databaseManager.switchActiveDatabase("tcp:10.0.0.5") }
 
         orchestrator.stop()
-    }
-
-    /**
-     * Lifecycle invariant: when the transport reports [ConnectionState.Connected] while the orchestrator is stopped
-     * (e.g. a late BLE liveness reconnect, or an emission that arrives after [MeshService.onDestroy]), the orchestrator
-     * MUST NOT auto-restart. The orchestrator is a Koin `@Single` whose lifetime exceeds the Android `Service`, so an
-     * unguarded observer launched in `init {}` would resurrect the orchestrator after a deliberate stop — connecting
-     * the radio in the background with no foreground service, no wake lock, and no UI.
-     *
-     * This also preserves the documented invariant that [MeshConnectionManagerImpl] is the only consumer of
-     * [RadioInterfaceService.connectionState]. Recovery after stop is the host's responsibility: it must call `start()`
-     * explicitly (e.g. via a fresh `MeshService.onCreate()`).
-     *
-     * Replaces the previous "orphan-Connected recovery" behavior that was removed for violating both invariants.
-     */
-    @Test
-    fun testConnectedWhileStoppedDoesNotRestartWithoutExplicitStart() {
-        val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-        val orchestrator = createOrchestrator(connectionState = connectionState)
-
-        // Stopped; never call start() explicitly.
-        assertFalse(orchestrator.isRunning)
-
-        // Transport reaches Connected — orchestrator must stay stopped.
-        connectionState.value = ConnectionState.Connected
-        assertFalse(orchestrator.isRunning)
-
-        // Likewise, subsequent transport state cycles must not restart the orchestrator.
-        connectionState.value = ConnectionState.Disconnected
-        connectionState.value = ConnectionState.Connected
-        assertFalse(orchestrator.isRunning)
     }
 
     @Test

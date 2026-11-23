@@ -46,6 +46,9 @@ kotlin {
             }
         }
 
+        // The card's failure line classifies Kable's own exceptions.
+        commonTest.dependencies { implementation(libs.kable.core) }
+
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
         // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.
         jvmTest.dependencies {

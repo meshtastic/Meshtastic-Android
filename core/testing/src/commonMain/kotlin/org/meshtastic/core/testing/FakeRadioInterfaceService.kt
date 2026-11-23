@@ -32,15 +32,12 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -48,22 +45,14 @@ import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 
 /**
- * A test double for [RadioInterfaceService] that provides an in-memory implementation.
- *
- * The [connectionState] here mirrors the transport-level semantics of the real implementation. In production, only
- * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager] observes this flow; tests should verify
- * that bridging behavior rather than consuming it directly from UI/feature test code (use
- * [FakeServiceRepository.connectionState] instead). Address selection remains separate from transport admission:
- * [connect] and an in-flight [restartTransport] publish a fresh monotonically increasing session generation.
+ * A test double for [RadioInterfaceService] that provides an in-memory implementation. Address selection remains
+ * separate from session admission: [connect] publishes a fresh monotonically increasing session generation. Tests that
+ * need a connection state use [FakeServiceRepository.connectionState], which the real service publishes to.
  */
 @Suppress("TooManyFunctions")
-class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
+class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
-
-    /** Transport-level connection state (raw hardware link status). */
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState
 
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(null)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow
@@ -129,15 +118,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _connectionError = MutableSharedFlow<String>()
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
-    private val _transportStatus = MutableStateFlow<TransportStatus?>(null)
-    override val transportStatus: StateFlow<TransportStatus?> = _transportStatus
-
-    /** Every status reported through [onStatus], in order. */
-    val reportedStatuses = mutableListOf<TransportStatus>()
-
     var connectCalled = false
-    var restartTransportCalled: Boolean = false
-        private set
 
     override val mockTransportEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
@@ -152,14 +133,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override suspend fun disconnect() {
         connectCalled = false
         revokeActiveSession()
-    }
-
-    override suspend fun restartTransport(expectedSession: RadioSessionContext?) {
-        restartTransportCalled = true
-        if (connectCalled && _activeSession.value != null) {
-            revokeActiveSession()
-            admitSelectedSession()
-        }
     }
 
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
@@ -248,19 +221,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "$interfaceId:$rest"
 
-    override fun onConnect() {
-        _connectionState.value = ConnectionState.Connected
-    }
-
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-        _connectionState.value = ConnectionState.Disconnected
-    }
-
-    override fun onStatus(status: TransportStatus) {
-        synchronized(sessionAdmissionLock) { reportedStatuses += status }
-        _transportStatus.value = status
-    }
-
     /** The SDK client [clientForSession] hands out while a session is admitted. */
     var client: RadioClient? = null
 
@@ -298,17 +258,13 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         return true
     }
 
-    // --- Helper methods for testing ---
+    private val gattCacheInvalidationRequestedState = atomic(false)
 
-    fun setConnectionState(state: ConnectionState) {
-        _connectionState.value = state
-    }
-
-    private val gattCacheInvalidationRequested = atomic(false)
+    /** Whether [requestGattCacheInvalidationOnNextConnect] was called. */
+    val gattCacheInvalidationRequested: Boolean
+        get() = gattCacheInvalidationRequestedState.value
 
     override fun requestGattCacheInvalidationOnNextConnect() {
-        gattCacheInvalidationRequested.value = true
+        gattCacheInvalidationRequestedState.value = true
     }
-
-    override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
 }

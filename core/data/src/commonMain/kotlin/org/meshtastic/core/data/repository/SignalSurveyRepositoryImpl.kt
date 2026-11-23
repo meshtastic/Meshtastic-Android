@@ -44,7 +44,6 @@ import org.meshtastic.core.data.datasource.SurveySessionHandle
 import org.meshtastic.core.database.entity.SignalSurveySessionEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SignalSample
 import org.meshtastic.core.model.SignalSurveySession
 import org.meshtastic.core.model.util.isDirectReception
@@ -57,6 +56,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SignalSurveyBlocker
 import org.meshtastic.core.repository.SignalSurveyRepository
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Clock
 
 @Single(binds = [SignalSurveyRepository::class])

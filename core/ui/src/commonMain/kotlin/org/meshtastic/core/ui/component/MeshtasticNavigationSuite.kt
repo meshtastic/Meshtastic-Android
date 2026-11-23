@@ -51,7 +51,6 @@ import androidx.window.core.layout.WindowSizeClass
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.navigation.ContactsRoute
@@ -59,13 +58,12 @@ import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.connected
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.node_restarting
 import org.meshtastic.core.ui.navigation.icon
+import org.meshtastic.core.ui.util.label
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.isInProgress
 
 /**
  * Shared adaptive navigation shell using [NavigationSuiteScaffold].
@@ -202,11 +200,7 @@ private fun NavigationIconContent(
     // red disconnect: the icon borrows the Connecting treatment and the tooltip says "Restarting".
     val restarting = nodeRestartExpected && connectionState != ConnectionState.Connected
     val presentedState =
-        if (restarting && connectionState == ConnectionState.Disconnected) {
-            ConnectionState.Connecting
-        } else {
-            connectionState
-        }
+        if (restarting && !connectionState.isInProgress) ConnectionState.Connecting(attempt = 1) else connectionState
 
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
@@ -262,8 +256,5 @@ private fun NavigationIconContent(
 @Composable
 private fun connectionTooltipLabel(restarting: Boolean, connectionState: ConnectionState): String = when {
     restarting -> stringResource(Res.string.node_restarting)
-    connectionState == ConnectionState.Connected -> stringResource(Res.string.connected)
-    connectionState == ConnectionState.Connecting -> stringResource(Res.string.connecting)
-    connectionState == ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-    else -> stringResource(Res.string.disconnected)
+    else -> stringResource(connectionState.label)
 }

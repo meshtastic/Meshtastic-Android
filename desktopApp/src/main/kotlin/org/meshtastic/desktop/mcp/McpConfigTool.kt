@@ -35,7 +35,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -46,6 +45,7 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.getOrNull
 import org.meshtastic.sdk.map
 import kotlin.time.Duration

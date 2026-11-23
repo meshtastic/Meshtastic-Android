@@ -20,7 +20,6 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
@@ -39,6 +38,7 @@ import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.

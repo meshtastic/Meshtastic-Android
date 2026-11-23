@@ -33,12 +33,11 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
+import org.meshtastic.core.repository.ConnectionEpochs
 import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.ConnectionLifecycle
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
@@ -63,6 +62,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.ConnectionState
 
 private data class AssociationSnapshot(
     val identity: ConnectionIdentity?,

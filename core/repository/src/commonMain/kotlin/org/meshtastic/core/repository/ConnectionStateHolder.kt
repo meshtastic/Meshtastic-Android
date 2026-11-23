@@ -21,9 +21,7 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.sdk.ConnectionState
 
 /** Owns canonical connection state, epochs, and compatibility projections under one publication lock. */
 class ConnectionStateHolder(

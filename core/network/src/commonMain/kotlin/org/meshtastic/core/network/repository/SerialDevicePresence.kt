@@ -24,9 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
  * Each key is the `rest` portion of an `InterfaceId.SERIAL` address (i.e. the address with its leading `'s'` prefix
  * stripped) — exactly the keys that [UsbRepository.serialDevices] emits on Android.
  *
- * Consumed by transport-recovery code (notably `SharedRadioInterfaceService.initStateListeners`) to detect when a
- * previously-selected serial device has been unplugged and replugged, so the transport can be brought back without
- * manual re-selection.
+ * `SharedRadioInterfaceService` watches it for the selected serial device coming back after an unplug, and asks the
+ * radio's client to retry at once.
  *
  * Platforms without hot-plug observation (e.g. JVM/Desktop jSerialComm) return a perpetually-empty set and answer
  * [portExists] instead.

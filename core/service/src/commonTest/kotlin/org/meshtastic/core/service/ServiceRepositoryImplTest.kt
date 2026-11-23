@@ -25,9 +25,9 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.repository.ConnectionEpochs
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -60,10 +60,10 @@ class ServiceRepositoryImplTest {
         val emittedState = async { repository.connectionState.drop(1).first() }
 
         runCurrent()
-        repository.setConnectionState(ConnectionState.Connecting)
+        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
 
-        assertEquals(ConnectionState.Connecting, emittedState.await())
-        assertEquals(ConnectionState.Connecting, repository.connectionState.value)
+        assertEquals(ConnectionState.Connecting(attempt = 1), emittedState.await())
+        assertEquals(ConnectionState.Connecting(attempt = 1), repository.connectionState.value)
     }
 
     @Test
@@ -73,7 +73,7 @@ class ServiceRepositoryImplTest {
         val baseline = repository.connectionEpochs.value
 
         repository.setConnectionState(ConnectionState.Disconnected)
-        repository.setConnectionState(ConnectionState.Connecting)
+        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
         repository.setConnectionState(ConnectionState.Connected)
 
         assertEquals(ConnectionState.Connected, repository.connectionState.value)

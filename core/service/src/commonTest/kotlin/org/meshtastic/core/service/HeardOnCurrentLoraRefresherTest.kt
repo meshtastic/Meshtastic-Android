@@ -34,7 +34,6 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -48,6 +47,7 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 

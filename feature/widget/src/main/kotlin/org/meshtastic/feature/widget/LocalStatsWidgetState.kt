@@ -29,13 +29,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.isInProgress
 
 data class LocalStatsWidgetUiState(
     val connectionState: ConnectionState = ConnectionState.Disconnected,
@@ -126,7 +127,7 @@ class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, connectionSt
 
         return LocalStatsWidgetUiState(
             connectionState = connectionState,
-            isConnecting = connectionState is ConnectionState.Connecting,
+            isConnecting = connectionState.isInProgress,
             showContent = connectionState is ConnectionState.Connected,
             nodeShortName = localNode?.user?.short_name,
             nodeColors = localNode?.colors,

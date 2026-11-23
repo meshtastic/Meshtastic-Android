@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DisplayMirrorManager
@@ -35,6 +34,7 @@ import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.DisplayInfo
+import org.meshtastic.sdk.ConnectionState
 
 @KoinViewModel
 class DisplayMirrorViewModel(

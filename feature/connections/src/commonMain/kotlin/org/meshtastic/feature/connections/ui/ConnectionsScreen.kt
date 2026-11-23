@@ -68,12 +68,10 @@ import org.jetbrains.compose.resources.ResourceEnvironment
 import org.jetbrains.compose.resources.rememberResourceEnvironment
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.FirmwareRoute
@@ -151,7 +149,6 @@ import org.meshtastic.core.ui.util.rememberOpenBluetoothSettings
 import org.meshtastic.core.ui.util.rememberOpenLocationSettings
 import org.meshtastic.core.ui.util.rememberOpenWifiSettings
 import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
-import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
@@ -166,6 +163,8 @@ import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.isInProgress
 
 /**
  * Fixed minimum height for the "connected device" card at the top of the Connections screen. Shared across the three UI
@@ -267,8 +266,7 @@ fun ConnectionsScreen(
     onConfigNavigate: (Route) -> Unit,
     onConnectCode: ((String) -> Unit)? = null,
 ) {
-    val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
-    val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
+    val restartExpected by connectionsViewModel.restartExpected.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
     val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
@@ -498,7 +496,7 @@ fun ConnectionsScreen(
                 connectionState is ConnectionState.Connected && ourNode != null -> ConnectionUiState.CONNECTED_WITH_NODE
 
                 connectionState is ConnectionState.Connected ||
-                    connectionState == ConnectionState.Connecting ||
+                    connectionState.isInProgress ||
                     selectedDevice != NO_DEVICE_SELECTED -> ConnectionUiState.CONNECTING
 
                 else -> ConnectionUiState.NO_DEVICE
@@ -571,9 +569,10 @@ fun ConnectionsScreen(
                                     recentTcpDevices = recentTcpDevices,
                                     usbDevices = usbDevices,
                                     virtualDevices = virtualDevices,
-                                    connectionStatus = connectionStatus,
-                                    transportStatus = transportStatus,
+                                    connectionState = connectionState,
+                                    restartExpected = restartExpected,
                                     onClickDisconnect = { scanModel.disconnect() },
+                                    onClickConnect = { scanModel.connect() },
                                 )
 
                             else -> NoDeviceContent()
@@ -1014,9 +1013,10 @@ private fun ConnectingDeviceContent(
     recentTcpDevices: List<DeviceListEntry>,
     usbDevices: List<DeviceListEntry>,
     virtualDevices: List<DeviceListEntry>,
-    connectionStatus: ConnectionStatus,
-    transportStatus: TransportStatus?,
+    connectionState: ConnectionState,
+    restartExpected: Boolean,
     onClickDisconnect: () -> Unit,
+    onClickConnect: () -> Unit,
 ) {
     val selectedEntry =
         bleDevices.find { it.fullAddress == selectedDevice }
@@ -1033,9 +1033,11 @@ private fun ConnectingDeviceContent(
     ConnectingDeviceInfo(
         deviceName = name,
         deviceAddress = address,
-        connectionStatus = connectionStatus,
-        transportStatus = transportStatus,
+        connectionState = connectionState,
+        restartExpected = restartExpected,
+        isBluetooth = DeviceType.fromAddress(selectedDevice) == DeviceType.BLE,
         onClickDisconnect = onClickDisconnect,
+        onClickConnect = onClickConnect,
     )
 }
 

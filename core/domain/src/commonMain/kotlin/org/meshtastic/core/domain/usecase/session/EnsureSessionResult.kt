@@ -36,6 +36,6 @@ sealed interface EnsureSessionResult {
     /** A routing NAK answered the metadata request, such as the target refusing our admin key. */
     data class Rejected(val routingError: Int) : EnsureSessionResult
 
-    /** The radio is not in [org.meshtastic.core.model.ConnectionState.Connected]; no packet was sent. */
+    /** The radio is not in [org.meshtastic.sdk.ConnectionState.Connected]; no packet was sent. */
     data object Disconnected : EnsureSessionResult
 }

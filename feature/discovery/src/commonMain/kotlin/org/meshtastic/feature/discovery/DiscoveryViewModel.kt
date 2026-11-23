@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isAlreadyJoined
@@ -42,6 +41,7 @@ import org.meshtastic.feature.discovery.scan.HardwareCapabilityResult
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
+import org.meshtastic.sdk.ConnectionState
 
 @KoinViewModel
 class DiscoveryViewModel(

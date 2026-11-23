@@ -14,21 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model
+package org.meshtastic.core.repository
 
-sealed interface ConnectionState {
-    /** We are disconnected from the device, and we should be trying to reconnect. */
-    data object Disconnected : ConnectionState
-
-    /** We are currently attempting to connect to the device. */
-    data object Connecting : ConnectionState
-
-    /** We are connected to the device and communicating normally. */
-    data object Connected : ConnectionState
-
-    /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
-    data object DeviceSleep : ConnectionState
-}
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * One atomically published view of canonical connection state and its lifecycle evidence.

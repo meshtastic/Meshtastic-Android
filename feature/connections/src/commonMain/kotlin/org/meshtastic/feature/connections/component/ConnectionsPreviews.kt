@@ -31,16 +31,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.TransportFailure
-import org.meshtastic.core.model.TransportFailureKind
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.LiveUpdateMode
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.UsbDeviceData
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
@@ -51,6 +45,8 @@ import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.LiveUpdateCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
 
 private const val PREVIEW_BLE_RSSI = -60
 
@@ -94,9 +90,8 @@ fun ConnectingDeviceInfoPreview() {
         ConnectingDeviceInfo(
             deviceName = "Meshtastic_abcd",
             deviceAddress = "AA:BB:CC:DD:EE:FF",
-            connectionStatus = ConnectionStatus.CONNECTING,
+            connectionState = ConnectionState.Connecting(attempt = 1),
             connectionProgress = "Discovering services...",
-            transportStatus = null,
             onClickDisconnect = {},
         )
     }
@@ -104,18 +99,12 @@ fun ConnectingDeviceInfoPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectingDeviceInfoPairingNeededPreview() {
+private fun ConnectingDeviceInfoFailedPreview() {
     AppTheme {
         ConnectingDeviceInfo(
             deviceName = "Meshtastic_abcd",
-            deviceAddress = "AA:BB:CC:DD:EE:FF",
-            connectionStatus = ConnectionStatus.NOT_CONNECTED,
-            connectionProgress = null,
-            transportStatus =
-            TransportStatus(
-                phase = TransportPhase.Subscribing,
-                lastFailure = TransportFailure(TransportFailureKind.PairingRequired),
-            ),
+            deviceAddress = "192.168.1.20",
+            connectionState = ConnectionState.Failed(MeshtasticException.Transport("Connection refused")),
             onClickDisconnect = {},
         )
     }

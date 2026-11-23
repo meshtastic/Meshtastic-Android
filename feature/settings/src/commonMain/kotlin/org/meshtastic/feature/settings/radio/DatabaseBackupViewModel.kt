@@ -26,7 +26,6 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.DatabaseBackup
 import org.meshtastic.core.database.DatabaseBackupOperations
 import org.meshtastic.core.database.RestoreStageResult
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
@@ -53,6 +52,7 @@ import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.settings.settingsPlatform
+import org.meshtastic.sdk.ConnectionState
 
 /** Backs up the app database for the connected device, and stages a restore that applies on the next launch. */
 @KoinViewModel
@@ -84,13 +84,14 @@ class DatabaseBackupViewModel(
         DatabaseBackup.fileName(target?.deviceId ?: nodeRepository.myNodeInfo.value?.deviceId, nowInstant)
 
     /**
-     * Runs [onReady] now when the radio is disconnected. Otherwise, including while it sleeps or connects, asks first
-     * and, once confirmed, disconnects the radio the same way the Connections screen does, then runs [onReady]. The
-     * backup or restore binds to the device database active before the disconnect or, already disconnected, to the last
-     * device's; with no device database it does not proceed.
+     * Runs [onReady] now when the radio is disconnected or stopped trying. Otherwise, including while it sleeps,
+     * connects or retries, asks first and, once confirmed, disconnects the radio the same way the Connections screen
+     * does, then runs [onReady]. The backup or restore binds to the device database active before the disconnect or,
+     * already disconnected, to the last device's; with no device database it does not proceed.
      */
     fun runWhenDisconnected(onReady: () -> Unit) {
-        if (radioController.connectionState.value is ConnectionState.Disconnected) {
+        val state = radioController.connectionState.value
+        if (state is ConnectionState.Disconnected || state is ConnectionState.Failed) {
             safeLaunch(tag = "databaseBackupTarget") {
                 target = captureTarget() ?: return@safeLaunch
                 onReady()

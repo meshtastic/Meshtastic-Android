@@ -21,13 +21,12 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.QuickChatAction
+import org.meshtastic.core.repository.ConnectionEpochs
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.Channel
@@ -37,6 +36,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -164,13 +164,13 @@ class RepositoryFakesTest {
         repository.setConnectionState(ConnectionState.Connected)
         assertEquals(ConnectionEpochs(completedHandshakes = 1), repository.connectionEpochs.value)
 
-        repository.setConnectionState(ConnectionState.Connecting)
+        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
         assertEquals(
             ConnectionEpochs(
                 departures = 1,
                 completedHandshakes = 1,
                 handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
+                lastDepartureState = ConnectionState.Connecting(attempt = 1),
             ),
             repository.connectionEpochs.value,
         )
@@ -181,7 +181,7 @@ class RepositoryFakesTest {
                 departures = 1,
                 completedHandshakes = 2,
                 handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
+                lastDepartureState = ConnectionState.Connecting(attempt = 1),
             ),
             repository.connectionEpochs.value,
         )

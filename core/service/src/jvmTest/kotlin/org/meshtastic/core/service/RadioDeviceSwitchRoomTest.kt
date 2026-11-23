@@ -21,10 +21,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import dev.mokkery.MockMode
-import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,11 +52,10 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeRadioPrefs
-import org.meshtastic.core.testing.FakeRadioTransport
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -69,6 +66,8 @@ import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class RadioDeviceSwitchRoomTest {
+
+    private val links = FakeLinks()
 
     @Test
     fun deviceSwitchDrainsAdmittedWritesBeforeChangingDatabases() = runTest(UnconfinedTestDispatcher()) {
@@ -94,6 +93,7 @@ class RadioDeviceSwitchRoomTest {
             val firstDatabase = databases.currentDb.value
             radio.connect()
             runCurrent()
+            assertNotNull(links.opened.last().host.openSession())
             val firstSession = assertNotNull(radio.activeSession.value)
             assertEquals(FIRST_ADDRESS, firstSession.address)
             val controller = createController(radio, databases)
@@ -126,6 +126,7 @@ class RadioDeviceSwitchRoomTest {
             assertTrue(firstWrite.await())
             switch.await()
             runCurrent()
+            assertNotNull(links.opened.last().host.openSession())
 
             val secondSession = assertNotNull(radio.activeSession.value)
             assertEquals(SECOND_ADDRESS, secondSession.address)
@@ -154,10 +155,6 @@ class RadioDeviceSwitchRoomTest {
         val network = mock<NetworkRepository>(MockMode.autofill)
         every { network.networkAvailable } returns MutableStateFlow(true)
         every { network.resolvedList } returns MutableSharedFlow()
-        val factory = mock<RadioTransportFactory>(MockMode.autofill)
-        every { factory.isAddressValid(any()) } returns true
-        every { factory.mockTransportEnabled } returns MutableStateFlow(false)
-        every { factory.createTransport(any(), any()) } calls { FakeRadioTransport() }
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
             bluetoothRepository = FakeBluetoothRepository(),
@@ -168,9 +165,10 @@ class RadioDeviceSwitchRoomTest {
             },
             processLifecycle = lifecycle,
             radioPrefs = FakeRadioPrefs().apply { setDevAddr(FIRST_ADDRESS) },
-            transportFactory = factory,
+            links = links,
             analytics = mock(MockMode.autofill),
             radioOperationLock = RadioOperationLock(),
+            serviceStateWriter = FakeServiceRepository(),
         )
     }
 

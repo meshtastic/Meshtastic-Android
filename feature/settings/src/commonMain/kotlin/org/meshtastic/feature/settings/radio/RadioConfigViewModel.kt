@@ -57,7 +57,6 @@ import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.toRadioResponseResult
 import org.meshtastic.core.model.Capabilities
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
@@ -118,6 +117,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 import org.meshtastic.proto.metadata
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds

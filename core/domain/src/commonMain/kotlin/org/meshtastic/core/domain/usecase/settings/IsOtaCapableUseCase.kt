@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
@@ -32,6 +31,7 @@ import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.sdk.ConnectionState
 
 /** Use case to determine if the currently connected device is capable of over-the-air (OTA) updates. */
 interface IsOtaCapableUseCase {

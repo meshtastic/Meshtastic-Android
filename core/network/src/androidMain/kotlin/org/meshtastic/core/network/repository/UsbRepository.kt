@@ -72,8 +72,8 @@ class UsbRepository(
                 // Key by a stable identity, NOT the raw deviceList key (the /dev/bus/usb/BBB/DDD path). Android
                 // reassigns that path on every re-enumeration — each reboot or replug bumps it (…/002 → …/008) — so a
                 // path-keyed map can't recognise the same physical node across a firmware-update reboot, and the
-                // auto-reconnect in SharedRadioInterfaceService (which matches the saved address against these keys)
-                // never re-arms. usbSerialStableKey() survives re-enumeration.
+                // link waiting for the saved address (which it matches against these keys) never finds it again.
+                // usbSerialStableKey() survives re-enumeration.
                 buildMap {
                     serialDevices.values.forEach { device ->
                         val driver = serialProber.probeDevice(device) ?: return@forEach

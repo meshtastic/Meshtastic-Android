@@ -17,7 +17,7 @@
 package org.meshtastic.core.service
 
 import android.service.quicksettings.Tile
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.sdk.ConnectionState
 
 /** What a tap on the Quick Settings tile does. */
 enum class QuickSettingsTileAction {
@@ -39,7 +39,13 @@ sealed interface QuickSettingsTileSubtitle {
 
     data object Connecting : QuickSettingsTileSubtitle
 
+    data object Reconnecting : QuickSettingsTileSubtitle
+
     data object DeviceSleeping : QuickSettingsTileSubtitle
+
+    data object Disconnecting : QuickSettingsTileSubtitle
+
+    data object Failed : QuickSettingsTileSubtitle
 
     data object Disconnected : QuickSettingsTileSubtitle
 
@@ -90,17 +96,40 @@ fun quickSettingsTileState(
                     QuickSettingsTileAction.Disconnect,
                 )
 
-            ConnectionState.Connecting ->
+            is ConnectionState.Connecting,
+            is ConnectionState.Configuring,
+            ->
                 QuickSettingsTileState(
                     Tile.STATE_ACTIVE,
                     QuickSettingsTileSubtitle.Connecting,
                     QuickSettingsTileAction.Disconnect,
                 )
 
-            ConnectionState.DeviceSleep ->
+            is ConnectionState.Reconnecting ->
+                QuickSettingsTileState(
+                    Tile.STATE_ACTIVE,
+                    QuickSettingsTileSubtitle.Reconnecting,
+                    QuickSettingsTileAction.Disconnect,
+                )
+
+            is ConnectionState.DeviceSleeping ->
                 QuickSettingsTileState(
                     Tile.STATE_INACTIVE,
                     QuickSettingsTileSubtitle.DeviceSleeping,
+                    QuickSettingsTileAction.Connect,
+                )
+
+            ConnectionState.Disconnecting ->
+                QuickSettingsTileState(
+                    Tile.STATE_INACTIVE,
+                    QuickSettingsTileSubtitle.Disconnecting,
+                    QuickSettingsTileAction.Connect,
+                )
+
+            is ConnectionState.Failed ->
+                QuickSettingsTileState(
+                    Tile.STATE_INACTIVE,
+                    QuickSettingsTileSubtitle.Failed,
                     QuickSettingsTileAction.Connect,
                 )
 

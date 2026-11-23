@@ -44,21 +44,12 @@ class FakeRadioInterfaceServiceSessionTest {
         service.connect()
         assertEquals(1L, service.sessionGeneration.value, "repeated connect must preserve the active session")
 
-        service.restartTransport()
-        assertEquals(2L, service.sessionGeneration.value)
-        assertEquals(2L, service.activeSession.value?.generation)
-        assertEquals("ble:same", service.activeSession.value?.address)
-
         service.disconnect()
         assertNull(service.activeSession.value)
 
-        service.restartTransport()
-        assertEquals(2L, service.sessionGeneration.value, "inactive restart must not admit a transport session")
-        assertNull(service.activeSession.value)
-
         service.connect()
-        assertEquals(3L, service.sessionGeneration.value)
-        assertEquals(3L, service.activeSession.value?.generation)
+        assertEquals(2L, service.sessionGeneration.value)
+        assertEquals(2L, service.activeSession.value?.generation)
         assertEquals("ble:same", service.activeSession.value?.address)
     }
 

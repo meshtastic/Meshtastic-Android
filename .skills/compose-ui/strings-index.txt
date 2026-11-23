@@ -331,6 +331,7 @@ connected_device
 connected_sleeping
 connecting
 ### CONNECTION ###
+connection_failed
 connection_failure_bluetooth_or_location_unavailable
 connection_failure_bluetooth_unavailable
 connection_failure_connect_failed
@@ -350,6 +351,7 @@ connection_phase_subscribing
 connection_retry_in
 connection_retry_now
 connection_status
+connection_stopped_retrying
 connections
 contact_draft_prefix
 contact_muted_snackbar
@@ -480,6 +482,7 @@ disabled
 discard_changes
 disconnect
 disconnected
+disconnecting
 discovered_network_devices
 ### DISCOVERY ###
 discovery_analysing_results

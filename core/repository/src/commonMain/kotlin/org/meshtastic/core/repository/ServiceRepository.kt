@@ -19,12 +19,12 @@ package org.meshtastic.core.repository
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Interface for managing background service state, connection status, and mesh events.
@@ -32,13 +32,9 @@ import org.meshtastic.proto.MeshPacket
  * This repository acts as the primary data bridge between the long-running mesh service and the UI/Feature layers. It
  * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
  *
- * **Connection state contract:** [connectionState] is the **canonical, app-level** connection state that all UI,
- * feature modules, and ViewModels should observe. It incorporates handshake progress, the SDK's device sleep, and
- * transport reconciliation — unlike [RadioInterfaceService.connectionState], which only reflects the raw hardware link
- * status. The [MeshConnectionManager] is the sole writer of this state; it bridges
- * [RadioInterfaceService.connectionState] changes into app-level transitions via [setConnectionState].
- *
- * @see RadioInterfaceService.connectionState
+ * **Connection state contract:** [connectionState] is the selected radio's SDK [ConnectionState], which all UI, feature
+ * modules, and ViewModels observe. [RadioInterfaceService] publishes the SDK client's states, except that
+ * [ConnectionState.Connected] is published by the snapshot install once the app holds the session's config and nodes.
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository :
@@ -47,30 +43,15 @@ interface ServiceRepository :
     NeighborInfoResponseProvider,
     ServiceStateWriter {
     /**
-     * Canonical app-level connection state.
-     *
-     * This is the **single source of truth** for connection status across the entire application. All UI components,
-     * feature modules, and ViewModels should observe this flow — never [RadioInterfaceService.connectionState].
-     *
-     * State transitions are managed exclusively by [MeshConnectionManager], which reconciles transport-level events
-     * with handshake progress:
-     * - [ConnectionState.Disconnected] — no active connection to a radio
-     * - [ConnectionState.Connecting] — transport is up, mesh handshake (config + node-info) in progress
-     * - [ConnectionState.Connected] — handshake complete, radio fully operational
-     * - [ConnectionState.DeviceSleep] — the SDK reported the radio asleep by design (transient disconnect)
-     *
-     * @see RadioInterfaceService.connectionState
+     * The selected radio's connection state, as its SDK client reports it: [ConnectionState.Connecting] and
+     * [ConnectionState.Configuring] while a session comes up, [ConnectionState.Connected] once the app has installed
+     * the session's snapshot, [ConnectionState.Reconnecting] and [ConnectionState.DeviceSleeping] while the client
+     * retries, [ConnectionState.Failed] once it stops, and [ConnectionState.Disconnecting] then
+     * [ConnectionState.Disconnected] when the user disconnects.
      */
     override val connectionState: StateFlow<ConnectionState>
 
-    /**
-     * Updates the canonical app-level connection state.
-     *
-     * **This should only be called by [MeshConnectionManager].** Direct mutation from other components would bypass the
-     * transport-to-app reconciliation logic and create state inconsistencies.
-     *
-     * @param connectionState The new [ConnectionState].
-     */
+    /** Publishes the connection state. Only the radio service and the snapshot install write it. */
     override fun setConnectionState(connectionState: ConnectionState)
 
     /**

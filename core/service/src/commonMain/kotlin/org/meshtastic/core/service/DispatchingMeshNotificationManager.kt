@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
@@ -38,6 +37,7 @@ import org.meshtastic.core.resources.mesh_beacon_notification_body
 import org.meshtastic.core.resources.mesh_beacon_notification_title
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * The [MeshNotificationManager] for platforms that show plain notifications through a [NotificationManager] (desktop

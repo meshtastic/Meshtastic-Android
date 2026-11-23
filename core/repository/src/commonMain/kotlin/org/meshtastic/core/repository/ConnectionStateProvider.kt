@@ -17,16 +17,13 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Read-only provider of the canonical app-level connection state.
  *
  * Inject this interface in ViewModels and feature modules that only need to **observe** connection state — never write
- * it. This enforces the single-writer contract (only [MeshConnectionManager] may mutate state via
- * [ServiceRepository.setConnectionState]).
+ * it. Only the radio service and the snapshot install write it, through [ServiceStateWriter.setConnectionState].
  *
  * @see ServiceRepository for the full read/write interface
  */

@@ -59,7 +59,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -83,6 +82,7 @@ import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Picks the node a [NodeTrackerWidget] instance tracks. The launcher opens it when the widget is placed or

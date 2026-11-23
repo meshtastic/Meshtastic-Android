@@ -30,11 +30,11 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

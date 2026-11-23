@@ -51,10 +51,8 @@ import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -75,6 +73,7 @@ import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeMark
@@ -208,10 +207,6 @@ open class ScannerViewModel(
      */
     val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
 
-    /** What the selected device's transport is doing and why it last failed; shown on the connecting card. */
-    val transportStatus: StateFlow<TransportStatus?>
-        get() = radioInterfaceService.transportStatus
-
     // ── BLE scanning ──────────────────────────────────────────────────────────────────────────
     private val _isBleScanning = MutableStateFlow(false)
 
@@ -296,7 +291,10 @@ open class ScannerViewModel(
             }
             .launchIn(viewModelScope)
         serviceRepository.connectionState
-            .map { it is ConnectionState.Disconnected }
+            // A radio stuck in its bootloader never connects, so the client keeps retrying or gives up.
+            .map {
+                it is ConnectionState.Disconnected || it is ConnectionState.Reconnecting || it is ConnectionState.Failed
+            }
             .distinctUntilChanged()
             .onEach { disconnected -> if (disconnected) lookForStrandedBootloader() }
             .launchIn(viewModelScope)
@@ -843,6 +841,11 @@ open class ScannerViewModel(
 
     /** Platform hook for requesting USB permission before connecting; default is a no-op. */
     protected open fun requestPermission(entry: DeviceListEntry.Usb) = Unit
+
+    /** Connects the selected device again after its client stopped trying. */
+    fun connect() {
+        radioInterfaceService.connect()
+    }
 
     /** Clears the persisted device name and tells the radio controller to disconnect. */
     fun disconnect() {

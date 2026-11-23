@@ -33,7 +33,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -49,6 +48,7 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.BeforeTest

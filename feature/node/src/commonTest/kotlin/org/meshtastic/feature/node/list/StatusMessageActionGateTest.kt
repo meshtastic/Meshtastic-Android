@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.node.list
 
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.ExcludedModules
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

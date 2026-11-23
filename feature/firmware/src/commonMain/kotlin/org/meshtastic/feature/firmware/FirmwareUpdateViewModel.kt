@@ -50,7 +50,6 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
@@ -103,6 +102,7 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_unsupported_update_method
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 
 // Bench measurement (Wio Tracker L1, 2 MB UF2): consume + reboot can outlast 30 s by a hair.
 private const val DEVICE_DETACH_TIMEOUT = 60_000L
@@ -1019,8 +1019,8 @@ class FirmwareUpdateViewModel(
                         ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
                     // All writes are done once the device detached. Release before verifying: for serial,
-                    // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
-                    // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
+                    // verification relies on the radio's link reopening, which is exactly what the lock
+                    // suppresses. (The release in finally is a no-op then.)
                     releaseMaintenanceLease()
                     verifyUpdateResult(originalDeviceAddress)
                 } catch (e: CancellationException) {
@@ -1375,21 +1375,15 @@ class FirmwareUpdateViewModel(
         // Trigger a fresh connection attempt by MeshService using the original prefixed address.
         //
         // For USB/serial, do NOT force this: a USB node re-enumerates several times through the bootloader over
-        // ~20s, so a one-shot setDeviceAddress fires into an enumeration gap, fails ("Serial device not found"),
-        // and stops the link for good — which preempts the dedicated USB auto-recovery in
-        // SharedRadioInterfaceService (observeUsbRecoveryTriggers), since that only arms from a recoverable drop.
-        // Leaving the link in that drop lets the recovery reconnect the moment the device re-attaches on its new
-        // (stable-keyed) address. BLE/TCP have no such hot-plug recovery, so they still need the explicit re-address.
+        // ~20s, and the link already waits for the device to come back on its stable-keyed address and reopens the
+        // port then. BLE/TCP links were deselected for the flash, so they still need the explicit re-address.
         address?.let { fullAddr ->
             if (radioPrefs.isSerial()) {
                 Logger.i { "Post-update: preflighting the USB permission grant for ${fullAddr.anonymize}" }
                 // The reboot gave the device a new USB identity, and Android scopes permission grants to the
-                // identity — without a fresh grant the auto-recovery fails with SecurityException and a healthy
-                // update lands on VerificationFailed. Ask now, while the user is still watching. On success,
-                // reconnect explicitly: auto-recovery's attach trigger already fired (and failed) while the
-                // permission dialog was still up, and it does not retry on a grant. At this point the device is
-                // enumerated and the grant is held, so the one-shot setDeviceAddress cannot land in the
-                // enumeration gap the bare-USB path avoids.
+                // identity, so the link cannot reopen the port without a fresh grant. Ask now, while the user is
+                // still watching, then reconnect at once: the device is enumerated and the grant is held, so the
+                // one-shot setDeviceAddress cannot land in the enumeration gap the bare-USB path avoids.
                 if (usbManager.ensureSerialPermission(USB_REATTACH_PERMISSION_WAIT)) {
                     Logger.i {
                         "Post-update: USB permission confirmed, reconnecting explicitly to ${fullAddr.anonymize}"

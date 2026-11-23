@@ -20,7 +20,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.model.util.TimeConstants
@@ -31,6 +30,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.proto.Constants
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -559,7 +559,11 @@ private val ConnectionState.name: String
     get() =
         when (this) {
             ConnectionState.Connected -> "CONNECTED"
-            ConnectionState.Connecting -> "CONNECTING"
+            is ConnectionState.Connecting -> "CONNECTING"
+            is ConnectionState.Configuring -> "CONFIGURING"
+            is ConnectionState.Reconnecting -> "RECONNECTING"
+            is ConnectionState.DeviceSleeping -> "DEVICE_SLEEP"
+            ConnectionState.Disconnecting -> "DISCONNECTING"
+            is ConnectionState.Failed -> "FAILED"
             ConnectionState.Disconnected -> "DISCONNECTED"
-            ConnectionState.DeviceSleep -> "DEVICE_SLEEP"
         }

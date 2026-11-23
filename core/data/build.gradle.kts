@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.meshtastic.sdk.transport.tcp)
             implementation(libs.meshtastic.sdk.transport.serial)
             implementation(libs.kable.core)
+            implementation(libs.usb.serial.android)
         }
         getByName("jvmMain").dependencies {
             implementation(libs.kable.core)
