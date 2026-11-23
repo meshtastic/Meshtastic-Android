@@ -204,9 +204,10 @@ class RadioSessionProjectionTest {
     @Test
     fun `every received packet lights the receive activity indicator`() = runTest {
         val harness = Harness(backgroundScope)
-        val encrypted = MeshPacket.Builder().also { it.from = REMOTE }.build()
+        // The SDK offers only decoded packets; a local admin reply arrives with from 0 and updates no sender node.
+        val localReply = loraPacket(hopStart = 0, hopLimit = 0, port = PortNum.ADMIN_APP, from = 0)
 
-        harness.packet(encrypted)
+        harness.packet(localReply)
         harness.packet(loraPacket(hopStart = 3, hopLimit = 3))
         runCurrent()
 
