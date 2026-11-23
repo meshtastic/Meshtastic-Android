@@ -39,6 +39,10 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
+import org.meshtastic.core.model.TransportPhase
+import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
@@ -107,6 +111,7 @@ class MeshConnectionManagerImplTest {
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private val transportStatus = MutableStateFlow<TransportStatus?>(null)
     private lateinit var connectionStateHolder: ConnectionStateHolder
     private val localConfigFlow = MutableStateFlow(LocalConfig.Builder().build())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig.Builder().build())
@@ -137,11 +142,13 @@ class MeshConnectionManagerImplTest {
 
         testDispatcher = UnconfinedTestDispatcher()
         radioConnectionState.value = ConnectionState.Disconnected
+        transportStatus.value = null
         connectionStateHolder = ConnectionStateHolder()
         localConfigFlow.value = LocalConfig.Builder().build()
         moduleConfigFlow.value = LocalModuleConfig.Builder().build()
 
         every { radioInterfaceService.connectionState } returns radioConnectionState
+        every { radioInterfaceService.transportStatus } returns transportStatus
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { serviceRepository.connectionState } returns connectionStateHolder.connectionState
@@ -193,6 +200,54 @@ class MeshConnectionManagerImplTest {
         radioConnectionState.value = ConnectionState.Connected
         runCurrent()
         assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun `the SDK handshake shows as connecting until the snapshot is installed`() = runTest(testDispatcher) {
+        manager = createManager(backgroundScope)
+
+        transportStatus.value = TransportStatus(TransportPhase.HandshakeConfig)
+        runCurrent()
+        // Main kept the app state Connecting from link-up until the config load finished.
+        assertEquals(ConnectionState.Connecting, serviceRepository.connectionState.value)
+
+        // MeshConfigFlowManagerImpl publishes Connected once the snapshot is installed.
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        radioConnectionState.value = ConnectionState.Connected
+        transportStatus.value = TransportStatus(TransportPhase.HandshakeNodes)
+        transportStatus.value = TransportStatus(TransportPhase.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun `a handshake phase collected after the snapshot install keeps the app connected`() = runTest(testDispatcher) {
+        manager = createManager(backgroundScope)
+        // The install publishes Connected from the SDK session while the status collector can still lag behind.
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        transportStatus.value = TransportStatus(TransportPhase.HandshakeNodes)
+        runCurrent()
+
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun `a handshake that fails short of Ready falls back to the link state`() = runTest(testDispatcher) {
+        radioConnectionState.value = ConnectionState.DeviceSleep
+        manager = createManager(backgroundScope)
+        runCurrent()
+        val linkState = serviceRepository.connectionState.value
+
+        transportStatus.value = TransportStatus(TransportPhase.HandshakeConfig)
+        runCurrent()
+        assertEquals(ConnectionState.Connecting, serviceRepository.connectionState.value)
+
+        // The link stays DeviceSleep through the retry, so no link state change reports the failure.
+        transportStatus.value =
+            TransportStatus(TransportPhase.WaitingToRetry, TransportFailure(TransportFailureKind.LinkLost))
+        runCurrent()
+        assertEquals(linkState, serviceRepository.connectionState.value)
     }
 
     @Test

@@ -22,8 +22,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -39,6 +41,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HistoryManager
@@ -121,6 +124,19 @@ class MeshConnectionManagerImpl(
             .onEach { state ->
                 safeCatching { onRadioConnectionState(state) }
                     .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
+            }
+            .launchIn(scope)
+
+        // The SDK reports the link up only at Ready, so its handshake phases stand in for main's link-up Connecting.
+        // A handshake that ends short of Ready hands the state back to the link, which may not have changed.
+        radioInterfaceService.transportStatus
+            .map { it?.phase in HANDSHAKE_PHASES }
+            .distinctUntilChanged()
+            .onEach { handshaking ->
+                safeCatching {
+                    if (handshaking) onHandshakeStarted() else onRadioConnectionState(radioInterfaceService.connectionState.value)
+                }
+                    .onFailure { Logger.e(it) { "Handshake state bridge failed; collector kept alive" } }
             }
             .launchIn(scope)
 
@@ -233,6 +249,15 @@ class MeshConnectionManagerImpl(
             }
             true
         }
+
+    /** Shows the handshake as Connecting until the snapshot install publishes Connected, as main's link-up did. */
+    private suspend fun onHandshakeStarted() = connectionMutex.withLock {
+        val current = serviceRepository.connectionState.value
+        if (current == ConnectionState.Connected || current == ConnectionState.Connecting) return@withLock
+        sleepTimeout?.cancel()
+        sleepTimeout = null
+        serviceRepository.setConnectionState(ConnectionState.Connecting)
+    }
 
     private fun tearDownConnection() {
         postHandshakeRequestsJob?.cancel()
@@ -540,6 +565,8 @@ class MeshConnectionManagerImpl(
         // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
 
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
+
+        private val HANDSHAKE_PHASES = setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes)
 
         // Maximum time (in seconds) to wait for a sleeping device before declaring it
         // disconnected, regardless of the device's ls_secs configuration. Without this
