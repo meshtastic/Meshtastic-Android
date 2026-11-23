@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
  *
  * This is an architecture rule rather than a review item because the failure mode is a missed site, and the easiest
  * sites to miss reach the log indirectly: a Kable logging `identifier`, which stamps the address onto every line the
- * BLE library emits, or a `tag` that a helper such as `retryBleOperation` prefixes to its own lines.
+ * BLE library emits, or a `tag` that a helper prefixes to its own lines.
  *
  * Scoped to the BLE-adjacent modules so matching on the `address` suffix stays low-noise. That scope includes the
  * transport modules, so TCP hosts go through `anonymizePublicHost()`, which keeps a host on the user's own network

@@ -201,7 +201,6 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
         // Bounded to at most two attempts: direct connect, then autoConnect fallback when a fresh
         // advertisement was available. Advertisement-less devices start on the autoConnect path.
-        // The outer reconnect loop (BleRadioTransport) owns the macro retry budget — see class kdoc.
         repeat(2) {
             if (p.state.value is State.Connected) return
             autoConnect =

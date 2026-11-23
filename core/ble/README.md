@@ -4,12 +4,12 @@
 
 The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide one Coroutine-based implementation for Android, Desktop and the web (wasmJs, over Web Bluetooth). The iOS target compiles against no-op stubs; `createPeripheral` throws there.
 
-This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`, `BluetoothRepository`, `MeshtasticRadioProfile`), so business logic in `commonMain` stays platform-agnostic and testable.
+This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`, `BluetoothRepository`), so business logic in `commonMain` stays platform-agnostic and testable.
 
 ## Key Components
 
 ### 1. `BleConnection`
-The connection contract, implemented over Kable's `Peripheral` by `KableBleConnection` and created through `KableBleConnectionFactory`.
+The connection contract, implemented over Kable's `Peripheral` by `KableBleConnection` and created through `KableBleConnectionFactory`. Firmware updates (ESP32 OTA, Nordic DFU) and Wi-Fi provisioning use it; the radio link itself runs on the SDK's BLE transport.
 
 - **Features:**
     - **Connection & Await:** `connect` and `connectAndAwait` connect and wait for a terminal `BleConnectionState`.
@@ -28,11 +28,10 @@ A singleton repository for the global state of Bluetooth on the device, implemen
 ### 3. `BleScanner`
 `scan(timeout, serviceUuid, address)` returns a `Flow<BleDevice>`, implemented over Kable's `Scanner` by `KableBleScanner`. A scan that cannot start fails with `BleScanStartException`, whose `BleScanStartFailureReason` names the cause. On the web, `WebBleScanner` uses Kable's `requestPeripheral` device chooser instead, since Kable's web `Scanner` needs Chrome's flagged `requestLEScan`: a scan without an address must start from a user gesture and yields the one device picked, and a scan for an address returns a device the page already holds a grant for.
 
-### 4. `MeshtasticRadioProfile`
-The Meshtastic GATT service as flows: `fromRadio`, `logRadio` and `sendToRadio`, implemented by `KableMeshtasticRadioProfile` (`BleService.toMeshtasticRadioProfile()`). UUIDs live in `MeshtasticBleConstants`.
+### 4. `classifyBleFailure`
+`classifyBleFailure` (`BleExceptionClassifier.kt`) turns a failed BLE connection attempt into the `TransportFailure` the connection card shows. It walks the cause chain, maps Kable exceptions and GATT status codes (and, on the web, Chrome's Web Bluetooth messages) to a `TransportFailureKind`, and keeps the most specific kind found.
 
-### 5. `retryBleOperation` and `classifyBleException`
-`retryBleOperation` (`BleRetry.kt`) runs a BLE operation with capped exponential backoff. `classifyBleException` and `isSessionFatalBleException` (`BleExceptionClassifier.kt`) sort failures into transient ones worth a retry and session-fatal ones that force a reconnect.
+`MeshtasticBleConstants` holds the Meshtastic service UUID the scanner filters on, the ESP32 OTA service UUIDs and the device name pattern.
 
 ## Integration
 

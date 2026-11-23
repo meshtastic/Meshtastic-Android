@@ -35,7 +35,7 @@ class BleFailureClassifierTest {
         it.message?.let(::webBluetoothMessageFailureKind)
     }
 
-    private fun Throwable.classifyOnWeb(setupHint: Throwable? = null) = classifyBleFailureWith(setupHint, webMessages)
+    private fun Throwable.classifyOnWeb() = classifyBleFailureWith(webMessages)
 
     // Kable wraps a rejected startNotifications() in an IOException named after the step; any wrapper type works here.
     private fun refusedSubscription() =
@@ -44,7 +44,7 @@ class BleFailureClassifierTest {
     @Test
     fun `a web connect rejected as no longer in range reads as out of range`() {
         val failure =
-            BleConnectFailedException(
+            RuntimeException(
                 "Failed to connect",
                 webRejection("Bluetooth Device is no longer in range."),
             )
@@ -54,7 +54,7 @@ class BleFailureClassifierTest {
     @Test
     fun `a web connection attempt failure reads as could not connect`() {
         val failure =
-            BleConnectFailedException(
+            RuntimeException(
                 "Failed to connect",
                 webRejection("Connection Error: Connection attempt failed."),
             )
@@ -77,54 +77,14 @@ class BleFailureClassifierTest {
     }
 
     @Test
-    fun `a link lost during setup after a refused subscription reads as rejected`() {
-        val lost = NotConnectedException("Connection lost during BLE profile execution")
-        assertEquals(
-            TransportFailureKind.ConnectionRejected,
-            lost.classifyOnWeb(setupHint = refusedSubscription()).kind,
-        )
-    }
-
-    @Test
-    fun `a subscription timeout after a refused subscription reads as rejected`() {
-        val timeout = RuntimeException("Timed out waiting for FROMNUM subscription readiness")
-        assertEquals(
-            TransportFailureKind.ConnectionRejected,
-            timeout.classifyOnWeb(setupHint = refusedSubscription()).kind,
-        )
-    }
-
-    @Test
-    fun `a link lost during setup with no hint reads as link lost`() {
+    fun `a lost link reads as link lost`() {
         val lost = NotConnectedException("Connection lost during BLE profile execution")
         assertEquals(TransportFailureKind.LinkLost, lost.classifyBleFailure().kind)
     }
 
     @Test
-    fun `a hint that is not about pairing does not override a lost link`() {
-        val lost = NotConnectedException("Connection lost during BLE profile execution")
-        val hint = webRejection("GATT Server is disconnected. Cannot perform GATT operations.")
-        assertEquals(TransportFailureKind.LinkLost, lost.classifyOnWeb(setupHint = hint).kind)
-    }
-
-    @Test
-    fun `a hint never overrides a failure that already names its cause`() {
-        val notFound = BleDeviceNotFoundException("Device not found at address ...")
-        assertEquals(
-            TransportFailureKind.OutOfRange,
-            notFound.classifyOnWeb(setupHint = refusedSubscription()).kind,
-        )
-    }
-
-    @Test
-    fun `a failed bond reads as pairing failed`() {
-        val failure = BlePairingFailedException(Exception("Bond failed or rejected"))
-        assertEquals(TransportFailureKind.PairingFailed, failure.classifyBleFailure().kind)
-    }
-
-    @Test
     fun `a web authentication failure reads as pairing failed`() {
-        val failure = BleConnectFailedException("Failed", webRejection("Connection Error: Authentication failed."))
+        val failure = RuntimeException("Failed", webRejection("Connection Error: Authentication failed."))
         assertEquals(TransportFailureKind.PairingFailed, failure.classifyOnWeb().kind)
     }
 
@@ -141,7 +101,7 @@ class BleFailureClassifierTest {
 
     @Test
     fun `android GATT 133 at connect reads as could not connect`() {
-        val failure = BleConnectFailedException("Failed", GattStatusException(message = "connect", status = 133))
+        val failure = RuntimeException("Failed", GattStatusException(message = "connect", status = 133))
         assertEquals(TransportFailureKind.ConnectFailed, failure.classifyBleFailure().kind)
     }
 
