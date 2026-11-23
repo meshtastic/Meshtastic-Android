@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -113,25 +114,35 @@ abstract class CommonChannelViewModelTest {
     }
 
     @Test
-    fun `a failed channel write offers a retry that writes the same channels`() = runTest(testDispatcher) {
-        val repository = FakeRadioConfigRepository()
-        val writer = ChannelViewModel(radioController, repository, analytics, snackbarManager)
-        val reset =
-            ChannelSet.Builder()
-                .also { wb -> wb.settings = listOf(ChannelSettings.Builder().also { it.name = "Reset" }.build()) }
-                .build()
-        radioController.failEditSettingsBegin = true
+    fun `a failed channel write keeps the radio channels and offers a retry that writes the same set`() =
+        runTest(testDispatcher) {
+            val repository = FakeRadioConfigRepository()
+            val onRadio =
+                ChannelSet.Builder()
+                    .also { wb -> wb.settings = listOf(ChannelSettings.Builder().also { it.name = "Team" }.build()) }
+                    .build()
+            repository.setChannelSet(onRadio)
+            val writer = ChannelViewModel(radioController, repository, analytics, snackbarManager)
+            val reset =
+                ChannelSet.Builder()
+                    .also { wb -> wb.settings = listOf(ChannelSettings.Builder().also { it.name = "Reset" }.build()) }
+                    .build()
+            radioController.failEditSettingsBegin = true
 
-        writer.setChannels(reset)
-        val failure = snackbarManager.events.first()
-        assertEquals("Retry", failure.actionLabel)
+            writer.setChannels(reset)
+            val failure = snackbarManager.events.first()
 
-        radioController.failEditSettingsBegin = false
-        failure.onAction?.invoke()
+            // ChannelScreen draws its list from `channels`, so the screen still shows what the radio has.
+            assertEquals(onRadio, writer.channels.first { it.settings.isNotEmpty() })
+            assertEquals("Couldn't update the channels on your radio.", failure.message)
+            assertEquals("Retry", failure.actionLabel)
 
-        // The retry finishes once this test suspends: the failure resumed it from inside its own unconfined frame.
-        val written = repository.channelSetFlow.first { it.settings.isNotEmpty() }
-        assertEquals(listOf("Reset"), written.settings.map { it.name })
-        snackbarManager.events.test { expectNoEvents() }
-    }
+            radioController.failEditSettingsBegin = false
+            failure.onAction?.invoke()
+
+            // The retry finishes once this test suspends: the failure resumed it from inside its own unconfined frame.
+            val written = repository.channelSetFlow.first { it != onRadio }
+            assertEquals(reset.settings.withOnWirePrecision(), written.settings)
+            snackbarManager.events.test { expectNoEvents() }
+        }
 }

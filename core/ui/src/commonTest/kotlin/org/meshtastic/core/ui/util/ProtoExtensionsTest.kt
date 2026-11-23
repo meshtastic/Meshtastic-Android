@@ -751,6 +751,9 @@ class ProtoExtensionsTest {
 
         val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
 
+        assertEquals(existing, preview.settings.take(7))
+        assertEquals(7, preview.existingCount)
+        assertTrue(preview.selections.take(7).all { it })
         assertFalse(preview.canDropExisting)
     }
 

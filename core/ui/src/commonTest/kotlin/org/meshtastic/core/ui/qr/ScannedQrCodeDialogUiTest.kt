@@ -151,6 +151,26 @@ class ScannedQrCodeDialogUiTest {
     }
 
     @Test
+    fun add_names_an_unnamed_incoming_channel_after_the_radio_preset_not_the_link_preset() = runComposeUiTest {
+        // Add keeps the radio's LoRa settings, so an unnamed channel takes the radio's preset name once added.
+        val unnamed = ChannelSettings.Builder().also { it.psk = ByteArray(32) { 9 }.toByteString() }.build()
+        val shortFastLink =
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(unnamed)
+                    wb.lora_config = lora { modem_preset = LoRaConfig.ModemPreset.SHORT_FAST }
+                }
+                .build()
+        show(incoming = shortFastLink, calls = Calls())
+
+        onNode(radioButton and hasText("Add")).performClick()
+
+        // The radio's own unnamed primary and the added channel are both LongFast on this radio.
+        onAllNodes(hasText("LongFast")).assertCountEquals(2)
+        onAllNodes(hasText("ShortFast")).assertCountEquals(0)
+    }
+
+    @Test
     fun add_flags_a_new_channel_named_like_one_on_the_radio() = runComposeUiTest {
         show(incoming = channelsOnly(channel("Team", 9)), channels = radioWithSecondary, calls = Calls())
 
