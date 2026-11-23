@@ -77,12 +77,16 @@ import org.meshtastic.core.resources.channel_import_confirm_add
 import org.meshtastic.core.resources.channel_import_confirm_replace
 import org.meshtastic.core.resources.channel_import_downlink
 import org.meshtastic.core.resources.channel_import_mode_label
+import org.meshtastic.core.resources.channel_import_name_conflict
 import org.meshtastic.core.resources.channel_import_position_approximate
 import org.meshtastic.core.resources.channel_import_position_precise
+import org.meshtastic.core.resources.channel_import_removes_existing
 import org.meshtastic.core.resources.channel_import_replace_description
 import org.meshtastic.core.resources.channel_import_title
 import org.meshtastic.core.resources.channel_import_uplink
+import org.meshtastic.core.resources.channel_import_waiting_for_radio
 import org.meshtastic.core.resources.channel_slots_full
+import org.meshtastic.core.resources.channel_slots_uncheck_new
 import org.meshtastic.core.resources.channel_slots_used
 import org.meshtastic.core.resources.config_lora_coding_rate_fraction
 import org.meshtastic.core.resources.dbm_value
@@ -167,11 +171,25 @@ fun ScannedQrCodeDialog(
                 // Keeps the device's own MQTT consent and TX power; loraChanges describes this exact config.
                 incoming.forReplace(channels.lora_config)
             } else {
-                channels.newBuilder().also { wb -> wb.settings = addPreview.settings }.build()
+                // Add never carries LoRa, so the import cannot retune the radio whatever its cached config says.
+                channels
+                    .newBuilder()
+                    .also { wb ->
+                        wb.settings = addPreview.settings
+                        wb.lora_config = null
+                    }
+                    .build()
             }
         }
 
-    val modemPresetName = Channel(loraConfig = channelSet.lora_config ?: Channel.default.loraConfig).name
+    // The LoRa config the rows are named and keyed under: the link's for Replace, the radio's own for Add.
+    val displayLora =
+        (if (shouldReplace) channelSet.lora_config else channels.lora_config) ?: Channel.default.loraConfig
+    val modemPresetName = Channel(loraConfig = displayLora).name
+
+    // An empty set means the radio's channels have not arrived. Add would then write only the link's channels, and
+    // Replace would lose the radio's TX power and MQTT consent, so both wait.
+    val radioChannelsLoaded = channels.settings.isNotEmpty()
 
     /* Holds selections made by the user */
     val channelSelections =
@@ -185,28 +203,20 @@ fun ScannedQrCodeDialog(
             mutableStateListOf<Boolean>().apply { addAll(defaults) }
         }
 
+    // Add keeps the radio's channels: the primary always, and every existing secondary unless the radio is full, where
+    // one may be dropped to make room (Apple FR-017 "replace a secondary, never the primary").
+    val existingCount = addPreview.existingCount
+    fun isLocked(index: Int): Boolean =
+        !shouldReplace && (index == 0 || (index < existingCount && !addPreview.canDropExisting))
+
     val selectedChannelSet =
-        if (shouldReplace) {
-            channelSet
-                .newBuilder()
-                .also { wb ->
-                    wb.settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-                }
-                .build()
-        } else {
-            channelSet
-                .newBuilder()
-                .also { wb ->
-                    wb.settings =
-                        channelSet.settings.filterIndexed { i, _ ->
-                            // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for
-                            // the incoming channel when the radio is full (Apple FR-017 "replace a secondary, never
-                            // the primary").
-                            i == 0 || channelSelections.getOrNull(i) == true
-                        }
-                }
-                .build()
-        }
+        channelSet
+            .newBuilder()
+            .also { wb ->
+                wb.settings =
+                    channelSet.settings.filterIndexed { i, _ -> isLocked(i) || channelSelections.getOrNull(i) == true }
+            }
+            .build()
 
     // Every LoRa setting whose effect differs from what channelSet will write, derived from that same config.
     val loraChanges =
@@ -216,8 +226,7 @@ fun ScannedQrCodeDialog(
         }
 
     // Follows the selection: the precision cap depends on which channel is written first.
-    val writtenSelection =
-        channelSet.settings.indices.map { (!shouldReplace && it == 0) || channelSelections.getOrNull(it) == true }
+    val writtenSelection = channelSet.settings.indices.map { isLocked(it) || channelSelections.getOrNull(it) == true }
     val sharing = importedChannelSharing(channelSet.settings, writtenSelection)
 
     AlertDialog(
@@ -257,38 +266,55 @@ fun ScannedQrCodeDialog(
                     )
 
                     channelSet.settings.forEachIndexed { index, channel ->
-                        val isPrimary = index == 0
+                        val locked = isLocked(index)
                         val channelSharing = sharing.getOrNull(index)?.takeIf { it.isNotable }
+                        val nameConflict = !shouldReplace && index in addPreview.nameConflicts
                         ChannelSelection(
                             index = index,
                             title = channel.name.ifEmpty { modemPresetName },
-                            // Primary is always kept. In ADD mode existing secondaries become deselectable so the user
-                            // can drop one to make room for the incoming channel on a full radio; REPLACE keeps its
-                            // prior all-selectable behavior.
-                            enabled = if (shouldReplace) true else !isPrimary,
-                            isSelected = if (!shouldReplace && isPrimary) true else channelSelections[index],
+                            enabled = !locked,
+                            isSelected = locked || channelSelections[index],
                             onSelected = {
                                 if (it || selectedChannelSet.settings.size > 1) {
                                     channelSelections[index] = it
                                 }
                             },
-                            channel = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig),
-                            supportingContent = channelSharing?.let { { ChannelSharingStatements(it) } },
+                            channel = Channel(channel, displayLora),
+                            supportingContent =
+                            if (nameConflict || channelSharing != null) {
+                                {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        if (nameConflict) NameConflictStatement()
+                                        channelSharing?.let { ChannelSharingStatements(it) }
+                                    }
+                                }
+                            } else {
+                                null
+                            },
                         )
                     }
 
-                    if (!shouldReplace) {
+                    if (!radioChannelsLoaded) {
+                        Text(
+                            text = stringResource(Res.string.channel_import_waiting_for_radio),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else if (!shouldReplace) {
                         val incomingLeftOut =
-                            (channels.settings.size until channelSelections.size).any { !channelSelections[it] }
+                            (existingCount until channelSelections.size).any { !channelSelections[it] }
                         AddCapacitySummary(
                             selectedCount = selectedChannelSet.settings.size,
                             maxChannels = effectiveMaxChannels,
                             alreadyOnRadio = addPreview.alreadyOnRadio,
                             incomingLeftOut = incomingLeftOut,
+                            canDropExisting = addPreview.canDropExisting,
+                            removedExisting = (1 until existingCount).count { !isLocked(it) && !channelSelections[it] },
                         )
                     }
 
-                    if (shouldReplace && loraChanges.isNotEmpty()) {
+                    // Until the radio's LoRa config is known, any list of changes would be measured against nothing.
+                    if (shouldReplace && radioChannelsLoaded && loraChanges.isNotEmpty()) {
                         LoraChangesSection(loraChanges)
                     }
                 }
@@ -317,7 +343,7 @@ fun ScannedQrCodeDialog(
                     onDismiss()
                     onConfirm(selectedChannelSet)
                 },
-                enabled = selectedChannelSet.settings.size in 1..effectiveMaxChannels,
+                enabled = radioChannelsLoaded && selectedChannelSet.settings.size in 1..effectiveMaxChannels,
                 colors =
                 ButtonDefaults.textButtonColors(
                     contentColor =
@@ -524,8 +550,16 @@ private fun loraValueText(value: LoraValue): String = when (value) {
 /**
  * Add never overwrites, so the operator sees the slot count, what was skipped, and what to do when the radio is full.
  */
+@Suppress("LongParameterList")
 @Composable
-private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRadio: Int, incomingLeftOut: Boolean) {
+private fun AddCapacitySummary(
+    selectedCount: Int,
+    maxChannels: Int,
+    alreadyOnRadio: Int,
+    incomingLeftOut: Boolean,
+    canDropExisting: Boolean,
+    removedExisting: Int,
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
         Text(
             text = stringResource(Res.string.channel_slots_used, selectedCount, maxChannels),
@@ -547,13 +581,43 @@ private fun AddCapacitySummary(selectedCount: Int, maxChannels: Int, alreadyOnRa
                 else -> 0
             }
         if (toUncheck > 0) {
+            // Only a full radio lets a channel already on it be unchecked; otherwise only new channels can make room.
+            val message = if (canDropExisting) Res.plurals.channel_slots_full else Res.plurals.channel_slots_uncheck_new
             Text(
-                text = pluralStringResource(Res.plurals.channel_slots_full, toUncheck, toUncheck, maxChannels),
+                text = pluralStringResource(message, toUncheck, toUncheck, maxChannels),
                 modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error,
             )
         }
+        if (removedExisting > 0) {
+            Text(
+                text =
+                pluralStringResource(Res.plurals.channel_import_removes_existing, removedExisting, removedExisting),
+                modifier = Modifier.padding(top = 4.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+}
+
+/** Add appends, so a new channel named like one on the radio would leave two channels of that name. */
+@Composable
+private fun NameConflictStatement() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = MeshtasticIcons.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.error,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = stringResource(Res.string.channel_import_name_conflict),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
+        )
     }
 }
 

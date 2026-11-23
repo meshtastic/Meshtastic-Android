@@ -27,6 +27,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.UsbRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
@@ -38,7 +39,6 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import org.meshtastic.feature.connections.model.getMeshtasticShortName
-import java.util.Locale
 
 @Suppress("LongParameterList")
 @Single(binds = [GetDiscoveredDevicesUseCase::class])
@@ -47,12 +47,11 @@ class AndroidGetDiscoveredDevicesUseCase(
     private val recentAddressesDataSource: RecentAddressesSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
+    private val nodeManager: NodeManager,
     private val usbRepository: UsbRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val usbManagerLazy: Lazy<UsbManager>,
 ) : GetDiscoveredDevicesUseCase {
-    private val macSuffixLength = 8
-
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun invoke(
         showMock: Boolean,
@@ -101,6 +100,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             usbDevicesFlow,
             resolvedList,
             recentAddressesDataSource.recentAddresses,
+            localNodeNums(databaseManager, nodeManager),
         ) { args: Array<Any> ->
             @Suppress("UNCHECKED_CAST", "MagicNumber")
             val db = args[0] as Map<Int, Node>
@@ -120,13 +120,16 @@ class AndroidGetDiscoveredDevicesUseCase(
             @Suppress("UNCHECKED_CAST", "MagicNumber")
             val recentList = args[5] as List<RecentAddress>
 
-            val bleForUi = matchBleNodes(bondedBle, db)
-            val usbForUi = matchNodesByName(usbDevices, db)
-            val virtualForUi = matchNodesByName(virtualDeviceEntries(showMock, showReplay), db)
+            @Suppress("MagicNumber")
+            val nums = args[6] as LocalNodeNums
 
-            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
+            val bleForUi = bondedBle.withLocalNodes(db, nums).sortedBy { it.name }
+            val usbForUi = usbDevices.withLocalNodes(db, nums)
+            val virtualForUi = virtualDeviceEntries(showMock, showReplay).withLocalNodes(db, nums)
+
+            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager, nums)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
-            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
+            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, nums)
 
             DiscoveredDevices(
                 bleDevices = bleForUi,
@@ -137,28 +140,4 @@ class AndroidGetDiscoveredDevicesUseCase(
             )
         }
     }
-
-    private fun matchBleNodes(bondedBle: List<DeviceListEntry.Ble>, db: Map<Int, Node>): List<DeviceListEntry.Ble> =
-        bondedBle
-            .map { entry ->
-                val matchingNode =
-                    if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                        db.values.find { node ->
-                            val macSuffix =
-                                entry.device.address.replace(":", "").takeLast(macSuffixLength).lowercase(Locale.ROOT)
-                            val nameSuffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
-                            node.user.id.lowercase(Locale.ROOT).endsWith(macSuffix) ||
-                                (nameSuffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(nameSuffix))
-                        }
-                    } else {
-                        null
-                    }
-                entry.copy(node = matchingNode)
-            }
-            .sortedBy { it.name }
-
-    private fun matchNodesByName(entries: List<DeviceListEntry>, db: Map<Int, Node>): List<DeviceListEntry> =
-        entries.map { entry ->
-            entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
-        }
 }

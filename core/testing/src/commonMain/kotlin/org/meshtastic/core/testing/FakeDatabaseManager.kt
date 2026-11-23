@@ -18,6 +18,7 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.database.DatabaseConstants.MAX_CACHE_LIMIT
 import org.meshtastic.core.database.DatabaseConstants.MIN_CACHE_LIMIT
 
@@ -33,6 +34,10 @@ class FakeDatabaseManager :
     var lastAssociatedNode: Int? = null
     var lastAssociatedDeviceId: String? = null
     val existingDatabases = mutableSetOf<String>()
+
+    /** Recorded local node numbers by normalized address, as [associateDevice] writes them. */
+    val localNodeNumsFlow = mutableStateFlow(emptyMap<String, Int>())
+    override val localNodeNums: StateFlow<Map<String, Int>> = localNodeNumsFlow
 
     init {
         registerResetAction {
@@ -65,6 +70,7 @@ class FakeDatabaseManager :
         lastAssociatedAddress = address
         lastAssociatedNode = nodeNum
         lastAssociatedDeviceId = deviceId
+        localNodeNumsFlow.value += normalizeAddress(address) to nodeNum
     }
 
     override fun hasDatabaseFor(address: String?): Boolean = address != null && existingDatabases.contains(address)
