@@ -27,15 +27,20 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.util.withOnWirePrecision
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
@@ -50,6 +55,7 @@ abstract class CommonChannelViewModelTest {
     protected val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     protected val analytics: PlatformAnalytics = mock(MockMode.autofill)
     protected val testDispatcher = UnconfinedTestDispatcher()
+    protected val snackbarManager = SnackbarManager()
 
     protected lateinit var viewModel: ChannelViewModel
 
@@ -59,7 +65,7 @@ abstract class CommonChannelViewModelTest {
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
 
-        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics, snackbarManager)
     }
 
     @AfterTest
@@ -76,7 +82,7 @@ abstract class CommonChannelViewModelTest {
                 }
                 .build()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(config)
-        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics, snackbarManager)
 
         viewModel.localConfig.test {
             awaitItem().security?.is_managed shouldBe true
@@ -106,4 +112,37 @@ abstract class CommonChannelViewModelTest {
 
         assertEquals(true, viewModel.requestChannelSet.value != null)
     }
+
+    @Test
+    fun `a failed channel write keeps the radio channels and offers a retry that writes the same set`() =
+        runTest(testDispatcher) {
+            val repository = FakeRadioConfigRepository()
+            val onRadio =
+                ChannelSet.Builder()
+                    .also { wb -> wb.settings = listOf(ChannelSettings.Builder().also { it.name = "Team" }.build()) }
+                    .build()
+            repository.setChannelSet(onRadio)
+            val writer = ChannelViewModel(radioController, repository, analytics, snackbarManager)
+            val reset =
+                ChannelSet.Builder()
+                    .also { wb -> wb.settings = listOf(ChannelSettings.Builder().also { it.name = "Reset" }.build()) }
+                    .build()
+            radioController.failEditSettingsBegin = true
+
+            writer.setChannels(reset)
+            val failure = snackbarManager.events.first()
+
+            // ChannelScreen draws its list from `channels`, so the screen still shows what the radio has.
+            assertEquals(onRadio, writer.channels.first { it.settings.isNotEmpty() })
+            assertEquals("Couldn't update the channels on your radio.", failure.message)
+            assertEquals("Retry", failure.actionLabel)
+
+            radioController.failEditSettingsBegin = false
+            failure.onAction?.invoke()
+
+            // The retry finishes once this test suspends: the failure resumed it from inside its own unconfined frame.
+            val written = repository.channelSetFlow.first { it != onRadio }
+            assertEquals(reset.settings.withOnWirePrecision(), written.settings)
+            snackbarManager.events.test { expectNoEvents() }
+        }
 }

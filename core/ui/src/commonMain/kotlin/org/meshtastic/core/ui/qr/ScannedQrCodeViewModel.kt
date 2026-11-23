@@ -22,6 +22,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -34,6 +35,7 @@ class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
     nodeRepository: NodeRepository,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     val channels =
@@ -46,7 +48,15 @@ class ScannedQrCodeViewModel(
                 initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
             )
 
-    /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) =
-        safeLaunch(tag = "setChannels") { importChannelSet(channelSet, radioController, radioConfigRepository) }
+    /**
+     * Set the radio config (also updates our saved copy in preferences). The dialog has closed by now, so a failure is
+     * reported with a snackbar that offers to retry the same import.
+     */
+    fun setChannels(channelSet: ChannelSet) {
+        safeLaunch(tag = "setChannels") {
+            snackbarManager.reportingChannelUpdateFailure(retry = { setChannels(channelSet) }) {
+                importChannelSet(channelSet, radioController, radioConfigRepository)
+            }
+        }
+    }
 }

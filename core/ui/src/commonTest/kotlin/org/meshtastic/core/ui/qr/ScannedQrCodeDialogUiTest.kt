@@ -23,6 +23,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
@@ -33,15 +34,22 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.withOnWirePrecision
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -90,6 +98,7 @@ class ScannedQrCodeDialogUiTest {
     private fun androidx.compose.ui.test.ComposeUiTest.show(
         incoming: ChannelSet = link,
         channels: ChannelSet = onRadio,
+        maxChannels: Int = DEFAULT_MAX_CHANNELS,
         calls: Calls,
     ) = setContent {
         AppTheme {
@@ -97,9 +106,75 @@ class ScannedQrCodeDialogUiTest {
                 channels = channels,
                 incoming = incoming,
                 onDismiss = { calls.dismissed++ },
+                maxChannels = maxChannels,
                 onConfirm = { calls.confirmed += it },
             )
         }
+    }
+
+    private fun channelsOnly(vararg settings: ChannelSettings) =
+        ChannelSet.Builder().also { it.settings = settings.toList() }.build()
+
+    private val radioWithSecondary =
+        onRadio.newBuilder().also { it.settings = onRadio.settings + channel("Team", 2) }.build()
+
+    @Test
+    fun add_keeps_an_existing_secondary_on_a_radio_with_free_slots() = runComposeUiTest {
+        val calls = Calls()
+        show(incoming = channelsOnly(channel("Field", 5)), channels = radioWithSecondary, calls = calls)
+
+        onNode(hasText("Team")).assertIsNotEnabled()
+        onNode(hasText("Team")).performClick()
+        onNodeWithText("Add channels").performClick()
+
+        assertEquals(radioWithSecondary.settings + channel("Field", 5), calls.confirmed.single().settings)
+    }
+
+    @Test
+    fun add_on_a_full_radio_warns_before_dropping_an_existing_channel_for_a_new_one() = runComposeUiTest {
+        val calls = Calls()
+        show(
+            incoming = channelsOnly(channel("Field", 5)),
+            channels = radioWithSecondary,
+            maxChannels = 2,
+            calls = calls,
+        )
+
+        onNodeWithText("1 channel already on your radio will be removed.").assertDoesNotExist()
+
+        onNode(hasText("Team")).performClick()
+        onNode(hasText("Field")).performClick()
+
+        onNodeWithText("1 channel already on your radio will be removed.").assertIsDisplayed()
+        onNodeWithText("Add channels").performClick()
+        assertEquals(onRadio.settings + channel("Field", 5), calls.confirmed.single().settings)
+    }
+
+    @Test
+    fun add_names_an_unnamed_incoming_channel_after_the_radio_preset_not_the_link_preset() = runComposeUiTest {
+        // Add keeps the radio's LoRa settings, so an unnamed channel takes the radio's preset name once added.
+        val unnamed = ChannelSettings.Builder().also { it.psk = ByteArray(32) { 9 }.toByteString() }.build()
+        val shortFastLink =
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(unnamed)
+                    wb.lora_config = lora { modem_preset = LoRaConfig.ModemPreset.SHORT_FAST }
+                }
+                .build()
+        show(incoming = shortFastLink, calls = Calls())
+
+        onNode(radioButton and hasText("Add")).performClick()
+
+        // The radio's own unnamed primary and the added channel are both LongFast on this radio.
+        onAllNodes(hasText("LongFast")).assertCountEquals(2)
+        onAllNodes(hasText("ShortFast")).assertCountEquals(0)
+    }
+
+    @Test
+    fun add_flags_a_new_channel_named_like_one_on_the_radio() = runComposeUiTest {
+        show(incoming = channelsOnly(channel("Team", 9)), channels = radioWithSecondary, calls = Calls())
+
+        onNodeWithText("Your radio has a channel with this name and a different key").assertIsDisplayed()
     }
 
     @Test
@@ -152,8 +227,77 @@ class ScannedQrCodeDialogUiTest {
 
         val imported = calls.confirmed.single()
         assertEquals(onRadio.settings + link.settings, imported.settings)
-        assertEquals(onRadio.lora_config, imported.lora_config)
+        // Add carries no LoRa config, so importChannelSet has nothing to retune with.
+        assertNull(imported.lora_config)
         assertEquals(1, calls.dismissed)
+    }
+
+    @Test
+    fun an_add_import_issues_no_lora_write_even_when_the_cached_lora_settings_disagree() {
+        val calls = Calls()
+        runComposeUiTest {
+            show(calls = calls)
+            onNode(radioButton and hasText("Add")).performClick()
+            onNodeWithText("Add channels").performClick()
+        }
+
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        radioConfigRepository.setChannelSet(onRadio)
+        // The local config cache lags the channel set's LoRa: a carried LoRa config would differ and be written.
+        radioConfigRepository.setLocalConfigDirect(
+            LocalConfig.Builder().also { it.lora = lora { hop_limit = 7 } }.build(),
+        )
+        runTest { importChannelSet(calls.confirmed.single(), radioController, radioConfigRepository) }
+
+        assertTrue(radioController.localConfigs.isEmpty())
+        assertEquals(
+            (onRadio.settings + link.settings).withOnWirePrecision(),
+            radioConfigRepository.currentChannelSet.settings,
+        )
+    }
+
+    @Test
+    fun add_waits_for_the_radio_channels_before_it_can_import() = runComposeUiTest {
+        val calls = Calls()
+        show(incoming = channelsOnly(channel("Field", 5)), channels = ChannelSet.Builder().build(), calls = calls)
+
+        onNodeWithText("Your radio's channels haven't loaded yet. You can import once they do.").assertIsDisplayed()
+        onNodeWithText("Add channels").assertIsNotEnabled()
+        onNodeWithText("Add channels").performClick()
+
+        assertTrue(calls.confirmed.isEmpty())
+    }
+
+    @Test
+    fun replace_waits_for_the_radio_channels_before_it_can_import() = runComposeUiTest {
+        // Without the radio's LoRa config, Replace cannot keep its TX power and MQTT consent.
+        val calls = Calls()
+        show(channels = ChannelSet.Builder().build(), calls = calls)
+
+        onNodeWithText("Your radio's channels haven't loaded yet. You can import once they do.").assertIsDisplayed()
+        onNodeWithText("Replace channels").assertIsNotEnabled()
+        onNodeWithText("Replace channels").performClick()
+
+        assertTrue(calls.confirmed.isEmpty())
+    }
+
+    @Test
+    fun add_counts_slots_without_the_blank_and_duplicate_entries_the_write_drops() = runComposeUiTest {
+        val calls = Calls()
+        val padded =
+            onRadio
+                .newBuilder()
+                .also { it.settings = onRadio.settings + ChannelSettings.Builder().build() + channel("Team", 2) }
+                .build()
+        // Three entries on a three-slot radio, but only two are real, so Field fits without removing anything.
+        show(incoming = channelsOnly(channel("Field", 5)), channels = padded, maxChannels = 3, calls = calls)
+
+        onNodeWithText("3 of 3 channel slots in use").assertIsDisplayed()
+        onNode(hasText("Team")).assertIsNotEnabled()
+        onNodeWithText("Add channels").performClick()
+
+        assertEquals(onRadio.settings + channel("Team", 2) + channel("Field", 5), calls.confirmed.single().settings)
     }
 
     @Test

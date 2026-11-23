@@ -27,6 +27,7 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
@@ -38,6 +39,72 @@ class ChannelSetUrlTest {
 
         assertEquals("Custom", channelSet.primaryChannel?.name)
         assertFalse(channelSet.hasLoraConfig())
+    }
+
+    @Test
+    fun `host and path match case insensitively`() {
+        for (url in listOf("HTTPS://MESHTASTIC.ORG/E/#$PAYLOAD", "HTTPS://mEsHtAsTiC.OrG/e/#$PAYLOAD")) {
+            assertEquals("LongFast", CommonUri.parse(url).toChannelSet().primaryChannel?.name, url)
+        }
+    }
+
+    @Test
+    fun `www host is accepted`() {
+        val channelSet = CommonUri.parse("https://www.meshtastic.org/e/#$PAYLOAD").toChannelSet()
+
+        assertEquals("LongFast", channelSet.primaryChannel?.name)
+    }
+
+    @Test
+    fun `short and legacy channel paths are accepted`() {
+        for (url in listOf("https://meshtastic.org/e#$PAYLOAD", "https://meshtastic.org/channel/e/#$PAYLOAD")) {
+            assertEquals("LongFast", CommonUri.parse(url).toChannelSet().primaryChannel?.name, url)
+        }
+    }
+
+    @Test
+    fun `add parameter in the fragment drops the LoRa config`() {
+        val channelSet = CommonUri.parse("$REPLACE_CHANNEL_URL?add=true").toChannelSet()
+
+        assertEquals("Custom", channelSet.primaryChannel?.name)
+        assertFalse(channelSet.hasLoraConfig())
+    }
+
+    @Test
+    fun `add parameter in the query drops the LoRa config`() {
+        val channelSet = CommonUri.parse("https://meshtastic.org/e/?add=true#$PAYLOAD").toChannelSet()
+
+        assertEquals("Custom", channelSet.primaryChannel?.name)
+        assertFalse(channelSet.hasLoraConfig())
+    }
+
+    @Test
+    fun `a fragment that is not base64 is rejected`() {
+        assertFailsWith<MalformedMeshtasticUrlException> {
+            CommonUri.parse("https://meshtastic.org/e/#!!!!").toChannelSet()
+        }
+    }
+
+    @Test
+    fun `base64 that is not a channel set is rejected`() {
+        // 0x0A 0xFF: field 1 claims 255 bytes and none follow, so the protobuf is truncated.
+        assertFailsWith<MalformedMeshtasticUrlException> {
+            CommonUri.parse("https://meshtastic.org/e/#Cv8=").toChannelSet()
+        }
+    }
+
+    @Test
+    fun `a link without a channel set is rejected`() {
+        for (url in listOf("https://meshtastic.org/e/", "https://meshtastic.org/e/#")) {
+            assertFailsWith<MalformedMeshtasticUrlException>(url) { CommonUri.parse(url).toChannelSet() }
+        }
+    }
+
+    @Test
+    fun `a channel set on another host or path is rejected`() {
+        for (url in listOf("https://example.com/e/#$PAYLOAD", "https://meshtastic.org/v/#$PAYLOAD")) {
+            assertFailsWith<MalformedMeshtasticUrlException>(url) { CommonUri.parse(url).toChannelSet() }
+        }
     }
 
     @Test
@@ -100,6 +167,8 @@ class ChannelSetUrlTest {
         .build()
 
     private companion object {
-        const val REPLACE_CHANNEL_URL = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
+        /** The default LongFast channel with use_preset, hop limit 3 and TX on, as the Python CLI encodes it. */
+        const val PAYLOAD = "CgMSAQESBggBQANIAQ"
+        const val REPLACE_CHANNEL_URL = "https://meshtastic.org/e/#$PAYLOAD"
     }
 }
