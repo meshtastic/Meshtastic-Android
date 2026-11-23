@@ -57,7 +57,7 @@ internal fun scrubSdkLogLine(message: String, cause: Throwable? = null): String 
 }
 
 /** Wire's toString of a message, `FromRadio{packet=MeshPacket{…}}`, which can carry text and positions. */
-private val WIRE_DUMP = Regex("""\b([A-Z]\w*)\{.*""", RegexOption.DOT_MATCHES_ALL)
+private val WIRE_DUMP = Regex("""\b([A-Z]\w*)\{[\s\S]*""")
 
 private val MAC_ADDRESS = Regex("""\b[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}\b""")
 
