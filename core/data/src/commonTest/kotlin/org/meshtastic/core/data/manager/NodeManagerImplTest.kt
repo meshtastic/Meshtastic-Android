@@ -120,6 +120,24 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `crossing the cap evicts down to the low-water mark and nothing more until the cap is crossed again`() {
+        val cap = NodeManagerImpl.MAX_IN_MEMORY_NODES
+        val lowWater = NodeManagerImpl.IN_MEMORY_NODES_LOW_WATER
+        var next = 100_000
+
+        floodDistinctNodes(cap + 1, startAt = next)
+        next += cap + 1
+        assertEquals(lowWater, nodeManager.nodeDBbyNodeNum.size, "crossing the cap should evict to the low-water mark")
+
+        floodDistinctNodes(cap - lowWater, startAt = next)
+        next += cap - lowWater
+        assertEquals(cap, nodeManager.nodeDBbyNodeNum.size, "no eviction should run while the index is at or under cap")
+
+        floodDistinctNodes(1, startAt = next)
+        assertEquals(lowWater, nodeManager.nodeDBbyNodeNum.size, "crossing the cap again should evict to low-water")
+    }
+
+    @Test
     fun `a flood of novel NodeInfo packets cannot grow the in-memory index without bound`() {
         // handleReceivedUser commits its own index rather than going through updateNodeState, so bounding only the
         // latter left this path — the one an unauthenticated peer drives most directly — completely unbounded.
