@@ -61,8 +61,6 @@ kotlin {
         // A browser cannot open raw TCP sockets (TcpTransport, mqtt-client-transport-tcp).
         getByName("nonWebMain").dependencies {
             api(libs.meshtastic.mqtt.client.transport.tcp)
-            // The WebSocket phone link pins CIO: OkHttp would apply the app's cleartext policy to a LAN ws:// radio.
-            implementation(libs.ktor.client.cio)
         }
 
         getByName("jvmMain") {
@@ -84,7 +82,6 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
             implementation(libs.ktor.client.mock)
         }
     }

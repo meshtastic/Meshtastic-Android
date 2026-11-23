@@ -77,7 +77,6 @@ kotlin {
         getByName("jvmTest").dependencies {
             implementation(projects.core.service)
             implementation(projects.core.ble)
-            implementation(libs.ktor.network)
             implementation(libs.androidx.datastore.preferences)
         }
 
