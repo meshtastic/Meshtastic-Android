@@ -1410,7 +1410,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             val waiting = assertNotNull(service.transportStatus.value)
             assertEquals(TransportPhase.WaitingToRetry, waiting.phase)
             assertEquals(refused, waiting.lastFailure)
-            // Main's BleReconnectPolicy: the first failure of a streak schedules attempt 2.
+            // The first failure of a streak schedules attempt 2.
             assertEquals(2, waiting.nextAttempt)
             assertNotNull(waiting.retryAtMillis)
 
@@ -1451,7 +1451,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             advanceTimeBy(1_001L)
             assertEquals(2, callbacks.size)
 
-            // A radio that crashes after config: Ready, then gone before main's 30 s network threshold.
+            // A radio that crashes after config: Ready, then gone before the 30 s network stability threshold.
             callbacks.last().onConnect()
             advanceTimeBy(29_000L)
             callbacks.last().onPhoneApiSessionEnded(recoverable = true)
@@ -1477,7 +1477,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         try {
             callbacks.single().onConnect()
             callbacks.single().onPhoneApiSessionEnded(recoverable = true)
-            // BleReconnectPolicy.DEFAULT_SETTLE_DELAY on main: 3 s before every BLE connect.
+            // A BLE retry waits 3 s for firmware to free its GATT session.
             advanceTimeBy(2_999L)
             assertEquals(1, callbacks.size)
             advanceTimeBy(2L)
@@ -1492,7 +1492,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks)
         try {
-            // MeshConnectionManagerImpl on main: MAX_CONSECUTIVE_RECOVERY_FAILURES = 3.
+            // Three recovery restarts are allowed before the radio is left to the user.
             repeat(3) { restart ->
                 callbacks.last().onPhoneApiSessionEnded(recoverable = true, handshakeTimedOut = true)
                 advanceTimeBy(60_000L)
@@ -1526,7 +1526,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             val callbacks = mutableListOf<RadioInterfaceService>()
             val service = createPhoneApiService(callbacks)
             try {
-                // MeshConnectionManagerImpl on main: MAX_CONSECUTIVE_RECOVERY_FAILURES = 3.
+                // Three recovery restarts are allowed before the radio is left to the user.
                 repeat(3) { restart ->
                     callbacks.last().onConnect()
                     callbacks.last().onPhoneApiSessionEnded(recoverable = true, receiveOverflowed = true)
@@ -1561,7 +1561,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             testDispatcher.scheduler.runCurrent()
             assertEquals(3, callbacks.size)
 
-            // Three more restarts are allowed, as main reset its count when the user re-selected the node.
+            // Re-selecting the node resets the count, so three more restarts are allowed.
             repeat(3) { restart ->
                 timeOut(callbacks)
                 assertEquals(restart + 4, callbacks.size)
@@ -1666,7 +1666,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         val service = createPhoneApiService(callbacks)
         try {
             val shown = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.take(2).toList() }
-            // Main's WebSocket loop showed one message per kind of failure, not one per retry.
+            // One message per kind of failure, not one per retry.
             repeat(3) {
                 callbacks
                     .last()
@@ -2368,7 +2368,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
-    // ─── Stale GATT cache refresh: main's GattCacheInvalidationGate (threshold 6, once per streak) ───
+    // ─── Stale GATT cache refresh: GattCacheInvalidationGate (threshold 6, once per streak) ───
 
     /** Ends the current session as a recoverable failure [times] times, letting each retry start the next session. */
     private fun TestScope.failPhoneApiSessions(callbacks: List<RadioInterfaceService>, times: Int) {
@@ -2421,7 +2421,7 @@ class SharedRadioInterfaceServiceLivenessTest {
             failPhoneApiSessions(callbacks, 6)
             assertTrue(callbacks.last().consumeGattCacheRefreshOnConnect())
 
-            // Ready, then up past main's 5 s BLE stability threshold: the streak ends.
+            // Ready, then up past the 5 s BLE stability threshold: the streak ends.
             callbacks.last().onConnect()
             advanceTimeBy(5_001L)
             failPhoneApiSessions(callbacks, 1)

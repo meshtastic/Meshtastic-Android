@@ -39,7 +39,7 @@ private const val BLE_PAIRING_PIN_LENGTH = 6
 
 private val BLE_ADDRESS = Regex("[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}")
 
-// The forms TcpTransport splits: `host`, `host:port`, or a bracketed IPv6 literal with an optional port.
+// The forms `parseTcpRadioAddress` splits: `host`, `host:port`, or a bracketed IPv6 literal with an optional port.
 private val TCP_ADDRESS = Regex("""(\[[0-9A-Za-z:.%_]+\]|[^\s:\[\]]+)(:\d{1,5})?""")
 
 /**

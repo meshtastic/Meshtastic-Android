@@ -26,8 +26,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Expected outcomes are main's WebSocketRadioTransport: 4001 and 1009 stop for good, five quick drops without a close
- * frame mean a contested slot, 1013 waits 30 s, and a failed dial names its cause. Messages are the SDK's
+ * Expected outcomes: close codes 4001 (another client took the slot) and 1009 stop for good, five quick drops without a
+ * close frame mean a contested slot, 1013 waits 30 s, and a failed dial names its cause. Messages are the SDK's
  * WebSocketTransport text for each case.
  */
 class WebSocketSessionHistoryTest {

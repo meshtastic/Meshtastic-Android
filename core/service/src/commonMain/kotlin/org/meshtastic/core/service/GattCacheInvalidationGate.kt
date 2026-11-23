@@ -50,7 +50,7 @@ internal class GattCacheInvalidationGate(private val failureThreshold: Int = DEF
     }
 
     companion object {
-        /** Main's `GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD`: far above an ordinary out-of-range blip. */
+        /** Consecutive failures before a stale GATT cache is suspected: far above an ordinary out-of-range blip. */
         const val DEFAULT_FAILURE_THRESHOLD = 6
     }
 }

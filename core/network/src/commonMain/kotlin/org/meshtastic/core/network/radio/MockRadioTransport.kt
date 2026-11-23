@@ -805,7 +805,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
     )
 
     private fun sendAdmin(fromIn: Int, toIn: Int, reqId: Int, initFn: AdminMessage.() -> AdminMessage) {
-        // Embed a deterministic 8-byte fake passkey so SessionManager can record a session refresh — mirrors what real
+        // Embed a deterministic 8-byte fake passkey so the SDK admin session can record a refresh — mirrors what real
         // firmware always attaches to admin responses (see firmware/src/modules/AdminModule.cpp:1460-1481).
         val adminMsg =
             AdminMessage.Builder()
