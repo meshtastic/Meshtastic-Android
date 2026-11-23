@@ -1541,6 +1541,25 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `firmware too old ends the session with its message and no retry`() = runTest(testDispatcher) {
+        val callbacks = mutableListOf<RadioInterfaceService>()
+        val service = createPhoneApiService(callbacks)
+        try {
+            val error = async(start = CoroutineStart.UNDISPATCHED) { service.connectionError.first() }
+            callbacks.single()
+                .onPhoneApiSessionEnded(recoverable = false, reason = TransportDisconnectReason.FirmwareTooOld)
+            advanceTimeBy(60_000L)
+
+            assertEquals(1, callbacks.size)
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
+            // The text comes from resources, which may resolve off the test dispatcher, so it is awaited last.
+            assertEquals(connectionErrorText(TransportDisconnectReason.FirmwareTooOld), error.await())
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
     fun `terminal PhoneAPI session end retires the transport without reconnecting`() = runTest(testDispatcher) {
         val callbacks = mutableListOf<RadioInterfaceService>()
         val service = createPhoneApiService(callbacks)

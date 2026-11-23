@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -102,6 +103,7 @@ internal class SdkPhoneApiRadioTransport(
     private suspend fun runPhoneApiSession() {
         var recoverable = true
         var handshakeTimedOut = false
+        var reason: TransportDisconnectReason? = null
         var ble: BleTransport? = null
         try {
             service.onStatus(TransportStatus(TransportPhase.Connecting))
@@ -127,8 +129,13 @@ internal class SdkPhoneApiRadioTransport(
         } catch (failure: MeshtasticException.HandshakeTimeout) {
             handshakeTimedOut = true
             reportSessionFailure(failure)
-        } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
+        } catch (failure: MeshtasticException.FirmwareTooOld) {
+            // Retrying cannot help until the radio is updated.
             recoverable = false
+            reason = TransportDisconnectReason.FirmwareTooOld
+            reportSessionFailure(failure)
+        } catch (@Suppress("TooGenericExceptionCaught") failure: Exception) {
+            // A vanished serial port or a session the service retired mid-install; the retry backs off.
             reportSessionFailure(failure)
         } finally {
             val client = currentClient.value
@@ -141,7 +148,7 @@ internal class SdkPhoneApiRadioTransport(
                 }
             }
         }
-        service.onPhoneApiSessionEnded(recoverable, handshakeTimedOut = handshakeTimedOut)
+        service.onPhoneApiSessionEnded(recoverable, handshakeTimedOut = handshakeTimedOut, reason = reason)
     }
 
     private fun reportSessionFailure(failure: Exception) {

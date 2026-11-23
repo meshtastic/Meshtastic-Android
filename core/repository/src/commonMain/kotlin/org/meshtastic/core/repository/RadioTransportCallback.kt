@@ -43,10 +43,14 @@ interface RadioTransportCallback {
     /**
      * Retires a transport that owns the PhoneAPI session. A recoverable end can start a new transport for the same
      * selection once the old session's work has drained; [handshakeTimedOut] counts toward the cap on consecutive
-     * handshake restarts. Invoke this after closing the underlying SDK client.
+     * handshake restarts, and [reason] tells the user why. Invoke this after closing the underlying SDK client.
      */
-    fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String? = null, handshakeTimedOut: Boolean = false) =
-        onDisconnect(isPermanent = !recoverable, errorMessage = errorMessage)
+    fun onPhoneApiSessionEnded(
+        recoverable: Boolean,
+        errorMessage: String? = null,
+        handshakeTimedOut: Boolean = false,
+        reason: TransportDisconnectReason? = null,
+    ) = onDisconnect(isPermanent = !recoverable, errorMessage = errorMessage, reason = reason)
 
     /**
      * Called as a connection attempt moves through its phases, fails or schedules a retry. Transports that have no

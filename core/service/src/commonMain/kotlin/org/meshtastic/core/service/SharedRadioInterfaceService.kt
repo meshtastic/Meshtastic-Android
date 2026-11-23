@@ -87,6 +87,7 @@ import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error_recovery_exhausted
+import org.meshtastic.core.resources.firmware_too_old
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.core.resources.websocket_connect_failed
@@ -190,6 +191,7 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource
     TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
     TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
     TransportDisconnectReason.HandshakeRecoveryExhausted -> Res.string.error_recovery_exhausted
+    TransportDisconnectReason.FirmwareTooOld -> Res.string.firmware_too_old
 }
 
 private val LINK_UP_PHASES =
@@ -802,6 +804,7 @@ class SharedRadioInterfaceService(
         recoverable: Boolean,
         errorMessage: String?,
         handshakeTimedOut: Boolean,
+        reason: TransportDisconnectReason?,
     ) {
         val interfaceId = DeviceAddress.parse(session.address)?.interfaceId
         // The SDK worker can report its own end. Run teardown independently so close() can join that worker.
@@ -828,7 +831,7 @@ class SharedRadioInterfaceService(
                         recoveryExhausted ||
                         (interfaceId != InterfaceId.SERIAL && interfaceId != InterfaceId.BLUETOOTH),
                     errorMessage = errorMessage.takeUnless { recoveryExhausted },
-                    reason = TransportDisconnectReason.HandshakeRecoveryExhausted.takeIf { recoveryExhausted },
+                    reason = if (recoveryExhausted) TransportDisconnectReason.HandshakeRecoveryExhausted else reason,
                 )
                 if (!connectionRequested) return@launch
                 nextPhoneApiRetryDelay(interfaceId)
@@ -1236,8 +1239,13 @@ class SharedRadioInterfaceService(
             }
         }
 
-        override fun onPhoneApiSessionEnded(recoverable: Boolean, errorMessage: String?, handshakeTimedOut: Boolean) {
-            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut)
+        override fun onPhoneApiSessionEnded(
+            recoverable: Boolean,
+            errorMessage: String?,
+            handshakeTimedOut: Boolean,
+            reason: TransportDisconnectReason?,
+        ) {
+            retirePhoneApiSession(session, recoverable, errorMessage, handshakeTimedOut, reason)
         }
 
         override fun onStatus(status: TransportStatus) {

@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
@@ -34,6 +35,7 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.TransportIdentity
 import org.meshtastic.sdk.testing.FakeRadioTransport
 import org.meshtastic.sdk.testing.toFrame
@@ -43,10 +45,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
+import org.meshtastic.sdk.RadioTransport as SdkRadioTransport
 
 class SdkPhoneApiRadioTransportTest {
 
-    private class Harness(scope: CoroutineScope, val link: FakeRadioTransport) {
+    private class Harness(
+        scope: CoroutineScope,
+        val link: FakeRadioTransport,
+        open: suspend () -> SdkRadioTransport = { link },
+    ) {
         private val fake =
             FakeRadioInterfaceService(scope).apply {
                 setDeviceAddress("tcp:sdk")
@@ -58,22 +65,27 @@ class SdkPhoneApiRadioTransportTest {
 
         /** Each `handshakeTimedOut` the transport reported when its session ended. */
         val timeouts = mutableListOf<Boolean>()
+
+        /** Each `reason` the transport reported when its session ended. */
+        val reasons = mutableListOf<TransportDisconnectReason?>()
         val radio: RadioInterfaceService =
             object : RadioInterfaceService by fake {
                 override fun onPhoneApiSessionEnded(
                     recoverable: Boolean,
                     errorMessage: String?,
                     handshakeTimedOut: Boolean,
+                    reason: TransportDisconnectReason?,
                 ) {
                     ends += recoverable
                     timeouts += handshakeTimedOut
+                    reasons += reason
                 }
             }
         private val nodeManager =
             NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
         val transport =
             SdkPhoneApiRadioTransport(
-                openTransport = { link },
+                openTransport = open,
                 service = radio,
                 projection = lazy { radioSessionProjection(nodeManager, radio, scope) },
                 connectionManager = lazy { mock(MockMode.autofill) },
@@ -145,6 +157,38 @@ class SdkPhoneApiRadioTransportTest {
 
             assertEquals(listOf(true), harness.ends)
             assertEquals(listOf(true), harness.timeouts)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    @Test
+    fun `firmware the SDK refuses as too old ends the session for good with its own reason`() = runTest {
+        val link = FakeRadioTransport(TransportIdentity("fake:old"))
+        val harness =
+            Harness(backgroundScope, link) { throw MeshtasticException.FirmwareTooOld(required = 30, present = 22) }
+        try {
+            harness.transport.start()
+            runCurrent()
+
+            assertEquals(listOf(false), harness.ends)
+            assertEquals(listOf<TransportDisconnectReason?>(TransportDisconnectReason.FirmwareTooOld), harness.reasons)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    @Test
+    fun `an unexpected failure opening the link leaves the session to the retry`() = runTest {
+        val link = FakeRadioTransport(TransportIdentity("fake:vanished"))
+        // A serial port that disappeared between the retry's check and the open.
+        val harness = Harness(backgroundScope, link) { throw IllegalStateException("port is gone") }
+        try {
+            harness.transport.start()
+            runCurrent()
+
+            assertEquals(listOf(true), harness.ends)
+            assertEquals(listOf<TransportDisconnectReason?>(null), harness.reasons)
         } finally {
             harness.transport.close()
         }
