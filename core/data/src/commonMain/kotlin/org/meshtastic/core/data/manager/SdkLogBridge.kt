@@ -31,11 +31,15 @@ internal val sdkLogSink = LogSink { level, tag, message, cause ->
     val logger = Logger.withTag("SDK/$tag")
     when (level) {
         LogLevel.VERBOSE -> logger.v(cause) { scrubSdkLogLine(message) }
+
         LogLevel.DEBUG -> logger.d(cause) { scrubSdkLogLine(message) }
+
         LogLevel.INFO -> logger.i { scrubSdkLogLine(message, cause) }
+
         LogLevel.WARN,
         LogLevel.ERROR,
         -> logger.w { scrubSdkLogLine(message, cause) }
+
         LogLevel.NONE -> Unit
     }
 }

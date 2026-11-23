@@ -73,7 +73,12 @@ class SdkLogBridgeTest {
     fun `a public host is anonymized while a LAN address stays whole`() {
         sdkLogSink.log(LogLevel.WARN, "Engine", "could not reach node.example.com:4403: refused", null)
         sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:203.0.113.9:4403)", null)
-        sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=ws:ws://node.example.com:80/api/v1/ws)", null)
+        sdkLogSink.log(
+            LogLevel.INFO,
+            "Engine",
+            "Connect requested (transport=ws:ws://node.example.com:80/api/v1/ws)",
+            null,
+        )
         sdkLogSink.log(LogLevel.INFO, "Engine", "Connect requested (transport=tcp:192.168.1.20:4403)", null)
 
         val messages = lines.map { it.message }
@@ -83,7 +88,8 @@ class SdkLogBridgeTest {
 
     @Test
     fun `a dropped FromRadio is logged by type without its contents`() {
-        val dump = "FromRadio{packet=MeshPacket{from=1, decoded=Data{portnum=TEXT_MESSAGE_APP, payload=[text=meet at 5]}}}"
+        val dump =
+            "FromRadio{packet=MeshPacket{from=1, decoded=Data{portnum=TEXT_MESSAGE_APP, payload=[text=meet at 5]}}}"
         sdkLogSink.log(LogLevel.WARN, "Engine", "Dropped $dump", null)
 
         assertEquals("Dropped FromRadio{…}", lines.single().message)

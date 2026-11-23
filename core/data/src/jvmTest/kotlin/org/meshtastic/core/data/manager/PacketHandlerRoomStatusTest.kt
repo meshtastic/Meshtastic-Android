@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.data.manager
 
-import dev.mokkery.every
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -104,20 +104,21 @@ class PacketHandlerRoomStatusTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val db = getInMemoryDatabaseBuilder().setQueryCoroutineContext(dispatcher).build()
         // Persisted-row reads are scoped to the selected radio's my_node row.
-        db.nodeInfoDao().setMyNodeInfo(
-            MyNodeEntity(
-                myNodeNum = LOCAL_NODE,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-            ),
-        )
+        db.nodeInfoDao()
+            .setMyNodeInfo(
+                MyNodeEntity(
+                    myNodeNum = LOCAL_NODE,
+                    model = null,
+                    firmwareVersion = null,
+                    couldUpdate = false,
+                    shouldUpdate = false,
+                    currentPacketId = 0L,
+                    messageTimeoutMsec = 0,
+                    minAppVersion = 0,
+                    maxChannels = 8,
+                    hasWifi = false,
+                ),
+            )
         val repository =
             PacketRepositoryImpl(SingleDatabaseProvider(db), CoroutineDispatchers(dispatcher, dispatcher, dispatcher))
         val transport =
