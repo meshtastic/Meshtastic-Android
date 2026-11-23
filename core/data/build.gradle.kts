@@ -28,6 +28,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)
+            implementation(projects.core.ble)
             implementation(projects.core.common)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
@@ -65,14 +66,12 @@ kotlin {
             implementation(libs.meshtastic.sdk.transport.tcp)
             implementation(libs.meshtastic.sdk.transport.serial)
         }
-        findByName("wasmJsMain")?.dependencies {
-            implementation(projects.core.ble)
-            implementation(libs.kable.core)
-        }
+        findByName("wasmJsMain")?.dependencies { implementation(libs.kable.core) }
 
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.meshtastic.sdk.testing)
+            implementation(libs.kable.core)
         }
 
         getByName("jvmTest").dependencies {

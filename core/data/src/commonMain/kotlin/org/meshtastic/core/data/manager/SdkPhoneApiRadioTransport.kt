@@ -35,7 +35,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.ble.classifyBleFailure
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.DeviceAddress
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TransportFailure
 import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
@@ -94,6 +97,7 @@ internal class SdkPhoneApiRadioTransport(
     override fun requestNodeDbRefresh(): Boolean = currentClient.value?.requestNodeDbRefresh() == true
 
     private val session = checkNotNull(service.activeSession.value)
+    private val isBluetooth = DeviceAddress.parse(session.address)?.interfaceId == InterfaceId.BLUETOOTH
     private var run: Job? = null
 
     override fun start() {
@@ -169,7 +173,9 @@ internal class SdkPhoneApiRadioTransport(
 
     private fun reportSessionFailure(failure: Exception) {
         Logger.w { "SDK PhoneAPI session failed: ${failure::class.simpleName}" }
-        val status = TransportFailure(TransportFailureKind.ConnectFailed)
+        // The SDK wraps the Kable failure that ended a BLE connect, which names the cause the card can show.
+        val status =
+            if (isBluetooth) failure.classifyBleFailure() else TransportFailure(TransportFailureKind.ConnectFailed)
         service.onStatus(TransportStatus(TransportPhase.Connecting, status))
     }
 

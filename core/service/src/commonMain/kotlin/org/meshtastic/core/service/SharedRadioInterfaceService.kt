@@ -64,6 +64,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -72,6 +73,8 @@ import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.TransportFailure
+import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.model.TransportPhase
 import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
@@ -196,6 +199,10 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource
 
 private val LINK_UP_PHASES =
     setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes, TransportPhase.Connected)
+
+/** A retry's phases carry the failure that caused it until the handshake starts, as main's BLE transport did. */
+private fun TransportStatus.keepingFailureOf(previous: TransportStatus?): TransportStatus =
+    if (lastFailure == null && phase !in LINK_UP_PHASES) copy(lastFailure = previous?.lastFailure) else this
 
 /** Permanent closes that only the user's next connect may undo. */
 private val USER_CONNECT_REASONS =
@@ -541,6 +548,9 @@ class SharedRadioInterfaceService(
      */
     private var phoneApiRetryDelay: Long? = null
 
+    /** PhoneAPI sessions that failed since the last stable one. Guarded by [transportMutex]. */
+    private var phoneApiFailureStreak = 0
+
     /**
      * The reason last shown for a retried PhoneAPI failure, so a retry that fails the same way stays quiet. Guarded by
      * [transportMutex].
@@ -826,11 +836,18 @@ class SharedRadioInterfaceService(
             val retryDelay = transportMutex.withLock {
                 if (!isSessionActive(session.context)) return@launch
                 val linkWasUp = synchronized(sessionCallbackLock) { linkedGeneration == session.generation }
+                // Read before the stop clears it. A link that came up and dropped reads as lost, as main's BLE retry did.
+                val failure =
+                    _transportStatus.value?.lastFailure?.takeUnless { linkWasUp && it.kind == TransportFailureKind.Unknown }
+                        ?: TransportFailure(TransportFailureKind.LinkLost).takeIf { linkWasUp }
                 // A session that reached Ready and ended without overflowing was stable.
                 if (linkWasUp && !receiveOverflowed) {
                     phoneApiRetryDelay = null
                     retryReason = null
                     recoveryRestarts = 0
+                    phoneApiFailureStreak = 0
+                } else {
+                    phoneApiFailureStreak++
                 }
                 if (handshakeTimedOut || receiveOverflowed) recoveryRestarts++
                 val recoveryExhausted = recoveryRestarts > MAX_RECOVERY_RESTARTS
@@ -857,18 +874,31 @@ class SharedRadioInterfaceService(
                     reason = shownReason,
                 )
                 if (!connectionRequested) return@launch
-                nextPhoneApiRetryDelay(interfaceId)
+                nextPhoneApiRetryDelay(interfaceId, failure)
             }
             retryPhoneApiSession(session, interfaceId, retryDelay)
         }
     }
 
-    /** The link's current PhoneAPI retry delay, doubling the next one. Guarded by [transportMutex]. */
-    private fun nextPhoneApiRetryDelay(interfaceId: InterfaceId?): Long {
+    /**
+     * The link's current PhoneAPI retry delay, doubling the next one, published with [failure] as the wait the card
+     * counts down. Guarded by [transportMutex].
+     */
+    private fun nextPhoneApiRetryDelay(
+        interfaceId: InterfaceId?,
+        failure: TransportFailure? = _transportStatus.value?.lastFailure,
+    ): Long {
         val initialRetry =
             if (interfaceId == InterfaceId.BLUETOOTH) BLE_INITIAL_RETRY_MS else PHONE_API_INITIAL_RETRY_MS
         return (phoneApiRetryDelay ?: initialRetry).also {
             phoneApiRetryDelay = (it * 2).coerceAtMost(PHONE_API_MAX_RETRY_MS)
+            _transportStatus.value =
+                TransportStatus(
+                    phase = TransportPhase.WaitingToRetry,
+                    lastFailure = failure,
+                    nextAttempt = phoneApiFailureStreak + 1,
+                    retryAtMillis = nowMillis + it,
+                )
         }
     }
 
@@ -878,7 +908,10 @@ class SharedRadioInterfaceService(
         while (true) {
             delay(wait)
             // Network and USB presence observers can restart a link once its environment is ready.
-            if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) return
+            if (interfaceId?.isNetwork == true && !networkRepository.networkAvailable.first()) {
+                transportMutex.withLock { if (radioTransport == null) dropRetryStatus() }
+                return
+            }
             wait = transportMutex.withLock {
                 val stillOwed =
                     connectionRequested &&
@@ -886,8 +919,10 @@ class SharedRadioInterfaceService(
                         sessionGenerationCounter.value == session.generation &&
                         getDeviceAddress() == session.address
                 if (!stillOwed) return
-                if (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) return
-                if (radioOperationLock.suppressesTransport) return
+                val handedOff =
+                    (interfaceId == InterfaceId.BLUETOOTH && !bluetoothRepository.state.value.enabled) ||
+                        radioOperationLock.suppressesTransport
+                if (handedOff) return dropRetryStatus()
                 if (interfaceId == InterfaceId.SERIAL) {
                     val presence = selectedSerialPresence(session.address, serialDevicePresence.deviceKeys.value)
                     when (presence.key?.let(serialDevicePresence::portExists)) {
@@ -898,7 +933,7 @@ class SharedRadioInterfaceService(
 
                         // Legacy selections are bus paths. Let the USB factory try its single-device
                         // resolution for those addresses even if the presence keys use VID/PID.
-                        null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return
+                        null -> if (!presence.present && presence.key?.startsWith("/dev/") != true) return dropRetryStatus()
                     }
                 }
                 Logger.i { "Retrying PhoneAPI transport after session ${session.generation}" }
@@ -906,6 +941,11 @@ class SharedRadioInterfaceService(
                 return
             }
         }
+    }
+
+    /** A retry left to an environment observer has no countdown to show. Guarded by [transportMutex]. */
+    private fun dropRetryStatus() {
+        if (_transportStatus.value?.phase == TransportPhase.WaitingToRetry) _transportStatus.value = null
     }
 
     override fun requestGattCacheInvalidationOnNextConnect() {
@@ -1273,7 +1313,10 @@ class SharedRadioInterfaceService(
         }
 
         override fun onStatus(status: TransportStatus) {
-            val admitted = runIfTransportSessionActive(session) { _transportStatus.value = status }
+            val admitted =
+                runIfTransportSessionActive(session) {
+                    _transportStatus.value = status.keepingFailureOf(_transportStatus.value)
+                }
             if (!admitted) {
                 Logger.d { "Dropping stale onStatus gen=${session.generation} addr=${session.address.anonymize}" }
             }

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.manager
 
+import com.juul.kable.GattStatusException
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.TransportFailureKind
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.testing.FakeLockdownCoordinator
@@ -55,10 +57,11 @@ class SdkPhoneApiRadioTransportTest {
         val link: FakeRadioTransport,
         open: suspend () -> SdkRadioTransport = { link },
         history: WebSocketSessionHistory? = null,
+        address: String = "tcp:sdk",
     ) {
         private val fake =
             FakeRadioInterfaceService(scope).apply {
-                setDeviceAddress("tcp:sdk")
+                setDeviceAddress(address)
                 connect()
             }
 
@@ -208,6 +211,26 @@ class SdkPhoneApiRadioTransportTest {
     }
 
     @Test
+    fun `a BLE connect the radio refuses for want of pairing reports pairing required`() = runTest {
+        val link = FakeRadioTransport(TransportIdentity("fake:ble"))
+        // BleTransport rethrows the warmup read's auth failure wrapped in its connect failure.
+        val refused =
+            MeshtasticException.Transport(
+                "BLE connect failed",
+                GattStatusException(message = "read", status = GATT_INSUFFICIENT_AUTHENTICATION),
+            )
+        val harness = Harness(backgroundScope, link, open = { throw refused }, address = "xAA:BB:CC:DD:EE:FF")
+        try {
+            harness.transport.start()
+            runCurrent()
+
+            assertEquals(TransportFailureKind.PairingRequired, harness.radio.transportStatus.value?.lastFailure?.kind)
+        } finally {
+            harness.transport.close()
+        }
+    }
+
+    @Test
     fun `a WebSocket the radio gave to another client ends for good with that reason`() = runTest {
         val link = FakeRadioTransport(TransportIdentity("fake:ws"))
         val harness = Harness(backgroundScope, link, history = WebSocketSessionHistory { currentTime })
@@ -243,5 +266,8 @@ class SdkPhoneApiRadioTransportTest {
         const val EARLY_PACKETS = 200
         const val SILENT_RADIO_MS = 10 * 60 * 1_000L
         const val CLOCK_TOLERANCE_S = 60L
+
+        // Android BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION.
+        const val GATT_INSUFFICIENT_AUTHENTICATION = 5
     }
 }
