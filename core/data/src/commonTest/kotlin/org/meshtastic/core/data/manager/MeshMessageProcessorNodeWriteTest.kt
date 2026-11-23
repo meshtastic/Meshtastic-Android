@@ -318,6 +318,105 @@ class MeshMessageProcessorNodeWriteTest {
         nodeRepository.releaseWrites.complete(Unit)
     }
 
+    /**
+     * Shaped like firmware's `PhoneAPI::makeReplay*Packet` for a node whose `last_heard` is not a wall-clock epoch and
+     * whose hop count is unknown: LoRa, no `rx_rssi`, no `rx_time`, `hop_start` and `hop_limit` both 0, and the stored
+     * `snr`, which is 0 for a node never measured.
+     */
+    private fun neverHeardReplayFrom(from: Int, id: Int) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.from = from
+            wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+            wb.rx_snr = 0f
+            wb.decoded =
+                Data.Builder()
+                    .also { d ->
+                        d.portnum = PortNum.TELEMETRY_APP
+                        d.payload = ByteString.EMPTY
+                    }
+                    .build()
+        }
+        .build()
+
+    @Test
+    fun `a node DB replay of a never-heard node leaves it unheard and unmeasured with unknown hops`() =
+        testScope.runTest {
+            val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+            fixture.nodeManager.installNodeInfo(NodeInfo.Builder().also { wb -> wb.num = SENDER }.build())
+            var handedToDataHandler: MeshPacket? = null
+            every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
+                { (packet: MeshPacket) ->
+                    handedToDataHandler = packet
+                }
+
+            launch { fixture.receive(neverHeardReplayFrom(SENDER, id = 1)) }
+            runCurrent()
+
+            val node = checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER])
+            assertEquals(0, node.lastHeard, "the phone's clock is not when the radio heard this node")
+            assertNull(node.snrOrNull, "a replayed snr is the radio's stored value, not a reception")
+            assertEquals(-1, node.hopsAway, "hop_start 0 without a bitfield is unknown, not direct")
+            assertNull(
+                checkNotNull(handedToDataHandler).rx_time,
+                "telemetry and position handlers must not see the phone's clock either",
+            )
+            nodeRepository.releaseWrites.complete(Unit)
+        }
+
+    @Test
+    fun `a node DB replay of a known direct neighbor keeps its heard time and hops without writing its stored snr`() =
+        testScope.runTest {
+            val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+            fixture.nodeManager.installNodeInfo(NodeInfo.Builder().also { wb -> wb.num = SENDER }.build())
+            val lastHeard = nowSeconds.toInt() - 3_600
+            // PhoneAPI::makeReplay*Packet for a node with a wall-clock last_heard and hops_away 0: rx_time is
+            // last_heard, hop_start == hop_limit == the configured hop limit, rx_snr is the stored reading, no rx_rssi.
+            val replay =
+                neverHeardReplayFrom(SENDER, id = 1)
+                    .newBuilder()
+                    .also { wb ->
+                        wb.rx_time = lastHeard
+                        wb.hop_start = 3
+                        wb.hop_limit = 3
+                        wb.rx_snr = 6.25f
+                    }
+                    .build()
+
+            launch { fixture.receive(replay) }
+            runCurrent()
+
+            val node = checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER])
+            assertEquals(lastHeard, node.lastHeard)
+            assertEquals(0, node.hopsAway)
+            assertNull(node.snrOrNull, "a stored snr was measured earlier, maybe on other settings")
+            nodeRepository.releaseWrites.complete(Unit)
+        }
+
+    @Test
+    fun `a live direct packet records a 0 dB snr and 0 hops as readings`() = testScope.runTest {
+        val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+        val direct =
+            packetFrom(SENDER, id = 1)
+                .newBuilder()
+                .also { wb ->
+                    wb.hop_start = 3
+                    wb.hop_limit = 3
+                    wb.rx_snr = 0f
+                }
+                .build()
+                .over(MeshPacket.TransportMechanism.TRANSPORT_LORA, rxRssi = -80)
+
+        launch { fixture.receive(direct) }
+        runCurrent()
+
+        val node = checkNotNull(fixture.nodeManager.nodeDBbyNodeNum[SENDER])
+        assertEquals(0f, node.snrOrNull)
+        assertEquals(-80, node.rssiOrNull)
+        assertEquals(0, node.hopsAway)
+        nodeRepository.releaseWrites.complete(Unit)
+    }
+
     private companion object {
         const val MY_NODE = 12345
         const val SENDER = 999
