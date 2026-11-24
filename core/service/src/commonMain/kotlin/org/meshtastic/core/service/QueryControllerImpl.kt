@@ -36,14 +36,12 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.repository.toNodeRequest
 import org.meshtastic.sdk.AdminResult
-import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.MessageHandle
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RoutingApi
 import org.meshtastic.sdk.TelemetryApi
-import org.meshtastic.sdk.channelFor
 import org.meshtastic.sdk.requestPaxcount
 import org.meshtastic.proto.Position as ProtoPosition
 import org.meshtastic.sdk.ConnectionState as SdkConnectionState
@@ -81,9 +79,6 @@ internal class QueryControllerImpl(
             try {
                 client.request()
             } catch (e: MeshtasticException) {
-                throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
-            } catch (e: IllegalArgumentException) {
-                // The SDK refuses a request addressed to the node it knows as ours.
                 throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
             }
         return handle.toNodeRequest()
@@ -124,7 +119,7 @@ internal class QueryControllerImpl(
                 null
             }
         // Firmware coarsens a phone-originated position to the channel precision, so an explicit 0,0 goes out as a
-        // real-looking coordinate. Without a valid fix only the time is shared, which the SDK stamps.
+        // real-looking coordinate. Without a valid fix only the time is shared.
         val shared =
             ProtoPosition.Builder()
                 .also { wb ->
@@ -138,9 +133,9 @@ internal class QueryControllerImpl(
                 .build()
         val client = requireClient("Position request")
         val node = NodeId(destNum)
-        val channel = client.remoteChannel(node, "Position request")
+        client.requireRemote(node, "Position request")
         val requestId = client.nextPacketId().raw
-        return rpc(client, requestId) { routingFor(local = false).requestPosition(node, channel, shared, requestId) }
+        return rpc(client, requestId) { routingFor(local = false).requestPosition(node, null, shared, requestId) }
     }
 
     override suspend fun requestUserInfo(destNum: Int): NodeRequest {
@@ -150,9 +145,9 @@ internal class QueryControllerImpl(
         // The SDK sends its own record of our user, so that is the one checked.
         if (client.ownNode.value?.user == null) throw LocalNodeUnavailableException("User-info request")
         val node = NodeId(destNum)
-        val channel = client.remoteChannel(node, "User-info request")
+        client.requireRemote(node, "User-info request")
         val requestId = client.nextPacketId().raw
-        return rpc(client, requestId) { routingFor(local = false).requestNodeInfo(node, channel, requestId) }
+        return rpc(client, requestId) { routingFor(local = false).requestNodeInfo(node, null, requestId) }
     }
 
     override suspend fun requestTraceroute(destNum: Int): NodeRequest {
@@ -194,17 +189,9 @@ internal class QueryControllerImpl(
     }
 }
 
-/**
- * The channel [node] was last heard on, for a request to it. The SDK refuses a request addressed to the node it knows
- * as ours, and one sent while it is not connected; both read as the session refusing admission.
- */
-private suspend fun RadioClient.remoteChannel(node: NodeId, operation: String): ChannelIndex {
+/** The SDK throws for a request to the node it knows as ours, after the call returns; refuse it before it starts. */
+private fun RadioClient.requireRemote(node: NodeId, operation: String) {
     if (ownNode.value?.num == node.raw) throw PacketQueueRejectedException(operation)
-    return try {
-        channelFor(node)
-    } catch (e: MeshtasticException) {
-        throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
-    }
 }
 
 /** A request to another node waits [REMOTE_READ_TIMEOUT], so a NAK after a multi-hop retransmit still settles it. */
