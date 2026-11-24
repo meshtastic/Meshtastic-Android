@@ -374,7 +374,8 @@ class TAKMeshIntegrationTest {
         h.serviceRepository.emitMeshPacket(createV2MeshPacket(payload))
         h.serviceRepository.emitMeshPacket(createV2MeshPacket(v2PliPayload("bravo-uid")))
 
-        assertEquals(2, h.serverManager.rawBroadcasts.size)
+        val uids = h.serverManager.rawBroadcasts.map { Regex("""uid="([^"]+)"""").find(it)?.groupValues?.get(1) }
+        assertEquals(listOf("alpha-uid", "bravo-uid"), uids)
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
