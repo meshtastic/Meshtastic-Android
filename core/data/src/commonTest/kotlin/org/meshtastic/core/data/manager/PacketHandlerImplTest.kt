@@ -181,7 +181,7 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `a dispatched send that ends Failed(Disconnected) is marked ERROR after its session is gone`() = runTest {
+    fun `a dispatched send that fails as disconnected is marked ERROR after its session is gone`() = runTest {
         // Regression: Unconfirmed plus Disconnected fell through and the write was refused by a lease already gone.
         val fixture = fixture()
         val outgoing = packet(801)
