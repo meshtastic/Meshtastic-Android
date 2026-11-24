@@ -96,13 +96,6 @@ class UsbRepository(
         }
     }
 
-    /**
-     * Creates a USB serial connection to the specified USB device. State changes and data arrival result in async
-     * callbacks on the supplied listener.
-     */
-    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener): SerialConnection =
-        SerialConnectionImpl(usbManagerLazy, device, listener)
-
     fun requestPermission(device: UsbDevice): Flow<Boolean> =
         usbManagerLazy.value?.requestPermission(application, device) ?: emptyFlow()
 
@@ -113,9 +106,9 @@ class UsbRepository(
      * Opens [driver]'s port, asserts DTR/RTS for [holdMillis], and closes it again.
      *
      * Exists because some firmware waits for a host before it will run: the nRF52 factory-erase image blocks in `while
-     * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately does not go
-     * through [createSerialConnection], which welds the assertion to a `SerialInputOutputManager` reader thread and a
-     * mandatory listener — there is no Meshtastic protocol on the other end here, just a blocked `setup()`.
+     * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately opens the port
+     * directly with no reader thread or listener: there is no Meshtastic protocol on the other end here, just a
+     * blocked `setup()`.
      *
      * @return true when the port was opened and DTR held; false if permission is missing or the port could not be
      *   opened.

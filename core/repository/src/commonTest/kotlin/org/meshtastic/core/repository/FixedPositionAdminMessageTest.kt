@@ -19,9 +19,7 @@ package org.meshtastic.core.repository
 import org.meshtastic.core.model.Position
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.meshtastic.proto.Position as ProtoPosition
 
 class FixedPositionAdminMessageTest {
@@ -36,21 +34,11 @@ class FixedPositionAdminMessageTest {
 
     @Test
     fun `a fixed position without altitude is sent without one`() {
-        val message = Position(protoPosition(altitude = null)).toFixedPositionAdminMessage()
-
-        assertNull(assertNotNull(message.set_fixed_position).altitude)
+        assertNull(Position(protoPosition(altitude = null)).toFixedPositionProto().altitude)
     }
 
     @Test
     fun `a sea level fixed position is sent as zero`() {
-        val message = Position(protoPosition(altitude = 0)).toFixedPositionAdminMessage()
-
-        assertEquals(0, assertNotNull(message.set_fixed_position).altitude)
-    }
-
-    @Test
-    fun `zero coordinates remove the fixed position whether or not altitude is present`() {
-        assertEquals(true, Position(0.0, 0.0, null).toFixedPositionAdminMessage().remove_fixed_position)
-        assertTrue(Position(0.0, 0.0, 0).isFixedPositionRemoval())
+        assertEquals(0, Position(protoPosition(altitude = 0)).toFixedPositionProto().altitude)
     }
 }

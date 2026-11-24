@@ -17,7 +17,6 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.Position
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Converts the model position to the exact protobuf payload used by fixed-position admin commands. */
@@ -28,10 +27,3 @@ fun Position.toFixedPositionProto(): ProtoPosition = ProtoPosition.Builder()
         wb.altitude = altitude
     }
     .build()
-
-/** Builds the device admin command for setting or removing a fixed position. */
-fun Position.toFixedPositionAdminMessage(): AdminMessage = if (isFixedPositionRemoval()) {
-    AdminMessage.Builder().also { wb -> wb.remove_fixed_position = true }.build()
-} else {
-    AdminMessage.Builder().also { wb -> wb.set_fixed_position = toFixedPositionProto() }.build()
-}

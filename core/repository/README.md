@@ -9,7 +9,7 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 ## Key Responsibilities
 
 - Define the reactive data contracts between the long-running mesh service and all feature/UI layers
-- Declare the per-link transport contract (`RadioTransport`) over the SDK PhoneAPI session
+- Declare the radio-link contracts (`RadioLinks`, `RadioLink`): the platform's address-to-SDK-client factory, and the selected radio's client and session hand-off
 - Provide the mesh node database interface (`NodeRepository`)
 - Expose the active radio session's SDK admin API and per-node admin session status (`RadioInterfaceService.adminForSession`, `adminSessionStatus`)
 - Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
@@ -22,7 +22,7 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 ```text
 src/
 ├── commonMain/kotlin/org/meshtastic/core/repository/
-│   ├── RadioTransport.kt              ← interface: raw hardware I/O
+│   ├── RadioLinks.kt                  ← interfaces: RadioLinks (address → SDK client), RadioLink, RadioSessionHost
 │   ├── ServiceRepository.kt           ← interface: service ↔ UI bridge (extends all providers)
 │   ├── ConnectionStateProvider.kt     ← interface: read-only connection state
 │   ├── ResponseProviders.kt           ← interfaces: TracerouteResponseProvider, NeighborInfoResponseProvider
@@ -56,7 +56,7 @@ src/
 │   ├── RadioConfigRepository.kt
 │   ├── RadioInterfaceService.kt
 │   ├── RadioSessionContext.kt
-│   ├── RadioTransportCallback.kt / RadioTransportFactory.kt
+│   ├── TransportDisconnectReason.kt   ← why a link failed, as the user reads it
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt
 │   ├── TracerouteHandler.kt / TracerouteSnapshotRepository.kt
@@ -71,29 +71,27 @@ The module has no platform source sets. Platform implementations such as the And
 
 ## Core Interfaces
 
-### `RadioTransport`
+### `RadioLinks` and `RadioLink`
 
-One radio link (BLE, USB, TCP, WebSocket, demo) and the SDK PhoneAPI session that runs over it. Every member but
-`close` has a default, so the inert transports (`NopRadioTransport`, the USB-unavailable placeholder) override nothing
-else.
+`RadioLinks` maps a saved device address (BLE, USB, TCP, WebSocket, demo) to the SDK client that serves it; each platform binds one in `:core:data`. `RadioLink` is the selected radio: its `RadioClient`, which owns connecting and reconnecting, and `run`, which feeds the client's sessions into the app through a `RadioSessionHost`.
 
 ```kotlin
-interface RadioTransport {
-    val admin: AdminApi?            // the session's SDK admin API
-    val client: RadioClient?        // the session's SDK client
-    fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus>
-    fun sendPaced(packet: MeshPacket): PacedMessageHandle?
-    fun tryLockdown(auth: LockdownAuth): Boolean
-    fun requestNodeDbRefresh(): Boolean
-    suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean
-    fun start() {}
-    suspend fun close()
+interface RadioLinks {
+    val supportedDeviceTypes: List<DeviceType>
+    fun isAddressValid(address: String?): Boolean
+    fun open(address: String, scope: CoroutineScope): RadioLink?
+}
+
+interface RadioLink {
+    val client: RadioClient
+    suspend fun connect()
+    suspend fun disconnect()
+    fun retryNow(): Boolean
+    suspend fun run(host: RadioSessionHost)
 }
 ```
 
-`RadioInterfaceService` admits work to the active transport under a per-session gate: `sendPaced`, `tryLockdown` and
-`deliverMqttProxy` run only while their session still owns the link, and teardown drains an admitted handoff before it
-closes the transport.
+`RadioInterfaceService` admits work to the active session under a per-session gate: `sendPaced`, `tryLockdown` and `deliverMqttProxy` run only while their session still owns the link.
 
 ### `ServiceRepository`
 

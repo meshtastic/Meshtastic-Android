@@ -23,10 +23,9 @@ import org.meshtastic.proto.SharedContact
 /**
  * Messaging operations — sending data packets, reactions, and shared contacts.
  *
- * Mirrors the SDK's send/messaging surface. When the SDK is adopted, implementations delegate to `RadioClient.send()` /
- * `RadioClient.sendText()`.
+ * Data packets go through the SDK's paced send; remote shell frames go straight to the session client.
  *
- * @see RadioController which extends this interface for backward compatibility
+ * @see RadioController
  */
 interface MessagingController {
 
