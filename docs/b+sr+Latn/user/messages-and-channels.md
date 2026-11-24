@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-11-21
+last_updated: 2026-11-23
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -60,9 +60,11 @@ On the **Channels** screen, tap **Share Channels** to show a QR code and a link 
 To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. The **Import channels** dialog lists the incoming channels. A code made with **Replace** opens with **Replace** selected, a code made with **Add** offers only **Add**, and the **Replace** and **Add** control only picks the mode: nothing changes on your node until you tap **Replace channels** or **Add channels**. A channel that forwards messages to or from MQTT, or shares your location, says so on its row.
 
 - **Replace** removes the channels on your node, then lists every LoRa setting that will change. Changes to sending and receiving, such as turning transmit off, come first in their own group.
-- **Add** lets you select the incoming channels you want and shows how many of your node's channel slots are in use. If the selection doesn't fit, a line says how many channels to uncheck. Unchecking a channel that is already on your node removes it.
+- **Add** keeps your node's channels and LoRa settings, lets you select the incoming channels you want, and shows how many channel slots are in use. If the selection doesn't fit, a line says how many new channels to uncheck. Only when your node is full can you uncheck a channel already on it to make room, and a red line then says how many of your channels will be removed. An incoming channel with the same name as one of yours but a different key is marked on its row.
 
-The title and the **Cancel** and confirm buttons stay in view while the list scrolls.
+The title and the **Cancel** and confirm buttons stay in view while the list scrolls. If the import fails, for example because the node disconnected, a message says so with a **Retry** button. Until the app has read your node's channels, the dialog says so and neither confirm button can be tapped.
+
+A channel link shared into Meshtastic from another app, on its own, opens the same **Import channels** dialog. Any other shared text opens as a message to send.
 
 ### Archived Channels
 
