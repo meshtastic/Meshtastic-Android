@@ -32,6 +32,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -261,6 +262,9 @@ class SharedRadioInterfaceService(
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
+    // Text lookup suspends, so one consumer keeps the errors in the order their states arrived.
+    private val connectionErrorReasons = Channel<TransportDisconnectReason>(Channel.UNLIMITED)
+
     companion object {
         /**
          * Ceiling on a single [runWhileSessionActive] handler. The block holds [sessionOperationMutex] — the whole
@@ -285,6 +289,9 @@ class SharedRadioInterfaceService(
             }
             .catch { Logger.e(it) { "radioPrefs.devAddr address-sync flow crashed" } }
             .launchIn(processLifecycle.coroutineScope)
+        processLifecycle.coroutineScope.launch(dispatchers.default) {
+            for (reason in connectionErrorReasons) _connectionError.emit(connectionErrorText(reason))
+        }
     }
 
     // ── Session admission ───────────────────────────────────────────────────
@@ -498,9 +505,7 @@ class SharedRadioInterfaceService(
         val reason = active.failureReason(state) ?: return
         if (reason == active.shownReason) return
         active.shownReason = reason
-        processLifecycle.coroutineScope.launch(dispatchers.default) {
-            _connectionError.emit(connectionErrorText(reason))
-        }
+        connectionErrorReasons.trySend(reason)
     }
 
     /** Opens the selected radio's link and starts its client. Must be called under [linkMutex]. */

@@ -49,7 +49,7 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LongParameterList")
 class AndroidRadioLinks(
     private val application: Application,
-    private val buildConfigProvider: BuildConfigProvider,
+    buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
     private val networkRepository: NetworkRepository,
     hiddenFeaturesUnlock: HiddenFeaturesUnlock,

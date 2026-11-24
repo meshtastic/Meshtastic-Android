@@ -223,7 +223,7 @@ internal class SdkRadioLink(
         }
         launch {
             client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collect {
-                current.value?.let { projection.refreshLocalNodeLastHeard(it) }
+                current.value?.let { session -> projection.refreshLocalNodeLastHeard(session) }
             }
         }
     }

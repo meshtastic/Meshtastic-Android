@@ -88,7 +88,7 @@ class SharedRadioInterfaceServiceTest {
 
     @AfterTest
     fun tearDown() {
-        kotlinx.coroutines.runBlocking { services.forEach { it.disconnect() } }
+        runTest(testDispatcher) { services.forEach { it.disconnect() } }
         lifecycleOwner.destroy()
         Dispatchers.resetMain()
     }
