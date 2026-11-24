@@ -49,6 +49,9 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
+/** No attribute value exceeds 512 bytes, while Android 14+ and BlueZ negotiate an MTU of 517 (a 514-byte payload). */
+internal const val MAX_ATTRIBUTE_LENGTH = 512
+
 /** [BleService] implementation backed by a Kable [Peripheral] for a specific GATT service. */
 class KableBleService(private val peripheral: Peripheral, private val serviceUuid: Uuid) : BleService {
     override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean = peripheral.services.value?.any { svc ->
@@ -246,7 +249,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                 "Failed to establish connection after bounded attempts (state=${p.state.value})",
             )
         }
-        writeLengthAtConnect = p.queryMaxWriteLength()
+        writeLengthAtConnect = p.queryMaxWriteLength()?.coerceAtMost(MAX_ATTRIBUTE_LENGTH)
     }
 
     @Suppress("TooGenericExceptionCaught")

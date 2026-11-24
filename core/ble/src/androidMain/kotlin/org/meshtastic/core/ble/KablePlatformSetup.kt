@@ -73,9 +73,6 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
 /** ATT protocol header size (opcode + handle) subtracted from MTU to get the usable payload. */
 private const val ATT_HEADER_SIZE = 3
 
-/** No attribute value exceeds 512 bytes, while Android 14+ negotiates an MTU of 517 whatever was requested. */
-private const val MAX_ATTRIBUTE_LENGTH = 512
-
 // Reads the live MTU rather than [atConnect], since Android can renegotiate it after connect.
 internal actual fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int? {
     val mtu = (this as? AndroidPeripheral)?.mtu?.value ?: return null
