@@ -66,7 +66,7 @@ internal class QueryControllerImpl(
 
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
 
-    /** The session's client once the app has installed its snapshot; the SDK refuses sends before then. */
+    /** The session's client once the app has installed its snapshot, so a request can read the local node. */
     private fun requireClient(operation: String): RadioClient =
         radio.activeSession.value
             ?.takeIf { connectionStateProvider.connectionState.value == ConnectionState.Connected }
