@@ -82,7 +82,9 @@ fun AdminResult<*>.routingErrorOrNull(): Int? = when (this) {
 
     AdminResult.RateLimited -> Routing.Error.RATE_LIMIT_EXCEEDED.value
 
-    AdminResult.Unauthorized -> Routing.Error.NOT_AUTHORIZED.value
+    // The SDK folds NOT_AUTHORIZED and ADMIN_PUBLIC_KEY_UNAUTHORIZED into Unauthorized; the key refusal is the
+    // actionable one.
+    AdminResult.Unauthorized -> Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value
 
     AdminResult.SessionKeyExpired -> Routing.Error.ADMIN_BAD_SESSION_KEY.value
 

@@ -17,6 +17,7 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.meshtastic.core.model.getStringResFrom
+import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.DeviceConnectionStatus
@@ -54,21 +55,7 @@ sealed interface RadioResponseResult {
  * caller's own deadline and connection handling report.
  */
 fun <T> AdminResult<T>.toRadioResponseResult(onSuccess: (T) -> RadioResponseResult): RadioResponseResult? =
-    when (this) {
-        is AdminResult.Success -> onSuccess(value)
+    if (this is AdminResult.Success) onSuccess(value) else routingErrorOrNull()?.let(::routingErrorResult)
 
-        is AdminResult.Failed -> routingErrorResult(routingError)
-
-        AdminResult.Unauthorized -> routingErrorResult(Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED)
-
-        AdminResult.SessionKeyExpired -> routingErrorResult(Routing.Error.ADMIN_BAD_SESSION_KEY)
-
-        AdminResult.RateLimited -> routingErrorResult(Routing.Error.RATE_LIMIT_EXCEEDED)
-
-        AdminResult.Timeout,
-        AdminResult.NodeUnreachable,
-        -> null
-    }
-
-private fun routingErrorResult(error: Routing.Error) =
-    RadioResponseResult.Error(UiText.Resource(getStringResFrom(error.value)), error)
+private fun routingErrorResult(error: Int) =
+    RadioResponseResult.Error(UiText.Resource(getStringResFrom(error)), Routing.Error.fromValue(error))
