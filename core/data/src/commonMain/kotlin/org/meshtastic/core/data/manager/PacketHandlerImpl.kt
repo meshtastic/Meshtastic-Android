@@ -29,6 +29,8 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -64,6 +66,7 @@ import kotlin.time.Duration.Companion.seconds
 @Single
 class PacketHandlerImpl(
     private val packetRepository: Lazy<PacketRepository>,
+    private val databaseProvider: DatabaseProvider,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateProvider: ConnectionStateProvider,
     private val nodeManager: NodeManager,
@@ -139,11 +142,7 @@ class PacketHandlerImpl(
         p.time = nowMillis
     }
 
-    /**
-     * The wire form of [p] under its persisted ID. The SDK's send builder builds only inside the SDK's own send, and
-     * the session's paced send takes a [MeshPacket], so the durable path builds the packet the SDK's paced queue then
-     * owns.
-     */
+    /** The wire form of [p] under its persisted ID, which the SDK's paced send takes as a built [MeshPacket]. */
     private fun meshPacketFor(p: DataPacket, data: Data): MeshPacket? {
         val client = activeClient() ?: return null
         val to = resolveNodeNum(NodeAddress.fromString(p.to))
@@ -198,34 +197,51 @@ class PacketHandlerImpl(
             .getOrNull()
     }
 
+    private fun isSelected(database: MeshtasticDatabase): Boolean = databaseProvider.currentDb.value === database
+
+    private fun mayWrite(session: RadioSessionContext, database: MeshtasticDatabase): Boolean =
+        radioInterfaceService.isSessionActive(session) || isSelected(database)
+
     @Suppress("ReturnCount")
     private fun submit(packet: MeshPacket): PacedMessageHandle? {
         if (!scope.isActive) return null
+        val database = databaseProvider.currentDb.value
         val session = radioInterfaceService.activeSession.value ?: return null
         if (connectionStateProvider.connectionLifecycle.value.state != ConnectionState.Connected) return null
 
         val handle = radioInterfaceService.sendPaced(session, packet) ?: return null
-        scope.handledLaunch { projectSend(session, packet, handle) }
+        scope.handledLaunch { projectSend(session, database, packet, handle) }
         return handle
     }
 
-    private suspend fun projectSend(session: RadioSessionContext, packet: MeshPacket, handle: PacedMessageHandle) {
+    private suspend fun projectSend(
+        session: RadioSessionContext,
+        database: MeshtasticDatabase,
+        packet: MeshPacket,
+        handle: PacedMessageHandle,
+    ) {
         if (!handle.awaitAdmission()) return
         if (!handle.awaitDispatch()) {
-            projectStatus(session, packet, MessageStatus.ERROR)
+            projectStatus(session, database, packet, MessageStatus.ERROR)
             return
         }
-        projectStatus(session, packet, MessageStatus.ENROUTE)
+        projectStatus(session, database, packet, MessageStatus.ENROUTE)
 
         when (handle.awaitQueueReceipt()) {
-            QueueReceipt.Rejected -> projectStatus(session, packet, MessageStatus.ERROR)
+            QueueReceipt.Rejected -> projectStatus(session, database, packet, MessageStatus.ERROR)
 
-            QueueReceipt.LocalDelivery -> projectStatus(session, packet, MessageStatus.DELIVERED)
+            QueueReceipt.LocalDelivery -> projectStatus(session, database, packet, MessageStatus.DELIVERED)
 
-            QueueReceipt.Unconfirmed -> {
-                val failure = (handle.message.await() as? SendOutcome.Failure)?.reason
-                if (failure is SendFailure.QueueRejected) projectStatus(session, packet, MessageStatus.ERROR)
-            }
+            // Unconfirmed: the queue receipt was lost or the link ended. A late queue rejection or the link ending
+            // fails the send; routing NAKs and ACK timeouts are settled elsewhere and leave the row ENROUTE.
+            QueueReceipt.Unconfirmed ->
+                when ((handle.message.await() as? SendOutcome.Failure)?.reason) {
+                    is SendFailure.QueueRejected,
+                    SendFailure.Disconnected,
+                    -> projectStatus(session, database, packet, MessageStatus.ERROR)
+
+                    else -> Unit
+                }
 
             QueueReceipt.Accepted,
             QueueReceipt.NotDispatched,
@@ -233,12 +249,17 @@ class PacketHandlerImpl(
         }
     }
 
-    private suspend fun projectStatus(session: RadioSessionContext, packet: MeshPacket, status: MessageStatus) {
+    private suspend fun projectStatus(
+        session: RadioSessionContext,
+        database: MeshtasticDatabase,
+        packet: MeshPacket,
+        status: MessageStatus,
+    ) {
         val persistence = packet.statusPersistence() ?: return
-        radioInterfaceService.runWithSessionLease(session) {
-            val target = PacketStatusTarget(packet, persistence)
-            withTimeoutOrNull(PERSISTED_STATUS_WAIT) {
-                while (!applyQueueStatus(session, target, status)) delay(PERSISTED_STATUS_RETRY_DELAY)
+        val target = PacketStatusTarget(packet, persistence)
+        withTimeoutOrNull(PERSISTED_STATUS_WAIT) {
+            while (mayWrite(session, database) && !applyQueueStatus(session, database, target, status)) {
+                delay(PERSISTED_STATUS_RETRY_DELAY)
             }
         }
     }
@@ -246,10 +267,12 @@ class PacketHandlerImpl(
     override fun rearmSendAckTimeouts() {
         val session = radioInterfaceService.activeSession.value ?: return
         radioInterfaceService.launchSessionWork(scope, session) {
+            val database = databaseProvider.currentDb.value
             packetRepository.value.getEnroutePackets().forEach { persisted ->
                 val remaining = persisted.packet.time + SEND_ACK_TIMEOUT.inWholeMilliseconds - nowMillis
                 scheduleSendAckTimeout(
                     session,
+                    database,
                     PersistedStatusTarget.DataPacket(persisted.id),
                     remaining.milliseconds.coerceAtLeast(REARM_GRACE),
                 )
@@ -258,6 +281,7 @@ class PacketHandlerImpl(
                 val remaining = persisted.reaction.timestamp + SEND_ACK_TIMEOUT.inWholeMilliseconds - nowMillis
                 scheduleSendAckTimeout(
                     session,
+                    database,
                     PersistedStatusTarget.Reaction(persisted.id),
                     remaining.milliseconds.coerceAtLeast(REARM_GRACE),
                 )
@@ -270,11 +294,12 @@ class PacketHandlerImpl(
      * response arrived) would stay ENROUTE — "Sending…" — forever. Stamp it as a retryable timeout instead; a late ACK
      * still upgrades it via handleAckNak.
      *
-     * Reconnecting re-arms timeouts for the selected database. A retired session cannot settle its rows through the
-     * active database provider.
+     * Timers survive disconnects. One fires while [session] is still active or [database], the one selected when it
+     * was armed, is still selected; reconnecting re-arms the selected database's rows.
      */
     private suspend fun scheduleSendAckTimeout(
         session: RadioSessionContext,
+        database: MeshtasticDatabase,
         target: PersistedStatusTarget,
         delayFor: Duration = SEND_ACK_TIMEOUT,
     ) {
@@ -284,7 +309,7 @@ class PacketHandlerImpl(
             sendAckTimeoutJobs[target] = scope.handledLaunch {
                 delay(delayFor)
                 // Any settlement that lands before the conditional transaction wins.
-                radioInterfaceService.runWithSessionLease(session) {
+                if (mayWrite(session, database)) {
                     when (target) {
                         is PersistedStatusTarget.DataPacket ->
                             packetRepository.value.timeOutEnroutePacket(target.id, Routing.Error.TIMEOUT.value)
@@ -299,6 +324,7 @@ class PacketHandlerImpl(
 
     private suspend fun applyQueueStatus(
         session: RadioSessionContext,
+        database: MeshtasticDatabase,
         target: PacketStatusTarget,
         status: MessageStatus,
     ): Boolean = when (target.persistence) {
@@ -309,7 +335,7 @@ class PacketHandlerImpl(
                 status == MessageStatus.ENROUTE &&
                     (current == MessageStatus.ENROUTE || shouldApplyOutgoingQueueStatus(current, status))
             if (shouldPersist) {
-                scheduleSendAckTimeout(session, PersistedStatusTarget.DataPacket(persisted.id))
+                scheduleSendAckTimeout(session, database, PersistedStatusTarget.DataPacket(persisted.id))
             }
             true
         }
@@ -322,7 +348,7 @@ class PacketHandlerImpl(
                 status == MessageStatus.ENROUTE &&
                 (current == MessageStatus.ENROUTE || shouldApplyOutgoingQueueStatus(current, status))
             ) {
-                scheduleSendAckTimeout(session, PersistedStatusTarget.Reaction(persisted.id))
+                scheduleSendAckTimeout(session, database, PersistedStatusTarget.Reaction(persisted.id))
             }
             true
         }

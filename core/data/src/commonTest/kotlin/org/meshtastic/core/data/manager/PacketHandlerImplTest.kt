@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.Data
@@ -83,7 +84,7 @@ class PacketHandlerImplTest {
         assertEquals(listOf(101, 102), fixture.sentTextIds())
         verifySuspend { fixture.repository.applyOutgoingQueueStatus(packet(101), MessageStatus.ENROUTE) }
         verifySuspend { fixture.repository.applyOutgoingQueueStatus(packet(102), MessageStatus.ENROUTE) }
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -97,7 +98,7 @@ class PacketHandlerImplTest {
         runCurrent()
 
         verifySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.DELIVERED) }
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -112,7 +113,7 @@ class PacketHandlerImplTest {
         fixture.queueStatus(551, result = 32)
         runCurrent()
         verifySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -124,11 +125,87 @@ class PacketHandlerImplTest {
         fixture.radio.disconnect()
         fixture.radio.setDeviceAddress("treplacement")
         fixture.radio.connect()
+        fixture.databases.switchToNewDatabase()
         fixture.queueStatus(601, result = 32)
         runCurrent()
 
         verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `an ENROUTE row still times out after its session ended with no reconnect`() = runTest {
+        // Regression: a timer fenced on the session lease leaves the row ENROUTE forever once the session is gone.
+        val fixture = fixture()
+        assertTrue(fixture.handler.sendToRadio(packet(701)))
+        runCurrent()
+        fixture.queueStatus(701, result = 0)
+        runCurrent()
+        fixture.radio.disconnect()
         fixture.client.disconnect()
+        advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT)
+        runCurrent()
+        verifySuspend { fixture.repository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `a timeout armed before a disconnect does not write after the database switches`() = runTest {
+        // Regression: a timer that writes whatever database is current would hit the replacement radio's database.
+        val fixture = fixture()
+        assertTrue(fixture.handler.sendToRadio(packet(711)))
+        runCurrent()
+        fixture.queueStatus(711, result = 0)
+        runCurrent()
+        fixture.radio.disconnect()
+        fixture.databases.switchToNewDatabase()
+        advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT)
+        runCurrent()
+        verifySuspend(exactly(0)) { fixture.repository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `a timeout still writes when the database instance is republished while the session is active`() = runTest {
+        // Regression: a database-only fence drops this write on association merge or wedge reopen; main wrote it.
+        val fixture = fixture()
+        assertTrue(fixture.handler.sendToRadio(packet(721)))
+        runCurrent()
+        fixture.queueStatus(721, result = 0)
+        runCurrent()
+        fixture.databases.switchToNewDatabase()
+        advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT)
+        runCurrent()
+        verifySuspend { fixture.repository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `a dispatched send that ends Failed(Disconnected) is marked ERROR after its session is gone`() = runTest {
+        // Regression: Unconfirmed plus Disconnected fell through and the write was refused by a lease already gone.
+        val fixture = fixture()
+        val outgoing = packet(801)
+        assertTrue(fixture.handler.sendToRadio(outgoing))
+        runCurrent()
+        fixture.radio.disconnect()
+        fixture.client.disconnect()
+        runCurrent()
+        verifySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `a send whose ACK wait times out stays ENROUTE for the 5 minute window`() = runTest {
+        // Regression: mapping AckTimeout to ERROR would cut main's 5 minute window to the SDK's 30 s.
+        val fixture = fixture()
+        val outgoing = packet(811)
+        assertTrue(fixture.handler.sendToRadio(outgoing))
+        runCurrent()
+        advanceTimeBy(6.seconds)
+        advanceTimeBy(26.seconds)
+        runCurrent()
+        verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
+        fixture.shutdown()
     }
 
     @Test
@@ -149,7 +226,7 @@ class PacketHandlerImplTest {
         advanceTimeBy(PacketHandlerImpl.REARM_GRACE)
         runCurrent()
         verifySuspend { fixture.repository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -180,7 +257,7 @@ class PacketHandlerImplTest {
         assertEquals(1, sent.decoded?.emoji)
         assertEquals(MessageStatus.QUEUED, packet.status)
         assertTrue(packet.time > 0)
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -197,7 +274,7 @@ class PacketHandlerImplTest {
         assertEquals(packet.id, sent.id)
         // HOP_RELIABLE in firmware's MeshTypes.h; the handshake here carries no LoRa config.
         assertEquals(3, sent.hop_limit)
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -210,7 +287,7 @@ class PacketHandlerImplTest {
 
         // RadioClient.nextPacketId steps its counter by one, so the SDK's own next send cannot reuse the row's ID.
         assertEquals(packet.id + 1, fixture.client.nextPacketId().raw)
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -231,7 +308,7 @@ class PacketHandlerImplTest {
         assertTrue(sent.pki_encrypted)
         assertEquals(PEER_KEY, sent.public_key)
         assertEquals(0, sent.channel)
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -244,7 +321,7 @@ class PacketHandlerImplTest {
 
         assertEquals(MessageStatus.ERROR, packet.status)
         assertEquals(0L, packet.time)
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     @Test
@@ -262,7 +339,7 @@ class PacketHandlerImplTest {
         assertTrue(failure.message.orEmpty().contains("Message too long"))
         assertEquals(MessageStatus.ERROR, packet.status)
         assertTrue(fixture.sentTextIds().isEmpty())
-        fixture.client.disconnect()
+        fixture.shutdown()
     }
 
     private suspend fun TestScope.fixture(): Fixture {
@@ -297,25 +374,33 @@ class PacketHandlerImplTest {
                 PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
                     .takeIf { args.arg<MeshPacket>(0).from == LOCAL_NODE }
             }
+        val databases = FakeDatabaseProvider()
         val handler =
             PacketHandlerImpl(
                 lazy { repository },
+                databases,
                 radioService,
                 service,
                 nodeManager(),
                 backgroundScope.asServiceScope(),
             )
-        return Fixture(handler, repository, service, radio, transport, client)
+        return Fixture(handler, repository, databases, service, radio, transport, client)
     }
 
     private class Fixture(
         val handler: PacketHandlerImpl,
         val repository: PacketRepository,
+        val databases: FakeDatabaseProvider,
         val service: FakeServiceRepository,
         val radio: FakeRadioInterfaceService,
         val transport: FakeRadioTransport,
         val client: RadioClient,
     ) {
+        suspend fun shutdown() {
+            client.disconnect()
+            databases.close()
+        }
+
         fun queueStatus(id: Int, result: Int) {
             val status =
                 QueueStatus.Builder()
