@@ -169,7 +169,7 @@ class SdkRadioLinkSessionRoutingTest {
 
     // Regression: late tagged items were written to whichever app session was open instead of their own.
     @Test
-    fun `a side-stream item for a closed session is dropped, not written to the next one`() = runTest {
+    fun `a side-stream item for a closed session is dropped and never written to the next one`() = runTest {
         val rig = Rig(this)
         val events = MutableSharedFlow<RadioSessionEvent>()
         val link = rig.link()
