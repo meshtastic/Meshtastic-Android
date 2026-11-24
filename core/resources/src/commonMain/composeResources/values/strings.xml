@@ -1283,6 +1283,8 @@
     <string name="mesh_beacon_interval">Broadcast interval</string>
     <string name="mesh_beacon_interval_error">Choose an interval of at least one hour</string>
     <string name="mesh_beacon_invitations_title">Mesh invitations</string>
+    <string name="mesh_beacon_legacy_split">Legacy text message</string>
+    <string name="mesh_beacon_legacy_split_summary">Also send the beacon message as a standard text message for older firmware</string>
     <string name="mesh_beacon_listen">Listen for beacons</string>
     <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
     <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>

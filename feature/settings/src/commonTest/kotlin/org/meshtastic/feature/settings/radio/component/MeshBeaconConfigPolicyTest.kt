@@ -770,4 +770,20 @@ class MeshBeaconConfigPolicyTest {
     fun beaconTargetSlotFallback_outOfRange_isKeptVisible() {
         assertEquals(longFastSlots, beaconTargetSlotFallback(longFastSlots, shortTurboSlots))
     }
+
+    @Test
+    fun legacySplitFlag_togglesWithoutDisturbingListenOrBroadcastBits() {
+        val listen = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
+        val broadcast = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
+        val legacySplit = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
+
+        val withSplit = (listen or broadcast).withFlag(legacySplit, true)
+        assertEquals(listen or broadcast or legacySplit, withSplit)
+        assertTrue(withSplit.hasFlag(legacySplit))
+        assertTrue(withSplit.hasFlag(listen))
+        assertTrue(withSplit.hasFlag(broadcast))
+
+        val withoutSplit = withSplit.withFlag(legacySplit, false)
+        assertEquals(listen or broadcast, withoutSplit)
+    }
 }

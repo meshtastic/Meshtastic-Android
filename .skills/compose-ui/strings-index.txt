@@ -1226,6 +1226,8 @@ mesh_beacon_channels_title
 mesh_beacon_interval
 mesh_beacon_interval_error
 mesh_beacon_invitations_title
+mesh_beacon_legacy_split
+mesh_beacon_legacy_split_summary
 mesh_beacon_listen
 mesh_beacon_listen_summary
 mesh_beacon_message_error

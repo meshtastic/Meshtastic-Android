@@ -47,6 +47,8 @@ import org.meshtastic.core.resources.mesh_beacon_broadcast_summary
 import org.meshtastic.core.resources.mesh_beacon_channel_number
 import org.meshtastic.core.resources.mesh_beacon_interval
 import org.meshtastic.core.resources.mesh_beacon_interval_error
+import org.meshtastic.core.resources.mesh_beacon_legacy_split
+import org.meshtastic.core.resources.mesh_beacon_legacy_split_summary
 import org.meshtastic.core.resources.mesh_beacon_listen
 import org.meshtastic.core.resources.mesh_beacon_listen_summary
 import org.meshtastic.core.resources.mesh_beacon_no_channels
@@ -147,6 +149,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
 
     val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
     val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
+    val legacySplitFlag = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
     // Only require a valid interval when broadcasting is actually on, otherwise a default (interval=0) config could
     // never be saved, blocking even a listen-only toggle.
     val broadcastEnabled = formState.value.flags.hasFlag(broadcastFlag)
@@ -304,6 +307,21 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                                     .also { wb -> wb.broadcast_interval_secs = it.toInt() }
                                     .build()
                         },
+                    )
+                    HorizontalDivider()
+                    SwitchPreference(
+                        title = stringResource(Res.string.mesh_beacon_legacy_split),
+                        summary = stringResource(Res.string.mesh_beacon_legacy_split_summary),
+                        checked = formState.value.flags.hasFlag(legacySplitFlag),
+                        enabled = broadcastGate.sectionsEnabled,
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.flags = formState.value.flags.withFlag(legacySplitFlag, it) }
+                                    .build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
             }
