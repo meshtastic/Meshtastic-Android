@@ -165,7 +165,8 @@ internal class SdkRadioLink(
                 return@collect
             }
             val slot =
-                current.value?.takeIf { it.sdkId == event.sessionId } ?: openSession(host, event.sessionId)
+                current.value?.takeIf { it.sdkId == event.sessionId }
+                    ?: openSession(host, event.sessionId)
                     ?: return@collect
             val session = slot.context
             // Nothing restarts this collector, so one event the app fails to write must not end the session's stream.
@@ -215,9 +216,11 @@ internal class SdkRadioLink(
     }
 
     internal fun routeDeviceLog(item: SessionScoped<LogRecord>) {
-        current.value?.takeIf { it.sdkId == item.sessionId }?.let {
-            pipeline.sessionProjection.onDeviceLog(item.value, it.context)
-        }
+        current.value
+            ?.takeIf { it.sdkId == item.sessionId }
+            ?.let {
+                pipeline.sessionProjection.onDeviceLog(item.value, it.context)
+            }
     }
 
     internal fun routeDisplayPalette(palette: DisplayPalette) {
@@ -233,16 +236,20 @@ internal class SdkRadioLink(
         launch { client.deviceLogs.collectGuarded("device log") { routeDeviceLog(it) } }
         launch {
             client.outboundPackets.collectGuarded("outbound packet") { item ->
-                current.value?.takeIf { it.sdkId == item.sessionId }?.let {
-                    projection.onOutboundPacket(item.value, it.context)
-                }
+                current.value
+                    ?.takeIf { it.sdkId == item.sessionId }
+                    ?.let {
+                        projection.onOutboundPacket(item.value, it.context)
+                    }
             }
         }
         launch {
             client.displayFrames.collectGuarded("display frame") { item ->
-                current.value?.takeIf { it.sdkId == item.sessionId }?.let {
-                    projection.onDisplayFrame(item.value, it.context)
-                }
+                current.value
+                    ?.takeIf { it.sdkId == item.sessionId }
+                    ?.let {
+                        projection.onDisplayFrame(item.value, it.context)
+                    }
             }
         }
         launch {

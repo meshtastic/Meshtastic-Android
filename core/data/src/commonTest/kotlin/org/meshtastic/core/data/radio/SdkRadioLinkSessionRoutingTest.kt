@@ -116,21 +116,20 @@ class SdkRadioLinkSessionRoutingTest {
                 lazy { lockdown },
             )
 
-        fun link(configure: RadioClient.Builder.() -> RadioClient.Builder = { this }) =
-            SdkRadioLink(
-                client =
-                RadioClient.Builder()
-                    .transport(FakeRadioTransport(TransportIdentity("fake:a7"), autoHandshake = true, nodeNum = 1))
-                    .storage(InMemoryStorageProvider())
-                    .coroutineContext(scope.backgroundScope.coroutineContext)
-                    .autoSyncTimeOnConnect(false)
-                    .configure()
-                    .build(),
-                pipeline = pipeline,
-                gattCache = null,
-                reasonOf = { null },
-                onClose = {},
-            )
+        fun link(configure: RadioClient.Builder.() -> RadioClient.Builder = { this }) = SdkRadioLink(
+            client =
+            RadioClient.Builder()
+                .transport(FakeRadioTransport(TransportIdentity("fake:a7"), autoHandshake = true, nodeNum = 1))
+                .storage(InMemoryStorageProvider())
+                .coroutineContext(scope.backgroundScope.coroutineContext)
+                .autoSyncTimeOnConnect(false)
+                .configure()
+                .build(),
+            pipeline = pipeline,
+            gattCache = null,
+            reasonOf = { null },
+            onClose = {},
+        )
     }
 
     private fun lockdown(id: Long) = RadioSessionEvent.Lockdown(id, 1, LockdownStatus.Builder().build())
