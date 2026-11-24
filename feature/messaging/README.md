@@ -30,7 +30,6 @@ Uses `HomoglyphCharacterStringTransformer` (from `:core:common`) to optionally r
 - **Message Reactions**: Support for reacting to messages with emojis.
 - **Markdown formatting**: `FormattingToolbar` inserts or toggles bold, italic, strikethrough, code and link markup.
 - **Delivery Status**: `MessageStatusIcon` shows each `MessageStatus`: queued, en route, delivered (ACK), error (NAK), and the SF++ chain routing and confirmed states.
-- **Background send** (Android): `WorkManagerMessageQueue` hands queued messages to WorkManager for transmission.
 
 ## Testing
 
