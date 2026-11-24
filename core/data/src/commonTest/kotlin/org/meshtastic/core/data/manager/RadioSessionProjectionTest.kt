@@ -428,7 +428,7 @@ class RadioSessionProjectionTest {
                 .autoSyncTimeOnConnect(false)
                 .sessionReceive()
                 .build()
-        val events = checkNotNull(client.sessionEvents)
+        val events = client.sessionEvents
         backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
             events.collect { event ->
                 if (event is RadioSessionEvent.Ready) {

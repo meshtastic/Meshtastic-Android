@@ -37,6 +37,8 @@ import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.DisplayPalette
+import org.meshtastic.proto.LogRecord
 import org.meshtastic.sdk.AutoReconnectConfig
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshEvent
@@ -45,6 +47,7 @@ import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.sdk.RadioSessionOverflowException
 import org.meshtastic.sdk.RadioTransportProvider
+import org.meshtastic.sdk.SessionScoped
 import org.meshtastic.sdk.TransportIdentity
 import kotlin.time.Duration.Companion.seconds
 
@@ -117,8 +120,9 @@ internal class SdkRadioLink(
     private val onClose: () -> Unit,
 ) : RadioLink {
 
-    private val current = MutableStateFlow<RadioSessionContext?>(null)
-    private var sdkSession: Long? = null
+    private data class Slot(val sdkId: Long, val context: RadioSessionContext)
+
+    private val current = MutableStateFlow<Slot?>(null)
 
     override fun refreshGattCacheOnNextConnect(): Boolean {
         gattCache?.refreshOnNextConnect() ?: return false
@@ -133,7 +137,7 @@ internal class SdkRadioLink(
         try {
             coroutineScope {
                 val sideFlows = launch { collectSideFlows() }
-                val events = checkNotNull(client.sessionEvents)
+                val events = client.sessionEvents
                 var streaming = true
                 while (streaming) {
                     try {
@@ -151,21 +155,17 @@ internal class SdkRadioLink(
         }
     }
 
-    private suspend fun consume(events: Flow<RadioSessionEvent>, host: RadioSessionHost) {
+    internal suspend fun consume(events: Flow<RadioSessionEvent>, host: RadioSessionHost) {
         events.collect { event ->
             if (event is RadioSessionEvent.Ended) {
-                if (event.sessionId == sdkSession) endSession(host)
+                // An Ended for an id that is not the open slot (already closed, or never opened) is a no-op.
+                if (current.value?.sdkId == event.sessionId) endSession(host)
                 return@collect
             }
-            // A session that stopped at Lockdown ends without an Ended; the next session's first event closes it.
-            if (event.sessionId != sdkSession) {
-                endSession(host)
-                val opened = host.openSession() ?: return@collect
-                pipeline.lockdown.onConnect()
-                sdkSession = event.sessionId
-                current.value = opened
-            }
-            val session = current.value ?: return@collect
+            val slot =
+                current.value?.takeIf { it.sdkId == event.sessionId } ?: openSession(host, event.sessionId)
+                    ?: return@collect
+            val session = slot.context
             // Nothing restarts this collector, so one event the app fails to write must not end the session's stream.
             safeCatching {
                 when (event) {
@@ -198,40 +198,57 @@ internal class SdkRadioLink(
         }
     }
 
+    private suspend fun openSession(host: RadioSessionHost, sdkId: Long): Slot? {
+        endSession(host) // close-before-open: a new id means the previous session is over
+        val opened = host.openSession() ?: return null
+        pipeline.lockdown.onConnect()
+        return Slot(sdkId, opened).also { current.value = it }
+    }
+
     private suspend fun endSession(host: RadioSessionHost) {
-        val session = current.value ?: return
+        val slot = current.value ?: return
         current.value = null
-        sdkSession = null
-        host.closeSession(session)
+        host.closeSession(slot.context)
         pipeline.lockdown.onDisconnect()
     }
 
-    /** The SDK's lossy side streams, which carry no session ID, go to whichever app session is open. */
+    internal fun routeDeviceLog(item: SessionScoped<LogRecord>) {
+        current.value?.takeIf { it.sdkId == item.sessionId }?.let {
+            pipeline.sessionProjection.onDeviceLog(item.value, it.context)
+        }
+    }
+
+    internal fun routeDisplayPalette(palette: DisplayPalette) {
+        current.value?.context?.let { pipeline.sessionProjection.onDisplayPalette(palette, it) }
+    }
+
+    /**
+     * Tagged streams go to the open session when their ID matches it. The palette and queue status carry no session ID
+     * and go to the open session, if any.
+     */
     private suspend fun collectSideFlows() = coroutineScope {
         val projection = pipeline.sessionProjection
+        launch { client.deviceLogs.collectGuarded("device log") { routeDeviceLog(it) } }
         launch {
-            client.deviceLogs.collectGuarded("device log") { log ->
-                current.value?.let { projection.onDeviceLog(log, it) }
+            client.outboundPackets.collectGuarded("outbound packet") { item ->
+                current.value?.takeIf { it.sdkId == item.sessionId }?.let {
+                    projection.onOutboundPacket(item.value, it.context)
+                }
             }
         }
         launch {
-            client.outboundPackets.collectGuarded("outbound packet") { packet ->
-                current.value?.let { projection.onOutboundPacket(packet, it) }
+            client.displayFrames.collectGuarded("display frame") { item ->
+                current.value?.takeIf { it.sdkId == item.sessionId }?.let {
+                    projection.onDisplayFrame(item.value, it.context)
+                }
             }
         }
         launch {
-            client.displayFrames.collectGuarded("display frame") { frame ->
-                current.value?.let { projection.onDisplayFrame(frame, it) }
-            }
-        }
-        launch {
-            client.displayPalette.filterNotNull().collectGuarded("display palette") { palette ->
-                current.value?.let { projection.onDisplayPalette(palette, it) }
-            }
+            client.displayPalette.filterNotNull().collectGuarded("display palette") { routeDisplayPalette(it) }
         }
         launch {
             client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collectGuarded("queue status") {
-                current.value?.let { session -> projection.refreshLocalNodeLastHeard(session) }
+                current.value?.context?.let { projection.refreshLocalNodeLastHeard(it) }
             }
         }
     }

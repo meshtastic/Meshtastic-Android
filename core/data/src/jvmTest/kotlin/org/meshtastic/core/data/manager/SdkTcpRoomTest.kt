@@ -498,7 +498,7 @@ class SdkTcpRoomTest {
             val refreshed = CompletableDeferred<Unit>()
             val reader = launch {
                 var sdkSession: Long? = null
-                assertNotNull(client.sessionEvents).collect { event ->
+                client.sessionEvents.collect { event ->
                     when (event) {
                         is RadioSessionEvent.Ready -> {
                             assertTrue(installSnapshot(session, event))
