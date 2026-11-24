@@ -26,8 +26,9 @@ import kotlin.time.Instant
  *
  * The mesh can hand the bridge the same logical CoT more than once — a packet relayed over several LoRa paths, or a
  * sender that retransmits — which makes ATAK show duplicate chat / TAK-Talk messages. This is a small TTL cache keyed
- * by the exact, already-normalized CoT XML: an identical event seen within [ttl] is dropped, while genuine updates (a
- * PLI with a new position, a moved marker, …) differ in content and pass through untouched.
+ * by the packet's wire payload: an identical payload seen within [ttl] is dropped, while genuine updates (a PLI with a
+ * new position, a moved marker, …) differ in content and pass through untouched. The key is the wire bytes, not the
+ * decoded XML, because decoding stamps `stale` (and `time`/`start` when the sender sent none) from the local clock.
  *
  * Scope: this only dedupes what the *bridge* injects. It cannot see copies the TAK client also receives over another
  * transport (e.g. Wi-Fi network SA); for those the client dedupes by `uid`, which is why the SDK preserves the original
@@ -41,19 +42,19 @@ internal class CotDeliveryDedup(
     private val maxEntries: Int = DEFAULT_MAX_ENTRIES,
     private val now: () -> Instant = Clock.System::now,
 ) {
-    // normalized XML -> last-seen time. Insertion-ordered: entries are re-inserted on each
+    // key -> last-seen time. Insertion-ordered: entries are re-inserted on each
     // sighting so the iteration order is oldest-first, which makes [evictExpired] cheap.
     private val seen = LinkedHashMap<String, Instant>()
 
     /**
-     * @return true if [normalizedXml] should be delivered (it is new, or its previous copy has aged past [ttl]); false
-     *   if it is a duplicate already delivered within [ttl] (drop it).
+     * @return true if [key] should be delivered (it is new, or its previous copy has aged past [ttl]); false if it is a
+     *   duplicate already delivered within [ttl] (drop it).
      */
-    fun admit(normalizedXml: String): Boolean {
+    fun admit(key: String): Boolean {
         val t = now()
         evictExpired(t)
-        if (seen.containsKey(normalizedXml)) return false // survived eviction => still within ttl
-        seen[normalizedXml] = t
+        if (seen.containsKey(key)) return false // survived eviction => still within ttl
+        seen[key] = t
         while (seen.size > maxEntries) seen.remove(seen.keys.first())
         return true
     }
