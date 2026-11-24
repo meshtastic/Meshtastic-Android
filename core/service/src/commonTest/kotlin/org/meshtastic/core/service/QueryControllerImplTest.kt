@@ -355,7 +355,7 @@ class QueryControllerImplTest {
     }
 
     @Test
-    fun `requests are refused until the snapshot install publishes Connected`() = runTest {
+    fun `a client that has not finished its handshake refuses requests before starting a timer`() = runTest {
         val fixture = fixture(connect = false, handshake = false)
         backgroundScope.launch { fixture.client.connect() }
         runCurrent()
