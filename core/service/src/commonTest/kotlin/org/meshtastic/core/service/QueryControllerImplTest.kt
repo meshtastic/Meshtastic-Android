@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -87,6 +88,7 @@ class QueryControllerImplTest {
         val transport: FakeRadioTransport,
         val client: RadioClient,
         val radio: FakeRadioInterfaceService,
+        val service: FakeServiceRepository,
         val uiPrefs: FakeUiPrefs,
         val timers: RecordingRequestTimers,
         val controller: QueryControllerImpl,
@@ -146,8 +148,10 @@ class QueryControllerImplTest {
             }
         val uiPrefs = FakeUiPrefs()
         val timers = RecordingRequestTimers()
-        val controller = QueryControllerImpl(radio, timers, timers, nodeManager, uiPrefs, backgroundScope)
-        return Fixture(transport, client, radio, uiPrefs, timers, controller)
+        val service = FakeServiceRepository()
+        if (connect && handshake) service.setConnectionState(SdkConnectionState.Connected)
+        val controller = QueryControllerImpl(radio, service, timers, timers, nodeManager, uiPrefs, backgroundScope)
+        return Fixture(transport, client, radio, service, uiPrefs, timers, controller)
     }
 
     @Test
@@ -338,8 +342,20 @@ class QueryControllerImplTest {
         fixture.client.disconnect()
     }
 
+    // Regression: gating on the SDK client state instead of the app's published Connected state.
     @Test
-    fun `a client that has not finished its handshake refuses requests before starting a timer`() = runTest {
+    fun `requests are refused while the app is not Connected even if the SDK client is`() = runTest {
+        val fixture = fixture()
+        assertEquals(SdkConnectionState.Connected, fixture.client.connection.value)
+        fixture.service.setConnectionState(SdkConnectionState.Connecting(attempt = 1))
+
+        assertFailsWith<PacketQueueRejectedException> { fixture.controller.requestTraceroute(PEER) }
+        assertTrue(fixture.timers.traceroutes.isEmpty())
+        fixture.client.disconnect()
+    }
+
+    @Test
+    fun `requests are refused until the snapshot install publishes Connected`() = runTest {
         val fixture = fixture(connect = false, handshake = false)
         backgroundScope.launch { fixture.client.connect() }
         runCurrent()
