@@ -28,7 +28,8 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
     WebBluetoothGrants.find(address)
         ?: error("No Web Bluetooth grant for ${address.anonymize()}; pick the device again")
 
-internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
+// Web Bluetooth exposes no MTU and Kable answers a constant 20; null keeps callers on their own fallbacks.
+internal actual fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int? = null
 
 // close() is terminal and only a new grant can replace the peripheral, so the grant keeps it open; disconnect() has
 // already dropped the GATT link.

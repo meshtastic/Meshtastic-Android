@@ -33,4 +33,4 @@ internal actual fun ScannerBuilder.platformScanConfig() {
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
 
-internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
+internal actual fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int? = null

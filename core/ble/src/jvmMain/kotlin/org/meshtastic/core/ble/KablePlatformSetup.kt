@@ -37,8 +37,5 @@ internal actual val bleAddressIsHardware: Boolean =
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
 
-// JVM/desktop Kable does not expose an MTU StateFlow; return a reasonable default (512)
-// so callers can size their writes without falling back to an overly conservative minimum.
-internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = DEFAULT_JVM_MTU
-
-private const val DEFAULT_JVM_MTU = 512
+// btleplug reports the negotiated MTU only through Kable's suspend maximumWriteValueLengthForType.
+internal actual fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int? = atConnect

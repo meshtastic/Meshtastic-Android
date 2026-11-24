@@ -129,6 +129,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var observationFailure: Throwable? = null
 
+    @Volatile private var writeLengthAtConnect: Int? = null
+
     override val lastFailureCause: Throwable?
         get() = connectFailure ?: observationFailure ?: peripheral?.preinstalledObservationFailure()
 
@@ -178,6 +180,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         withContext(NonCancellable) {
             cleanUpPeripheral()
             peripheral = p
+            writeLengthAtConnect = null
             ActiveBleConnection.active = ActiveConnection(p, device.address)
         }
 
@@ -188,6 +191,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         stateJob =
             p.state
                 .onEach { kableState ->
+                    if (kableState is State.Disconnected) writeLengthAtConnect = null
                     val mappedState = kableState.toBleConnectionState(hasStartedConnecting) ?: return@onEach
                     if (kableState is State.Connecting || kableState is State.Connected) {
                         hasStartedConnecting = true
@@ -203,7 +207,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         // advertisement was available. Advertisement-less devices start on the autoConnect path.
         // The outer reconnect loop (BleRadioTransport) owns the macro retry budget — see class kdoc.
         repeat(2) {
-            if (p.state.value is State.Connected) return
+            if (p.state.value is State.Connected) return@repeat
             autoConnect =
                 try {
                     connectionScope?.let { oldScope ->
@@ -242,6 +246,17 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                 "Failed to establish connection after bounded attempts (state=${p.state.value})",
             )
         }
+        writeLengthAtConnect = p.queryMaxWriteLength()
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun Peripheral.queryMaxWriteLength(): Int? = try {
+        asException { maximumWriteValueLengthForType(WriteType.WithoutResponse) }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Logger.w(e) { "maximumWriteValueLengthForType failed; callers use their own fallback" }
+        null
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -277,6 +292,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         val owned = peripheral
         safeClosePeripheral("disconnect")
         peripheral = null
+        writeLengthAtConnect = null
         connectionScope = null
 
         if (owned != null && ActiveBleConnection.active?.peripheral === owned) {
@@ -327,7 +343,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         }
     }
 
-    override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
+    override fun maximumWriteValueLength(writeType: BleWriteType): Int? =
+        peripheral?.negotiatedMaxWriteLength(writeLengthAtConnect)
 
     override fun requestHighConnectionPriority(): Boolean = peripheral?.requestHighConnectionPriority() == true
 

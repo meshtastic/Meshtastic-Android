@@ -33,9 +33,10 @@ internal expect suspend fun Peripheral.connectedRssi(): Int?
 
 /**
  * Returns the negotiated maximum write payload length in bytes (i.e. ATT MTU minus the 3-byte ATT header), or `null` if
- * MTU has not yet been negotiated on this platform.
+ * MTU has not yet been negotiated on this platform. [atConnect] is Kable's `maximumWriteValueLengthForType`, read once
+ * after the last connect, for platforms that only report it through that suspend call.
  */
-internal expect fun Peripheral.negotiatedMaxWriteLength(): Int?
+internal expect fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int?
 
 /**
  * Requests the highest-throughput BLE connection priority (smallest connection interval) supported by the platform.
