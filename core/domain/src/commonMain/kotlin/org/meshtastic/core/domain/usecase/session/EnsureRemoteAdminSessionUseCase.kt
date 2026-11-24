@@ -30,7 +30,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.proto.Routing
+import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.AdminSessionStatus
@@ -102,18 +102,7 @@ open class EnsureRemoteAdminSessionUseCase(
                 }
             }
 
-            is AdminResult.Failed -> EnsureSessionResult.Rejected(result.routingError.value)
-
-            AdminResult.Unauthorized -> EnsureSessionResult.Rejected(Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value)
-
-            AdminResult.SessionKeyExpired -> EnsureSessionResult.Rejected(Routing.Error.ADMIN_BAD_SESSION_KEY.value)
-
-            AdminResult.RateLimited -> EnsureSessionResult.Rejected(Routing.Error.RATE_LIMIT_EXCEEDED.value)
-
-            AdminResult.NodeUnreachable,
-            AdminResult.Timeout,
-            null,
-            -> EnsureSessionResult.Timeout
+            else -> result?.routingErrorOrNull()?.let { EnsureSessionResult.Rejected(it) } ?: EnsureSessionResult.Timeout
         }
     }
 

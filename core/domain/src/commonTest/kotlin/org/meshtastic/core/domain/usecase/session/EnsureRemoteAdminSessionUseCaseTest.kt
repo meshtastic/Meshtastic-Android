@@ -110,6 +110,16 @@ class EnsureRemoteAdminSessionUseCaseTest {
         )
     }
 
+    @Test
+    fun `a rate limited answer is rejected with the rate limit error`() = runTest {
+        val fixture = fixture()
+        everySuspend { fixture.admin.getDeviceMetadata() } returns AdminResult.RateLimited
+        assertEquals(
+            EnsureSessionResult.Rejected(Routing.Error.RATE_LIMIT_EXCEEDED.value),
+            fixture.ensure(DEST.raw),
+        )
+    }
+
     private fun TestScope.fixture(): Fixture {
         val session = MutableStateFlow<RadioSessionContext?>(SESSION)
         val status = MutableStateFlow<AdminSessionStatus>(AdminSessionStatus.NoSession)
