@@ -108,7 +108,7 @@ Shared infrastructure used by all features:
 | `core:repository` | Repository interfaces |
 | `core:service` | Mesh service layer |
 | `core:di` | DI utilities |
-| `core:network` | HTTP/serial/transport |
+| `core:network` | HTTP, MQTT and LAN discovery |
 | `core:ble` | Bluetooth LE abstractions |
 | `core:barcode` | QR / barcode scanning (channel-share QR codes); Android library |
 | `core:nfc` | NFC read/write support; Android library |

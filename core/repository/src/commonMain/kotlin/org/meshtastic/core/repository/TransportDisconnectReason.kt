@@ -40,8 +40,8 @@ enum class TransportDisconnectReason {
     WebSocketSlotContested,
 
     /**
-     * The handshake timed out, or the receive queue overflowed, after every restart the service allows, so the radio
-     * waits for the user to connect.
+     * The SDK failed the session with a handshake timeout or a protocol error, so the radio waits for the user to
+     * connect.
      */
     HandshakeRecoveryExhausted,
 

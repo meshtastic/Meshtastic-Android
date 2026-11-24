@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. It also supplies the virtual radios used by Demo Mode and capture replay.
+The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. The virtual radios for Demo Mode and capture replay live in `:core:data`.
 
 ## Key Components
 
@@ -33,7 +33,6 @@ graph TB
   :core:network -.-> :core:common
   :core:network -.-> :core:di
   :core:network -.-> :core:model
-  :core:network -.-> :core:ble
   :core:network -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

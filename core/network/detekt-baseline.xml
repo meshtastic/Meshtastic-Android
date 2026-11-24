@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>UnusedPrivateProperty:AndroidNetworkMonitor.kt:AndroidNetworkMonitor$private val connectivityManager: ConnectivityManager</ID>
-    <ID>UnusedPrivateProperty:AndroidRadioTransportFactory.kt:AndroidRadioTransportFactory$private val buildConfigProvider: BuildConfigProvider</ID>
     <ID>UnusedPrivateProperty:AndroidServiceDiscovery.kt:AndroidServiceDiscovery$private val nsdManager: NsdManager</ID>
     <ID>UnusedPrivateProperty:JvmServiceDiscovery.kt:JvmServiceDiscovery$private val dispatchers: CoroutineDispatchers</ID>
     <ID>UnusedPrivateProperty:UsbRepository.kt:UsbRepository$private val usbSerialProberLazy: Lazy&lt;UsbSerialProber&gt;</ID>

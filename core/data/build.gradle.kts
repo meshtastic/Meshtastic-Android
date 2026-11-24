@@ -80,8 +80,3 @@ kotlin {
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }
-
-// The sticky error is a string resource, which the browser loads asynchronously; the assertion runs first.
-meshtasticWeb.browserTestExclusions.add(
-    "*MeshConnectionManagerImplTest.Recovery exhaustion after three consecutive failures surfaces sticky error*",
-)
