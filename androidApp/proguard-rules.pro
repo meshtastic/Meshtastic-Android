@@ -40,14 +40,6 @@
 # ---- Names read at runtime --------------------------------------------------
 # Each name below is looked up by string, so obfuscation must leave it alone.
 
-# KableGattCacheRefresh reads these private Kable fields by reflection.
--keepclassmembernames class com.juul.kable.BluetoothDeviceAndroidPeripheral {
-    kotlinx.coroutines.flow.MutableStateFlow connection;
-}
--keepclassmembernames class com.juul.kable.Connection {
-    android.bluetooth.BluetoothGatt gatt;
-}
-
 # rumViewName() reports a route's class name as its Datadog view name.
 -keepnames class * implements androidx.navigation3.runtime.NavKey
 
