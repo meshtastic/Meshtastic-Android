@@ -74,10 +74,12 @@ class MeshConfigFlowManagerImpl(
 
     /**
      * Installs the SDK handshake snapshot under the app's current session lease. The session waits for this call to
-     * return true before delivering retained packets.
+     * return true before delivering retained packets. False when the session closed first or the snapshot carries no
+     * my_info.
      */
+    @Suppress("ReturnCount")
     internal suspend fun installRadioSnapshot(session: RadioSessionContext, ready: RadioSessionEvent.Ready): Boolean {
-        val myInfo = checkNotNull(ready.myInfo)
+        val myInfo = ready.myInfo ?: return false
         val bundle = ready.configBundle
         val metadata = bundle?.metadata
         val info = buildMyNodeInfo(myInfo, metadata) ?: return false

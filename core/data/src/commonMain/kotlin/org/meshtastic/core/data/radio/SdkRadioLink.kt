@@ -183,7 +183,7 @@ internal class SdkRadioLink(
 
     private suspend fun install(event: RadioSessionEvent.Ready, session: RadioSessionContext, host: RadioSessionHost) {
         if (!pipeline.sessionProjection.installReady(event, session)) {
-            Logger.w { "SDK session snapshot was not installed: app session ${session.generation} closed first" }
+            Logger.w { "SDK session snapshot was not installed for app session ${session.generation}" }
             return
         }
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }
@@ -209,22 +209,35 @@ internal class SdkRadioLink(
     /** The SDK's lossy side streams, which carry no session ID, go to whichever app session is open. */
     private suspend fun collectSideFlows() = coroutineScope {
         val projection = pipeline.sessionProjection
-        launch { client.deviceLogs.collect { log -> current.value?.let { projection.onDeviceLog(log, it) } } }
         launch {
-            client.outboundPackets.collect { packet -> current.value?.let { projection.onOutboundPacket(packet, it) } }
+            client.deviceLogs.collectGuarded("device log") { log ->
+                current.value?.let { projection.onDeviceLog(log, it) }
+            }
         }
         launch {
-            client.displayFrames.collect { frame -> current.value?.let { projection.onDisplayFrame(frame, it) } }
+            client.outboundPackets.collectGuarded("outbound packet") { packet ->
+                current.value?.let { projection.onOutboundPacket(packet, it) }
+            }
         }
         launch {
-            client.displayPalette.filterNotNull().collect { palette ->
+            client.displayFrames.collectGuarded("display frame") { frame ->
+                current.value?.let { projection.onDisplayFrame(frame, it) }
+            }
+        }
+        launch {
+            client.displayPalette.filterNotNull().collectGuarded("display palette") { palette ->
                 current.value?.let { projection.onDisplayPalette(palette, it) }
             }
         }
         launch {
-            client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collect {
+            client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collectGuarded("queue status") {
                 current.value?.let { session -> projection.refreshLocalNodeLastHeard(session) }
             }
         }
     }
+}
+
+/** Collects [this], writing each item with [handle]; one item the app fails to write must not end the stream. */
+internal suspend fun <T> Flow<T>.collectGuarded(label: String, handle: suspend (T) -> Unit) = collect { item ->
+    safeCatching { handle(item) }.onFailure { Logger.e(it) { "Writing SDK $label failed" } }
 }
