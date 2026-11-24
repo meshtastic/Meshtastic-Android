@@ -66,7 +66,7 @@ class WebSerialPortRegistry {
      * The port registered under [id], or `null` if unknown.
      *
      * `internal`, unlike [refreshGrantedPorts]/[requestNewPort]: [JsSerialPort] is `core:network`-only JS interop, so
-     * only a same-module transport (e.g. [WebSerialRadioLink]) can use the raw handle this returns. Cross-module
+     * only a same-module transport (e.g. [WebSerialTransport]) can use the raw handle this returns. Cross-module
      * callers (e.g. `feature:connections`'s USB scanner) get everything they need from [GrantedSerialPort] instead.
      */
     internal fun get(id: String): JsSerialPort? = portsById[id]

@@ -47,7 +47,7 @@ Serial communication over USB:
 - Probe table for supported USB vendor/product IDs
 - Automatic detection when USB device is connected; on Web only for a port the user has already granted through the browser's port picker
 
-Android and desktop use the SDK serial transports. On the web, `WebSerialRadioLink` opens
+Android and desktop use the SDK serial transports. On the web, `WebSerialTransport` opens
 the granted browser streams and feeds the shared SDK frame assembler.
 
 ## TCP/IP
