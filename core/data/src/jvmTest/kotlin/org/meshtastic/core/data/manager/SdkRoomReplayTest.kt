@@ -183,7 +183,7 @@ class SdkRoomReplayTest {
         val processed = CompletableDeferred<Unit>()
         val delivery = scope.launch {
             var sdkSession: Long? = null
-            assertNotNull(client.sessionEvents).collect { event ->
+            client.sessionEvents.collect { event ->
                 when (event) {
                     is RadioSessionEvent.Ready -> {
                         ingress.install(

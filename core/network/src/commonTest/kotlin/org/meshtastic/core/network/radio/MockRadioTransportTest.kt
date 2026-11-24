@@ -104,7 +104,7 @@ class MockRadioTransportTest {
                 .build()
         try {
             val ready = async {
-                assertNotNull(client.sessionEvents).filterIsInstance<RadioSessionEvent.Ready>().first()
+                client.sessionEvents.filterIsInstance<RadioSessionEvent.Ready>().first()
             }
             client.connect()
             val snapshot = ready.await()
