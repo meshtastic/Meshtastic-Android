@@ -398,6 +398,12 @@ class TAKMeshIntegration(
     }
 
     private fun handleV2Packet(wirePayload: ByteArray) {
+        // Drop a payload the mesh delivered more than once (multi-path relay or retransmit) so ATAK doesn't surface
+        // doubled chat / TAK-Talk messages; see CotDeliveryDedup for why the key is the wire bytes.
+        if (!deliveryDedup.admit(wirePayload.toHexString())) {
+            Logger.d { "Dropped duplicate CoT from mesh (already delivered within dedup window)" }
+            return
+        }
         try {
             // Decompress to CoT XML via the SDK's CotXmlBuilder, which handles
             // ALL typed payloads (DrawnShape, Marker, Route, etc.) and preserves
@@ -409,13 +415,6 @@ class TAKMeshIntegration(
             // and collapse inter-tag whitespace so ATAK's streaming parser sees
             // bare <event>...</event> on a single line. Centralized in the SDK.
             val xml = CotSanitizer.normalizeCotXml(rawXml)
-            // Drop exact duplicates the mesh delivered more than once (multi-path relay or
-            // retransmit) so ATAK doesn't surface doubled chat / TAK-Talk messages. Genuine
-            // updates (new PLI position, moved marker, …) differ in content and pass through.
-            if (!deliveryDedup.admit(xml)) {
-                Logger.d { "Dropped duplicate CoT from mesh (already delivered within dedup window)" }
-                return
-            }
             // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and save it to Downloads for import into ATAK.
