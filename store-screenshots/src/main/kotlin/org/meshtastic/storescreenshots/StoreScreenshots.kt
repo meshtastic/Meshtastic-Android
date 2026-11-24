@@ -229,7 +229,7 @@ class StoreScreenshots {
         /** Where the captures are left for `adb pull`: a folder per flavor, laid out as fastlane's `images/`. */
         const val DEVICE_OUTPUT = "/data/local/tmp/store-screenshots"
 
-        /** Demo Mode's hidden showcase mesh; `MockScenario.SHOWCASE` in `:core:network`. */
+        /** Demo Mode's hidden showcase mesh; `MockScenario.SHOWCASE` in `:core:data`. */
         const val SHOWCASE_ADDRESS = "mshowcase"
         const val SHOWCASE_NODE_NAME = "Base Camp"
 

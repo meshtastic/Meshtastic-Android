@@ -18,6 +18,7 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 - **`RadioSessionProjection`** / **`RadioSessionEventHandler`**: Project the SDK's typed session events into Room and the repositories: the Ready snapshot, packets, node, config and channel changes, and events such as client notifications and the MQTT proxy. Packets reach `MeshDataHandlerImpl` and its per-port handlers (`TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others), and the SDK's `RoutingReport` settles the stored message or reaction an ACK or NAK names. Each packet on the client's `outboundPackets` becomes an outgoing MeshLog row under the local node.
 - **`PacketHandlerImpl`**: Data packets (messages, reactions, waypoints, alerts, TAK) and app-built requests through the SDK's paced send under their persisted IDs, with the Room delivery projection. Packet IDs come from the session client's `nextPacketId()`.
 - **`NodeManagerImpl`**, **`MqttManagerImpl`**: The in-memory node database and the MQTT proxy.
+- **`radio/sim`**: Demo Mode (`MockRadioTransport`, `MockScenario`), capture replay (`ReplayRadioTransport`) and their firmware-side framing (`VirtualRadioLink`, `TransportLifecycleGate`); `HandshakeConstants` holds the nonces they answer.
 
 ### 3. `ai/`
 `AiFunctionProvider` is the contract for operations a system assistant can invoke (on Android, through AppFunctions), with `FuzzyNameResolver` resolving node and channel names.

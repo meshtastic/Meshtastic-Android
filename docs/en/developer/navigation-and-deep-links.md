@@ -122,7 +122,7 @@ null for them, and the caller hands them to its import fallback.
 | `/firmware` | `FirmwareRoute.FirmwareGraph` | Firmware screen |
 | `/firmware/update` | `FirmwareRoute.FirmwareUpdate` | Firmware update flow |
 
-Demo Mode's addresses start with `m`. In a debug build, or in an Android release build once hidden features are unlocked, `/connections?address=m` connects to the demo mesh and `/connections?address=mshowcase` to the store-screenshot mesh, which the device picker never lists. `MockScenario` in `:core:network` holds both.
+Demo Mode's addresses start with `m`. In a debug build, or in an Android release build once hidden features are unlocked, `/connections?address=m` connects to the demo mesh and `/connections?address=mshowcase` to the store-screenshot mesh, which the device picker never lists. `MockScenario` in `:core:data` holds both.
 
 ### Backstack synthesis
 

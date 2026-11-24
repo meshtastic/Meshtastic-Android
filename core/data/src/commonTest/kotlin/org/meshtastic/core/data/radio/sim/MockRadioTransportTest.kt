@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.network.radio
+package org.meshtastic.core.data.radio.sim
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -30,7 +30,6 @@ import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.crc32
-import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio

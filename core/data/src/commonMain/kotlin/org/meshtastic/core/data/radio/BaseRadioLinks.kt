@@ -20,11 +20,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.data.radio.sim.MockRadioTransport
+import org.meshtastic.core.data.radio.sim.ReplayRadioTransport
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.normalizeWebSocketUrl
-import org.meshtastic.core.network.radio.MockRadioTransport
-import org.meshtastic.core.network.radio.ReplayRadioTransport
 import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.sdk.TransportIdentity
