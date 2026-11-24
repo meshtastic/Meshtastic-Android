@@ -213,6 +213,7 @@ class PacketHandlerImpl(
         return handle
     }
 
+    @Suppress("ReturnCount")
     private suspend fun projectSend(
         session: RadioSessionContext,
         database: MeshtasticDatabase,

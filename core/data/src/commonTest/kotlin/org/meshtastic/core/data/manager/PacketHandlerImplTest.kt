@@ -215,9 +215,9 @@ class PacketHandlerImplTest {
         val fixture = fixture()
         val outgoing = packet(902)
         val stored = PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
-        var calls = 0
+        var attempts = 0
         everySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE) } calls
-            { if (calls++ == 0) null else stored }
+            { if (attempts++ == 0) null else stored }
         assertTrue(fixture.handler.sendToRadio(outgoing))
         runCurrent()
         fixture.databases.switchToNewDatabase()
