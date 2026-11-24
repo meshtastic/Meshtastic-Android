@@ -256,7 +256,7 @@ internal class SdkRadioLink(
             client.displayPalette.filterNotNull().collectGuarded("display palette") { routeDisplayPalette(it) }
         }
         launch {
-            client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collectGuarded("queue status") {
+            client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collectGuarded("queue status") { _ ->
                 current.value?.context?.let { projection.refreshLocalNodeLastHeard(it) }
             }
         }
