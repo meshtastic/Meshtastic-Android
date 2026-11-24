@@ -102,7 +102,6 @@ Decomposed into focused sub-interfaces via Interface Segregation Principle:
 interface ConnectionStateProvider {
     val connectionLifecycle: StateFlow<ConnectionLifecycle>
     val connectionState: StateFlow<ConnectionState>
-    val connectionEpochs: StateFlow<ConnectionEpochs>
 }
 
 interface TracerouteResponseProvider {

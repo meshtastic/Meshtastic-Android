@@ -37,7 +37,6 @@ class FakeServiceRepository : ServiceRepository {
     private val connectionStateHolder = ConnectionStateHolder()
     override val connectionLifecycle = connectionStateHolder.connectionLifecycle
     override val connectionState = connectionStateHolder.connectionState
-    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
     override fun setConnectionState(connectionState: ConnectionState) =
         connectionStateHolder.setConnectionState(connectionState)

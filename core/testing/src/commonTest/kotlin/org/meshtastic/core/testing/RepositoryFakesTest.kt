@@ -26,7 +26,6 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.QuickChatAction
-import org.meshtastic.core.repository.ConnectionEpochs
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.Channel
@@ -155,39 +154,6 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `service repository fake preserves connection epoch semantics`() {
-        val repository = FakeServiceRepository()
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), repository.connectionEpochs.value)
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), repository.connectionEpochs.value)
-
-        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting(attempt = 1),
-            ),
-            repository.connectionEpochs.value,
-        )
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 2,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting(attempt = 1),
-            ),
-            repository.connectionEpochs.value,
-        )
-    }
-
-    @Test
     fun `FakeRadioController preserves configuration and fixed-position evidence until reset`() = runTest {
         val controller = FakeRadioController()
         val local = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
@@ -224,7 +190,7 @@ class RepositoryFakesTest {
         assertEquals(listOf(7), controller.moduleConfigDestinations)
         assertEquals(listOf(position), controller.fixedPositions)
         assertEquals(ConnectionState.Connected, controller.connectionState.value)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), controller.connectionEpochs.value)
+        assertEquals(1L, controller.connectionLifecycle.value.version)
 
         controller.reset()
 
@@ -235,15 +201,7 @@ class RepositoryFakesTest {
         assertTrue(controller.moduleConfigDestinations.isEmpty())
         assertTrue(controller.fixedPositions.isEmpty())
         assertEquals(ConnectionState.Disconnected, controller.connectionState.value)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Disconnected,
-            ),
-            controller.connectionEpochs.value,
-        )
+        assertEquals(2L, controller.connectionLifecycle.value.version)
     }
 
     @Test
