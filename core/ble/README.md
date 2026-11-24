@@ -35,7 +35,7 @@ A singleton repository for the global state of Bluetooth on the device, implemen
 
 ## Integration
 
-The SDK's BLE transport runs the link; `:core:ble` supplies discovery, bonding and host permission state, and [`:core:network`](../network/README.md) selects the transport for an `x` address.
+The SDK's BLE transport runs the link; `:core:ble` supplies discovery, bonding and host permission state, and `BaseRadioLinks` in [`:core:data`](../data/README.md) selects it for an `x` address.
 
 ## Usage
 

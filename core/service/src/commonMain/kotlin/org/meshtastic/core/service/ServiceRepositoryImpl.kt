@@ -42,7 +42,7 @@ import org.meshtastic.sdk.ConnectionState
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
 
-    // Canonical app-level connection state — written exclusively by MeshConnectionManager.
+    // Canonical app-level connection state, written by SharedRadioInterfaceService and MeshConfigFlowManagerImpl.
     private val connectionStateHolder = ConnectionStateHolder()
     override val connectionLifecycle = connectionStateHolder.connectionLifecycle
     override val connectionState = connectionStateHolder.connectionState

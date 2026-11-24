@@ -34,7 +34,6 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.ble)
 
             implementation(libs.okio)
             // mqtt-client 0.4.0 splits into BOM + core + transport modules. `api` (not `implementation`)

@@ -16,8 +16,7 @@
  */
 package org.meshtastic.core.network.transport
 
-/** The port firmware's TCP phone API listens on. */
-const val DEFAULT_TCP_PORT: Int = 4403
+import org.meshtastic.core.network.repository.NetworkConstants
 
 /**
  * Split a discovered or entered address into host and port. A bracketed IPv6 literal (`[fe80::1]:4403`, as
@@ -28,11 +27,12 @@ fun parseTcpRadioAddress(address: String): Pair<String, Int> {
         val closeBracket = address.indexOf(']')
         if (closeBracket != -1) {
             val host = address.substring(1, closeBracket)
-            val port = address.substring(closeBracket + 1).removePrefix(":").toIntOrNull() ?: DEFAULT_TCP_PORT
+            val port =
+                address.substring(closeBracket + 1).removePrefix(":").toIntOrNull() ?: NetworkConstants.SERVICE_PORT
             return host to port
         }
     }
     val parts = address.split(":", limit = 2)
-    val port = parts.getOrNull(1)?.toIntOrNull() ?: DEFAULT_TCP_PORT
+    val port = parts.getOrNull(1)?.toIntOrNull() ?: NetworkConstants.SERVICE_PORT
     return parts[0] to port
 }

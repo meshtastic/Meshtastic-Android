@@ -90,7 +90,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Image Loading (Coil):** Coil must use `coil-network-ktor3` in host modules. Feature modules should ONLY depend on `libs.coil` (coil-compose) and never configure fetchers.
 - [ ] **Room KMP:** Ensure `factory = { MeshtasticDatabaseConstructor.initialize() }` is used in `Room.databaseBuilder`. DAOs and Entities must reside in `commonMain`.
 - [ ] **Room Patterns:** Verify use of `@Upsert` for insert-or-update logic. Check for `LIMIT 1` on single-row queries. Flag N+1 query patterns (loops calling single-row queries) — batch with chunked `WHERE IN` instead.
-- [ ] **Bluetooth (BLE):** All Bluetooth communication must be routed through `core:ble` using Kable abstractions.
+- [ ] **Bluetooth (BLE):** The link runs in the SDK's BLE transport; Bluetooth discovery, bonding and permissions must go through `core:ble` using Kable abstractions.
 
 ### 6. Dependency Catalog Aliases
 - [ ] **JetBrains vs. AndroidX:**
