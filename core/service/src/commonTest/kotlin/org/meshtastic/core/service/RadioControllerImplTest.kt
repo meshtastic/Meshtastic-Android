@@ -81,6 +81,7 @@ import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminApi
@@ -1530,7 +1531,8 @@ class RadioControllerImplTest {
                 }
                 .build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build())
         controller.setHamMode(
             123,
             HamParameters.Builder()
@@ -1559,12 +1561,39 @@ class RadioControllerImplTest {
         }
     }
 
+    // Regression: with no LoRa config loaded, zeros were sent and firmware applied them verbatim (AdminModule.cpp).
     @Test
-    fun setHamModeWithNoCachedLoraConfigSendsProtoDefaults() = runTest {
+    fun setHamModeWithNoCachedLoraConfigFailsBadRequestAndWritesNothing() = runTest {
         val admin = recordingAdmin()
         val controller = editController(backgroundScope, admin, myNodeNum = 123)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+
+        val result =
+            controller.setHamMode(
+                123,
+                HamParameters.Builder()
+                    .also { wb ->
+                        wb.call_sign = "KK7ABC"
+                        wb.short_name = "KK7A"
+                    }
+                    .build(),
+            )
+
+        assertEquals(AdminResult.Failed(Routing.Error.BAD_REQUEST), result)
+        assertNull(admin.sentHam)
+        assertTrue(admin.commands.isEmpty())
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+    }
+
+    // Regression: a ham send to a node absent from the node DB must still seed a user from the proto defaults.
+    @Test
+    fun setHamModeForAnUnknownNodeSeedsTheUserFromTheHamParameters() = runTest {
+        val admin = recordingAdmin()
+        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build())
 
         controller.setHamMode(
             123,
@@ -1576,10 +1605,6 @@ class RadioControllerImplTest {
                 .build(),
         )
 
-        val ham = admin.sentHam
-        assertEquals(0, ham?.tx_power)
-        assertEquals(0f, ham?.frequency)
-        // Unknown node: the optimistic update is built on a default User.
         verify {
             nodeManager.handleReceivedUser(
                 123,

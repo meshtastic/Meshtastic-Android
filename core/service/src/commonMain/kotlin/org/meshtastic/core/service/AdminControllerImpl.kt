@@ -120,7 +120,10 @@ internal class AdminControllerImpl(
         }
         // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
         // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
-        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig.Builder().build()
+        // Firmware applies tx_power and override_frequency verbatim, so sending zeros would wipe them.
+        val lora =
+            radioConfigRepository.localConfigFlow.firstOrNull()?.lora
+                ?: return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         val params =
             hamParameters
                 .newBuilder()
