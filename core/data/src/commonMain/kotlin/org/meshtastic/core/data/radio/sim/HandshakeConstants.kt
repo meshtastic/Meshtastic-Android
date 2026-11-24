@@ -16,7 +16,10 @@
  */
 package org.meshtastic.core.data.radio.sim
 
-/** Nonces the simulated radios answer in the two-stage handshake: [CONFIG_NONCE] asks for config and channels, [NODE_INFO_NONCE] for the node database. */
+/**
+ * Nonces the simulated radios answer in the two-stage handshake: [CONFIG_NONCE] asks for config and channels,
+ * [NODE_INFO_NONCE] for the node database.
+ */
 object HandshakeConstants {
     /** Nonce sent in `want_config_id` to request config-only (Stage 1). */
     const val CONFIG_NONCE = 69420

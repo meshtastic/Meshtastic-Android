@@ -67,10 +67,9 @@ internal class QueryControllerImpl(
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
 
     /** The session's client once the app has installed its snapshot, so a request can read the local node. */
-    private fun requireClient(operation: String): RadioClient =
-        radio.activeSession.value
-            ?.takeIf { connectionStateProvider.connectionState.value == ConnectionState.Connected }
-            ?.let(radio::clientForSession) ?: throw PacketQueueRejectedException(operation)
+    private fun requireClient(operation: String): RadioClient = radio.activeSession.value
+        ?.takeIf { connectionStateProvider.connectionState.value == ConnectionState.Connected }
+        ?.let(radio::clientForSession) ?: throw PacketQueueRejectedException(operation)
 
     /** Sends through the client's request helper; an SDK refusal reads as the session refusing admission. */
     private suspend fun send(operation: String, request: suspend RadioClient.() -> MessageHandle): NodeRequest {
