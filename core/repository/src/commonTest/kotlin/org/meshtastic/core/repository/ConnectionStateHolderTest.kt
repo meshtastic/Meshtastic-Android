@@ -131,6 +131,10 @@ class ConnectionStateHolderTest {
 
             val recordedSnapshots = synchronized(snapshotsLock) { snapshots.toList() }
             assertTrue(recordedSnapshots.any { it.version > 0 }, "collector must observe an active transition")
+            assertTrue(
+                recordedSnapshots.zipWithNext().all { (a, b) -> b.version >= a.version },
+                "version must never decrease",
+            )
             val lifecycle = holder.connectionLifecycle.value
             assertEquals(lifecycle.state, holder.connectionState.value)
         }

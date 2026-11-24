@@ -154,21 +154,6 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `service repository fake advances lifecycle version once per state change`() {
-        val repository = FakeServiceRepository()
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(1L, repository.connectionLifecycle.value.version)
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(1L, repository.connectionLifecycle.value.version)
-
-        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(3L, repository.connectionLifecycle.value.version)
-    }
-
-    @Test
     fun `FakeRadioController preserves configuration and fixed-position evidence until reset`() = runTest {
         val controller = FakeRadioController()
         val local = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()

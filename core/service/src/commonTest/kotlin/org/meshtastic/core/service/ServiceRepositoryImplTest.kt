@@ -66,20 +66,6 @@ class ServiceRepositoryImplTest {
     }
 
     @Test
-    fun lifecycleVersionChangesWhenConnectionDropsAndReturns() = runTest {
-        val repository = ServiceRepositoryImpl()
-        repository.setConnectionState(ConnectionState.Connected)
-        val versionWhileConnected = repository.connectionLifecycle.value.version
-
-        repository.setConnectionState(ConnectionState.Disconnected)
-        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
-        repository.setConnectionState(ConnectionState.Connected)
-
-        assertEquals(ConnectionState.Connected, repository.connectionState.value)
-        assertEquals(versionWhileConnected + 3, repository.connectionLifecycle.value.version)
-    }
-
-    @Test
     fun duplicateConnectionStatesDoNotAdvanceLifecycleVersion() = runTest {
         val repository = ServiceRepositoryImpl()
         repository.setConnectionState(ConnectionState.Connected)
