@@ -729,10 +729,12 @@ class MeshDataHandlerImpl(
      * replies. The packet keeps its own [DataPacket.channel].
      */
     private fun DataPacket.conversationChannel(myNodeNum: Int): Int {
-        if (isFromLocal(myNodeNum) || isBroadcast || channel == NodeAddress.PKC_CHANNEL_INDEX) return channel
-        val sender = from?.let(nodeManager::getNodeById) ?: return channel
-        val ourNode = nodeManager.nodeDBbyNodeNum[myNodeNum]
-        return if (ourNode?.hasPKC == true && sender.hasPKC) NodeAddress.PKC_CHANNEL_INDEX else channel
+        val inboundDirect = !isFromLocal(myNodeNum) && !isBroadcast
+        val bothKeyed =
+            inboundDirect &&
+                from?.let(nodeManager::getNodeById)?.hasPKC == true &&
+                nodeManager.nodeDBbyNodeNum[myNodeNum]?.hasPKC == true
+        return if (bothKeyed) NodeAddress.PKC_CHANNEL_INDEX else channel
     }
 
     private fun DataPacket.hasSameSenderAs(other: DataPacket, myNodeNum: Int): Boolean =
