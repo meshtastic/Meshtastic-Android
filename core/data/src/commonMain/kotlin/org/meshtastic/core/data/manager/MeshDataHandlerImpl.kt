@@ -719,7 +719,20 @@ class MeshDataHandlerImpl(
 
     private fun DataPacket.contactKey(myNodeNum: Int): String {
         val contactId = if (isFromLocal(myNodeNum) || isBroadcast) to else from
-        return "$channel$contactId"
+        return "${conversationChannel(myNodeNum)}$contactId"
+    }
+
+    /**
+     * The channel slot of the conversation this packet belongs to. A direct message from a node that both ends hold a
+     * key for goes in the PKI conversation, the one the node list opens, even when it arrived channel-encrypted: a
+     * sender without our key (firmware 2.7 falls back to the channel) would otherwise open a second chat for its
+     * replies. The packet keeps its own [DataPacket.channel].
+     */
+    private fun DataPacket.conversationChannel(myNodeNum: Int): Int {
+        if (isFromLocal(myNodeNum) || isBroadcast || channel == NodeAddress.PKC_CHANNEL_INDEX) return channel
+        val sender = from?.let(nodeManager::getNodeById) ?: return channel
+        val ourNode = nodeManager.nodeDBbyNodeNum[myNodeNum]
+        return if (ourNode?.hasPKC == true && sender.hasPKC) NodeAddress.PKC_CHANNEL_INDEX else channel
     }
 
     private fun DataPacket.hasSameSenderAs(other: DataPacket, myNodeNum: Int): Boolean =

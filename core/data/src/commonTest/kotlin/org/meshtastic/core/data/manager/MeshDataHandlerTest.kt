@@ -1479,6 +1479,75 @@ class MeshDataHandlerTest {
         assertEquals(0x5A, assertNotNull(persistedReaction).relayNode)
     }
 
+    private fun keyedNode(num: Int, id: String, withKey: Boolean = true) = Node(
+        num = num,
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = id
+                wb.long_name = "Node $id"
+                if (withKey) wb.public_key = ByteArray(32) { 1 }.toByteString()
+            }
+            .build(),
+    )
+
+    /** Delivers a channel-encrypted text DM from 456 to us (123) and returns the contact key it was stored under. */
+    private fun TestScope.contactKeyOfChannelDm(senderHasKey: Boolean): String? {
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 77
+                    wb.from = 456
+                    wb.to = 123
+                    wb.channel = 0
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "reply".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        val dataPacket =
+            DataPacket(
+                id = 77,
+                from = "!remote",
+                to = NodeAddress.ID_LOCAL,
+                bytes = "reply".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = 0,
+            )
+        var storedKey: String? = null
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(123 to keyedNode(123, NodeAddress.ID_LOCAL), 456 to keyedNode(456, "!remote", senderHasKey))
+        every { nodeManager.getNodeById("!remote") } returns keyedNode(456, "!remote", senderHasKey)
+        everySuspend { packetRepository.findPacketsWithId(77) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        everySuspend { packetRepository.insert(any(), any(), any(), any(), any(), any()) } calls
+            {
+                storedKey = it.args[2] as String
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+        return storedKey
+    }
+
+    // Meshtastic-Android#8069: a 2.7 node that lacks our key answers a PKI DM over the channel. Filing that reply by
+    // its channel opened a second, unlocked chat beside the PKI one the node list opens.
+    @Test
+    fun `channel-encrypted DM from a keyed node is filed in the PKI conversation`() = testScope.runTest {
+        assertEquals("${NodeAddress.PKC_CHANNEL_INDEX}!remote", contactKeyOfChannelDm(senderHasKey = true))
+    }
+
+    @Test
+    fun `channel-encrypted DM from a keyless node stays in its channel conversation`() = testScope.runTest {
+        assertEquals("0!remote", contactKeyOfChannelDm(senderHasKey = false))
+    }
+
     @Test
     fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
         val emoji = "+1"
