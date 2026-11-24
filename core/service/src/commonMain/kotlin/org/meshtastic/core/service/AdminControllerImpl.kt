@@ -119,7 +119,9 @@ internal class AdminControllerImpl(
         val local = isLocal(destNum)
         val lora = if (local) radioConfigRepository.localConfigFlow.firstOrNull()?.lora else null
         if (lora == null) {
-            if (!local) Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
+            if (!local) {
+                Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
+            }
             return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         }
         val params =
