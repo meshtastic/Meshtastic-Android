@@ -69,7 +69,6 @@ fun ConnectingDeviceInfo(
     restartExpected: Boolean = false,
     isBluetooth: Boolean = false,
     onClickConnect: () -> Unit = {},
-    connectionProgress: String? = null,
 ) {
     val waitingToRetry = (connectionState as? ConnectionState.Reconnecting)?.retryAt != null
     val now by
@@ -107,9 +106,6 @@ fun ConnectingDeviceInfo(
                 val statusLabel = rememberSettledPhase(detail.status)?.let { stringResource(it) }.orEmpty()
                 val primaryLabel =
                     when {
-                        connectionProgress != null && connectionState is ConnectionState.Connecting ->
-                            connectionProgress
-
                         retry == null -> statusLabel
 
                         retry.seconds > 0 ->
@@ -127,10 +123,6 @@ fun ConnectingDeviceInfo(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                // The handshake's own counters ("Channels (3 / 8)") say more than its phase name does.
-                connectionProgress
-                    ?.takeIf { connectionState is ConnectionState.Configuring && it.isNotBlank() }
-                    ?.let { Text(text = it, style = MaterialTheme.typography.bodyMedium) }
                 detail.failure?.let { failure ->
                     Text(
                         text = stringResource(failure),

@@ -91,7 +91,6 @@ fun ConnectingDeviceInfoPreview() {
             deviceName = "Meshtastic_abcd",
             deviceAddress = "AA:BB:CC:DD:EE:FF",
             connectionState = ConnectionState.Connecting(attempt = 1),
-            connectionProgress = "Discovering services...",
             onClickDisconnect = {},
         )
     }
