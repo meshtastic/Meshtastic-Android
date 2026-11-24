@@ -56,6 +56,27 @@ import kotlin.test.assertTrue
 /** Which app session each SDK session event and tagged side-stream item reaches, keyed by SDK session id. */
 class SdkRadioLinkSessionRoutingTest {
 
+    private class RecordingHost(private val radio: FakeRadioInterfaceService, private val log: MutableList<String>) :
+        RadioSessionHost,
+        RadioSessionAuthority by radio {
+        var open: RadioSessionContext? = null
+
+        override fun openSession(): RadioSessionContext {
+            check(open == null) { "an app session is already open" }
+            radio.connect()
+            return checkNotNull(radio.activeSession.value).also {
+                open = it
+                log += "open ${it.generation}"
+            }
+        }
+
+        override suspend fun closeSession(session: RadioSessionContext) {
+            log += "close ${session.generation}"
+            open = null
+            radio.disconnect()
+        }
+    }
+
     private class Rig(val scope: TestScope) {
         val log = mutableListOf<String>()
         val radio = FakeRadioInterfaceService(scope.backgroundScope).apply { setDeviceAddress("tfake") }
@@ -79,25 +100,7 @@ class SdkRadioLinkSessionRoutingTest {
 
                 override fun reset() = Unit
             }
-        val host =
-            object : RadioSessionHost, RadioSessionAuthority by radio {
-                var open: RadioSessionContext? = null
-
-                override fun openSession(): RadioSessionContext {
-                    check(open == null) { "an app session is already open" }
-                    radio.connect()
-                    return checkNotNull(radio.activeSession.value).also {
-                        open = it
-                        log += "open ${it.generation}"
-                    }
-                }
-
-                override suspend fun closeSession(session: RadioSessionContext) {
-                    log += "close ${session.generation}"
-                    open = null
-                    radio.disconnect()
-                }
-            }
+        val host = RecordingHost(radio, log)
         val pipeline =
             RadioSessionPipeline(
                 lazy {
