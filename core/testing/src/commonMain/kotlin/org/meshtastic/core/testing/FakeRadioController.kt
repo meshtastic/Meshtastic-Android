@@ -58,7 +58,6 @@ class FakeRadioController :
     private val connectionStateHolder = ConnectionStateHolder()
     override val connectionLifecycle = connectionStateHolder.connectionLifecycle
     override val connectionState = connectionStateHolder.connectionState
-    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
     private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification

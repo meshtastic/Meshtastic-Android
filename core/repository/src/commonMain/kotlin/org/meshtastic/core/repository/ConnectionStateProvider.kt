@@ -29,10 +29,9 @@ import org.meshtastic.sdk.ConnectionState
  */
 interface ConnectionStateProvider {
     /**
-     * Atomically correlated canonical state and lifecycle evidence.
+     * Atomically correlated canonical state and its snapshot version.
      *
-     * Lifecycle-sensitive code must observe this flow rather than combining independent reads from [connectionState]
-     * and [connectionEpochs].
+     * Lifecycle-sensitive code must observe this flow rather than combining independent reads of [connectionState].
      */
     val connectionLifecycle: StateFlow<ConnectionLifecycle>
 
@@ -44,11 +43,4 @@ interface ConnectionStateProvider {
      * @see ServiceRepository.connectionState
      */
     val connectionState: StateFlow<ConnectionState>
-
-    /**
-     * Convenience view of monotonic departures and completed handshakes. Use [connectionLifecycle] when the counters
-     * must be correlated with a specific state, because independent StateFlow collections can observe different
-     * versions.
-     */
-    val connectionEpochs: StateFlow<ConnectionEpochs>
 }

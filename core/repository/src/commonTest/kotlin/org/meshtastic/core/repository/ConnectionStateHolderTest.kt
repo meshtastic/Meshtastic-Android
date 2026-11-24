@@ -32,13 +32,25 @@ import kotlinx.coroutines.withTimeout
 import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 class ConnectionStateHolderTest {
     @Test
-    fun `transitions advance matching epochs exactly once`() {
+    fun `lifecycle version changes when the connection drops and returns`() {
+        val holder = ConnectionStateHolder()
+
+        holder.setConnectionState(ConnectionState.Connected)
+        val versionWhileConnected = holder.connectionLifecycle.value.version
+        holder.setConnectionState(ConnectionState.Disconnected)
+        holder.setConnectionState(ConnectionState.Connected)
+
+        assertEquals(ConnectionState.Connected, holder.connectionState.value)
+        assertEquals(versionWhileConnected + 2, holder.connectionLifecycle.value.version)
+    }
+
+    @Test
+    fun `version advances once per state change and not on repeats`() {
         val holder = ConnectionStateHolder()
 
         holder.setConnectionState(ConnectionState.Connected)
@@ -49,66 +61,23 @@ class ConnectionStateHolderTest {
 
         assertEquals(ConnectionState.Connected, holder.connectionState.value)
         assertEquals(4L, holder.connectionLifecycle.value.version)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 2,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting(attempt = 1),
-            ),
-            holder.connectionEpochs.value,
-        )
     }
 
     @Test
-    fun `device sleep departure records handshake evidence`() {
-        val holder = ConnectionStateHolder()
-
-        holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(
-            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
-        )
-
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState =
-                ConnectionState.DeviceSleeping(
-                    kotlin.time.Instant.fromEpochMilliseconds(0),
-                    expectedWakeSeconds = 300,
-                ),
-            ),
-            holder.connectionEpochs.value,
-        )
-    }
-
-    @Test
-    fun `lifecycle flow publishes state and epochs as one correlated snapshot`() {
+    fun `lifecycle flow publishes state and version as one snapshot`() {
         val holder = ConnectionStateHolder()
 
         holder.setConnectionState(ConnectionState.Connected)
         holder.setConnectionState(ConnectionState.Connecting(attempt = 1))
 
         assertEquals(
-            ConnectionLifecycle(
-                version = 2,
-                state = ConnectionState.Connecting(attempt = 1),
-                epochs =
-                ConnectionEpochs(
-                    departures = 1,
-                    completedHandshakes = 1,
-                    handshakesAtLastDeparture = 1,
-                    lastDepartureState = ConnectionState.Connecting(attempt = 1),
-                ),
-            ),
+            ConnectionLifecycle(version = 2, state = ConnectionState.Connecting(attempt = 1)),
             holder.connectionLifecycle.value,
         )
     }
 
     @Test
-    fun `concurrent duplicate transitions advance each lifecycle edge once`() = runTest {
+    fun `concurrent duplicate transitions advance the version once per edge`() = runTest {
         val holder = ConnectionStateHolder()
 
         suspend fun fanOut(state: ConnectionState) = coroutineScope {
@@ -120,45 +89,11 @@ class ConnectionStateHolderTest {
         fanOut(ConnectionState.Connected)
 
         assertEquals(ConnectionState.Connected, holder.connectionState.value)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 2,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting(attempt = 1),
-            ),
-            holder.connectionEpochs.value,
-        )
+        assertEquals(3L, holder.connectionLifecycle.value.version)
     }
 
     @Test
-    fun `initial epochs reject impossible departure evidence`() {
-        assertFailsWith<IllegalArgumentException> {
-            ConnectionStateHolder(
-                initialEpochs =
-                ConnectionEpochs(
-                    departures = 0,
-                    completedHandshakes = 1,
-                    handshakesAtLastDeparture = 1,
-                    lastDepartureState = null,
-                ),
-            )
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ConnectionStateHolder(
-                initialEpochs =
-                ConnectionEpochs(
-                    departures = 1,
-                    completedHandshakes = 1,
-                    handshakesAtLastDeparture = 1,
-                    lastDepartureState = ConnectionState.Connected,
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `concurrent mixed transitions publish correlated lifecycle snapshots while active`() = runTest {
+    fun `concurrent mixed transitions keep lifecycle and state projections equal while active`() = runTest {
         repeat(25) {
             val holder = ConnectionStateHolder()
             val snapshotsLock = SynchronizedObject()
@@ -196,178 +131,27 @@ class ConnectionStateHolderTest {
 
             val recordedSnapshots = synchronized(snapshotsLock) { snapshots.toList() }
             assertTrue(recordedSnapshots.any { it.version > 0 }, "collector must observe an active transition")
-            recordedSnapshots.forEach { lifecycle ->
-                val connectedOffset = if (lifecycle.state is ConnectionState.Connected) 1 else 0
-                assertEquals(lifecycle.epochs.departures + connectedOffset, lifecycle.epochs.completedHandshakes)
-                assertTrue(
-                    lifecycle.epochs.handshakesAtLastDeparture <= lifecycle.epochs.completedHandshakes,
-                    "departure handshake evidence must come from the same lifecycle commit",
-                )
-            }
-
             val lifecycle = holder.connectionLifecycle.value
             assertEquals(lifecycle.state, holder.connectionState.value)
-            assertEquals(lifecycle.epochs, holder.connectionEpochs.value)
         }
     }
 
     @Test
-    fun `reset preserves monotonic epochs when no baseline is supplied`() {
-        val holder = ConnectionStateHolder()
-        holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(ConnectionState.Disconnected)
-        val epochsBeforeReset = holder.connectionEpochs.value
-
-        holder.reset(
-            state =
-            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
-        )
-
-        assertEquals(epochsBeforeReset, holder.connectionEpochs.value)
-        assertEquals(
-            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
-            holder.connectionState.value,
-        )
-    }
-
-    @Test
-    fun `reset into disconnected records a canonical departure`() {
-        val holder = ConnectionStateHolder()
-        holder.setConnectionState(ConnectionState.Connected)
-
-        holder.reset()
-
-        assertEquals(ConnectionState.Disconnected, holder.connectionState.value)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Disconnected,
-            ),
-            holder.connectionEpochs.value,
-        )
-    }
-
-    @Test
-    fun `reset rejects an explicit epoch baseline that rewinds monotonic counters`() {
-        val holder = ConnectionStateHolder()
-        holder.setConnectionState(ConnectionState.Connected)
-        holder.setConnectionState(ConnectionState.Disconnected)
-
-        assertFailsWith<IllegalArgumentException> { holder.reset(epochs = ConnectionEpochs()) }
-    }
-
-    @Test
-    fun `explicit reset baseline must include the requested lifecycle transition`() {
-        val holder = ConnectionStateHolder()
-        holder.setConnectionState(ConnectionState.Connected)
-        val connectedEpochs = holder.connectionEpochs.value
-
-        assertFailsWith<IllegalArgumentException> {
-            holder.reset(state = ConnectionState.Disconnected, epochs = connectedEpochs)
-        }
-    }
-
-    @Test
-    fun `explicit reset baseline must preserve the canonical departure state`() {
-        val holder = ConnectionStateHolder()
-        holder.setConnectionState(ConnectionState.Connected)
-
-        assertFailsWith<IllegalArgumentException> {
-            holder.reset(
-                state = ConnectionState.Disconnected,
-                epochs =
-                ConnectionEpochs(
-                    departures = 1,
-                    completedHandshakes = 1,
-                    handshakesAtLastDeparture = 1,
-                    lastDepartureState = ConnectionState.Connecting(attempt = 1),
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `explicit reset baseline must retain its last departure state`() {
-        val holder = ConnectionStateHolder()
-
-        assertFailsWith<IllegalArgumentException> { holder.reset(epochs = ConnectionEpochs(departures = 1)) }
-    }
-
-    @Test
-    fun `constructor rejects negative epoch counters`() {
-        listOf(
-            ConnectionEpochs(departures = -1, lastDepartureState = ConnectionState.Disconnected),
-            ConnectionEpochs(completedHandshakes = -1),
-            ConnectionEpochs(handshakesAtLastDeparture = -1),
-        )
-            .forEach { epochs ->
-                assertFailsWith<IllegalArgumentException> { ConnectionStateHolder(initialEpochs = epochs) }
-            }
-    }
-
-    @Test
-    fun `constructor rejects an initial epoch snapshot without its departure state`() {
-        assertFailsWith<IllegalArgumentException> {
-            ConnectionStateHolder(initialEpochs = ConnectionEpochs(departures = 1))
-        }
-    }
-
-    @Test
-    fun `constructor rejects initial departure evidence beyond completed handshakes`() {
-        assertFailsWith<IllegalArgumentException> {
-            ConnectionStateHolder(
-                initialEpochs =
-                ConnectionEpochs(
-                    departures = 1,
-                    completedHandshakes = 1,
-                    handshakesAtLastDeparture = 2,
-                    lastDepartureState = ConnectionState.Disconnected,
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `reset restores an explicit state and epoch baseline`() {
+    fun `reset restores an explicit state and always advances the version`() {
         val holder = ConnectionStateHolder()
         holder.setConnectionState(ConnectionState.Connected)
         val versionBeforeReset = holder.connectionLifecycle.value.version
+        val sleeping =
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300)
 
-        holder.reset(
-            state =
-            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
-            epochs =
-            ConnectionEpochs(
-                departures = 7,
-                completedHandshakes = 11,
-                handshakesAtLastDeparture = 10,
-                lastDepartureState =
-                ConnectionState.DeviceSleeping(
-                    kotlin.time.Instant.fromEpochMilliseconds(0),
-                    expectedWakeSeconds = 300,
-                ),
-            ),
-        )
+        holder.reset(state = sleeping)
 
         assertEquals(versionBeforeReset + 1, holder.connectionLifecycle.value.version)
-        assertEquals(
-            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
-            holder.connectionState.value,
-        )
-        assertEquals(
-            ConnectionEpochs(
-                departures = 7,
-                completedHandshakes = 11,
-                handshakesAtLastDeparture = 10,
-                lastDepartureState =
-                ConnectionState.DeviceSleeping(
-                    kotlin.time.Instant.fromEpochMilliseconds(0),
-                    expectedWakeSeconds = 300,
-                ),
-            ),
-            holder.connectionEpochs.value,
-        )
+        assertEquals(sleeping, holder.connectionState.value)
+        assertEquals(sleeping, holder.connectionLifecycle.value.state)
+
+        holder.reset(state = sleeping)
+
+        assertEquals(versionBeforeReset + 2, holder.connectionLifecycle.value.version)
     }
 }

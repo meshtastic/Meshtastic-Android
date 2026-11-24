@@ -35,7 +35,6 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.ConnectionEpochs
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.ConnectionLifecycle
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -268,9 +267,6 @@ class RadioControllerImpl(
 
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
-
-    override val connectionEpochs: StateFlow<ConnectionEpochs>
-        get() = serviceRepository.connectionEpochs
 
     override val clientNotification: StateFlow<ClientNotification?>
         get() = serviceRepository.clientNotification

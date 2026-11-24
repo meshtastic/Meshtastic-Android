@@ -202,7 +202,7 @@ It is decomposed into focused provider interfaces following the Interface Segreg
 
 | Interface | Responsibility |
 |-----------|---------------|
-| `ConnectionStateProvider` | Read-only `connectionState`, plus `connectionLifecycle` and `connectionEpochs` for code that has to correlate state with connection departures and completed handshakes |
+| `ConnectionStateProvider` | Read-only `connectionState`, plus `connectionLifecycle` (state with a version that changes on every transition) for code that must detect a reconnect |
 | `TracerouteResponseProvider` | Traceroute response state + clear |
 | `NeighborInfoResponseProvider` | Neighbor info response state + clear |
 | `ServiceStateWriter` | Write-side for handlers (set*, emit*, clear*) |
