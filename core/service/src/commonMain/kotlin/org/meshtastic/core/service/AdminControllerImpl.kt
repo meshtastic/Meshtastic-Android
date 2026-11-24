@@ -114,16 +114,14 @@ internal class AdminControllerImpl(
     override suspend fun getOwner(destNum: Int): AdminResult<User> = onNode(destNum, read = true) { getOwner() }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): AdminResult<Unit> {
-        if (!isLocal(destNum)) {
-            Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
+        // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current values;
+        // with no LoRa config loaded there is nothing to echo, and zeros would wipe the overrides.
+        val local = isLocal(destNum)
+        val lora = if (local) radioConfigRepository.localConfigFlow.firstOrNull()?.lora else null
+        if (lora == null) {
+            if (!local) Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
             return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         }
-        // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
-        // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
-        // Firmware applies tx_power and override_frequency verbatim, so sending zeros would wipe them.
-        val lora =
-            radioConfigRepository.localConfigFlow.firstOrNull()?.lora
-                ?: return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         val params =
             hamParameters
                 .newBuilder()

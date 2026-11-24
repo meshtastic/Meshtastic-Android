@@ -194,9 +194,9 @@ internal class SdkRadioLink(
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }
         host.runWithSessionLease(session) {
             safeCatching { pipeline.connections.onRadioConfigLoaded() }
-                .onFailure { Logger.w(it) { "App radio-config readiness callback failed" } }
+                .onFailure { e -> Logger.w(e) { "App radio-config readiness callback failed" } }
             safeCatching { pipeline.connections.onNodeDbReady() }
-                .onFailure { Logger.w(it) { "App node-db readiness callback failed" } }
+                .onFailure { e -> Logger.w(e) { "App node-db readiness callback failed" } }
         }
     }
 
