@@ -106,7 +106,6 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     override fun reset() {
         rects.reset()
         _frame.value = null
-        _palette.value = null
     }
 
     private companion object {

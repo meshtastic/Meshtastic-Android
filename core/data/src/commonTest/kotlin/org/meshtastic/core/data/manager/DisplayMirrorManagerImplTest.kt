@@ -113,14 +113,14 @@ class DisplayMirrorManagerImplTest {
     }
 
     @Test
-    fun `reset clears frames and palettes`() {
+    fun `reset clears the frame but keeps the palette the device sends once per connection`() {
         manager.handleFrame(frame(bytes(256, 7), width = 64, height = 32))
-        manager.handlePalette(palette(signature = 9, regions = emptyList()))
+        manager.handlePalette(palette(signature = 42, regions = emptyList()))
 
         manager.reset()
 
         assertNull(manager.frame.value)
-        assertNull(manager.palette.value)
+        assertEquals(42, manager.palette.value?.signature)
     }
 
     @Test
