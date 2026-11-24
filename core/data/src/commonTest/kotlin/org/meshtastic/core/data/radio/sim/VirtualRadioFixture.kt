@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.network.radio
+package org.meshtastic.core.data.radio.sim
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

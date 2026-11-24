@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.network.radio
+package org.meshtastic.core.data.radio.sim
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
@@ -29,7 +29,6 @@ import okio.ByteString.Companion.toByteString
 import okio.EOFException
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio

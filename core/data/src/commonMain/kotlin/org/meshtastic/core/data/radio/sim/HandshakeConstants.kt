@@ -14,16 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.repository
+package org.meshtastic.core.data.radio.sim
 
-/**
- * Shared constants for the two-stage mesh handshake protocol.
- *
- * Stage 1 (`CONFIG_NONCE`): requests device config, module config, and channels. Stage 2 (`NODE_INFO_NONCE`): requests
- * the full node database.
- *
- * Used by the mock and replay radios, which answer the SDK's two-stage want_config handshake with these nonces.
- */
+/** Nonces the simulated radios answer in the two-stage handshake: [CONFIG_NONCE] asks for config and channels, [NODE_INFO_NONCE] for the node database. */
 object HandshakeConstants {
     /** Nonce sent in `want_config_id` to request config-only (Stage 1). */
     const val CONFIG_NONCE = 69420

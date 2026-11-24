@@ -42,6 +42,8 @@ import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.datasource.SwitchingNodeInfoReadDataSource
+import org.meshtastic.core.data.radio.sim.HandshakeConstants
+import org.meshtastic.core.data.radio.sim.ReplayRadioTransport
 import org.meshtastic.core.data.repository.MeshLogRepositoryImpl
 import org.meshtastic.core.data.repository.PacketRepositoryImpl
 import org.meshtastic.core.database.DatabaseProvider
@@ -51,10 +53,8 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.network.radio.ReplayRadioTransport
 import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
-import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshDataHandler
