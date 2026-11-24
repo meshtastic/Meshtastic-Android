@@ -31,7 +31,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
-import org.meshtastic.core.database.dao.shouldApplyOutgoingQueueStatus
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -105,7 +104,7 @@ class PacketHandlerImpl(
         REACTION,
     }
 
-    private data class PacketStatusTarget(val packet: MeshPacket, val persistence: StatusPersistence?)
+    private data class PacketStatusTarget(val packet: MeshPacket, val persistence: StatusPersistence)
 
     private sealed interface PersistedStatusTarget {
         data class DataPacket(val id: PersistedPacketId) : PersistedStatusTarget
@@ -214,6 +213,7 @@ class PacketHandlerImpl(
         return handle
     }
 
+    @Suppress("ReturnCount")
     private suspend fun projectSend(
         session: RadioSessionContext,
         database: MeshtasticDatabase,
@@ -225,27 +225,51 @@ class PacketHandlerImpl(
             projectStatus(session, database, packet, MessageStatus.ERROR)
             return
         }
-        projectStatus(session, database, packet, MessageStatus.ENROUTE)
+        val target = projectStatus(session, database, packet, MessageStatus.ENROUTE)
 
-        when (handle.awaitQueueReceipt()) {
-            QueueReceipt.Rejected -> projectStatus(session, database, packet, MessageStatus.ERROR)
+        val receipt = handle.awaitQueueReceipt()
+        when (receipt) {
+            QueueReceipt.Rejected -> {
+                projectStatus(session, database, packet, MessageStatus.ERROR)
+                return
+            }
 
-            QueueReceipt.LocalDelivery -> projectStatus(session, database, packet, MessageStatus.DELIVERED)
+            QueueReceipt.LocalDelivery -> {
+                projectStatus(session, database, packet, MessageStatus.DELIVERED)
+                return
+            }
 
-            // Unconfirmed: the queue receipt was lost or the link ended. A late queue rejection or the link ending
-            // fails the send; routing NAKs and ACK timeouts are settled elsewhere and leave the row ENROUTE.
-            QueueReceipt.Unconfirmed ->
-                when ((handle.message.await() as? SendOutcome.Failure)?.reason) {
-                    is SendFailure.QueueRejected,
-                    SendFailure.Disconnected,
-                    -> projectStatus(session, database, packet, MessageStatus.ERROR)
-
-                    else -> Unit
-                }
+            QueueReceipt.NotDispatched -> return
 
             QueueReceipt.Accepted,
-            QueueReceipt.NotDispatched,
+            QueueReceipt.Unconfirmed,
             -> Unit
+        }
+        settleAfterSend(session, database, packet, handle, receipt, target)
+    }
+
+    // The SDK ends the ACK wait at SEND_ACK_TIMEOUT; routing NAKs and ACKs settle the row elsewhere.
+    private suspend fun settleAfterSend(
+        session: RadioSessionContext,
+        database: MeshtasticDatabase,
+        packet: MeshPacket,
+        handle: PacedMessageHandle,
+        receipt: QueueReceipt,
+        target: PersistedStatusTarget?,
+    ) {
+        when ((handle.message.await() as? SendOutcome.Failure)?.reason) {
+            SendFailure.AckTimeout -> target?.let { scheduleSendAckTimeout(session, database, it, Duration.ZERO) }
+
+            SendFailure.Disconnected ->
+                if (receipt == QueueReceipt.Unconfirmed) {
+                    projectStatus(session, database, packet, MessageStatus.ERROR)
+                } else {
+                    target?.let { scheduleSendAckTimeout(session, database, it) }
+                }
+
+            is SendFailure.QueueRejected -> projectStatus(session, database, packet, MessageStatus.ERROR)
+
+            else -> Unit
         }
     }
 
@@ -254,13 +278,16 @@ class PacketHandlerImpl(
         database: MeshtasticDatabase,
         packet: MeshPacket,
         status: MessageStatus,
-    ) {
-        val persistence = packet.statusPersistence() ?: return
+    ): PersistedStatusTarget? {
+        val persistence = packet.statusPersistence() ?: return null
         val target = PacketStatusTarget(packet, persistence)
-        withTimeoutOrNull(PERSISTED_STATUS_WAIT) {
-            while (mayWrite(session, database) && !applyQueueStatus(session, database, target, status)) {
-                delay(PERSISTED_STATUS_RETRY_DELAY)
+        return withTimeoutOrNull(PERSISTED_STATUS_WAIT) {
+            var applied: PersistedStatusTarget? = null
+            while (mayWrite(session, database) && applied == null) {
+                applied = applyQueueStatus(target, status)
+                if (applied == null) delay(PERSISTED_STATUS_RETRY_DELAY)
             }
+            applied
         }
     }
 
@@ -322,39 +349,18 @@ class PacketHandlerImpl(
         }
     }
 
-    private suspend fun applyQueueStatus(
-        session: RadioSessionContext,
-        database: MeshtasticDatabase,
-        target: PacketStatusTarget,
-        status: MessageStatus,
-    ): Boolean = when (target.persistence) {
-        StatusPersistence.DATA_PACKET -> {
-            val persisted = packetRepository.value.applyOutgoingQueueStatus(target.packet, status) ?: return false
-            val current = persisted.packet.status
-            val shouldPersist =
-                status == MessageStatus.ENROUTE &&
-                    (current == MessageStatus.ENROUTE || shouldApplyOutgoingQueueStatus(current, status))
-            if (shouldPersist) {
-                scheduleSendAckTimeout(session, database, PersistedStatusTarget.DataPacket(persisted.id))
-            }
-            true
-        }
+    private suspend fun applyQueueStatus(target: PacketStatusTarget, status: MessageStatus): PersistedStatusTarget? =
+        when (target.persistence) {
+            StatusPersistence.DATA_PACKET ->
+                packetRepository.value.applyOutgoingQueueStatus(target.packet, status)?.let {
+                    PersistedStatusTarget.DataPacket(it.id)
+                }
 
-        StatusPersistence.REACTION -> {
-            val persisted =
-                packetRepository.value.applyOutgoingReactionQueueStatus(target.packet.id, status) ?: return false
-            val current = persisted.reaction.status
-            if (
-                status == MessageStatus.ENROUTE &&
-                (current == MessageStatus.ENROUTE || shouldApplyOutgoingQueueStatus(current, status))
-            ) {
-                scheduleSendAckTimeout(session, database, PersistedStatusTarget.Reaction(persisted.id))
-            }
-            true
+            StatusPersistence.REACTION ->
+                packetRepository.value.applyOutgoingReactionQueueStatus(target.packet.id, status)?.let {
+                    PersistedStatusTarget.Reaction(it.id)
+                }
         }
-
-        null -> true
-    }
 
     private fun MeshPacket.statusPersistence(): StatusPersistence? {
         val data = decoded ?: return null

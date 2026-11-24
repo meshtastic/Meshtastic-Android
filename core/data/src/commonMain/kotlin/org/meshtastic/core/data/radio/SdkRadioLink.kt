@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.data.manager.PacketHandlerImpl
 import org.meshtastic.core.data.manager.RadioSessionProjection
 import org.meshtastic.core.data.manager.sdkLogSink
 import org.meshtastic.core.repository.LockdownCoordinator
@@ -91,6 +92,7 @@ class RadioSessionPipeline(
                 .logger(sdkLogSink)
                 .coroutineContext(scope.coroutineContext)
                 .sessionReceive()
+                .sendAckTimeout(PacketHandlerImpl.SEND_ACK_TIMEOUT)
                 .autoReconnect(radioReconnectConfig(ble))
                 .build()
         return SdkRadioLink(client, this, gattCache, failureReason, close)

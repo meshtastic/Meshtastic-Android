@@ -195,16 +195,35 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `a send whose ACK wait times out stays ENROUTE for the 5 minute window`() = runTest {
-        // Regression: mapping AckTimeout to ERROR would cut main's 5 minute window to the SDK's 30 s.
+    fun `a send whose ACK wait times out becomes TIMEOUT without any app timer`() = runTest {
+        // Regression: AckTimeout not projected, so the row waits for a re-arm that never comes while connected.
         val fixture = fixture()
-        val outgoing = packet(811)
+        val outgoing = packet(901)
         assertTrue(fixture.handler.sendToRadio(outgoing))
         runCurrent()
         advanceTimeBy(6.seconds)
-        advanceTimeBy(26.seconds)
+        advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT)
         runCurrent()
+        verifySuspend { fixture.repository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
         verifySuspend(exactly(0)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ERROR) }
+        fixture.shutdown()
+    }
+
+    @Test
+    fun `a status write still lands when the database is republished while the session is active`() = runTest {
+        // Regression: gating the status write on the selected database alone drops it after an in-session republish.
+        val fixture = fixture()
+        val outgoing = packet(902)
+        val stored = PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
+        var attempts = 0
+        everySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE) } calls
+            { if (attempts++ == 0) null else stored }
+        assertTrue(fixture.handler.sendToRadio(outgoing))
+        runCurrent()
+        fixture.databases.switchToNewDatabase()
+        advanceTimeBy(PacketHandlerImpl.PERSISTED_STATUS_RETRY_DELAY)
+        runCurrent()
+        verifySuspend(exactly(2)) { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE) }
         fixture.shutdown()
     }
 
@@ -351,6 +370,7 @@ class PacketHandlerImplTest {
                 .storage(InMemoryStorageProvider())
                 .coroutineContext(backgroundScope.coroutineContext)
                 .autoSyncTimeOnConnect(false)
+                .sendAckTimeout(PacketHandlerImpl.SEND_ACK_TIMEOUT)
                 .build()
         client.connect()
         val radio =
