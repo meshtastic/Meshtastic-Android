@@ -15,7 +15,7 @@ The `:core:service` module runs the mesh service: the shared orchestrator that w
 The shared implementation of `:core:repository`'s `ServiceRepository`, exposing reactive `Flow`s for connection status, errors and arriving packets. `AndroidServiceRepository` is its Android Koin binding.
 
 ### 3. `SharedRadioInterfaceService`
-The multiplatform connection orchestrator: connect, reconnect loop, device-address state and Bluetooth/network toggles, delegating the byte transport to a platform `RadioTransportFactory`. It publishes the `ConnectionState` from `:core:model` (`Connected`, `Connecting`, `Disconnected`, `DeviceSleep`).
+The multiplatform connection orchestrator: builds the selected radio's SDK client through the platform `RadioLinks`, connects and disconnects it, and asks it to retry at once when Bluetooth, the network or the USB device returns. The SDK client owns backoff and reconnecting. It publishes the SDK's `ConnectionState` to `ServiceStateWriter`.
 
 ### 4. `RadioControllerImpl`
 The in-process `RadioController` composition root (Desktop, iOS, and single-process Android). It assembles four focused sub-controllers — `AdminControllerImpl`, `MessagingControllerImpl`, `NodeControllerImpl`, `QueryControllerImpl` — via Kotlin interface delegation, and owns the cross-cutting concerns (connection state, packet-id, location, device-address switching). Commands run on the active session's SDK client: admin commands on its `AdminApi`, queries on `TelemetryApi`, `RoutingApi` and the request helpers, each returning a `NodeRequest` that reports a routing NAK, and data packets through `PacketHandler`'s paced send. Config writes use the `editSettings { }` transaction.

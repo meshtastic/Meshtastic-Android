@@ -27,8 +27,8 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:datastore` | Multiplatform DataStore for preferences. |
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
-| `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer: Ktor HTTP clients, MQTT, transport selection (`BaseRadioTransportFactory` and the platform `*SdkTransportFactory` seams that open the SDK's BLE, TCP, serial and WebSocket transports), and the demo radios (`MockRadioTransport`, `ReplayRadioTransport`). |
+| `core:data` | Core manager implementations and data orchestration. Includes `BaseRadioLinks` and the platform `*RadioLinks`, which open the SDK's BLE, TCP, serial and WebSocket transports. |
+| `core:network` | KMP networking layer: Ktor HTTP clients, MQTT, the demo radios (`MockRadioTransport`, `ReplayRadioTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies. `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
