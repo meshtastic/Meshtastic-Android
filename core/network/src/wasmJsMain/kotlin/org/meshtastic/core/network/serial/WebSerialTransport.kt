@@ -35,7 +35,7 @@ import org.meshtastic.sdk.transport.serial.SerialFrameAssembler
 import kotlin.time.Duration.Companion.seconds
 
 /** Browser I/O for an existing port grant. The SDK owns framing and PhoneAPI session state. */
-class WebSerialRadioLink(private val portId: String, private val registry: WebSerialPortRegistry) : RadioTransport {
+class WebSerialTransport(private val portId: String, private val registry: WebSerialPortRegistry) : RadioTransport {
     override val identity = TransportIdentity("serial-web:$portId")
 
     private val linkState = MutableStateFlow<TransportState>(TransportState.Disconnected)

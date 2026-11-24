@@ -129,7 +129,7 @@ class SharedRadioInterfaceServiceTest {
 
     @Test
     fun `transport session diagnostic redacts its address`() {
-        val diagnostic = RadioTransportSession(generation = 7L, address = BLE).toString()
+        val diagnostic = ActiveRadioSession(generation = 7L, address = BLE).toString()
 
         assertFalse(BLE in diagnostic)
         assertTrue("generation=7" in diagnostic)

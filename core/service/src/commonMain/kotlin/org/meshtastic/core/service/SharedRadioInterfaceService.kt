@@ -113,12 +113,12 @@ import kotlin.concurrent.Volatile
  * Immutable per-session identity. [generation] is bumped for every app session, one per SDK session of the selected
  * radio, so consumers can discard state retained from a previous session even when the selected address is unchanged.
  */
-data class RadioTransportSession(val generation: Long, val address: String) {
+data class ActiveRadioSession(val generation: Long, val address: String) {
     /** Immutable context carried with every frame admitted by this session. */
     val context = RadioSessionContext(generation = generation, address = address)
 
     /** Prevent accidental disclosure of the raw transport address in diagnostic interpolation. */
-    override fun toString(): String = "RadioTransportSession(generation=$generation, address=...)"
+    override fun toString(): String = "ActiveRadioSession(generation=$generation, address=...)"
 }
 
 private class SessionOperationState(var admittedOperations: Int = 0, var drainWaiter: CompletableDeferred<Unit>? = null)
@@ -223,10 +223,10 @@ class SharedRadioInterfaceService(
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession.asStateFlow()
 
     /**
-     * The session that owns lifecycle completion. [revokeTransportSession] closes its admission first, waits for every
+     * The session that owns lifecycle completion. [revokeSession] closes its admission first, waits for every
      * already-admitted operation, then clears this token. Callbacks are rejected as soon as admission closes.
      */
-    @Volatile private var activeTransportSession: RadioTransportSession? = null
+    @Volatile private var activeRadioSession: ActiveRadioSession? = null
 
     /** Serializes session publication/revocation with callback and suspend-operation admission. */
     private val sessionCallbackLock = SynchronizedObject()
@@ -278,7 +278,7 @@ class SharedRadioInterfaceService(
          */
         private const val SESSION_HANDLER_TIMEOUT_MILLIS = 2 * 60 * 1000L
 
-        /** How often [revokeTransportSession] reports a lease drain that has not completed. */
+        /** How often [revokeSession] reports a lease drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
     }
 
@@ -300,11 +300,11 @@ class SharedRadioInterfaceService(
     // ── Session admission ───────────────────────────────────────────────────
 
     override fun isSessionActive(session: RadioSessionContext): Boolean =
-        synchronized(sessionCallbackLock) { sessionAdmissionOpen && activeTransportSession?.context == session }
+        synchronized(sessionCallbackLock) { sessionAdmissionOpen && activeRadioSession?.context == session }
 
     override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
         synchronized(sessionCallbackLock) {
-            if (!sessionAdmissionOpen || activeTransportSession?.context != session) return@synchronized false
+            if (!sessionAdmissionOpen || activeRadioSession?.context != session) return@synchronized false
             block()
             true
         }
@@ -315,7 +315,7 @@ class SharedRadioInterfaceService(
     ): Boolean {
         val admittedSession =
             synchronized(sessionCallbackLock) {
-                val active = activeTransportSession
+                val active = activeRadioSession
                 if (!sessionAdmissionOpen || active?.context != session) {
                     null
                 } else {
@@ -329,7 +329,7 @@ class SharedRadioInterfaceService(
                 override val session: RadioSessionContext = session
 
                 override fun isCurrent(): Boolean =
-                    synchronized(sessionCallbackLock) { activeTransportSession === admittedSession }
+                    synchronized(sessionCallbackLock) { activeRadioSession === admittedSession }
             }
 
         try {
@@ -362,7 +362,7 @@ class SharedRadioInterfaceService(
         }
     }
 
-    private fun releaseSessionOperation(admittedSession: RadioTransportSession) {
+    private fun releaseSessionOperation(admittedSession: ActiveRadioSession) {
         val drainWaiter =
             synchronized(sessionCallbackLock) {
                 val state = sessionOperationStates[admittedSession.generation]
@@ -385,7 +385,7 @@ class SharedRadioInterfaceService(
     }
 
     /** Removes a drained session's operation state without letting a diagnostic invariant failure block teardown. */
-    private fun removeDrainedSessionStateLocked(session: RadioTransportSession): CompletableDeferred<Unit>? {
+    private fun removeDrainedSessionStateLocked(session: ActiveRadioSession): CompletableDeferred<Unit>? {
         val state = sessionOperationStates.remove(session.generation)
         if (state == null) {
             Logger.e { "Session generation ${session.generation} lost its operation state during drain" }
@@ -406,12 +406,12 @@ class SharedRadioInterfaceService(
     /** Admits a new session for [active], or null once [active] is no longer the selected radio's open link. */
     private fun admitSession(active: ActiveLink): RadioSessionContext? = synchronized(sessionCallbackLock) {
         if (activeLink.value !== active || active.closing) return@synchronized null
-        check(activeTransportSession == null && sessionOperationStates.isEmpty()) {
+        check(activeRadioSession == null && sessionOperationStates.isEmpty()) {
             "Cannot admit a session while the previous one is still draining"
         }
-        val session = RadioTransportSession(sessionGenerationCounter.incrementAndGet(), active.address)
+        val session = ActiveRadioSession(sessionGenerationCounter.incrementAndGet(), active.address)
         sessionOperationStates[session.generation] = SessionOperationState()
-        activeTransportSession = session
+        activeRadioSession = session
         sessionAdmissionOpen = true
         _activeSession.value = session.context
         _sessionGeneration.value = session.generation
@@ -424,12 +424,12 @@ class SharedRadioInterfaceService(
      * The closed gate rejects queued callbacks and new operations immediately; the retained session token prevents a
      * replacement session from overlapping an admitted database commit.
      */
-    private suspend fun revokeTransportSession(session: RadioTransportSession?) {
+    private suspend fun revokeSession(session: ActiveRadioSession?) {
         if (session == null) return
         withContext(NonCancellable) {
             val drainWaiter =
                 synchronized(sessionCallbackLock) {
-                    if (activeTransportSession !== session) return@synchronized null
+                    if (activeRadioSession !== session) return@synchronized null
                     sessionAdmissionOpen = false
                     val state = sessionOperationStates[session.generation]
                     if (state == null) {
@@ -460,9 +460,9 @@ class SharedRadioInterfaceService(
             }
             val retainedDrainWaiter =
                 synchronized(sessionCallbackLock) {
-                    if (activeTransportSession === session) {
+                    if (activeRadioSession === session) {
                         val waiter = removeDrainedSessionStateLocked(session)
-                        activeTransportSession = null
+                        activeRadioSession = null
                         _activeSession.value = null
                         waiter
                     } else {
@@ -473,7 +473,7 @@ class SharedRadioInterfaceService(
         }
     }
 
-    private fun sessionFor(context: RadioSessionContext): RadioTransportSession? = activeTransportSession?.takeIf {
+    private fun sessionFor(context: RadioSessionContext): ActiveRadioSession? = activeRadioSession?.takeIf {
         it.context == context
     }
 
@@ -484,7 +484,7 @@ class SharedRadioInterfaceService(
         override fun openSession(): RadioSessionContext? = admitSession(active)
 
         override suspend fun closeSession(session: RadioSessionContext) {
-            revokeTransportSession(synchronized(sessionCallbackLock) { sessionFor(session) })
+            revokeSession(synchronized(sessionCallbackLock) { sessionFor(session) })
             // A snapshot install can publish Connected after the link dropped; the drop's state wins once it closes.
             publishState(active)
         }
@@ -553,7 +553,7 @@ class SharedRadioInterfaceService(
     private suspend fun closeLinkLocked() = withContext(NonCancellable) {
         val active = activeLink.value ?: return@withContext
         active.closing = true
-        revokeTransportSession(synchronized(sessionCallbackLock) { activeTransportSession })
+        revokeSession(synchronized(sessionCallbackLock) { activeRadioSession })
         try {
             active.link.disconnect()
             active.pipeline?.cancelAndJoin()
@@ -735,7 +735,7 @@ class SharedRadioInterfaceService(
     private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
         val admitted =
             synchronized(sessionCallbackLock) {
-                val current = activeTransportSession
+                val current = activeRadioSession
                 val link = activeLink.value
                 if (!sessionAdmissionOpen || current == null || link == null) return@synchronized null
                 if (session != null && current.context != session) return@synchronized null

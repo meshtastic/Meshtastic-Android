@@ -25,7 +25,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.WebBleScanner
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.serial.WebSerialPortRegistry
-import org.meshtastic.core.network.serial.WebSerialRadioLink
+import org.meshtastic.core.network.serial.WebSerialTransport
 import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.sdk.TransportIdentity
@@ -78,6 +78,6 @@ class WebRadioLinks(
         identity = TransportIdentity("serial-web:$rest"),
         ble = false,
         scope = scope,
-        provider = { _, _ -> WebSerialRadioLink(rest, serialPorts) },
+        provider = { _, _ -> WebSerialTransport(rest, serialPorts) },
     )
 }

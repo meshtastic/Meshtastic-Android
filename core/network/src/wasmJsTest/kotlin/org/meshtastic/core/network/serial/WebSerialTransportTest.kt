@@ -26,12 +26,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class WebSerialRadioLinkTest {
+class WebSerialTransportTest {
     @Test
     fun `frames split across reads arrive in order then EOF ends the link`() = runTest {
         val port = fakePort()
         val registry = WebSerialPortRegistry().also { it.rebind("test", port) }
-        val link = WebSerialRadioLink("test", registry)
+        val link = WebSerialTransport("test", registry)
         val received = mutableListOf<Frame>()
 
         try {
