@@ -19,6 +19,7 @@ package org.meshtastic.core.data.radio
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,19 +28,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.data.manager.MeshConfigFlowManagerImpl
+import org.meshtastic.core.data.manager.NodeManagerImpl
 import org.meshtastic.core.data.manager.radioSessionProjection
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.LockdownCoordinator
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.repository.RadioSessionAuthority
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
 import org.meshtastic.core.testing.FakeMeshLogRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeNotificationPrefs
+import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.LogRecord
+import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.sdk.DisplayMirrorFrame
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.RadioClient
@@ -60,8 +70,14 @@ class SdkRadioLinkSessionRoutingTest {
         RadioSessionHost,
         RadioSessionAuthority by radio {
         var open: RadioSessionContext? = null
+        var openFailure: Throwable? = null
+        var closeFailure: Throwable? = null
 
         override fun openSession(): RadioSessionContext {
+            openFailure?.let {
+                openFailure = null
+                throw it
+            }
             check(open == null) { "an app session is already open" }
             radio.connect()
             return checkNotNull(radio.activeSession.value).also {
@@ -74,6 +90,7 @@ class SdkRadioLinkSessionRoutingTest {
             log += "close ${session.generation}"
             open = null
             radio.disconnect()
+            closeFailure?.let { throw it }
         }
     }
 
@@ -100,19 +117,44 @@ class SdkRadioLinkSessionRoutingTest {
 
                 override fun reset() = Unit
             }
+        val connections =
+            mock<MeshConnectionManager>(MockMode.autofill).also {
+                everySuspend { it.onNodeDbReady() } calls { log += "node-db-ready" }
+            }
+        val nodeRepository = FakeNodeRepository()
+        val nodeManager =
+            NodeManagerImpl(nodeRepository, mock(MockMode.autofill), radio, scope.backgroundScope.asServiceScope())
+                .apply {
+                    setMyNodeNum(1)
+                    setNodeDbReady(true)
+                    setAllowNodeDbWrites(true)
+                }
+        val configFlowManager =
+            MeshConfigFlowManagerImpl(
+                nodeManager = nodeManager,
+                nodeRepository = nodeRepository,
+                radioConfigRepository = FakeRadioConfigRepository(),
+                serviceStateWriter = FakeServiceRepository(),
+                analytics = mock(MockMode.autofill),
+                notificationPrefs = FakeNotificationPrefs(),
+                radioInterfaceService = radio,
+                scope = scope.backgroundScope.asServiceScope(),
+            )
         val host = RecordingHost(radio, log)
         val pipeline =
             RadioSessionPipeline(
                 lazy {
                     radioSessionProjection(
-                        nodeManager = mock(MockMode.autofill),
+                        nodeManager = nodeManager,
                         radio = radio,
                         scope = scope.backgroundScope,
                         meshLogRepository = logs,
+                        nodeRepository = nodeRepository,
+                        configFlowManager = lazy { configFlowManager },
                         displayMirrorManager = mirror,
                     )
                 },
-                lazy { error("connection manager is not under test") },
+                lazy { connections },
                 lazy { lockdown },
             )
 
@@ -249,5 +291,50 @@ class SdkRadioLinkSessionRoutingTest {
 
         assertNull(rig.host.open)
         assertTrue("close 1" in rig.log)
+    }
+
+    // Regression: a throw from the host opening a session escaped consume and ended the pump.
+    @Test
+    fun `a failed session open is skipped and the next session id opens normally`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        pump(rig, rig.link(), events)
+        rig.host.openFailure = IllegalStateException("Cannot admit a session while the previous one is still draining")
+
+        send(events, lockdown(1), lockdown(2))
+
+        assertNotNull(rig.host.open, "the event for the new session id must open an app session")
+        assertEquals(listOf("open 1", "lockdown-connect"), rig.log)
+    }
+
+    // Regression: a throw from host.closeSession skipped lockdown.onDisconnect.
+    @Test
+    fun `lockdown is told of the disconnect when closing the session throws`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        val link = rig.link()
+        backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) { runCatching { link.consume(events, rig.host) } }
+        rig.host.closeFailure = IllegalStateException("close failed")
+
+        send(events, lockdown(1), RadioSessionEvent.Ended(1))
+
+        assertEquals(listOf("open 1", "lockdown-connect", "close 1", "lockdown-disconnect"), rig.log)
+    }
+
+    // Regression: one try block around both readiness callbacks skipped onNodeDbReady when onRadioConfigLoaded threw.
+    @Test
+    fun `a throwing onRadioConfigLoaded still calls onNodeDbReady`() = runTest {
+        val rig = Rig(this)
+        every { rig.connections.onRadioConfigLoaded() } calls { error("config callback failed") }
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        pump(rig, rig.link(), events)
+        val myInfo = MyNodeInfo.Builder().also { it.my_node_num = 1 }.build()
+
+        send(
+            events,
+            RadioSessionEvent.Ready(1, myInfo, configBundle = null, channels = emptyList(), nodes = emptyMap()),
+        )
+
+        assertTrue("node-db-ready" in rig.log, "onNodeDbReady must run after onRadioConfigLoaded threw: ${rig.log}")
     }
 }

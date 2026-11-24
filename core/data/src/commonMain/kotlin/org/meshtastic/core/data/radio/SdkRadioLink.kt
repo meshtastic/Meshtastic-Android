@@ -166,7 +166,9 @@ internal class SdkRadioLink(
             }
             val slot =
                 current.value?.takeIf { it.sdkId == event.sessionId }
-                    ?: openSession(host, event.sessionId)
+                    ?: safeCatching { openSession(host, event.sessionId) }
+                        .onFailure { Logger.e(it) { "App session open for SDK session ${event.sessionId} failed" } }
+                        .getOrNull()
                     ?: return@collect
             val session = slot.context
             // Nothing restarts this collector, so one event the app fails to write must not end the session's stream.
@@ -191,13 +193,10 @@ internal class SdkRadioLink(
         }
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }
         host.runWithSessionLease(session) {
-            safeCatching {
-                pipeline.connections.onRadioConfigLoaded()
-                pipeline.connections.onNodeDbReady()
-            }
-                .onFailure { failure ->
-                    Logger.w { "App readiness callback failed: ${failure::class.simpleName}" }
-                }
+            safeCatching { pipeline.connections.onRadioConfigLoaded() }
+                .onFailure { Logger.w(it) { "App radio-config readiness callback failed" } }
+            safeCatching { pipeline.connections.onNodeDbReady() }
+                .onFailure { Logger.w(it) { "App node-db readiness callback failed" } }
         }
     }
 
@@ -211,8 +210,11 @@ internal class SdkRadioLink(
     private suspend fun endSession(host: RadioSessionHost) {
         val slot = current.value ?: return
         current.value = null
-        host.closeSession(slot.context)
-        pipeline.lockdown.onDisconnect()
+        try {
+            host.closeSession(slot.context)
+        } finally {
+            pipeline.lockdown.onDisconnect()
+        }
     }
 
     internal fun routeDeviceLog(item: SessionScoped<LogRecord>) {
