@@ -64,6 +64,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
@@ -536,8 +537,11 @@ class SharedRadioInterfaceService(
         val active = ActiveLink(address, link, scope)
         synchronized(stateLock) { activeLink.value = active }
         Logger.i { "Opened the link for ${address.anonymize}" }
-        active.pipeline = scope.launch { link.run(LinkHost(active)) }
-        link.connection.onEach { onLinkState(active, it) }.launchIn(scope)
+        active.pipeline = scope.handledLaunch { link.run(LinkHost(active)) }
+        link.connection
+            .onEach { onLinkState(active, it) }
+            .catch { Logger.e(it) { "Link state handling failed for ${address.anonymize}" } }
+            .launchIn(scope)
         active.connect = scope.launch {
             // With auto-reconnect on, connect() returns at the first Connected and throws only on Failed, which
             // the state already shows.
