@@ -809,10 +809,6 @@ class NodeManagerImpl(
         }
     }
 
-    override fun updateNodeStatus(nodeNum: Int, status: String?) {
-        updateNode(nodeNum) { node -> applyNodeStatus(node, status) }
-    }
-
     override suspend fun updateNodeStatusAndPersist(nodeNum: Int, status: String?) {
         updateNodeAndPersist(nodeNum) { node -> applyNodeStatus(node, status) }
     }
