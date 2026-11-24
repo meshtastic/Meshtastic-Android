@@ -23,6 +23,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -36,6 +37,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.repository.toNodeRequest
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.MessageHandle
 import org.meshtastic.sdk.NodeId
@@ -44,7 +46,6 @@ import org.meshtastic.sdk.RoutingApi
 import org.meshtastic.sdk.TelemetryApi
 import org.meshtastic.sdk.requestPaxcount
 import org.meshtastic.proto.Position as ProtoPosition
-import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 
 /**
  * [QueryController] implementation over the active session's SDK client: `TelemetryApi`, `RoutingApi`, the request
@@ -55,6 +56,7 @@ import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 @Suppress("LongParameterList")
 internal class QueryControllerImpl(
     private val radio: RadioInterfaceService,
+    private val connectionStateProvider: ConnectionStateProvider,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
@@ -64,13 +66,11 @@ internal class QueryControllerImpl(
 
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
 
-    /**
-     * The session's client once its handshake is Ready; the SDK refuses sends and answers RPCs as unreachable before.
-     */
+    /** The session's client once the app has installed its snapshot; the SDK refuses sends before then. */
     private fun requireClient(operation: String): RadioClient =
-        radio.activeSession.value?.let(radio::clientForSession)?.takeIf {
-            it.connection.value == SdkConnectionState.Connected
-        } ?: throw PacketQueueRejectedException(operation)
+        radio.activeSession.value
+            ?.takeIf { connectionStateProvider.connectionState.value == ConnectionState.Connected }
+            ?.let(radio::clientForSession) ?: throw PacketQueueRejectedException(operation)
 
     /** Sends through the client's request helper; an SDK refusal reads as the session refusing admission. */
     private suspend fun send(operation: String, request: suspend RadioClient.() -> MessageHandle): NodeRequest {
