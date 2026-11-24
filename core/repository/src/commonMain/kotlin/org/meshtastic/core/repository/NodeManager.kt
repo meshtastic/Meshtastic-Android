@@ -165,9 +165,6 @@ interface NodeManager : NodeIdLookup {
     /** Processes a received node status message. */
     fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage, session: RadioSessionContext? = null)
 
-    /** Updates the status string for a node. */
-    fun updateNodeStatus(nodeNum: Int, status: String?)
-
     /** Updates node status and awaits any required persistence. */
     suspend fun updateNodeStatusAndPersist(nodeNum: Int, status: String?)
 

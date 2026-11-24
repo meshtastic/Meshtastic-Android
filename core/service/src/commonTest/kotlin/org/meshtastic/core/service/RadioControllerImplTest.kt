@@ -1215,7 +1215,7 @@ class RadioControllerImplTest {
         verify(exactly(1)) { nodeManager.handleReceivedPosition(1234, 1234, any(), any(), any()) }
         // The SDK reports the committed local config, module config and owner as session events.
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
-        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verifySuspend(exactly(0)) { nodeManager.updateNodeStatusAndPersist(any(), any()) }
         verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
         verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
     }
@@ -1297,7 +1297,7 @@ class RadioControllerImplTest {
         advanceUntilIdle()
 
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
-        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verifySuspend(exactly(0)) { nodeManager.updateNodeStatusAndPersist(any(), any()) }
         verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
         verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
         verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
