@@ -294,8 +294,8 @@ class PacketHandlerImpl(
      * response arrived) would stay ENROUTE — "Sending…" — forever. Stamp it as a retryable timeout instead; a late ACK
      * still upgrades it via handleAckNak.
      *
-     * Timers survive disconnects. One fires while [session] is still active or [database], the one selected when it
-     * was armed, is still selected; reconnecting re-arms the selected database's rows.
+     * Timers survive disconnects. One fires while [session] is still active or [database], the one selected when it was
+     * armed, is still selected; reconnecting re-arms the selected database's rows.
      */
     private suspend fun scheduleSendAckTimeout(
         session: RadioSessionContext,

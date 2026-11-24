@@ -119,8 +119,7 @@ class PacketHandlerRoomStatusTest {
                 ),
             )
         val provider = SingleDatabaseProvider(db)
-        val repository =
-            PacketRepositoryImpl(provider, CoroutineDispatchers(dispatcher, dispatcher, dispatcher))
+        val repository = PacketRepositoryImpl(provider, CoroutineDispatchers(dispatcher, dispatcher, dispatcher))
         val transport =
             FakeRadioTransport(TransportIdentity("fake:outgoing"), autoHandshake = true, nodeNum = LOCAL_NODE)
         val client =

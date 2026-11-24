@@ -102,7 +102,8 @@ open class EnsureRemoteAdminSessionUseCase(
                 }
             }
 
-            else -> result?.routingErrorOrNull()?.let { EnsureSessionResult.Rejected(it) } ?: EnsureSessionResult.Timeout
+            else ->
+                result?.routingErrorOrNull()?.let { EnsureSessionResult.Rejected(it) } ?: EnsureSessionResult.Timeout
         }
     }
 

@@ -107,8 +107,8 @@ class UsbRepository(
      *
      * Exists because some firmware waits for a host before it will run: the nRF52 factory-erase image blocks in `while
      * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately opens the port
-     * directly with no reader thread or listener: there is no Meshtastic protocol on the other end here, just a
-     * blocked `setup()`.
+     * directly with no reader thread or listener: there is no Meshtastic protocol on the other end here, just a blocked
+     * `setup()`.
      *
      * @return true when the port was opened and DTR held; false if permission is missing or the port could not be
      *   opened.
