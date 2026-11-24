@@ -362,6 +362,7 @@ class SdkTcpRoomTest {
         private val outgoing =
             PacketHandlerImpl(
                 lazy { outboundRepository },
+                databases,
                 radio,
                 state,
                 nodeManager,

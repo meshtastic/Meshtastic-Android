@@ -118,8 +118,9 @@ class PacketHandlerRoomStatusTest {
                     hasWifi = false,
                 ),
             )
+        val provider = SingleDatabaseProvider(db)
         val repository =
-            PacketRepositoryImpl(SingleDatabaseProvider(db), CoroutineDispatchers(dispatcher, dispatcher, dispatcher))
+            PacketRepositoryImpl(provider, CoroutineDispatchers(dispatcher, dispatcher, dispatcher))
         val transport =
             FakeRadioTransport(TransportIdentity("fake:outgoing"), autoHandshake = true, nodeNum = LOCAL_NODE)
         val client =
@@ -149,6 +150,7 @@ class PacketHandlerRoomStatusTest {
         val handler =
             PacketHandlerImpl(
                 lazy { repository },
+                provider,
                 radioService,
                 FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) },
                 nodeManager,
