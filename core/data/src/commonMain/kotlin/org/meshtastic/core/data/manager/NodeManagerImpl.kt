@@ -168,7 +168,8 @@ class NodeManagerImpl(
         }
 
         /**
-         * Shrinks the index to at most [maxNodes] entries, never removing anything in [keep].
+         * Once the index exceeds [maxNodes] entries, shrinks it to [lowWater] entries, never removing anything in
+         * [keep]. At or under [maxNodes] it returns the receiver unchanged.
          *
          * `packet.from` is untrusted and unthrottled, so without this every novel value allocates a permanent [Node]
          * and the index grows until the process dies. Only `core:data` reads this index — for correlation,
@@ -183,8 +184,13 @@ class NodeManagerImpl(
          * The cap is therefore best-effort rather than absolute: if protected entries alone exceed [maxNodes] the index
          * stays above it. That is deliberate — these marks are set only by the local user, so no remote party can
          * inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
+         *
+         * Evicting down to [lowWater] rather than to [maxNodes] amortizes the sort: under a flood of novel numbers it
+         * runs once per `maxNodes - lowWater` inserts instead of on every one. Protected entries above [lowWater]
+         * shrink that batch, and once they fill [maxNodes] every insert past it pays for the filter and sort again.
          */
-        fun evictedToFit(maxNodes: Int, keep: Set<Int>): NodeIndex {
+        fun evictedToFit(maxNodes: Int, lowWater: Int, keep: Set<Int>): NodeIndex {
+            require(lowWater < maxNodes) { "lowWater $lowWater must be below maxNodes $maxNodes" }
             if (byNum.size <= maxNodes) return this
             val evictable =
                 byNum.values
@@ -195,7 +201,7 @@ class NodeManagerImpl(
                             .thenBy { it.lastHeard }
                             .thenBy { it.num },
                     )
-            val toDrop = evictable.take(byNum.size - maxNodes)
+            val toDrop = evictable.take(byNum.size - lowWater)
             return toDrop.fold(this) { index, node -> index.remove(node.num) }
         }
 
@@ -449,6 +455,12 @@ class NodeManagerImpl(
          * legitimately busy mesh never reaches it and only sustained novel-`from` traffic does.
          */
         const val MAX_IN_MEMORY_NODES = 2_000
+
+        /**
+         * Size the in-memory node index is cut back to once it passes [MAX_IN_MEMORY_NODES], so a flood pays for one
+         * eviction pass per 200 novel nodes rather than per node. A cached NodeDB over the cap loads at this size.
+         */
+        const val IN_MEMORY_NODES_LOW_WATER = MAX_IN_MEMORY_NODES * 9 / 10
     }
 
     override fun loadCachedNodeDB() {
@@ -612,7 +624,8 @@ class NodeManagerImpl(
         nodeState.value.index.byNum[n] ?: createDefaultNode(n, channel)
 
     /**
-     * Applies [MAX_IN_MEMORY_NODES] to this state's index, protecting the local node and [alsoKeep].
+     * Applies [MAX_IN_MEMORY_NODES] to this state's index, cutting it back to [IN_MEMORY_NODES_LOW_WATER] once it is
+     * over, and protecting the local node and [alsoKeep].
      *
      * EVERY path that installs an index must go through this. There are three — the ordinary [updateNodeState] reducer,
      * the [handleReceivedUser] commit, and the [loadCachedNodeDB] snapshot install — and bounding only the first left
@@ -621,7 +634,12 @@ class NodeManagerImpl(
      * Returns the receiver unchanged when nothing needs evicting, so a CAS on the result stays cheap.
      */
     private fun NodeState.withBoundedIndex(alsoKeep: Int? = null): NodeState {
-        val bounded = index.evictedToFit(MAX_IN_MEMORY_NODES, keep = setOfNotNull(alsoKeep, localNodeNum))
+        val bounded =
+            index.evictedToFit(
+                MAX_IN_MEMORY_NODES,
+                IN_MEMORY_NODES_LOW_WATER,
+                keep = setOfNotNull(alsoKeep, localNodeNum),
+            )
         return if (bounded === index) this else copy(index = bounded)
     }
 

@@ -120,10 +120,28 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `crossing the cap evicts down to the low-water mark and nothing more until the cap is crossed again`() {
+        val cap = NodeManagerImpl.MAX_IN_MEMORY_NODES
+        val lowWater = NodeManagerImpl.IN_MEMORY_NODES_LOW_WATER
+        var next = 100_000
+
+        floodDistinctNodes(cap + 1, startAt = next)
+        next += cap + 1
+        assertEquals(lowWater, nodeManager.nodeDBbyNodeNum.size, "crossing the cap should evict to the low-water mark")
+
+        floodDistinctNodes(cap - lowWater, startAt = next)
+        next += cap - lowWater
+        assertEquals(cap, nodeManager.nodeDBbyNodeNum.size, "no eviction should run while the index is at or under cap")
+
+        floodDistinctNodes(1, startAt = next)
+        assertEquals(lowWater, nodeManager.nodeDBbyNodeNum.size, "crossing the cap again should evict to low-water")
+    }
+
+    @Test
     fun `a flood of novel NodeInfo packets cannot grow the in-memory index without bound`() {
         // handleReceivedUser commits its own index rather than going through updateNodeState, so bounding only the
         // latter left this path — the one an unauthenticated peer drives most directly — completely unbounded.
-        repeat(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500) { i ->
+        repeat(NodeManagerImpl.MAX_IN_MEMORY_NODES + 1) { i ->
             val num = 200_000 + i
             nodeManager.handleReceivedUser(
                 num,
@@ -138,10 +156,63 @@ class NodeManagerImplTest {
             )
         }
 
-        assertTrue(
-            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
-            "index grew to ${nodeManager.nodeDBbyNodeNum.size} via the NodeInfo path",
+        assertEquals(
+            NodeManagerImpl.IN_MEMORY_NODES_LOW_WATER,
+            nodeManager.nodeDBbyNodeNum.size,
+            "the NodeInfo path should evict to the low-water mark once it crosses the cap",
         )
+    }
+
+    /** A cached snapshot of placeholders, one past the cap, plus [extra] nodes the caller wants in it. */
+    private fun overCapSnapshot(vararg extra: Node): Map<Int, Node> =
+        (0..NodeManagerImpl.MAX_IN_MEMORY_NODES).associate { i ->
+            val num = 300_000 + i
+            num to nodeManager.getOrCreateNode(num).copy(lastHeard = i)
+        } + extra.associateBy { it.num }
+
+    @Test
+    fun `a cached NodeDB over the cap loads at the low-water mark and keeps protected nodes`() = testScope.runTest {
+        val myNum = 4242
+        val favourite = 5150
+        nodeManager.setMyNodeNum(myNum)
+        // Both sort first for eviction, so only their protection keeps them.
+        val snapshot =
+            overCapSnapshot(
+                nodeManager.getOrCreateNode(myNum).copy(lastHeard = -1),
+                nodeManager.getOrCreateNode(favourite).copy(lastHeard = -1, isFavorite = true),
+            )
+        everySuspend { nodeRepository.getNodeDbSnapshot() } returns snapshot
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        nodeManager.loadCachedNodeDB()
+        advanceUntilIdle()
+
+        assertEquals(NodeManagerImpl.IN_MEMORY_NODES_LOW_WATER, nodeManager.nodeDBbyNodeNum.size)
+        assertNotNull(nodeManager.nodeDBbyNodeNum[myNum], "the local node must survive a bounded load")
+        assertNotNull(nodeManager.nodeDBbyNodeNum[favourite], "a favourite must survive a bounded load")
+    }
+
+    @Test
+    fun `a cached NodeDB over the cap merged with a live update loads at the low-water mark`() = testScope.runTest {
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                overCapSnapshot()
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        // A live update during the load window sends the commit down the merge branch rather than direct install.
+        nodeManager.updateNode(9_999) { it.copy(lastHeard = Int.MAX_VALUE) }
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(NodeManagerImpl.IN_MEMORY_NODES_LOW_WATER, nodeManager.nodeDBbyNodeNum.size)
+        assertNotNull(nodeManager.nodeDBbyNodeNum[9_999], "the merge branch ran: the live node is in the index")
     }
 
     @Test
