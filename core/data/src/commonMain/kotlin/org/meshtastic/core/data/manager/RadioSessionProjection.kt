@@ -84,9 +84,16 @@ class RadioSessionProjection(
     /** The config last written to the MeshLog, so a change logs only the sections it moved. */
     private val loggedConfig = atomic<ConfigBundle?>(null)
 
-    /** Installs the handshake snapshot; the caller publishes app readiness only when this returns true. */
+    /**
+     * Installs the handshake snapshot; the caller publishes app readiness only when this returns true. Returns false
+     * when the session closed first or the snapshot carries no my_info.
+     */
     suspend fun installReady(event: RadioSessionEvent.Ready, session: RadioSessionContext): Boolean {
-        val myInfo = checkNotNull(event.myInfo)
+        val myInfo = event.myInfo
+        if (myInfo == null) {
+            Logger.w { "SDK Ready carried no my_info; snapshot not installed for app session ${session.generation}" }
+            return false
+        }
         val config = event.configBundle
         val installed = configFlowManager.value.installRadioSnapshot(session, event)
         if (installed) {

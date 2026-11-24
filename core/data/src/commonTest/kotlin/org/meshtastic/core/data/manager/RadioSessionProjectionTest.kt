@@ -152,6 +152,27 @@ class RadioSessionProjectionTest {
     }
 
     @Test
+    fun `a Ready without my_info is not installed and writes no my_info row`() = runTest {
+        val harness = Harness(backgroundScope)
+
+        val installed =
+            harness.projection.installReady(
+                RadioSessionEvent.Ready(
+                    SDK_SESSION,
+                    null,
+                    configBundle = null,
+                    channels = emptyList(),
+                    nodes = emptyMap(),
+                ),
+                harness.session,
+            )
+        runCurrent()
+
+        assertFalse(installed)
+        assertEquals(emptyList(), harness.logs.currentLogs.filter { it.message_type == MeshLog.TYPE_MY_INFO })
+    }
+
+    @Test
     fun `a direct LoRa packet sets the sender's link metrics and a relayed one keeps them`() = runTest {
         val harness = Harness(backgroundScope)
         harness.nodeManager.updateNode(REMOTE) { it.copy(heardOnCurrentLora = false) }

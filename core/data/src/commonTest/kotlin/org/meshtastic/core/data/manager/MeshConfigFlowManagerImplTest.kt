@@ -157,9 +157,10 @@ class MeshConfigFlowManagerImplTest {
         moduleConfigs: List<ModuleConfig> = emptyList(),
         files: List<FileInfo> = emptyList(),
         regionPresets: LoRaRegionPresetMap? = null,
+        myInfo: ProtoMyNodeInfo? = protoMyNodeInfo,
     ) = RadioSessionEvent.Ready(
         sessionId = 1L,
-        myInfo = protoMyNodeInfo,
+        myInfo = myInfo,
         configBundle =
         ConfigBundle(
             myInfo = protoMyNodeInfo,
@@ -273,6 +274,14 @@ class MeshConfigFlowManagerImplTest {
         assertFalse(manager.installRadioSnapshot(activeSession, snapshot()))
         verify(VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
         verifySuspend(VerifyMode.exactly(0)) { radioConfigRepository.clearLocalConfig() }
+    }
+
+    @Test
+    fun `a snapshot without my_info installs nothing and reports not installed`() = testScope.runTest {
+        assertFalse(manager.installRadioSnapshot(activeSession, snapshot(myInfo = null)))
+        verify(VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verifySuspend(VerifyMode.exactly(0)) { radioConfigRepository.clearLocalConfig() }
+        verify(VerifyMode.exactly(0)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
     }
 
     @Test
