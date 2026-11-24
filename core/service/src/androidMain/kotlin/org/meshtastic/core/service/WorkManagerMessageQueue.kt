@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.worker
+package org.meshtastic.core.service
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PersistedPacketId
 
-/** Android implementation of [MessageQueue] that uses [WorkManager] for reliable background transmission. */
+/** Android [MessageQueue] that hands each persisted message to [MeshWorkerManager] for background transmission. */
 @Single
 class WorkManagerMessageQueue(private val workerManager: MeshWorkerManager) : MessageQueue {
 

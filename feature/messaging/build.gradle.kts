@@ -43,8 +43,6 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
-        androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
-
         commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
 
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
