@@ -59,20 +59,16 @@ kotlin {
             implementation(libs.androidx.core.location.altitude)
             implementation(libs.meshtastic.sdk.transport.tcp)
             implementation(libs.meshtastic.sdk.transport.serial)
-            implementation(libs.kable.core)
             implementation(libs.usb.serial.android)
         }
         getByName("jvmMain").dependencies {
-            implementation(libs.kable.core)
             implementation(libs.meshtastic.sdk.transport.tcp)
             implementation(libs.meshtastic.sdk.transport.serial)
         }
-        findByName("wasmJsMain")?.dependencies { implementation(libs.kable.core) }
 
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.meshtastic.sdk.testing)
-            implementation(libs.kable.core)
         }
 
         getByName("jvmTest").dependencies {
