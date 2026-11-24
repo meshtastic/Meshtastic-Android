@@ -27,7 +27,7 @@ import org.meshtastic.core.model.TelemetryType
  * Room through the session's receive projection.
  *
  * @throws PacketQueueRejectedException from each request when no radio session can take it.
- * @see RadioController which extends this interface for backward compatibility
+ * @see RadioController
  */
 interface QueryController {
 

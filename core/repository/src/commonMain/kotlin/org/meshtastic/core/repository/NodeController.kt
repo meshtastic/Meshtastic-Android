@@ -19,10 +19,10 @@ package org.meshtastic.core.repository
 /**
  * Node management operations — favorite, ignore, mute, and remove nodes.
  *
- * Mirrors the node management subset of the SDK's `AdminApi` (setFavorite, setIgnored, toggleMuted). When the SDK is
- * adopted, implementations delegate to `RadioClient.admin.setFavorite(NodeId, Boolean)` etc.
+ * Mirrors the node management subset of the SDK's `AdminApi` (setFavorite, setIgnored, toggleMuted); implementations
+ * delegate to the session's `RadioClient.admin`.
  *
- * @see RadioController which extends this interface for backward compatibility
+ * @see RadioController
  */
 interface NodeController {
 
