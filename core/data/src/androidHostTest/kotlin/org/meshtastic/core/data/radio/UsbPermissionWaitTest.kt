@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.data.radio
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.meshtastic.core.repository.TransportDisconnectReason
@@ -26,15 +29,22 @@ import kotlin.test.assertNull
 
 class UsbPermissionWaitTest {
     private var requests = 0
-    private var reattachWaits = 0
+    private val events = mutableListOf<String>()
 
-    private suspend fun UsbPermissionWait.run(granted: Boolean = false, answer: Boolean? = false) = await(
+    private suspend fun UsbPermissionWait.run(
+        device: String = "usb-1",
+        granted: Boolean = false,
+        answer: Boolean? = false,
+        awaitChange: suspend (String) -> Unit = { events += "wait" },
+    ) = await(
+        deviceName = { device },
         hasPermission = { granted },
         request = {
             requests++
+            events += "request"
             answer
         },
-        awaitReattachOrGrant = { reattachWaits++ },
+        awaitChange = awaitChange,
     )
 
     // Catches the regression where a deny was ignored and the wait polled forever.
@@ -51,23 +61,48 @@ class UsbPermissionWaitTest {
 
     // Catches a prompt on every SDK backoff retry after a deny.
     @Test
-    fun `after a deny the next call waits for re-attach before it asks again`() = runTest {
+    fun `after a deny the next call suspends before it asks again`() = runTest {
         val wait = UsbPermissionWait()
-        assertFailsWith<UsbPermissionDeniedException> { wait.run(answer = false) }
-        assertEquals(0, reattachWaits)
-        assertFailsWith<UsbPermissionDeniedException> { wait.run(answer = false) }
-        assertEquals(1, reattachWaits)
+        assertFailsWith<UsbPermissionDeniedException> { wait.run() }
+        val release = CompletableDeferred<Unit>()
+        val second = async {
+            runCatching { wait.run(awaitChange = { release.await() }) }
+        }
+        runCurrent()
+        assertEquals(1, requests)
+        release.complete(Unit)
+        second.await()
         assertEquals(2, requests)
+    }
+
+    // Catches the stuck state where a device re-enumerated between attempts waited for yet another replug.
+    @Test
+    fun `a device replaced between attempts asks again without waiting`() = runTest {
+        val wait = UsbPermissionWait()
+        assertFailsWith<UsbPermissionDeniedException> { wait.run(device = "usb-1") }
+        events.clear()
+        assertFailsWith<UsbPermissionDeniedException> { wait.run(device = "usb-2") }
+        assertEquals(listOf("request"), events)
+    }
+
+    // Catches a denial on one radio silencing the prompt for a different radio.
+    @Test
+    fun `a deny on one device does not suppress the prompt for another`() = runTest {
+        val wait = UsbPermissionWait()
+        assertFailsWith<UsbPermissionDeniedException> { wait.run(device = "usb-1") }
+        wait.run(device = "usb-2", answer = true)
+        assertEquals(2, requests)
+        assertEquals(listOf("request", "request"), events)
     }
 
     @Test
     fun `a grant after a deny is accepted without another prompt`() = runTest {
         val wait = UsbPermissionWait()
-        assertFailsWith<UsbPermissionDeniedException> { wait.run(answer = false) }
+        assertFailsWith<UsbPermissionDeniedException> { wait.run() }
         wait.run(granted = true)
         assertEquals(1, requests)
         wait.run(granted = true)
-        assertEquals(1, reattachWaits)
+        assertEquals(listOf("request", "wait"), events)
     }
 
     @Test

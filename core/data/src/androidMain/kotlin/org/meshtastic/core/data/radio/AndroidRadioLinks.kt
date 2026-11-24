@@ -139,19 +139,20 @@ class AndroidRadioLinks(
     private suspend fun awaitUsbDevice(key: String): android.hardware.usb.UsbDevice {
         var device = usbRepository.serialDevices.mapNotNull { matchUsbDevice(it, key) }.first()
         usbPermission.await(
+            deviceName = { device.deviceName },
             hasPermission = { usbRepository.hasPermission(device) },
             request = {
                 Logger.i { "Asking for USB permission before connecting" }
                 usbRepository.requestPermission(device).firstOrNull()
             },
-            awaitReattachOrGrant = {
+            awaitChange = { denied ->
                 var gone = false
                 device =
                     usbRepository.serialDevices
                         .mapNotNull { devices ->
                             val match = matchUsbDevice(devices, key)
                             if (match == null) gone = true
-                            match?.takeIf { gone || usbRepository.hasPermission(it) }
+                            match?.takeIf { gone || it.deviceName != denied || usbRepository.hasPermission(it) }
                         }
                         .first()
             },
@@ -193,23 +194,25 @@ internal fun usbFailureReason(cause: MeshtasticException): TransportDisconnectRe
     if (cause.cause is UsbPermissionDeniedException) TransportDisconnectReason.UsbPermissionDenied else null
 
 /**
- * Asks for USB permission once per denial. After a deny the next [await] suspends until the device is re-attached or
- * permission is granted, so the SDK's backoff retries do not re-prompt.
+ * Asks for USB permission once per denial. After a deny, a call for the same device suspends in [awaitChange] until it
+ * is re-attached or permission is granted, so the SDK's backoff retries do not re-prompt; a call for a different
+ * device, such as one re-enumerated between attempts, asks again at once.
  */
 internal class UsbPermissionWait {
-    private var denied = false
+    private var deniedDevice: String? = null
 
     suspend fun await(
+        deviceName: () -> String,
         hasPermission: suspend () -> Boolean,
         request: suspend () -> Boolean?,
-        awaitReattachOrGrant: suspend () -> Unit,
+        awaitChange: suspend (denied: String) -> Unit,
     ) {
-        if (denied) awaitReattachOrGrant()
+        deniedDevice?.takeIf { it == deviceName() }?.let { awaitChange(it) }
         if (hasPermission() || request() == true) {
-            denied = false
+            deniedDevice = null
             return
         }
-        denied = true
+        deniedDevice = deviceName()
         throw UsbPermissionDeniedException()
     }
 }
