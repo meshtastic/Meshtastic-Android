@@ -89,6 +89,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error_recovery_exhausted
 import org.meshtastic.core.resources.firmware_too_old
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.core.resources.websocket_connect_failed
 import org.meshtastic.core.resources.websocket_handshake_rejected
 import org.meshtastic.core.resources.websocket_message_too_big
@@ -154,6 +155,7 @@ internal fun TransportDisconnectReason.toConnectionErrorMessage(): StringResourc
     TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
     TransportDisconnectReason.HandshakeRecoveryExhausted -> Res.string.error_recovery_exhausted
     TransportDisconnectReason.FirmwareTooOld -> Res.string.firmware_too_old
+    TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied
 }
 
 /**

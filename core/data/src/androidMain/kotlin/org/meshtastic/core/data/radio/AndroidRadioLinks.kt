@@ -21,11 +21,11 @@ import android.content.Context
 import android.provider.Settings
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.BuildConfigProvider
@@ -36,13 +36,14 @@ import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.network.transport.parseTcpRadioAddress
 import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioLinks
+import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.TransportIdentity
 import org.meshtastic.sdk.TransportSpec
 import org.meshtastic.sdk.transport.ble.BleResilience
 import org.meshtastic.sdk.transport.ble.BleTransport
 import org.meshtastic.sdk.transport.serial.AndroidUsbSerialPorts
 import org.meshtastic.sdk.transport.tcp.TcpTransport
-import kotlin.time.Duration.Companion.seconds
 
 /** Android's radio links: Bluetooth, TCP, WebSocket, USB serial and the demo radios. */
 @Single(binds = [RadioLinks::class])
@@ -126,24 +127,43 @@ class AndroidRadioLinks(
         ble = false,
         scope = scope,
         provider = { _, _ -> AndroidUsbSerialPorts.open(application, awaitUsbDevice(rest)) },
+        failureReason = ::usbFailureReason,
     )
+
+    private val usbPermission = UsbPermissionWait()
 
     /**
      * The attached device [key] names once Android lets the app open it. Old installations saved a bus path, so a
      * missing stable key falls back to the one attached device only for those.
      */
     private suspend fun awaitUsbDevice(key: String): android.hardware.usb.UsbDevice {
-        val device =
-            usbRepository.serialDevices
-                .first { devices -> devices[key] != null || (key.startsWith("/dev/") && devices.size == 1) }
-                .let { devices -> (devices[key] ?: devices.values.single()).device }
-        if (!usbRepository.hasPermission(device)) {
-            Logger.i { "Asking for USB permission before connecting" }
-            usbRepository.requestPermission(device).firstOrNull()
-            while (!usbRepository.hasPermission(device)) delay(USB_PERMISSION_POLL)
-        }
+        var device = usbRepository.serialDevices.mapNotNull { matchUsbDevice(it, key) }.first()
+        usbPermission.await(
+            hasPermission = { usbRepository.hasPermission(device) },
+            request = {
+                Logger.i { "Asking for USB permission before connecting" }
+                usbRepository.requestPermission(device).firstOrNull()
+            },
+            awaitReattachOrGrant = {
+                var gone = false
+                device =
+                    usbRepository.serialDevices
+                        .mapNotNull { devices ->
+                            val match = matchUsbDevice(devices, key)
+                            if (match == null) gone = true
+                            match?.takeIf { gone || usbRepository.hasPermission(it) }
+                        }
+                        .first()
+            },
+        )
         return device
     }
+
+    private fun matchUsbDevice(
+        devices: Map<String, com.hoho.android.usbserial.driver.UsbSerialDriver>,
+        key: String,
+    ): android.hardware.usb.UsbDevice? =
+        (devices[key] ?: devices.values.singleOrNull()?.takeIf { key.startsWith("/dev/") })?.device
 
     override fun replayFrames(): ByteArray? {
         val frames = runCatching {
@@ -161,9 +181,35 @@ class AndroidRadioLinks(
         /** A stale cache after a long absence fails every reconnect until the user unpairs. */
         const val GATT_REFRESH_AFTER_FAILURES = 6
 
-        val USB_PERMISSION_POLL = 1.seconds
-
         fun isFirebaseTestLab(context: Context): Boolean =
             Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+    }
+}
+
+/** The user declined Android's USB permission prompt for the radio. */
+internal class UsbPermissionDeniedException : Exception("USB permission denied")
+
+internal fun usbFailureReason(cause: MeshtasticException): TransportDisconnectReason? =
+    if (cause.cause is UsbPermissionDeniedException) TransportDisconnectReason.UsbPermissionDenied else null
+
+/**
+ * Asks for USB permission once per denial. After a deny the next [await] suspends until the device is re-attached or
+ * permission is granted, so the SDK's backoff retries do not re-prompt.
+ */
+internal class UsbPermissionWait {
+    private var denied = false
+
+    suspend fun await(
+        hasPermission: suspend () -> Boolean,
+        request: suspend () -> Boolean?,
+        awaitReattachOrGrant: suspend () -> Unit,
+    ) {
+        if (denied) awaitReattachOrGrant()
+        if (hasPermission() || request() == true) {
+            denied = false
+            return
+        }
+        denied = true
+        throw UsbPermissionDeniedException()
     }
 }

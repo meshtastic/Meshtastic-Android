@@ -47,4 +47,7 @@ enum class TransportDisconnectReason {
 
     /** The radio's firmware is older than the SDK supports, so the session was refused until the radio is updated. */
     FirmwareTooOld,
+
+    /** The user declined Android's USB permission prompt, so the radio stays unreachable until it is re-attached. */
+    UsbPermissionDenied,
 }
