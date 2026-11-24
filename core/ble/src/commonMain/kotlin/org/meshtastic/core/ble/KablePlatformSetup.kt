@@ -33,9 +33,10 @@ internal expect suspend fun Peripheral.connectedRssi(): Int?
 
 /**
  * Returns the negotiated maximum write payload length in bytes (i.e. ATT MTU minus the 3-byte ATT header), or `null` if
- * MTU has not yet been negotiated on this platform.
+ * MTU has not yet been negotiated on this platform. [atConnect] is Kable's `maximumWriteValueLengthForType`, read once
+ * after the last connect, for platforms that only report it through that suspend call.
  */
-internal expect fun Peripheral.negotiatedMaxWriteLength(): Int?
+internal expect fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int?
 
 /**
  * Requests the highest-throughput BLE connection priority (smallest connection interval) supported by the platform.
@@ -54,9 +55,7 @@ internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
 /**
  * Clears the platform's cached GATT service table for the connected [Peripheral].
  *
- * Kable keeps Android's `BluetoothGatt` on an internal connection object owned by the peripheral. This extension
- * searches the peripheral and its active connection for that field, then invokes the hidden `refresh()` API to clear
- * the per-device service cache.
+ * On Android this is Kable's `AndroidPeripheral.refreshGattCache`, which invokes the hidden `BluetoothGatt.refresh()`.
  *
  * Necessary when a device reboots into a different GATT profile (e.g., ESP32 OTA loader) using the same BLE MAC.
  *

@@ -362,10 +362,41 @@ class TAKMeshIntegrationTest {
         }
     }
 
+    // ── Inbound mesh → TAK client (V2) ──────────────────────────────────────
+
+    @Test
+    fun `the same V2 payload delivered twice reaches TAK clients once`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+        val payload = v2PliPayload("alpha-uid")
+
+        h.serviceRepository.emitMeshPacket(createV2MeshPacket(payload))
+        h.serviceRepository.emitMeshPacket(createV2MeshPacket(payload))
+        h.serviceRepository.emitMeshPacket(createV2MeshPacket(v2PliPayload("bravo-uid")))
+
+        val uids = h.serverManager.rawBroadcasts.map { Regex("""uid="([^"]+)"""").find(it)?.groupValues?.get(1) }
+        assertEquals(listOf("alpha-uid", "bravo-uid"), uids)
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun createPli(uid: String) =
         CoTMessage.pli(uid = uid, callsign = "TEST", latitude = 33.0, longitude = -84.0)
+
+    private fun v2PliPayload(uid: String): ByteArray =
+        assertNotNull(TakSdkCompressor.compressCoT(createPli(uid).toXml(), MAX_TAK_WIRE_PAYLOAD_BYTES).wirePayload)
+
+    private fun createV2MeshPacket(wirePayload: ByteArray): MeshPacket = MeshPacket.Builder()
+        .also { wb ->
+            wb.decoded =
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.ATAK_PLUGIN_V2
+                        wb.payload = wirePayload.toByteString()
+                    }
+                    .build()
+        }
+        .build()
 
     private fun createV1PliMeshPacket(isCompressed: Boolean = false): MeshPacket {
         val takPacket =
