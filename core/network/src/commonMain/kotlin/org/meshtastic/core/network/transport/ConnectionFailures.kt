@@ -22,8 +22,8 @@ import kotlinx.io.IOException
  * Whether this throwable is an ordinary, expected connection failure rather than an application defect.
  *
  * A radio that is powered off, a hostname that no longer resolves, a broker that closes the socket, or Wi-Fi dropping
- * mid-read are all routine for a mesh client: the MQTT client reconnects. Reporting them to crash/error tracking
- * buries real defects — an unreachable host accounted for hundreds of "errors" per day with nothing to fix.
+ * mid-read are all routine for a mesh client: the MQTT client reconnects. Reporting them to crash/error tracking buries
+ * real defects — an unreachable host accounted for hundreds of "errors" per day with nothing to fix.
  *
  * Callers should still log these (at warn) so a support session can see them; they just should not be raised as errors.
  */

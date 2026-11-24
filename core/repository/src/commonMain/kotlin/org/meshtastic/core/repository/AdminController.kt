@@ -34,9 +34,9 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Mirrors the SDK's `AdminApi` interface — local and remote configuration, channel management, owner identity, device
  * lifecycle commands, and batch edit sessions. Implementations delegate to the session's `RadioClient.admin`.
- * Operations that enqueue outbound admin packets can throw
- * [PacketQueueRejectedException] when the current transport cannot admit the handoff. “Fire-and-forget” means no device
- * response is awaited, not that local queue rejection is silently ignored.
+ * Operations that enqueue outbound admin packets can throw [PacketQueueRejectedException] when the current transport
+ * cannot admit the handoff. “Fire-and-forget” means no device response is awaited, not that local queue rejection is
+ * silently ignored.
  *
  * @see RadioController
  */
