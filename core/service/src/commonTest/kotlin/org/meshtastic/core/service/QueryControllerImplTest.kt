@@ -202,6 +202,39 @@ class QueryControllerImplTest {
         fixture.client.disconnect()
     }
 
+    // Regression: the SDK's null-channel fallback must resolve to the channel the peer was last heard on; a
+    // hard-coded 0 or dropped channel would send on the wrong one.
+    @Test
+    fun `a position request goes out on the channel the peer was last heard on`() = runTest {
+        val fixture = fixture()
+        fixture.transport.injectPacket(
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = PEER
+                    wb.to = 0
+                    wb.channel = 2
+                    wb.rx_time = 1_700_000_100
+                    wb.decoded =
+                        Data.Builder()
+                            .also { db ->
+                                db.portnum = PortNum.NODEINFO_APP
+                                db.payload =
+                                    User.ADAPTER.encode(User.Builder().also { ub -> ub.long_name = "Peer" }.build())
+                                        .toByteString()
+                            }
+                            .build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        fixture.controller.requestPosition(PEER, Position(0.0, 0.0, 0))
+        runCurrent()
+
+        assertEquals(2, fixture.sent(PortNum.POSITION_APP).channel)
+        fixture.client.disconnect()
+    }
+
     @Test
     fun `a position request without location sharing carries only the time`() = runTest {
         val fixture = fixture(ownStoredPosition = STORED_POSITION)

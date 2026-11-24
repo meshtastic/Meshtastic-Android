@@ -726,15 +726,15 @@ class SharedRadioInterfaceService(
         clientForSession(session)?.requestNodeDbRefresh() == true
 
     /** Runs [send] on [session]'s client under a lease, so teardown drains the handoff before revoking the session. */
-    private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (RadioClient) -> T?): T? {
+    private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
         val admitted =
             synchronized(sessionCallbackLock) {
                 val current = activeTransportSession
-                val client = activeLink.value?.link?.client
-                if (!sessionAdmissionOpen || current == null || client == null) return@synchronized null
+                val link = activeLink.value
+                if (!sessionAdmissionOpen || current == null || link == null) return@synchronized null
                 if (session != null && current.context != session) return@synchronized null
                 checkNotNull(sessionOperationStates[current.generation]).admittedOperations++
-                current to client
+                current to link
             } ?: return null
         return try {
             safeCatching { send(admitted.second) }
@@ -745,22 +745,23 @@ class SharedRadioInterfaceService(
         }
     }
 
-    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? =
-        withAdmittedClient(session) { it.sendPaced(packet) }
-            ?.also { handle ->
-                activeLink.value?.scope?.launch {
-                    if (handle.awaitDispatch()) runIfSessionActive(session) { _meshActivity.tryEmit(MeshActivity.Send) }
-                }
-            }
+    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? {
+        val (handle, linkScope) =
+            withAdmittedClient(session) { it.link.client.sendPaced(packet) to it.scope } ?: return null
+        linkScope.launch {
+            if (handle.awaitDispatch()) runIfSessionActive(session) { _meshActivity.tryEmit(MeshActivity.Send) }
+        }
+        return handle
+    }
 
     override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean {
-        val sent = withAdmittedClient(session) { it.tryLockdown(auth) } == true
+        val sent = withAdmittedClient(session) { it.link.client.tryLockdown(auth) } == true
         if (sent) _meshActivity.tryEmit(MeshActivity.Send)
         return sent
     }
 
     override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean {
-        val sent = withAdmittedClient(null) { it.mqttProxy.deliver(message) } == true
+        val sent = withAdmittedClient(null) { it.link.client.mqttProxy.deliver(message) } == true
         if (sent) _meshActivity.tryEmit(MeshActivity.Send)
         return sent
     }
