@@ -39,8 +39,9 @@ interface DisplayMirrorManager {
     fun handlePalette(palette: DisplayPalette)
 
     /**
-     * Clears all held state — latest frame, latest palette, and partial reassembly buffers. Call when a session ends or
-     * a fresh mirror UI opens, so a previous device's final screen is never shown as if live.
+     * Clears the latest frame and partial reassembly buffers. Call when a session ends or a fresh mirror UI opens, so a
+     * previous device's final screen is never shown as if live. The palette outlives a reset because the device sends
+     * it once per connection.
      */
     fun reset()
 }
