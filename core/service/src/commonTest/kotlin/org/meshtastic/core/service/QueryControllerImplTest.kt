@@ -427,6 +427,20 @@ class QueryControllerImplTest {
         fixture.client.disconnect()
     }
 
+    @Test
+    fun `a peer's GOT_NAK to a paxcount request reports GOT_NAK not NO_ROUTE`() = runTest {
+        val fixture = fixture()
+
+        val request = fixture.controller.requestTelemetry(PEER, TelemetryType.PAX)
+        runCurrent()
+        val sent = fixture.sent(PortNum.PAXCOUNTER_APP)
+        fixture.transport.injectRoutingError(sent.id, Routing.Error.GOT_NAK, fromNode = PEER)
+        runCurrent()
+
+        assertEquals(Routing.Error.GOT_NAK.value, request.awaitRoutingError())
+        fixture.client.disconnect()
+    }
+
     private companion object {
         /** Past both the SDK's default RPC timeout and `REMOTE_READ_TIMEOUT`. */
         const val RPC_DEADLINE_MS = 151_000L
