@@ -20,8 +20,8 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.MessageHandle
 import org.meshtastic.sdk.PacedMessageHandle
-import org.meshtastic.sdk.SendFailure
 import org.meshtastic.sdk.SendOutcome
+import org.meshtastic.sdk.routingError
 
 /**
  * A node request the radio admitted.
@@ -47,33 +47,7 @@ fun PacedMessageHandle.toNodeRequest(): NodeRequest = message.toNodeRequest()
 /** The routing error a failed send carries; null for success and for failures the mesh did not report. */
 fun SendOutcome.routingErrorOrNull(): Int? = when (this) {
     SendOutcome.Success -> null
-    is SendOutcome.Failure -> reason.routingErrorOrNull()
-}
-
-private fun SendFailure.routingErrorOrNull(): Int? = when (this) {
-    SendFailure.NoRoute -> Routing.Error.NO_ROUTE.value
-
-    SendFailure.MaxRetransmit -> Routing.Error.MAX_RETRANSMIT.value
-
-    SendFailure.Timeout -> Routing.Error.TIMEOUT.value
-
-    SendFailure.DutyCycleLimit -> Routing.Error.DUTY_CYCLE_LIMIT.value
-
-    SendFailure.RateLimited -> Routing.Error.RATE_LIMIT_EXCEEDED.value
-
-    // Firmware reports a refused phone packet both as this receipt and as a NAK carrying the same code.
-    is SendFailure.QueueRejected -> Routing.Error.fromValue(res)?.takeIf { it != Routing.Error.NONE }?.value
-
-    is SendFailure.Other -> routingError.value
-
-    SendFailure.AckTimeout,
-    SendFailure.Disconnected,
-    SendFailure.HandshakeFailed,
-    SendFailure.Cancelled,
-    SendFailure.IdCollision,
-    SendFailure.QueueFull,
-    is SendFailure.Unknown,
-    -> null
+    is SendOutcome.Failure -> reason.routingError?.value
 }
 
 /** The routing error a failed RPC carries; null for success, a timeout and a lost link. */
