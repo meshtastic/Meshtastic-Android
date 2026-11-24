@@ -22,7 +22,6 @@ import android.hardware.usb.UsbManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.WorkManager
-import com.hoho.android.usbserial.driver.ProbeTable
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
@@ -41,7 +40,6 @@ import org.meshtastic.core.datastore.di.CoreDatastoreAndroidModule
 import org.meshtastic.core.datastore.di.CoreDatastoreModule
 import org.meshtastic.core.network.di.CoreNetworkAndroidModule
 import org.meshtastic.core.network.di.CoreNetworkModule
-import org.meshtastic.core.network.repository.ProbeTableProvider
 import org.meshtastic.core.prefs.di.CorePrefsAndroidModule
 import org.meshtastic.core.prefs.di.CorePrefsModule
 import org.meshtastic.core.service.di.CoreServiceAndroidModule
@@ -59,6 +57,7 @@ import org.meshtastic.feature.node.di.FeatureNodeModule
 import org.meshtastic.feature.settings.di.FeatureSettingsModule
 import org.meshtastic.feature.widget.di.FeatureWidgetModule
 import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
+import org.meshtastic.sdk.transport.serial.AndroidUsbSerialPorts
 
 @Module(
     includes =
@@ -121,7 +120,5 @@ class AppKoinModule {
     fun provideUsbManager(application: Application): UsbManager? =
         application.getSystemService(Context.USB_SERVICE) as UsbManager?
 
-    @Single fun provideProbeTable(provider: ProbeTableProvider): ProbeTable = provider.get()
-
-    @Single fun provideUsbSerialProber(probeTable: ProbeTable): UsbSerialProber = UsbSerialProber(probeTable)
+    @Single fun provideUsbSerialProber(): UsbSerialProber = AndroidUsbSerialPorts.prober
 }
