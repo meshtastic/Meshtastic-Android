@@ -66,15 +66,6 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
  *
  * @property regionCode The region code
  * @property description A human readable description of the region
- * @property freqStart The starting frequency in MHz
- * @property freqEnd The ending frequency in MHz
- * @property wideLora Whether the region uses wide Lora
- * @property spacing Gap between frequency slots (and at the start of the band) in MHz, from the firmware's region
- *   profile
- * @property padding Gap at each side of a frequency slot in MHz, from the firmware's region profile (coerces the modem
- *   bandwidth up to the region's slot width, e.g. ham 15.625 kHz -> 20 kHz)
- * @property overrideSlot The region's fixed default frequency slot (1-based), or 0 to derive the slot from the primary
- *   channel-name hash as usual
  * @property minFirmware The first firmware release whose region table contains this region, or null for regions all
  *   supported firmware knows; [Capabilities.supportsRegion] gates the picker with it
  * @see
@@ -84,12 +75,6 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
 enum class RegionInfo(
     val regionCode: RegionCode,
     val description: String,
-    val freqStart: Float,
-    val freqEnd: Float,
-    val wideLora: Boolean = false,
-    val spacing: Float = 0f,
-    val padding: Float = 0f,
-    val overrideSlot: Int = 0,
     val minFirmware: DeviceVersion? = null,
 ) {
     /**
@@ -98,10 +83,10 @@ enum class RegionInfo(
      * @see [Springer Link](https://link.springer.com/content/pdf/bbm%3A978-1-4842-4357-2%2F1.pdf)
      * @see [The Things Network](https://www.thethingsnetwork.org/docs/lorawan/regional-parameters/)
      */
-    US(RegionCode.US, "United States", 902.0f, 928.0f),
+    US(RegionCode.US, "United States"),
 
     /** European Union 433MHz */
-    EU_433(RegionCode.EU_433, "European Union 433MHz", 433.0f, 434.0f),
+    EU_433(RegionCode.EU_433, "European Union 433MHz"),
 
     /**
      * European Union 868MHz
@@ -115,10 +100,10 @@ enum class RegionInfo(
      * @see
      *   [ETSI EN 300 220-2 V3.1.1](https://www.etsi.org/deliver/etsi_en/300200_300299/30022002/03.01.01_60/en_30022002v030101p.pdf)
      */
-    EU_868(RegionCode.EU_868, "European Union 868MHz", 869.4f, 869.65f),
+    EU_868(RegionCode.EU_868, "European Union 868MHz"),
 
     /** China */
-    CN(RegionCode.CN, "China", 470.0f, 510.0f),
+    CN(RegionCode.CN, "China"),
 
     /**
      * Japan
@@ -126,7 +111,7 @@ enum class RegionInfo(
      * @see [ARIB STD-T108](https://www.arib.or.jp/english/html/overview/doc/5-STD-T108v1_5-E1.pdf)
      * @see [Qiita](https://qiita.com/ammo0613/items/d952154f1195b64dc29f)
      */
-    JP(RegionCode.JP, "Japan", 920.5f, 923.5f),
+    JP(RegionCode.JP, "Japan"),
 
     /**
      * Australia / New Zealand
@@ -135,7 +120,7 @@ enum class RegionInfo(
      * @see
      *   [IoT Spectrum in NZ Briefing Paper](https://iotalliance.org.nz/wp-content/uploads/sites/4/2019/05/IoT-Spectrum-in-NZ-Briefing-Paper.pdf)
      */
-    ANZ(RegionCode.ANZ, "Australia / Brazil / New Zealand", 915.0f, 928.0f),
+    ANZ(RegionCode.ANZ, "Australia / Brazil / New Zealand"),
 
     /**
      * Korea
@@ -144,7 +129,7 @@ enum class RegionInfo(
      * @see
      *   [LoRaWAN Regional Parameters](https://resources.lora-alliance.org/technical-specifications/rp002-1-0-4-regional-parameters)
      */
-    KR(RegionCode.KR, "Korea", 920.0f, 923.0f),
+    KR(RegionCode.KR, "Korea"),
 
     /**
      * Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor. 5.8.1 in the Low-power Radio-frequency
@@ -153,7 +138,7 @@ enum class RegionInfo(
      * @see [NCC Taiwan](https://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
      * @see [National Gazette](https://gazette.nat.gov.tw/egFront/e_detail.do?metaid=147283)
      */
-    TW(RegionCode.TW, "Taiwan", 920.0f, 925.0f),
+    TW(RegionCode.TW, "Taiwan"),
 
     /**
      * Russia Note:
@@ -161,10 +146,10 @@ enum class RegionInfo(
      *
      * @see [Digital.gov.ru](https://digital.gov.ru/uploaded/files/prilozhenie-12-k-reshenyu-gkrch-18-46-03-1.pdf)
      */
-    RU(RegionCode.RU, "Russia", 868.7f, 869.2f),
+    RU(RegionCode.RU, "Russia"),
 
     /** India */
-    IN(RegionCode.IN, "India", 865.0f, 867.0f),
+    IN(RegionCode.IN, "India"),
 
     /**
      * New Zealand 865MHz
@@ -173,24 +158,24 @@ enum class RegionInfo(
      * @see
      *   [IoT Spectrum in NZ Briefing Paper](https://iotalliance.org.nz/wp-content/uploads/sites/4/2019/05/IoT-Spectrum-in-NZ-Briefing-Paper.pdf)
      */
-    NZ_865(RegionCode.NZ_865, "New Zealand 865MHz", 864.0f, 868.0f),
+    NZ_865(RegionCode.NZ_865, "New Zealand 865MHz"),
 
     /** Thailand */
-    TH(RegionCode.TH, "Thailand", 920.0f, 925.0f),
+    TH(RegionCode.TH, "Thailand"),
 
     /**
      * Ukraine 433MHz 433,05-434,7 Mhz 10 mW
      *
      * @see [NKZRZI](https://nkrzi.gov.ua/images/upload/256/5810/PDF_UUZ_19_01_2016.pdf)
      */
-    UA_433(RegionCode.UA_433, "Ukraine 433MHz", 433.0f, 434.7f),
+    UA_433(RegionCode.UA_433, "Ukraine 433MHz"),
 
     /**
      * Malaysia 433MHz 433 - 435 MHz at 100mW, no restrictions.
      *
      * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
      */
-    MY_433(RegionCode.MY_433, "Malaysia 433MHz", 433.0f, 435.0f),
+    MY_433(RegionCode.MY_433, "Malaysia 433MHz"),
 
     /**
      * Malaysia 919MHz 919 - 923 Mhz at 500mW, no restrictions. 923 - 924 MHz at 500mW with 1% duty cycle OR frequency
@@ -198,7 +183,7 @@ enum class RegionInfo(
      *
      * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
      */
-    MY_919(RegionCode.MY_919, "Malaysia 919MHz", 919.0f, 924.0f),
+    MY_919(RegionCode.MY_919, "Malaysia 919MHz"),
 
     /**
      * Singapore 923MHz SG_923 Band 30d: 917 - 925 MHz at 100mW, no restrictions.
@@ -206,31 +191,31 @@ enum class RegionInfo(
      * @see
      *   [IMDA](https://www.imda.gov.sg/-/media/imda/files/regulation-licensing-and-consultations/ict-standards/telecommunication-standards/radio-comms/imdatssrd.pdf)
      */
-    SG_923(RegionCode.SG_923, "Singapore 923MHz", 917.0f, 925.0f),
+    SG_923(RegionCode.SG_923, "Singapore 923MHz"),
 
     /**
      * Philippines 433MHz 433 - 434.7 MHz <10 mW erp, NTC approved device required
      *
      * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
-    PH_433(RegionCode.PH_433, "Philippines 433MHz", 433.0f, 434.7f),
+    PH_433(RegionCode.PH_433, "Philippines 433MHz"),
 
     /**
      * Philippines 868MHz 868 - 869.4 MHz <25 mW erp, NTC approved device required
      *
      * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
-    PH_868(RegionCode.PH_868, "Philippines 868MHz", 868.0f, 869.4f),
+    PH_868(RegionCode.PH_868, "Philippines 868MHz"),
 
     /**
      * Philippines 915MHz 915 - 918 MHz <250 mW EIRP, no external antenna allowed
      *
      * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
-    PH_915(RegionCode.PH_915, "Philippines 915MHz", 915.0f, 918.0f),
+    PH_915(RegionCode.PH_915, "Philippines 915MHz"),
 
     /** 2.4 GHZ WLAN Band equivalent. Only for SX128x chips. */
-    LORA_24(RegionCode.LORA_24, "2.4 GHz", 2400.0f, 2483.5f, wideLora = true),
+    LORA_24(RegionCode.LORA_24, "2.4 GHz"),
 
     /**
      * Australia / New Zealand 433MHz 433.05 - 434.79 MHz, 25mW EIRP max, No duty cycle restrictions
@@ -238,35 +223,35 @@ enum class RegionInfo(
      * @see [ACMA](https://www.acma.gov.au/licences/low-interference-potential-devices-lipd-class-licence)
      * @see [NZ Gazette](https://gazette.govt.nz/notice/id/2022-go3100)
      */
-    ANZ_433(RegionCode.ANZ_433, "Australia / New Zealand 433MHz", 433.05f, 434.79f),
+    ANZ_433(RegionCode.ANZ_433, "Australia / New Zealand 433MHz"),
 
     /**
      * Kazakhstan 433MHz 433.075 - 434.775 MHz <10 mW EIRP, Low Powered Devices (LPD)
      *
      * @see [Firmware Issue #7204](https://github.com/meshtastic/firmware/issues/7204)
      */
-    KZ_433(RegionCode.KZ_433, "Kazakhstan 433MHz", 433.075f, 434.775f),
+    KZ_433(RegionCode.KZ_433, "Kazakhstan 433MHz"),
 
     /**
      * Kazakhstan 863MHz 863 - 868 MHz <25 mW EIRP, 500kHz channels allowed, must not be used at airfields
      *
      * @see [Firmware Issue #7204](https://github.com/meshtastic/firmware/issues/7204)
      */
-    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f),
+    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz"),
 
     /**
      * Nepal 865Mhz 865 - 868 Mhz
      *
      * @see [Firmware Issue #7380](https://github.com/meshtastic/firmware/pull/7380)
      */
-    NP_865(RegionCode.NP_865, "Nepal 865MHz", 865.0f, 868.0f, wideLora = false),
+    NP_865(RegionCode.NP_865, "Nepal 865MHz"),
 
     /**
      * Brazil 902MHz 902 - 907.5 MHz
      *
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
      */
-    BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
+    BR_902(RegionCode.BR_902, "Brazil 902MHz"),
 
     /**
      * European Union 865-868MHz (Lite): four 600 kHz slots at 865.7/866.3/866.9/867.5 MHz, 2.5% duty cycle.
@@ -277,10 +262,6 @@ enum class RegionInfo(
     EU_866(
         RegionCode.EU_866,
         "European Union 866MHz",
-        865.6f,
-        867.6f,
-        spacing = 0.4f,
-        padding = 0.0375f,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -288,10 +269,6 @@ enum class RegionInfo(
     EU_N_868(
         RegionCode.EU_N_868,
         "European Union 868MHz (Narrow)",
-        869.4f,
-        869.65f,
-        padding = 0.0104f,
-        overrideSlot = 1,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -303,10 +280,6 @@ enum class RegionInfo(
     ITU1_2M(
         RegionCode.ITU1_2M,
         "ITU Region 1 / Amateur 2m",
-        144.0f,
-        146.0f,
-        padding = 0.0022f,
-        overrideSlot = 26,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -318,10 +291,6 @@ enum class RegionInfo(
     ITU2_2M(
         RegionCode.ITU2_2M,
         "ITU Region 2 / Amateur 2m",
-        144.0f,
-        148.0f,
-        padding = 0.0022f,
-        overrideSlot = 51,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -334,10 +303,6 @@ enum class RegionInfo(
     ITU3_2M(
         RegionCode.ITU3_2M,
         "ITU Region 3 / Amateur 2m",
-        144.0f,
-        148.0f,
-        padding = 0.0022f,
-        overrideSlot = 33,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -348,10 +313,6 @@ enum class RegionInfo(
     ITU2_125CM(
         RegionCode.ITU2_125CM,
         "ITU Region 2 / Amateur 1.25m",
-        220.0f,
-        225.0f,
-        padding = 0.01875f,
-        overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -359,10 +320,6 @@ enum class RegionInfo(
     ITU1_70CM(
         RegionCode.ITU1_70CM,
         "ITU Region 1 / Amateur 70cm",
-        430.0f,
-        440.0f,
-        padding = 0.01875f,
-        overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -373,10 +330,6 @@ enum class RegionInfo(
     ITU2_70CM(
         RegionCode.ITU2_70CM,
         "ITU Region 2 / Amateur 70cm",
-        420.0f,
-        450.0f,
-        padding = 0.01875f,
-        overrideSlot = 137,
         minFirmware = FIRMWARE_2_8,
     ),
 
@@ -387,15 +340,11 @@ enum class RegionInfo(
     ITU3_70CM(
         RegionCode.ITU3_70CM,
         "ITU Region 3 / Amateur 70cm",
-        430.0f,
-        450.0f,
-        padding = 0.01875f,
-        overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
     ),
 
-    /** This needs to be last. Same as US. */
-    UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),
+    /** This needs to be last. */
+    UNSET(RegionCode.UNSET, "Please set a region"),
     ;
 
     companion object {
@@ -405,7 +354,6 @@ enum class RegionInfo(
 
 enum class ChannelOption(
     val modemPreset: ModemPreset,
-    val bandwidth: Float,
     val spreadingFactor: Int,
     /** The coding-rate denominator the preset uses, 5 through 8 for 4/5 through 4/8. */
     val codingRate: Int,
@@ -413,7 +361,7 @@ enum class ChannelOption(
     val removedInFirmware: DeviceVersion? = null,
 ) {
     // Grouped by range and speed for better readability.
-    // Preset parameters mirror firmware's modemPresetToParams (src/mesh/MeshRadio.h).
+    // Spreading factor and coding rate mirror firmware's modemPresetToParams (src/mesh/MeshRadio.h).
     // minFirmware = first firmware release whose preset table has the entry, removedInFirmware = first release
     // without it ([Capabilities.supportsPreset]); firmware silently falls back to LONG_FAST when sent a preset its
     // table lacks.
@@ -421,30 +369,27 @@ enum class ChannelOption(
     // Historical parameters for firmware predating the removal of VERY_LONG_SLOW.
     VERY_LONG_SLOW(
         ModemPreset.VERY_LONG_SLOW,
-        0.0625f,
         spreadingFactor = 12,
         codingRate = 8,
         removedInFirmware = FIRMWARE_2_6_5,
     ),
-    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, spreadingFactor = 11, codingRate = 8, minFirmware = FIRMWARE_2_7_17),
-    LONG_FAST(ModemPreset.LONG_FAST, 0.250f, spreadingFactor = 11, codingRate = 5),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f, spreadingFactor = 11, codingRate = 8),
-    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, spreadingFactor = 12, codingRate = 8),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f, spreadingFactor = 9, codingRate = 5),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f, spreadingFactor = 10, codingRate = 5),
-    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, 0.500f, spreadingFactor = 9, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, spreadingFactor = 7, codingRate = 5),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, spreadingFactor = 8, codingRate = 5),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, spreadingFactor = 7, codingRate = 5),
-    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, spreadingFactor = 9, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, spreadingFactor = 10, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, spreadingFactor = 7, codingRate = 6, minFirmware = FIRMWARE_2_8),
-    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
+    LONG_TURBO(ModemPreset.LONG_TURBO, spreadingFactor = 11, codingRate = 8, minFirmware = FIRMWARE_2_7_17),
+    LONG_FAST(ModemPreset.LONG_FAST, spreadingFactor = 11, codingRate = 5),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, spreadingFactor = 11, codingRate = 8),
+    LONG_SLOW(ModemPreset.LONG_SLOW, spreadingFactor = 12, codingRate = 8),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, spreadingFactor = 9, codingRate = 5),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, spreadingFactor = 10, codingRate = 5),
+    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, spreadingFactor = 9, codingRate = 5, minFirmware = FIRMWARE_2_8),
+    SHORT_FAST(ModemPreset.SHORT_FAST, spreadingFactor = 7, codingRate = 5),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, spreadingFactor = 8, codingRate = 5),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, spreadingFactor = 7, codingRate = 5),
+    LITE_FAST(ModemPreset.LITE_FAST, spreadingFactor = 9, codingRate = 5, minFirmware = FIRMWARE_2_8),
+    LITE_SLOW(ModemPreset.LITE_SLOW, spreadingFactor = 10, codingRate = 5, minFirmware = FIRMWARE_2_8),
+    NARROW_FAST(ModemPreset.NARROW_FAST, spreadingFactor = 7, codingRate = 6, minFirmware = FIRMWARE_2_8),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
 
-    // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
-    // padded channel spacing, not the modem bandwidth used for the SDK slot math).
-    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, spreadingFactor = 7, codingRate = 5, minFirmware = FIRMWARE_2_8),
-    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
+    TINY_FAST(ModemPreset.TINY_FAST, spreadingFactor = 7, codingRate = 5, minFirmware = FIRMWARE_2_8),
+    TINY_SLOW(ModemPreset.TINY_SLOW, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
     ;
 
     // Semtech demodulation floor: -7.5 dB at SF7, improving 2.5 dB per SF step.
