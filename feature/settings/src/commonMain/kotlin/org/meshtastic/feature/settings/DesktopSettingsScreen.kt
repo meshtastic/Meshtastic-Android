@@ -181,6 +181,7 @@ fun DesktopSettingsScreen(
                 databaseBackupAvailable = databaseBackup.available,
                 onBackupDatabase = databaseBackup.onBackup,
                 onRestoreDatabase = databaseBackup.onRestore,
+                destNum = destNode?.num,
                 onNavigate = onNavigate,
                 onImport = profileTransfer.onImport,
                 onExport = profileTransfer.onExport,

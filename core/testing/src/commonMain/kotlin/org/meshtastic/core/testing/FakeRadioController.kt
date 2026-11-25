@@ -33,6 +33,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
@@ -393,6 +394,36 @@ class FakeRadioController :
     }
 
     override suspend fun setTime(destNum: Int, packetId: Int) {}
+
+    /** What the remote node-DB writes return, standing in for the remote node's acknowledgement. */
+    var remoteNodeDbAck: Boolean = true
+
+    /** Answers one remote node-DB write by its recorded kind, in place of [remoteNodeDbAck]. */
+    var remoteNodeDbAckFor: (suspend (kind: String) -> Boolean)? = null
+
+    private suspend fun remoteAck(kind: String): Boolean = remoteNodeDbAckFor?.invoke(kind) ?: remoteNodeDbAck
+
+    override suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean {
+        recordAdminRequest("addRemoteContact", destNum, contact, packetId = null)
+        return remoteAck("addRemoteContact")
+    }
+
+    override suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean {
+        val kind = if (favorite) "setRemoteFavorite" else "removeRemoteFavorite"
+        recordAdminRequest(kind, destNum, nodeNum, packetId = null)
+        return remoteAck(kind)
+    }
+
+    override suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean {
+        val kind = if (ignored) "setRemoteIgnored" else "removeRemoteIgnored"
+        recordAdminRequest(kind, destNum, nodeNum, packetId = null)
+        return remoteAck(kind)
+    }
+
+    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean {
+        recordAdminRequest("removeRemoteNode", destNum, nodeNum, packetId = null)
+        return remoteAck("removeRemoteNode")
+    }
 
     override suspend fun getOwner(destNum: Int, packetId: Int) {
         recordAdminRequest("getOwner", destNum, payload = null, packetId)
