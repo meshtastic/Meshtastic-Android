@@ -658,6 +658,9 @@ interface NodeInfoDao {
         }
         clearMyNodeInfo()
         setMyNodeInfo(mi)
+        // Only the radio can say a node went unheard, so a row it no longer holds rests at heard; the dump below
+        // rewrites the flag on every row it does hold.
+        markAllHeardOnCurrentLora()
         putAll(getVerifiedNodesForUpsert(nodes, selfNum = mi.myNodeNum, removedNums = removedNums))
         return removedNums
     }
