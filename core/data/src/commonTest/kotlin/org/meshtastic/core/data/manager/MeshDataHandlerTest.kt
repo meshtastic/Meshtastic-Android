@@ -746,6 +746,7 @@ class MeshDataHandlerTest {
         hopLimit: Int = 0,
         relayNode: Int = 0,
         viaMqtt: Boolean = false,
+        transport: MeshPacket.TransportMechanism = MeshPacket.TransportMechanism.TRANSPORT_INTERNAL,
     ): MeshPacket {
         val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
         val packet =
@@ -757,6 +758,7 @@ class MeshDataHandlerTest {
                     wb.hop_limit = hopLimit
                     wb.relay_node = relayNode
                     wb.via_mqtt = viaMqtt
+                    wb.transport_mechanism = transport
                     wb.decoded =
                         Data.Builder()
                             .also { wb ->
@@ -839,9 +841,25 @@ class MeshDataHandlerTest {
     }
 
     @Test
-    fun `an ack from MQTT names no relay`() = testScope.runTest {
+    fun `an MQTT ack from firmware without a transport names no relay`() = testScope.runTest {
+        // Firmware before 2.7.5 leaves transport_mechanism at INTERNAL, so via_mqtt is the only signal.
         val fromMqtt = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A, viaMqtt = true)
         assertNull(ackRelayFor(fromMqtt))
+    }
+
+    @Test
+    fun `an ack that crossed MQTT then reached us over LoRa names its relay`() = testScope.runTest {
+        // A gateway rebroadcast keeps the via_mqtt flag bit and stamps its own byte; our radio marks it TRANSPORT_LORA.
+        val overRf =
+            routingPacket(
+                Routing.Error.NONE,
+                hopStart = 3,
+                hopLimit = 1,
+                relayNode = 0x5A,
+                viaMqtt = true,
+                transport = MeshPacket.TransportMechanism.TRANSPORT_LORA,
+            )
+        assertEquals(0x5A, ackRelayFor(overRf))
     }
 
     @Test
