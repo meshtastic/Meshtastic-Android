@@ -19,11 +19,10 @@ package org.meshtastic.feature.map.hud
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.feature.map.survey.SurveyCellUi
+import org.meshtastic.sdk.PositionUtils
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -52,7 +51,7 @@ internal fun List<SurveyCellUi>.toHudTiles(here: PhoneLocation, declinationDeg: 
         val cell = item.cell
         val centerLat = (cell.south + cell.north) / 2
         val centerLon = (cell.west + cell.east) / 2
-        val distance = latLongToMeter(here.latitude, here.longitude, centerLat, centerLon)
+        val distance = PositionUtils.distance(here.latitude, here.longitude, centerLat, centerLon)
         if (distance > SURVEY_TILE_RADIUS_M) return@mapNotNull null
         val corners =
             listOf(
@@ -70,8 +69,8 @@ internal fun List<SurveyCellUi>.toHudTiles(here: PhoneLocation, declinationDeg: 
 
 /** East and north metres from here to the point, in the magnetic frame the camera pose uses. */
 private fun PhoneLocation.offsetTo(lat: Double, lon: Double, declinationDeg: Float): Pair<Double, Double> {
-    val distance = latLongToMeter(latitude, longitude, lat, lon)
-    val magnetic = ((bearing(latitude, longitude, lat, lon) - declinationDeg) % FULL_CIRCLE).toRadians()
+    val distance = PositionUtils.distance(latitude, longitude, lat, lon)
+    val magnetic = ((PositionUtils.bearing(latitude, longitude, lat, lon) - declinationDeg) % FULL_CIRCLE).toRadians()
     return distance * sin(magnetic) to distance * cos(magnetic)
 }
 

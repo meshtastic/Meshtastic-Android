@@ -16,14 +16,14 @@
  */
 package org.meshtastic.core.model.geofence
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.PositionUtils
 
 /** A circular geofence centered on [centerLat]/[centerLon] (decimal degrees) with [radiusMeters]. */
 data class GeofenceCircle(val centerLat: Double, val centerLon: Double, val radiusMeters: Int) {
     /** True when ([lat], [lon]) is within [radiusMeters] great-circle metres of the centre. */
-    fun contains(lat: Double, lon: Double): Boolean = latLongToMeter(lat, lon, centerLat, centerLon) <= radiusMeters
+    fun contains(lat: Double, lon: Double): Boolean = PositionUtils.distance(lat, lon, centerLat, centerLon) <= radiusMeters
 }
 
 /** An axis-aligned WSEN bounding box in decimal degrees. Bounds are inclusive (matches the Apple reference). */
