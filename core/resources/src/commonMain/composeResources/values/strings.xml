@@ -1915,14 +1915,10 @@
     <string name="remote_admin">Remote Administration</string>
     <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
     <string name="remote_contacts">Contacts and favorites</string>
-    <string name="remote_contacts_add_contact">Add contact</string>
-    <string name="remote_contacts_add_needs_key">Your radio has no trusted public key for this node, so it can't be added as a contact.</string>
-    <string name="remote_contacts_add_without_favorite">Add without favorite</string>
+    <string name="remote_contacts_add_needs_key">Your radio has no trusted public key for this node, so it can't be sent as a contact.</string>
     <string name="remote_contacts_explainer">Changes %1$s's node database over the mesh, not your radio's.</string>
     <string name="remote_contacts_explainer_client_base">Changes %1$s's node database over the mesh, not your radio's. %1$s is a Client Base: favorites change what it rebroadcasts.</string>
     <string name="remote_contacts_failed">No confirmation from %1$s. The change may still have reached it, and sending again is safe.</string>
-    <string name="remote_contacts_favorite">Favorite</string>
-    <string name="remote_contacts_favorite_sent">%1$s acknowledged the command. The favorite takes effect only if %1$s already knows this node. If unsure, use Add contact.</string>
     <string name="remote_contacts_ignore">Ignore</string>
     <string name="remote_contacts_ignore_confirm">Ignore %1$s on %2$s? %2$s drops its packets and deletes the messages and telemetry it stored from it. Unignore lifts the block but does not bring those back.</string>
     <string name="remote_contacts_invalid_url">That isn't a Meshtastic contact URL.</string>
@@ -1932,6 +1928,7 @@
     <string name="remote_contacts_remove">Remove</string>
     <string name="remote_contacts_remove_confirm">Remove %1$s from %2$s's node database? %2$s forgets its public key and favorite until it hears %1$s again.</string>
     <string name="remote_contacts_self">That contact is %1$s itself.</string>
+    <string name="remote_contacts_send_contact">Send contact &amp; favorite</string>
     <string name="remote_contacts_sending">Sending to %1$s…</string>
     <string name="remote_contacts_sent">%1$s acknowledged</string>
     <string name="remote_contacts_target">Sending to %1$s</string>

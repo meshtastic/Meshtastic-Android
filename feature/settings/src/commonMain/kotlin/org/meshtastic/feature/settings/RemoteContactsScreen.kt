@@ -61,14 +61,10 @@ import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.live_update_search_nodes
 import org.meshtastic.core.resources.remote_contacts
-import org.meshtastic.core.resources.remote_contacts_add_contact
 import org.meshtastic.core.resources.remote_contacts_add_needs_key
-import org.meshtastic.core.resources.remote_contacts_add_without_favorite
 import org.meshtastic.core.resources.remote_contacts_explainer
 import org.meshtastic.core.resources.remote_contacts_explainer_client_base
 import org.meshtastic.core.resources.remote_contacts_failed
-import org.meshtastic.core.resources.remote_contacts_favorite
-import org.meshtastic.core.resources.remote_contacts_favorite_sent
 import org.meshtastic.core.resources.remote_contacts_ignore
 import org.meshtastic.core.resources.remote_contacts_ignore_confirm
 import org.meshtastic.core.resources.remote_contacts_invalid_url
@@ -78,6 +74,7 @@ import org.meshtastic.core.resources.remote_contacts_pick
 import org.meshtastic.core.resources.remote_contacts_remove
 import org.meshtastic.core.resources.remote_contacts_remove_confirm
 import org.meshtastic.core.resources.remote_contacts_self
+import org.meshtastic.core.resources.remote_contacts_send_contact
 import org.meshtastic.core.resources.remote_contacts_sending
 import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_target
@@ -88,7 +85,6 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.DoDisturb
-import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.PersonAdd
@@ -157,7 +153,6 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit,
                 CandidateCard(
                     node = node,
                     target = target,
-                    clientBase = destNode.isClientBase(),
                     enabled = enabled,
                     result = lastResult?.takeIf { it.nodeNum == node.num },
                     onAction = { viewModel.perform(node, it) },
@@ -217,7 +212,7 @@ private fun ContactUrlCard(target: String, enabled: Boolean, result: RemoteWrite
             )
             ActionButton(
                 icon = MeshtasticIcons.PersonAdd,
-                label = Res.string.remote_contacts_add_contact,
+                label = Res.string.remote_contacts_send_contact,
                 enabled = enabled && url.isNotBlank(),
                 onClick = { onAdd(url) },
             )
@@ -230,7 +225,6 @@ private fun ContactUrlCard(target: String, enabled: Boolean, result: RemoteWrite
 internal fun CandidateCard(
     node: Node,
     target: String,
-    clientBase: Boolean,
     enabled: Boolean,
     result: RemoteWriteResult?,
     onAction: (RemoteContactAction) -> Unit,
@@ -269,8 +263,7 @@ internal fun CandidateCard(
                 }
             }
             CandidateActions(
-                clientBase = clientBase,
-                canAdd = node.hasTrustedKey,
+                canSend = node.hasTrustedKey,
                 enabled = enabled,
                 onConfirm = { confirming = it },
                 onAction = onAction,
@@ -290,26 +283,14 @@ internal fun CandidateCard(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CandidateActions(
-    clientBase: Boolean,
-    canAdd: Boolean,
+    canSend: Boolean,
     enabled: Boolean,
     onConfirm: (RemoteContactAction) -> Unit,
     onAction: (RemoteContactAction) -> Unit,
 ) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled && canAdd) {
-            onAction(RemoteContactAction.ADD_CONTACT)
-        }
-        if (clientBase) {
-            ActionButton(
-                icon = MeshtasticIcons.PersonAdd,
-                label = Res.string.remote_contacts_add_without_favorite,
-                enabled = enabled && canAdd,
-                onClick = { onAction(RemoteContactAction.ADD_WITHOUT_FAVORITE) },
-            )
-        }
-        ActionButton(MeshtasticIcons.Favorite, Res.string.remote_contacts_favorite, enabled) {
-            onAction(RemoteContactAction.FAVORITE)
+        ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_send_contact, enabled && canSend) {
+            onAction(RemoteContactAction.SEND_CONTACT)
         }
         ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
             onAction(RemoteContactAction.UNFAVORITE)
@@ -341,16 +322,8 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
             RemoteWriteStatus.SENDING ->
                 stringResource(Res.string.remote_contacts_sending, target) to MaterialTheme.colorScheme.onSurfaceVariant
 
-            RemoteWriteStatus.ACKNOWLEDGED -> {
-                // Firmware acknowledges set_favorite_node even for a node it does not hold, where it changes nothing.
-                val sent =
-                    if (result.action == RemoteContactAction.FAVORITE) {
-                        Res.string.remote_contacts_favorite_sent
-                    } else {
-                        Res.string.remote_contacts_sent
-                    }
-                stringResource(sent, target) to MaterialTheme.colorScheme.primary
-            }
+            RemoteWriteStatus.ACKNOWLEDGED ->
+                stringResource(Res.string.remote_contacts_sent, target) to MaterialTheme.colorScheme.primary
 
             RemoteWriteStatus.NOT_ACKNOWLEDGED ->
                 stringResource(Res.string.remote_contacts_failed, target) to MaterialTheme.colorScheme.error

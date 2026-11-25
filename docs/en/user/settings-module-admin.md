@@ -277,12 +277,11 @@ Remote administration changes another node's settings over the mesh. The target 
 
 #### Contacts and favorites on a remote node
 
-A remote node's **Settings** has a **Contacts and favorites** row that edits that node's own node database, not your radio's. It lists the nodes your radio knows, with your own node first, then your favorites, then the most recently heard. Each has buttons for **Add contact**, **Favorite**, **Unfavorite**, **Ignore**, **Unignore** and **Remove**. **Ignore** and **Remove** ask before sending. To add a node your radio doesn't know, paste its contact URL.
+A remote node's **Settings** has a **Contacts and favorites** row that edits that node's own node database, not your radio's. It lists the nodes your radio knows, with your own node first, then your favorites, then the most recently heard. Each has buttons for **Send contact & favorite**, **Unfavorite**, **Ignore**, **Unignore** and **Remove**. **Ignore** and **Remove** ask before sending. To send a node your radio doesn't know, paste its contact URL and use the same button there.
 
-- **Add contact** gives the remote node that node's public key, so the two can exchange direct messages, and favorites it there. It is the reliable way to get a node favorited on the remote node.
-- On a **Client Base** remote node, **Add contact** sends the contact, waits for the remote node to confirm it, then sends the favorite. If the contact isn't confirmed, the favorite isn't sent. **Add without favorite** sends only the contact, because favorites change what a Client Base rebroadcasts.
-- **Favorite** works only for a node the remote node already knows. The remote node acknowledges the command either way, so an acknowledgement doesn't prove the favorite was set.
-- A node your radio has no trusted public key for stays in the list, but its add buttons are disabled. It can still be favorited, unfavorited, ignored, unignored and removed.
+- **Send contact & favorite** gives the remote node that node's public key, so the two can exchange direct messages, and favorites it there. It is the only way to favorite a node on the remote node, because a favorite sent on its own does nothing for a node the remote node doesn't know.
+- On a **Client Base** remote node, **Send contact & favorite** sends the contact, waits for the remote node to confirm it, then sends the favorite. If the contact isn't confirmed, the favorite isn't sent. Favorites change what a Client Base rebroadcasts.
+- A node your radio has no trusted public key for stays in the list, but its **Send contact & favorite** button is disabled. It can still be unfavorited, ignored, unignored and removed.
 - **Ignore** makes the remote node drop that node's packets and delete what it stored from it. **Unignore** lifts the block.
 - **Remove** deletes the node from the remote node's database until it hears from it again.
 - The remote node can't report which favorites or contacts it already holds, so the list shows your radio's nodes, not its.

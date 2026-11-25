@@ -1837,14 +1837,10 @@ remote
 remote_admin
 remote_admin_unreachable
 remote_contacts
-remote_contacts_add_contact
 remote_contacts_add_needs_key
-remote_contacts_add_without_favorite
 remote_contacts_explainer
 remote_contacts_explainer_client_base
 remote_contacts_failed
-remote_contacts_favorite
-remote_contacts_favorite_sent
 remote_contacts_ignore
 remote_contacts_ignore_confirm
 remote_contacts_invalid_url
@@ -1854,6 +1850,7 @@ remote_contacts_pick
 remote_contacts_remove
 remote_contacts_remove_confirm
 remote_contacts_self
+remote_contacts_send_contact
 remote_contacts_sending
 remote_contacts_sent
 remote_contacts_target

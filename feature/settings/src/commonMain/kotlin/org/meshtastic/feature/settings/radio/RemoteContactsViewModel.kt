@@ -43,19 +43,13 @@ import org.meshtastic.proto.SharedContact
 
 /** A write this screen sends to the remote node's node DB. */
 enum class RemoteContactAction {
-    ADD_CONTACT,
-
-    /** Offered for a Client Base only, where a favorite changes what the node rebroadcasts. */
-    ADD_WITHOUT_FAVORITE,
-    FAVORITE,
+    /** Gives the remote node the contact's key and favorites it there. The only action that favorites. */
+    SEND_CONTACT,
     UNFAVORITE,
     IGNORE,
     UNIGNORE,
     REMOVE,
 }
-
-private val RemoteContactAction.sendsKey
-    get() = this == RemoteContactAction.ADD_CONTACT || this == RemoteContactAction.ADD_WITHOUT_FAVORITE
 
 enum class RemoteWriteStatus {
     SENDING,
@@ -75,8 +69,9 @@ enum class RemoteWriteStatus {
 data class RemoteWriteResult(val nodeNum: Int?, val action: RemoteContactAction, val status: RemoteWriteStatus)
 
 /**
- * Edits the node DB of [destNum], a node this radio administers remotely: add contact, favorite, ignore, remove and
- * their undos. Candidates come from the local node DB, since firmware has no admin request that lists a remote node DB.
+ * Edits the node DB of [destNum], a node this radio administers remotely: send a contact and favorite it, unfavorite,
+ * ignore, unignore and remove. Candidates come from the local node DB, since firmware has no admin request that lists a
+ * remote node DB.
  */
 @KoinViewModel
 class RemoteContactsViewModel(
@@ -96,7 +91,7 @@ class RemoteContactsViewModel(
 
     /**
      * Every node other than [destNum] itself: our own node first, then local favorites, then most recently heard. One
-     * without a trusted key stays listed, since only the add actions need a key: see [hasTrustedKey].
+     * without a trusted key stays listed, since only sending it as a contact needs a key: see [hasTrustedKey].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val candidates: StateFlow<List<Node>> =
@@ -121,34 +116,38 @@ class RemoteContactsViewModel(
     }
 
     fun perform(node: Node, action: RemoteContactAction) {
-        if (action.sendsKey && !node.hasTrustedKey) {
+        if (action == RemoteContactAction.SEND_CONTACT && !node.hasTrustedKey) {
             if (!sending) settle(node.num, action, RemoteWriteStatus.NO_PUBLIC_KEY)
             return
         }
-        val destIsClientBase = nodeRepository.nodeDBbyNum.value[destNum].isClientBase()
-        send(node.num, action) { write(node, action, destIsClientBase) }
+        val thenFavorite = destIsClientBase()
+        send(node.num, action) { write(node, action, thenFavorite) }
     }
 
-    private suspend fun write(node: Node, action: RemoteContactAction, destIsClientBase: Boolean): Boolean =
-        when (action) {
-            RemoteContactAction.ADD_CONTACT -> addContact(node, thenFavorite = destIsClientBase)
-            RemoteContactAction.ADD_WITHOUT_FAVORITE -> addContact(node, thenFavorite = false)
-            RemoteContactAction.FAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = true)
-            RemoteContactAction.UNFAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = false)
-            RemoteContactAction.IGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = true)
-            RemoteContactAction.UNIGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = false)
-            RemoteContactAction.REMOVE -> radioController.removeRemoteNode(destNum, node.num)
+    private suspend fun write(node: Node, action: RemoteContactAction, thenFavorite: Boolean): Boolean = when (action) {
+        RemoteContactAction.SEND_CONTACT -> {
+            val isOwnContact = node.num == nodeRepository.myNodeInfo.value?.myNodeNum
+            sendContact(node.toSharedContact(isOwnContact), thenFavorite)
         }
+
+        RemoteContactAction.UNFAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = false)
+
+        RemoteContactAction.IGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = true)
+
+        RemoteContactAction.UNIGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = false)
+
+        RemoteContactAction.REMOVE -> radioController.removeRemoteNode(destNum, node.num)
+    }
 
     /**
      * A Client Base does not favorite on `add_contact`, and `set_favorite_node` does nothing for a node the target does
      * not hold, so the favorite goes out only once the contact is acknowledged.
      */
-    private suspend fun addContact(node: Node, thenFavorite: Boolean): Boolean {
-        val isOwnContact = node.num == nodeRepository.myNodeInfo.value?.myNodeNum
-        return radioController.addRemoteContact(destNum, node.toSharedContact(isOwnContact)) &&
-            (!thenFavorite || radioController.setRemoteFavorite(destNum, node.num, favorite = true))
-    }
+    private suspend fun sendContact(contact: SharedContact, thenFavorite: Boolean): Boolean =
+        radioController.addRemoteContact(destNum, contact) &&
+            (!thenFavorite || radioController.setRemoteFavorite(destNum, contact.node_num, favorite = true))
+
+    private fun destIsClientBase() = nodeRepository.nodeDBbyNum.value[destNum].isClientBase()
 
     fun addContactFromUrl(url: String) {
         if (sending) return
@@ -161,12 +160,13 @@ class RemoteContactsViewModel(
                 else -> null
             }
         if (rejection != null || parsed == null) {
-            settle(null, RemoteContactAction.ADD_CONTACT, rejection ?: RemoteWriteStatus.INVALID_URL)
+            settle(null, RemoteContactAction.SEND_CONTACT, rejection ?: RemoteWriteStatus.INVALID_URL)
             return
         }
         // A pasted URL asks to add a contact, never to block it on the remote node.
         val contact = parsed.newBuilder().also { wb -> wb.should_ignore = false }.build()
-        send(null, RemoteContactAction.ADD_CONTACT) { radioController.addRemoteContact(destNum, contact) }
+        val thenFavorite = destIsClientBase()
+        send(null, RemoteContactAction.SEND_CONTACT) { sendContact(contact, thenFavorite) }
     }
 
     private fun send(nodeNum: Int?, action: RemoteContactAction, write: suspend () -> Boolean) {
