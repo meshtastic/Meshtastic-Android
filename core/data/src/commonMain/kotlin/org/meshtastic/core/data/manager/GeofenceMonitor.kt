@@ -48,7 +48,9 @@ import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.isExpired
 import kotlin.concurrent.Volatile
+import kotlin.time.Instant
 
 /**
  * Raises a LOCAL notification when another mesh node's reported position crosses a waypoint's geofence. Evaluation runs
@@ -147,11 +149,11 @@ class GeofenceMonitor(
     }
 
     private suspend fun evaluate(nodeNum: Int, lat: Double, lon: Double) {
-        val now = nowSeconds
+        val now = Instant.fromEpochSeconds(nowSeconds)
         for (waypoint in activeGeofences) {
             // Re-check expiry per evaluation: the snapshot is only recomputed on a new waypoint emission, so a
             // waypoint that expired since the last emission must not keep firing.
-            if (waypoint.expire == 0 || waypoint.expire.toLong() > now) {
+            if (!waypoint.isExpired(now)) {
                 val geofence = waypoint.toGeofence() ?: continue
                 when (crossingStore.update(waypoint.id, nodeNum, geofence.contains(lat, lon))) {
                     GeofenceTransition.ENTERED -> if (waypoint.notify_on_enter) notifyCrossing(waypoint, nodeNum, true)

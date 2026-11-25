@@ -81,6 +81,8 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Waypoint
 import org.meshtastic.sdk.MeshEvent
+import org.meshtastic.sdk.isExpired
+import kotlin.time.Instant
 
 /**
  * Implementation of [MeshDataHandler] that decodes and routes incoming mesh data packets.
@@ -287,7 +289,7 @@ class MeshDataHandlerImpl(
             Logger.w { "Clearing an out-of-range waypoint icon code point (${u.icon})" }
             dataPacket.bytes = Waypoint.ADAPTER.encode(u.newBuilder().also { wb -> wb.icon = 0 }.build()).toByteString()
         }
-        val updateNotification = u.expire > nowSeconds.toInt()
+        val updateNotification = !u.isExpired(Instant.fromEpochSeconds(nowSeconds))
         radioInterfaceService.launchSessionWork(scope, session) {
             // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.
             // The inbound check above only validates the incoming payload, so without this a non-owner could hijack a

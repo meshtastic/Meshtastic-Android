@@ -19,6 +19,8 @@ package org.meshtastic.core.model.geofence
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.isExpired
+import kotlin.time.Instant
 
 /**
  * Collapse a raw waypoint-packet list into the set of currently active waypoints, keyed by waypoint id.
@@ -29,14 +31,12 @@ import org.meshtastic.proto.Waypoint
  * on waypoints the user can no longer see. Both the map UI and the geofence engine go through here so they cannot
  * drift. Rows are ordered oldest-first, so `toMap` keeps the newest copy per id.
  */
-fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> = mapNotNull { packet ->
-    packet.waypoint?.let { it.id to packet }
+fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> {
+    val now = Instant.fromEpochSeconds(nowSeconds)
+    return mapNotNull { packet -> packet.waypoint?.let { it.id to packet } }
+        .toMap()
+        .filterValues { it.waypoint?.isExpired(now) != true }
 }
-    .toMap()
-    .filterValues {
-        val expire = it.waypoint?.expire ?: 0
-        expire == 0 || expire.toLong() > nowSeconds
-    }
 
 /**
  * The geofences whose crossings THIS device should raise notifications for: waypoints we created ([isFromLocal]) plus

@@ -1963,6 +1963,42 @@ class MeshDataHandlerTest {
         }
     }
 
+    // Firmware notifies for any non-expired inbound waypoint and expire 0 is live (WaypointModule.cpp, meshUtils.h).
+    @Test
+    fun `a waypoint that never expires notifies`() = testScope.runTest {
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { nodeManager.getNodeById(any()) } returns
+            Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
+        val packet =
+            waypointPacket(
+                txId = 507,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.name = "Camp"
+                        wb.expire = 0
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(507)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateWaypointNotification(
+                any(),
+                "Hawk Ridge",
+                "Waypoint received: Camp",
+                42,
+                false,
+            )
+        }
+    }
+
     @Test
     fun `critical alert notifies on the alert path with its conversation`() = testScope.runTest {
         val payload = "Fire at camp".encodeToByteArray().toByteString()
