@@ -561,7 +561,8 @@ interface NodeInfoDao {
                         migrateNodeIdentity(from = conflicting, to = newNode)
                         removedNums += conflicting.num
                         result.add(newNode)
-                    } else {
+                    } else if (conflicting.num !in existingNodesMap) {
+                        // A stored copy added after the batch's own row for that num would overwrite it.
                         result.add(conflicting)
                     }
                 } else {
