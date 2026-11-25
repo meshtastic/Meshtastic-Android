@@ -72,11 +72,7 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
  *   [LoRaWAN Regional Parameters](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf)
  */
 @Suppress("MagicNumber")
-enum class RegionInfo(
-    val regionCode: RegionCode,
-    val description: String,
-    val minFirmware: DeviceVersion? = null,
-) {
+enum class RegionInfo(val regionCode: RegionCode, val description: String, val minFirmware: DeviceVersion? = null) {
     /**
      * United States
      *
@@ -387,7 +383,6 @@ enum class ChannelOption(
     LITE_SLOW(ModemPreset.LITE_SLOW, spreadingFactor = 10, codingRate = 5, minFirmware = FIRMWARE_2_8),
     NARROW_FAST(ModemPreset.NARROW_FAST, spreadingFactor = 7, codingRate = 6, minFirmware = FIRMWARE_2_8),
     NARROW_SLOW(ModemPreset.NARROW_SLOW, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
-
     TINY_FAST(ModemPreset.TINY_FAST, spreadingFactor = 7, codingRate = 5, minFirmware = FIRMWARE_2_8),
     TINY_SLOW(ModemPreset.TINY_SLOW, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
     ;

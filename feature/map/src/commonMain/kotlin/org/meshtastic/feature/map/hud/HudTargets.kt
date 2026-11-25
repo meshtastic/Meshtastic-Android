@@ -319,8 +319,9 @@ private fun PhoneLocation.fenceFor(waypoint: Waypoint, declination: Float): HudF
             edge =
             outline.map { (lat, lon) ->
                 FencePoint(
-                    bearingDeg = (PositionUtils.bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) %
-                            FULL_CIRCLE,
+                    bearingDeg =
+                    (PositionUtils.bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) %
+                        FULL_CIRCLE,
                     distanceM = PositionUtils.distance(latitude, longitude, lat, lon),
                 )
             },

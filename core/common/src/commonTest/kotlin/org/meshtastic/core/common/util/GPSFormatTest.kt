@@ -14,21 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MatchingDeclarationName")
-
 package org.meshtastic.core.common.util
 
-import kotlin.math.pow
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-@Suppress("MagicNumber")
-object GPSFormat {
-    fun toDec(latitude: Double, longitude: Double): String {
-        // Simple decimal formatting for KMP
-        fun Double.format(digits: Int): String {
-            val multiplier = 10.0.pow(digits)
-            val rounded = (this * multiplier).toLong() / multiplier
-            return rounded.toString()
-        }
-        return "${latitude.format(5)}, ${longitude.format(5)}"
+class GPSFormatTest {
+
+    @Test
+    fun testGpsFormat() {
+        val formatted = GPSFormat.toDec(45.123456, -93.654321)
+        assertEquals("45.12345, -93.65432", formatted)
     }
 }

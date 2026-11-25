@@ -16,14 +16,17 @@
  */
 package org.meshtastic.core.common.util
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.math.pow
 
-class LocationUtilsTest {
-
-    @Test
-    fun testGpsFormat() {
-        val formatted = GPSFormat.toDec(45.123456, -93.654321)
-        assertEquals("45.12345, -93.65432", formatted)
+@Suppress("MagicNumber")
+object GPSFormat {
+    fun toDec(latitude: Double, longitude: Double): String {
+        // Simple decimal formatting for KMP
+        fun Double.format(digits: Int): String {
+            val multiplier = 10.0.pow(digits)
+            val rounded = (this * multiplier).toLong() / multiplier
+            return rounded.toString()
+        }
+        return "${latitude.format(5)}, ${longitude.format(5)}"
     }
 }

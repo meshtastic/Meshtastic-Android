@@ -54,7 +54,8 @@ data class MqttRootDirectory(
             at != null &&
                 center != null &&
                 radiusKm != null &&
-                PositionUtils.distance(at.latitude, at.longitude, center.latitude, center.longitude) <= radiusKm * METERS_PER_KM
+                PositionUtils.distance(at.latitude, at.longitude, center.latitude, center.longitude) <=
+                radiusKm * METERS_PER_KM
         bySubdivision || byRadius
     }
 

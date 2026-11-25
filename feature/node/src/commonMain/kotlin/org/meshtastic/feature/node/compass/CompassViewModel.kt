@@ -156,7 +156,8 @@ class CompassViewModel(
         if (canUseLocation(locationState, target)) {
             val location = locationState.location ?: return null
             val activeTarget = target ?: return null
-            PositionUtils.bearing(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toFloat()
+            PositionUtils.bearing(location.latitude, location.longitude, activeTarget.first, activeTarget.second)
+                .toFloat()
         } else {
             null
         }
@@ -165,7 +166,8 @@ class CompassViewModel(
         if (canUseLocation(locationState, target)) {
             val location = locationState.location ?: return null
             val activeTarget = target ?: return null
-            PositionUtils.distance(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toInt()
+            PositionUtils.distance(location.latitude, location.longitude, activeTarget.first, activeTarget.second)
+                .toInt()
         } else {
             null
         }
