@@ -18,7 +18,6 @@ package org.meshtastic.core.common.util
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class LocationUtilsTest {
 
@@ -26,35 +25,5 @@ class LocationUtilsTest {
     fun testGpsFormat() {
         val formatted = GPSFormat.toDec(45.123456, -93.654321)
         assertEquals("45.12345, -93.65432", formatted)
-    }
-
-    @Test
-    fun testLatLongToMeter() {
-        // Distance from (0,0) to (0,1) at equator should be approx 111.3km
-        val distance = latLongToMeter(0.0, 0.0, 0.0, 1.0)
-        assertTrue(distance > 111000 && distance < 112000, "Distance was $distance")
-
-        // Distance from (45, -93) to (45, -92)
-        val distance2 = latLongToMeter(45.0, -93.0, 45.0, -92.0)
-        assertTrue(distance2 > 78000 && distance2 < 79000, "Distance was $distance2")
-    }
-
-    @Test
-    fun `distance uses the mean earth radius`() {
-        // One degree of arc on a 6,371 km sphere, and London to Paris on the same sphere.
-        assertEquals(111_194.93, latLongToMeter(0.0, 0.0, 0.0, 1.0), absoluteTolerance = 0.01)
-        assertEquals(343_556.06, latLongToMeter(51.5074, -0.1278, 48.8566, 2.3522), absoluteTolerance = 0.01)
-    }
-
-    @Test
-    fun testBearing() {
-        // North
-        assertEquals(0.0, bearing(0.0, 0.0, 1.0, 0.0), 0.1)
-        // East
-        assertEquals(90.0, bearing(0.0, 0.0, 0.0, 1.0), 0.1)
-        // South
-        assertEquals(180.0, bearing(0.0, 0.0, -1.0, 0.0), 0.1)
-        // West
-        assertEquals(270.0, bearing(0.0, 0.0, 0.0, -1.0), 0.1)
     }
 }

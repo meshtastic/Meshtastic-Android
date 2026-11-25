@@ -16,9 +16,9 @@
  */
 package org.meshtastic.feature.map.survey
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.Quality
+import org.meshtastic.sdk.PositionUtils
 
 /** A line from a survey square to a node heard directly there. */
 data class SurveyLink(
@@ -54,7 +54,7 @@ internal fun surveyLinks(selected: SurveyCellUi, nodes: Map<Int, Node>): SurveyL
                     toLatitude = node.latitude,
                     toLongitude = node.longitude,
                     quality = quality,
-                    distanceM = latLongToMeter(latitude, longitude, node.latitude, node.longitude),
+                    distanceM = PositionUtils.distance(latitude, longitude, node.latitude, node.longitude),
                 )
             }
             .sortedBy { it.distanceM }

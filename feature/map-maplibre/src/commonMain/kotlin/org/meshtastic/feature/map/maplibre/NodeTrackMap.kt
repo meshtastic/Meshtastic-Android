@@ -47,7 +47,6 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
@@ -66,6 +65,7 @@ import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.meshtastic.feature.map.trackFadeAlpha
 import org.meshtastic.feature.map.trackRecency
+import org.meshtastic.sdk.PositionUtils
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -231,7 +231,7 @@ internal fun trackLineStops(points: List<GeoPosition>, recency: List<Float>): Li
     val along = DoubleArray(points.size)
     for (i in 1 until points.size) {
         val (a, b) = points[i - 1] to points[i]
-        along[i] = along[i - 1] + latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+        along[i] = along[i - 1] + PositionUtils.distance(a.latitude, a.longitude, b.latitude, b.longitude)
     }
     val total = along.lastOrNull() ?: 0.0
     val stops = mutableListOf<Pair<Double, Float>>()

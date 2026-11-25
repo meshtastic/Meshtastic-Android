@@ -16,10 +16,9 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.sdk.PositionUtils
 
 data class Position(
     val latitude: Double,
@@ -61,10 +60,10 @@ data class Position(
     )
 
     /** @return distance in meters to some other position */
-    fun distance(o: Position) = latLongToMeter(latitude, longitude, o.latitude, o.longitude)
+    fun distance(o: Position) = PositionUtils.distance(latitude, longitude, o.latitude, o.longitude)
 
     /** @return bearing to the other position in degrees */
-    fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
+    fun bearing(o: Position) = PositionUtils.bearing(latitude, longitude, o.latitude, o.longitude)
 
     /** Returns whether this position represents the protocol sentinel for removing a fixed position. */
     fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && (altitude == null || altitude == 0)

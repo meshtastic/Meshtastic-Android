@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.map.hud
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.sdk.PositionUtils
 
 private const val WINDOW_MS = 30_000L
 
@@ -57,7 +57,7 @@ internal class FixAverager {
         val current = fixes.takeIf { it.isNotEmpty() }?.let { mean() }
         val jumped =
             current != null &&
-                latLongToMeter(current.latitude, current.longitude, fix.latitude, fix.longitude) >
+                PositionUtils.distance(current.latitude, current.longitude, fix.latitude, fix.longitude) >
                 JUMP_RADII * (fix.accuracyM ?: UNKNOWN_ACCURACY_M).coerceAtLeast(MIN_ACCURACY_M)
         if (moving || jumped) fixes.clear()
         fixes.addLast(fix)

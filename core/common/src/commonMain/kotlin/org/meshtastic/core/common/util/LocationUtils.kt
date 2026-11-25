@@ -18,13 +18,7 @@
 
 package org.meshtastic.core.common.util
 
-import kotlin.math.PI
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 @Suppress("MagicNumber")
 object GPSFormat {
@@ -37,55 +31,4 @@ object GPSFormat {
         }
         return "${latitude.format(5)}, ${longitude.format(5)}"
     }
-}
-
-/** Mean radius of the Earth in meters, the sphere every distance here is measured on. */
-const val EARTH_RADIUS_METERS = 6_371_000.0
-
-@Suppress("MagicNumber")
-private fun Double.toRadians(): Double = this * PI / 180.0
-
-@Suppress("MagicNumber")
-private fun Double.toDegrees(): Double = this * 180.0 / PI
-
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Double {
-    val lat1 = latitudeA.toRadians()
-    val lon1 = longitudeA.toRadians()
-    val lat2 = latitudeB.toRadians()
-    val lon2 = longitudeB.toRadians()
-
-    val dLat = lat2 - lat1
-    val dLon = lon2 - lon1
-
-    val a = sin(dLat / 2).pow(2) + cos(lat1) * cos(lat2) * sin(dLon / 2).pow(2)
-    val c = 2 * asin(sqrt(a))
-
-    return EARTH_RADIUS_METERS * c
-}
-
-/**
- * Computes the bearing in degrees between two points on Earth.
- *
- * @param lat1 Latitude of the first point
- * @param lon1 Longitude of the first point
- * @param lat2 Latitude of the second point
- * @param lon2 Longitude of the second point
- * @return Bearing between the two points in degrees. A value of 0 means due north.
- */
-@Suppress("MagicNumber")
-fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val lat1Rad = lat1.toRadians()
-    val lon1Rad = lon1.toRadians()
-    val lat2Rad = lat2.toRadians()
-    val lon2Rad = lon2.toRadians()
-
-    val dLon = lon2Rad - lon1Rad
-
-    val y = sin(dLon) * cos(lat2Rad)
-    val x = cos(lat1Rad) * sin(lat2Rad) - sin(lat1Rad) * cos(lat2Rad) * cos(dLon)
-    val bearing = atan2(y, x).toDegrees()
-
-    return (bearing + 360) % 360
 }

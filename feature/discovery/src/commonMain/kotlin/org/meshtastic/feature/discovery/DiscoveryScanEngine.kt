@@ -40,7 +40,6 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.state.OperationLease
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
@@ -71,6 +70,7 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.LoRaFrequency
+import org.meshtastic.sdk.PositionUtils
 import org.meshtastic.core.model.Channel as ChannelModel
 
 /**
@@ -908,7 +908,7 @@ class DiscoveryScanEngine(
         val lon = longitude
         val distance =
             if (lat != null && lon != null && hasValidCoordinates(lat, lon) && hasValidCoordinates(userLat, userLon)) {
-                latLongToMeter(userLat, userLon, lat, lon)
+                PositionUtils.distance(userLat, userLon, lat, lon)
             } else {
                 null
             }

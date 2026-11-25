@@ -27,9 +27,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.formatString
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -42,6 +40,7 @@ import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.Position
+import org.meshtastic.sdk.PositionUtils
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.min
@@ -157,7 +156,7 @@ class CompassViewModel(
         if (canUseLocation(locationState, target)) {
             val location = locationState.location ?: return null
             val activeTarget = target ?: return null
-            bearing(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toFloat()
+            PositionUtils.bearing(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toFloat()
         } else {
             null
         }
@@ -166,7 +165,7 @@ class CompassViewModel(
         if (canUseLocation(locationState, target)) {
             val location = locationState.location ?: return null
             val activeTarget = target ?: return null
-            latLongToMeter(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toInt()
+            PositionUtils.distance(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toInt()
         } else {
             null
         }

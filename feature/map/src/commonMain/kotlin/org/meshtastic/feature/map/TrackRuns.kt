@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.map
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.proto.Position
+import org.meshtastic.sdk.PositionUtils
 
 /** Wider than a stationary fix's GPS jitter, narrower than a walked block. */
 const val TRACK_STOP_RADIUS_METERS = 25.0
@@ -60,6 +60,6 @@ private fun Position.isWithin(other: Position, radiusMeters: Double): Boolean {
         lonA != null &&
         latB != null &&
         lonB != null &&
-        latLongToMeter(latA * DEG_PER_UNIT, lonA * DEG_PER_UNIT, latB * DEG_PER_UNIT, lonB * DEG_PER_UNIT) <=
+        PositionUtils.distance(latA * DEG_PER_UNIT, lonA * DEG_PER_UNIT, latB * DEG_PER_UNIT, lonB * DEG_PER_UNIT) <=
         radiusMeters
 }

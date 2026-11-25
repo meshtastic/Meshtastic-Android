@@ -16,14 +16,13 @@
  */
 package org.meshtastic.feature.map.hud
 
-import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.model.util.fixTimeSecondsOrNull
 import org.meshtastic.core.model.util.uncertaintyRadiusMetersOrNull
 import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.sdk.PositionUtils
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -126,11 +125,11 @@ private fun PhoneLocation.pathPoint(position: ProtoPosition, declination: Float)
     if (!position.hasFix()) return null
     val lat = Position.degD(position.latitude_i ?: 0)
     val lon = Position.degD(position.longitude_i ?: 0)
-    val distance = latLongToMeter(latitude, longitude, lat, lon)
+    val distance = PositionUtils.distance(latitude, longitude, lat, lon)
     val reach =
         maxOf(MIN_VIEWER_RADIUS_M, hypot(position.uncertaintyRadiusMetersOrNull() ?: 0.0, accuracyM?.toDouble() ?: 0.0))
     return PathPoint(
-        bearingDeg = (bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) % FULL_CIRCLE,
+        bearingDeg = (PositionUtils.bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) % FULL_CIRCLE,
         elevationDeg = elevationDeg(distance, riseTo(position)),
         distanceM = distance,
         atViewer = distance <= reach,
