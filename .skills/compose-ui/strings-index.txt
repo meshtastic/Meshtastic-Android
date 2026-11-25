@@ -1844,6 +1844,7 @@ remote_contacts_explainer
 remote_contacts_explainer_client_base
 remote_contacts_failed
 remote_contacts_favorite
+remote_contacts_favorite_sent
 remote_contacts_ignore
 remote_contacts_ignore_confirm
 remote_contacts_invalid_url

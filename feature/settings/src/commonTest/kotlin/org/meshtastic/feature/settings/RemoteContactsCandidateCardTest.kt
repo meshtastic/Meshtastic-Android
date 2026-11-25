@@ -30,9 +30,13 @@ import org.meshtastic.core.resources.remote_contacts_add_contact
 import org.meshtastic.core.resources.remote_contacts_add_needs_key
 import org.meshtastic.core.resources.remote_contacts_add_without_favorite
 import org.meshtastic.core.resources.remote_contacts_favorite
+import org.meshtastic.core.resources.remote_contacts_favorite_sent
+import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_unignore
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.radio.RemoteContactAction
+import org.meshtastic.feature.settings.radio.RemoteWriteResult
+import org.meshtastic.feature.settings.radio.RemoteWriteStatus
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -76,5 +80,27 @@ class RemoteContactsCandidateCardTest {
         onNodeWithText(getString(Res.string.remote_contacts_unignore)).assertIsEnabled().performClick()
 
         assertEquals(listOf(RemoteContactAction.FAVORITE, RemoteContactAction.UNIGNORE), sent)
+    }
+
+    // Firmware's set_favorite_node handler does nothing when getMeshNode returns NULL (AdminModule.cpp), and the ACK
+    // comes back either way, so an acknowledged Favorite must not read as a plain success.
+    @Test
+    fun anAcknowledgedFavoriteSaysItOnlyTakesEffectForANodeTheRemoteKnows() = runComposeUiTest {
+        setContent {
+            AppTheme {
+                CandidateCard(
+                    node = keyless,
+                    target = "Remote",
+                    clientBase = false,
+                    enabled = true,
+                    result =
+                    RemoteWriteResult(keyless.num, RemoteContactAction.FAVORITE, RemoteWriteStatus.ACKNOWLEDGED),
+                    onAction = {},
+                )
+            }
+        }
+
+        onNodeWithText(getString(Res.string.remote_contacts_favorite_sent, "Remote")).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.remote_contacts_sent, "Remote")).assertDoesNotExist()
     }
 }

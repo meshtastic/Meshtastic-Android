@@ -68,6 +68,7 @@ import org.meshtastic.core.resources.remote_contacts_explainer
 import org.meshtastic.core.resources.remote_contacts_explainer_client_base
 import org.meshtastic.core.resources.remote_contacts_failed
 import org.meshtastic.core.resources.remote_contacts_favorite
+import org.meshtastic.core.resources.remote_contacts_favorite_sent
 import org.meshtastic.core.resources.remote_contacts_ignore
 import org.meshtastic.core.resources.remote_contacts_ignore_confirm
 import org.meshtastic.core.resources.remote_contacts_invalid_url
@@ -337,8 +338,16 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
             RemoteWriteStatus.SENDING ->
                 stringResource(Res.string.remote_contacts_sending, target) to MaterialTheme.colorScheme.onSurfaceVariant
 
-            RemoteWriteStatus.ACKNOWLEDGED ->
-                stringResource(Res.string.remote_contacts_sent, target) to MaterialTheme.colorScheme.primary
+            RemoteWriteStatus.ACKNOWLEDGED -> {
+                // Firmware acknowledges set_favorite_node even for a node it does not hold, where it changes nothing.
+                val sent =
+                    if (result.action == RemoteContactAction.FAVORITE) {
+                        Res.string.remote_contacts_favorite_sent
+                    } else {
+                        Res.string.remote_contacts_sent
+                    }
+                stringResource(sent, target) to MaterialTheme.colorScheme.primary
+            }
 
             RemoteWriteStatus.NOT_ACKNOWLEDGED ->
                 stringResource(Res.string.remote_contacts_failed, target) to MaterialTheme.colorScheme.error
