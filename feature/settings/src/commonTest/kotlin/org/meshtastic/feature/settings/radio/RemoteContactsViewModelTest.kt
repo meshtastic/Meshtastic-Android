@@ -85,7 +85,7 @@ class RemoteContactsViewModelTest {
             listOf(node(REMOTE, "Remote"), node(KEYED, "Keyed"), node(KEYLESS, "Keyless", ByteString.EMPTY)),
         )
         val vm = viewModel()
-        backgroundScope.launch { vm.candidates.collect {} }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.candidates.collect {} }
 
         assertEquals(listOf(KEYED), vm.candidates.value.map { it.num })
     }
