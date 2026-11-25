@@ -6,6 +6,12 @@
   ],
   "prereleases": [
     {
+      "dir": "v2.8.5-closed.2",
+      "version": "2.8.5",
+      "track": "closed",
+      "seq": 2
+    },
+    {
       "dir": "v2.8.5-closed.1",
       "version": "2.8.5",
       "track": "closed",
