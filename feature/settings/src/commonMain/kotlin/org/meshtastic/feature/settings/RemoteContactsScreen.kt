@@ -80,7 +80,9 @@ import org.meshtastic.core.resources.remote_contacts_target
 import org.meshtastic.core.resources.remote_contacts_unfavorite
 import org.meshtastic.core.resources.remote_contacts_unignore
 import org.meshtastic.core.resources.remote_contacts_url
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -97,7 +99,7 @@ import org.meshtastic.feature.settings.radio.RemoteWriteStatus
 import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @Composable
-fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit) {
+fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val candidates by viewModel.candidates.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
@@ -106,6 +108,7 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit)
     val enabled = lastResult?.status != RemoteWriteStatus.SENDING
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             RadioAdminAppBar(
                 title = stringResource(Res.string.remote_contacts),
@@ -316,6 +319,19 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
         }
         Text(text = text, style = MaterialTheme.typography.bodyMedium, color = color)
     }
+}
+
+/** The row on a remote node's settings page that opens [RemoteContactsScreen]. */
+@Composable
+internal fun RemoteContactsRow(enabled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.remote_contacts),
+        modifier = modifier,
+        leadingIcon = MeshtasticIcons.PersonAdd,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        enabled = enabled,
+        onClick = onClick,
+    )
 }
 
 private fun Int.toNodeId() = NodeAddress.numToDefaultId(this)
