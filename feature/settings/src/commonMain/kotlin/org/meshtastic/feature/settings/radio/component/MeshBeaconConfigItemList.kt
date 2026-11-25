@@ -149,7 +149,6 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
 
     val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
     val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
-    val legacySplitFlag = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
     // Only require a valid interval when broadcasting is actually on, otherwise a default (interval=0) config could
     // never be saved, blocking even a listen-only toggle.
     val broadcastEnabled = formState.value.flags.hasFlag(broadcastFlag)
@@ -309,19 +308,13 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         },
                     )
                     HorizontalDivider()
-                    SwitchPreference(
-                        title = stringResource(Res.string.mesh_beacon_legacy_split),
-                        summary = stringResource(Res.string.mesh_beacon_legacy_split_summary),
-                        checked = formState.value.flags.hasFlag(legacySplitFlag),
+                    LegacySplitPreference(
+                        flags = formState.value.flags,
                         enabled = broadcastGate.sectionsEnabled,
-                        onCheckedChange = {
+                        onFlagsChange = { updatedFlags ->
                             formState.value =
-                                formState.value
-                                    .newBuilder()
-                                    .also { wb -> wb.flags = formState.value.flags.withFlag(legacySplitFlag, it) }
-                                    .build()
+                                formState.value.newBuilder().also { wb -> wb.flags = updatedFlags }.build()
                         },
-                        containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
             }
@@ -360,6 +353,23 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
             }
         }
     }
+}
+
+/**
+ * Toggle for `MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT`: updates only that bit so other flag bits survive. Internal
+ * (not private): unit-testable directly, mirroring [OfferChannelPreference] and [BroadcastTargetsCard].
+ */
+@Composable
+internal fun LegacySplitPreference(flags: Int, enabled: Boolean, onFlagsChange: (Int) -> Unit) {
+    val legacySplitFlag = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
+    SwitchPreference(
+        title = stringResource(Res.string.mesh_beacon_legacy_split),
+        summary = stringResource(Res.string.mesh_beacon_legacy_split_summary),
+        checked = flags.hasFlag(legacySplitFlag),
+        enabled = enabled,
+        onCheckedChange = { checked -> onFlagsChange(flags.withFlag(legacySplitFlag, checked)) },
+        containerColor = CardDefaults.cardColors().containerColor,
+    )
 }
 
 /**

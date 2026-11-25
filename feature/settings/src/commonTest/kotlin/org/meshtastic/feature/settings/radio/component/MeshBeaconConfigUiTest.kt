@@ -27,7 +27,10 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -36,6 +39,7 @@ import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.mesh_beacon_broadcast_requires_preset
+import org.meshtastic.core.resources.mesh_beacon_legacy_split
 import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_region_required
 import org.meshtastic.core.resources.mesh_beacon_target
@@ -44,6 +48,7 @@ import org.meshtastic.core.resources.mesh_beacon_target_frequency_slot
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.resources.schema_lora_modempreset_long_fast
+import org.meshtastic.core.resources.schema_lora_modempreset_short_turbo
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -624,5 +629,197 @@ class MeshBeaconConfigUiTest {
             assertEquals(3, targetsState.value.single().frequency_slot)
             assertEquals(ModemPreset.LONG_FAST, targetsState.value.single().preset)
         }
+    }
+
+    @Test
+    fun broadcastTargetRow_outOfRangeStoredSlot_rendersAsDisabledFallbackWithoutCallingOnChange() = runComposeUiTest {
+        val longFastSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST)
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.SHORT_TURBO), ModemPreset.SHORT_TURBO, false)
+        var onChangeCalls = 0
+
+        setContent {
+            AppTheme {
+                BroadcastTargetsCard(
+                    targets =
+                    listOf(
+                        MeshBeaconConfig.BroadcastTarget.Builder()
+                            .also { wb ->
+                                wb.channel_index = 0
+                                wb.preset = ModemPreset.SHORT_TURBO
+                                wb.frequency_slot = longFastSlots
+                            }
+                            .build(),
+                    ),
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.SHORT_TURBO,
+                    region = RegionCode.US,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = "2.8.2"),
+                    onChange = { onChangeCalls++ },
+                )
+            }
+        }
+
+        // Stored out-of-range slot stays visible (never blank) and its dropdown entry is disabled.
+        onNodeWithText(longFastSlots.toString()).assertIsDisplayed().performClick()
+        onAllNodesWithText(longFastSlots.toString()).onLast().assertIsNotEnabled().performClick()
+
+        runOnIdle { assertEquals(0, onChangeCalls) }
+    }
+
+    @Test
+    fun broadcastTargetRow_presetChange_clearsOutOfRangeSlotAndKeepsInRangeSlot() = runComposeUiTest {
+        val longFastSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST)
+        val presetConstraint =
+            RegionPresetConstraint(
+                presets = listOf(ModemPreset.LONG_FAST, ModemPreset.SHORT_TURBO),
+                ModemPreset.LONG_FAST,
+                false,
+            )
+        lateinit var targetsState: MutableState<List<MeshBeaconConfig.BroadcastTarget>>
+
+        setContent {
+            AppTheme {
+                targetsState = remember {
+                    mutableStateOf(
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.channel_index = 0
+                                    wb.preset = ModemPreset.LONG_FAST
+                                    wb.frequency_slot = longFastSlots
+                                }
+                                .build(),
+                        ),
+                    )
+                }
+                BroadcastTargetsCard(
+                    targets = targetsState.value,
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = "2.8.2"),
+                    onChange = { targetsState.value = it },
+                )
+            }
+        }
+
+        // Switching to a wider preset with fewer slots clears the out-of-range pin.
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_long_fast)).performClick()
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_short_turbo)).performClick()
+
+        runOnIdle {
+            assertEquals(ModemPreset.SHORT_TURBO, targetsState.value.single().preset)
+            assertNull(targetsState.value.single().frequency_slot)
+        }
+
+        // Pin an in-range slot (1), then switch back to LongFast and again to ShortTurbo: slot 1 survives.
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
+        onNodeWithText("1").performClick()
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_short_turbo)).performClick()
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_long_fast)).performClick()
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_long_fast)).performClick()
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_short_turbo)).performClick()
+
+        runOnIdle {
+            assertEquals(ModemPreset.SHORT_TURBO, targetsState.value.single().preset)
+            assertEquals(1, targetsState.value.single().frequency_slot)
+        }
+    }
+
+    @Test
+    fun broadcastTargetRow_defaultPresetRow_radioPresetShrinkTurnsPinIntoDisabledFallback() = runComposeUiTest {
+        val longFastSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST)
+        val presetConstraint =
+            RegionPresetConstraint(
+                presets = listOf(ModemPreset.LONG_FAST, ModemPreset.SHORT_TURBO),
+                ModemPreset.LONG_FAST,
+                false,
+            )
+        lateinit var currentPresetState: MutableState<ModemPreset>
+        var onChangeCalls = 0
+
+        setContent {
+            AppTheme {
+                currentPresetState = remember { mutableStateOf(ModemPreset.LONG_FAST) }
+                BroadcastTargetsCard(
+                    targets =
+                    listOf(
+                        MeshBeaconConfig.BroadcastTarget.Builder()
+                            .also { wb ->
+                                wb.channel_index = 0
+                                wb.preset = null
+                                wb.frequency_slot = longFastSlots
+                            }
+                            .build(),
+                    ),
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = currentPresetState.value,
+                    region = RegionCode.US,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = "2.8.2"),
+                    onChange = { onChangeCalls++ },
+                )
+            }
+        }
+
+        // While the radio is on LongFast, longFastSlots is in range.
+        onNodeWithText(longFastSlots.toString()).assertIsDisplayed()
+
+        // Radio switches to ShortTurbo: the Default-preset row now has fewer slots, so the stored pin becomes a
+        // disabled fallback item rather than rendering blank or silently mutating state.
+        runOnIdle { currentPresetState.value = ModemPreset.SHORT_TURBO }
+
+        onNodeWithText(longFastSlots.toString()).assertIsDisplayed().performClick()
+        onAllNodesWithText(longFastSlots.toString()).onLast().assertIsNotEnabled().performClick()
+
+        runOnIdle { assertEquals(0, onChangeCalls) }
+    }
+
+    @Test
+    fun legacySplitPreference_togglesOnlyLegacySplitBitAndRespectsBroadcastGate() = runComposeUiTest {
+        val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
+        val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
+        val legacySplitFlag = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
+        lateinit var flagsState: MutableState<Int>
+        lateinit var usePresetState: MutableState<Boolean>
+
+        setContent {
+            AppTheme {
+                flagsState = remember { mutableStateOf(listenFlag or broadcastFlag) }
+                usePresetState = remember { mutableStateOf(true) }
+                val gate =
+                    beaconBroadcastGate(
+                        connected = true,
+                        useStandardPreset = usePresetState.value,
+                        storedBroadcastEnabled = true,
+                    )
+                LegacySplitPreference(
+                    flags = flagsState.value,
+                    enabled = gate.sectionsEnabled,
+                    onFlagsChange = { flagsState.value = it },
+                )
+            }
+        }
+
+        val label = getString(Res.string.mesh_beacon_legacy_split)
+        onNodeWithText(label).assertIsEnabled().assertIsOff().performClick()
+
+        runOnIdle { assertEquals(listenFlag or broadcastFlag or legacySplitFlag, flagsState.value) }
+        onNodeWithText(label).assertIsOn()
+
+        // When the broadcast section is gated off (custom LoRa params), the switch is disabled.
+        runOnIdle { usePresetState.value = false }
+        onNodeWithText(label).assertIsNotEnabled().performClick()
+
+        runOnIdle { assertEquals(listenFlag or broadcastFlag or legacySplitFlag, flagsState.value) }
     }
 }
