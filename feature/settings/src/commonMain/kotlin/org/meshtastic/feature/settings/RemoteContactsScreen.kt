@@ -72,6 +72,7 @@ import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_target
 import org.meshtastic.core.resources.remote_contacts_unfavorite
 import org.meshtastic.core.resources.remote_contacts_url
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NotFavorite
@@ -109,7 +110,7 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit)
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(16.dp),
         ) {
-            item { TargetBanner(target = target, targetId = viewModel.destNum.toNodeId()) }
+            item { TargetBanner(target = target, targetId = viewModel.destNum.toNodeId(), targetNode = destNode) }
             item {
                 ContactUrlCard(
                     target = target,
@@ -147,7 +148,7 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit)
 }
 
 @Composable
-private fun TargetBanner(target: String, targetId: String) {
+private fun TargetBanner(target: String, targetId: String, targetNode: Node?) {
     Card(
         colors =
         CardDefaults.cardColors(
@@ -157,11 +158,14 @@ private fun TargetBanner(target: String, targetId: String) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = stringResource(Res.string.remote_contacts_target, "$target ($targetId)"),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                targetNode?.let { NodeChip(node = it) }
+                Text(
+                    text = stringResource(Res.string.remote_contacts_target, "$target ($targetId)"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             Text(
                 text = stringResource(Res.string.remote_contacts_explainer, target),
                 style = MaterialTheme.typography.bodyMedium,
@@ -217,12 +221,17 @@ private fun CandidateCard(
     }
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = node.effectiveLongName, style = MaterialTheme.typography.titleSmall)
-            Text(
-                text = node.user.id,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                NodeChip(node = node)
+                Column {
+                    Text(text = node.effectiveLongName, style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        text = node.user.id,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled) {
                     onAction(RemoteContactAction.ADD_CONTACT)
