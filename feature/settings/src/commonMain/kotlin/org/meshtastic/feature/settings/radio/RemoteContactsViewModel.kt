@@ -37,11 +37,15 @@ import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 
 /** A write this screen sends to the remote node's node DB. */
 enum class RemoteContactAction {
     ADD_CONTACT,
+
+    /** Offered for a Client Base only, where a favorite changes what the node rebroadcasts. */
+    ADD_WITHOUT_FAVORITE,
     FAVORITE,
     UNFAVORITE,
     IGNORE,
@@ -73,7 +77,7 @@ data class RemoteWriteResult(val nodeNum: Int?, val action: RemoteContactAction,
 @KoinViewModel
 class RemoteContactsViewModel(
     @InjectedParam val destNum: Int,
-    nodeRepository: NodeRepository,
+    private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
 ) : ViewModel() {
@@ -104,16 +108,29 @@ class RemoteContactsViewModel(
         _query.value = query
     }
 
-    fun perform(node: Node, action: RemoteContactAction) = send(node.num, action) {
+    fun perform(node: Node, action: RemoteContactAction) {
+        val destIsClientBase = nodeRepository.nodeDBbyNum.value[destNum].isClientBase()
+        send(node.num, action) { write(node, action, destIsClientBase) }
+    }
+
+    private suspend fun write(node: Node, action: RemoteContactAction, destIsClientBase: Boolean): Boolean =
         when (action) {
-            RemoteContactAction.ADD_CONTACT -> radioController.addRemoteContact(destNum, node.toSharedContact())
+            RemoteContactAction.ADD_CONTACT -> addContact(node, thenFavorite = destIsClientBase)
+            RemoteContactAction.ADD_WITHOUT_FAVORITE -> addContact(node, thenFavorite = false)
             RemoteContactAction.FAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = true)
             RemoteContactAction.UNFAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = false)
             RemoteContactAction.IGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = true)
             RemoteContactAction.UNIGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = false)
             RemoteContactAction.REMOVE -> radioController.removeRemoteNode(destNum, node.num)
         }
-    }
+
+    /**
+     * A Client Base does not favorite on `add_contact`, and `set_favorite_node` does nothing for a node the target does
+     * not hold, so the favorite goes out only once the contact is acknowledged.
+     */
+    private suspend fun addContact(node: Node, thenFavorite: Boolean): Boolean =
+        radioController.addRemoteContact(destNum, node.toSharedContact()) &&
+            (!thenFavorite || radioController.setRemoteFavorite(destNum, node.num, favorite = true))
 
     fun addContactFromUrl(url: String) {
         if (sending) return
@@ -162,3 +179,5 @@ class RemoteContactsViewModel(
         return key.size == 0 || key == Node.ERROR_BYTE_STRING
     }
 }
+
+internal fun Node?.isClientBase(): Boolean = this?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE

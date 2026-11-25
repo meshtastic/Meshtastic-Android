@@ -38,6 +38,7 @@ import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
@@ -67,7 +68,12 @@ class RemoteContactsViewModelTest {
 
     private fun viewModel() = RemoteContactsViewModel(REMOTE, nodeRepository, radioController, ensureSession)
 
-    private fun node(num: Int, name: String, key: ByteString = KEY) = Node(
+    private fun node(
+        num: Int,
+        name: String,
+        key: ByteString = KEY,
+        role: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
+    ) = Node(
         num = num,
         user =
         User.Builder()
@@ -75,9 +81,14 @@ class RemoteContactsViewModelTest {
                 wb.id = "!" + num.toUInt().toString(16).padStart(8, '0')
                 wb.long_name = name
                 wb.public_key = key
+                wb.role = role
             }
             .build(),
     )
+
+    private fun remoteIs(role: Config.DeviceConfig.Role) {
+        nodeRepository.setNodes(listOf(node(REMOTE, "Remote", role = role), node(KEYED, "Keyed")))
+    }
 
     private fun remoteWrites() = radioController.adminRequests.filter { it.kind.contains("Remote") }
 
@@ -147,6 +158,84 @@ class RemoteContactsViewModelTest {
         assertEquals("addRemoteContact", write.kind)
         assertEquals(REMOTE, write.destNum)
         assertEquals(KEY, (write.payload as SharedContact).user?.public_key)
+    }
+
+    // Firmware's addFromContact leaves is_favorite alone on CLIENT_BASE (NodeDB.cpp), and set_favorite_node is a no-op
+    // for a node the target does not hold (AdminModule.cpp), so the favorite must follow the contact's ACK.
+    @Test
+    fun addContactOnAClientBaseFavoritesOnlyAfterTheContactIsAcknowledged() = runTest {
+        remoteIs(Config.DeviceConfig.Role.CLIENT_BASE)
+        val contactAck = CompletableDeferred<Boolean>()
+        radioController.remoteNodeDbAckFor = { kind -> if (kind == "addRemoteContact") contactAck.await() else true }
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
+
+        assertEquals(listOf("addRemoteContact"), remoteWrites().map { it.kind })
+        assertEquals(RemoteWriteStatus.SENDING, vm.lastResult.value?.status)
+
+        contactAck.complete(true)
+
+        assertEquals(listOf("addRemoteContact", "setRemoteFavorite"), remoteWrites().map { it.kind })
+        val favorite = remoteWrites().last()
+        assertEquals(REMOTE, favorite.destNum)
+        assertEquals(KEYED, favorite.payload)
+        assertEquals(
+            RemoteWriteResult(KEYED, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.ACKNOWLEDGED),
+            vm.lastResult.value,
+        )
+    }
+
+    @Test
+    fun aClientBaseContactThatIsNotAcknowledgedIsNotFavorited() = runTest {
+        remoteIs(Config.DeviceConfig.Role.CLIENT_BASE)
+        radioController.remoteNodeDbAck = false
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
+
+        assertEquals(listOf("addRemoteContact"), remoteWrites().map { it.kind })
+        assertEquals(RemoteWriteStatus.NOT_ACKNOWLEDGED, vm.lastResult.value?.status)
+    }
+
+    @Test
+    fun aClientBaseFavoriteThatIsNotAcknowledgedIsReportedAsFailed() = runTest {
+        remoteIs(Config.DeviceConfig.Role.CLIENT_BASE)
+        radioController.remoteNodeDbAckFor = { kind -> kind == "addRemoteContact" }
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
+
+        assertEquals(listOf("addRemoteContact", "setRemoteFavorite"), remoteWrites().map { it.kind })
+        assertEquals(RemoteWriteStatus.NOT_ACKNOWLEDGED, vm.lastResult.value?.status)
+    }
+
+    // Every other role favorites inside addFromContact, so a second packet would only spend airtime.
+    @Test
+    fun addContactOnANodeThatIsNotAClientBaseSendsOnlyTheContact() = runTest {
+        remoteIs(Config.DeviceConfig.Role.ROUTER)
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
+
+        assertEquals(listOf("addRemoteContact"), remoteWrites().map { it.kind })
+        assertEquals(RemoteWriteStatus.ACKNOWLEDGED, vm.lastResult.value?.status)
+    }
+
+    @Test
+    fun addWithoutFavoriteOnAClientBaseSendsOnlyTheContact() = runTest {
+        remoteIs(Config.DeviceConfig.Role.CLIENT_BASE)
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_WITHOUT_FAVORITE)
+
+        val write = remoteWrites().single()
+        assertEquals("addRemoteContact", write.kind)
+        assertEquals(KEY, (write.payload as SharedContact).user?.public_key)
+        assertEquals(
+            RemoteWriteResult(KEYED, RemoteContactAction.ADD_WITHOUT_FAVORITE, RemoteWriteStatus.ACKNOWLEDGED),
+            vm.lastResult.value,
+        )
     }
 
     @Test

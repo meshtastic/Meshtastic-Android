@@ -62,7 +62,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.live_update_search_nodes
 import org.meshtastic.core.resources.remote_contacts
 import org.meshtastic.core.resources.remote_contacts_add_contact
+import org.meshtastic.core.resources.remote_contacts_add_without_favorite
 import org.meshtastic.core.resources.remote_contacts_explainer
+import org.meshtastic.core.resources.remote_contacts_explainer_client_base
 import org.meshtastic.core.resources.remote_contacts_failed
 import org.meshtastic.core.resources.remote_contacts_favorite
 import org.meshtastic.core.resources.remote_contacts_ignore
@@ -97,6 +99,7 @@ import org.meshtastic.feature.settings.radio.RemoteContactsViewModel
 import org.meshtastic.feature.settings.radio.RemoteWriteResult
 import org.meshtastic.feature.settings.radio.RemoteWriteStatus
 import org.meshtastic.feature.settings.radio.component.WarningDialog
+import org.meshtastic.feature.settings.radio.isClientBase
 
 @Composable
 fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -151,6 +154,7 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit,
                 CandidateCard(
                     node = node,
                     target = target,
+                    clientBase = destNode.isClientBase(),
                     enabled = enabled,
                     result = lastResult?.takeIf { it.nodeNum == node.num },
                     onAction = { viewModel.perform(node, it) },
@@ -179,8 +183,14 @@ private fun TargetBanner(target: String, targetId: String, targetNode: Node?) {
                     fontWeight = FontWeight.Bold,
                 )
             }
+            val explainer =
+                if (targetNode.isClientBase()) {
+                    Res.string.remote_contacts_explainer_client_base
+                } else {
+                    Res.string.remote_contacts_explainer
+                }
             Text(
-                text = stringResource(Res.string.remote_contacts_explainer, target),
+                text = stringResource(explainer, target),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -210,11 +220,11 @@ private fun ContactUrlCard(target: String, enabled: Boolean, result: RemoteWrite
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CandidateCard(
     node: Node,
     target: String,
+    clientBase: Boolean,
     enabled: Boolean,
     result: RemoteWriteResult?,
     onAction: (RemoteContactAction) -> Unit,
@@ -251,27 +261,48 @@ private fun CandidateCard(
                     )
                 }
             }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled) {
-                    onAction(RemoteContactAction.ADD_CONTACT)
-                }
-                ActionButton(MeshtasticIcons.Favorite, Res.string.remote_contacts_favorite, enabled) {
-                    onAction(RemoteContactAction.FAVORITE)
-                }
-                ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
-                    onAction(RemoteContactAction.UNFAVORITE)
-                }
-                ActionButton(MeshtasticIcons.DoDisturb, Res.string.remote_contacts_ignore, enabled) {
-                    confirming = RemoteContactAction.IGNORE
-                }
-                ActionButton(MeshtasticIcons.Visibility, Res.string.remote_contacts_unignore, enabled) {
-                    onAction(RemoteContactAction.UNIGNORE)
-                }
-                ActionButton(MeshtasticIcons.PersonOff, Res.string.remote_contacts_remove, enabled) {
-                    confirming = RemoteContactAction.REMOVE
-                }
-            }
+            CandidateActions(
+                clientBase = clientBase,
+                enabled = enabled,
+                onConfirm = { confirming = it },
+                onAction = onAction,
+            )
             result?.let { WriteStatusLine(it, target) }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CandidateActions(
+    clientBase: Boolean,
+    enabled: Boolean,
+    onConfirm: (RemoteContactAction) -> Unit,
+    onAction: (RemoteContactAction) -> Unit,
+) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled) {
+            onAction(RemoteContactAction.ADD_CONTACT)
+        }
+        if (clientBase) {
+            ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_without_favorite, enabled) {
+                onAction(RemoteContactAction.ADD_WITHOUT_FAVORITE)
+            }
+        }
+        ActionButton(MeshtasticIcons.Favorite, Res.string.remote_contacts_favorite, enabled) {
+            onAction(RemoteContactAction.FAVORITE)
+        }
+        ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
+            onAction(RemoteContactAction.UNFAVORITE)
+        }
+        ActionButton(MeshtasticIcons.DoDisturb, Res.string.remote_contacts_ignore, enabled) {
+            onConfirm(RemoteContactAction.IGNORE)
+        }
+        ActionButton(MeshtasticIcons.Visibility, Res.string.remote_contacts_unignore, enabled) {
+            onAction(RemoteContactAction.UNIGNORE)
+        }
+        ActionButton(MeshtasticIcons.PersonOff, Res.string.remote_contacts_remove, enabled) {
+            onConfirm(RemoteContactAction.REMOVE)
         }
     }
 }
