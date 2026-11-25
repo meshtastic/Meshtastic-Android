@@ -223,12 +223,12 @@ private fun ChannelConfigScreen(
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             Column {
                 ChannelConfigHeader(
-                    frequency = primaryChannel.radioFreq,
+                    frequency = primaryChannel.frequencyPlan.frequencyMHz ?: 0f,
                     slot =
                     if (loraConfig.channel_num != 0) {
                         loraConfig.channel_num
                     } else {
-                        primaryChannel.channelNum
+                        primaryChannel.frequencyPlan.slot ?: 0
                     },
                     isAutoSlot = loraConfig.channel_num == 0 && loraConfig.override_frequency == 0f,
                 )

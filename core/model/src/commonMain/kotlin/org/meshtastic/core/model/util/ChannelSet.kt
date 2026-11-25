@@ -22,8 +22,6 @@ import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.channelNum
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
@@ -166,16 +164,15 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
     // offer_region == UNSET (0) means "not offered"; only a set, differing region forces a switch.
     val regionMatches = offer_region == RegionCode.UNSET || offer_region == lora.region
     if (!presetMatches || !regionMatches) return BeaconJoinOption.SWITCH
-    if (lora.numChannels <= 0) return BeaconJoinOption.SWITCH
+    // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
+    // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
+    val currentSlot =
+        lora.resolveFrequencySlot(currentChannels.firstOrNull()?.name.orEmpty()) ?: return BeaconJoinOption.SWITCH
     val advertisedSlot = advertisedFrequencySlot(lora)
     // Only an advertised slot makes a pinned radio comparable: our own channel_num describes where we sit, never
     // where the offered mesh sits, so without one there is nothing to compare a pin against.
     if (advertisedSlot == null && lora.channel_num != 0) return BeaconJoinOption.SWITCH
-    // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
-    // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
-    val currentSlot =
-        lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings.Builder().build(), lora).name)
-    val offeredSlot = advertisedSlot ?: lora.channelNum(Channel(offer, lora).name)
+    val offeredSlot = advertisedSlot ?: lora.resolveFrequencySlot(offer.name)
     return if (offeredSlot == currentSlot) BeaconJoinOption.ADD else BeaconJoinOption.SWITCH
 }
 

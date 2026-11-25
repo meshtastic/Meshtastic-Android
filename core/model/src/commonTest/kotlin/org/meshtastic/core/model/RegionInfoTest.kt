@@ -16,28 +16,11 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.proto.Config.LoRaConfig
-import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-/**
- * Frequency-slot expectations mirror the firmware's region table and slot math in
- * `RadioInterface.cpp::applyModemConfig` (slot width = spacing + 2*padding + bandwidth; default slots from each
- * region's RDEF entry).
- */
 class RegionInfoTest {
-
-    private fun lora(region: RegionCode, preset: ModemPreset, channelNum: Int = 0) = LoRaConfig.Builder()
-        .also { wb ->
-            wb.use_preset = true
-            wb.modem_preset = preset
-            wb.region = region
-            wb.channel_num = channelNum
-        }
-        .build()
 
     /**
      * Every region the firmware's region table defines must be selectable in the app. The proto enum is a superset
@@ -89,96 +72,5 @@ class RegionInfoTest {
                 "Missing RegionInfo entry for firmware region '${region.name}'.",
             )
         }
-    }
-
-    @Test
-    fun ham_2m_regions_use_20kHz_slots() {
-        // ITU1_2M: 144-146 MHz, TINY_FAST (15.625 kHz) padded to 20.025 kHz slots -> 100 slots, default slot 26.
-        val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST)
-        assertEquals(100, itu1.numChannels)
-        assertEquals(26, itu1.channelNum("TinyFast"))
-        assertEquals(144.5106f, itu1.radioFreq(26), 0.001f)
-
-        // ITU2_2M: 144-148 MHz -> 200 slots, default slot 51 (145.010 MHz).
-        val itu2 = lora(RegionCode.ITU2_2M, ModemPreset.TINY_FAST)
-        assertEquals(200, itu2.numChannels)
-        assertEquals(145.011f, itu2.radioFreq(itu2.channelNum("TinyFast")), 0.001f)
-
-        // ITU3_2M: 144-148 MHz -> 200 slots, default slot 33 (144.650 MHz).
-        val itu3 = lora(RegionCode.ITU3_2M, ModemPreset.TINY_FAST)
-        assertEquals(200, itu3.numChannels)
-        assertEquals(144.6508f, itu3.radioFreq(itu3.channelNum("TinyFast")), 0.001f)
-    }
-
-    @Test
-    fun ham_70cm_and_125cm_regions_use_100kHz_slots() {
-        // ITU2_70CM: 420-450 MHz, NARROW_SLOW (62.5 kHz) padded to 100 kHz slots -> 300 slots,
-        // default slot 137 (433.650 MHz).
-        val itu270cm = lora(RegionCode.ITU2_70CM, ModemPreset.NARROW_SLOW)
-        assertEquals(300, itu270cm.numChannels)
-        assertEquals(137, itu270cm.channelNum("NarrowSlow"))
-        assertEquals(433.65f, itu270cm.radioFreq(137), 0.001f)
-
-        // ITU1_70CM: 430-440 MHz -> 100 slots, default slot 37 (433.650 MHz).
-        val itu170cm = lora(RegionCode.ITU1_70CM, ModemPreset.NARROW_SLOW)
-        assertEquals(100, itu170cm.numChannels)
-        assertEquals(433.65f, itu170cm.radioFreq(itu170cm.channelNum("NarrowSlow")), 0.001f)
-
-        // ITU3_70CM: 430-450 MHz -> 200 slots, default slot 37 (433.650 MHz).
-        val itu370cm = lora(RegionCode.ITU3_70CM, ModemPreset.NARROW_SLOW)
-        assertEquals(200, itu370cm.numChannels)
-        assertEquals(433.65f, itu370cm.radioFreq(itu370cm.channelNum("NarrowSlow")), 0.001f)
-
-        // ITU2_125CM: 220-225 MHz -> 50 slots, default slot 37 (223.650 MHz).
-        val itu2125cm = lora(RegionCode.ITU2_125CM, ModemPreset.NARROW_SLOW)
-        assertEquals(50, itu2125cm.numChannels)
-        assertEquals(223.65f, itu2125cm.radioFreq(itu2125cm.channelNum("NarrowSlow")), 0.001f)
-    }
-
-    @Test
-    fun eu_866_lite_gives_four_600kHz_slots() {
-        // EU_866: 865.6-867.6 MHz, LITE_FAST (125 kHz) with 400 kHz spacing + 37.5 kHz padding
-        // -> 4 slots at 865.7/866.3/866.9/867.5 MHz.
-        val eu866 = lora(RegionCode.EU_866, ModemPreset.LITE_FAST)
-        assertEquals(4, eu866.numChannels)
-        assertEquals(865.7f, eu866.radioFreq(1), 0.001f)
-        assertEquals(867.5f, eu866.radioFreq(4), 0.001f)
-    }
-
-    @Test
-    fun eu_n_868_narrow_defaults_to_first_slot() {
-        val euN868 = lora(RegionCode.EU_N_868, ModemPreset.NARROW_SLOW)
-        assertEquals(3, euN868.numChannels)
-        assertEquals(1, euN868.channelNum("NarrowSlow"))
-        assertEquals(869.4417f, euN868.radioFreq(1), 0.001f)
-    }
-
-    @Test
-    fun standard_regions_keep_legacy_slot_math() {
-        // US: 902-928 MHz, LONG_FAST (250 kHz), no spacing/padding/override -> 104 hash-addressed slots.
-        val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
-        assertEquals(104, us.numChannels)
-        assertEquals(906.875f, us.radioFreq(20), 0.001f)
-
-        // Firmware adds frequency_offset to the slot frequency as well as to an override.
-        val offset = us.newBuilder().also { wb -> wb.frequency_offset = 0.01f }.build()
-        assertEquals(906.885f, offset.radioFreq(20), 0.001f)
-
-        // KZ_863: 863-868 MHz, standard (not wide) LoRa like firmware's RDEF -> 20 slots.
-        assertEquals(20, lora(RegionCode.KZ_863, ModemPreset.LONG_FAST).numChannels)
-    }
-
-    @Test
-    fun non_ascii_channel_names_hash_their_utf8_bytes_like_firmware() {
-        val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
-        assertEquals(20, us.channelNum("LongFast"))
-        assertEquals(23, us.channelNum("Häme"))
-        assertEquals(93, us.channelNum("Mesh🙂"))
-    }
-
-    @Test
-    fun explicit_channel_num_wins_over_override_slot() {
-        val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST, channelNum = 5)
-        assertEquals(5, itu1.channelNum("TinyFast"))
     }
 }

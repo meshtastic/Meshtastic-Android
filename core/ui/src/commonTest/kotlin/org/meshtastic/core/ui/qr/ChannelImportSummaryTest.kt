@@ -248,6 +248,7 @@ class ChannelImportSummaryTest {
     fun bandwidth_codes_show_the_kilohertz_the_slot_math_uses() {
         fun shown(code: Int) = loraConfigChanges(lora { use_preset = false }, lora { bandwidth = code }).single().to
 
+        assertEquals(LoraValue.Kilohertz("15.6"), shown(16))
         assertEquals(LoraValue.Kilohertz("31.25"), shown(31))
         assertEquals(LoraValue.Kilohertz("203.125"), shown(200))
         assertEquals(LoraValue.Kilohertz("812.5"), shown(800))

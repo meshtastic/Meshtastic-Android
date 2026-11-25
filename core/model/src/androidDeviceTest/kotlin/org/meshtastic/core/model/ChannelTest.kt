@@ -54,21 +54,21 @@ class ChannelTest {
     fun numChannelsGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(104, ch.loraConfig.numChannels)
+        Assert.assertEquals(104, ch.frequencyPlan.numChannels)
     }
 
     @Test
     fun channelNumGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(20, ch.channelNum)
+        Assert.assertEquals(20, ch.frequencyPlan.slot)
     }
 
     @Test
     fun radioFreqGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(906.875f, ch.radioFreq)
+        Assert.assertEquals(906.875f, ch.frequencyPlan.frequencyMHz)
     }
 
     @Test

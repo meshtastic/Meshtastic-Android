@@ -50,7 +50,6 @@ import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.snrOrNull
@@ -71,6 +70,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.LoRaFrequency
 import org.meshtastic.core.model.Channel as ChannelModel
 
 /**
@@ -622,7 +622,8 @@ class DiscoveryScanEngine(
             // Bound the pinned slot against the config we are about to apply, not the one we are leaving: a nonzero
             // channel_num is taken verbatim, so an unaddressable slot would tune the scan to a frequency that does
             // not exist. Zero puts us back on deriving it from the offered name.
-            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels } ?: 0
+            val frequencySlot =
+                target.frequencySlot?.takeIf { it in 1..LoRaFrequency.plan(targetLora, "").numChannels } ?: 0
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->

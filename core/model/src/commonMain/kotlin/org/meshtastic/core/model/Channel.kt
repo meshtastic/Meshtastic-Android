@@ -24,6 +24,8 @@ import org.meshtastic.core.model.util.xorHash
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.sdk.LoRaFrequency
+import org.meshtastic.sdk.LoRaFrequencyPlan
 
 data class Channel(val settings: ChannelSettings = default.settings, val loraConfig: LoRaConfig = default.loraConfig) {
     companion object {
@@ -99,7 +101,7 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                 // human readable name.
                 //
                 // INTEROP-CRITICAL: these strings must byte-match the firmware, because the channel hash, channel
-                // number / radio frequency, and MQTT topic all derive from this name (see `hash`, `channelNum`).
+                // number / radio frequency, and MQTT topic all derive from this name (see `hash`, `frequencyPlan`).
                 // Source of truth: firmware DisplayFormatters::getModemPresetDisplayName(preset, useShortName=false).
                 // Two names are deliberately abbreviated (LONG_MODERATE -> "LongMod", VERY_LONG_SLOW -> "VLongSlow"),
                 // so do NOT auto-derive from the enum name. This `when` is intentionally exhaustive with no `else`: a
@@ -157,11 +159,9 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
             return if (settings.use_aead) base xor AEAD_HASH_MARKER else base
         }
 
-    val channelNum: Int
-        get() = loraConfig.channelNum(name)
-
-    val radioFreq: Float
-        get() = loraConfig.radioFreq(channelNum)
+    /** Slot count, slot and center frequency firmware derives for this primary channel. */
+    val frequencyPlan: LoRaFrequencyPlan
+        get() = LoRaFrequency.plan(loraConfig, settings.name)
 
     override fun equals(other: Any?): Boolean =
         (other is Channel) && psk.toByteArray() contentEquals other.psk.toByteArray() && name == other.name

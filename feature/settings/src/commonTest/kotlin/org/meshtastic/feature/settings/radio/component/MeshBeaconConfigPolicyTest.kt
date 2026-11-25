@@ -18,7 +18,6 @@ package org.meshtastic.feature.settings.radio.component
 
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.proto.ChannelSettings
@@ -657,8 +656,9 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_pinnedRadio_advertisesTheSlotItActuallySitsOn() {
-        assertTrue(presetRadio.numChannels > 1, "a one-slot region makes this vacuous")
-        val derived = Channel(primaryChannel, presetRadio).channelNum
+        val plan = Channel(primaryChannel, presetRadio).frequencyPlan
+        assertTrue(plan.numChannels > 1, "a one-slot region makes this vacuous")
+        val derived = plan.slot!!
         val pin = if (derived == 1) 2 else 1
         val radioLora = presetRadio.newBuilder().also { wb -> wb.channel_num = pin }.build()
 

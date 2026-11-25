@@ -21,38 +21,6 @@ package org.meshtastic.core.model
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
-import kotlin.math.round
-
-/** The bandwidth in MHz that a manual `LoRaConfig.bandwidth` wire code stands for in the slot math. */
-fun loraBandwidthMegahertz(code: Int): Float = when (code) {
-    31 -> .03125f
-    62 -> .0625f
-    200 -> .203125f
-    400 -> .40625f
-    800 -> .8125f
-    1600 -> 1.6250f
-    else -> code / 1000f
-}
-
-/**
- * djb2 over the name's UTF-8 bytes, matching firmware `RadioInterface.cpp` `hash()`; hashing UTF-16 chars gives a
- * different slot for any non-ASCII name.
- */
-private fun hash(name: String): UInt {
-    var hash = 5381u
-    for (b in name.encodeToByteArray()) {
-        hash += (hash shl 5) + b.toUByte().toUInt()
-    }
-    return hash
-}
-
-private val ModemPreset.bandwidth: Float
-    get() {
-        for (option in ChannelOption.entries) {
-            if (option.modemPreset == this) return option.bandwidth
-        }
-        return 0f
-    }
 
 /**
  * The SNR (in dB) at or above which a packet sent with this modem preset can still be demodulated — i.e. the
@@ -65,55 +33,6 @@ private val ModemPreset.bandwidth: Float
  */
 val ModemPreset?.snrLimit: Float
     get() = (ChannelOption.from(this) ?: ChannelOption.DEFAULT).snrLimit
-
-private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
-    modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
-} else {
-    loraBandwidthMegahertz(bandwidth)
-}
-
-/**
- * Width of one frequency slot: modem bandwidth plus the region's per-side padding and inter-slot spacing (firmware
- * `RadioInterface::applyModemConfig`).
- */
-private fun LoRaConfig.freqSlotWidth(regionInfo: RegionInfo): Float =
-    regionInfo.spacing + regionInfo.padding * 2 + bandwidth(regionInfo)
-
-val LoRaConfig.numChannels: Int
-    get() {
-        val regionInfo = RegionInfo.fromRegionCode(region)
-        if (regionInfo == null) return 0
-
-        val bw = bandwidth(regionInfo)
-        if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
-
-        val num = round((regionInfo.freqEnd - regionInfo.freqStart + regionInfo.spacing) / freqSlotWidth(regionInfo))
-        // If the regional frequency range is smaller than the slot width, the firmware would
-        // fall back to a default preset. In the app, we return 1 to avoid a crash.
-        return if (num > 0) num.toInt() else 1
-    }
-
-internal fun LoRaConfig.channelNum(primaryName: String): Int {
-    val overrideSlot = RegionInfo.fromRegionCode(region)?.overrideSlot ?: 0
-    return when {
-        channel_num != 0 -> channel_num
-        numChannels == 0 -> 0
-        overrideSlot > 0 -> overrideSlot
-        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
-    }
-}
-
-internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
-    if (override_frequency != 0f) return override_frequency + frequency_offset
-    val regionInfo = RegionInfo.fromRegionCode(region)
-    return if (regionInfo != null) {
-        (regionInfo.freqStart + bandwidth(regionInfo) / 2 + regionInfo.padding) +
-            (channelNum - 1) * freqSlotWidth(regionInfo) +
-            frequency_offset
-    } else {
-        0f
-    }
-}
 
 /**
  * With `use_preset` on, keeps `coding_rate` only while it raises the preset's own coding rate, and stores 0 ("use the
