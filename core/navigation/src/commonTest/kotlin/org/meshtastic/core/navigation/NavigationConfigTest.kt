@@ -75,6 +75,7 @@ class NavigationConfigTest {
             SettingsRoute.DeviceConfiguration,
             SettingsRoute.ModuleConfiguration,
             SettingsRoute.Administration,
+            SettingsRoute.RemoteContacts(destNum = 999),
             SettingsRoute.User,
             SettingsRoute.UserStatusMessage,
             SettingsRoute.ChannelConfig,

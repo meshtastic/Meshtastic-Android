@@ -26,6 +26,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.HamName
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
@@ -46,6 +47,8 @@ import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.Routing
+import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminEdit
@@ -263,6 +266,47 @@ internal class AdminControllerImpl(
         Logger.i { "Set time requested for node $destNum" }
         return onNode(destNum) { setTime() }
     }
+
+    // ── Remote node DB ─────────────────────────────────────────────────────
+
+    override suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean {
+        // An empty or all-zero key overwrites the one the remote node holds and breaks its DMs with that node.
+        val key = contact.user?.public_key
+        if (contact.node_num == 0 || key == null || key.size == 0 || key == Node.ERROR_BYTE_STRING) return false
+        return safeCatching {
+            commandSender.sendAdminAwait(destNum) {
+                AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
+            }
+        }
+            .getOrDefault(false)
+    }
+
+    override suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean = safeCatching {
+        commandSender.sendAdminAwait(destNum) {
+            AdminMessage.Builder()
+                .also { wb ->
+                    if (favorite) wb.set_favorite_node = nodeNum else wb.remove_favorite_node = nodeNum
+                }
+                .build()
+        }
+    }
+        .getOrDefault(false)
+
+    override suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean = safeCatching {
+        commandSender.sendAdminAwait(destNum) {
+            AdminMessage.Builder()
+                .also { wb -> if (ignored) wb.set_ignored_node = nodeNum else wb.remove_ignored_node = nodeNum }
+                .build()
+        }
+    }
+        .getOrDefault(false)
+
+    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean = safeCatching {
+        commandSender.sendAdminAwait(destNum) {
+            AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = nodeNum }.build()
+        }
+    }
+        .getOrDefault(false)
 
     override suspend fun getCannedMessages(destNum: Int): AdminResult<String> =
         onNode(destNum, read = true) { getCannedMessages() }

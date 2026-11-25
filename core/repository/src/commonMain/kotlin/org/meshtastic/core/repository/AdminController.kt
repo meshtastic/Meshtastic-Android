@@ -24,6 +24,7 @@ import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
 import kotlin.time.Duration
@@ -125,6 +126,21 @@ interface AdminController {
      * has drifted can be corrected without an on-site visit. The firmware applies the value without an admin response.
      */
     suspend fun setTime(destNum: Int): AdminResult<Unit>
+
+    /**
+     * Adds [contact] to [destNum]'s node DB via `AdminMessage.add_contact`. Firmware also favorites it, except on a
+     * `CLIENT_BASE` node. Returns `true` once [destNum] acknowledges.
+     */
+    suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean
+
+    /** Favorites or unfavorites [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean
+
+    /** Ignores or unignores [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean
+
+    /** Removes [nodeNum] from [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean
 
     // ── Remote queries ──────────────────────────────────────────────────────
     //
