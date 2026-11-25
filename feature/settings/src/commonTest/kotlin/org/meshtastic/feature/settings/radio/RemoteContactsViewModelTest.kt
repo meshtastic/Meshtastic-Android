@@ -173,7 +173,8 @@ class RemoteContactsViewModelTest {
 
     @Test
     fun contactUrlIsSentToTheRemoteNodeAsAContactNeverABlock() = runTest {
-        val blocking = node(KEYED, "Keyed").toSharedContact().newBuilder().also { wb -> wb.should_ignore = true }.build()
+        val blocking =
+            node(KEYED, "Keyed").toSharedContact().newBuilder().also { wb -> wb.should_ignore = true }.build()
         val vm = viewModel()
 
         vm.addContactFromUrl(blocking.getSharedContactUrl().toString())

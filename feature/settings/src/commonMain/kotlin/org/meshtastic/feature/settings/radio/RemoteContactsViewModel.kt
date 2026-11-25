@@ -138,15 +138,14 @@ class RemoteContactsViewModel(
         if (sending) return
         settle(nodeNum, action, RemoteWriteStatus.SENDING)
         viewModelScope.launch {
-            val status =
-                safeCatching {
-                    when {
-                        !ensureRemoteAdminSession(destNum).isUsable() -> RemoteWriteStatus.NOT_SENT
-                        write() -> RemoteWriteStatus.ACKNOWLEDGED
-                        else -> RemoteWriteStatus.NOT_ACKNOWLEDGED
-                    }
+            val status = safeCatching {
+                when {
+                    !ensureRemoteAdminSession(destNum).isUsable() -> RemoteWriteStatus.NOT_SENT
+                    write() -> RemoteWriteStatus.ACKNOWLEDGED
+                    else -> RemoteWriteStatus.NOT_ACKNOWLEDGED
                 }
-                    .getOrDefault(RemoteWriteStatus.NOT_ACKNOWLEDGED)
+            }
+                .getOrDefault(RemoteWriteStatus.NOT_ACKNOWLEDGED)
             settle(nodeNum, action, status)
         }
     }

@@ -46,11 +46,11 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AcknowledgementsScreen
 import org.meshtastic.feature.settings.AdministrationScreen
-import org.meshtastic.feature.settings.RemoteContactsScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.DeviceLinkDirectoryScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.NodeListScreen
+import org.meshtastic.feature.settings.RemoteContactsScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.appfunctions.AppFunctionsSettingsScreen
 import org.meshtastic.feature.settings.appfunctions.AppFunctionsSettingsViewModel

@@ -221,9 +221,11 @@ private fun CandidateCard(
         val ignore = action == RemoteContactAction.IGNORE
         WarningDialog(
             icon = if (ignore) MeshtasticIcons.DoDisturb else MeshtasticIcons.PersonOff,
-            title = stringResource(if (ignore) Res.string.remote_contacts_ignore else Res.string.remote_contacts_remove),
+            title =
+            stringResource(if (ignore) Res.string.remote_contacts_ignore else Res.string.remote_contacts_remove),
             text = {
-                val body = if (ignore) Res.string.remote_contacts_ignore_confirm else Res.string.remote_contacts_remove_confirm
+                val body =
+                    if (ignore) Res.string.remote_contacts_ignore_confirm else Res.string.remote_contacts_remove_confirm
                 Text(stringResource(body, node.effectiveLongName, target))
             },
             onDismiss = { confirming = null },
@@ -285,16 +287,22 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
         when (result.status) {
             RemoteWriteStatus.SENDING ->
                 stringResource(Res.string.remote_contacts_sending, target) to MaterialTheme.colorScheme.onSurfaceVariant
+
             RemoteWriteStatus.ACKNOWLEDGED ->
                 stringResource(Res.string.remote_contacts_sent, target) to MaterialTheme.colorScheme.primary
+
             RemoteWriteStatus.NOT_ACKNOWLEDGED ->
                 stringResource(Res.string.remote_contacts_failed, target) to MaterialTheme.colorScheme.error
+
             RemoteWriteStatus.INVALID_URL ->
                 stringResource(Res.string.remote_contacts_invalid_url) to MaterialTheme.colorScheme.error
+
             RemoteWriteStatus.NO_PUBLIC_KEY ->
                 stringResource(Res.string.remote_contacts_no_public_key, target) to MaterialTheme.colorScheme.error
+
             RemoteWriteStatus.NOT_SENT ->
                 stringResource(Res.string.remote_contacts_not_sent, target) to MaterialTheme.colorScheme.error
+
             RemoteWriteStatus.SELF_CONTACT ->
                 stringResource(Res.string.remote_contacts_self, target) to MaterialTheme.colorScheme.error
         }
