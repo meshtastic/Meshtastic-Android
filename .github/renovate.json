@@ -31,6 +31,19 @@
   },
   "packageRules": [
     {
+      "description": "AndroidX and com.android.* resolve only from Google's Maven repository. The settings scripts route them there through exclusiveContent, which Renovate's Gradle parser does not read, so without this rule it looks them up everywhere except Google's repository and finds nothing.",
+      "matchDatasources": [
+        "maven"
+      ],
+      "matchPackageNames": [
+        "/^androidx\\./",
+        "/^com\\.android\\./"
+      ],
+      "registryUrls": [
+        "https://dl.google.com/android/maven2/"
+      ]
+    },
+    {
       "description": "setup-java pins stay at the major (25): setup-java resolves the newest build per arch, and a JDK major moves with the toolchain, JBR and the Flatpak openjdk extension, by hand",
       "matchDatasources": [
         "java-version"
