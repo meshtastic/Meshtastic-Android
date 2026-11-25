@@ -32,8 +32,9 @@ import org.meshtastic.sdk.LoRaFrequency
  * to. A value outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than refusing
  * the join: that is the behaviour we had before the field existed, and the offer is advisory either way.
  */
-internal fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? =
-    offer_frequency_slot?.takeIf { it in 1..LoRaFrequency.plan(lora, "").numChannels }
+internal fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? = offer_frequency_slot?.takeIf {
+    it in 1..LoRaFrequency.plan(lora, "").numChannels
+}
 
 /**
  * The frequency slot to advertise alongside an outgoing offer, or `null` to leave the field unset.
@@ -49,11 +50,9 @@ fun beaconOfferFrequencySlot(
     primaryChannel: ChannelSettings?,
     radioLora: LoRaConfig,
 ): Int? {
-    if (offerChannel == null) return null
-    val actual = radioLora.resolveFrequencySlot(primaryChannel?.name.orEmpty()) ?: return null
+    val actual = offerChannel?.let { radioLora.resolveFrequencySlot(primaryChannel?.name.orEmpty()) }
     // Derive the way a receiver must: off the offered channel's name with our own pin removed.
-    val derived = radioLora.resolveFrequencySlot(offerChannel.name, channelNum = 0)
-    return actual.takeIf { it != derived }
+    return actual?.takeIf { it != radioLora.resolveFrequencySlot(offerChannel.name, channelNum = 0) }
 }
 
 /**

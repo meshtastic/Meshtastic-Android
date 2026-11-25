@@ -182,6 +182,8 @@ class MeshDataHandlerTest {
                 activeConversationTracker = activeConversationTracker,
                 scope = testScope.asServiceScope(),
             )
+        // Every live waypoint notifies (expire 0 included), and compose-resources cannot load on the plain JVM.
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
 
         everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
             {

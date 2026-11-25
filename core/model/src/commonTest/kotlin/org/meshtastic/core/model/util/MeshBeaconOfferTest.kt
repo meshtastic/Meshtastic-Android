@@ -460,8 +460,7 @@ class MeshBeaconOfferTest {
         // The NYMesh case: the offered name hashes to our slot, but the mesh actually sits elsewhere. Deriving would
         // call this a no-reboot ADD and the user would join and hear nothing.
         val homeSlot = slotOf("HomeMesh")
-        val elsewhere =
-            if (homeSlot < LoRaFrequency.plan(radioLora, "").numChannels) homeSlot + 1 else homeSlot - 1
+        val elsewhere = if (homeSlot < LoRaFrequency.plan(radioLora, "").numChannels) homeSlot + 1 else homeSlot - 1
         assertEquals(
             BeaconJoinOption.SWITCH,
             offerOn("HomeMesh", slot = elsewhere).beaconJoinOption(radioLora, radioChannels),
