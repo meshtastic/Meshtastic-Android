@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.radio.StreamTransport
 import org.meshtastic.core.network.radio.TransportLifecycleGate
 import org.meshtastic.core.network.transport.HeartbeatSender
@@ -99,20 +100,20 @@ private class SerialPortState {
     fun takePort(): SerialPort? = synchronized(lock) { port.also { port = null } }
 }
 
-private fun writeFullyWithDeadline(port: SerialPort, payload: ByteArray, portName: String, timeoutMs: Int) {
+private fun writeFullyWithDeadline(port: SerialPort, payload: ByteArray, logName: String, timeoutMs: Int) {
     val startedNanos = System.nanoTime()
     val timeoutNanos = timeoutMs.toLong() * NANOS_PER_MILLISECOND
     var offset = 0
     while (offset < payload.size) {
         val written = port.writeBytes(payload, payload.size - offset, offset)
         if (written < 0) {
-            throw IOException("[$portName] Serial write failed after $offset/${payload.size} bytes")
+            throw IOException("[$logName] Serial write failed after $offset/${payload.size} bytes")
         }
         offset += written
         if (offset < payload.size) {
             if (System.nanoTime() - startedNanos >= timeoutNanos) {
                 throw IOException(
-                    "[$portName] Serial write timed out after ${timeoutMs}ms at $offset/${payload.size} bytes",
+                    "[$logName] Serial write timed out after ${timeoutMs}ms at $offset/${payload.size} bytes",
                 )
             }
             // Partial writes can make progress while still keeping the driver continuously writable. Yield between
@@ -150,18 +151,20 @@ private fun diagnoseSerialOpenFailure(portName: String): String {
     }
 }
 
-private fun detectSerialGroup(devPath: String): String = runCatching {
+internal fun detectSerialGroup(devPath: String): String = runCatching {
     // -L: a by-id address is a symlink, and the group that grants access is the device node's.
     val process = ProcessBuilder("stat", "-L", "-c", "%G", devPath).redirectErrorStream(true).start()
     try {
         if (!process.waitFor(SERIAL_GROUP_LOOKUP_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-            Logger.w { "stat lookup for $devPath timed out" }
+            Logger.w { "stat lookup for ${devPath.anonymize()} timed out" }
             "dialout"
         } else {
             val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
             if (process.exitValue() != 0) {
                 val detail = output.takeIf(String::isNotEmpty)?.let { ": $it" }.orEmpty()
-                Logger.w { "stat lookup for $devPath failed with exit code ${process.exitValue()}$detail" }
+                Logger.w {
+                    "stat lookup for ${devPath.anonymize()} failed with exit code ${process.exitValue()}$detail"
+                }
                 "dialout"
             } else {
                 output.takeIf { it.isNotEmpty() && it.none(Char::isWhitespace) } ?: "dialout"
@@ -174,9 +177,9 @@ private fun detectSerialGroup(devPath: String): String = runCatching {
 }
     .getOrDefault("dialout")
 
-private fun closeSerialPort(portName: String, port: SerialPort) {
+private fun closeSerialPort(logName: String, port: SerialPort) {
     val failure = runCatching { if (port.isOpen) port.closePort() }.exceptionOrNull()
-    if (failure != null) Logger.w(failure) { "[$portName] Failed to close serial port" }
+    if (failure != null) Logger.w(failure) { "[$logName] Failed to close serial port" }
 }
 
 private data class SerialReadStep(val continueReading: Boolean, val failed: Boolean = false)
@@ -184,7 +187,7 @@ private data class SerialReadStep(val continueReading: Boolean, val failed: Bool
 private fun processSerialRead(
     readResult: Result<Int>,
     buffer: ByteArray,
-    portName: String,
+    logName: String,
     lifecycle: TransportLifecycleGate,
     readChar: (Byte) -> Unit,
 ): SerialReadStep {
@@ -211,7 +214,7 @@ private fun processSerialRead(
         failure !is Exception -> throw failure
 
         else -> {
-            Logger.w(failure) { "[$portName] Serial read error" }
+            Logger.w(failure) { "[$logName] Serial read error" }
             SerialReadStep(continueReading = false, failed = true)
         }
     }
@@ -219,7 +222,7 @@ private fun processSerialRead(
 
 private suspend fun runSerialReadLoop(
     port: SerialPort,
-    portName: String,
+    logName: String,
     lifecycle: TransportLifecycleGate,
     readChar: (Byte) -> Unit,
 ): Boolean {
@@ -229,7 +232,7 @@ private suspend fun runSerialReadLoop(
     try {
         var reading = true
         while (currentCoroutineContext().isActive && port.isOpen && reading) {
-            val step = processSerialRead(runCatching { input.read(buffer) }, buffer, portName, lifecycle, readChar)
+            val step = processSerialRead(runCatching { input.read(buffer) }, buffer, logName, lifecycle, readChar)
             reading = step.continueReading
             endedUnexpectedly = endedUnexpectedly || step.failed
         }
@@ -272,9 +275,11 @@ private constructor(
     scope: CoroutineScope,
     private val dispatchers: CoroutineDispatchers,
 ) : StreamTransport(callback, scope) {
+    // A by-id address carries the radio's USB serial number; logs keep only its tail.
+    private val logName = portName.anonymize()
     private val lifecycle = TransportLifecycleGate("JVM serial")
     private val portState = SerialPortState()
-    private val heartbeatSender = HeartbeatSender(sendToRadio = { handleSendToRadio(it) }, logTag = "Serial[$portName]")
+    private val heartbeatSender = HeartbeatSender(sendToRadio = { handleSendToRadio(it) }, logTag = "Serial[$logName]")
 
     override fun start() {
         val job = scope.launch(dispatchers.io, start = CoroutineStart.LAZY) { runConnectionStart() }
@@ -282,7 +287,7 @@ private constructor(
             job.start()
         } else {
             job.cancel()
-            if (lifecycle.isClosed) Logger.d { "[$portName] Ignoring start after serial transport close" }
+            if (lifecycle.isClosed) Logger.d { "[$logName] Ignoring start after serial transport close" }
         }
     }
 
@@ -291,7 +296,7 @@ private constructor(
         try {
             if (!startConnection() && !lifecycle.isClosed) {
                 val errorMessage = diagnoseSerialOpenFailure(portName)
-                Logger.w { "[$portName] Serial port could not be opened; signalling disconnect" }
+                Logger.w { "[$logName] Serial port could not be opened; signalling disconnect" }
                 publishSerialCallbackIfOpen(lifecycle, portState, requireNoPublishedPort = true) {
                     callback.onDisconnect(isPermanent = false, errorMessage = errorMessage)
                 }
@@ -315,15 +320,15 @@ private constructor(
                 candidatePort = port
                 configureSerialPort(port, baudRate)
                 if (!runInterruptible(dispatchers.io) { port.openPort() }) {
-                    Logger.w { "[$portName] Serial port openPort() returned false" }
-                    closeSerialPort(portName, port)
+                    Logger.w { "[$logName] Serial port openPort() returned false" }
+                    closeSerialPort(logName, port)
                     candidatePort = null
                     false
                 } else {
                     port.setDTR()
                     port.setRTS()
                     if (!portState.publishPort(port, lifecycle.isClosed)) {
-                        closeSerialPort(portName, port)
+                        closeSerialPort(logName, port)
                         candidatePort = null
                         false
                     } else {
@@ -334,32 +339,32 @@ private constructor(
             }
         }
         val failure = attempt.exceptionOrNull()
-        candidatePort?.let { closeSerialPort(portName, it) }
+        candidatePort?.let { closeSerialPort(logName, it) }
         return when {
             failure == null -> attempt.getOrDefault(false)
 
             failure is CancellationException -> {
-                portState.takePort()?.let { closeSerialPort(portName, it) }
+                portState.takePort()?.let { closeSerialPort(logName, it) }
                 throw failure
             }
 
             failure !is Exception -> {
-                portState.takePort()?.let { closeSerialPort(portName, it) }
+                portState.takePort()?.let { closeSerialPort(logName, it) }
                 throw failure
             }
 
             else -> {
-                portState.takePort()?.let { closeSerialPort(portName, it) }
-                Logger.w(failure) { "[$portName] Serial connection failed" }
+                portState.takePort()?.let { closeSerialPort(logName, it) }
+                Logger.w(failure) { "[$logName] Serial connection failed" }
                 false
             }
         }
     }
 
     private suspend fun finishPublishedPort(port: SerialPort): Boolean {
-        Logger.i { "[$portName] Serial port opened (baud=$baudRate)" }
+        Logger.i { "[$logName] Serial port opened (baud=$baudRate)" }
         runInterruptible(dispatchers.io) {
-            writeFullyWithDeadline(port, StreamFrameCodec.WAKE_BYTES, portName, SERIAL_WRITE_TIMEOUT_MS)
+            writeFullyWithDeadline(port, StreamFrameCodec.WAKE_BYTES, logName, SERIAL_WRITE_TIMEOUT_MS)
         }
         val connected = publishSerialCallbackIfOpen(lifecycle, portState, expectedPort = port) { callback.onConnect() }
         if (connected) startReadLoop(port)
@@ -369,9 +374,9 @@ private constructor(
     private fun startReadLoop(port: SerialPort) {
         val job =
             scope.launch(dispatchers.io, start = CoroutineStart.LAZY) {
-                val endedUnexpectedly = runSerialReadLoop(port, portName, lifecycle, ::readChar)
-                Logger.d { "[$portName] Serial read loop exiting" }
-                if (portState.retirePort(port)) closeSerialPort(portName, port)
+                val endedUnexpectedly = runSerialReadLoop(port, logName, lifecycle, ::readChar)
+                Logger.d { "[$logName] Serial read loop exiting" }
+                if (portState.retirePort(port)) closeSerialPort(logName, port)
                 if (endedUnexpectedly) {
                     publishSerialCallbackIfOpen(lifecycle, portState, requireNoPublishedPort = true) {
                         onDeviceDisconnect(waitForStopped = true, isPermanent = false)
@@ -379,7 +384,7 @@ private constructor(
                 }
             }
         if (portState.publishReadJob(port, job, lifecycle.isClosed)) {
-            Logger.d { "[$portName] Starting serial read loop" }
+            Logger.d { "[$logName] Starting serial read loop" }
             job.start()
         } else {
             job.cancel()
@@ -397,7 +402,7 @@ private constructor(
                 payload = p,
                 writer = { bytes ->
                     runInterruptible(dispatchers.io) {
-                        writeFullyWithDeadline(port, bytes, portName, SERIAL_WRITE_TIMEOUT_MS)
+                        writeFullyWithDeadline(port, bytes, logName, SERIAL_WRITE_TIMEOUT_MS)
                     }
                 },
                 flusher = {},
@@ -407,7 +412,7 @@ private constructor(
     }
 
     override fun sendBytes(p: ByteArray) {
-        portState.currentOpenPort()?.let { port -> writeFullyWithDeadline(port, p, portName, SERIAL_WRITE_TIMEOUT_MS) }
+        portState.currentOpenPort()?.let { port -> writeFullyWithDeadline(port, p, logName, SERIAL_WRITE_TIMEOUT_MS) }
     }
 
     override fun flushBytes() {
@@ -420,13 +425,13 @@ private constructor(
 
     override suspend fun close() {
         withContext(NonCancellable) {
-            Logger.d { "[$portName] Closing serial transport" }
+            Logger.d { "[$logName] Closing serial transport" }
             val currentStartJob = portState.beginClose()
             if (currentStartJob != null) {
                 currentStartJob.cancel()
                 val joined = withTimeoutOrNull(SERIAL_START_JOIN_TIMEOUT) { currentStartJob.join() } != null
                 if (!joined) {
-                    Logger.w { "[$portName] Serial open did not stop within $SERIAL_START_JOIN_TIMEOUT" }
+                    Logger.w { "[$logName] Serial open did not stop within $SERIAL_START_JOIN_TIMEOUT" }
                 }
             }
             // beginClose makes new sends reject synchronously. Stop the framed-send worker now so queued sends release
@@ -434,10 +439,10 @@ private constructor(
             super.close()
             val completed = lifecycle.close {
                 val currentReadJob = portState.takeReadJob()
-                runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(portName, it) } }
+                runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(logName, it) } }
                 currentReadJob?.cancelAndJoin()
             }
-            if (!completed) Logger.w { "[$portName] JVM serial teardown did not complete within its lifecycle bounds" }
+            if (!completed) Logger.w { "[$logName] JVM serial teardown did not complete within its lifecycle bounds" }
         }
     }
 

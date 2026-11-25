@@ -50,8 +50,8 @@ class SerialPortsTest {
     @Test
     fun `a node with two links always maps to the first by name`() {
         dev.resolve("ttyUSB0").createFile()
-        val first = link("usb-Silicon_Labs_CP2102-if00-port0", "ttyUSB0")
         link("usb-Silicon_Labs_CP2102_extra-if00-port0", "ttyUSB0")
+        val first = link("usb-Silicon_Labs_CP2102-if00-port0", "ttyUSB0")
 
         assertEquals(mapOf("ttyUSB0" to first), serialByIdLinks(byId.toFile()))
     }
@@ -71,5 +71,17 @@ class SerialPortsTest {
             listOf(SerialPortEntry("ttyACM3", link), SerialPortEntry("ttyS0", "ttyS0")),
             serialPortEntries(listOf("ttyACM3", "ttyS0"), mapOf("ttyACM3" to link)),
         )
+    }
+
+    // A by-id address is a symlink: the permission hint must name the device node's group, not the link's.
+    @Test
+    fun `the group hint for a link names its target's group`() {
+        if (!System.getProperty("os.name").lowercase().contains("linux")) return // GNU stat only
+        val target = "/dev/null"
+        val targetGroup =
+            ProcessBuilder("stat", "-c", "%G", target).start().inputStream.bufferedReader().readText().trim()
+        val link = byId.resolve("usb-test-if00").createSymbolicLinkPointingTo(File(target).toPath()).toString()
+
+        assertEquals(targetGroup, detectSerialGroup(link))
     }
 }
