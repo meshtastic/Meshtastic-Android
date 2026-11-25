@@ -1498,13 +1498,14 @@ class MeshDataHandlerTest {
     private fun TestScope.storeChannelDm(
         senderHasKey: Boolean,
         localHasKey: Boolean = true,
+        broadcast: Boolean = false,
     ): Pair<DataPacket, String>? {
         val packet =
             MeshPacket.Builder()
                 .also { wb ->
                     wb.id = 77
                     wb.from = 456
-                    wb.to = 123
+                    wb.to = if (broadcast) NodeAddress.NODENUM_BROADCAST else 123
                     wb.channel = 0
                     wb.decoded =
                         Data.Builder()
@@ -1519,7 +1520,7 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 77,
                 from = "!remote",
-                to = NodeAddress.ID_LOCAL,
+                to = if (broadcast) NodeAddress.ID_BROADCAST else NodeAddress.ID_LOCAL,
                 bytes = "reply".encodeToByteArray().toByteString(),
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
                 channel = 0,
@@ -1565,6 +1566,20 @@ class MeshDataHandlerTest {
     @Test
     fun `channel-encrypted DM filed in the PKI conversation keeps its own channel`() = testScope.runTest {
         assertEquals(0, assertNotNull(storeChannelDm(senderHasKey = true)).first.channel)
+    }
+
+    @Test
+    fun `channel-encrypted DM from a keyed node notifies for the PKI conversation`() = testScope.runTest {
+        storeChannelDm(senderHasKey = true)
+
+        verifySuspend {
+            serviceNotifications.updateMessageNotification("8!remote", any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `broadcast from a keyed node stays in its channel`() = testScope.runTest {
+        assertEquals("0${NodeAddress.ID_BROADCAST}", storeChannelDm(senderHasKey = true, broadcast = true)?.second)
     }
 
     @Test

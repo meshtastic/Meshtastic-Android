@@ -46,7 +46,12 @@ class ChannelKeyMarkerTest {
         assertFalse(received(contactKey = "0!abcd1234", channel = 0).channelKeyEncrypted)
     }
 
-    private suspend fun received(contactKey: String, channel: Int) = PacketEntity(
+    @Test
+    fun `our own message in the PKI conversation is not marked`() = runTest {
+        assertFalse(received(contactKey = "8!abcd1234", channel = 0, from = NodeAddress.ID_LOCAL).channelKeyEncrypted)
+    }
+
+    private suspend fun received(contactKey: String, channel: Int, from: String = "!abcd1234") = PacketEntity(
         packet =
         Packet(
             uuid = 1L,
@@ -59,8 +64,8 @@ class ChannelKeyMarkerTest {
             DataPacket(
                 bytes = null,
                 dataType = 1,
-                from = "!abcd1234",
-                to = NodeAddress.ID_LOCAL,
+                from = from,
+                to = if (from == NodeAddress.ID_LOCAL) "!abcd1234" else NodeAddress.ID_LOCAL,
                 time = 1_000L,
                 channel = channel,
             ),
