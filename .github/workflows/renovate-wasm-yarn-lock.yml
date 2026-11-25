@@ -1,0 +1,63 @@
+name: Renovate Wasm Yarn Lock
+
+# A catalog bump can change the npm packages a Kotlin/Wasm dependency pulls in (ktor 3.6.2 added format-util),
+# and Web Check then fails on kotlinWasmStoreYarnLock. Hosted Renovate runs only Mend's own postUpgradeTasks
+# allowlist, so this job regenerates kotlin-js-store/wasm/yarn.lock on the Renovate branch and pushes it with a PAT
+# so CI runs on the new head. renovate.json lists the commit author under gitIgnoredAuthors, so Renovate does not
+# treat the branch as modified and keeps updating it; each Renovate rewrite drops this commit and the job reruns.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - gradle/libs.versions.toml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renovate-wasm-yarn-lock-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  update-lock:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.head_ref, 'renovate/')
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          job_summary_pr_comment: 'never'
+          cache_read_only: 'true'
+
+      # -Dorg.gradle.isolated-projects=false: KGP's wasm npm resolver configures the root project from each
+      # wasmJs project, which Isolated Projects rejects (same flags as Web Check).
+      - name: Regenerate wasm yarn.lock
+        run: ./gradlew kotlinWasmUpgradeYarnLock -Pmeshtastic.web=true -Dorg.gradle.isolated-projects=false -Pci=true
+
+      - name: Push the lock if it changed
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if git diff --quiet -- kotlin-js-store/wasm/yarn.lock; then
+            echo "wasm yarn.lock unchanged"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kotlin-js-store/wasm/yarn.lock
+          git commit -m 'chore(deps): update wasm yarn.lock'
+          git push origin "HEAD:$BRANCH"

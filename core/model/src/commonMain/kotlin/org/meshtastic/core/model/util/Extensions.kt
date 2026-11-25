@@ -70,11 +70,25 @@ fun Any.toPIIString() = if (!isDebug) {
     this.toOneLineString()
 }
 
+private val loraTransports =
+    setOf(
+        MeshPacket.TransportMechanism.TRANSPORT_LORA.value,
+        MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1.value,
+        MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2.value,
+        MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3.value,
+    )
+
 /** Returns true if this packet arrived via a LoRa transport mechanism. */
-fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
-    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||
-    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
-    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3
+fun MeshPacket.isLora(): Boolean = isLoraTransport(transport_mechanism.value)
+
+/** True when [transportMechanism] (a [MeshPacket.TransportMechanism] value) is one of the LoRa radios. */
+fun isLoraTransport(transportMechanism: Int?): Boolean = transportMechanism in loraTransports
+
+/**
+ * True when a received packet's relay byte names the RF hop that delivered it. Firmware zeroes the byte on MQTT
+ * downlink but keeps via_mqtt through later LoRa hops; before 2.7.5 it sent no transport, so via_mqtt decides alone.
+ */
+fun relayIsRfHop(transportMechanism: Int?, viaMqtt: Boolean): Boolean = isLoraTransport(transportMechanism) || !viaMqtt
 
 /**
  * True for a packet the radio rebuilt from its own node DB and replayed after `config_complete_id`, not one it just

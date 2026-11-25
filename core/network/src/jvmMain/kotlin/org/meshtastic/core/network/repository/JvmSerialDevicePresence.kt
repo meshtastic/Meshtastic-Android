@@ -20,17 +20,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
-import org.meshtastic.core.network.availableSerialPortNames
+import org.meshtastic.core.network.availableSerialPorts
+import java.io.File
 
 /**
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
- * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty and [portExists] asks jSerialComm for
- * the system port name a desktop selection stores (`sttyUSB0`, `sCOM3`).
+ * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty. [portExists] takes the port a desktop
+ * selection stores: a Linux `/dev/serial/by-id` link, present while udev has it pointed at a device, or a system port
+ * name (`ttyUSB0`, `COM3`) jSerialComm lists.
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
     override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow<Set<String>>(emptySet()).asStateFlow()
 
-    override fun portExists(key: String): Boolean = key in availableSerialPortNames()
+    override fun portExists(key: String): Boolean =
+        if (key.startsWith("/")) File(key).exists() else availableSerialPorts().any { it.name == key }
 }
