@@ -45,6 +45,7 @@ import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.relayIsRfHop
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.ActiveConversationTracker
@@ -387,7 +388,9 @@ class MeshDataHandlerImpl(
      */
     private fun ackRelayNode(packet: MeshPacket): Int? {
         val heardDirect = packet.hop_start != 0 && packet.hop_limit == packet.hop_start
-        return packet.relay_node.takeUnless { heardDirect || packet.via_mqtt == true }
+        return packet.relay_node.takeUnless {
+            heardDirect || !relayIsRfHop(packet.transport_mechanism.value, packet.via_mqtt == true)
+        }
     }
 
     private fun handleRouting(packet: MeshPacket, session: RadioSessionContext) {

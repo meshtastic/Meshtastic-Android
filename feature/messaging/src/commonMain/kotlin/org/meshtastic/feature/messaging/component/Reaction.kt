@@ -382,7 +382,14 @@ internal fun ReactionDialog(
                     if (reaction.user.id == myId || reaction.user.id == NodeAddress.ID_LOCAL) {
                         null
                     } else {
-                        resolveRelay(receivedRelayNode(reaction.relayNode, reaction.hopsAway, reaction.viaMqtt))
+                        resolveRelay(
+                            receivedRelayNode(
+                                reaction.relayNode,
+                                reaction.hopsAway,
+                                reaction.viaMqtt,
+                                reaction.transportMechanism,
+                            ),
+                        )
                     }
                 receivedRelay?.let {
                     Text(
