@@ -8,6 +8,32 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.5-internal.5)
+Changes since [`v2.8.5-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.5-closed.1):
+
+#### 🏗️ Features
+* feat(messaging): show the relaying node on received messages and on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8210
+#### 🖥️ Desktop
+* fix(desktop): keep the data directory owner-only and read the agent port from a JVM property by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8213
+#### 🛠️ Fixes
+* fix(network): refuse payloads larger than the phone API frame limit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8207
+* fix(datastore): keep the radio config stores in memory on web by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8209
+* fix(ui): open only web and mail addresses from message links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8208
+* fix(mqtt): publish for the radio only under its root topic by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8216
+* fix(logs): keep credentials out of persisted logs, debug export and CSV cells by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8212
+* fix(firmware): fail on a manifest mismatch, cap download size, pin bootloader release base by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8211
+* fix(schema-strings): give the protobufs version a line of its own and sync to 2.8.3 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8220
+* fix(admin): accept a response only from the node the request was sent to by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8217
+* fix(wifi-provision): let the user choose which device receives the Wi-Fi setup by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8218
+* fix(ui): list every LoRa change and channel sharing flag when replacing from a channel link by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8214
+* fix(build): link wasm development binaries without the incremental cache by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8229
+* fix(nodes): stop node DB replays marking nodes heard now with 0 SNR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8230
+* fix(connections): label each radio with the node it reported as its own by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8231
+* fix(channels): keep existing channels in Add and report failed imports by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8233
+* fix(data): amortize node index eviction with a low-water mark by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8236
+* fix(takserver): dedupe mesh CoT on the wire payload by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8240
+* fix(ble): adopt Kable 0.46 GATT cache refresh and desktop MTU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8239
+
 ### Closed Beta (v2.8.5-closed.1)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
