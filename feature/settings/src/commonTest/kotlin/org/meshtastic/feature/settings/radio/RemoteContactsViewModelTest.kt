@@ -22,7 +22,6 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -90,14 +89,17 @@ class RemoteContactsViewModelTest {
         assertEquals(listOf(KEYED), vm.candidates.value.map { it.num })
     }
 
+
     @Test
-    fun addContactSendsThatNodesContactToTheRemoteNode() = runTest {
-        val target = node(KEYED, "Keyed")
+    fun addContactSendsThatNodesContactToTheRemoteNodeAndReportsOnItsRow() = runTest {
         val vm = viewModel()
 
-        vm.addContact(target)
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
 
-        assertEquals(RemoteContactsEvent.Acknowledged, vm.events.first())
+        assertEquals(
+            RemoteWriteResult(KEYED, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.ACKNOWLEDGED),
+            vm.lastResult.value,
+        )
         val write = remoteWrites().single()
         assertEquals("addRemoteContact", write.kind)
         assertEquals(REMOTE, write.destNum)
@@ -109,9 +111,9 @@ class RemoteContactsViewModelTest {
         everySuspend { ensureSession(any()) } returns EnsureSessionResult.Timeout
         val vm = viewModel()
 
-        vm.setFavorite(node(KEYED, "Keyed"), favorite = true)
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.FAVORITE)
 
-        assertEquals(RemoteContactsEvent.NotAcknowledged, vm.events.first())
+        assertEquals(RemoteWriteStatus.NOT_ACKNOWLEDGED, vm.lastResult.value?.status)
         assertTrue(remoteWrites().isEmpty())
     }
 
@@ -120,9 +122,9 @@ class RemoteContactsViewModelTest {
         radioController.remoteNodeDbAck = false
         val vm = viewModel()
 
-        vm.setFavorite(node(KEYED, "Keyed"), favorite = false)
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.UNFAVORITE)
 
-        assertEquals(RemoteContactsEvent.NotAcknowledged, vm.events.first())
+        assertEquals(RemoteWriteStatus.NOT_ACKNOWLEDGED, vm.lastResult.value?.status)
         assertEquals("removeRemoteFavorite", remoteWrites().single().kind)
     }
 
@@ -133,7 +135,10 @@ class RemoteContactsViewModelTest {
 
         vm.addContactFromUrl(url)
 
-        assertEquals(RemoteContactsEvent.Acknowledged, vm.events.first())
+        assertEquals(
+            RemoteWriteResult(null, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.ACKNOWLEDGED),
+            vm.lastResult.value,
+        )
         assertEquals(KEYED, (remoteWrites().single().payload as SharedContact).node_num)
     }
 
@@ -143,12 +148,13 @@ class RemoteContactsViewModelTest {
         val vm = viewModel()
 
         vm.addContactFromUrl("https://example.com/not-a-contact")
-        assertEquals(RemoteContactsEvent.InvalidUrl, vm.events.first())
+        assertEquals(RemoteWriteStatus.INVALID_URL, vm.lastResult.value?.status)
         vm.addContactFromUrl(keylessUrl)
-        assertEquals(RemoteContactsEvent.NoPublicKey, vm.events.first())
+        assertEquals(RemoteWriteStatus.NO_PUBLIC_KEY, vm.lastResult.value?.status)
 
         assertTrue(remoteWrites().isEmpty())
     }
+
 
     private companion object {
         const val REMOTE = 0x42C91376

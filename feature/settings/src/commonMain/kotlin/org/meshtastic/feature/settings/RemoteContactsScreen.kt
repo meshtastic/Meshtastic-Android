@@ -17,84 +17,78 @@
 package org.meshtastic.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.add
-import org.meshtastic.core.resources.add_favorite
-import org.meshtastic.core.resources.input_shared_contact_url
 import org.meshtastic.core.resources.live_update_search_nodes
 import org.meshtastic.core.resources.remote_contacts
 import org.meshtastic.core.resources.remote_contacts_add_contact
 import org.meshtastic.core.resources.remote_contacts_explainer
 import org.meshtastic.core.resources.remote_contacts_failed
+import org.meshtastic.core.resources.remote_contacts_favorite
 import org.meshtastic.core.resources.remote_contacts_invalid_url
+import org.meshtastic.core.resources.remote_contacts_no_public_key
+import org.meshtastic.core.resources.remote_contacts_pick
+import org.meshtastic.core.resources.remote_contacts_sending
 import org.meshtastic.core.resources.remote_contacts_sent
-import org.meshtastic.core.resources.remove_favorite
-import org.meshtastic.core.resources.shared_contact_no_public_key
-import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.resources.remote_contacts_target
+import org.meshtastic.core.resources.remote_contacts_unfavorite
+import org.meshtastic.core.resources.remote_contacts_url
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.PersonAdd
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.feature.settings.component.RadioAdminAppBar
-import org.meshtastic.feature.settings.radio.RemoteContactsEvent
+import org.meshtastic.feature.settings.radio.RemoteContactAction
 import org.meshtastic.feature.settings.radio.RemoteContactsViewModel
+import org.meshtastic.feature.settings.radio.RemoteWriteResult
+import org.meshtastic.feature.settings.radio.RemoteWriteStatus
 
 @Composable
 fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit) {
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val candidates by viewModel.candidates.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
-    val busy by viewModel.busy.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            val name = destNode?.effectiveLongName ?: ""
-            val message =
-                when (event) {
-                    RemoteContactsEvent.Acknowledged -> getString(Res.string.remote_contacts_sent, name)
-                    RemoteContactsEvent.NotAcknowledged -> getString(Res.string.remote_contacts_failed, name)
-                    RemoteContactsEvent.InvalidUrl -> getString(Res.string.remote_contacts_invalid_url)
-                    RemoteContactsEvent.NoPublicKey -> getString(Res.string.shared_contact_no_public_key)
-                }
-            snackbarHostState.showSnackbar(message)
-        }
-    }
+    val lastResult by viewModel.lastResult.collectAsStateWithLifecycle()
+    val target = destNode?.effectiveLongName ?: viewModel.destNum.toNodeId()
+    val enabled = lastResult?.status != RemoteWriteStatus.SENDING
 
     Scaffold(
         topBar = {
@@ -105,36 +99,43 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit)
                 onNavigateUp = onBack,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(16.dp),
         ) {
+            item { TargetBanner(target = target, targetId = viewModel.destNum.toNodeId()) }
             item {
-                if (busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                Text(
-                    text = stringResource(Res.string.remote_contacts_explainer),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp),
+                ContactUrlCard(
+                    target = target,
+                    enabled = enabled,
+                    result = lastResult?.takeIf { it.nodeNum == null },
+                    onAdd = viewModel::addContactFromUrl,
                 )
-                ContactUrlRow(enabled = !busy, onAdd = viewModel::addContactFromUrl)
+            }
+            item {
+                Text(
+                    text = stringResource(Res.string.remote_contacts_pick),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
                 OutlinedTextField(
                     value = query,
                     onValueChange = viewModel::setQuery,
                     label = { Text(stringResource(Res.string.live_update_search_nodes)) },
                     leadingIcon = { Icon(MeshtasticIcons.Search, contentDescription = null) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
             }
             items(candidates, key = { it.num }) { node ->
-                CandidateRow(
+                CandidateCard(
                     node = node,
-                    enabled = !busy,
-                    onAddContact = { viewModel.addContact(node) },
-                    onSetFavorite = { viewModel.setFavorite(node, it) },
+                    target = target,
+                    enabled = enabled,
+                    result = lastResult?.takeIf { it.nodeNum == node.num },
+                    onAction = { viewModel.perform(node, it) },
                 )
             }
         }
@@ -142,63 +143,114 @@ fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit)
 }
 
 @Composable
-private fun ContactUrlRow(enabled: Boolean, onAdd: (String) -> Unit) {
-    var url by rememberSaveable { mutableStateOf("") }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun TargetBanner(target: String, targetId: String) {
+    Card(
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text(stringResource(Res.string.input_shared_contact_url)) },
-            singleLine = true,
-            modifier = Modifier.weight(1f),
-        )
-        TextButton(enabled = enabled && url.isNotBlank(), onClick = { onAdd(url) }) {
-            Text(stringResource(Res.string.add))
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = stringResource(Res.string.remote_contacts_target, "$target ($targetId)"),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = stringResource(Res.string.remote_contacts_explainer, target),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }
 
 @Composable
-private fun CandidateRow(
+private fun ContactUrlCard(target: String, enabled: Boolean, result: RemoteWriteResult?, onAdd: (String) -> Unit) {
+    var url by rememberSaveable { mutableStateOf("") }
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = url,
+                onValueChange = { url = it },
+                label = { Text(stringResource(Res.string.remote_contacts_url, target)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            ActionButton(
+                icon = MeshtasticIcons.PersonAdd,
+                label = Res.string.remote_contacts_add_contact,
+                enabled = enabled && url.isNotBlank(),
+                onClick = { onAdd(url) },
+            )
+            result?.let { WriteStatusLine(it, target) }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CandidateCard(
     node: Node,
+    target: String,
     enabled: Boolean,
-    onAddContact: () -> Unit,
-    onSetFavorite: (Boolean) -> Unit,
+    result: RemoteWriteResult?,
+    onAction: (RemoteContactAction) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        ListItem(
-            text = node.effectiveLongName,
-            supportingText = node.user.id,
-            enabled = enabled,
-            trailingIcon = null,
-            onClick = { expanded = true },
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            ActionItem(MeshtasticIcons.PersonAdd, stringResource(Res.string.remote_contacts_add_contact)) {
-                expanded = false
-                onAddContact()
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = node.effectiveLongName, style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = node.user.id,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled) {
+                    onAction(RemoteContactAction.ADD_CONTACT)
+                }
+                ActionButton(MeshtasticIcons.Favorite, Res.string.remote_contacts_favorite, enabled) {
+                    onAction(RemoteContactAction.FAVORITE)
+                }
+                ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
+                    onAction(RemoteContactAction.UNFAVORITE)
+                }
             }
-            ActionItem(MeshtasticIcons.Favorite, stringResource(Res.string.add_favorite)) {
-                expanded = false
-                onSetFavorite(true)
-            }
-            ActionItem(MeshtasticIcons.NotFavorite, stringResource(Res.string.remove_favorite)) {
-                expanded = false
-                onSetFavorite(false)
-            }
+            result?.let { WriteStatusLine(it, target) }
         }
     }
 }
 
 @Composable
-private fun ActionItem(icon: ImageVector, label: String, onClick: () -> Unit) {
-    DropdownMenuItem(
-        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
-        text = { Text(label) },
-        onClick = onClick,
-    )
+private fun ActionButton(icon: ImageVector, label: StringResource, enabled: Boolean, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, enabled = enabled, contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+        Text(text = stringResource(label), modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+    }
 }
+
+@Composable
+private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
+    val (text, color) =
+        when (result.status) {
+            RemoteWriteStatus.SENDING ->
+                stringResource(Res.string.remote_contacts_sending, target) to MaterialTheme.colorScheme.onSurfaceVariant
+            RemoteWriteStatus.ACKNOWLEDGED ->
+                stringResource(Res.string.remote_contacts_sent, target) to MaterialTheme.colorScheme.primary
+            RemoteWriteStatus.NOT_ACKNOWLEDGED ->
+                stringResource(Res.string.remote_contacts_failed, target) to MaterialTheme.colorScheme.error
+            RemoteWriteStatus.INVALID_URL ->
+                stringResource(Res.string.remote_contacts_invalid_url) to MaterialTheme.colorScheme.error
+            RemoteWriteStatus.NO_PUBLIC_KEY ->
+                stringResource(Res.string.remote_contacts_no_public_key, target) to MaterialTheme.colorScheme.error
+        }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (result.status == RemoteWriteStatus.SENDING) {
+            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+        }
+        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = color)
+    }
+}
+
+private fun Int.toNodeId() = NodeAddress.numToDefaultId(this)

@@ -19,14 +19,11 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -42,16 +39,23 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.SharedContact
 
-/** The outcome of one write to the remote node's node DB, shown once. */
-sealed interface RemoteContactsEvent {
-    data object Acknowledged : RemoteContactsEvent
-
-    data object NotAcknowledged : RemoteContactsEvent
-
-    data object InvalidUrl : RemoteContactsEvent
-
-    data object NoPublicKey : RemoteContactsEvent
+/** A write this screen sends to the remote node's node DB. */
+enum class RemoteContactAction {
+    ADD_CONTACT,
+    FAVORITE,
+    UNFAVORITE,
 }
+
+enum class RemoteWriteStatus {
+    SENDING,
+    ACKNOWLEDGED,
+    NOT_ACKNOWLEDGED,
+    INVALID_URL,
+    NO_PUBLIC_KEY,
+}
+
+/** The latest write and how it went. [nodeNum] is null for a contact pasted as a URL. */
+data class RemoteWriteResult(val nodeNum: Int?, val action: RemoteContactAction, val status: RemoteWriteStatus)
 
 /**
  * Adds contacts to, and favorites or unfavorites nodes in, the node DB of [destNum], a node this radio administers
@@ -68,11 +72,8 @@ class RemoteContactsViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    private val _busy = MutableStateFlow(false)
-    val busy: StateFlow<Boolean> = _busy.asStateFlow()
-
-    private val _events = Channel<RemoteContactsEvent>(Channel.BUFFERED)
-    val events: Flow<RemoteContactsEvent> = _events.receiveAsFlow()
+    private val _lastResult = MutableStateFlow<RemoteWriteResult?>(null)
+    val lastResult: StateFlow<RemoteWriteResult?> = _lastResult.asStateFlow()
 
     val destNode: StateFlow<Node?> = nodeRepository.nodeDBbyNum.map { it[destNum] }.stateInWhileSubscribed(null)
 
@@ -88,35 +89,36 @@ class RemoteContactsViewModel(
         _query.value = query
     }
 
-    fun addContact(node: Node) = send { radioController.addRemoteContact(destNum, node.toSharedContact()) }
+    fun perform(node: Node, action: RemoteContactAction) = send(node.num, action) {
+        when (action) {
+            RemoteContactAction.ADD_CONTACT -> radioController.addRemoteContact(destNum, node.toSharedContact())
+            RemoteContactAction.FAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = true)
+            RemoteContactAction.UNFAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = false)
+        }
+    }
 
     fun addContactFromUrl(url: String) {
         val contact = safeCatching { CommonUri.parse(url.trim()).toSharedContact() }.getOrNull()
         when {
-            contact == null -> _events.trySend(RemoteContactsEvent.InvalidUrl)
-            contact.hasNoPublicKey() -> _events.trySend(RemoteContactsEvent.NoPublicKey)
-            else -> send { radioController.addRemoteContact(destNum, contact) }
+            contact == null -> settle(null, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.INVALID_URL)
+            contact.hasNoPublicKey() -> settle(null, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.NO_PUBLIC_KEY)
+            else -> send(null, RemoteContactAction.ADD_CONTACT) { radioController.addRemoteContact(destNum, contact) }
         }
     }
 
-    fun setFavorite(node: Node, favorite: Boolean) = send {
-        radioController.setRemoteFavorite(destNum, node.num, favorite)
-    }
-
-    private fun send(write: suspend () -> Boolean) {
-        if (_busy.value) return
-        _busy.value = true
+    private fun send(nodeNum: Int?, action: RemoteContactAction, write: suspend () -> Boolean) {
+        if (_lastResult.value?.status == RemoteWriteStatus.SENDING) return
+        settle(nodeNum, action, RemoteWriteStatus.SENDING)
         viewModelScope.launch {
             val acknowledged =
-                try {
-                    ensureRemoteAdminSession(destNum).isUsable() && write()
-                } finally {
-                    _busy.value = false
-                }
-            _events.send(
-                if (acknowledged) RemoteContactsEvent.Acknowledged else RemoteContactsEvent.NotAcknowledged,
-            )
+                safeCatching { ensureRemoteAdminSession(destNum).isUsable() && write() }.getOrDefault(false)
+            val status = if (acknowledged) RemoteWriteStatus.ACKNOWLEDGED else RemoteWriteStatus.NOT_ACKNOWLEDGED
+            settle(nodeNum, action, status)
         }
+    }
+
+    private fun settle(nodeNum: Int?, action: RemoteContactAction, status: RemoteWriteStatus) {
+        _lastResult.value = RemoteWriteResult(nodeNum, action, status)
     }
 
     private fun EnsureSessionResult.isUsable() =
