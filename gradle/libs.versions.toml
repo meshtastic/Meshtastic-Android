@@ -91,7 +91,7 @@ mlkit-translate = "17.0.3"
 camerax = "1.7.0"
 
 # Networking
-ktor = "3.6.1"
+ktor = "3.6.2"
 mcp-kotlin-sdk = "0.16.0"
 
 # Other
