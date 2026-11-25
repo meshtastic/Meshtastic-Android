@@ -46,6 +46,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AcknowledgementsScreen
 import org.meshtastic.feature.settings.AdministrationScreen
+import org.meshtastic.feature.settings.RemoteContactsScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.DeviceLinkDirectoryScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
@@ -249,6 +250,7 @@ private fun NavKey.usesRadioConfigSettingsSession(): Boolean = this is SettingsR
     this == SettingsRoute.DeviceConfiguration ||
     this == SettingsRoute.ModuleConfiguration ||
     this == SettingsRoute.Administration ||
+    this is SettingsRoute.RemoteContacts ||
     this is SettingsRoute.RadioSetup ||
     ConfigRoute.entries.any { it.route == this } ||
     ModuleRoute.entries.any { it.route == this }
@@ -300,6 +302,13 @@ fun EntryProviderScope<NavKey>.settingsGraph(
     entry<SettingsRoute.Administration> {
         AdministrationScreen(
             viewModel = radioConfigViewModelProvider(null),
+            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
+    }
+
+    entry<SettingsRoute.RemoteContacts> { args ->
+        RemoteContactsScreen(
+            viewModel = koinViewModel { parametersOf(args.destNum) },
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }

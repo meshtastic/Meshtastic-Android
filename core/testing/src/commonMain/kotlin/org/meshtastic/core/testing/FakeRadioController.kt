@@ -33,6 +33,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
@@ -393,6 +394,19 @@ class FakeRadioController :
     }
 
     override suspend fun setTime(destNum: Int, packetId: Int) {}
+
+    /** What [addRemoteContact] and [setRemoteFavorite] return, standing in for the remote node's acknowledgement. */
+    var remoteNodeDbAck: Boolean = true
+
+    override suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean {
+        recordAdminRequest("addRemoteContact", destNum, contact, packetId = null)
+        return remoteNodeDbAck
+    }
+
+    override suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean {
+        recordAdminRequest(if (favorite) "setRemoteFavorite" else "removeRemoteFavorite", destNum, nodeNum, null)
+        return remoteNodeDbAck
+    }
 
     override suspend fun getOwner(destNum: Int, packetId: Int) {
         recordAdminRequest("getOwner", destNum, payload = null, packetId)

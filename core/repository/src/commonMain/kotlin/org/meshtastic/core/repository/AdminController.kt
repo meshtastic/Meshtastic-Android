@@ -22,6 +22,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
@@ -118,6 +119,15 @@ interface AdminController {
      * an admin response (the routing ACK confirms delivery).
      */
     suspend fun setTime(destNum: Int, packetId: Int)
+
+    /**
+     * Adds [contact] to [destNum]'s node DB via `AdminMessage.add_contact`. Firmware also favorites it, except on a
+     * `CLIENT_BASE` node. Returns `true` once [destNum] acknowledges.
+     */
+    suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean
+
+    /** Favorites or unfavorites [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean
 
     // ── Remote queries ──────────────────────────────────────────────────────
 

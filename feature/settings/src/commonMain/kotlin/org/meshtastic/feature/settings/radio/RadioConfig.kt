@@ -65,6 +65,7 @@ import org.meshtastic.core.resources.nodedb_reset
 import org.meshtastic.core.resources.radio_setup_title
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.reboot_into_dfu
+import org.meshtastic.core.resources.remote_contacts
 import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.resources.set_time
 import org.meshtastic.core.resources.shutdown
@@ -78,6 +79,7 @@ import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PersonAdd
 import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
@@ -97,6 +99,7 @@ fun RadioConfigItemList(
     databaseBackupAvailable: Boolean = true,
     onBackupDatabase: () -> Unit = {},
     onRestoreDatabase: () -> Unit = {},
+    destNum: Int? = null,
     onNavigate: (Route) -> Unit,
 ) {
     val waiting = state.responseState.isWaiting()
@@ -118,6 +121,7 @@ fun RadioConfigItemList(
             RadioConfigContent(readable, onRouteClick)
             DeviceConfigContent(readable, onNavigate)
             ModuleSettingsContent(readable, onNavigate)
+            if (!state.isLocal && destNum != null) RemoteContactsContent(enabled, destNum, onNavigate)
             AdministrationContent(enabled, onNavigate)
         }
 
@@ -245,6 +249,18 @@ private fun BackupRestoreSection(
             enabled = databaseBackupAvailable,
             onClick = onRestoreDatabase,
         )
+    }
+}
+
+@Composable
+private fun ColumnScope.RemoteContactsContent(enabled: Boolean, destNum: Int, onNavigate: (Route) -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.remote_contacts),
+        leadingIcon = MeshtasticIcons.PersonAdd,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        enabled = enabled,
+    ) {
+        onNavigate(SettingsRoute.RemoteContacts(destNum))
     }
 }
 

@@ -1914,6 +1914,12 @@
     <string name="remote">Remote</string>
     <string name="remote_admin">Remote Administration</string>
     <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
+    <string name="remote_contacts">Contacts and favorites</string>
+    <string name="remote_contacts_add_contact">Add as contact</string>
+    <string name="remote_contacts_explainer">Changes go to this node's own node database. Adding a contact gives it that node's public key and, unless it is a Client Base, favorites it. The node can't report which favorites it already holds.</string>
+    <string name="remote_contacts_failed">%1$s did not acknowledge</string>
+    <string name="remote_contacts_invalid_url">That isn't a Meshtastic contact URL.</string>
+    <string name="remote_contacts_sent">%1$s acknowledged</string>
     <string name="remote_hardware">Remote Hardware</string>
     <string name="remote_hardware_config">Remote Hardware Config</string>
     <string name="remote_hardware_enabled">Remote Hardware enabled</string>
