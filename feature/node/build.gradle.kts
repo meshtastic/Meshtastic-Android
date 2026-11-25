@@ -56,17 +56,13 @@ kotlin {
             // string form is the one overload that takes an exclude; the version still comes from the catalog.
             implementation("io.github.sceneview:sceneview-compose:${libs.versions.sceneview.get()}") {
                 exclude(group = "org.jetbrains.compose.desktop", module = "desktop-jvm-macos-arm64")
-                // Fuel 2.3.1 (the Android renderer's URL loader, unused here) ships the pre-Parcelize runtime.
-                exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
             }
         }
 
         androidMain.dependencies {
             implementation(libs.markdown.renderer.android)
             // The Android renderer under sceneview-compose, which only ships it at runtime scope.
-            implementation("io.github.sceneview:sceneview:${libs.versions.sceneview.get()}") {
-                exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
-            }
+            implementation("io.github.sceneview:sceneview:${libs.versions.sceneview.get()}")
         }
 
         // PacketRepository returns PagingData, which core:repository takes as implementation. A mock of it needs the

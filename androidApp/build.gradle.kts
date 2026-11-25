@@ -278,10 +278,8 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
-    // ARCore for the device model viewer; proprietary, so google only. Same exclusions as feature/node's sceneview.
-    googleImplementation("io.github.sceneview:arsceneview:${libs.versions.sceneview.get()}") {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
-    }
+    // ARCore for the device model viewer; proprietary, so google only.
+    googleImplementation("io.github.sceneview:arsceneview:${libs.versions.sceneview.get()}")
     // Jetpack XR pulls ARCore and a prebuilt native renderer, so the spatial shell is google only.
     googleImplementation(projects.feature.xr)
     googleImplementation(libs.maps.compose)
