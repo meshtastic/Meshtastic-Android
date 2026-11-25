@@ -62,6 +62,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.live_update_search_nodes
 import org.meshtastic.core.resources.remote_contacts
 import org.meshtastic.core.resources.remote_contacts_add_contact
+import org.meshtastic.core.resources.remote_contacts_add_needs_key
 import org.meshtastic.core.resources.remote_contacts_add_without_favorite
 import org.meshtastic.core.resources.remote_contacts_explainer
 import org.meshtastic.core.resources.remote_contacts_explainer_client_base
@@ -99,6 +100,7 @@ import org.meshtastic.feature.settings.radio.RemoteContactsViewModel
 import org.meshtastic.feature.settings.radio.RemoteWriteResult
 import org.meshtastic.feature.settings.radio.RemoteWriteStatus
 import org.meshtastic.feature.settings.radio.component.WarningDialog
+import org.meshtastic.feature.settings.radio.hasTrustedKey
 import org.meshtastic.feature.settings.radio.isClientBase
 
 @Composable
@@ -221,13 +223,14 @@ private fun ContactUrlCard(target: String, enabled: Boolean, result: RemoteWrite
 }
 
 @Composable
-private fun CandidateCard(
+internal fun CandidateCard(
     node: Node,
     target: String,
     clientBase: Boolean,
     enabled: Boolean,
     result: RemoteWriteResult?,
     onAction: (RemoteContactAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var confirming by rememberSaveable { mutableStateOf<RemoteContactAction?>(null) }
     confirming?.let { action ->
@@ -248,7 +251,7 @@ private fun CandidateCard(
             },
         )
     }
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    OutlinedCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 NodeChip(node = node)
@@ -263,10 +266,18 @@ private fun CandidateCard(
             }
             CandidateActions(
                 clientBase = clientBase,
+                canAdd = node.hasTrustedKey,
                 enabled = enabled,
                 onConfirm = { confirming = it },
                 onAction = onAction,
             )
+            if (!node.hasTrustedKey) {
+                Text(
+                    text = stringResource(Res.string.remote_contacts_add_needs_key),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             result?.let { WriteStatusLine(it, target) }
         }
     }
@@ -276,18 +287,22 @@ private fun CandidateCard(
 @Composable
 private fun CandidateActions(
     clientBase: Boolean,
+    canAdd: Boolean,
     enabled: Boolean,
     onConfirm: (RemoteContactAction) -> Unit,
     onAction: (RemoteContactAction) -> Unit,
 ) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled) {
+        ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_contact, enabled && canAdd) {
             onAction(RemoteContactAction.ADD_CONTACT)
         }
         if (clientBase) {
-            ActionButton(MeshtasticIcons.PersonAdd, Res.string.remote_contacts_add_without_favorite, enabled) {
-                onAction(RemoteContactAction.ADD_WITHOUT_FAVORITE)
-            }
+            ActionButton(
+                icon = MeshtasticIcons.PersonAdd,
+                label = Res.string.remote_contacts_add_without_favorite,
+                enabled = enabled && canAdd,
+                onClick = { onAction(RemoteContactAction.ADD_WITHOUT_FAVORITE) },
+            )
         }
         ActionButton(MeshtasticIcons.Favorite, Res.string.remote_contacts_favorite, enabled) {
             onAction(RemoteContactAction.FAVORITE)

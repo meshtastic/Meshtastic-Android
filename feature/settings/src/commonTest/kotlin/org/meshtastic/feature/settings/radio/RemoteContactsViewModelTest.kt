@@ -93,7 +93,7 @@ class RemoteContactsViewModelTest {
     private fun remoteWrites() = radioController.adminRequests.filter { it.kind.contains("Remote") }
 
     @Test
-    fun candidatesLeaveOutTheRemoteNodeAndNodesWithoutATrustedPublicKey() = runTest {
+    fun candidatesLeaveOutOnlyTheRemoteNode() = runTest {
         nodeRepository.setNodes(
             listOf(
                 node(REMOTE, "Remote"),
@@ -105,7 +105,46 @@ class RemoteContactsViewModelTest {
         val vm = viewModel()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.candidates.collect {} }
 
-        assertEquals(listOf(KEYED), vm.candidates.value.map { it.num })
+        assertEquals(setOf(KEYED, KEYLESS, DISPUTED), vm.candidates.value.map { it.num }.toSet())
+    }
+
+    // set_favorite_node, set_ignored_node and remove_by_nodenum carry a node number only (admin.proto), so a node the
+    // radio holds no key for can still be favorited, ignored and removed on the remote node.
+    @Test
+    fun aNodeWithoutATrustedKeyCanStillBeFavoritedIgnoredAndRemoved() = runTest {
+        val vm = viewModel()
+        val keyless = node(KEYLESS, "Keyless", ByteString.EMPTY)
+        val disputed = node(KEYED, "Disputed").copy(keyMatch = false)
+
+        vm.perform(keyless, RemoteContactAction.FAVORITE)
+        vm.perform(keyless, RemoteContactAction.IGNORE)
+        vm.perform(disputed, RemoteContactAction.REMOVE)
+
+        assertEquals(listOf("setRemoteFavorite", "setRemoteIgnored", "removeRemoteNode"), remoteWrites().map { it.kind })
+        assertEquals(listOf<Any?>(KEYLESS, KEYLESS, KEYED), remoteWrites().map { it.payload })
+    }
+
+    @Test
+    fun addingANodeWithoutATrustedKeySendsNothingAndSaysWhy() = runTest {
+        val vm = viewModel()
+        val untrusted =
+            listOf(
+                node(KEYLESS, "Keyless", ByteString.EMPTY),
+                node(DISPUTED, "Disputed", Node.ERROR_BYTE_STRING),
+                node(KEYED, "Mismatched").copy(keyMatch = false),
+            )
+
+        untrusted.forEach { candidate ->
+            listOf(RemoteContactAction.ADD_CONTACT, RemoteContactAction.ADD_WITHOUT_FAVORITE).forEach { action ->
+                vm.perform(candidate, action)
+                assertEquals(
+                    RemoteWriteResult(candidate.num, action, RemoteWriteStatus.NO_PUBLIC_KEY),
+                    vm.lastResult.value,
+                )
+            }
+        }
+
+        assertTrue(remoteWrites().isEmpty())
     }
 
     @Test

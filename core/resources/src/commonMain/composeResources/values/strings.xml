@@ -1916,6 +1916,7 @@
     <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
     <string name="remote_contacts">Contacts and favorites</string>
     <string name="remote_contacts_add_contact">Add contact</string>
+    <string name="remote_contacts_add_needs_key">Your radio has no trusted public key for this node, so it can't be added as a contact.</string>
     <string name="remote_contacts_add_without_favorite">Add without favorite</string>
     <string name="remote_contacts_explainer">Every button here sends a command over the mesh to %1$s and changes %1$s's node database, not your radio's. Add contact gives %1$s that node's public key and favorites it there. Ignore makes %1$s drop that node's packets, and Remove deletes it from %1$s's node database. %1$s can't report which favorites it already holds.</string>
     <string name="remote_contacts_explainer_client_base">Every button here sends a command over the mesh to %1$s and changes %1$s's node database, not your radio's. %1$s is a Client Base, where favorites change what it rebroadcasts. Add contact sends that node's public key, waits for %1$s to confirm, then favorites the node there. Add without favorite sends only the key. Ignore makes %1$s drop that node's packets, and Remove deletes it from %1$s's node database. %1$s can't report which favorites it already holds.</string>

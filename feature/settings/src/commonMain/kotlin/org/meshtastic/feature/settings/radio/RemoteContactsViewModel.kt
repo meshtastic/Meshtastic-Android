@@ -53,6 +53,9 @@ enum class RemoteContactAction {
     REMOVE,
 }
 
+private val RemoteContactAction.sendsKey
+    get() = this == RemoteContactAction.ADD_CONTACT || this == RemoteContactAction.ADD_WITHOUT_FAVORITE
+
 enum class RemoteWriteStatus {
     SENDING,
     ACKNOWLEDGED,
@@ -91,14 +94,14 @@ class RemoteContactsViewModel(
     val destNode: StateFlow<Node?> = nodeRepository.nodeDBbyNum.map { it[destNum] }.stateInWhileSubscribed(null)
 
     /**
-     * Nodes with a trusted public key, other than [destNum] itself: a keyless or disputed key sent as a contact would
-     * overwrite the key the remote node holds.
+     * Every node other than [destNum] itself. One without a trusted key stays listed, since only the add actions need a
+     * key: see [hasTrustedKey].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val candidates: StateFlow<List<Node>> =
         _query
             .flatMapLatest { nodeRepository.getNodes(sort = NodeSortOption.ALPHABETICAL, filter = it) }
-            .map { nodes -> nodes.filter { it.num != destNum && it.hasPKC && !it.mismatchKey } }
+            .map { nodes -> nodes.filter { it.num != destNum } }
             .stateInWhileSubscribed(emptyList())
 
     private val sending
@@ -109,6 +112,10 @@ class RemoteContactsViewModel(
     }
 
     fun perform(node: Node, action: RemoteContactAction) {
+        if (action.sendsKey && !node.hasTrustedKey) {
+            if (!sending) settle(node.num, action, RemoteWriteStatus.NO_PUBLIC_KEY)
+            return
+        }
         val destIsClientBase = nodeRepository.nodeDBbyNum.value[destNum].isClientBase()
         send(node.num, action) { write(node, action, destIsClientBase) }
     }
@@ -179,5 +186,9 @@ class RemoteContactsViewModel(
         return key.size == 0 || key == Node.ERROR_BYTE_STRING
     }
 }
+
+/** A keyless or disputed key sent as a contact would not give the remote node a key it can use. */
+internal val Node.hasTrustedKey
+    get() = hasPKC && !mismatchKey
 
 internal fun Node?.isClientBase(): Boolean = this?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE

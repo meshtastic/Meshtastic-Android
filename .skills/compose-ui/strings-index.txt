@@ -1838,6 +1838,7 @@ remote_admin
 remote_admin_unreachable
 remote_contacts
 remote_contacts_add_contact
+remote_contacts_add_needs_key
 remote_contacts_add_without_favorite
 remote_contacts_explainer
 remote_contacts_explainer_client_base
