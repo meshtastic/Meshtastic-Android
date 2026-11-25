@@ -1,9 +1,10 @@
 name: Renovate Wasm Yarn Lock
 
 # A catalog bump can change the npm packages a Kotlin/Wasm dependency pulls in (ktor 3.6.2 added format-util),
-# and Web Check then fails on kotlinWasmStoreYarnLock. Hosted Renovate cannot run Gradle, so this job regenerates
-# kotlin-js-store/wasm/yarn.lock on the Renovate branch and pushes it with a PAT so CI runs on the new head.
-# renovate.json lists the commit author under gitIgnoredAuthors, so Renovate keeps rebasing and automerging.
+# and Web Check then fails on kotlinWasmStoreYarnLock. Hosted Renovate runs only Mend's own postUpgradeTasks
+# allowlist, so this job regenerates kotlin-js-store/wasm/yarn.lock on the Renovate branch and pushes it with a PAT
+# so CI runs on the new head. renovate.json lists the commit author under gitIgnoredAuthors, so Renovate does not
+# treat the branch as modified and keeps updating it; each Renovate rewrite drops this commit and the job reruns.
 
 on:
   pull_request:
