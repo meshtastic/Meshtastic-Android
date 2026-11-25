@@ -21,6 +21,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -321,6 +322,21 @@ class RemoteContactsViewModelTest {
         val sent = remoteWrites().map { it.payload as SharedContact }
         assertEquals(listOf(OWN, KEYED), sent.map { it.node_num })
         assertEquals(listOf(true, false), sent.map { it.manually_verified })
+    }
+
+    @Test
+    fun aCancelledSessionEnsureSettlesAsNotSentAndDoesNotBlockTheNextWrite() = runTest {
+        everySuspend { ensureSession(any()) } calls { throw CancellationException("session ensure cancelled") }
+        val vm = viewModel()
+
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.UNFAVORITE)
+        assertEquals(RemoteWriteStatus.NOT_SENT, vm.lastResult.value?.status)
+
+        everySuspend { ensureSession(any()) } returns EnsureSessionResult.AlreadyActive
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.REMOVE)
+
+        assertEquals(listOf("removeRemoteNode"), remoteWrites().map { it.kind })
+        assertEquals(RemoteWriteStatus.ACKNOWLEDGED, vm.lastResult.value?.status)
     }
 
     @Test

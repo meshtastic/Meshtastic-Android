@@ -173,15 +173,22 @@ class RemoteContactsViewModel(
         if (sending) return
         settle(nodeNum, action, RemoteWriteStatus.SENDING)
         viewModelScope.launch {
-            val status = safeCatching {
-                when {
-                    !ensureRemoteAdminSession(destNum).isUsable() -> RemoteWriteStatus.NOT_SENT
-                    write() -> RemoteWriteStatus.ACKNOWLEDGED
-                    else -> RemoteWriteStatus.NOT_ACKNOWLEDGED
-                }
+            // Settled in finally: a cancelled session ensure would leave SENDING and block every later write.
+            var status = RemoteWriteStatus.NOT_SENT
+            try {
+                status =
+                    safeCatching {
+                        if (!ensureRemoteAdminSession(destNum).isUsable()) {
+                            RemoteWriteStatus.NOT_SENT
+                        } else {
+                            status = RemoteWriteStatus.NOT_ACKNOWLEDGED
+                            if (write()) RemoteWriteStatus.ACKNOWLEDGED else RemoteWriteStatus.NOT_ACKNOWLEDGED
+                        }
+                    }
+                        .getOrDefault(RemoteWriteStatus.NOT_ACKNOWLEDGED)
+            } finally {
+                settle(nodeNum, action, status)
             }
-                .getOrDefault(RemoteWriteStatus.NOT_ACKNOWLEDGED)
-            settle(nodeNum, action, status)
         }
     }
 
