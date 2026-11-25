@@ -1491,8 +1491,14 @@ class MeshDataHandlerTest {
             .build(),
     )
 
-    /** Delivers a channel-encrypted text DM from 456 to us (123) and returns the contact key it was stored under. */
-    private fun TestScope.contactKeyOfChannelDm(senderHasKey: Boolean): String? {
+    /**
+     * Delivers a channel-encrypted text DM from 456 to us (123) and returns the packet and contact key it was stored
+     * as.
+     */
+    private fun TestScope.storeChannelDm(
+        senderHasKey: Boolean,
+        localHasKey: Boolean = true,
+    ): Pair<DataPacket, String>? {
         val packet =
             MeshPacket.Builder()
                 .also { wb ->
@@ -1518,34 +1524,114 @@ class MeshDataHandlerTest {
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
                 channel = 0,
             )
-        var storedKey: String? = null
+        var stored: Pair<DataPacket, String>? = null
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.nodeDBbyNodeNum } returns
-            mapOf(123 to keyedNode(123, NodeAddress.ID_LOCAL), 456 to keyedNode(456, "!remote", senderHasKey))
+            mapOf(
+                123 to keyedNode(123, NodeAddress.ID_LOCAL, localHasKey),
+                456 to keyedNode(456, "!remote", senderHasKey),
+            )
         every { nodeManager.getNodeById("!remote") } returns keyedNode(456, "!remote", senderHasKey)
         everySuspend { packetRepository.findPacketsWithId(77) } returns emptyList()
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
         everySuspend { packetRepository.insert(any(), any(), any(), any(), any(), any()) } calls
             {
-                storedKey = it.args[2] as String
+                stored = it.args[0] as DataPacket to it.args[2] as String
             }
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
-        return storedKey
+        return stored
     }
 
     // Meshtastic-Android#8069: a 2.7 node that lacks our key answers a PKI DM over the channel. Filing that reply by
     // its channel opened a second, unlocked chat beside the PKI one the node list opens.
     @Test
     fun `channel-encrypted DM from a keyed node is filed in the PKI conversation`() = testScope.runTest {
-        assertEquals("${NodeAddress.PKC_CHANNEL_INDEX}!remote", contactKeyOfChannelDm(senderHasKey = true))
+        assertEquals("${NodeAddress.PKC_CHANNEL_INDEX}!remote", storeChannelDm(senderHasKey = true)?.second)
     }
 
     @Test
     fun `channel-encrypted DM from a keyless node stays in its channel conversation`() = testScope.runTest {
-        assertEquals("0!remote", contactKeyOfChannelDm(senderHasKey = false))
+        assertEquals("0!remote", storeChannelDm(senderHasKey = false)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted DM stays in its channel conversation when our node has no key`() = testScope.runTest {
+        assertEquals("0!remote", storeChannelDm(senderHasKey = true, localHasKey = false)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted DM filed in the PKI conversation keeps its own channel`() = testScope.runTest {
+        assertEquals(0, assertNotNull(storeChannelDm(senderHasKey = true)).first.channel)
+    }
+
+    @Test
+    fun `channel-encrypted reaction to our PKI DM finds its parent in the PKI conversation`() = testScope.runTest {
+        val emoji = "+1"
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 98
+                    wb.from = 456
+                    wb.to = 123
+                    wb.channel = 0
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emoji.encodeToByteArray().toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        val dataPacket =
+            DataPacket(
+                id = 98,
+                from = "!remote",
+                to = NodeAddress.ID_LOCAL,
+                bytes = emoji.encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = 0,
+            )
+        val parent =
+            DataPacket(
+                id = 42,
+                from = NodeAddress.ID_LOCAL,
+                to = "!remote",
+                bytes = "parent".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(123 to keyedNode(123, NodeAddress.ID_LOCAL), 456 to keyedNode(456, "!remote"))
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.toNodeID(123) } returns NodeAddress.ID_LOCAL
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { nodeManager.getNodeById("!remote") } returns keyedNode(456, "!remote")
+        everySuspend { packetRepository.findReactionsWithId(98) } returns emptyList()
+        everySuspend { packetRepository.findPacketsWithId(42) } returns listOf(parent)
+        everySuspend { packetRepository.getContactSettings("8!remote") } returns
+            ContactSettings(contactKey = "8!remote")
+        everySuspend { packetRepository.insertReaction(any(), 123) } returns Unit
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateReactionNotification(
+                contactKey = "8!remote",
+                name = "Node !remote",
+                emoji = emoji,
+                isBroadcast = false,
+                channelName = null,
+                isSilent = false,
+            )
+        }
     }
 
     @Test
