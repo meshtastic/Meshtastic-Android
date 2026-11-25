@@ -37,6 +37,7 @@ class ChannelFrequencyPlanTest {
     private fun named(name: String) =
         Channel(ChannelSettings.Builder().also { wb -> wb.name = name }.build(), usLongFast)
 
+    // Regression: a blank name not resolving to the preset name, or the US row changing.
     @Test
     fun `blank primary on US LongFast sits on slot 20 at 906 point 875`() {
         val plan = Channel(ChannelSettings.Builder().build(), usLongFast).frequencyPlan

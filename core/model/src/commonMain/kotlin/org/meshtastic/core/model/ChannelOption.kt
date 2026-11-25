@@ -442,7 +442,7 @@ enum class ChannelOption(
     NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
 
     // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
-    // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
+    // padded channel spacing, not the modem bandwidth used for the SDK slot math).
     TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, spreadingFactor = 7, codingRate = 5, minFirmware = FIRMWARE_2_8),
     TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, spreadingFactor = 8, codingRate = 6, minFirmware = FIRMWARE_2_8),
     ;
