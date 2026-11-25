@@ -50,25 +50,28 @@ class ChannelTest {
         Assert.assertEquals(8, ch.hash)
     }
 
+    // Regression: an unset region reporting a slot count instead of 0 (firmware RadioInterface.cpp).
     @Test
     fun numChannelsGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(104, ch.loraConfig.numChannels)
+        Assert.assertEquals(0, ch.frequencyPlan.numChannels)
     }
 
+    // Regression: an unset region resolving a slot instead of none.
     @Test
     fun channelNumGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(20, ch.channelNum)
+        Assert.assertNull(ch.frequencyPlan.slot)
     }
 
+    // Regression: an unset region resolving a frequency instead of none.
     @Test
     fun radioFreqGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(906.875f, ch.radioFreq)
+        Assert.assertNull(ch.frequencyPlan.frequencyMHz)
     }
 
     @Test

@@ -20,12 +20,12 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.MeshBeaconOffer
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.MeshBeacon
+import org.meshtastic.sdk.LoRaFrequency
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -424,8 +424,7 @@ class MeshBeaconOfferTest {
         assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
     }
 
-    private fun slotOf(name: String, lora: LoRaConfig = radioLora): Int =
-        Channel(ChannelSettings.Builder().also { wb -> wb.name = name }.build(), lora).channelNum
+    private fun slotOf(name: String, lora: LoRaConfig = radioLora): Int = lora.resolveFrequencySlot(name)!!
 
     private fun offerOn(name: String, slot: Int? = null): MeshBeacon = MeshBeacon.Builder()
         .also { wb ->
@@ -447,11 +446,22 @@ class MeshBeaconOfferTest {
     }
 
     @Test
+    fun `an override frequency does not change which slot an offer compares against`() {
+        // Regression: deriving beacon slots from plan().slot, which is null under override_frequency.
+        val overridden = radioLora.newBuilder().also { wb -> wb.override_frequency = 915.5f }.build()
+        val homeSlot = slotOf("HomeMesh")
+        val offered = generateSequence(0) { it + 1 }.map { "PinnedMesh$it" }.first { slotOf(it) != homeSlot }
+        assertEquals(BeaconJoinOption.SWITCH, offerOn(offered).beaconJoinOption(overridden, radioChannels))
+        assertEquals(BeaconJoinOption.ADD, offerOn("HomeMesh").beaconJoinOption(overridden, radioChannels))
+    }
+
+    @Test
     fun `an advertised slot away from ours forces SWITCH even when the names hash alike`() {
         // The NYMesh case: the offered name hashes to our slot, but the mesh actually sits elsewhere. Deriving would
         // call this a no-reboot ADD and the user would join and hear nothing.
         val homeSlot = slotOf("HomeMesh")
-        val elsewhere = if (homeSlot < radioLora.numChannels) homeSlot + 1 else homeSlot - 1
+        val elsewhere =
+            if (homeSlot < LoRaFrequency.plan(radioLora, "").numChannels) homeSlot + 1 else homeSlot - 1
         assertEquals(
             BeaconJoinOption.SWITCH,
             offerOn("HomeMesh", slot = elsewhere).beaconJoinOption(radioLora, radioChannels),
@@ -472,7 +482,8 @@ class MeshBeaconOfferTest {
         // Unaddressable here, so behave as though the field were absent rather than refuse an advisory offer.
         assertEquals(
             BeaconJoinOption.ADD,
-            offerOn("HomeMesh", slot = radioLora.numChannels + 1).beaconJoinOption(radioLora, radioChannels),
+            offerOn("HomeMesh", slot = LoRaFrequency.plan(radioLora, "").numChannels + 1)
+                .beaconJoinOption(radioLora, radioChannels),
         )
         assertEquals(BeaconJoinOption.ADD, offerOn("HomeMesh", slot = 0).beaconJoinOption(radioLora, radioChannels))
     }
