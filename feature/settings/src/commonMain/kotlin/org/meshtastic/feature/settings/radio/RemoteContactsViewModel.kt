@@ -135,9 +135,11 @@ class RemoteContactsViewModel(
      * A Client Base does not favorite on `add_contact`, and `set_favorite_node` does nothing for a node the target does
      * not hold, so the favorite goes out only once the contact is acknowledged.
      */
-    private suspend fun addContact(node: Node, thenFavorite: Boolean): Boolean =
-        radioController.addRemoteContact(destNum, node.toSharedContact()) &&
+    private suspend fun addContact(node: Node, thenFavorite: Boolean): Boolean {
+        val isOwnContact = node.num == nodeRepository.myNodeInfo.value?.myNodeNum
+        return radioController.addRemoteContact(destNum, node.toSharedContact(isOwnContact)) &&
             (!thenFavorite || radioController.setRemoteFavorite(destNum, node.num, favorite = true))
+    }
 
     fun addContactFromUrl(url: String) {
         if (sending) return

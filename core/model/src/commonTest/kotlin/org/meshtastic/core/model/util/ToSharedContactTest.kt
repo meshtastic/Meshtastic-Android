@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.model.util
 
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
@@ -26,15 +28,21 @@ import kotlin.test.assertTrue
 
 class ToSharedContactTest {
 
-    private fun node(manuallyVerified: Boolean = false) = Node(
+    private fun node(
+        manuallyVerified: Boolean = false,
+        publicKey: ByteString? = null,
+        userPublicKey: ByteString = ByteString.EMPTY,
+    ) = Node(
         num = 7,
         user =
         User.Builder()
             .also { wb ->
                 wb.id = "!7"
                 wb.long_name = "Seven"
+                wb.public_key = userPublicKey
             }
             .build(),
+        publicKey = publicKey,
         manuallyVerified = manuallyVerified,
     )
 
@@ -67,5 +75,18 @@ class ToSharedContactTest {
         val shared = node().toSharedContact()
         assertEquals(7, shared.node_num)
         assertEquals("Seven", shared.user?.long_name)
+    }
+
+    @Test
+    fun `populates user public_key from Node publicKey when user public_key is empty`() {
+        val key = ByteArray(Node.PUBLIC_KEY_SIZE) { (it + 1).toByte() }.toByteString()
+        val shared = node(publicKey = key).toSharedContact()
+        assertEquals(key, shared.user?.public_key)
+    }
+
+    @Test
+    fun `strips ERROR_BYTE_STRING instead of exporting sentinel key`() {
+        val shared = node(userPublicKey = Node.ERROR_BYTE_STRING).toSharedContact()
+        assertEquals(ByteString.EMPTY, shared.user?.public_key)
     }
 }

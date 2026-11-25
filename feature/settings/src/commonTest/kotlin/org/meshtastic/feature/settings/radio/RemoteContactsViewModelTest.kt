@@ -38,6 +38,7 @@ import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
@@ -277,6 +278,20 @@ class RemoteContactsViewModelTest {
         )
     }
 
+    // design#149 point 2: our own radio's key is one we hold, so it goes out verified. Anyone else's is relayed as is.
+    @Test
+    fun onlyOurOwnNodeIsSentAsManuallyVerified() = runTest {
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = OWN))
+        val vm = viewModel()
+
+        vm.perform(node(OWN, "Own"), RemoteContactAction.ADD_CONTACT)
+        vm.perform(node(KEYED, "Keyed"), RemoteContactAction.ADD_CONTACT)
+
+        val sent = remoteWrites().map { it.payload as SharedContact }
+        assertEquals(listOf(OWN, KEYED), sent.map { it.node_num })
+        assertEquals(listOf(true, false), sent.map { it.manually_verified })
+    }
+
     @Test
     fun noWriteIsSentWithoutAUsableAdminSession() = runTest {
         everySuspend { ensureSession(any()) } returns EnsureSessionResult.Timeout
@@ -336,6 +351,7 @@ class RemoteContactsViewModelTest {
     private companion object {
         const val REMOTE = 0x42C91376
         const val KEYED = 0x5264FF52
+        const val OWN = 0x3F8B0E01
         const val KEYLESS = 0x1234ABCD
         const val DISPUTED = 0x0BADC0DE
         val KEY = ByteArray(32) { (it + 1).toByte() }.toByteString()
