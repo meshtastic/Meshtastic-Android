@@ -182,8 +182,6 @@ class MeshDataHandlerTest {
                 activeConversationTracker = activeConversationTracker,
                 scope = testScope.asServiceScope(),
             )
-        // Every live waypoint notifies (expire 0 included), and compose-resources cannot load on the plain JVM.
-        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
 
         everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
             {
@@ -1757,10 +1755,16 @@ class MeshDataHandlerTest {
         every { packetRepository.getWaypoints() } returns flowOf(listOf(stored))
     }
 
-    private fun stubWaypointPersistDependencies(txId: Int) {
+    private fun stubWaypointPersistDependencies(txId: Int, namedSender: Boolean = false) {
         everySuspend { packetRepository.findPacketsWithId(txId) } returns emptyList()
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
+        // An accepted live waypoint notifies; keep its sender name and text off compose-resources.
+        if (namedSender) {
+            every { nodeManager.getNodeById(any()) } returns
+                Node(num = 1, user = User.Builder().also { wb -> wb.long_name = "Sender" }.build())
+            handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        }
     }
 
     @Test
@@ -1852,7 +1856,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(502)
+        stubWaypointPersistDependencies(502, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1875,7 +1879,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(503)
+        stubWaypointPersistDependencies(503, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1899,7 +1903,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(504)
+        stubWaypointPersistDependencies(504, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1922,7 +1926,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(505)
+        stubWaypointPersistDependencies(505, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
