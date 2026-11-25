@@ -1545,8 +1545,8 @@ class MeshDataHandlerTest {
         return stored
     }
 
-    // Meshtastic-Android#8069: a 2.7 node that lacks our key answers a PKI DM over the channel. Filing that reply by
-    // its channel opened a second, unlocked chat beside the PKI one the node list opens.
+    // Meshtastic-Android#8069: filing a channel-encrypted reply by its channel opened a second chat beside the PKI one
+    // the node list opens.
     @Test
     fun `channel-encrypted DM from a keyed node is filed in the PKI conversation`() = testScope.runTest {
         assertEquals("${NodeAddress.PKC_CHANNEL_INDEX}!remote", storeChannelDm(senderHasKey = true)?.second)

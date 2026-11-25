@@ -74,6 +74,10 @@ data class PacketEntity(
             filtered = filtered,
             transportMechanism = data.transportMechanism,
             xeddsaSigned = data.xeddsaSigned,
+            channelKeyEncrypted =
+            !isFromLocal &&
+                ContactKey(contact_key).channelOrNull == NodeAddress.PKC_CHANNEL_INDEX &&
+                data.channel != NodeAddress.PKC_CHANNEL_INDEX,
             ackProofStatus = data.ackProofStatus,
             translatedText = translatedText,
             showTranslated = showTranslated,

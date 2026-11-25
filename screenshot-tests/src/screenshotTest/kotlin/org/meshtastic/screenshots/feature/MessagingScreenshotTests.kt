@@ -32,6 +32,7 @@ import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
 import org.meshtastic.feature.messaging.RetiredChannelNoticePreview
 import org.meshtastic.feature.messaging.component.MessageActionsContentPreview
+import org.meshtastic.feature.messaging.component.MessageItemChannelKeyPreview
 import org.meshtastic.feature.messaging.component.MessageItemGroupedRunPreview
 import org.meshtastic.feature.messaging.component.MessageItemMarkdownPreview
 import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
@@ -94,6 +95,13 @@ fun ScreenshotMessageSearchBar() {
 @Composable
 fun ScreenshotMessageItemSigned() {
     MessageItemSignedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMessageItemChannelKey() {
+    MessageItemChannelKeyPreview()
 }
 
 @PreviewTest

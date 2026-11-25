@@ -724,9 +724,8 @@ class MeshDataHandlerImpl(
 
     /**
      * The channel slot of the conversation this packet belongs to. A direct message from a node that both ends hold a
-     * key for goes in the PKI conversation, the one the node list opens, even when it arrived channel-encrypted: a
-     * sender without our key (firmware 2.7 falls back to the channel) would otherwise open a second chat for its
-     * replies. The packet keeps its own [DataPacket.channel].
+     * key for goes in the PKI conversation, the one the node list opens, even when it arrived channel-encrypted, so a
+     * peer's DMs stay in one chat. The packet keeps its own [DataPacket.channel], which marks it in that chat.
      */
     private fun DataPacket.conversationChannel(myNodeNum: Int): Int {
         val inboundDirect = !isFromLocal(myNodeNum) && !isBroadcast
