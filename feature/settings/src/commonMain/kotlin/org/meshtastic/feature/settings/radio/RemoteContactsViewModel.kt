@@ -53,8 +53,14 @@ enum class RemoteWriteStatus {
     SENDING,
     ACKNOWLEDGED,
     NOT_ACKNOWLEDGED,
+
+    /** No admin session with the remote node could be opened, so nothing was sent. */
+    NOT_SENT,
     INVALID_URL,
     NO_PUBLIC_KEY,
+
+    /** The pasted contact is the remote node itself. */
+    SELF_CONTACT,
 }
 
 /** The latest write and how it went. [nodeNum] is null for a contact pasted as a URL. */
@@ -80,13 +86,19 @@ class RemoteContactsViewModel(
 
     val destNode: StateFlow<Node?> = nodeRepository.nodeDBbyNum.map { it[destNum] }.stateInWhileSubscribed(null)
 
-    /** Nodes with a public key, other than [destNum] itself; a keyless contact would erase the remote node's key. */
+    /**
+     * Nodes with a trusted public key, other than [destNum] itself: a keyless or disputed key sent as a contact would
+     * overwrite the key the remote node holds.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val candidates: StateFlow<List<Node>> =
         _query
             .flatMapLatest { nodeRepository.getNodes(sort = NodeSortOption.ALPHABETICAL, filter = it) }
-            .map { nodes -> nodes.filter { it.num != destNum && it.hasPKC } }
+            .map { nodes -> nodes.filter { it.num != destNum && it.hasPKC && !it.mismatchKey } }
             .stateInWhileSubscribed(emptyList())
+
+    private val sending
+        get() = _lastResult.value?.status == RemoteWriteStatus.SENDING
 
     fun setQuery(query: String) {
         _query.value = query
@@ -104,21 +116,37 @@ class RemoteContactsViewModel(
     }
 
     fun addContactFromUrl(url: String) {
-        val contact = safeCatching { CommonUri.parse(url.trim()).toSharedContact() }.getOrNull()
-        when {
-            contact == null -> settle(null, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.INVALID_URL)
-            contact.hasNoPublicKey() -> settle(null, RemoteContactAction.ADD_CONTACT, RemoteWriteStatus.NO_PUBLIC_KEY)
-            else -> send(null, RemoteContactAction.ADD_CONTACT) { radioController.addRemoteContact(destNum, contact) }
+        if (sending) return
+        val parsed = safeCatching { CommonUri.parse(url.trim()).toSharedContact() }.getOrNull()
+        val rejection =
+            when {
+                parsed == null -> RemoteWriteStatus.INVALID_URL
+                parsed.hasNoPublicKey() -> RemoteWriteStatus.NO_PUBLIC_KEY
+                parsed.node_num == destNum -> RemoteWriteStatus.SELF_CONTACT
+                else -> null
+            }
+        if (rejection != null || parsed == null) {
+            settle(null, RemoteContactAction.ADD_CONTACT, rejection ?: RemoteWriteStatus.INVALID_URL)
+            return
         }
+        // A pasted URL asks to add a contact, never to block it on the remote node.
+        val contact = parsed.newBuilder().also { wb -> wb.should_ignore = false }.build()
+        send(null, RemoteContactAction.ADD_CONTACT) { radioController.addRemoteContact(destNum, contact) }
     }
 
     private fun send(nodeNum: Int?, action: RemoteContactAction, write: suspend () -> Boolean) {
-        if (_lastResult.value?.status == RemoteWriteStatus.SENDING) return
+        if (sending) return
         settle(nodeNum, action, RemoteWriteStatus.SENDING)
         viewModelScope.launch {
-            val acknowledged =
-                safeCatching { ensureRemoteAdminSession(destNum).isUsable() && write() }.getOrDefault(false)
-            val status = if (acknowledged) RemoteWriteStatus.ACKNOWLEDGED else RemoteWriteStatus.NOT_ACKNOWLEDGED
+            val status =
+                safeCatching {
+                    when {
+                        !ensureRemoteAdminSession(destNum).isUsable() -> RemoteWriteStatus.NOT_SENT
+                        write() -> RemoteWriteStatus.ACKNOWLEDGED
+                        else -> RemoteWriteStatus.NOT_ACKNOWLEDGED
+                    }
+                }
+                    .getOrDefault(RemoteWriteStatus.NOT_ACKNOWLEDGED)
             settle(nodeNum, action, status)
         }
     }
@@ -130,5 +158,8 @@ class RemoteContactsViewModel(
     private fun EnsureSessionResult.isUsable() =
         this == EnsureSessionResult.AlreadyActive || this == EnsureSessionResult.Refreshed
 
-    private fun SharedContact.hasNoPublicKey() = user?.public_key?.size?.let { it == 0 } ?: true
+    private fun SharedContact.hasNoPublicKey(): Boolean {
+        val key = user?.public_key ?: return true
+        return key.size == 0 || key == Node.ERROR_BYTE_STRING
+    }
 }

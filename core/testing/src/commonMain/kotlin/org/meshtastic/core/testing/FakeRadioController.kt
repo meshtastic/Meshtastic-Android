@@ -395,7 +395,7 @@ class FakeRadioController :
 
     override suspend fun setTime(destNum: Int, packetId: Int) {}
 
-    /** What [addRemoteContact] and [setRemoteFavorite] return, standing in for the remote node's acknowledgement. */
+    /** What the remote node-DB writes return, standing in for the remote node's acknowledgement. */
     var remoteNodeDbAck: Boolean = true
 
     override suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean {

@@ -27,6 +27,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -84,8 +85,10 @@ class RemoteNodeDbAdminTest {
     }
 
     @Test
-    fun addRemoteContactRefusesAKeylessContactWithoutSending() = runTest {
-        assertFalse(controller().addRemoteContact(REMOTE, contact(key = ByteString.EMPTY)))
+    fun addRemoteContactRefusesAKeylessOrZeroKeyContactWithoutSending() = runTest {
+        val controller = controller()
+        assertFalse(controller.addRemoteContact(REMOTE, contact(key = ByteString.EMPTY)))
+        assertFalse(controller.addRemoteContact(REMOTE, contact(key = Node.ERROR_BYTE_STRING)))
 
         assertTrue(commandSender.adminRequests.isEmpty())
     }

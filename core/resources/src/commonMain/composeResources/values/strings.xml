@@ -1923,9 +1923,11 @@
     <string name="remote_contacts_ignore_confirm">Ignore %1$s on %2$s? %2$s drops its packets and deletes the messages and telemetry it stored from it. Unignore lifts the block but does not bring those back.</string>
     <string name="remote_contacts_invalid_url">That isn't a Meshtastic contact URL.</string>
     <string name="remote_contacts_no_public_key">This contact has no public key. Sending it would erase the key %1$s holds for that node.</string>
+    <string name="remote_contacts_not_sent">Couldn't open an admin session with %1$s. Nothing was sent.</string>
     <string name="remote_contacts_pick">Nodes your radio knows</string>
     <string name="remote_contacts_remove">Remove</string>
     <string name="remote_contacts_remove_confirm">Remove %1$s from %2$s's node database? %2$s forgets its public key and favorite until it hears %1$s again.</string>
+    <string name="remote_contacts_self">That contact is %1$s itself.</string>
     <string name="remote_contacts_sending">Sending to %1$s…</string>
     <string name="remote_contacts_sent">%1$s acknowledged</string>
     <string name="remote_contacts_target">Sending to %1$s</string>

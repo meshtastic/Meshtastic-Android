@@ -47,6 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,9 +69,11 @@ import org.meshtastic.core.resources.remote_contacts_ignore
 import org.meshtastic.core.resources.remote_contacts_ignore_confirm
 import org.meshtastic.core.resources.remote_contacts_invalid_url
 import org.meshtastic.core.resources.remote_contacts_no_public_key
+import org.meshtastic.core.resources.remote_contacts_not_sent
 import org.meshtastic.core.resources.remote_contacts_pick
 import org.meshtastic.core.resources.remote_contacts_remove
 import org.meshtastic.core.resources.remote_contacts_remove_confirm
+import org.meshtastic.core.resources.remote_contacts_self
 import org.meshtastic.core.resources.remote_contacts_sending
 import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_target
@@ -288,8 +293,16 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
                 stringResource(Res.string.remote_contacts_invalid_url) to MaterialTheme.colorScheme.error
             RemoteWriteStatus.NO_PUBLIC_KEY ->
                 stringResource(Res.string.remote_contacts_no_public_key, target) to MaterialTheme.colorScheme.error
+            RemoteWriteStatus.NOT_SENT ->
+                stringResource(Res.string.remote_contacts_not_sent, target) to MaterialTheme.colorScheme.error
+            RemoteWriteStatus.SELF_CONTACT ->
+                stringResource(Res.string.remote_contacts_self, target) to MaterialTheme.colorScheme.error
         }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         if (result.status == RemoteWriteStatus.SENDING) {
             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
         }

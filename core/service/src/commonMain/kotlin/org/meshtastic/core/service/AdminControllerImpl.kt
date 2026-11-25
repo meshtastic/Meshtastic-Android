@@ -32,6 +32,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.HamName
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
@@ -279,11 +280,13 @@ internal class AdminControllerImpl(
     // ── Remote node DB ─────────────────────────────────────────────────────
 
     override suspend fun addRemoteContact(destNum: Int, contact: SharedContact): Boolean {
-        // An empty key overwrites the one the remote node holds and breaks its DMs with that node.
+        // An empty or all-zero key overwrites the one the remote node holds and breaks its DMs with that node.
         val key = contact.user?.public_key
-        if (contact.node_num == 0 || key == null || key.size == 0) return false
+        if (contact.node_num == 0 || key == null || key.size == 0 || key == Node.ERROR_BYTE_STRING) return false
         return safeCatching {
-            commandSender.sendAdminAwait(destNum) { AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build() }
+            commandSender.sendAdminAwait(destNum) {
+                AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
+            }
         }
             .getOrDefault(false)
     }
