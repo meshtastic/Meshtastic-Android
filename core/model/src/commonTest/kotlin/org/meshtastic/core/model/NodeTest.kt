@@ -53,9 +53,9 @@ class NodeTest {
         val northOrigin = nodeWithPosition(num = 1, latitudeI = 100000000, longitudeI = 100000000)
         val northTarget = nodeWithPosition(num = 2, latitudeI = 200000000, longitudeI = 100000000)
         val southTarget = nodeWithPosition(num = 3, latitudeI = -100000000, longitudeI = 100000000)
-        val eastOrigin = nodeWithPosition(num = 4, latitudeI = 1, longitudeI = 200000000)
-        val eastTarget = nodeWithPosition(num = 5, latitudeI = 1, longitudeI = 300000000)
-        val westTarget = nodeWithPosition(num = 6, latitudeI = 1, longitudeI = 100000000)
+        val eastOrigin = nodeWithPosition(num = 4, latitudeI = 0, longitudeI = 200000000)
+        val eastTarget = nodeWithPosition(num = 5, latitudeI = 0, longitudeI = 300000000)
+        val westTarget = nodeWithPosition(num = 6, latitudeI = 0, longitudeI = 100000000)
 
         assertEquals(0, northOrigin.bearing(northTarget))
         assertEquals(180, northOrigin.bearing(southTarget))
@@ -168,7 +168,17 @@ class NodeTest {
                     .build(),
             )
 
+        val equatorPosition =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 0
+                    wb.longitude_i = 100000000
+                }
+                .build()
+        val equatorNode = Node(num = 4, position = equatorPosition)
+
         assertEquals(validPosition, validNode.validPosition)
+        assertEquals(equatorPosition, equatorNode.validPosition)
         assertEquals(null, zeroNode.validPosition)
         assertEquals(null, outOfRangeNode.validPosition)
     }

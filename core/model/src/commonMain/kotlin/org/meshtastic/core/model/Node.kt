@@ -176,10 +176,7 @@ data class Node(
     val longitude
         get() = (position.longitude_i ?: 0) * 1e-7
 
-    private fun hasValidPosition(): Boolean = latitude != 0.0 &&
-        longitude != 0.0 &&
-        (latitude >= -90 && latitude <= 90.0) &&
-        (longitude >= -180 && longitude <= 180)
+    private fun hasValidPosition(): Boolean = PositionUtils.isValidPosition(latitude, longitude)
 
     val validPosition: Position?
         get() = position.takeIf { hasValidPosition() }
