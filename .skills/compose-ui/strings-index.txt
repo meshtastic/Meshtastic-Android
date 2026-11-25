@@ -1544,6 +1544,7 @@ node_count_online
 node_count_shown
 node_count_template
 node_count_total
+node_database
 node_filter_exclude_infrastructure
 node_filter_exclude_mqtt
 node_filter_exclude_unheard
@@ -1835,6 +1836,19 @@ reload
 ### REMOTE ###
 remote
 remote_admin
+remote_admin_add_and_favorite_node
+remote_admin_add_and_favorite_node_summary
+remote_admin_add_node
+remote_admin_add_node_summary
+remote_admin_confirm_add_and_favorite
+remote_admin_confirm_add_node
+remote_admin_confirm_remove_favorite
+remote_admin_confirm_remove_node
+remote_admin_node_no_public_key
+remote_admin_remove_favorite
+remote_admin_remove_favorite_summary
+remote_admin_remove_node
+remote_admin_remove_node_summary
 remote_admin_unreachable
 remote_hardware
 remote_hardware_config

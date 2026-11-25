@@ -1604,6 +1604,7 @@
     <string name="node_count_shown">%1$d shown</string>
     <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="node_count_total">%1$d total</string>
+    <string name="node_database">Node database</string>
     <string name="node_filter_exclude_infrastructure">Exclude infrastructure</string>
     <string name="node_filter_exclude_mqtt">Exclude MQTT</string>
     <string name="node_filter_exclude_unheard">Hide unheard nodes</string>
@@ -1913,6 +1914,19 @@
     <!-- REMOTE -->
     <string name="remote">Remote</string>
     <string name="remote_admin">Remote Administration</string>
+    <string name="remote_admin_add_and_favorite_node">Add &amp; favorite node</string>
+    <string name="remote_admin_add_and_favorite_node_summary">Send contact info and mark as a favorite</string>
+    <string name="remote_admin_add_node">Add node</string>
+    <string name="remote_admin_add_node_summary">Send contact info without marking as a favorite</string>
+    <string name="remote_admin_confirm_add_and_favorite">Send '%1$s' to '%2$s' and mark it as a favorite?</string>
+    <string name="remote_admin_confirm_add_node">Send '%1$s' to '%2$s' without marking it as a favorite?</string>
+    <string name="remote_admin_confirm_remove_favorite">Remove '%1$s' from favorites on '%2$s'?</string>
+    <string name="remote_admin_confirm_remove_node">Remove '%1$s' from the node database on '%2$s'?</string>
+    <string name="remote_admin_node_no_public_key">No public key available</string>
+    <string name="remote_admin_remove_favorite">Remove favorite</string>
+    <string name="remote_admin_remove_favorite_summary">Unmark a node as a favorite if present</string>
+    <string name="remote_admin_remove_node">Remove node</string>
+    <string name="remote_admin_remove_node_summary">Delete a node from this device's node database</string>
     <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
     <string name="remote_hardware">Remote Hardware</string>
     <string name="remote_hardware_config">Remote Hardware Config</string>

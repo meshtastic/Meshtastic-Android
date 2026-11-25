@@ -19,6 +19,7 @@ package org.meshtastic.core.domain.usecase.settings
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.proto.SharedContact
 
 /**
  * Use case for performing administrative and destructive actions on mesh nodes.
@@ -132,6 +133,57 @@ constructor(
             nodeRepository.clearNodeDB(preserveFavorites)
         }
 
+        return packetId
+    }
+
+    /**
+     * Adds or updates [contact] in [destNum]'s NodeDB via `AdminMessage.add_contact`.
+     *
+     * @param destNum The remote node number to administer.
+     * @param contact The contact payload to send.
+     * @param onRequestId Invoked with the request's packet ID before the send is issued.
+     * @return The packet ID of the request.
+     */
+    open suspend fun addContact(destNum: Int, contact: SharedContact, onRequestId: (Int) -> Unit = {}): Int {
+        val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
+        radioController.addContact(destNum, contact, packetId)
+        return packetId
+    }
+
+    /**
+     * Marks or unmarks [targetNodeNum] as a favorite on [destNum] via `set_favorite_node` or `remove_favorite_node`.
+     *
+     * @param destNum The node number to administer.
+     * @param targetNodeNum The peer node number on [destNum] to favorite or unfavorite.
+     * @param favorite Whether to add or remove favorite status.
+     * @param onRequestId Invoked with the request's packet ID before the send is issued.
+     * @return The packet ID of the request.
+     */
+    open suspend fun setRemoteFavorite(
+        destNum: Int,
+        targetNodeNum: Int,
+        favorite: Boolean,
+        onRequestId: (Int) -> Unit = {},
+    ): Int {
+        val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
+        radioController.setRemoteFavorite(destNum, targetNodeNum, favorite, packetId)
+        return packetId
+    }
+
+    /**
+     * Removes [targetNodeNum] from [destNum]'s NodeDB via `AdminMessage.remove_by_nodenum`.
+     *
+     * @param destNum The node number to administer.
+     * @param targetNodeNum The peer node number to remove from [destNum]'s NodeDB.
+     * @param onRequestId Invoked with the request's packet ID before the send is issued.
+     * @return The packet ID of the request.
+     */
+    open suspend fun removeRemoteNode(destNum: Int, targetNodeNum: Int, onRequestId: (Int) -> Unit = {}): Int {
+        val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
+        radioController.removeRemoteNode(destNum, targetNodeNum, packetId)
         return packetId
     }
 }

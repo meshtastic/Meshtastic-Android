@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -44,6 +45,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
+import org.meshtastic.core.resources.node_database
 import org.meshtastic.core.resources.preserve_favorites
 import org.meshtastic.core.resources.reboot_into_dfu_warning
 import org.meshtastic.core.ui.component.ListItem
@@ -52,17 +54,63 @@ import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.radio.AdminRoute
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RemoteNodeDbAction
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.feature.settings.radio.component.RemoteNodePickerSheet
 import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
+import org.meshtastic.feature.settings.radio.remoteNodeDbActionsForRole
 
 @Composable
 fun AdministrationScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+
+    AdministrationContent(
+        state = state,
+        destNode = destNode,
+        myNodeNum = viewModel.myNodeNum,
+        getRemoteNodeDbCandidates = viewModel::getRemoteNodeDbCandidates,
+        onConfirmAdminRoute = viewModel::setResponseStateLoading,
+        onPreserveFavoritesChange = viewModel::setPreserveFavorites,
+        onConfirmRemoteNodeDbAction = viewModel::performRemoteNodeDbAction,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onBack = onBack,
+    )
+}
+
+@Suppress("LongParameterList")
+@Composable
+internal fun AdministrationContent(
+    state: RadioConfigState,
+    destNode: Node?,
+    myNodeNum: Int?,
+    getRemoteNodeDbCandidates: () -> List<Node>,
+    onConfirmAdminRoute: (AdminRoute) -> Unit,
+    onPreserveFavoritesChange: (Boolean) -> Unit,
+    onConfirmRemoteNodeDbAction: (RemoteNodeDbAction, Node) -> Unit,
+    onDismissPacketResponse: () -> Unit,
+    onBack: () -> Unit,
+) {
     val enabled = state.connected && !state.responseState.isWaiting()
+    var activeRemoteAction by remember { mutableStateOf<RemoteNodeDbAction?>(null) }
+    var remoteCandidates by remember { mutableStateOf<List<Node>>(emptyList()) }
+
+    activeRemoteAction?.let { action ->
+        RemoteNodePickerSheet(
+            action = action,
+            destNode = destNode,
+            myNodeNum = myNodeNum,
+            candidates = remoteCandidates,
+            onDismiss = { activeRemoteAction = null },
+            onConfirm = { pickedNode ->
+                activeRemoteAction = null
+                onConfirmRemoteNodeDbAction(action, pickedNode)
+            },
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -79,11 +127,28 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                if (!state.isLocal) {
+                    RemoteNodeDbSection(
+                        targetRole = state.radioConfig.device?.role ?: destNode?.user?.role,
+                        enabled = enabled,
+                        onSelectAction = { action ->
+                            remoteCandidates = getRemoteNodeDbCandidates()
+                            activeRemoteAction = action
+                        },
+                    )
+                }
+
                 ExpressiveSection(
                     title = stringResource(Res.string.administration),
                     titleColor = MaterialTheme.colorScheme.error,
                 ) {
-                    AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)
+                    AdminRouteItems(
+                        enabled = enabled,
+                        state = state,
+                        destNode = destNode,
+                        onConfirm = onConfirmAdminRoute,
+                        onPreserveFavoritesChange = onPreserveFavoritesChange,
+                    )
                 }
             }
         }
@@ -93,22 +158,49 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         if (state.responseState is ResponseState.Success || state.responseState is ResponseState.Error) {
             PacketResponseStateDialog(
                 state = state.responseState,
-                onDismiss = { viewModel.clearPacketResponse() },
+                onDismiss = onDismissPacketResponse,
                 onComplete = {
-                    viewModel.clearPacketResponse()
+                    onDismissPacketResponse()
                     onBack()
                 },
+                rebootBehavior = state.adminRebootBehavior,
             )
         }
     }
 }
 
 @Composable
+private fun RemoteNodeDbSection(
+    targetRole: org.meshtastic.proto.Config.DeviceConfig.Role?,
+    enabled: Boolean,
+    onSelectAction: (RemoteNodeDbAction) -> Unit,
+) {
+    ExpressiveSection(title = stringResource(Res.string.node_database)) {
+        remoteNodeDbActionsForRole(targetRole).forEach { action ->
+            key(action) {
+                val contentColor = if (action.isDestructive) MaterialTheme.colorScheme.error else Color.Unspecified
+                ListItem(
+                    enabled = enabled,
+                    text = stringResource(action.title),
+                    supportingText = stringResource(action.summary),
+                    leadingIcon = vectorResource(action.icon),
+                    leadingIconTint = contentColor,
+                    textColor = contentColor,
+                ) {
+                    onSelectAction(action)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun AdminRouteItems(
-    viewModel: RadioConfigViewModel,
     enabled: Boolean,
     state: RadioConfigState,
     destNode: Node?,
+    onConfirm: (AdminRoute) -> Unit,
+    onPreserveFavoritesChange: (Boolean) -> Unit,
 ) {
     AdminRoute.entries
         .filter { it != AdminRoute.REBOOT_DFU || state.canRebootToDfu }
@@ -119,8 +211,8 @@ private fun AdminRouteItems(
                     destNode = destNode,
                     enabled = enabled,
                     state = state,
-                    onConfirm = { viewModel.setResponseStateLoading(route) },
-                    onPreserveFavoritesChange = { viewModel.setPreserveFavorites(it) },
+                    onConfirm = { onConfirm(route) },
+                    onPreserveFavoritesChange = onPreserveFavoritesChange,
                 )
             }
         }

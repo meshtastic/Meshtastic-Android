@@ -22,6 +22,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
@@ -161,6 +162,15 @@ interface AdminController {
 
     /** Resets the NodeDB on a node. */
     suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean)
+
+    /** Adds or updates [contact] in [destNum]'s NodeDB via `AdminMessage.add_contact`. */
+    suspend fun addContact(destNum: Int, contact: SharedContact, packetId: Int)
+
+    /** Marks or unmarks [targetNodeNum] as a favorite on [destNum] via `set_favorite_node` / `remove_favorite_node`. */
+    suspend fun setRemoteFavorite(destNum: Int, targetNodeNum: Int, favorite: Boolean, packetId: Int)
+
+    /** Removes [targetNodeNum] from [destNum]'s NodeDB via `AdminMessage.remove_by_nodenum`. */
+    suspend fun removeRemoteNode(destNum: Int, targetNodeNum: Int, packetId: Int)
 
     // ── Batch edit ──────────────────────────────────────────────────────────
 

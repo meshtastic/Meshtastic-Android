@@ -68,6 +68,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
+import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
@@ -94,6 +95,7 @@ import org.meshtastic.core.resources.key_backup_not_found
 import org.meshtastic.core.resources.key_backup_restore_failed
 import org.meshtastic.core.resources.key_backup_restored
 import org.meshtastic.core.resources.key_backup_saved
+import org.meshtastic.core.resources.shared_contact_no_public_key
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.resources.unknown_error
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -164,6 +166,8 @@ data class RadioConfigState(
     val canRebootToDfu: Boolean = false,
     /** Whether the board's `HardwareModel` says the maker wired its GPS. */
     val isOemFixedGps: Boolean = false,
+    /** Reboot expectation for the active [AdministrationScreen] request, driving [PacketResponseStateDialog] copy. */
+    val adminRebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
 )
 
 @KoinViewModel
@@ -328,6 +332,8 @@ open class RadioConfigViewModel(
     // the channel set at reply time.
     private val requestAdminChannelIndexes = mutableMapOf<Int, Int?>()
     private val lateRemoteReads = mutableMapOf<Int, LateRemoteRead>()
+    private var pendingRemoteNodeDbOp: PendingRemoteNodeDbOp? = null
+    private var pendingFollowUpFavoriteNodeNum: Int? = null
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -745,6 +751,115 @@ open class RadioConfigViewModel(
         }
     }
 
+    /** Returns a point-in-time snapshot of local NodeDB peers eligible for remote NodeDB actions. */
+    fun getRemoteNodeDbCandidates(): List<Node> {
+        val excludedNum = destNum ?: destNode.value?.num
+        return nodeRepository.nodeDBbyNum.value.values.filter { it.num != excludedNum }
+    }
+
+    /**
+     * Runs [action] targeting [targetNode] on the currently administered remote node.
+     *
+     * Refreshes the remote session passkey first via `SESSIONKEY_CONFIG`, then sends the node-DB mutation with reliable
+     * delivery tracking. On `CLIENT_BASE`, [RemoteNodeDbAction.ADD_AND_FAVORITE] awaits the `add_contact` routing ACK
+     * before issuing `set_favorite_node` so the entry is guaranteed to exist in the remote NodeDB.
+     */
+    fun performRemoteNodeDbAction(action: RemoteNodeDbAction, targetNode: Node) {
+        val destNum = destNum ?: destNode.value?.num ?: return
+        if (action.requiresPublicKey && (!targetNode.hasPKC || targetNode.mismatchKey)) {
+            sendError(Res.string.shared_contact_no_public_key)
+            return
+        }
+        val targetRole = radioConfigState.value.radioConfig.device?.role ?: destNode.value?.user?.role
+        val chainSetFavorite =
+            action == RemoteNodeDbAction.ADD_AND_FAVORITE && targetRole == Config.DeviceConfig.Role.CLIENT_BASE
+        pendingRemoteNodeDbOp =
+            PendingRemoteNodeDbOp(action = action, targetNode = targetNode, chainSetFavorite = chainSetFavorite)
+        pendingFollowUpFavoriteNodeNum = null
+        loadFanOut = null
+        _radioConfigState.update {
+            it.copy(
+                route = REMOTE_NODEDB_ROUTE,
+                adminRebootBehavior = RebootBehavior.NEVER,
+                responseState =
+                ResponseState.Loading(
+                    total = if (chainSetFavorite) REMOTE_NODEDB_CHAINED_STEPS else REMOTE_NODEDB_SINGLE_STEPS,
+                    showOverlay = true,
+                ),
+            )
+        }
+        safeLaunch(tag = "getSessionKeyForNodeDb") {
+            radioConfigUseCase.getConfig(
+                destNum,
+                AdminMessage.ConfigType.SESSIONKEY_CONFIG.value,
+                onRequestId = ::registerReadRequestId,
+            )
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun sendRemoteNodeDbRequest(destNum: Int) {
+        val op = pendingRemoteNodeDbOp
+        pendingRemoteNodeDbOp = null
+        _radioConfigState.update { it.copy(route = "") }
+        if (op == null) {
+            clearRequestIds()
+            sendError(Res.string.unknown_error)
+            return
+        }
+        val targetRole = radioConfigState.value.radioConfig.device?.role ?: destNode.value?.user?.role
+        val isTargetClientBase = targetRole == Config.DeviceConfig.Role.CLIENT_BASE
+        if (op.chainSetFavorite) {
+            pendingFollowUpFavoriteNodeNum = op.targetNode.num
+        }
+
+        safeLaunch(tag = "remoteNodeDbAction") {
+            runRemoteNodeDbDispatch("Remote NodeDB action ${op.action}") {
+                when (op.action) {
+                    RemoteNodeDbAction.ADD_AND_FAVORITE,
+                    RemoteNodeDbAction.ADD_NODE,
+                    -> {
+                        val isOwnContact = op.targetNode.num == myNodeNum
+                        val contact = op.targetNode.toSharedContact(isOwnContact = isOwnContact)
+                        adminActionsUseCase.addContact(destNum, contact, onRequestId = ::registerRequestId)
+                    }
+
+                    RemoteNodeDbAction.REMOVE_FAVORITE ->
+                        adminActionsUseCase.setRemoteFavorite(
+                            destNum = destNum,
+                            targetNodeNum = op.targetNode.num,
+                            favorite = false,
+                            onRequestId = ::registerRequestId,
+                        )
+
+                    RemoteNodeDbAction.REMOVE_NODE ->
+                        adminActionsUseCase.removeRemoteNode(
+                            destNum = destNum,
+                            targetNodeNum = op.targetNode.num,
+                            onRequestId = ::registerRequestId,
+                        )
+                }
+                analytics.trackAction(
+                    "remote_nodedb_action",
+                    mapOf("action" to op.action.name.lowercase(), "is_client_base" to isTargetClientBase),
+                )
+            }
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun runRemoteNodeDbDispatch(label: String, block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.w(e) { "$label failed during dispatch" }
+            clearRequestIds()
+            e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
+        }
+    }
+
     fun setFixedPosition(position: Position) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
@@ -942,6 +1057,12 @@ open class RadioConfigViewModel(
             }
 
             is AdminRoute -> {
+                _radioConfigState.update {
+                    it.copy(
+                        adminRebootBehavior =
+                        if (route == AdminRoute.SET_TIME) RebootBehavior.NEVER else RebootBehavior.ALWAYS,
+                    )
+                }
                 safeLaunch(tag = "getSessionKeyConfig") {
                     radioConfigUseCase.getConfig(
                         destNum,
@@ -1211,6 +1332,8 @@ open class RadioConfigViewModel(
         lateRemoteReads.values.forEach { it.expiryJob.cancel() }
         lateRemoteReads.clear()
         manualChannelBatchRequestIds.clear()
+        pendingRemoteNodeDbOp = null
+        pendingFollowUpFavoriteNodeNum = null
         requestIds.value = hashSetOf()
     }
 
@@ -1319,7 +1442,23 @@ open class RadioConfigViewModel(
                 if (requestId != null && !isLateRemoteRead && route.isEmpty() && requestId !in readRequestRoutes) {
                     removeRequestId(requestId)
                     if (!hasPendingRequestsForRoute(route)) {
-                        completeSetRequestOrProgressBatch()
+                        val followUpNodeNum = pendingFollowUpFavoriteNodeNum
+                        if (followUpNodeNum != null) {
+                            pendingFollowUpFavoriteNodeNum = null
+                            incrementCompleted()
+                            safeLaunch(tag = "setRemoteFavoriteFollowUp") {
+                                runRemoteNodeDbDispatch("Remote set_favorite_node follow-up") {
+                                    adminActionsUseCase.setRemoteFavorite(
+                                        destNum = destNum,
+                                        targetNodeNum = followUpNodeNum,
+                                        favorite = true,
+                                        onRequestId = ::registerRequestId,
+                                    )
+                                }
+                            }
+                        } else {
+                            completeSetRequestOrProgressBatch()
+                        }
                     } else {
                         incrementCompleted()
                     }
@@ -1449,6 +1588,8 @@ open class RadioConfigViewModel(
 
         if (AdminRoute.entries.any { it.name == route }) {
             sendAdminRequest(destNum)
+        } else if (route == REMOTE_NODEDB_ROUTE) {
+            sendRemoteNodeDbRequest(destNum)
         }
 
         if (requestId == null) return
@@ -1461,7 +1602,9 @@ open class RadioConfigViewModel(
             removeRequestId(requestId)
 
             if (requestIds.value.isEmpty()) {
-                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                if (
+                    route.isNotEmpty() && !AdminRoute.entries.any { it.name == route } && route != REMOTE_NODEDB_ROUTE
+                ) {
                     clearPacketResponse()
                 } else if (route.isEmpty()) {
                     completeSetRequestOrProgressBatch()
@@ -1498,6 +1641,16 @@ open class RadioConfigViewModel(
         lateRemoteReads.remove(packetId)?.expiryJob?.cancel()
     }
 }
+
+private const val REMOTE_NODEDB_ROUTE = "REMOTE_NODEDB_ACTION"
+private const val REMOTE_NODEDB_SINGLE_STEPS = 2
+private const val REMOTE_NODEDB_CHAINED_STEPS = 3
+
+private data class PendingRemoteNodeDbOp(
+    val action: RemoteNodeDbAction,
+    val targetNode: Node,
+    val chainSetFavorite: Boolean,
+)
 
 private data class LateRemoteRead(val route: String, val expiryJob: Job, val adminChannelIndex: Int?)
 

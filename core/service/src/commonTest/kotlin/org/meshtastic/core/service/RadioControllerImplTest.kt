@@ -2008,4 +2008,85 @@ class RadioControllerImplTest {
         verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
     }
+
+    @Test
+    fun addContactSendsAdminWithoutMutatingLocalNodeManager() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val contact =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.node_num = 555
+                    wb.user =
+                        User.Builder()
+                            .also { u ->
+                                u.id = "!0000022b"
+                                u.long_name = "Peer"
+                                u.public_key = TEST_PUBLIC_KEY
+                            }
+                            .build()
+                }
+                .build()
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(456, 77, false, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.addContact(destNum = 456, contact = contact, packetId = 77)
+
+        assertEquals(contact, sentMessage?.add_contact)
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun addContactRejectsEmptyPublicKey() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val contact =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.node_num = 555
+                    wb.user = User.Builder().also { u -> u.id = "!0000022b" }.build()
+                }
+                .build()
+
+        assertFailsWith<IllegalArgumentException> {
+            controller.addContact(destNum = 456, contact = contact, packetId = 77)
+        }
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun setRemoteFavoriteSendsAdminWithoutMutatingLocalNodeManager() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val sentMessages = mutableListOf<AdminMessage>()
+        everySuspend { commandSender.sendAdmin(456, any(), false, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessages += (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.setRemoteFavorite(destNum = 456, targetNodeNum = 88, favorite = true, packetId = 10)
+        controller.setRemoteFavorite(destNum = 456, targetNodeNum = 88, favorite = false, packetId = 11)
+
+        assertEquals(88, sentMessages[0].set_favorite_node)
+        assertEquals(88, sentMessages[1].remove_favorite_node)
+        verify(exactly(0)) { nodeManager.updateNode(any(), any(), any()) }
+    }
+
+    @Test
+    fun removeRemoteNodeSendsAdminWithoutMutatingLocalNodeManager() = runTest {
+        val controller = createController(scope = backgroundScope)
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(456, 12, false, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.removeRemoteNode(destNum = 456, targetNodeNum = 99, packetId = 12)
+
+        assertEquals(99, sentMessage?.remove_by_nodenum)
+        verify(exactly(0)) { nodeManager.removeByNodenum(any()) }
+    }
 }

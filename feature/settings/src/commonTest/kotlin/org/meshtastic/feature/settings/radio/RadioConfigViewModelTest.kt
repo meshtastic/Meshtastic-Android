@@ -3168,35 +3168,430 @@ class RadioConfigViewModelTest {
 
         assertFalse(nodeRestartTracker.restartExpected.value)
     }
+
+    @Test
+    fun `CLIENT_BASE ADD_AND_FAVORITE chains addContact then setRemoteFavorite after first ack`() = runTest {
+        val pk = ByteArray(Node.PUBLIC_KEY_SIZE) { 7 }.toByteString()
+        val localNode =
+            Node(
+                num = 100,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!100"
+                        wb.long_name = "Local"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val remoteClientBase =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.long_name = "Base"
+                        wb.role = Config.DeviceConfig.Role.CLIENT_BASE
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val peerNode =
+            Node(
+                num = 789,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!789"
+                        wb.long_name = "Peer"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(localNode, remoteClientBase, peerNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value, any()) } calls
+            {
+                it.args.onRequestIdArg()(11)
+                11
+            }
+        everySuspend { adminActionsUseCase.addContact(456, any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(12)
+                12
+            }
+        everySuspend { adminActionsUseCase.setRemoteFavorite(456, 789, true, any()) } calls
+            {
+                it.args.onRequestIdArg()(13)
+                13
+            }
+
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.ADD_AND_FAVORITE, peerNode)
+        runCurrent()
+        assertEquals(RebootBehavior.NEVER, viewModel.radioConfigState.value.adminRebootBehavior)
+        val loadingInitial = viewModel.radioConfigState.value.responseState as ResponseState.Loading
+        assertEquals(3, loadingInitial.total)
+
+        // Session passkey response triggers addContact, NOT setRemoteFavorite yet.
+        packetFlow.emit(remoteMetadataReply(requestId = 11, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+        verifySuspend { adminActionsUseCase.addContact(456, any(), any()) }
+        verifySuspend(exactly(0)) { adminActionsUseCase.setRemoteFavorite(any(), any(), any(), any()) }
+
+        // First routing ACK triggers the chained setRemoteFavorite(true).
+        packetFlow.emit(routingAck(requestId = 12, from = 456))
+        runCurrent()
+        verifySuspend { adminActionsUseCase.setRemoteFavorite(456, 789, true, any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        // Second routing ACK completes the action.
+        packetFlow.emit(routingAck(requestId = 13, from = 456))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `CLIENT_BASE ADD_AND_FAVORITE aborts before setRemoteFavorite when addContact fails`() = runTest {
+        val pk = ByteArray(Node.PUBLIC_KEY_SIZE) { 7 }.toByteString()
+        val localNode =
+            Node(
+                num = 100,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!100"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val remoteClientBase =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.role = Config.DeviceConfig.Role.CLIENT_BASE
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val peerNode =
+            Node(
+                num = 789,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!789"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(localNode, remoteClientBase, peerNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value, any()) } calls
+            {
+                it.args.onRequestIdArg()(21)
+                21
+            }
+        everySuspend { adminActionsUseCase.addContact(456, any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(22)
+                22
+            }
+
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.ADD_AND_FAVORITE, peerNode)
+        runCurrent()
+
+        packetFlow.emit(remoteMetadataReply(requestId = 21, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+
+        // Routing NAK on addContact must fail immediately and never send setRemoteFavorite.
+        packetFlow.emit(
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { d ->
+                                d.portnum = PortNum.ROUTING_APP
+                                d.request_id = 22
+                                d.payload =
+                                    ByteString.of(
+                                        *Routing.Builder()
+                                            .also { r -> r.error_reason = Routing.Error.MAX_RETRANSMIT }
+                                            .build()
+                                            .encode(),
+                                    )
+                            }
+                            .build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+        verifySuspend(exactly(0)) { adminActionsUseCase.setRemoteFavorite(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `non-CLIENT_BASE ADD_AND_FAVORITE sends addContact only and marks own contact manually verified`() = runTest {
+        val pk = ByteArray(Node.PUBLIC_KEY_SIZE) { 9 }.toByteString()
+        val localNode =
+            Node(
+                num = 100,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!100"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val remoteClient =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.role = Config.DeviceConfig.Role.CLIENT
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(localNode, remoteClient))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value, any()) } calls
+            {
+                it.args.onRequestIdArg()(31)
+                31
+            }
+        var capturedContact: org.meshtastic.proto.SharedContact? = null
+        everySuspend { adminActionsUseCase.addContact(456, any(), any()) } calls
+            {
+                capturedContact = it.args[1] as org.meshtastic.proto.SharedContact
+                it.args.onRequestIdArg()(32)
+                32
+            }
+
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.ADD_AND_FAVORITE, localNode)
+        runCurrent()
+
+        assertEquals(2, (viewModel.radioConfigState.value.responseState as ResponseState.Loading).total)
+        packetFlow.emit(remoteMetadataReply(requestId = 31, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+
+        assertEquals(100, capturedContact?.node_num)
+        assertEquals(true, capturedContact?.manually_verified)
+        verifySuspend(exactly(0)) { adminActionsUseCase.setRemoteFavorite(any(), any(), any(), any()) }
+
+        packetFlow.emit(routingAck(requestId = 32, from = 456))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `CLIENT_BASE ADD_NODE sends addContact without follow-up setRemoteFavorite`() = runTest {
+        val pk = ByteArray(Node.PUBLIC_KEY_SIZE) { 4 }.toByteString()
+        val localNode =
+            Node(
+                num = 100,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!100"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val remoteClientBase =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.role = Config.DeviceConfig.Role.CLIENT_BASE
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val peerNode =
+            Node(
+                num = 789,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!789"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(localNode, remoteClientBase, peerNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value, any()) } calls
+            {
+                it.args.onRequestIdArg()(41)
+                41
+            }
+        everySuspend { adminActionsUseCase.addContact(456, any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.ADD_NODE, peerNode)
+        runCurrent()
+
+        packetFlow.emit(remoteMetadataReply(requestId = 41, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+        packetFlow.emit(routingAck(requestId = 42, from = 456))
+        runCurrent()
+
+        verifySuspend { adminActionsUseCase.addContact(456, any(), any()) }
+        verifySuspend(exactly(0)) { adminActionsUseCase.setRemoteFavorite(any(), any(), any(), any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `REMOVE_FAVORITE and REMOVE_NODE call expected useCase methods and complete on ack`() = runTest {
+        val pk = ByteArray(Node.PUBLIC_KEY_SIZE) { 4 }.toByteString()
+        val localNode =
+            Node(
+                num = 100,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!100"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val remoteNode =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.public_key = pk
+                    }
+                    .build(),
+            )
+        val keylessPeer = Node(num = 789, user = User.Builder().also { wb -> wb.id = "!789" }.build())
+        nodeRepository.setNodes(listOf(localNode, remoteNode, keylessPeer))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        var nextReqId = 50
+        everySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value, any()) } calls
+            {
+                val id = ++nextReqId
+                it.args.onRequestIdArg()(id)
+                id
+            }
+        everySuspend { adminActionsUseCase.setRemoteFavorite(456, 789, false, any()) } calls
+            {
+                val id = ++nextReqId
+                it.args.onRequestIdArg()(id)
+                id
+            }
+        everySuspend { adminActionsUseCase.removeRemoteNode(456, 789, any()) } calls
+            {
+                val id = ++nextReqId
+                it.args.onRequestIdArg()(id)
+                id
+            }
+
+        viewModel = createViewModel(destNum = 456, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        // REMOVE_FAVORITE works even without a public key on the peer.
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.REMOVE_FAVORITE, keylessPeer)
+        runCurrent()
+        packetFlow.emit(remoteMetadataReply(requestId = 51, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+        packetFlow.emit(routingAck(requestId = 52, from = 456))
+        runCurrent()
+        verifySuspend { adminActionsUseCase.setRemoteFavorite(456, 789, false, any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+
+        viewModel.clearPacketResponse()
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.REMOVE_NODE, keylessPeer)
+        runCurrent()
+        packetFlow.emit(remoteMetadataReply(requestId = 53, from = 456, channel = 0, pkiEncrypted = true))
+        runCurrent()
+        packetFlow.emit(routingAck(requestId = 54, from = 456))
+        runCurrent()
+        verifySuspend { adminActionsUseCase.removeRemoteNode(456, 789, any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `ADD_AND_FAVORITE rejects keyless peer with error before touching radio`() = runTest {
+        val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb -> wb.id = "!456" }.build())
+        val keylessPeer = Node(num = 789, user = User.Builder().also { wb -> wb.id = "!789" }.build())
+        nodeRepository.setNodes(listOf(localNode, remoteNode, keylessPeer))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+
+        viewModel = createViewModel(destNum = 456)
+        viewModel.performRemoteNodeDbAction(RemoteNodeDbAction.ADD_AND_FAVORITE, keylessPeer)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+        verifySuspend(exactly(0)) { radioConfigUseCase.getConfig(any(), any(), any()) }
+    }
 }
 
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
 @Suppress("UNCHECKED_CAST")
 private fun List<Any?>.onRequestIdArg(): (Int) -> Unit = last() as (Int) -> Unit
 
-/** A non-PKI ADMIN_APP device metadata reply for [requestId] from node [from], received on [channel]. */
-private fun remoteMetadataReply(requestId: Int, from: Int, channel: Int) = MeshPacket.Builder()
-    .also { wb ->
-        wb.from = from
-        wb.channel = channel
-        wb.decoded =
-            Data.Builder()
-                .also { wb ->
-                    wb.portnum = PortNum.ADMIN_APP
-                    wb.request_id = requestId
-                    wb.payload =
-                        AdminMessage.Builder()
-                            .also { wb ->
-                                wb.get_device_metadata_response =
-                                    DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.9.0" }.build()
-                            }
-                            .build()
-                            .encode()
-                            .toByteString()
-                }
-                .build()
-    }
-    .build()
+/** An ADMIN_APP device metadata reply for [requestId] from node [from], received on [channel]. */
+private fun remoteMetadataReply(requestId: Int, from: Int, channel: Int, pkiEncrypted: Boolean = false) =
+    MeshPacket.Builder()
+        .also { wb ->
+            wb.from = from
+            wb.channel = channel
+            wb.pki_encrypted = pkiEncrypted
+            wb.decoded =
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.ADMIN_APP
+                        wb.request_id = requestId
+                        wb.payload =
+                            AdminMessage.Builder()
+                                .also { wb ->
+                                    wb.get_device_metadata_response =
+                                        DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.9.0" }.build()
+                                }
+                                .build()
+                                .encode()
+                                .toByteString()
+                    }
+                    .build()
+        }
+        .build()
 
 /** A real ROUTING_APP ack for [requestId] as the radio would deliver it, sent by node [from]. */
 private fun routingAck(requestId: Int, from: Int) = MeshPacket.Builder()

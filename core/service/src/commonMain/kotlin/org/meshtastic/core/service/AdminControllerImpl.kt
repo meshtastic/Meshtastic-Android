@@ -31,6 +31,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.HamName
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
@@ -49,6 +50,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
@@ -337,6 +339,35 @@ internal class AdminControllerImpl(
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
         commandSender.sendAdmin(destNum, packetId) {
             AdminMessage.Builder().also { wb -> wb.nodedb_reset = preserveFavorites }.build()
+        }
+    }
+
+    override suspend fun addContact(destNum: Int, contact: SharedContact, packetId: Int) {
+        require(contact.node_num != 0 && (contact.user?.public_key?.size ?: 0) == Node.PUBLIC_KEY_SIZE) {
+            "addContact requires a non-zero node_num and a ${Node.PUBLIC_KEY_SIZE}-byte public key"
+        }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
+        }
+    }
+
+    override suspend fun setRemoteFavorite(destNum: Int, targetNodeNum: Int, favorite: Boolean, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder()
+                .also { wb ->
+                    if (favorite) {
+                        wb.set_favorite_node = targetNodeNum
+                    } else {
+                        wb.remove_favorite_node = targetNodeNum
+                    }
+                }
+                .build()
+        }
+    }
+
+    override suspend fun removeRemoteNode(destNum: Int, targetNodeNum: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = targetNodeNum }.build()
         }
     }
 

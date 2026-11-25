@@ -33,6 +33,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
@@ -440,6 +441,18 @@ class FakeRadioController :
     }
 
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
+
+    override suspend fun addContact(destNum: Int, contact: SharedContact, packetId: Int) {
+        recordAdminRequest("addContact", destNum, contact, packetId)
+    }
+
+    override suspend fun setRemoteFavorite(destNum: Int, targetNodeNum: Int, favorite: Boolean, packetId: Int) {
+        recordAdminRequest("setRemoteFavorite", destNum, targetNodeNum to favorite, packetId)
+    }
+
+    override suspend fun removeRemoteNode(destNum: Int, targetNodeNum: Int, packetId: Int) {
+        recordAdminRequest("removeRemoteNode", destNum, targetNodeNum, packetId)
+    }
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
