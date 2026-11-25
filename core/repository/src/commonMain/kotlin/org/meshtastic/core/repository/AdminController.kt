@@ -129,6 +129,9 @@ interface AdminController {
     /** Favorites or unfavorites [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
     suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean
 
+    /** Removes [nodeNum] from [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean
+
     // ── Remote queries ──────────────────────────────────────────────────────
 
     /** Requests the current owner (user info) from a remote node. */

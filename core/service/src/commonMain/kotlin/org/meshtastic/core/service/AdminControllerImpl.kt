@@ -299,6 +299,13 @@ internal class AdminControllerImpl(
     }
         .getOrDefault(false)
 
+    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean = safeCatching {
+        commandSender.sendAdminAwait(destNum) {
+            AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = nodeNum }.build()
+        }
+    }
+        .getOrDefault(false)
+
     override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
             AdminMessage.Builder().also { wb -> wb.get_canned_message_module_messages_request = true }.build()

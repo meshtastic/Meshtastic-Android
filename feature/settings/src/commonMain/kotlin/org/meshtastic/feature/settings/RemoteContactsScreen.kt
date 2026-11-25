@@ -65,6 +65,8 @@ import org.meshtastic.core.resources.remote_contacts_favorite
 import org.meshtastic.core.resources.remote_contacts_invalid_url
 import org.meshtastic.core.resources.remote_contacts_no_public_key
 import org.meshtastic.core.resources.remote_contacts_pick
+import org.meshtastic.core.resources.remote_contacts_remove
+import org.meshtastic.core.resources.remote_contacts_remove_confirm
 import org.meshtastic.core.resources.remote_contacts_sending
 import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_target
@@ -74,12 +76,14 @@ import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.PersonAdd
+import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.radio.RemoteContactAction
 import org.meshtastic.feature.settings.radio.RemoteContactsViewModel
 import org.meshtastic.feature.settings.radio.RemoteWriteResult
 import org.meshtastic.feature.settings.radio.RemoteWriteStatus
+import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @Composable
 fun RemoteContactsScreen(viewModel: RemoteContactsViewModel, onBack: () -> Unit) {
@@ -198,6 +202,19 @@ private fun CandidateCard(
     result: RemoteWriteResult?,
     onAction: (RemoteContactAction) -> Unit,
 ) {
+    var confirmRemove by rememberSaveable { mutableStateOf(false) }
+    if (confirmRemove) {
+        WarningDialog(
+            icon = MeshtasticIcons.PersonOff,
+            title = stringResource(Res.string.remote_contacts_remove),
+            text = { Text(stringResource(Res.string.remote_contacts_remove_confirm, node.effectiveLongName, target)) },
+            onDismiss = { confirmRemove = false },
+            onConfirm = {
+                confirmRemove = false
+                onAction(RemoteContactAction.REMOVE)
+            },
+        )
+    }
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = node.effectiveLongName, style = MaterialTheme.typography.titleSmall)
@@ -215,6 +232,9 @@ private fun CandidateCard(
                 }
                 ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
                     onAction(RemoteContactAction.UNFAVORITE)
+                }
+                ActionButton(MeshtasticIcons.PersonOff, Res.string.remote_contacts_remove, enabled) {
+                    confirmRemove = true
                 }
             }
             result?.let { WriteStatusLine(it, target) }

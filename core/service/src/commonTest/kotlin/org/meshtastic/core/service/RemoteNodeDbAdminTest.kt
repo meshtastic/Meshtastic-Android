@@ -106,6 +106,15 @@ class RemoteNodeDbAdminTest {
     }
 
     @Test
+    fun removeRemoteNodeSendsRemoveByNodenumToTheRemoteNode() = runTest {
+        assertTrue(controller().removeRemoteNode(REMOTE, CONTACT))
+
+        val request = commandSender.adminRequests.single()
+        assertEquals(REMOTE, request.destNum)
+        assertEquals(CONTACT, request.message.remove_by_nodenum)
+    }
+
+    @Test
     fun remoteNodeDbWritesReportFailureWhenTheRemoteNodeDoesNotAcknowledge() = runTest {
         commandSender.awaitedAdminResult = AwaitedSendResult(AwaitedSendStatus.TIMED_OUT, departureEpochAtDispatch = 0)
         val controller = controller()

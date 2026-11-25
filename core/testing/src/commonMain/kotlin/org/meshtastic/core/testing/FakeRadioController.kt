@@ -408,6 +408,11 @@ class FakeRadioController :
         return remoteNodeDbAck
     }
 
+    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean {
+        recordAdminRequest("removeRemoteNode", destNum, nodeNum, packetId = null)
+        return remoteNodeDbAck
+    }
+
     override suspend fun getOwner(destNum: Int, packetId: Int) {
         recordAdminRequest("getOwner", destNum, payload = null, packetId)
     }
