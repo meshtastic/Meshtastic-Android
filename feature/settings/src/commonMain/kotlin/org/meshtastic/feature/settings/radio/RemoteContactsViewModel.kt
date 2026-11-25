@@ -44,6 +44,8 @@ enum class RemoteContactAction {
     ADD_CONTACT,
     FAVORITE,
     UNFAVORITE,
+    IGNORE,
+    UNIGNORE,
     REMOVE,
 }
 
@@ -59,8 +61,8 @@ enum class RemoteWriteStatus {
 data class RemoteWriteResult(val nodeNum: Int?, val action: RemoteContactAction, val status: RemoteWriteStatus)
 
 /**
- * Adds contacts to, favorites, unfavorites and removes nodes in the node DB of [destNum], a node this radio administers
- * remotely. Candidates come from the local node DB, since firmware has no admin request that lists a remote node DB.
+ * Edits the node DB of [destNum], a node this radio administers remotely: add contact, favorite, ignore, remove and
+ * their undos. Candidates come from the local node DB, since firmware has no admin request that lists a remote node DB.
  */
 @KoinViewModel
 class RemoteContactsViewModel(
@@ -95,6 +97,8 @@ class RemoteContactsViewModel(
             RemoteContactAction.ADD_CONTACT -> radioController.addRemoteContact(destNum, node.toSharedContact())
             RemoteContactAction.FAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = true)
             RemoteContactAction.UNFAVORITE -> radioController.setRemoteFavorite(destNum, node.num, favorite = false)
+            RemoteContactAction.IGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = true)
+            RemoteContactAction.UNIGNORE -> radioController.setRemoteIgnored(destNum, node.num, ignored = false)
             RemoteContactAction.REMOVE -> radioController.removeRemoteNode(destNum, node.num)
         }
     }

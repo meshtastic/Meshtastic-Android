@@ -62,6 +62,8 @@ import org.meshtastic.core.resources.remote_contacts_add_contact
 import org.meshtastic.core.resources.remote_contacts_explainer
 import org.meshtastic.core.resources.remote_contacts_failed
 import org.meshtastic.core.resources.remote_contacts_favorite
+import org.meshtastic.core.resources.remote_contacts_ignore
+import org.meshtastic.core.resources.remote_contacts_ignore_confirm
 import org.meshtastic.core.resources.remote_contacts_invalid_url
 import org.meshtastic.core.resources.remote_contacts_no_public_key
 import org.meshtastic.core.resources.remote_contacts_pick
@@ -71,14 +73,17 @@ import org.meshtastic.core.resources.remote_contacts_sending
 import org.meshtastic.core.resources.remote_contacts_sent
 import org.meshtastic.core.resources.remote_contacts_target
 import org.meshtastic.core.resources.remote_contacts_unfavorite
+import org.meshtastic.core.resources.remote_contacts_unignore
 import org.meshtastic.core.resources.remote_contacts_url
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NotFavorite
 import org.meshtastic.core.ui.icon.PersonAdd
 import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.Search
+import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.radio.RemoteContactAction
 import org.meshtastic.feature.settings.radio.RemoteContactsViewModel
@@ -206,16 +211,20 @@ private fun CandidateCard(
     result: RemoteWriteResult?,
     onAction: (RemoteContactAction) -> Unit,
 ) {
-    var confirmRemove by rememberSaveable { mutableStateOf(false) }
-    if (confirmRemove) {
+    var confirming by rememberSaveable { mutableStateOf<RemoteContactAction?>(null) }
+    confirming?.let { action ->
+        val ignore = action == RemoteContactAction.IGNORE
         WarningDialog(
-            icon = MeshtasticIcons.PersonOff,
-            title = stringResource(Res.string.remote_contacts_remove),
-            text = { Text(stringResource(Res.string.remote_contacts_remove_confirm, node.effectiveLongName, target)) },
-            onDismiss = { confirmRemove = false },
+            icon = if (ignore) MeshtasticIcons.DoDisturb else MeshtasticIcons.PersonOff,
+            title = stringResource(if (ignore) Res.string.remote_contacts_ignore else Res.string.remote_contacts_remove),
+            text = {
+                val body = if (ignore) Res.string.remote_contacts_ignore_confirm else Res.string.remote_contacts_remove_confirm
+                Text(stringResource(body, node.effectiveLongName, target))
+            },
+            onDismiss = { confirming = null },
             onConfirm = {
-                confirmRemove = false
-                onAction(RemoteContactAction.REMOVE)
+                confirming = null
+                onAction(action)
             },
         )
     }
@@ -242,8 +251,14 @@ private fun CandidateCard(
                 ActionButton(MeshtasticIcons.NotFavorite, Res.string.remote_contacts_unfavorite, enabled) {
                     onAction(RemoteContactAction.UNFAVORITE)
                 }
+                ActionButton(MeshtasticIcons.DoDisturb, Res.string.remote_contacts_ignore, enabled) {
+                    confirming = RemoteContactAction.IGNORE
+                }
+                ActionButton(MeshtasticIcons.Visibility, Res.string.remote_contacts_unignore, enabled) {
+                    onAction(RemoteContactAction.UNIGNORE)
+                }
                 ActionButton(MeshtasticIcons.PersonOff, Res.string.remote_contacts_remove, enabled) {
-                    confirmRemove = true
+                    confirming = RemoteContactAction.REMOVE
                 }
             }
             result?.let { WriteStatusLine(it, target) }

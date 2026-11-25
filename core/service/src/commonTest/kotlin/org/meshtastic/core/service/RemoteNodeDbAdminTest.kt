@@ -106,6 +106,21 @@ class RemoteNodeDbAdminTest {
     }
 
     @Test
+    fun setRemoteIgnoredSendsSetOrRemoveIgnoredToTheRemoteNode() = runTest {
+        val controller = controller()
+        controller.setRemoteIgnored(REMOTE, CONTACT, ignored = true)
+        controller.setRemoteIgnored(REMOTE, CONTACT, ignored = false)
+
+        val (ignore, unignore) = commandSender.adminRequests
+        assertEquals(REMOTE, ignore.destNum)
+        assertEquals(CONTACT, ignore.message.set_ignored_node)
+        assertNull(ignore.message.remove_ignored_node)
+        assertEquals(REMOTE, unignore.destNum)
+        assertEquals(CONTACT, unignore.message.remove_ignored_node)
+        assertNull(unignore.message.set_ignored_node)
+    }
+
+    @Test
     fun removeRemoteNodeSendsRemoveByNodenumToTheRemoteNode() = runTest {
         assertTrue(controller().removeRemoteNode(REMOTE, CONTACT))
 

@@ -299,6 +299,15 @@ internal class AdminControllerImpl(
     }
         .getOrDefault(false)
 
+    override suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean = safeCatching {
+        commandSender.sendAdminAwait(destNum) {
+            AdminMessage.Builder()
+                .also { wb -> if (ignored) wb.set_ignored_node = nodeNum else wb.remove_ignored_node = nodeNum }
+                .build()
+        }
+    }
+        .getOrDefault(false)
+
     override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean = safeCatching {
         commandSender.sendAdminAwait(destNum) {
             AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = nodeNum }.build()

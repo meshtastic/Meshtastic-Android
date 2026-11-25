@@ -1916,9 +1916,11 @@
     <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
     <string name="remote_contacts">Contacts and favorites</string>
     <string name="remote_contacts_add_contact">Add contact</string>
-    <string name="remote_contacts_explainer">Every button here sends a command over the mesh to %1$s and changes %1$s's node database, not your radio's. Add contact gives %1$s that node's public key and favorites it there, except on a Client Base. Remove deletes that node from %1$s. %1$s can't report which favorites it already holds.</string>
+    <string name="remote_contacts_explainer">Every button here sends a command over the mesh to %1$s and changes %1$s's node database, not your radio's. Add contact gives %1$s that node's public key and favorites it there, except on a Client Base. Ignore makes %1$s drop that node's packets, and Remove deletes it from %1$s's node database. %1$s can't report which favorites it already holds.</string>
     <string name="remote_contacts_failed">No confirmation from %1$s. The change may still have reached it, and sending again is safe.</string>
     <string name="remote_contacts_favorite">Favorite</string>
+    <string name="remote_contacts_ignore">Ignore</string>
+    <string name="remote_contacts_ignore_confirm">Ignore %1$s on %2$s? %2$s drops its packets and deletes the messages and telemetry it stored from it. Unignore lifts the block but does not bring those back.</string>
     <string name="remote_contacts_invalid_url">That isn't a Meshtastic contact URL.</string>
     <string name="remote_contacts_no_public_key">This contact has no public key. Sending it would erase the key %1$s holds for that node.</string>
     <string name="remote_contacts_pick">Nodes your radio knows</string>
@@ -1928,6 +1930,7 @@
     <string name="remote_contacts_sent">%1$s acknowledged</string>
     <string name="remote_contacts_target">Sending to %1$s</string>
     <string name="remote_contacts_unfavorite">Unfavorite</string>
+    <string name="remote_contacts_unignore">Unignore</string>
     <string name="remote_contacts_url">Contact URL to add to %1$s</string>
     <string name="remote_hardware">Remote Hardware</string>
     <string name="remote_hardware_config">Remote Hardware Config</string>

@@ -129,6 +129,9 @@ interface AdminController {
     /** Favorites or unfavorites [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
     suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean
 
+    /** Ignores or unignores [nodeNum] in [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
+    suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean
+
     /** Removes [nodeNum] from [destNum]'s node DB. Returns `true` once [destNum] acknowledges. */
     suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean
 
