@@ -323,7 +323,7 @@ private fun WriteStatusLine(result: RemoteWriteResult, target: String) {
 
 /** The row on a remote node's settings page that opens [RemoteContactsScreen]. */
 @Composable
-internal fun RemoteContactsRow(enabled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+internal fun RemoteContactsRow(enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     ListItem(
         text = stringResource(Res.string.remote_contacts),
         modifier = modifier,

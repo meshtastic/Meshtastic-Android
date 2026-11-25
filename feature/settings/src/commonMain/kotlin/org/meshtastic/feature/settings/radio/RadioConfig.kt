@@ -82,8 +82,8 @@ import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
-import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.RemoteContactsRow
+import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.settingsPlatform
 
@@ -121,7 +121,7 @@ fun RadioConfigItemList(
             DeviceConfigContent(readable, onNavigate)
             ModuleSettingsContent(readable, onNavigate)
             if (!state.isLocal && destNum != null) {
-                RemoteContactsRow(enabled) { onNavigate(SettingsRoute.RemoteContacts(destNum)) }
+                RemoteContactsRow(enabled = enabled, onClick = { onNavigate(SettingsRoute.RemoteContacts(destNum)) })
             }
             AdministrationContent(enabled, onNavigate)
         }

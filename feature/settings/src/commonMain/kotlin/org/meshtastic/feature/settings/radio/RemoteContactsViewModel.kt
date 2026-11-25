@@ -73,7 +73,7 @@ data class RemoteWriteResult(val nodeNum: Int?, val action: RemoteContactAction,
 @KoinViewModel
 class RemoteContactsViewModel(
     @InjectedParam val destNum: Int,
-    private val nodeRepository: NodeRepository,
+    nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
 ) : ViewModel() {
