@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -94,14 +95,22 @@ class RemoteContactsViewModel(
     val destNode: StateFlow<Node?> = nodeRepository.nodeDBbyNum.map { it[destNum] }.stateInWhileSubscribed(null)
 
     /**
-     * Every node other than [destNum] itself. One without a trusted key stays listed, since only the add actions need a
-     * key: see [hasTrustedKey].
+     * Every node other than [destNum] itself: our own node first, then local favorites, then most recently heard. One
+     * without a trusted key stays listed, since only the add actions need a key: see [hasTrustedKey].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val candidates: StateFlow<List<Node>> =
         _query
-            .flatMapLatest { nodeRepository.getNodes(sort = NodeSortOption.ALPHABETICAL, filter = it) }
-            .map { nodes -> nodes.filter { it.num != destNum } }
+            .flatMapLatest { nodeRepository.getNodes(sort = NodeSortOption.LAST_HEARD, filter = it) }
+            .combine(nodeRepository.myNodeInfo) { nodes, mine ->
+                nodes
+                    .filter { it.num != destNum }
+                    .sortedWith(
+                        compareByDescending<Node> { it.num == mine?.myNodeNum }
+                            .thenByDescending { it.isFavorite }
+                            .thenByDescending { it.lastHeard },
+                    )
+            }
             .stateInWhileSubscribed(emptyList())
 
     private val sending

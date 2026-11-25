@@ -109,6 +109,28 @@ class RemoteContactsViewModelTest {
         assertEquals(setOf(KEYED, KEYLESS, DISPUTED), vm.candidates.value.map { it.num }.toSet())
     }
 
+    @Test
+    fun candidatesPutOurOwnNodeFirstThenFavoritesThenTheMostRecentlyHeard() = runTest {
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = OWN))
+        nodeRepository.setNodes(
+            listOf(
+                node(REMOTE, "Remote").copy(lastHeard = 999),
+                node(KEYLESS, "Stale").copy(lastHeard = 100),
+                node(DISPUTED, "Recent").copy(lastHeard = 500),
+                node(KEYED, "Favorite").copy(isFavorite = true, lastHeard = 50),
+                node(OWN, "Own").copy(lastHeard = 10),
+            ),
+        )
+        val vm = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.candidates.collect {} }
+
+        assertEquals(listOf(OWN, KEYED, DISPUTED, KEYLESS), vm.candidates.value.map { it.num })
+
+        vm.setQuery("recent")
+
+        assertEquals(listOf(DISPUTED), vm.candidates.value.map { it.num })
+    }
+
     // set_favorite_node, set_ignored_node and remove_by_nodenum carry a node number only (admin.proto), so a node the
     // radio holds no key for can still be favorited, ignored and removed on the remote node.
     @Test
