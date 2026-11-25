@@ -454,8 +454,5 @@ private constructor(
             scope: CoroutineScope,
             dispatchers: CoroutineDispatchers,
         ): SerialTransport = SerialTransport(portName, baudRate, callback, scope, dispatchers)
-
-        /** Returns names of all available serial ports. */
-        fun getAvailablePorts(): List<String> = SerialPort.getCommPorts().map { it.systemPortName }
     }
 }

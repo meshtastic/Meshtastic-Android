@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import org.koin.core.annotation.Single
-import org.meshtastic.core.network.SerialTransport
+import org.meshtastic.core.network.availableSerialPorts
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.JvmUsbDeviceData
 import kotlin.coroutines.coroutineContext
@@ -32,11 +32,11 @@ class JvmUsbScanner : UsbScanner {
     override fun scanUsbDevices(): Flow<List<DeviceListEntry.Usb>> = flow {
         while (coroutineContext.isActive) {
             val ports =
-                SerialTransport.getAvailablePorts().map { portName ->
+                availableSerialPorts().map { port ->
                     DeviceListEntry.Usb(
-                        usbData = JvmUsbDeviceData(portName),
-                        name = portName,
-                        fullAddress = "s$portName",
+                        usbData = JvmUsbDeviceData(port.name),
+                        name = port.name,
+                        fullAddress = "s${port.address}",
                         bonded = true, // Desktop serial ports don't need Android USB permission bonding
                         node = null,
                     )
