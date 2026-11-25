@@ -143,7 +143,10 @@ class RemoteContactsViewModelTest {
         vm.perform(keyless, RemoteContactAction.IGNORE)
         vm.perform(disputed, RemoteContactAction.REMOVE)
 
-        assertEquals(listOf("setRemoteFavorite", "setRemoteIgnored", "removeRemoteNode"), remoteWrites().map { it.kind })
+        assertEquals(
+            listOf("setRemoteFavorite", "setRemoteIgnored", "removeRemoteNode"),
+            remoteWrites().map { it.kind },
+        )
         assertEquals(listOf<Any?>(KEYLESS, KEYLESS, KEYED), remoteWrites().map { it.payload })
     }
 
