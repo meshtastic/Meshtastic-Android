@@ -61,4 +61,15 @@ class SerialPortsTest {
     fun `a missing by-id directory gives no links`() {
         assertEquals(emptyMap(), serialByIdLinks(File(dev.toFile(), "absent")))
     }
+
+    // The stored address is the link where one exists; a built-in UART with no link keeps its own name.
+    @Test
+    fun `a port with a link is addressed by the link and one without by its name`() {
+        val link = "/dev/serial/by-id/usb-RAKwireless_WisCore_RAK4631_Board_7885014CB2C5B186-if00"
+
+        assertEquals(
+            listOf(SerialPortEntry("ttyACM3", link), SerialPortEntry("ttyS0", "ttyS0")),
+            serialPortEntries(listOf("ttyACM3", "ttyS0"), mapOf("ttyACM3" to link)),
+        )
+    }
 }

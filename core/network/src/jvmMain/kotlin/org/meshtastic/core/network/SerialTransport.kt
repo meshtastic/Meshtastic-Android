@@ -151,7 +151,8 @@ private fun diagnoseSerialOpenFailure(portName: String): String {
 }
 
 private fun detectSerialGroup(devPath: String): String = runCatching {
-    val process = ProcessBuilder("stat", "-c", "%G", devPath).redirectErrorStream(true).start()
+    // -L: a by-id address is a symlink, and the group that grants access is the device node's.
+    val process = ProcessBuilder("stat", "-L", "-c", "%G", devPath).redirectErrorStream(true).start()
     try {
         if (!process.waitFor(SERIAL_GROUP_LOOKUP_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
             Logger.w { "stat lookup for $devPath timed out" }

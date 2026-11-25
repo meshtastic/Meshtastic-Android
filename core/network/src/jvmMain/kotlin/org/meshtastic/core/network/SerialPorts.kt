@@ -26,11 +26,12 @@ private val SERIAL_BY_ID_DIR = File("/dev/serial/by-id")
  * kernel gives a re-enumerated device the next free `ttyACM` number while the old one is still open, and udev points
  * the link at the new one. Other ports, and other hosts, whose names already follow the device, use the system name.
  */
-fun availableSerialPorts(): List<SerialPortEntry> {
-    val links = serialByIdLinks(SERIAL_BY_ID_DIR)
-    return SerialPort.getCommPorts().map {
-        SerialPortEntry(it.systemPortName, links[it.systemPortName] ?: it.systemPortName)
-    }
+fun availableSerialPorts(): List<SerialPortEntry> =
+    serialPortEntries(SerialPort.getCommPorts().map { it.systemPortName }, serialByIdLinks(SERIAL_BY_ID_DIR))
+
+/** Each of [names] with its by-id link from [links] as the address, or its own name when it has none. */
+internal fun serialPortEntries(names: List<String>, links: Map<String, String>): List<SerialPortEntry> = names.map {
+    SerialPortEntry(it, links[it] ?: it)
 }
 
 /** Each device node name in [dir]'s link targets, mapped to the first of its links by name. */
