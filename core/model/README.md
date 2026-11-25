@@ -17,7 +17,7 @@ across Android, JVM, and iOS.
 - **`Channel`**: Represents a mesh channel configuration.
 - **`util/`**: Meshtastic URL handling (`ChannelSet`, `SharedContact`, `dispatchMeshtasticUri`), `UnitConversions`, and proto extension helpers.
 
-The module `api`-exports the `org.meshtastic:protobufs` artifact and the TAKPacket-SDK (with the SDK's own transitive protobufs excluded), so consumers get both without declaring them.
+The module `api`-exports the `org.meshtastic:protobufs` artifact, the Meshtastic SDK core (`org.meshtastic:sdk-core`) and the TAKPacket-SDK (with the SDK's own transitive protobufs excluded), so consumers get all three without declaring them.
 
 ## Usage
 This module is a core dependency of most feature modules.

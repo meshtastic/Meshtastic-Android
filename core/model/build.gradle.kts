@@ -31,6 +31,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.meshtastic.protobufs)
+            api(libs.meshtastic.sdk.core)
             api(projects.core.common)
             api(projects.core.resources)
 
