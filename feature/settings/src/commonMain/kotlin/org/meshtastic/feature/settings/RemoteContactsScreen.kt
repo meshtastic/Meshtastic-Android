@@ -177,12 +177,15 @@ private fun TargetBanner(target: String, targetId: String, targetNode: Node?) {
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 targetNode?.let { NodeChip(node = it) }
                 Text(
                     text = stringResource(Res.string.remote_contacts_target, "$target ($targetId)"),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -194,7 +197,7 @@ private fun TargetBanner(target: String, targetId: String, targetNode: Node?) {
                 }
             Text(
                 text = stringResource(explainer, target),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }
