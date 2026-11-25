@@ -94,6 +94,44 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun installConfigRestsRowsTheRadioNoLongerHoldsAtHeard() = runTest {
+        createDb()
+        val dropped =
+            NodeEntity(num = 1, user = User.Builder().also { it.id = "!1" }.build(), heardOnCurrentLora = false)
+        val held = NodeEntity(num = 2, user = User.Builder().also { it.id = "!2" }.build(), heardOnCurrentLora = false)
+        dao.upsert(dropped)
+        dao.upsert(held)
+
+        dao.installConfig(myNodeInfo, listOf(held.copy()))
+
+        assertTrue(assertNotNull(dao.getNodeByNum(1)).node.heardOnCurrentLora)
+        assertFalse(assertNotNull(dao.getNodeByNum(2)).node.heardOnCurrentLora)
+    }
+
+    @Test
+    fun installConfigKeepsTheDumpFlagWhenAnotherDumpRowSharesTheKey() = runTest {
+        createDb()
+        val key = ByteArray(32) { 7 }.toByteString()
+        fun node(num: Int) = NodeEntity(
+            num = num,
+            user =
+            User.Builder()
+                .also {
+                    it.id = "!$num"
+                    it.public_key = key
+                }
+                .build(),
+            heardOnCurrentLora = false,
+        )
+        dao.upsert(node(10))
+
+        // 11 is not crc32(key), so the stored 10 keeps the identity and is not migrated.
+        dao.installConfig(myNodeInfo, listOf(node(10), node(11)))
+
+        assertFalse(assertNotNull(dao.getNodeByNum(10)).node.heardOnCurrentLora)
+    }
+
+    @Test
     fun testNodeDBbyNum() = runTest {
         createDb()
         val node1 = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build())
