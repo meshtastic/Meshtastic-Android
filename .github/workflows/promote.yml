@@ -589,7 +589,9 @@ jobs:
             "$RUNNER_TEMP/discord-notes.md" "$VERSION" "$TRACK" \
             "https://github.com/$GITHUB_REPOSITORY/releases/tag/$VERSION")
 
-          curl --fail-with-body -sS -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+          # A webhook error must not fail update-github-release: the cask and Flathub jobs run after it.
+          curl --fail-with-body -sS -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK" \
+            || echo "::warning::The Discord post failed"
 
   # Runs in-workflow rather than on `release: published` because the undraft above
   # uses github.token, whose events never trigger other workflows. Once the cask is
