@@ -56,6 +56,26 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsJpAribSlotGrid_requires_post_arib_firmware_even_with_forceEnableAll() {
+        assertFalse(caps("2.7.26").supportsJpAribSlotGrid)
+        assertFalse(caps("2.8.0").supportsJpAribSlotGrid)
+        assertFalse(caps("2.8.1").supportsJpAribSlotGrid)
+        assertFalse(caps("2.8.2").supportsJpAribSlotGrid)
+        assertFalse(caps("2.8.2.d5f1619").supportsJpAribSlotGrid)
+        assertFalse(caps(null).supportsJpAribSlotGrid)
+        assertFalse(caps("").supportsJpAribSlotGrid)
+        assertFalse(caps("0.0.0").supportsJpAribSlotGrid)
+        assertFalse(caps("invalid").supportsJpAribSlotGrid)
+        assertFalse(Capabilities("2.8.2", forceEnableAll = true).supportsJpAribSlotGrid)
+        assertFalse(Capabilities(null, forceEnableAll = true).supportsJpAribSlotGrid)
+
+        assertTrue(caps("2.8.3").supportsJpAribSlotGrid)
+        assertTrue(caps("2.8.3.abcdef0").supportsJpAribSlotGrid)
+        assertTrue(caps("2.9.0").supportsJpAribSlotGrid)
+        assertTrue(caps("3.0.0").supportsJpAribSlotGrid)
+    }
+
+    @Test
     fun supportsLockdown_requires_V2_8_0() {
         assertFalse(caps("2.7.21").supportsLockdown)
         assertTrue(caps("2.8.0").supportsLockdown)
@@ -249,6 +269,7 @@ class CapabilitiesTest {
         assertFalse(c.supportsTakConfig)
         assertFalse(c.supportsRemoteShell)
         assertFalse(c.supportsEsp32Ota)
+        assertFalse(c.supportsJpAribSlotGrid)
     }
 
     @Test

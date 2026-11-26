@@ -340,6 +340,10 @@ internal fun BeaconsPage(
     onJoin: (ChannelSet) -> Unit,
     onNavigate: (Route) -> Unit,
 ) {
+    val jpAribGrid =
+        remember(state.metadata?.firmware_version) {
+            Capabilities(state.metadata?.firmware_version).supportsJpAribSlotGrid
+        }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OnboardingPageHeader(
             headline = stringResource(Res.string.radio_setup_beacons_headline),
@@ -375,6 +379,7 @@ internal fun BeaconsPage(
                 lora = lora,
                 channels = state.channelList,
                 canWrite = canWrite,
+                jpAribGrid = jpAribGrid,
                 onJoin = onJoin,
             )
         }
@@ -402,9 +407,11 @@ private fun BeaconOfferRow(
     lora: Config.LoRaConfig?,
     channels: List<ChannelSettings>,
     canWrite: Boolean,
+    jpAribGrid: Boolean,
     onJoin: (ChannelSet) -> Unit,
 ) {
-    val joinOption = remember(offer, lora, channels) { offer.beacon.beaconJoinOption(lora, channels) }
+    val joinOption =
+        remember(offer, lora, channels, jpAribGrid) { offer.beacon.beaconJoinOption(lora, channels, jpAribGrid) }
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -432,7 +439,7 @@ private fun BeaconOfferRow(
                     Res.string.mesh_beacon_offer_join
                 }
             Button(
-                onClick = { offer.beacon.toJoinChannelSet(joinOption, lora)?.let(onJoin) },
+                onClick = { offer.beacon.toJoinChannelSet(joinOption, lora, jpAribGrid)?.let(onJoin) },
                 enabled = canWrite && joinOption != BeaconJoinOption.NONE,
             ) {
                 Text(stringResource(label))

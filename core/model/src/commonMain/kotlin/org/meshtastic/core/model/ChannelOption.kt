@@ -82,26 +82,23 @@ private data class SlotPlan(
     val firstCenter: Float,
     val lowerCount: Int,
     val upperFirstCenter: Float,
-) {
-    fun centerFreq(slotIndex: Int): Float = if (lowerCount < count && slotIndex >= lowerCount) {
-        upperFirstCenter + (slotIndex - lowerCount) * width
-    } else {
-        firstCenter + slotIndex * width
-    }
-}
+)
 
 /**
  * Computes the frequency-slot grid for [bwMHz] in this region.
  *
- * Regions that define a unit-channel raster ([RegionInfo.unitChannelMHz]) or sub-band split ([RegionInfo.bandSplitMHz])
- * mirror firmware `RegionInfo::getSlotPlan` (symmetric unit-channel bonding and non-straddling sub-band truncation).
- * All other regions keep the legacy `round()` slot count unchanged.
+ * With [jpAribGrid], regions that define a unit-channel raster ([RegionInfo.unitChannelMHz]) or sub-band split
+ * ([RegionInfo.bandSplitMHz]) mirror firmware `RegionInfo::getSlotPlan` (symmetric unit-channel bonding and
+ * non-straddling sub-band truncation). Without it, and for every region that defines neither, the legacy `round()` slot
+ * count is used, which is what firmware predating [Capabilities.supportsJpAribSlotGrid] still runs.
  */
-private fun RegionInfo.slotPlan(bwMHz: Float): SlotPlan {
+private fun RegionInfo.slotPlan(bwMHz: Float, jpAribGrid: Boolean): SlotPlan {
+    val unit = if (jpAribGrid) unitChannelMHz else 0f
+    val split = if (jpAribGrid) bandSplitMHz else 0f
     val effectivePadding =
-        if (unitChannelMHz > 0f && bwMHz > 0f) {
-            val numUnits = ((bwMHz / unitChannelMHz) * (1f - 1e-6f)).toInt() + 1
-            val slotSpan = numUnits * unitChannelMHz
+        if (unit > 0f && bwMHz > 0f) {
+            val numUnits = ((bwMHz / unit) * (1f - 1e-6f)).toInt() + 1
+            val slotSpan = numUnits * unit
             if (slotSpan > bwMHz) (slotSpan - bwMHz) * 0.5f else 0f
         } else {
             padding
@@ -110,11 +107,11 @@ private fun RegionInfo.slotPlan(bwMHz: Float): SlotPlan {
     val width = spacing + effectivePadding * 2f + bwMHz
     val centerOffset = bwMHz * 0.5f + effectivePadding
     val lowerFirst = freqStart + centerOffset
-    val hasBandSplit = bandSplitMHz > freqStart && bandSplitMHz < freqEnd
+    val hasBandSplit = split > freqStart && split < freqEnd
 
     return if (width <= 0f || freqEnd <= freqStart) {
         SlotPlan(width, 0, lowerFirst, 0, lowerFirst)
-    } else if (unitChannelMHz > 0f || hasBandSplit) {
+    } else if (unit > 0f || hasBandSplit) {
         val countSubBand: (Float, Float) -> Int = { subStart, subEnd ->
             val span = subEnd - subStart
             if (span + spacing <= 0f) {
@@ -127,9 +124,9 @@ private fun RegionInfo.slotPlan(bwMHz: Float): SlotPlan {
             }
         }
         if (hasBandSplit) {
-            val lowerCount = countSubBand(freqStart, bandSplitMHz)
-            val upperCount = countSubBand(bandSplitMHz, freqEnd)
-            val upperFirst = bandSplitMHz + centerOffset
+            val lowerCount = countSubBand(freqStart, split)
+            val upperCount = countSubBand(split, freqEnd)
+            val upperFirst = split + centerOffset
             val firstCenter = if (lowerCount > 0 || upperCount == 0) lowerFirst else upperFirst
             SlotPlan(width, lowerCount + upperCount, firstCenter, lowerCount, upperFirst)
         } else {
@@ -142,32 +139,44 @@ private fun RegionInfo.slotPlan(bwMHz: Float): SlotPlan {
     }
 }
 
-val LoRaConfig.numChannels: Int
-    get() {
-        val regionInfo = RegionInfo.fromRegionCode(region) ?: return 0
-        val bw = bandwidth(regionInfo)
-        val count = if (bw <= 0f) 1 else regionInfo.slotPlan(bw).count
-        // If the regional frequency range is smaller than the slot width, the firmware would
-        // fall back to a default preset. In the app, we return 1 to avoid a crash.
-        return if (count > 0) count else 1
-    }
+/**
+ * Number of frequency slots in this config's region. [jpAribGrid] is [Capabilities.supportsJpAribSlotGrid] of the radio
+ * the config belongs to; it is off by default because firmware without the JP ARIB STD-T108 grid plans JP on the legacy
+ * one.
+ */
+fun LoRaConfig.numChannels(jpAribGrid: Boolean = false): Int {
+    val regionInfo = RegionInfo.fromRegionCode(region) ?: return 0
+    val bw = bandwidth(regionInfo)
+    val count = if (bw <= 0f) 1 else regionInfo.slotPlan(bw, jpAribGrid).count
+    // If the regional frequency range is smaller than the slot width, the firmware would
+    // fall back to a default preset. In the app, we return 1 to avoid a crash.
+    return if (count > 0) count else 1
+}
 
-internal fun LoRaConfig.channelNum(primaryName: String): Int {
+internal fun LoRaConfig.channelNum(primaryName: String, jpAribGrid: Boolean = false): Int {
     val overrideSlot = RegionInfo.fromRegionCode(region)?.overrideSlot ?: 0
+    val slotCount = numChannels(jpAribGrid)
     return when {
         channel_num != 0 -> channel_num
-        numChannels == 0 -> 0
+        slotCount == 0 -> 0
         overrideSlot > 0 -> overrideSlot
-        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+        else -> (hash(primaryName) % slotCount.toUInt()).toInt() + 1
     }
 }
 
-internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
+internal fun LoRaConfig.radioFreq(channelNum: Int, jpAribGrid: Boolean = false): Float {
     if (override_frequency != 0f) return override_frequency + frequency_offset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
-        val plan = regionInfo.slotPlan(bandwidth(regionInfo))
-        plan.centerFreq((channelNum - 1).coerceAtLeast(0)) + frequency_offset
+        val plan = regionInfo.slotPlan(bandwidth(regionInfo), jpAribGrid)
+        val slotIndex = (channelNum - 1).coerceAtLeast(0)
+        val center =
+            if (plan.lowerCount < plan.count && slotIndex >= plan.lowerCount) {
+                plan.upperFirstCenter + (slotIndex - plan.lowerCount) * plan.width
+            } else {
+                plan.firstCenter + slotIndex * plan.width
+            }
+        center + frequency_offset
     } else {
         0f
     }
@@ -212,8 +221,10 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
  *   profile
  * @property padding Gap at each side of a frequency slot in MHz, from the firmware's region profile (coerces the modem
  *   bandwidth up to the region's slot width, e.g. ham 15.625 kHz -> 20 kHz)
- * @property unitChannelMHz Unit-channel raster in MHz; when > 0, bonds contiguous unit channels and overrides [padding]
- * @property bandSplitMHz Optional sub-band boundary in MHz that slots never straddle (0 = unsplit)
+ * @property unitChannelMHz Unit-channel raster in MHz; when > 0, bonds contiguous unit channels and overrides
+ *   [padding]. Only applied for a radio whose firmware has it ([Capabilities.supportsJpAribSlotGrid])
+ * @property bandSplitMHz Optional sub-band boundary in MHz that slots never straddle (0 = unsplit); gated like
+ *   [unitChannelMHz]
  * @property overrideSlot The region's fixed default frequency slot (1-based), or 0 to derive the slot from the primary
  *   channel-name hash as usual
  * @property minFirmware The first firmware release whose region table contains this region, or null for regions all

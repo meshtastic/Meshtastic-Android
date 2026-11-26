@@ -622,7 +622,8 @@ class DiscoveryScanEngine(
             // Bound the pinned slot against the config we are about to apply, not the one we are leaving: a nonzero
             // channel_num is taken verbatim, so an unaddressable slot would tune the scan to a frequency that does
             // not exist. Zero puts us back on deriving it from the offered name.
-            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels } ?: 0
+            val jpAribGrid = nodeRepository.ourNodeInfo.value?.capabilities?.supportsJpAribSlotGrid == true
+            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels(jpAribGrid) } ?: 0
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->

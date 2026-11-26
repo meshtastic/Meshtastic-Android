@@ -54,7 +54,7 @@ class ChannelTest {
     fun numChannelsGood() {
         val ch = Channel.default
 
-        Assert.assertEquals(104, ch.loraConfig.numChannels)
+        Assert.assertEquals(104, ch.loraConfig.numChannels())
     }
 
     @Test

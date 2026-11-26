@@ -62,7 +62,9 @@ internal fun beaconPresetConstraint(
  * (design#140's never-render-blank rule); null when the stored value is already one of the allowed intervals.
  */
 internal fun beaconIntervalFallback(storedSeconds: Long, allowed: List<FixedUpdateIntervals>): Long? =
-    storedSeconds.takeUnless { seconds -> allowed.any { it.value == seconds } }
+    storedSeconds.takeUnless { seconds ->
+        allowed.any { it.value == seconds }
+    }
 
 /**
  * Matches [offerChannel] to its true `channel_index` among [selectableChannels] by name and PSK (a channel's identity
@@ -100,6 +102,7 @@ internal fun stampBeaconConfigForSave(
     stored: MeshBeaconConfig,
     radioLora: Config.LoRaConfig,
     channelList: List<ChannelSettings>,
+    jpAribGrid: Boolean = false,
 ): MeshBeaconConfig = if (radioLora.use_preset) {
     val offerChannel =
         (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
@@ -117,7 +120,7 @@ internal fun stampBeaconConfigForSave(
             wb.broadcast_offer_preset = radioLora.modem_preset
             wb.broadcast_offer_channel = offerChannel
             wb.broadcast_offer_frequency_slot =
-                beaconOfferFrequencySlot(offerChannel, channelList.getOrNull(0), radioLora)
+                beaconOfferFrequencySlot(offerChannel, channelList.getOrNull(0), radioLora, jpAribGrid)
             wb.broadcast_targets =
                 form.broadcast_targets.map { it.newBuilder().also { wb -> wb.region = radioLora.region }.build() }
         }
@@ -163,7 +166,9 @@ internal fun selectBeaconTargetChannel(
  * stored list is returned unchanged.
  */
 internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): List<MeshBeaconConfig.BroadcastTarget> =
-    stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()) }
+    stored.ifEmpty {
+        listOf(MeshBeaconConfig.BroadcastTarget.Builder().build())
+    }
 
 /**
  * [MeshBeaconConfigScreen]'s actual `formState` initial value: [seedBeaconTargets] applied to the loaded config's

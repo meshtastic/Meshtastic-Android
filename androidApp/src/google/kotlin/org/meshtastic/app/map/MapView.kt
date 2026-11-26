@@ -1182,7 +1182,8 @@ fun MapView(
             },
             // Hands params to the hosted Site Planner and imports the returned coverage.
             onSitePlannerClick = {
-                sitePlannerLaunch = SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
+                sitePlannerLaunch =
+                    SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet, ourNodeInfo))
             },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
@@ -1292,7 +1293,10 @@ fun MapView(
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
             sitePlannerLaunch =
-                SitePlannerLaunch(initialParams = node.toSitePlannerParams(channelSet), selectedNode = node)
+                SitePlannerLaunch(
+                    initialParams = node.toSitePlannerParams(channelSet, ourNodeInfo),
+                    selectedNode = node,
+                )
             if (node.validPosition != null) {
                 cameraPositionState.animateOrLog("centering on site planner node") {
                     CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude))

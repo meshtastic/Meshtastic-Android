@@ -451,7 +451,7 @@ class MeshBeaconOfferTest {
         // The NYMesh case: the offered name hashes to our slot, but the mesh actually sits elsewhere. Deriving would
         // call this a no-reboot ADD and the user would join and hear nothing.
         val homeSlot = slotOf("HomeMesh")
-        val elsewhere = if (homeSlot < radioLora.numChannels) homeSlot + 1 else homeSlot - 1
+        val elsewhere = if (homeSlot < radioLora.numChannels()) homeSlot + 1 else homeSlot - 1
         assertEquals(
             BeaconJoinOption.SWITCH,
             offerOn("HomeMesh", slot = elsewhere).beaconJoinOption(radioLora, radioChannels),
@@ -472,7 +472,7 @@ class MeshBeaconOfferTest {
         // Unaddressable here, so behave as though the field were absent rather than refuse an advisory offer.
         assertEquals(
             BeaconJoinOption.ADD,
-            offerOn("HomeMesh", slot = radioLora.numChannels + 1).beaconJoinOption(radioLora, radioChannels),
+            offerOn("HomeMesh", slot = radioLora.numChannels() + 1).beaconJoinOption(radioLora, radioChannels),
         )
         assertEquals(BeaconJoinOption.ADD, offerOn("HomeMesh", slot = 0).beaconJoinOption(radioLora, radioChannels))
     }
@@ -488,5 +488,86 @@ class MeshBeaconOfferTest {
     fun `a switch with no advertised slot leaves channel_num zero for firmware to derive`() {
         val set = assertNotNull(offerOn("PinnedMesh").toJoinChannelSet(BeaconJoinOption.SWITCH, radioLora))
         assertEquals(0, assertNotNull(set.lora_config).channel_num)
+    }
+
+    @Test
+    fun `jp beacon slot 12 is honoured on legacy firmware and dropped on arib firmware`() {
+        val jpLora =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.region = RegionCode.JP
+                    wb.channel_num = 0
+                }
+                .build()
+        val pinned12 = jpLora.newBuilder().also { wb -> wb.channel_num = 12 }.build()
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = "AnyName" }.build()
+                    wb.offer_preset = ModemPreset.LONG_FAST
+                    wb.offer_region = RegionCode.JP
+                    wb.offer_frequency_slot = 12
+                }
+                .build()
+
+        // Legacy JP LongFast has 12 slots: slot 12 is valid and joins without retuning a radio pinned to 12.
+        assertEquals(12, beacon.advertisedFrequencySlot(jpLora, jpAribGrid = false))
+        assertEquals(BeaconJoinOption.ADD, beacon.beaconJoinOption(pinned12, radioChannels, jpAribGrid = false))
+        val legacySwitch = assertNotNull(beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, jpLora, jpAribGrid = false))
+        assertEquals(12, assertNotNull(legacySwitch.lora_config).channel_num)
+
+        // ARIB JP LongFast has 7 slots: slot 12 is unaddressable, so it drops back to derivation (channel_num = 0).
+        assertNull(beacon.advertisedFrequencySlot(jpLora, jpAribGrid = true))
+        assertEquals(BeaconJoinOption.SWITCH, beacon.beaconJoinOption(pinned12, radioChannels, jpAribGrid = true))
+        val aribSwitch = assertNotNull(beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, jpLora, jpAribGrid = true))
+        assertEquals(0, assertNotNull(aribSwitch.lora_config).channel_num)
+    }
+
+    @Test
+    fun `jp beacon slot 6 matches unpinned long fast only on arib firmware`() {
+        val jpLora =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.region = RegionCode.JP
+                    wb.channel_num = 0
+                }
+                .build()
+        val defaultPrimary = listOf(ChannelSettings.Builder().also { wb -> wb.name = "" }.build())
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = "LongFast" }.build()
+                    wb.offer_preset = ModemPreset.LONG_FAST
+                    wb.offer_region = RegionCode.JP
+                    wb.offer_frequency_slot = 6
+                }
+                .build()
+
+        // Unpinned JP LongFast hashes to slot 12 on the legacy 12-slot grid and slot 6 on the ARIB 7-slot grid.
+        assertEquals(BeaconJoinOption.SWITCH, beacon.beaconJoinOption(jpLora, defaultPrimary, jpAribGrid = false))
+        assertEquals(BeaconJoinOption.ADD, beacon.beaconJoinOption(jpLora, defaultPrimary, jpAribGrid = true))
+    }
+
+    @Test
+    fun `jp outgoing beacon slot follows the firmware grid`() {
+        val pinned6 =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.region = RegionCode.JP
+                    wb.channel_num = 6
+                }
+                .build()
+        val primary = ChannelSettings.Builder().also { wb -> wb.name = "LongFast" }.build()
+
+        // On legacy JP (derived slot 12), pinning slot 6 diverges and must be advertised; on ARIB (derived slot 6) it
+        // matches derivation and is omitted.
+        assertEquals(6, beaconOfferFrequencySlot(primary, primary, pinned6, jpAribGrid = false))
+        assertNull(beaconOfferFrequencySlot(primary, primary, pinned6, jpAribGrid = true))
     }
 }

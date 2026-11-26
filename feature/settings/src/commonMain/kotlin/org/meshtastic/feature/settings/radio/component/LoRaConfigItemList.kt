@@ -190,7 +190,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = loraConfig)
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
-    val primaryChannel = remember(primarySettings, formState.value) { Channel(primarySettings, formState.value) }
+    val primaryChannel =
+        remember(primarySettings, formState.value, capabilities) {
+            Channel(primarySettings, formState.value, capabilities.supportsJpAribSlotGrid)
+        }
     val focusManager = LocalFocusManager.current
     val bandwidthSelection =
         loRaBandwidthSelection(
@@ -439,7 +442,8 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         null
                     },
                     onValueChanged = {
-                        if (it <= formState.value.numChannels) { // total num of LoRa channels
+                        // total num of LoRa channels
+                        if (it <= formState.value.numChannels(capabilities.supportsJpAribSlotGrid)) {
                             formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
                         }
                     },

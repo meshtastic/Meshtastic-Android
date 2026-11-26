@@ -149,6 +149,21 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsHeardOnCurrentLora = version != null && version >= V2_8_1
 
     /**
+     * Whether the node plans JP frequency slots on the ARIB STD-T108 200 kHz unit-channel grid (firmware#11559), so the
+     * app must too. Firmware at or below [LAST_PRE_ARIB_JP_FIRMWARE], and an unknown or unparseable version, keeps the
+     * legacy grid: showing it the new one would put a wrong slot count and frequency on screen and could pin a slot the
+     * node rejects.
+     *
+     * Deliberately outside [forceEnableAll]: like [supportsHeardOnCurrentLora], turning this on in a debug build
+     * against pre-ARIB JP firmware does not merely reveal an ignored control — it displays wrong RF frequencies, blocks
+     * valid legacy slots, and stamps the wrong beacon offer slot.
+     *
+     * [DeviceVersion] compares `major.minor.patch` only and ignores a trailing build hash, so this tells builds apart
+     * only when the ARIB release carries a higher `major.minor.patch` than [LAST_PRE_ARIB_JP_FIRMWARE].
+     */
+    val supportsJpAribSlotGrid = version != null && version > LAST_PRE_ARIB_JP_FIRMWARE
+
+    /**
      * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
      * [RegionInfo.minFirmware]; older firmware would treat an unknown region code as UNSET, so the picker hides it.
      */
@@ -166,6 +181,15 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     }
 
     companion object {
+        /**
+         * PLACEHOLDER: the newest firmware release that does NOT carry the JP ARIB STD-T108 slot grid (firmware#11559,
+         * tracked in firmware#12441). It is the current alpha, not the real boundary. Once #11559 has shipped, replace
+         * it with the version string of the last release before it, alpha or beta, whichever is the latest. If that
+         * release shares its `major.minor.patch` with the first ARIB one, [DeviceVersion] cannot tell them apart: gate
+         * on the first ARIB release with `>=` instead.
+         */
+        private val LAST_PRE_ARIB_JP_FIRMWARE = DeviceVersion("2.8.2.d5f1619")
+
         private val V2_6_8 = DeviceVersion("2.6.8")
         private val V2_6_9 = DeviceVersion("2.6.9")
         private val V2_6_10 = DeviceVersion("2.6.10")

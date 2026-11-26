@@ -35,11 +35,15 @@ class SitePlannerLaunch(val initialParams: SitePlannerParams, private val select
  * transmit frequency (from the primary channel), transmit power (dBm→W), and a receiver sensitivity derived from the
  * modem preset. Antenna gain/height aren't in the device config, so they keep the planner's stock defaults.
  *
+ * The channel's frequency is the connected [radio]'s to plan, which may not be this node: its firmware decides whether
+ * JP slots follow the ARIB STD-T108 grid.
+ *
  * Flavor-neutral: both the Google and F-Droid maps feed the same hosted Site Planner.
  */
-fun Node?.toSitePlannerParams(channelSet: ChannelSet?): SitePlannerParams {
+fun Node?.toSitePlannerParams(channelSet: ChannelSet?, radio: Node? = null): SitePlannerParams {
     val lora = channelSet?.lora_config
-    val freqMhz = channelSet?.primaryChannel?.radioFreq?.toDouble()?.takeIf { it > 0.0 }
+    val jpAribGrid = radio?.capabilities?.supportsJpAribSlotGrid == true
+    val freqMhz = channelSet?.primaryChannel?.copy(jpAribGrid = jpAribGrid)?.radioFreq?.toDouble()?.takeIf { it > 0.0 }
     return SitePlannerParams(
         name = this?.effectiveLongName?.takeIf { it.isNotBlank() } ?: "Coverage",
         latitude = this?.latitude ?: 0.0,

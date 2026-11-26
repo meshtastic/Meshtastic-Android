@@ -125,8 +125,11 @@ private fun ChannelConfigScreen(
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
     val modemPresetName = remember(loraConfig) { Channel(loraConfig = loraConfig).name }
-    val primaryChannel = remember(primarySettings, loraConfig) { Channel(primarySettings, loraConfig) }
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
+    val primaryChannel =
+        remember(primarySettings, loraConfig, capabilities) {
+            Channel(primarySettings, loraConfig, capabilities.supportsJpAribSlotGrid)
+        }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
