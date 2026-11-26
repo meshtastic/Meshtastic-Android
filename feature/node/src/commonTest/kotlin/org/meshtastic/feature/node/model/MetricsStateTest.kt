@@ -74,18 +74,49 @@ class MetricsStateTest {
     }
 
     @Test
+    fun ownNodePageListsEachOfOurRequestsOnceAndNeverAsReceivedNeighborInfo() {
+        // Our own page reads every log our radio originated as a result, our requests included.
+        val selfRequest =
+            neighborLog(uuid = "self", packetId = 10, receivedDate = 1_000, fromNum = LOCAL, wantResponse = true)
+        val otherRequest =
+            neighborLog(uuid = "other", packetId = 11, receivedDate = 2_000, fromNum = LOCAL, wantResponse = true)
+        val reply = neighborLog(uuid = "reply", packetId = 12, requestId = 10, receivedDate = 3_000, fromNum = LOCAL)
+        val state =
+            MetricsState(
+                neighborInfoRequests = listOf(selfRequest),
+                neighborInfoResults = listOf(selfRequest, otherRequest, reply),
+            )
+
+        assertEquals(listOf(NeighborInfoEntry.Requested(selfRequest, reply)), state.neighborInfoEntries())
+    }
+
+    @Test
+    fun neighborInfoTimesAreWholeSecondsSoTheChartAcceptsThem() {
+        val broadcast = neighborLog(uuid = "b", packetId = 1, receivedDate = 1_764_000_000_123)
+
+        assertEquals(1_764_000_000.0, NeighborInfoEntry.Received(broadcast).timeSeconds)
+    }
+
+    @Test
     fun neighborInfoLogsExistWithOnlyUnaskedNeighborInfo() {
         val state = MetricsState(neighborInfoResults = listOf(neighborLog(uuid = "b", packetId = 1, receivedDate = 1)))
 
         assertTrue(state.hasNeighborInfoLogs())
     }
 
-    private fun neighborLog(uuid: String, packetId: Int, receivedDate: Long, requestId: Int = 0) = MeshLog(
+    private fun neighborLog(
+        uuid: String,
+        packetId: Int,
+        receivedDate: Long,
+        requestId: Int = 0,
+        fromNum: Int = 2,
+        wantResponse: Boolean = false,
+    ) = MeshLog(
         uuid = uuid,
         message_type = "Packet",
         received_date = receivedDate,
         raw_message = "",
-        fromNum = 2,
+        fromNum = fromNum,
         portNum = PortNum.NEIGHBORINFO_APP.value,
         fromRadio =
         FromRadio.Builder()
@@ -99,6 +130,7 @@ class MetricsStateTest {
                                     .also { data ->
                                         data.portnum = PortNum.NEIGHBORINFO_APP
                                         data.request_id = requestId
+                                        data.want_response = wantResponse
                                     }
                                     .build()
                         }
@@ -113,4 +145,8 @@ class MetricsStateTest {
             wb.local_stats = LocalStats.Builder().also { wb -> wb.noise_floor = -101 }.build()
         }
         .build()
+
+    private companion object {
+        const val LOCAL = MeshLog.NODE_NUM_LOCAL
+    }
 }
