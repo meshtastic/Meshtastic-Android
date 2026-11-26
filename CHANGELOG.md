@@ -8,7 +8,19 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Closed Beta (v2.8.5-closed.2)
+### Internal (v2.8.5-internal.6)
+Changes since [`v2.8.5-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.5-open.1):
+
+#### 🏗️ Features
+* feat(settings): manage contacts and favorites on a remote node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8251
+#### 🖥️ Desktop
+* fix(desktop): address Linux serial radios by their /dev/serial/by-id link by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8250
+#### 🛠️ Fixes
+* fix(messaging): show the relay on packets that crossed MQTT but arrived over LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8252
+* fix(nodes): stop offering nodes the radio no longer holds as unheard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8248
+* fix(node): stop the neighbor info log crashing on duplicate rows and chart x-values by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8266
+
+### Open Beta (v2.8.5-open.1)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
 #### 🏗️ Features
@@ -127,6 +139,9 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(connections): move connect-code scan to the import FAB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8083
 * fix(data): retry the bundled hardware catalog after a failed seed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8097
 * refactor(settings): make the location, key backup and TAK permission composables common by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8191
+
+## New Contributors
+* @ThomasGorisse made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8254
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
