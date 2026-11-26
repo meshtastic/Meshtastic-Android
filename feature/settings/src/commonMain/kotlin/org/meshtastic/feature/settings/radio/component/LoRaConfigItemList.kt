@@ -441,12 +441,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     } else {
                         null
                     },
-                    onValueChanged = {
-                        // total num of LoRa channels
-                        if (it <= formState.value.numChannels(capabilities.supportsJpAribSlotGrid)) {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
-                        }
-                    },
+                    onValueChanged = { formState.value = formState.value.withChannelSlotFor(it, capabilities) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -565,6 +560,13 @@ private fun FrequencyOverridePreference(
 
 internal fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
     if (capabilities.supportsCodingRateOverride) normalizeCodingRateOverride() else this
+
+internal fun Config.LoRaConfig.withChannelSlotFor(slot: Int, capabilities: Capabilities): Config.LoRaConfig =
+    if (slot in 0..numChannels(capabilities.supportsJpAribSlotGrid)) {
+        newBuilder().also { wb -> wb.channel_num = slot }.build()
+    } else {
+        this
+    }
 
 /**
  * Raises the preset's coding rate without leaving the preset (design#161). Only rates above the preset's own are

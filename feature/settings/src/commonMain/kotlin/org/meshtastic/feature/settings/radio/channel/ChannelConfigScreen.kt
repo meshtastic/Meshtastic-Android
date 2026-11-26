@@ -128,7 +128,7 @@ private fun ChannelConfigScreen(
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val primaryChannel =
         remember(primarySettings, loraConfig, capabilities) {
-            Channel(primarySettings, loraConfig, capabilities.supportsJpAribSlotGrid)
+            primaryChannelForConfig(primarySettings, loraConfig, capabilities)
         }
 
     val focusManager = LocalFocusManager.current
@@ -321,6 +321,12 @@ private val channelPskEditStatesSaver =
 internal fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
     add(toIndex, removeAt(fromIndex))
 }
+
+internal fun primaryChannelForConfig(
+    primarySettings: ChannelSettings,
+    loraConfig: Config.LoRaConfig,
+    capabilities: Capabilities,
+): Channel = Channel(primarySettings, loraConfig, capabilities.supportsJpAribSlotGrid)
 
 /** The primary channel a secondary at [index] inherits an unset key from, or null for the primary itself. */
 internal fun List<ChannelSettings>.primaryFor(index: Int): ChannelSettings? = firstOrNull().takeIf { index > 0 }
