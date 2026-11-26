@@ -30,11 +30,13 @@ import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.network.transport.parseTcpRadioAddress
 import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioLinks
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.sdk.TransportIdentity
 import org.meshtastic.sdk.TransportSpec
 import org.meshtastic.sdk.transport.ble.BleTransport
 import org.meshtastic.sdk.transport.serial.JvmSerialPorts
 import org.meshtastic.sdk.transport.tcp.TcpTransport
+import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 /** Desktop's radio links: Bluetooth, TCP, WebSocket, serial ports and, in debug builds, the demo radio. */
@@ -93,9 +95,23 @@ class DesktopRadioLinks(
             while (serialDevicePresence.portExists(rest) == false) delay(PORT_POLL)
             JvmSerialPorts.open(rest)
         },
+        failureReason = { serialFailureReason(rest) },
     )
 
     private companion object {
         val PORT_POLL = 1.seconds
     }
+}
+
+/**
+ * Reads a failed serial open the way the user can fix it: on Linux, a device node that exists but that this account
+ * cannot read and write means it lacks the node's group. jSerialComm reports only that the open failed.
+ */
+internal fun serialFailureReason(
+    address: String,
+    isLinux: Boolean = System.getProperty("os.name", "").lowercase().contains("linux"),
+): TransportDisconnectReason? {
+    val node = File(if (address.startsWith("/")) address else "/dev/$address")
+    val denied = isLinux && node.exists() && !(node.canRead() && node.canWrite())
+    return if (denied) TransportDisconnectReason.SerialPermissionDenied else null
 }

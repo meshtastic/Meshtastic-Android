@@ -2053,6 +2053,7 @@ send
 ### SERIAL ###
 serial
 serial_config
+serial_permission_denied
 serial_port_chip
 serial_port_unknown
 serial_port_usb_ids

@@ -2134,6 +2134,7 @@
     <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Serial Config</string>
+    <string name="serial_permission_denied">Permission denied for the serial port. Add your account to the group that owns it, usually dialout (uucp on Arch), then log out and back in.</string>
     <string name="serial_port_chip">%1$s USB serial</string>
     <string name="serial_port_unknown">Serial device</string>
     <string name="serial_port_usb_ids">USB serial device %1$s</string>

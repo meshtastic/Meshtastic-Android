@@ -50,4 +50,7 @@ enum class TransportDisconnectReason {
 
     /** The user declined Android's USB permission prompt, so the radio stays unreachable until it is re-attached. */
     UsbPermissionDenied,
+
+    /** Linux refused to open the serial port's device node for this user, who lacks the group that owns it. */
+    SerialPermissionDenied,
 }
