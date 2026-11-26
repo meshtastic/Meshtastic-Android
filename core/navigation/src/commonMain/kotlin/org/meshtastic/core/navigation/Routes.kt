@@ -121,6 +121,9 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object Administration : SettingsRoute
 
+    /** Contacts and favorites in the node DB of [destNum], a remotely administered node. */
+    @Serializable data class RemoteContacts(val destNum: Int) : SettingsRoute
+
     /**
      * The guided setup for the connected radio: region, preset and name. [address] is the transport address of the
      * radio it was opened for; the setup writes to that radio only and closes when another one connects.

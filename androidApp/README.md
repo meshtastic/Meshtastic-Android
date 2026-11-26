@@ -6,7 +6,7 @@ The `:androidApp` module is the entry point for the Meshtastic Android applicati
 ## Key Components
 
 ### 1. `MainActivity` & `Main.kt`
-The single Activity of the application. It hosts the shared `MeshtasticNavDisplay` navigation shell and manages the root UI structure (Navigation Bar, Rail, etc.).
+The single Activity of the application. `Main.kt` runs the app version check and shows the shared `MeshtasticMainScreen` from `:appShell`, which holds the navigation shell (bar, rail and `MeshtasticNavDisplay`).
 
 ### 2. `MeshService`
 The core background service that manages long-running communication with the mesh radio. While it is declared in the `:androidApp` manifest for system visibility, its implementation resides in the `:core:service` module. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
@@ -55,6 +55,7 @@ graph TB
   :androidApp -.-> :core:ui
   :androidApp -.-> :core:barcode
   :androidApp -.-> :core:takserver
+  :androidApp -.-> :appShell
   :androidApp -.-> :feature:intro
   :androidApp -.-> :feature:messaging
   :androidApp -.-> :feature:connections

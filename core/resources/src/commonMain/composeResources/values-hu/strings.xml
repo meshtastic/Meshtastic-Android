@@ -344,6 +344,8 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_modem_preset">Modem-előbeállítás</string>
+    <string name="lora_value_none">Semmi</string>
     <string name="low_battery">Alacsony töltöttség</string>
     <string name="low_battery_message">A %1$s csomópont akkumulátora alacsony (%2$d%)</string>
     <string name="low_battery_title">Alacsony töltöttség: %1$s</string>
@@ -439,7 +441,6 @@
     <string name="neighbor_info">Szomszéd-információ</string>
     <string name="neighbor_info_config">Szomszéd-információ beállításai</string>
     <string name="network">Hálózat</string>
-    <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="new_messages_below">Új üzenetek lent</string>
     <string name="new_node_seen">Új csomópont észlelve: %1$s</string>
     <string name="new_nodes">Új csomópontok</string>
@@ -566,6 +567,8 @@
     <!-- REMOTE -->
     <string name="remote">Távoli</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
+    <string name="remote_contacts_ignore">Mellőzés</string>
+    <string name="remote_contacts_remove">Törlés</string>
     <string name="remote_hardware">Távoli hardver</string>
     <string name="remote_hardware_config">Távoli hardver beállításai</string>
     <string name="remote_hardware_enabled">Távoli hardver engedélyezve</string>

@@ -59,7 +59,6 @@
     <!-- ADD -->
     <string name="add">Добавить</string>
     <string name="add_a_note">Добавить личную заметку…</string>
-    <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выбери те, которые хочешь добавить на свое устройство. Существующие каналы будут сохранены.</string>
     <string name="add_custom_tile_source">Добавить источник сетевых плиток</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="add_layer">Добавить слой</string>
@@ -1146,10 +1145,12 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
-    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
-    <string name="lora_config_changes">Изменения настроек LoRa:</string>
+    <string name="lora_fem_lna_auto">Автоматически</string>
+    <string name="lora_field_frequency_offset">Частотное смещение</string>
+    <string name="lora_field_modem_preset">Режим работы модема</string>
     <string name="lora_preset_custom">Пользовательский</string>
     <string name="lora_preset_region">%1$s · %2$s</string>
+    <string name="lora_value_none">Отсутствует</string>
     <string name="low_battery">Низкий заряд батареи</string>
     <string name="low_battery_message">У узла %1$s низкий заряд (%2$d%)</string>
     <string name="low_battery_title">Низкий заряд батареи: %1$s</string>
@@ -1524,7 +1525,6 @@
     <string name="neighbor_mean_snr">Среднее значение SNR соседа</string>
     <string name="neighbor_mean_snr_description">Средний уровень шума, при котором эта нода слышит сообщения своих соседей.</string>
     <string name="network">Сеть</string>
-    <string name="new_channel_rcvd">Получен URL нового канала</string>
     <string name="new_messages_below">Новые сообщения ниже</string>
     <string name="new_node_seen">Найдена новая нода: %1$s</string>
     <string name="new_nodes">Новые ноды</string>
@@ -1868,6 +1868,8 @@
     <string name="remote">Удаленные</string>
     <string name="remote_admin">Удаленное администрирование</string>
     <string name="remote_admin_unreachable">Не удается подключиться к ноде — попробуй еще раз или подойди ближе.</string>
+    <string name="remote_contacts_ignore">Игнорировать</string>
+    <string name="remote_contacts_remove">Удалить</string>
     <string name="remote_hardware">Удаленное устройство</string>
     <string name="remote_hardware_config">Настройка удаленного оборудования</string>
     <string name="remote_hardware_enabled">Удаленное оборудование включено</string>
@@ -1925,7 +1927,6 @@
         <item quantity="other">%1$d ноды будут удалены из твоего списка до тех пор, пока твоя нода снова не получит от них данные.</item>
     </plurals>
     <string name="replace">Заменить</string>
-    <string name="replace_channels_and_settings_description">Этот QR-код содержит полную конфигурацию. Это заменит ваши существующие каналы и настройки радио. Все существующие каналы будут удалены.</string>
     <string name="reply">Ответить</string>
     <string name="replying_to">Ответить %1$s</string>
     <string name="report">Отчет</string>
@@ -2430,7 +2431,6 @@
     <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
-    <string name="wifi_provision_available_networks">Доступные сети</string>
     <string name="wifi_provision_choose_device">Выбери устройство</string>
     <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
@@ -2438,14 +2438,13 @@
     <string name="wifi_provision_device_found_detail">Готов сканировать Wi-Fi сети.</string>
     <string name="wifi_provision_hidden_network">Скрытая сеть</string>
     <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Устройства не найдены</string>
     <string name="wifi_provision_no_networks">Сети не найдены</string>
     <string name="wifi_provision_scan_failed">Не удалось найти Wi-Fi сети: %1$s</string>
-    <string name="wifi_provision_scan_networks">Поиск сетей</string>
     <string name="wifi_provision_scanning_ble">Поиск устройства…</string>
     <string name="wifi_provision_scanning_wifi">Поиск…</string>
     <string name="wifi_provision_sending_credentials">Применение конфигурации Wi-Fi…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Имя сети (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
     <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
     <string name="wifi_provision_status_failed">Не удалось применить конфигурацию Wi-Fi</string>

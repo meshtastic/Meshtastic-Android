@@ -36,6 +36,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.isNodeDbReplay
 import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLineString
@@ -155,7 +156,8 @@ class MeshMessageProcessorImpl(
         }
     }
 
-    private fun logVariant(proto: FromRadio, session: RadioSessionContext) {
+    private fun logVariant(received: FromRadio, session: RadioSessionContext) {
+        val proto = received.redactedForLog()
         val myInfo = proto.my_info
         val nodeInfo = proto.node_info
         val config = proto.config
@@ -191,9 +193,15 @@ class MeshMessageProcessorImpl(
 
     /** Test seam for packet-only fixtures with explicit transport authority. */
     internal suspend fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?, session: RadioSessionContext) {
-        // Single normalization point: every consumer downstream of this copy sees a stamped packet.
+        // Single normalization point: every consumer downstream of this copy sees a stamped packet, except a node DB
+        // replay, where the phone's clock would turn a never-heard node into one heard just now.
         val preparedPacket =
-            packet.newBuilder().also { wb -> wb.rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt() }.build()
+            packet
+                .newBuilder()
+                .also { wb ->
+                    wb.rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt().takeUnless { packet.isNodeDbReplay() }
+                }
+                .build()
 
         // Require myNodeNum to be known before storing: processReceivedMeshPacket only keys a local packet under
         // NODE_NUM_LOCAL when packet.from == myNodeNum. If myNodeNum is still null (early in a (re)connect, before
@@ -277,15 +285,16 @@ class MeshMessageProcessorImpl(
     @Suppress("LongMethod")
     private suspend fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val decoded = packet.decoded ?: return
+        val loggedPacket = packet.redactedForLog()
         val log =
             MeshLog(
                 uuid = Uuid.random().toString(),
                 message_type = "Packet",
                 received_date = nowMillis,
-                raw_message = packet.toString(),
+                raw_message = loggedPacket.toString(),
                 fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
-                fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
+                fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
             )
         val logJob = insertMeshLog(log, session)
 
@@ -312,7 +321,7 @@ class MeshMessageProcessorImpl(
     private fun applySenderPacketUpdate(node: Node, packet: MeshPacket, decoded: org.meshtastic.proto.Data): Node {
         val viaMqtt = packet.via_mqtt == true
         val isDirect = packet.hop_start == packet.hop_limit
-        val updateRadioMetrics = isDirect && packet.isLora() && !viaMqtt
+        val updateRadioMetrics = isDirect && packet.isLora() && !viaMqtt && !packet.isNodeDbReplay()
         // Every real reception carries rx_rssi; the stored packets firmware replays after a node DB dump are marked
         // LoRa
         // but carry none, and were heard earlier, maybe on other settings.
@@ -326,9 +335,8 @@ class MeshMessageProcessorImpl(
                 else -> packet.hop_start - packet.hop_limit
             }
         return node.copy(
-            // Packets reach here already stamped, so the fallback is unreachable by design and must stay that way:
-            // a packet that just arrived SHOULD refresh lastHeard, using the phone's clock when the radio had no
-            // time source. The fallback only guards a future caller that skips normalization from writing the epoch.
+            // Live packets reach here stamped with the phone's clock when the radio had none. Only a node DB replay
+            // arrives without rx_time, and it must leave lastHeard where the node DB dump put it.
             lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
             viaMqtt = viaMqtt,
             heardOnCurrentLora = node.heardOnCurrentLora || heardOverOurRadio,

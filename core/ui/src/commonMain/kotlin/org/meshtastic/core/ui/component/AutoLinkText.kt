@@ -175,8 +175,9 @@ internal fun buildAnnotatedStringWithLinks(
         }
 
         // Bare URL/email/phone autolinking, skipping anything already covered by a mention or markdown link.
-        for ((range, url) in autoLinks) {
-            if (range.any { it in usedIndices }) continue
+        for ((range, candidate) in autoLinks) {
+            val url = openableLinkTarget(candidate, allowTel = true)
+            if (url == null || range.any { it in usedIndices }) continue
             addLink(LinkAnnotation.Url(url = url, styles = linkStyles), range.first, range.last + 1)
             range.forEach { usedIndices.add(it) }
         }
@@ -222,7 +223,10 @@ private fun collectAutolinkMatches(display: String): List<Pair<IntRange, String>
         matches.add(match.range to if (url.startsWith("www.", ignoreCase = true)) "https://$url" else url)
     }
     EMAIL_REGEX.findAll(display).forEach { match -> matches.add(match.range to "mailto:${match.value}") }
-    PHONE_REGEX.findAll(display).forEach { match -> matches.add(match.range to "tel:${match.value}") }
+    PHONE_REGEX.findAll(display).forEach { match ->
+        // A number written with spaces dials without them.
+        matches.add(match.range to "tel:${match.value.filterNot { it.isWhitespace() }}")
+    }
     return matches.sortedWith(compareBy({ it.first.first }, { -(it.first.last - it.first.first) }))
 }
 

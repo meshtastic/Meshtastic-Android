@@ -18,7 +18,6 @@
 
 package org.meshtastic.app.ui
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
@@ -27,38 +26,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
+import org.meshtastic.appshell.MeshtasticMainScreen
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.LockdownState
-import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
-import org.meshtastic.core.ui.component.MeshtasticAppShell
-import org.meshtastic.core.ui.component.MeshtasticNavDisplay
-import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.connections.navigation.connectionsGraph
-import org.meshtastic.feature.discovery.navigation.discoveryGraph
-import org.meshtastic.feature.docs.navigation.docsEntries
-import org.meshtastic.feature.firmware.navigation.firmwareGraph
-import org.meshtastic.feature.map.navigation.mapGraph
-import org.meshtastic.feature.messaging.navigation.contactsGraph
-import org.meshtastic.feature.node.navigation.nodesGraph
-import org.meshtastic.feature.settings.lockdown.LockdownDialog
-import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
-import org.meshtastic.feature.settings.navigation.settingsGraph
-import org.meshtastic.feature.settings.radio.channel.channelsGraph
-import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
 @Composable
 fun MainScreen() {
@@ -66,60 +46,15 @@ fun MainScreen() {
     // Land on Connections for first-run / no-device-selected; otherwise on Nodes (seeded from prefs).
     val initialTab = remember { startDestination(viewModel.currentDeviceAddressFlow.value) }
     val multiBackstack = rememberMultiBackstack(initialTab)
-    val backStack = multiBackstack.activeBackStack
-    val scrollToTopEvents = viewModel.scrollToTopEventFlow
-    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
 
     AndroidAppVersionCheck(viewModel)
 
-    val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
-    LockdownDialog(
-        lockdownState = lockdownState,
-        onSubmit = { passphrase, boots, hours, sessionMinutes ->
-            viewModel.sendLockdownUnlock(passphrase, boots, hours, sessionMinutes * TimeConstants.SECONDS_PER_MINUTE)
-        },
-        onDisconnect = { viewModel.setDeviceAddress("n") },
+    MeshtasticMainScreen(
+        uiViewModel = viewModel,
+        multiBackstack = multiBackstack,
+        displayModifier = Modifier.recalculateWindowInsets().safeDrawingPadding(),
+        analytics = koinInject<PlatformAnalytics>(),
     )
-    // Auto-disconnect when firmware acknowledges Lock Now
-    LaunchedEffect(lockdownState) {
-        if (lockdownState is LockdownState.LockNowAcknowledged) {
-            viewModel.setDeviceAddress("n")
-        }
-    }
-
-    MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = viewModel, hostModifier = Modifier) {
-        MeshtasticNavigationSuite(
-            multiBackstack = multiBackstack,
-            uiViewModel = viewModel,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            MeshtasticNavDisplay(
-                multiBackstack = multiBackstack,
-                entryProvider =
-                entryProvider<NavKey> {
-                    contactsGraph(backStack, scrollToTopEvents, onHandleDeepLink = viewModel::handleDeepLink)
-                    nodesGraph(
-                        backStack = backStack,
-                        scrollToTopEvents = scrollToTopEvents,
-                        onHandleDeepLink = viewModel::handleDeepLink,
-                        onNavigateToConnections = {
-                            multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
-                        },
-                    )
-                    mapGraph(backStack)
-                    channelsGraph(backStack)
-                    connectionsGraph(backStack)
-                    discoveryGraph(backStack)
-                    settingsGraph(backStack, settingsRadioConfigViewModelProvider)
-                    docsEntries(backStack)
-                    firmwareGraph(backStack)
-                    wifiProvisionGraph(backStack)
-                },
-                modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
-                analytics = koinInject<PlatformAnalytics>(),
-            )
-        }
-    }
 }
 
 @Composable

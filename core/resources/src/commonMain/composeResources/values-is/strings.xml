@@ -138,7 +138,6 @@
     <!-- MUTE -->
     <string name="name">Heiti</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="nodedb_reset">Endurræsa NodeDB</string>
@@ -173,6 +172,7 @@
     <string name="radio_setup_name_headline">Heiti</string>
     <string name="reboot">Endurræsa</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">Hunsa</string>
     <string name="remote_shell_modifier_locked">Læst</string>
     <string name="remote_shell_send">Senda</string>
     <string name="remote_shell_status_not_connected">Ekki tengdur</string>

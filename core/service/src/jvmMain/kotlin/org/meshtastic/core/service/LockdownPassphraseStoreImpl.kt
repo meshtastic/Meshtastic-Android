@@ -18,7 +18,9 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.database.ensureOwnerOnlyFile
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.StoredPassphrase
 import java.io.File
@@ -34,7 +36,7 @@ import javax.crypto.SecretKey
 @Suppress("TooGenericExceptionCaught")
 class LockdownPassphraseStoreImpl(dataDir: File = File(desktopDataDir())) : LockdownPassphraseStore {
 
-    private val lockdownDir: File by lazy { File(dataDir, LOCKDOWN_DIR).also { it.mkdirs() } }
+    private val lockdownDir: File by lazy { File(dataDir, LOCKDOWN_DIR).also(::createOwnerOnlyDirectories) }
 
     private val cipher by lazy { DesktopKeystoreCipher(lockdownDir, KEY_ALIAS, KEYSTORE_PASSWORD) }
 
@@ -70,7 +72,9 @@ class LockdownPassphraseStoreImpl(dataDir: File = File(desktopDataDir())) : Lock
     ) {
         val key = masterKey ?: error("Lockdown: Cannot save passphrase - keystore unavailable")
         val plaintext = serialize(passphrase, boots, hours, maxSessionSeconds)
-        entryFile(deviceAddress).writeBytes(cipher.encrypt(key, plaintext))
+        val entry = entryFile(deviceAddress)
+        ensureOwnerOnlyFile(entry)
+        entry.writeBytes(cipher.encrypt(key, plaintext))
     }
 
     override fun clearPassphrase(deviceAddress: String) {

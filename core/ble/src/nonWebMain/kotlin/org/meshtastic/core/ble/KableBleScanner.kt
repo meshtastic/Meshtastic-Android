@@ -70,6 +70,8 @@ private fun Advertisement.toScanResult(): KableScanResult =
 open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     private val scanStartLimiter = createBleScanStartLimiter()
 
+    override val addressIsHardware: Boolean = bleAddressIsHardware
+
     internal open suspend fun reserveScanStart() = scanStartLimiter.reserveStart()
 
     internal open fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {

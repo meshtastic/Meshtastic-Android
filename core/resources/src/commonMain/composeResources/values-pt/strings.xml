@@ -50,7 +50,6 @@
     <!-- ADD -->
     <string name="add">Adicionar</string>
     <string name="add_a_note">Adicionar uma nota privada…</string>
-    <string name="add_channels_description">Os seguintes canais foram encontrados no código QR. Selecione os que deseja adicionar ao seu dispositivo. Os canais existentes serão preservados.</string>
     <string name="add_custom_tile_source">Adicionar fonte de mosaicos de rede</string>
     <string name="add_favorite">Adicionar aos favoritos</string>
     <string name="add_layer">Adicionar Camada</string>
@@ -646,6 +645,8 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_modem_preset">Predefinição de modem</string>
+    <string name="lora_value_none">Nenhum</string>
     <string name="low_battery_message">O node %1$s tem a bateria fraca (%2$d%)</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="lux">Lux</string>
@@ -713,7 +714,6 @@
     <string name="neighbor_info">Informações da vizinhança</string>
     <string name="neighbor_info_config">Configuração de informações dos vizinhos</string>
     <string name="network">Rede</string>
-    <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_ignored">Está a visualizar nós ignorados,\nPrima para regressar à lista de nós.</string>
@@ -795,6 +795,8 @@
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administração Remota</string>
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Remover</string>
     <string name="remote_hardware">Equipamento remoto</string>
     <string name="remote_hardware_config">Configuração de Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto ativado</string>

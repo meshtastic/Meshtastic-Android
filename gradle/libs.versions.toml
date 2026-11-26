@@ -4,7 +4,7 @@ jsqr = "1.4.0"
 xmlutil = "1.0.2.1"
 
 # Android
-agp = "9.5.2"
+agp = "9.5.3"
 appcompat = "1.8.0"
 appfunctions = "1.0.0"
 
@@ -91,7 +91,7 @@ mlkit-translate = "17.0.3"
 camerax = "1.7.0"
 
 # Networking
-ktor = "3.6.1"
+ktor = "3.6.2"
 mcp-kotlin-sdk = "0.16.0"
 
 # Other
@@ -111,7 +111,7 @@ okio = "3.18.2"
 bouncycastle = "1.87"
 uri-kmp = "0.0.21"
 spotless = "8.12.0"
-sceneview = "4.70.0"
+sceneview = "4.74.0"
 vico = "3.4.0-next.1"
 kable = "0.46.0"
 mqttastic = "0.9.1"
@@ -360,7 +360,7 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.5.2" }
+android-tools-common = { module = "com.android.tools:common", version = "32.5.3" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

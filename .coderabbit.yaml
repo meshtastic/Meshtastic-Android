@@ -274,7 +274,11 @@ reviews:
           assert the value comes back, tests that assert only a collection's size rather than
           which items survived, and tests asserting emission ORDER under Dispatchers.Unconfined
           (not a stable contract). A test must assert the side effect only the intended path
-          produces — a call counter, a request issued, a cache written.
+          produces — a call counter, a request issued, a cache written. Read changes to existing
+          tests before the production diff and flag any that weaken one: a deleted test or
+          assertion, a new @Ignore, @Disabled, assume or skip, an equality relaxed to not-null or
+          isNotEmpty, a removed verify or call-count check, a widened tolerance or timeout, a
+          swallowed exception, or a bug fix that changes only tests. Each needs a stated reason.
       - name: "Regression coverage for changed behavior"
         mode: "warning"
         instructions: >-

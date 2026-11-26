@@ -17,6 +17,7 @@
 package org.meshtastic.feature.messaging
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,7 +55,35 @@ class RelayNodeLabelTest {
     }
 
     @Test
+    fun aPacketHeardDirectNamesNoRelay() {
+        // Firmware stamps the transmitter's own byte (Router.cpp), so a 0-hop packet carries the sender's.
+        assertNull(receivedRelayNode(0x5A, hopsAway = 0, viaMqtt = false, transportMechanism = LORA))
+    }
+
+    @Test
+    fun anMqttPacketFromFirmwareWithoutTransportNamesNoRelay() {
+        // Firmware before 2.7.5 leaves transport_mechanism at 0, so via_mqtt is the only signal.
+        assertNull(receivedRelayNode(0x5A, hopsAway = 2, viaMqtt = true, transportMechanism = 0))
+    }
+
+    @Test
+    fun aPacketThatCrossedMqttThenReachedUsOverLoraKeepsItsRelay() {
+        // The LoRa header carries via_mqtt as a flag bit and the last relayer's byte (RadioLibInterface.cpp), and
+        // deliverToReceiver stamps TRANSPORT_LORA, so the byte is the last RF hop even though via_mqtt is set.
+        assertEquals(0x5A, receivedRelayNode(0x5A, hopsAway = 2, viaMqtt = true, transportMechanism = LORA))
+    }
+
+    @Test
+    fun aRelayedPacketKeepsItsRelay() {
+        assertEquals(0x5A, receivedRelayNode(0x5A, hopsAway = 1, viaMqtt = false, transportMechanism = 0))
+    }
+
+    @Test
     fun ourOwnNodeIsNeverTheRelay() {
         assertEquals("0x5A", relayNodeLabel(0x5A, listOf(node(0x5A, "Me")), ourNodeNum = 0x5A))
+    }
+
+    private companion object {
+        val LORA = MeshPacket.TransportMechanism.TRANSPORT_LORA.value
     }
 }

@@ -154,7 +154,6 @@
     <string name="mute_notifications">Silenciar notificacións</string>
     <string name="name">Nome</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Incluír descoñecido</string>
@@ -200,6 +199,8 @@
     <string name="radio_setup_name_headline">Nome</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Eliminar</string>
     <string name="remote_shell_modifier_locked">Bloqueado</string>
     <string name="remote_shell_send">Enviar</string>
     <string name="remote_shell_status_not_connected">Non conectado</string>

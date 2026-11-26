@@ -39,6 +39,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class AdminPacketHandlerImplTest {
 
@@ -65,13 +66,24 @@ class AdminPacketHandlerImplTest {
             )
     }
 
-    /** Builds a response to a request this app sent unless [requestId] names one it did not. */
-    private fun makePacket(from: Int, adminMessage: AdminMessage, requestId: Int = SENT_REQUEST_ID): MeshPacket {
-        if (requestId == SENT_REQUEST_ID) adminRequestRegistry.register(requestId)
+    /**
+     * Builds a response to a request this app sent to [from] unless [requestId] names one it did not. Remote responses
+     * are PKI-encrypted by default.
+     */
+    private fun makePacket(
+        from: Int,
+        adminMessage: AdminMessage,
+        requestId: Int = SENT_REQUEST_ID,
+        pkiEncrypted: Boolean = from != myNodeNum,
+        channel: Int = 0,
+    ): MeshPacket {
+        if (requestId == SENT_REQUEST_ID) adminRequestRegistry.register(requestId, from, ADMIN_CHANNEL_INDEX)
         val payload = adminMessage.encode().toByteString()
         return MeshPacket.Builder()
             .also { wb ->
                 wb.from = from
+                wb.pki_encrypted = pkiEncrypted
+                wb.channel = channel
                 wb.decoded =
                     Data.Builder()
                         .also { wb ->
@@ -139,6 +151,111 @@ class AdminPacketHandlerImplTest {
         handle(packet)
 
         verify(VerifyMode.exactly(1)) { configHandler.handleDeviceConfig(config, session) }
+    }
+
+    @Test
+    fun `response from a node the request was not sent to is ignored and the genuine response still completes it`() {
+        val passkey = ByteString.of(4, 3, 2, 1)
+        val metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.5.0" }.build()
+        val adminMsg =
+            AdminMessage.Builder()
+                .also { wb ->
+                    wb.session_passkey = passkey
+                    wb.get_device_metadata_response = metadata
+                }
+                .build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, ADMIN_CHANNEL_INDEX)
+
+        handle(makePacket(OTHER_NODE, adminMsg, requestId = OTHER_REQUEST_ID, pkiEncrypted = true))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        verify(VerifyMode.not) { nodeManager.insertMetadata(any(), any(), any()) }
+
+        handle(makePacket(REMOTE_NODE, adminMsg, requestId = OTHER_REQUEST_ID, pkiEncrypted = true))
+
+        verify { sessionManager.recordSession(REMOTE_NODE, passkey) }
+        verify { nodeManager.insertMetadata(REMOTE_NODE, metadata, session) }
+    }
+
+    @Test
+    fun `remote response that is neither PKI encrypted nor on the admin channel is ignored and stays outstanding`() {
+        val passkey = ByteString.of(7, 7, 7, 7)
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, ADMIN_CHANNEL_INDEX)
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = 0))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = true))
+
+        verify { sessionManager.recordSession(REMOTE_NODE, passkey) }
+    }
+
+    @Test
+    fun `remote response on the admin channel without PKI is handled`() {
+        val passkey = ByteString.of(8, 8, 8, 8)
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, ADMIN_CHANNEL_INDEX)
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = ADMIN_CHANNEL_INDEX))
+
+        verify { sessionManager.recordSession(REMOTE_NODE, passkey) }
+    }
+
+    @Test
+    fun `remote response without PKI is ignored when no admin channel existed at send`() {
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = ByteString.of(6, 6, 6, 6) }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, adminChannelIndex = null)
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = 0))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+    }
+
+    @Test
+    fun `local response from the previous node number is ignored and stays pending after a renumber`() {
+        val passkey = ByteString.of(1, 1, 1, 1)
+        val config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
+        val adminMsg =
+            AdminMessage.Builder()
+                .also { wb ->
+                    wb.session_passkey = passkey
+                    wb.get_config_response = config
+                }
+                .build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, PREVIOUS_NODE_NUM, null)
+
+        handle(makePacket(PREVIOUS_NODE_NUM, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        verify(VerifyMode.not) { configHandler.handleDeviceConfig(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
+    }
+
+    @Test
+    fun `response from the current node number to a request addressed to the previous one is ignored`() {
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = ByteString.of(2, 2, 2, 2) }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, PREVIOUS_NODE_NUM, null)
+
+        handle(makePacket(myNodeNum, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = true))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
+    }
+
+    @Test
+    fun `non PKI response on a channel other than the admin channel is ignored and stays pending`() {
+        val passkey = ByteString.of(3, 3, 3, 3)
+        val adminMsg = AdminMessage.Builder().also { wb -> wb.session_passkey = passkey }.build()
+        adminRequestRegistry.register(OTHER_REQUEST_ID, REMOTE_NODE, ADMIN_CHANNEL_INDEX)
+
+        val otherChannel = ADMIN_CHANNEL_INDEX + 1
+
+        handle(makePacket(REMOTE_NODE, adminMsg, OTHER_REQUEST_ID, pkiEncrypted = false, channel = otherChannel))
+
+        verify(VerifyMode.not) { sessionManager.recordSession(any(), any()) }
+        assertNotNull(adminRequestRegistry.find(OTHER_REQUEST_ID))
     }
 
     // ---------- Session passkey ----------
@@ -355,5 +472,10 @@ class AdminPacketHandlerImplTest {
     private companion object {
         const val SENT_REQUEST_ID = 4242
         const val UNSOLICITED_REQUEST_ID = 777
+        const val OTHER_REQUEST_ID = 555
+        const val REMOTE_NODE = 99999
+        const val OTHER_NODE = 88888
+        const val PREVIOUS_NODE_NUM = 11111
+        const val ADMIN_CHANNEL_INDEX = 3
     }
 }

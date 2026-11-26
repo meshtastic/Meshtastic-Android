@@ -569,6 +569,7 @@ jobs:
         if: ${{ always() && steps.release.outcome == 'success' && inputs.channel != 'internal' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.final_tag }}
           CHANNEL: ${{ inputs.channel }}
         run: |
@@ -582,35 +583,15 @@ jobs:
           if [ "$CHANNEL" == "open" ]; then TRACK="Beta (Open)"; fi
           if [ "$CHANNEL" == "production" ]; then TRACK="Production"; fi
 
-          # Construct JSON Payload
-          PAYLOAD=$(cat <<EOF
-          {
-            "content": null,
-            "embeds": [
-              {
-                "title": "🚀 New Android Release: $VERSION",
-                "description": "A new build has been promoted to the **$TRACK** track.",
-                "color": 5763719,
-                "fields": [
-                  {
-                    "name": "Track",
-                    "value": "$TRACK",
-                    "inline": true
-                  },
-                  {
-                    "name": "Version",
-                    "value": "$VERSION",
-                    "inline": true
-                  }
-                ],
-                "url": "https://github.com/meshtastic/Meshtastic-Android/releases/tag/$VERSION"
-              }
-            ]
-          }
-          EOF
-          )
+          # The published release notes: Highlights, then the generated sections, as the release page reads.
+          gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/discord-notes.md" || : > "$RUNNER_TEMP/discord-notes.md"
+          PAYLOAD=$(python3 .workflow-ref/scripts/discord-release-post.py \
+            "$RUNNER_TEMP/discord-notes.md" "$VERSION" "$TRACK" \
+            "https://github.com/$GITHUB_REPOSITORY/releases/tag/$VERSION")
 
-          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+          # A webhook error must not fail update-github-release: the cask and Flathub jobs run after it.
+          curl --fail-with-body -sS -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK" \
+            || echo "::warning::The Discord post failed"
 
   # Runs in-workflow rather than on `release: published` because the undraft above
   # uses github.token, whose events never trigger other workflows. Once the cask is

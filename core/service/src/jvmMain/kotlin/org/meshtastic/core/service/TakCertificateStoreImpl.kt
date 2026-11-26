@@ -18,7 +18,9 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createOwnerOnlyDirectories
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.database.restrictToOwner
 import org.meshtastic.core.repository.TakCertificateMaterial
 import org.meshtastic.core.repository.TakCertificateStore
 import java.io.ByteArrayOutputStream
@@ -39,7 +41,7 @@ import javax.crypto.SecretKey
 @Suppress("TooGenericExceptionCaught")
 class TakCertificateStoreImpl(dataDir: File = File(desktopDataDir())) : TakCertificateStore {
 
-    private val storeDir: File by lazy { File(dataDir, STORE_DIR).also { it.mkdirs() } }
+    private val storeDir: File by lazy { File(dataDir, STORE_DIR).also(::createOwnerOnlyDirectories) }
 
     private val cipher by lazy { DesktopKeystoreCipher(storeDir, KEY_ALIAS, KEYSTORE_PASSWORD) }
 
@@ -77,8 +79,10 @@ class TakCertificateStoreImpl(dataDir: File = File(desktopDataDir())) : TakCerti
         val encrypted = cipher.encrypt(key, serialize(material))
         val temp = Files.createTempFile(storeDir.toPath(), "$MATERIAL_FILE.", ".tmp")
         try {
+            restrictToOwner(temp.toFile())
             Files.write(temp, encrypted)
             Files.move(temp, materialFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            restrictToOwner(materialFile)
         } finally {
             Files.deleteIfExists(temp)
         }

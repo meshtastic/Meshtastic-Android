@@ -48,7 +48,7 @@ Release builds run ProGuard 7.9.1 to shrink the app. Obfuscation is off (`obfusc
 
 The module depends on the JVM variants of the KMP modules: every `core:*` module except `core:nfc`, `core:barcode`, `core:konsist` and `core:testing`, and every `feature:*` module except `feature:widget` (`feature:map-terrain` arrives through `feature:map-maplibre`). The map is `feature:map-maplibre`, shared with the `fdroid` Android flavor, with exactly one MapLibre native runtime chosen for the build host's architecture.
 
-**Navigation:** Uses the JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle. `DesktopMainScreen` assembles the shared `MeshtasticAppShell`, `MeshtasticNavigationSuite` and `MeshtasticNavDisplay`, and `desktopNavGraph` registers the graphs each feature module exports from `commonMain` (`nodesGraph`, `contactsGraph`, `channelsGraph`, `mapGraph`, `settingsGraph`, `connectionsGraph`, `discoveryGraph`, `firmwareGraph`, `wifiProvisionGraph`).
+**Navigation:** Uses the JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle. `DesktopMainScreen` shows the shared `MeshtasticMainScreen` from `:appShell` with room for the window's bottom edge; `:appShell` assembles the app shell, navigation suite and `MeshtasticNavDisplay`, and its `sharedNavGraph` registers the graphs each feature module exports.
 
 **Coroutines:** Requires `kotlinx-coroutines-swing` for `Dispatchers.Main` on JVM/Desktop. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` crashes at runtime.
 
@@ -58,7 +58,9 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 
 **Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. `core:service`'s `DispatchingMeshNotificationManager`, shared with web, turns mesh events into the `Notification`s it receives. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
-**Agent MCP server:** A debug build starts a loopback-only MCP server (`mcp/DesktopMcpServer.kt`, streamable HTTP at `http://127.0.0.1:<port>/mcp`) when `MESHTASTIC_MCP_PORT` or `-Dmeshtastic.mcp.port` names a port. It is wired to the radio layer, not the UI, and offers `connection_state`, `connect`, `nodes` and `send_text`. It can start in any build without `-Pdesktop.release=true`, the release build type included; the release workflow passes that flag.
+**Agent MCP server:** A debug build starts a loopback-only MCP server (`mcp/DesktopMcpServer.kt`, streamable HTTP at `http://127.0.0.1:<port>/mcp`) when the `meshtastic.mcp.port` system property names a port. `:desktopApp:run` and `:desktopApp:hotRun` copy `MESHTASTIC_MCP_PORT` from the environment into that property; the app itself never reads the environment. It is wired to the radio layer, not the UI, and offers `connection_state`, `connect`, `nodes` and `send_text`. A build is a debug build unless `-Pdesktop.release=true` is passed, so a packaged build made without the flag still honors the property; the release workflow passes the flag.
+
+**Data directory:** The database, DataStore files, key backups, TAK certificates and lockdown passphrases live in `~/.meshtastic`, or in `MESHTASTIC_DATA_DIR` when set. The default directory is restricted to the current user (`rwx------`) on every start. For an explicit `MESHTASTIC_DATA_DIR` only the app's own subdirectories and the database file are restricted, not the directory you chose. Where the file system has no POSIX permissions the app falls back to `java.io.File` flags and logs one warning if that fails.
 
 **Localization:** Desktop exposes a language picker that persists the selected BCP-47 tag in `UiPrefs.locale`. `Main.kt` resolves it against the system locale (`resolveLocale`) and applies it as the JVM default `Locale`.
 
@@ -69,8 +71,7 @@ The module depends on the JVM variants of the KMP modules: every `core:*` module
 | File | Purpose |
 |---|---|
 | `Main.kt` | App entry point: Koin bootstrap, Compose Desktop window and tray, theme and locale application, update check |
-| `ui/DesktopMainScreen.kt` | Navigation 3 shell: shared app shell, navigation suite and `MeshtasticNavDisplay` |
-| `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
+| `ui/DesktopMainScreen.kt` | The shared `MeshtasticMainScreen`, padded for the window's bottom edge |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB (jSerialComm) and BLE (Kable) transports |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |

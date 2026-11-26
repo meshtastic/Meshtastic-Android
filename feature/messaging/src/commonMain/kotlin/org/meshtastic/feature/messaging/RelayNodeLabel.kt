@@ -18,6 +18,7 @@ package org.meshtastic.feature.messaging
 
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.effectiveLongName
+import org.meshtastic.core.model.util.relayIsRfHop
 
 private const val RELAY_BYTE_MASK = 0xFF
 private const val HEX_RADIX = 16
@@ -33,3 +34,12 @@ internal fun relayNodeLabel(relayNode: Int?, nodes: List<Node>, ourNodeNum: Int?
     val name = Node.getRelayNode(relay, nodes, ourNodeNum)?.effectiveLongName?.takeIf { it.isNotBlank() }
     return if (name != null) "$name ($hex)" else hex
 }
+
+/**
+ * The relay byte of a received packet, or null when it names no relay: every node stamps its own byte on transmit, so a
+ * packet heard direct carries the sender's, and one handed to us by MQTT names no RF hop.
+ */
+internal fun receivedRelayNode(relayNode: Int?, hopsAway: Int, viaMqtt: Boolean, transportMechanism: Int?): Int? =
+    relayNode.takeUnless {
+        hopsAway == 0 || !relayIsRfHop(transportMechanism, viaMqtt)
+    }

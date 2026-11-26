@@ -30,7 +30,7 @@ A step-by-step workflow for implementing a new feature in the Meshtastic-Android
 - Define typed route objects in `core:navigation`.
 - Export the navigation graph as an extension function on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.myFeatureGraph()`).
 - Add the required DI bindings via Koin Annotations (`@Factory`, `@Single`, `@KoinViewModel`) in `commonMain`.
-- **CRITICAL:** Ensure the module is registered in the app root graphs (`AppKoinModule.kt`, `DesktopKoinModule.kt`) and the navigation is injected into the root entry provider in the host shell.
+- **CRITICAL:** Ensure the module is registered in the DI roots (`AppKoinModule.kt`, `DesktopKoinModule.kt`, and `WebKoinModule.kt` for a module with a web target), is a dependency of `:appShell`, and has its graph called from `sharedNavGraph` in `appShell`'s `MeshtasticMainScreen.kt`.
 
 ### 5. Validate Platform Separation
 - If you need a platform-specific API (like camera or specific mapping SDK), define an interface in `commonMain`, implement it in the host shell, and inject it via `CompositionLocal` or Koin.

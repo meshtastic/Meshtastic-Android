@@ -23,6 +23,9 @@ import com.juul.kable.ScannerBuilder
 // Kable's `Filter.Address` throws UnsupportedOperationException on Apple.
 internal actual val supportsNativeAddressScanFilter: Boolean = false
 
+// CoreBluetooth identifies a peripheral by a per-host UUID, never its MAC.
+internal actual val bleAddressIsHardware: Boolean = false
+
 internal actual fun ScannerBuilder.platformScanConfig() {
     // No-op: preConflate is Android-only.
 }
@@ -30,4 +33,4 @@ internal actual fun ScannerBuilder.platformScanConfig() {
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
 
-internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
+internal actual fun Peripheral.negotiatedMaxWriteLength(atConnect: Int?): Int? = null

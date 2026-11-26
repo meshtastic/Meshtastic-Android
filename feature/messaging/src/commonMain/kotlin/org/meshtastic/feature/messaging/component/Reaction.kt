@@ -65,7 +65,9 @@ import org.meshtastic.core.model.isAckProofForged
 import org.meshtastic.core.model.isMessageStatusRetryable
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ack_relayed_by
 import org.meshtastic.core.resources.react
+import org.meshtastic.core.resources.relayed_by
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.Rssi
@@ -79,6 +81,7 @@ import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.messaging.DeliveryInfo
+import org.meshtastic.feature.messaging.receivedRelayNode
 
 @Composable
 internal fun ReactionItem(
@@ -208,6 +211,8 @@ internal fun ReactionDialog(
     myId: String? = null,
     /** Reactor id to local display name, for reactors the user has renamed. */
     reactorNames: Map<String, String> = emptyMap(),
+    /** Names the node behind a relay byte. */
+    resolveRelay: (Int?) -> String? = { null },
     /** False for an archived conversation: a failed reaction cannot be retried there. */
     canReact: Boolean = true,
     onResend: (Reaction) -> Unit = {},
@@ -246,6 +251,10 @@ internal fun ReactionDialog(
             },
             onDismiss = { showStatusDialog = null },
             relays = reaction.relays,
+            relay =
+            resolveRelay(reaction.relayNode)?.let {
+                stringResource(if (isDirectMessage) Res.string.ack_relayed_by else Res.string.relayed_by, it)
+            },
         )
     }
 
@@ -367,6 +376,28 @@ internal fun ReactionDialog(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(text = getShortDateTime(reaction.timestamp), style = MaterialTheme.typography.labelSmall)
+                }
+                // A sent reaction's relay is the ack's, shown in its status dialog instead.
+                val receivedRelay =
+                    if (reaction.user.id == myId || reaction.user.id == NodeAddress.ID_LOCAL) {
+                        null
+                    } else {
+                        resolveRelay(
+                            receivedRelayNode(
+                                reaction.relayNode,
+                                reaction.hopsAway,
+                                reaction.viaMqtt,
+                                reaction.transportMechanism,
+                            ),
+                        )
+                    }
+                receivedRelay?.let {
+                    Text(
+                        text = stringResource(Res.string.relayed_by, it),
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }

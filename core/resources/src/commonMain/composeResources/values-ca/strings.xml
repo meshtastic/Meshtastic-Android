@@ -155,7 +155,6 @@
     <string name="mute_notifications">Silenciar notificacions</string>
     <string name="name">Nom</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_ignored">Estàs veient nodes ignorats, \n Prem per tornar al llistat de nodes</string>
@@ -206,6 +205,8 @@
     <string name="radio_setup_name_headline">Nom</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Eliminar</string>
     <string name="remote_shell_modifier_locked">Bloquejat</string>
     <string name="remote_shell_send">Enviar</string>
     <string name="remote_shell_status_not_connected">No connectat</string>

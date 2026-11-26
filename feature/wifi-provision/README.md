@@ -8,7 +8,7 @@ The `:feature:wifi-provision` module provides BLE-based Wi-Fi provisioning for [
 
 - **Protocol:** Nymea BLE network manager (GATT service `e081fec0-f757-4449-b9c9-bfa83133f7fc`)
 - **Transport:** BLE via `core:ble` Kable abstractions with chunked packet codec
-- **UI:** Single-screen Material 3 Expressive flow with 6 phases (Idle, ConnectingBle, DeviceFound, LoadingNetworks, Connected, Provisioning)
+- **UI:** Single-screen Material 3 Expressive flow with 9 phases (Idle, Discovering, DeviceList, ConfirmDevice, ConnectingBle, DeviceFound, LoadingNetworks, Connected, Provisioning)
 
 ```mermaid
 sequenceDiagram
@@ -16,13 +16,14 @@ sequenceDiagram
     participant BLE as BLE Scanner
     participant Device as Provisioning Device
 
-    Note over App: Phase 1: Scan
+    Note over App: Phase 1: Choose
     App->>BLE: Scan for GATT service UUID
-    BLE-->>App: Device discovered
+    BLE-->>App: Devices discovered (listed strongest first)
+    App->>App: User taps one device
 
     Note over App: Phase 2: Connect
-    App->>Device: BLE Connect
-    App->>App: Show device name for confirmation
+    App->>Device: BLE Connect (chosen device only)
+    App->>App: Show device name and address for confirmation
 
     Note over App, Device: Phase 3: Network List
     App->>Device: TriggerScan command (c=4)
@@ -35,13 +36,19 @@ sequenceDiagram
     App->>Device: GetConnection (c=5) if no IP came back
 ```
 
+Nothing connects until the user chooses. Without an address the screen lists every provisioning device in range (name, address, signal strength) and connects only to the one tapped, even when a single device is listed, with a rescan action when none is found. An address supplied by a caller (`WifiProvisionRoute.WifiProvision(address)`, which a deep link can set) first shows the address and advertised name with Connect and Cancel, and connects only on Connect. Where the browser supplies the device chooser, its own pick is the choice.
+
 The BLE connection stays open after provisioning, so the user can retry or pick another network; it is released when the user taps **Cancel** or leaves the screen. The flow is reached from the Android and Desktop settings screens and settings search (`WifiProvisionRoute`, registered by `wifiProvisionGraph()`).
+
+### Protocol Source
+
+Replies are decoded against what the device service writes, not the nymea README: `WirelessService::createResponse` and the `command*` methods in `libnymea-networkmanager/bluetooth/wirelessservice.cpp`, identical in `nymea/libnymea-networkmanager` and `mPWRD-OS/libnymea-networkmanager`. The mPWRD-OS image installs the `nymea-networkmanager` package (`mPWRD-OS` `extensions/provisioning/nymea-networkmanager.sh`). Every reply carries integer `c` and `r`, GetNetworks always carries a list, and each entry always carries string `e` and `m` and integer `s` (percent) and `p` (0 or 1), so a reply or entry without them is rejected. The service has no command 2 (a hidden network is `"h": true` on Connect; it answers command 2 with Connect and InvalidCommand), and numbers error 5 as wireless disabled and 6 as networking disabled.
 
 ### Key Classes
 
-- `WifiProvisionViewModel.kt`: MVI state machine with 6 phases and SSID deduplication.
+- `WifiProvisionViewModel.kt`: MVI state machine with 9 phases, device list ordering and SSID deduplication.
 - `WifiProvisionScreen.kt`: Material 3 Expressive single-screen UI with Crossfade transitions.
-- `NymeaWifiService.kt`: BLE service layer — connect, scan networks, provision, close.
+- `NymeaWifiService.kt`: BLE service layer — connect to a chosen device or address, scan networks, provision, close.
 - `NymeaPacketCodec.kt`: Chunked BLE packet encoder/decoder with reassembly.
 - `NymeaProtocol.kt`: JSON serialization for Nymea network manager commands and responses.
 - `ProvisionStatusCard.kt`: Inline status feedback card (idle/success/failed) with Material 3 colors.
@@ -49,7 +56,7 @@ The BLE connection stays open after provisioning, so the user can retry or pick 
 
 ## Testing
 
-`./gradlew :feature:wifi-provision:allTests` covers the packet codec, the protocol JSON, the service against a fake BLE connection, SSID deduplication, and the ViewModel.
+`./gradlew :feature:wifi-provision:allTests` covers the packet codec, the protocol JSON, the service against a fake BLE connection, SSID deduplication, and the ViewModel, including that no connection is made before the user chooses or confirms.
 
 ## Dependency Graph
 

@@ -59,6 +59,27 @@ class ShareMessageDeepLinkTest {
     }
 
     @Test
+    fun `shared text that is only a channel link goes to the channel import`() {
+        val link = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
+
+        assertEquals(link, sharedChannelUrl(link).toString())
+        assertEquals(link, sharedChannelUrl("  $link\n").toString())
+    }
+
+    @Test
+    fun `other shared text stays a message`() {
+        val texts =
+            listOf(
+                "camp & ridge #4",
+                "join us https://meshtastic.org/e/#CgMSAQESBggBQANIAQ",
+                "https://meshtastic.org/e/#!!!!",
+                "https://meshtastic.org/v/#CgMSAQESBggBQANIAQ",
+            )
+
+        texts.forEach { assertNull(sharedChannelUrl(it), it) }
+    }
+
+    @Test
     fun `share callback pending intent carries the encoded message deep link`() {
         val message = "camp & ridge #4? answer=yes + backup"
         val activity = Robolectric.buildActivity(MainActivity::class.java).get()

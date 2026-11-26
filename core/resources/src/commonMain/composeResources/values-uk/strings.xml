@@ -551,6 +551,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Жоден</string>
     <string name="low_battery">Низький заряд батареї</string>
     <string name="low_battery_message">Вузол %1$s має низький заряд батареї (%2$d%)</string>
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
@@ -673,7 +674,6 @@
     <string name="neighbor_info">Інформація про сусідів</string>
     <string name="neighbor_info_config">Налаштування інформації про сусідів</string>
     <string name="network">Мережа</string>
-    <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
     <string name="new_messages_below">Нові повідомлення нище</string>
     <string name="new_node_seen">Виявлено новий вузол: %1$s</string>
     <string name="new_nodes">Нові Вузли</string>
@@ -874,6 +874,8 @@
     <string name="remote">Віддалений</string>
     <string name="remote_admin">Віддалене керування</string>
     <string name="remote_admin_unreachable">Не вдалося зв'язатися з вузлом — спробуйте ще раз або підійдіть ближче.</string>
+    <string name="remote_contacts_ignore">Ігнорувати</string>
+    <string name="remote_contacts_remove">Видалити</string>
     <string name="remote_hardware">Віддалене обладнання</string>
     <string name="remote_hardware_config">Конфігурація віддаленого пристрою</string>
     <string name="remote_hardware_enabled">Конфігурація віддаленого пристрою активована</string>
@@ -1134,15 +1136,13 @@
     <string name="widget_telemetry_title">Телеметрія</string>
     <!-- WIFI -->
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Доступні мережі</string>
     <string name="wifi_provision_hidden_network">Прихована мережа</string>
     <string name="wifi_provision_mpwrd_disclaimer">Дізнайтесь більше про проєкт mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Пристрої не знайдено</string>
     <string name="wifi_provision_no_networks">Не знайдено жодної мережі</string>
-    <string name="wifi_provision_scan_networks">Сканувати мережі</string>
     <string name="wifi_provision_scanning_ble">Пошук пристрою…</string>
     <string name="wifi_provision_scanning_wifi">Сканування…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Назва мережі (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Введіть або оберіть мережу</string>
     <string name="wifi_provision_success_done">Готово</string>
     <string name="wifi_provision_success_ip_address">Адреса IP</string>

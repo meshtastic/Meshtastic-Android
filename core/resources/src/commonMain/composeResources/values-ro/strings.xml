@@ -491,6 +491,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Niciunul</string>
     <string name="low_battery">Baterie descarcata </string>
     <string name="low_battery_message">Nodul %1$s are bateria descărcată (%2$d%)</string>
     <string name="low_battery_title">Baterie descărcată: %1$s</string>
@@ -596,7 +597,6 @@
     <string name="neighbor_info">Informații vecin</string>
     <string name="neighbor_info_config">Configurare informații vecin</string>
     <string name="network">Rețea</string>
-    <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
     <string name="new_messages_below">Mesaje noi mai jos</string>
     <string name="new_node_seen">Nod nou găsit: %1$s</string>
     <string name="new_nodes">Noduri Noi</string>
@@ -758,6 +758,8 @@
     <!-- REMOTE -->
     <string name="remote">De la distanta</string>
     <string name="remote_admin">Administrare la distanță</string>
+    <string name="remote_contacts_ignore">Ignoră</string>
+    <string name="remote_contacts_remove">Eliminare</string>
     <string name="remote_hardware">Hardware la distanță</string>
     <string name="remote_hardware_config">Configurare hardware la distanță</string>
     <string name="remote_hardware_enabled">Hardware extern activat</string>
@@ -773,7 +775,6 @@
     <string name="remove_layer">Elimină strat</string>
     <string name="remove_node_text">Acest nod va fi eliminat din listă până când nodul dvs. va primi din nou date de la acesta.</string>
     <string name="replace">Înlocuire</string>
-    <string name="replace_channels_and_settings_description">Acest cod QR conţine o configuraţie completă. Aceasta va REPLACE canalele existente şi setările radio existente. Toate canalele existente vor fi eliminate.</string>
     <string name="reply">Răspunde</string>
     <string name="replying_to">Răspunde la %1$s</string>
     <string name="report">Raportare</string>
@@ -1009,17 +1010,14 @@
     <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Rețele disponibile</string>
     <string name="wifi_provision_connect_failed">Nu se poate conecta: %1$s</string>
     <string name="wifi_provision_description">Furnizați acreditări Wi-Fi pentru dispozitivul mPWRD-OS prin Bluetooth.</string>
     <string name="wifi_provision_device_found">Dispozitiv gasit</string>
     <string name="wifi_provision_mpwrd_disclaimer">Aflați mai multe despre proiectul mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Nu au fost găsite rețele</string>
-    <string name="wifi_provision_scan_networks">Scanare pentru reţele</string>
     <string name="wifi_provision_scanning_ble">Căutare dispozitive</string>
     <string name="wifi_provision_scanning_wifi">Scanare…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Nume rețea (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Introdu sau selecteaza o retea</string>
     <string name="wifi_provision_success_done">Gata</string>
     <string name="wifi_provision_success_ip_address">Adresa IP</string>

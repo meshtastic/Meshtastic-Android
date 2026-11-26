@@ -87,6 +87,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -741,6 +742,11 @@ class MeshDataHandlerTest {
     private fun routingPacket(
         error: Routing.Error,
         ackProofStatus: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+        hopStart: Int = 0,
+        hopLimit: Int = 0,
+        relayNode: Int = 0,
+        viaMqtt: Boolean = false,
+        transport: MeshPacket.TransportMechanism = MeshPacket.TransportMechanism.TRANSPORT_INTERNAL,
     ): MeshPacket {
         val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
         val packet =
@@ -748,6 +754,11 @@ class MeshDataHandlerTest {
                 .also { wb ->
                     wb.from = 456
                     wb.ack_proof_status = ackProofStatus
+                    wb.hop_start = hopStart
+                    wb.hop_limit = hopLimit
+                    wb.relay_node = relayNode
+                    wb.via_mqtt = viaMqtt
+                    wb.transport_mechanism = transport
                     wb.decoded =
                         Data.Builder()
                             .also { wb ->
@@ -800,6 +811,55 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updates.single().ackProofStatus)
+    }
+
+    private suspend fun TestScope.ackRelayFor(packet: MeshPacket): Int? {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+        return updates.single().relayNode
+    }
+
+    @Test
+    fun `an ack heard straight from the destination names no relay`() = testScope.runTest {
+        // Firmware stamps the transmitter's byte on send, so a direct ack's byte is the destination's own.
+        assertNull(ackRelayFor(routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 3, relayNode = 0xC8)))
+    }
+
+    @Test
+    fun `an ack relayed on its way back names its relay`() = testScope.runTest {
+        val relayed = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A)
+        assertEquals(0x5A, ackRelayFor(relayed))
+    }
+
+    @Test
+    fun `an implicit ack keeps the relayer it overheard`() = testScope.runTest {
+        // ReliableRouter builds it locally with hop_start 0 and copies the rebroadcast's relay byte.
+        assertEquals(0x5A, ackRelayFor(routingPacket(Routing.Error.NONE, relayNode = 0x5A)))
+    }
+
+    @Test
+    fun `an MQTT ack from firmware without a transport names no relay`() = testScope.runTest {
+        // Firmware before 2.7.5 leaves transport_mechanism at INTERNAL, so via_mqtt is the only signal.
+        val fromMqtt = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A, viaMqtt = true)
+        assertNull(ackRelayFor(fromMqtt))
+    }
+
+    @Test
+    fun `an ack that crossed MQTT then reached us over LoRa names its relay`() = testScope.runTest {
+        // A gateway rebroadcast keeps the via_mqtt flag bit and stamps its own byte; our radio marks it TRANSPORT_LORA.
+        val overRf =
+            routingPacket(
+                Routing.Error.NONE,
+                hopStart = 3,
+                hopLimit = 1,
+                relayNode = 0x5A,
+                viaMqtt = true,
+                transport = MeshPacket.TransportMechanism.TRANSPORT_LORA,
+            )
+        assertEquals(0x5A, ackRelayFor(overRf))
     }
 
     @Test
@@ -1389,6 +1449,52 @@ class MeshDataHandlerTest {
         val reaction = assertNotNull(persistedReaction)
         assertEquals(true, reaction.viaMqtt)
         assertEquals(MeshPacket.TransportMechanism.TRANSPORT_MQTT.value, reaction.transportMechanism)
+    }
+
+    @Test
+    fun `a received reaction is persisted with the relay byte from its header`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 97
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.hop_start = 3
+                    wb.hop_limit = 2
+                    wb.relay_node = 0x5A
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 97,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(97) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        assertEquals(0x5A, assertNotNull(persistedReaction).relayNode)
     }
 
     @Test

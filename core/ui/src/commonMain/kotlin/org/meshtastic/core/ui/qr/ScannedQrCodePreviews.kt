@@ -20,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.ui.component.PRECISE_POSITION_BITS
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.ModuleSettings
 
 private fun namedChannel(name: String, key: Byte) = ChannelSettings.Builder()
     .also { wb ->
@@ -30,6 +33,23 @@ private fun namedChannel(name: String, key: Byte) = ChannelSettings.Builder()
         wb.psk = byteArrayOf(key).toByteString()
     }
     .build()
+
+/** A private channel (a full-length key) that forwards to and from MQTT and shares the sender's precise position. */
+private fun sharingChannel(name: String, key: Byte) = namedChannel(name, key)
+    .newBuilder()
+    .also { wb ->
+        wb.psk = ByteArray(KEY_BYTES) { key }.toByteString()
+        wb.uplink_enabled = true
+        wb.downlink_enabled = true
+        wb.module_settings = ModuleSettings.Builder().also { it.position_precision = PRECISE_POSITION_BITS }.build()
+    }
+    .build()
+
+private const val KEY_BYTES = 32
+private const val SAMPLE_NODE_NUM = 0x12345678
+private const val SAMPLE_FREQUENCY_MHZ = 915.5f
+private const val SAMPLE_SLOT = 20
+private const val SAMPLE_HOP_LIMIT = 5
 
 private val fullRadio =
     ChannelSet.Builder()
@@ -46,8 +66,76 @@ private val addOnlyLink =
         .also { wb -> wb.settings = listOf(namedChannel("Team 2", 2), namedChannel("Hiking", 9)) }
         .build()
 
+private val currentRadio =
+    ChannelSet.Builder()
+        .also { wb ->
+            wb.settings = listOf(Channel.default.settings, namedChannel("Team 2", 2))
+            wb.lora_config = Channel.default.loraConfig
+        }
+        .build()
+
+/** A link that changes every kind of LoRa setting, including all three that affect sending and receiving. */
+private val manyChangesLink =
+    ChannelSet.Builder()
+        .also { wb ->
+            wb.settings = listOf(sharingChannel("Field", 5), namedChannel("Ops", 6))
+            wb.lora_config =
+                Channel.default.loraConfig
+                    .newBuilder()
+                    .also { lora ->
+                        lora.region = LoRaConfig.RegionCode.EU_868
+                        lora.modem_preset = LoRaConfig.ModemPreset.SHORT_FAST
+                        lora.hop_limit = SAMPLE_HOP_LIMIT
+                        lora.channel_num = SAMPLE_SLOT
+                        lora.tx_enabled = false
+                        lora.override_duty_cycle = true
+                        lora.sx126x_rx_boosted_gain = true
+                        lora.override_frequency = SAMPLE_FREQUENCY_MHZ
+                        lora.ignore_incoming = listOf(SAMPLE_NODE_NUM)
+                    }
+                    .build()
+        }
+        .build()
+
+private val fewChangesLink =
+    ChannelSet.Builder()
+        .also { wb ->
+            wb.settings = listOf(namedChannel("Field", 5))
+            wb.lora_config =
+                Channel.default.loraConfig.newBuilder().also { lora -> lora.hop_limit = SAMPLE_HOP_LIMIT }.build()
+        }
+        .build()
+
 @PreviewLightDark
 @Composable
 fun PreviewScannedQrCodeAddToFullRadio() {
     AppTheme { ScannedQrCodeDialog(channels = fullRadio, incoming = addOnlyLink, onDismiss = {}, onConfirm = {}) }
+}
+
+/** Add mode with free slots, for a link that carries channels only. */
+@PreviewLightDark
+@Composable
+fun PreviewScannedQrCodeAddWithRoom() {
+    AppTheme {
+        ScannedQrCodeDialog(
+            channels = currentRadio,
+            incoming = ChannelSet.Builder().also { wb -> wb.settings = listOf(sharingChannel("Field", 5)) }.build(),
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun PreviewScannedQrCodeReplaceManyChanges() {
+    AppTheme {
+        ScannedQrCodeDialog(channels = currentRadio, incoming = manyChangesLink, onDismiss = {}, onConfirm = {})
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun PreviewScannedQrCodeReplaceFewChanges() {
+    AppTheme { ScannedQrCodeDialog(channels = currentRadio, incoming = fewChangesLink, onDismiss = {}, onConfirm = {}) }
 }

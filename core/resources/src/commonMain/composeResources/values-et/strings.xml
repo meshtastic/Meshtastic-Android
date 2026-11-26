@@ -52,7 +52,6 @@
     <!-- ADD -->
     <string name="add">Lisa</string>
     <string name="add_a_note">Lisa privaatsõnum…</string>
-    <string name="add_channels_description">QR-koodist leiti järgmised kanalid. Vali, millised soovid oma seadmesse lisada. Olemasolevad kanalid säilivad.</string>
     <string name="add_custom_tile_source">Lisa võrgupaani allikas</string>
     <string name="add_favorite">Lisa lemmikutesse</string>
     <string name="add_layer">Lisa kiht</string>
@@ -910,6 +909,9 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_frequency_offset">Sagedusnihe</string>
+    <string name="lora_field_modem_preset">Modemi vaikesäte</string>
+    <string name="lora_value_none">Puudub</string>
     <string name="low_battery">Madal akutase</string>
     <string name="low_battery_message">Sõlmel %1$s on madal aku pinge (%2$d%)</string>
     <string name="low_battery_title">Madal akupinge: %1$s</string>
@@ -1113,7 +1115,6 @@
     <string name="neighbor_info_config">Naabruskonna teabe sätted</string>
     <string name="neighbor_info_received">Kätte saadud</string>
     <string name="network">Võrk</string>
-    <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
     <string name="new_messages_below">Uued sõnumid allpool</string>
     <string name="new_node_seen">Uus sõlm nähtud: %1$s</string>
     <string name="new_nodes">Uus sõlm</string>
@@ -1365,6 +1366,8 @@
     <string name="remote">Kaugjuhtimine</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="remote_admin_unreachable">Sõlmega ei õnnest ühenduda – proovi uuesti või liigu lähemale.</string>
+    <string name="remote_contacts_ignore">Eira</string>
+    <string name="remote_contacts_remove">Eemalda</string>
     <string name="remote_hardware">Kaugriistvara</string>
     <string name="remote_hardware_config">Kaug riistvara sätted</string>
     <string name="remote_hardware_enabled">Kaug riistvara lubatud</string>
@@ -1382,7 +1385,6 @@
     <string name="remove_layer">Eemalda kiht</string>
     <string name="remove_node_text">Antud sõlm eemaldatakse loendist kuniks sinu sõlm võtab sellelt vastu uuesti andmeid.</string>
     <string name="replace">Asenda</string>
-    <string name="replace_channels_and_settings_description">See QR-kood sisaldab täielikku konfiguratsiooni. See ASENDAB olemasolevad kanalid ja raadioseaded. Kõik olemasolevad kanalid eemaldatakse.</string>
     <string name="reply">Vasta</string>
     <string name="replying_to">Vasta kasutajale %1$s</string>
     <string name="report">Raport</string>
@@ -1752,18 +1754,16 @@
     <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
-    <string name="wifi_provision_available_networks">Saada olevad võrgud</string>
     <string name="wifi_provision_connect_failed">Ühenduse loomine ebaõnnestus: %1$s</string>
     <string name="wifi_provision_description">Anna mPWRD-OS-seadmele Sinihamba kaudu WiFi mandaadid.</string>
     <string name="wifi_provision_device_found">Seade leitud</string>
     <string name="wifi_provision_hidden_network">Peidetud võrk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Lisateavet mPWRD-OS projekti kohta leiate aadressilt\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Ühtegi seadet ei leitud</string>
     <string name="wifi_provision_no_networks">Võrke ei leitud</string>
-    <string name="wifi_provision_scan_networks">Võrkude otsimine</string>
     <string name="wifi_provision_scanning_ble">Seadme otsimine…</string>
     <string name="wifi_provision_scanning_wifi">Otsin…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Võrgu nimi (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Sisesta või vali võrk</string>
     <string name="wifi_provision_success_description">Sinu mPWRD-OS seade on WiFi-võrguga ühendatud.</string>
     <string name="wifi_provision_success_device_connected">Seade ühendatud</string>

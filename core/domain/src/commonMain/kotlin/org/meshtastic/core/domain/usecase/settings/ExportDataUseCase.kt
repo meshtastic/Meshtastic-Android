@@ -80,7 +80,7 @@ constructor(
                     val timeZone = TimeZone.currentSystemDefault()
                     val rxDateTimeObj = Instant.fromEpochMilliseconds(packet.received_date).toLocalDateTime(timeZone)
                     val timeString = rxDateTimeObj.time.toString().substringBefore('.')
-                    val rxDateTime = "\"${rxDateTimeObj.date}\",\"$timeString\""
+                    val rxDateTime = "${csvCell(rxDateTimeObj.date)},${csvCell(timeString)}"
                     val rxFrom = proto.from.toUInt()
                     val senderName = nodes[proto.from]?.user?.long_name ?: ""
 
@@ -118,20 +118,45 @@ constructor(
                                 setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.RANGE_TEST_APP.value) ->
                                 "<${decoded?.portnum}>"
 
-                            decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
+                            decoded != null -> decoded.payload.utf8()
 
                             encrypted != null -> "${encrypted.size} encrypted bytes"
 
                             else -> ""
                         }
 
-                    @Suppress("MaxLineLength")
-                    sink.writeUtf8(
-                        "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$hopStart\",\"$relayNode\",\"$payload\"\n",
-                    )
+                    // Numeric and app-formatted columns use csvCell; remote-supplied text (name, payload) uses
+                    // csvTextCell so a leading formula character is neutralized.
+                    val cells =
+                        listOf(
+                            rxDateTime,
+                            csvCell(rxFrom),
+                            csvTextCell(senderName),
+                            csvCell(senderLat),
+                            csvCell(senderLong),
+                            csvCell(rxLat),
+                            csvCell(rxLong),
+                            csvCell(rxAlt),
+                            csvCell(rxSnr),
+                            csvCell(dist),
+                            csvCell(hopLimit),
+                            csvCell(hopStart),
+                            csvCell(relayNode),
+                            csvTextCell(payload),
+                        )
+                    sink.writeUtf8(cells.joinToString(",", postfix = "\n"))
                 }
             }
         }
         sink.flush()
     }
 }
+
+private val FORMULA_TRIGGERS = setOf('=', '+', '-', '@', '\t', '\r')
+
+/** Quotes [value] per RFC 4180: embedded quotes are doubled and the cell is always wrapped in quotes. */
+internal fun csvCell(value: Any?): String = "\"${value.toString().replace("\"", "\"\"")}\""
+
+/** Like [csvCell] for free text: a leading formula character gets a `'` prefix so spreadsheets open it as text. */
+internal fun csvTextCell(value: String): String =
+    csvCell(if (value.firstOrNull() in FORMULA_TRIGGERS) "'$value" else value)

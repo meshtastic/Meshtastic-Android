@@ -561,7 +561,8 @@ interface NodeInfoDao {
                         migrateNodeIdentity(from = conflicting, to = newNode)
                         removedNums += conflicting.num
                         result.add(newNode)
-                    } else {
+                    } else if (conflicting.num !in existingNodesMap) {
+                        // A stored copy added after the batch's own row for that num would overwrite it.
                         result.add(conflicting)
                     }
                 } else {
@@ -658,6 +659,9 @@ interface NodeInfoDao {
         }
         clearMyNodeInfo()
         setMyNodeInfo(mi)
+        // Only the radio can say a node went unheard, so a row it no longer holds rests at heard; the dump below
+        // rewrites the flag on every row it does hold.
+        markAllHeardOnCurrentLora()
         putAll(getVerifiedNodesForUpsert(nodes, selfNum = mi.myNodeNum, removedNums = removedNums))
         return removedNums
     }

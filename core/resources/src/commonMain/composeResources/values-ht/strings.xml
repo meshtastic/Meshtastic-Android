@@ -131,6 +131,7 @@
     <!-- LOG -->
     <string name="logs">Jounal</string>
     <!-- LORA -->
+    <string name="lora_value_none">Pa gen</string>
     <!-- MAP -->
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>
@@ -175,7 +176,6 @@
     <string name="name">Non</string>
     <string name="navigate_back">Navige Tounen</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Nouvo kanal URL resevwa</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Enkli enkoni</string>
@@ -223,6 +223,8 @@
     <string name="reboot">Rekòmanse</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrasyon Remote</string>
+    <string name="remote_contacts_ignore">Ignoré</string>
+    <string name="remote_contacts_remove">Retire</string>
     <string name="remote_shell_modifier_locked">Loken</string>
     <string name="remote_shell_send">Voye</string>
     <string name="remote_shell_status_not_connected">Pa konekte</string>

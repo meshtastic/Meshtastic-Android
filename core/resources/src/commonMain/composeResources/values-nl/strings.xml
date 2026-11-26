@@ -200,6 +200,7 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_value_none">Geen</string>
     <string name="low_battery_title">Batterij bijna leeg: %1$s</string>
     <string name="lux">Lux</string>
     <string name="manual_position_request">Handmatige positieaanvraag vereist</string>
@@ -258,7 +259,6 @@
     <string name="navigate_back">Ga terug</string>
     <!-- NEIGHBOR -->
     <string name="network">Netwerk</string>
-    <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Include onbekend</string>
@@ -328,6 +328,8 @@
     <string name="reboot">Herstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Extern beheer</string>
+    <string name="remote_contacts_ignore">Negeer</string>
+    <string name="remote_contacts_remove">Verwijder</string>
     <string name="remote_hardware">Externe Hardware</string>
     <string name="remote_hardware_config">Externe hardwareconfiguratie</string>
     <string name="remote_hardware_enabled">Externe hardware ingeschakeld</string>

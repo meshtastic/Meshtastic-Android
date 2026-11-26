@@ -47,11 +47,9 @@ class AdminPacketHandlerImpl(
         val u = AdminMessage.ADAPTER.decode(payload)
         Logger.d { "Admin message from=${packet.from} fields=${u.summarize()}" }
         // The firmware forwards every decoded ADMIN_APP packet addressed to it, so a response is authoritative
-        // only when it answers a request we sent.
-        if (!adminRequestRegistry.consume(data.request_id)) {
-            Logger.w { "Ignoring admin message from=${packet.from} with no outstanding request id=${data.request_id}" }
-            return
-        }
+        // only when it answers a request we sent, from the node it went to. A rejected response leaves the
+        // request outstanding for the genuine one.
+        if (!consumeMatchingRequest(packet, data.request_id, myNodeNum)) return
         // Firmware embeds the session_passkey in every admin response. A missing (default-empty)
         // field must not reset stored state, so only record refreshes when bytes arrived.
         val incomingPasskey = u.session_passkey
@@ -84,6 +82,18 @@ class AdminPacketHandlerImpl(
                 nodeManager.insertMetadata(fromNum, it, session)
             }
         }
+    }
+
+    /** Consumes the outstanding request [requestId] when [packet] answers it authentically; otherwise leaves it. */
+    private fun consumeMatchingRequest(packet: MeshPacket, requestId: Int, myNodeNum: Int): Boolean {
+        val request = adminRequestRegistry.find(requestId)
+        val accepted = request?.acceptsResponseFrom(packet.from, myNodeNum, packet.pki_encrypted, packet.channel)
+        if (request == null) {
+            Logger.w { "Ignoring admin message from=${packet.from} with no outstanding request id=$requestId" }
+        } else if (accepted != true) {
+            Logger.w { "Ignoring admin message from=${packet.from} not authentic for request to=${request.destNum}" }
+        }
+        return accepted == true && adminRequestRegistry.consume(requestId)
     }
 }
 

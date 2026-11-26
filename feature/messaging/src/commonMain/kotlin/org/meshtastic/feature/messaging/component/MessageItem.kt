@@ -109,6 +109,7 @@ import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.feature.messaging.receivedRelayNode
 
 internal const val MESSAGE_STATUS_LABEL_TEST_TAG = "message_status_label"
 
@@ -164,6 +165,8 @@ fun MessageItem(
     searchQuery: String = "",
     translationAvailable: Boolean = false,
     isDirectMessage: Boolean = false,
+    /** Names the node behind a relay byte; called only when the actions sheet opens. */
+    resolveRelay: (Int?) -> String? = { null },
     onTranslate: () -> Unit = {},
     onToggleTranslation: () -> Unit = {},
 ) = Column(
@@ -237,6 +240,20 @@ fun MessageItem(
                         // Mesh time (rx_time), matching the bubble header. receivedTime is when this phone
                         // pulled the packet off the node, which is misleading after an offline backlog sync.
                         timestamp = timestamp,
+                        // A sent message's relay is the ack's, shown in its status dialog instead.
+                        relay =
+                        if (message.fromLocal) {
+                            null
+                        } else {
+                            resolveRelay(
+                                receivedRelayNode(
+                                    message.relayNode,
+                                    message.hopsAway,
+                                    message.viaMqtt,
+                                    message.transportMechanism,
+                                ),
+                            )
+                        },
                         xeddsaSigned = message.xeddsaSigned,
                         ackProofStatus = message.ackProofStatus,
                         onStatus = onStatusClick,

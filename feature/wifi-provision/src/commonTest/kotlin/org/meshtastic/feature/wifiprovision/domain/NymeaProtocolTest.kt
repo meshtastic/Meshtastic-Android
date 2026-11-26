@@ -16,9 +16,11 @@
  */
 package org.meshtastic.feature.wifiprovision.domain
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /** Tests for the nymea JSON protocol serialization models. */
@@ -124,29 +126,74 @@ class NymeaProtocolTest {
                 .trimIndent()
         val response = NymeaJson.decodeFromString<NymeaNetworksResponse>(json)
         assertEquals(0, response.responseCode)
-        assertEquals(2, response.networks.size)
-        assertEquals("HomeWifi", response.networks[0].ssid)
-        assertEquals(85, response.networks[0].signalStrength)
-        assertEquals(1, response.networks[0].protection)
-        assertEquals("OpenNet", response.networks[1].ssid)
-        assertEquals(0, response.networks[1].protection)
+        val networks = requireNotNull(response.networks)
+        assertEquals(2, networks.size)
+        assertEquals("HomeWifi", networks[0].ssid)
+        assertEquals(85, networks[0].signalStrength)
+        assertEquals(1, networks[0].protection)
+        assertEquals("OpenNet", networks[1].ssid)
+        assertEquals(0, networks[1].protection)
     }
 
     @Test
     fun `networks response deserializes empty list`() {
         val json = """{"c":0,"r":0,"p":[]}"""
         val response = NymeaJson.decodeFromString<NymeaNetworksResponse>(json)
-        assertTrue(response.networks.isEmpty())
+        assertTrue(requireNotNull(response.networks).isEmpty())
     }
 
     @Test
-    fun `networks response uses defaults for missing fields`() {
-        val json = """{"c":0,"r":0,"p":[{"e":"Minimal"}]}"""
-        val response = NymeaJson.decodeFromString<NymeaNetworksResponse>(json)
-        val entry = response.networks[0]
+    fun `networks response keeps a missing bssid empty`() {
+        val json = """{"c":0,"r":0,"p":[{"e":"Minimal","s":40,"p":1}]}"""
+        val entry = requireNotNull(NymeaJson.decodeFromString<NymeaNetworksResponse>(json).networks)[0]
         assertEquals("Minimal", entry.ssid)
         assertEquals("", entry.bssid)
-        assertEquals(0, entry.signalStrength)
-        assertEquals(0, entry.protection)
+    }
+
+    @Test
+    fun `networks response without a list has no list rather than an empty one`() {
+        val response = NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0}""")
+        assertEquals(null, response.networks)
+    }
+
+    @Test
+    fun `a network without a signal or protection does not decode`() {
+        assertFailsWith<SerializationException> {
+            NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0,"p":[{"e":"Minimal"}]}""")
+        }
+    }
+
+    @Test
+    fun `a network without a protection flag does not decode`() {
+        assertFailsWith<SerializationException> {
+            NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0,"p":[{"e":"Minimal","s":70}]}""")
+        }
+    }
+
+    @Test
+    fun `a network without a signal does not decode`() {
+        assertFailsWith<SerializationException> {
+            NymeaJson.decodeFromString<NymeaNetworksResponse>("""{"c":0,"r":0,"p":[{"e":"Minimal","p":1}]}""")
+        }
+    }
+
+    @Test
+    fun `a response without a status does not decode`() {
+        assertFailsWith<SerializationException> { NymeaJson.decodeFromString<NymeaResponse>("""{"c":1}""") }
+    }
+
+    @Test
+    fun `a response with a quoted status does not decode`() {
+        assertFailsWith<SerializationException> { NymeaJson.decodeFromString<NymeaResponse>("""{"c":1,"r":"0"}""") }
+    }
+
+    @Test
+    fun `a response with a null status does not decode`() {
+        assertFailsWith<SerializationException> { NymeaJson.decodeFromString<NymeaResponse>("""{"c":1,"r":null}""") }
+    }
+
+    @Test
+    fun `a reply header without a command does not decode`() {
+        assertFailsWith<SerializationException> { NymeaJson.decodeFromString<NymeaReplyHeader>("""{"r":0}""") }
     }
 }

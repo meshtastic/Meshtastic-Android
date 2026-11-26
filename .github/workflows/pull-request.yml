@@ -86,6 +86,7 @@ jobs:
             # when a module applying meshtastic.kmp.web is missing here.
             web:
               - 'webApp/**'
+              - 'appShell/**'
               - 'core/**'
               - 'feature/connections/**'
               - 'feature/discovery/**'
@@ -112,6 +113,7 @@ jobs:
               - '.github/actions/**'
               # Product modules validated by reusable-check
               - 'androidApp/**'
+              - 'appShell/**'
               - 'baselineprofile/**'
               - 'desktopApp/**'
               - 'webApp/**'
@@ -176,6 +178,8 @@ jobs:
         run: ./scripts/verify-rb-selftest.sh
       - name: Self-test verify-abi-parity
         run: ./scripts/verify-abi-parity-selftest.sh
+      - name: Self-test the Discord release post
+        run: python3 scripts/test_discord_release_post.py
       # Locale codes, lengths and HTML for all three stores that read the tree. supply
       # uploads every locale directory it finds and neither it nor the Crowdin CLI
       # validates the names, so an unmapped code is only rejected by the Play API, partway

@@ -358,6 +358,9 @@ Rango de Valores 0 - 500.</string>
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_frequency_offset">Desplazamiento de frecuencia</string>
+    <string name="lora_field_modem_preset">Modem predefinido</string>
+    <string name="lora_value_none">Ninguna</string>
     <string name="low_battery">Batería baja</string>
     <string name="low_battery_message">El nodo %1$s tiene poca batería (%2$d%)</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
@@ -452,7 +455,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="neighbor_info">Información de Vecinos</string>
     <string name="neighbor_info_config">Configuración de Información de Vecinos</string>
     <string name="network">Conexión Red</string>
-    <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
     <string name="new_messages_below">Nuevos mensajes abajo</string>
     <string name="new_node_seen">Visto nuevo nodo: %1$s</string>
     <string name="new_nodes">Nuevos nodos</string>
@@ -578,6 +580,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- REMOTE -->
     <string name="remote">Remoto</string>
     <string name="remote_admin">Administración remota</string>
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Quitar</string>
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configuración del hardware remotamente</string>
     <string name="remote_hardware_enabled">Hardware remoto activado</string>

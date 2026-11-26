@@ -73,7 +73,7 @@ permissions:
 jobs:
   release-google:
     runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -122,7 +122,8 @@ jobs:
           else
             echo "::warning::DATADOG_API_KEY is not set, so Datadog gets no R8 mapping for this release"
           fi
-          ./gradlew "${tasks[@]}" \
+          # --no-build-cache: a shipped artifact is compiled on this runner, never restored from the shared cache.
+          ./gradlew --no-build-cache "${tasks[@]}" \
             -Pandroid.injected.version.name="$VERSION_NAME" \
             -Pandroid.injected.version.code="$VERSION_CODE" \
             -PaboutLibraries.release=true \
@@ -174,7 +175,7 @@ jobs:
 
   release-fdroid:
     runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -204,7 +205,7 @@ jobs:
           VERSION_NAME: ${{ inputs.version_name }}
           VERSION_CODE: ${{ inputs.version_code }}
         run: >
-          ./gradlew :androidApp:assembleFdroidRelease
+          ./gradlew --no-build-cache :androidApp:assembleFdroidRelease
           -Pandroid.injected.version.name="$VERSION_NAME"
           -Pandroid.injected.version.code="$VERSION_CODE"
 
@@ -227,7 +228,7 @@ jobs:
 
   release-desktop:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -274,7 +275,7 @@ jobs:
         # Both flags must go together and must be flags, not -D properties (inert on
         # windows-latest) — full rationale on the desktop packaging step in reusable-check.yml.
         run: >
-          ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
+          ./gradlew --no-build-cache :desktopApp:packageReleaseDistributionForCurrentOS
           ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' '-Pdesktop.release=true' --no-daemon
           ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
@@ -466,7 +467,7 @@ jobs:
   # on it, and a failed web build loses neither the release nor its tag.
   release-web:
     runs-on: ubuntu-26.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     continue-on-error: true
     steps:
       - name: Checkout code
@@ -490,7 +491,7 @@ jobs:
           VERSION_NAME: ${{ inputs.version_name }}
           VERSION_CODE: ${{ inputs.version_code }}
         run: >
-          ./gradlew :webApp:wasmJsBrowserDistribution
+          ./gradlew --no-build-cache :webApp:wasmJsBrowserDistribution
           -Pmeshtastic.web=true
           -Dorg.gradle.isolated-projects=false
           -Pkotlin.incremental.wasm=false

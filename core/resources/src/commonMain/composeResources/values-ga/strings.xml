@@ -135,6 +135,7 @@
     <!-- LOG -->
     <string name="logs">Lógáil</string>
     <!-- LORA -->
+    <string name="lora_value_none">Ní dhéanfaidh sé</string>
     <!-- MAP -->
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>
@@ -179,7 +180,6 @@
     <string name="name">Ainm</string>
     <string name="navigate_back">Súil Siar</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Cuir Anaithnid san áireamh</string>
@@ -227,6 +227,8 @@
     <string name="reboot">Athmhaoinigh</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
+    <string name="remote_contacts_ignore">Ignóra</string>
+    <string name="remote_contacts_remove">Bain</string>
     <string name="remote_shell_modifier_locked">Ceangailte</string>
     <string name="remote_shell_send">Seol</string>
     <string name="remote_shell_status_not_connected">Ní ceangailte</string>

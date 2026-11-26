@@ -232,6 +232,10 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">자동</string>
+    <string name="lora_field_frequency_offset">주파수 오프셋</string>
+    <string name="lora_field_modem_preset">모뎀 프리셋</string>
+    <string name="lora_value_none">없음</string>
     <string name="low_battery_message">%1$s 노드의 배터리가 낮습니다. (%2$d%)</string>
     <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="lux">조도</string>
@@ -305,7 +309,6 @@
     <string name="neighbor_info">이웃 정보</string>
     <string name="neighbor_info_config">이웃 정보 설정</string>
     <string name="network">네트워크</string>
-    <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">미확인 노드 포함</string>
@@ -391,6 +394,8 @@
     <!-- REMOTE -->
     <string name="remote">원격</string>
     <string name="remote_admin">원격 설정</string>
+    <string name="remote_contacts_ignore">무시하기</string>
+    <string name="remote_contacts_remove">지우기</string>
     <string name="remote_hardware">원격 하드웨어</string>
     <string name="remote_hardware_config">원격 하드웨어 설정</string>
     <string name="remote_hardware_enabled">원격 하드웨어 활성화</string>

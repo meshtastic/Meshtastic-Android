@@ -359,6 +359,10 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">Automatyczny</string>
+    <string name="lora_field_frequency_offset">Przesunięcie częstotliwości</string>
+    <string name="lora_field_modem_preset">Ustawienie modemu</string>
+    <string name="lora_value_none">Brak</string>
     <string name="low_battery">Słaba bateria</string>
     <string name="low_battery_message">Węzeł %1$s ma niski poziom baterii (%2$d%)</string>
     <string name="low_battery_title">Niski poziom baterii: %1$s</string>
@@ -452,7 +456,6 @@
     <string name="neighbor_info">Informacje o sąsiadze</string>
     <string name="neighbor_info_config">Konfiguracja Info o sąsiedzie</string>
     <string name="network">Sieć</string>
-    <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
     <string name="new_messages_below">Nowe wiadomości poniżej</string>
     <string name="new_node_seen">Wykryto nowy węzeł: %1$s</string>
     <string name="new_nodes">Nowe węzły</string>
@@ -563,6 +566,8 @@
     <string name="reload">Odśwież</string>
     <!-- REMOTE -->
     <string name="remote_admin">Zdalne zarządzanie</string>
+    <string name="remote_contacts_ignore">Zignoruj</string>
+    <string name="remote_contacts_remove">Usuń</string>
     <string name="remote_shell_modifier_locked">Zablokowany</string>
     <string name="remote_shell_send">Wyślij</string>
     <string name="remote_shell_status_not_connected">Rozłączony</string>

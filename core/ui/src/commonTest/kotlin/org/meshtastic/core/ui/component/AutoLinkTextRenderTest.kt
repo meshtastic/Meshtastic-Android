@@ -136,6 +136,93 @@ class AutoLinkTextRenderTest {
         assertTrue(result.urlLinks().isEmpty())
     }
 
+    @Test
+    fun mail_and_mixed_case_web_destinations_stay_links() {
+        assertEquals("mailto:a@e.com", build("[mail](mailto:a@e.com)").urlLinks().single().first)
+        assertEquals("HTTPS://e.com/x", build("[site](HTTPS://e.com/x)").urlLinks().single().first)
+        assertEquals("http://e.com", build("[site](http://e.com)").urlLinks().single().first)
+    }
+
+    @Test
+    fun destination_with_unsupported_scheme_renders_as_text() {
+        val destinations =
+            listOf(
+                "javascript:run()",
+                "JaVaScRiPt:run()",
+                "file:///etc/hosts",
+                "intent://host#Intent;scheme=x;end",
+                "content://provider/item",
+                "data:text/html;base64,AAAA",
+                "myapp://open/thing",
+                "tel:desk",
+            )
+        for (destination in destinations) {
+            val source = "[label]($destination)"
+            val result = build(source)
+            assertEquals(source, result.text, "rendered text for $destination")
+            assertTrue(result.urlLinks().isEmpty(), "no link span for $destination")
+        }
+    }
+
+    @Test
+    fun destination_without_scheme_renders_as_text() {
+        for (source in listOf("[label](//e.com/x)", "[label](e.com)", "[label](/path)")) {
+            val result = build(source)
+            assertEquals(source, result.text)
+            assertTrue(result.urlLinks().none { it.first == "e.com" || it.first == "//e.com/x" || it.first == "/path" })
+        }
+    }
+
+    @Test
+    fun link_title_is_not_part_of_the_address() {
+        val result = build("[label](https://e.com \"a title\")")
+        assertEquals("label", result.text)
+        assertEquals("https://e.com", result.urlLinks().single().first)
+    }
+
+    @Test
+    fun label_naming_another_host_renders_as_text() {
+        val source = "[https://meshtastic.org](https://example.com/login)"
+        val result = build(source)
+        assertEquals(source, result.text)
+        assertTrue(result.urlLinks().none { it.first == "https://example.com/login" && it.second == 0 })
+    }
+
+    @Test
+    fun label_naming_the_same_host_stays_a_link() {
+        val result = build("[meshtastic.org](https://www.meshtastic.org/docs)")
+        assertEquals("meshtastic.org", result.text)
+        assertEquals("https://www.meshtastic.org/docs", result.urlLinks().single().first)
+    }
+
+    @Test
+    fun styled_or_escaped_label_naming_another_host_renders_as_text() {
+        for (source in listOf("[**meshtastic.org**](https://example.com)", "[meshtastic\\.org](https://example.com)")) {
+            val result = build(source)
+            val label = result.text.indexOf("meshtastic")
+            assertTrue(result.urlLinks().none { label in it.second until it.third }, source)
+        }
+    }
+
+    @Test
+    fun detected_phone_written_with_spaces_dials_without_them() {
+        val link = build("call 555 123 4567").urlLinks().single()
+        assertEquals("tel:5551234567", link.first)
+        assertEquals("call ".length, link.second)
+        assertEquals("call 555 123 4567".length, link.third)
+    }
+
+    @Test
+    fun bare_ftp_address_is_not_linked() {
+        assertTrue(build("get ftp://files.e.com/x").urlLinks().isEmpty())
+    }
+
+    @Test
+    fun detected_email_and_phone_stay_links() {
+        assertEquals("mailto:a@e.com", build("write a@e.com").urlLinks().single().first)
+        assertEquals("tel:555-123-4567", build("call 555-123-4567").urlLinks().single().first)
+    }
+
     @Test // A-5 supporting: mention without a resolver keeps the raw id token
     fun mention_without_resolver_is_left_untouched() {
         val result = build("hi @!abcd1234")

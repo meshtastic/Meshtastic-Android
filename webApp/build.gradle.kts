@@ -121,6 +121,7 @@ kotlin {
             implementation(projects.core.ui)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.ble)
+            implementation(projects.appShell)
 
             // The feature modules with a wasmJs target. maplibre-compose publishes no wasmJs variant, so no map.
             implementation(projects.feature.settings)

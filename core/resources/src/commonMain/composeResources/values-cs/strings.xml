@@ -50,7 +50,6 @@
     <!-- ADD -->
     <string name="add">Přidat</string>
     <string name="add_a_note">Přidat soukromou poznámku…</string>
-    <string name="add_channels_description">QR kód obsahuje následující kanály. Vyberte ty, které chcete přidat do zařízení. Stávající kanály zůstanou zachovány.</string>
     <string name="add_favorite">Přidat do oblíbených</string>
     <string name="add_layer">Přidat vrstvu</string>
     <string name="add_network_device">Přidat</string>
@@ -962,6 +961,8 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_modem_preset">Předvolba modemu</string>
+    <string name="lora_value_none">Žádný</string>
     <string name="low_battery">Nízký stav baterie</string>
     <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%)</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
@@ -1180,7 +1181,6 @@
     <string name="neighbor_info">Informace o sousedech</string>
     <string name="neighbor_info_config">Nastavení informace o sousedech</string>
     <string name="network">Síť</string>
-    <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
     <string name="new_messages_below">Nové zprávy</string>
     <string name="new_node_seen">Nově objevený uzel: %1$s</string>
     <string name="new_nodes">Nové uzly</string>
@@ -1474,6 +1474,8 @@
     <string name="remote">Vzdálený</string>
     <string name="remote_admin">Vzdálená administrace</string>
     <string name="remote_admin_unreachable">Nelze se připojit k uzlu — zkuste to znovu nebo se přesuňte blíže.</string>
+    <string name="remote_contacts_ignore">Ignorovat</string>
+    <string name="remote_contacts_remove">Odstranit</string>
     <string name="remote_hardware">Vzdálený hardware</string>
     <string name="remote_hardware_config">Konfigurace vzdáleného modulu</string>
     <string name="remote_hardware_enabled">Vzdálený modul povolen</string>
@@ -1489,7 +1491,6 @@
     <string name="remove_layer">Odebrat vrstvu</string>
     <string name="remove_node_text">Tento uzel bude odstraněn z vašeho seznamu, dokud z něj váš uzel znovu neobdrží data.</string>
     <string name="replace">Nahradit</string>
-    <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <string name="reply">Odpovědět</string>
     <string name="replying_to">Odpověď na %1$s</string>
     <string name="report">Odeslat chybové hlášení</string>
@@ -1850,20 +1851,18 @@
     <!-- WIFI -->
     <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Dostupné sítě</string>
     <string name="wifi_provision_connect_failed">Nelze se připojit: %1$s</string>
     <string name="wifi_provision_description">Nastavit přihlašovací údaje k Wi-Fi v zařízení mPWRD-OS přes Bluetooth.</string>
     <string name="wifi_provision_device_found">Zařízení nalezeno</string>
     <string name="wifi_provision_device_found_detail">Připraveno prohledávat Wi-Fi sítě.</string>
     <string name="wifi_provision_hidden_network">Skrytá síť</string>
     <string name="wifi_provision_mpwrd_disclaimer">Více informací o projektu mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Zařízení nenalezena</string>
     <string name="wifi_provision_no_networks">Žádná síť nebyla nalezena</string>
     <string name="wifi_provision_scan_failed">Nepodařilo se prohledat Wi-Fi sítě: %1$s</string>
-    <string name="wifi_provision_scan_networks">Vyhledat sítě</string>
     <string name="wifi_provision_scanning_ble">Vyhledávání zařízení…</string>
     <string name="wifi_provision_scanning_wifi">Vyhledávání…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Název sítě (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Zadejte nebo vyberte síť</string>
     <string name="wifi_provision_status_failed">Nepodařilo se použít nastavení Wi-Fi</string>
     <string name="wifi_provision_success_description">Vaše zařízení mPWRD-OS se připojilo k Wi-Fi síti.</string>

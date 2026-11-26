@@ -1,7 +1,7 @@
 ---
 title: Messages & Channels
 nav_order: 3
-last_updated: 2026-11-20
+last_updated: 2026-11-23
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -56,7 +56,14 @@ On the **Channels** screen, tap **Share Channels** to show a QR code and a link 
 - **Replace** overwrites every channel on their node with yours and applies your LoRa settings.
 - **Add** keeps their channels and LoRa settings and appends yours.
 
-To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. For an Add code, the app lists the incoming channels so you can select the ones you want and shows how many of your node's channel slots are in use. If the selection doesn't fit, a line says how many channels to uncheck. Unchecking a channel that is already on your node removes it.
+To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. The **Import channels** dialog lists the incoming channels. A code made with **Replace** opens with **Replace** selected, a code made with **Add** offers only **Add**, and the **Replace** and **Add** control only picks the mode: nothing changes on your node until you tap **Replace channels** or **Add channels**. A channel that forwards messages to or from MQTT, or shares your location, says so on its row.
+
+- **Replace** removes the channels on your node, then lists every LoRa setting that will change. Changes to sending and receiving, such as turning transmit off, come first in their own group.
+- **Add** keeps your node's channels and LoRa settings, lets you select the incoming channels you want, and shows how many channel slots are in use. If the selection doesn't fit, a line says how many new channels to uncheck. Only when your node is full can you uncheck a channel already on it to make room, and a red line then says how many of your channels will be removed. An incoming channel with the same name as one of yours but a different key is marked on its row.
+
+The title and the **Cancel** and confirm buttons stay in view while the list scrolls. If the import fails, for example because the node disconnected, a message says so with a **Retry** button. Until the app has read your node's channels, the dialog says so and neither confirm button can be tapped.
+
+A channel link shared into Meshtastic from another app, on its own, opens the same **Import channels** dialog. Any other shared text opens as a message to send.
 
 ### Archived Channels
 
@@ -75,9 +82,9 @@ To remove an archived conversation for good, swipe it left in the conversation l
 
 ## Messages directs
 
-Direct messages (DMs) go to one specific node. When both nodes hold each other's public keys, your node encrypts the message to the other node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
+Direct messages (DMs) go to one specific node. When both nodes hold each other's public keys, your node encrypts the message to the other node's public key, so no one else on the mesh can read it — not even nodes that share your channel. A licensed (Ham) node never encrypts: its direct messages go out unencrypted, readable by anyone in range, and only a licensed node accepts them.
 
-Your node must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a node that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
+Unless your node is licensed, it must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a node that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
 
 A public-key conversation carries an encryption icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red crossed-out key means the node's public key changed and no longer matches the one your node stored. Tap the icon for the details. This icon describes the conversation's encryption, so it keeps the locks at every firmware version rather than showing the signed or verified badges from the node list.
 
@@ -133,7 +140,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
 Tap the status under any message you sent to open its delivery details. For a failed message, or a direct message marked **Relayed, not confirmed by recipient**, choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 
-The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded.
+The same dialog names the relaying node: for a channel message the node that relayed it, and for a direct message the node that relayed the acknowledgment back, such as **Ack relayed by Ridge (0x5A)**. A packet carries only the last byte of the relay's node ID, so the name is the app's best match among the nodes it knows and can be wrong. No line appears when no relay was recorded, when the acknowledgment came straight back from the recipient, or when your node got it over MQTT. An acknowledgment that crossed an MQTT bridge and then reached your node over LoRa names its last LoRa relay, if your node runs firmware 2.7.5 or later.
 
 ### Delivery Errors
 
@@ -227,6 +234,7 @@ React to messages with emoji:
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
+- Tap a reaction badge to see who reacted. A received reaction names the node that relayed it, and the delivery details of your own reaction name the relay the same way a sent message does
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
@@ -257,7 +265,11 @@ Touch & hold or double-tap a message to open the quick reaction bar, then tap **
 sheet — that is where reactions live. Beneath it, **Signed · verified** appears on a message whose
 signature your node checked against the sender's key, and **Delivery proven**, **Delivery proof
 failed**, or **Delivery proof unchecked** appears when the acknowledgment for your message carried
-a delivery proof. The message's timestamp and delivery status follow, then these actions:
+a delivery proof. The message's timestamp and delivery status follow, and for a received message
+the node that relayed it to you, such as **Relayed by Ridge (0x5A)**. No relay shows for a message
+heard directly from its sender or one your node got over MQTT. A message that crossed an MQTT bridge
+and then reached your node over LoRa shows its last LoRa relay, if your node runs firmware 2.7.5 or
+later. Then these actions:
 
 - **Reply** — quote the message in your response
 - **Copy** — copy the message text to the clipboard

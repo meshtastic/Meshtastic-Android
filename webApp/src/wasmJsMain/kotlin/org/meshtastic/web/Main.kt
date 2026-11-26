@@ -31,6 +31,7 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
 import org.koin.core.KoinApplication
 import org.koin.plugin.module.dsl.startKoin
+import org.meshtastic.appshell.MeshServiceLifecycle
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.WebDatabaseAccess
 import org.meshtastic.core.database.webDatabaseAccess
@@ -39,7 +40,6 @@ import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.web_database_unavailable
-import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.service.UnreadBadgeSync
 import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.theme.AppTheme
@@ -146,16 +146,6 @@ private fun DatabaseGate(koinApp: KoinApplication, askedForDatabase: Boolean) {
         WebDatabaseAccess.Failed -> DatabaseUnavailable(Res.string.web_database_unavailable)
 
         WebDatabaseAccess.Starting -> WebLoading()
-    }
-}
-
-/** Starts [MeshServiceOrchestrator] on composition and stops it on disposal, as desktopApp's does. */
-@Composable
-private fun MeshServiceLifecycle() {
-    val meshServiceController = koinInject<MeshServiceOrchestrator>()
-    DisposableEffect(Unit) {
-        meshServiceController.start()
-        onDispose { meshServiceController.stop() }
     }
 }
 

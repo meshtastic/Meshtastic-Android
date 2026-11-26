@@ -322,6 +322,8 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_field_modem_preset">Predefinição do Modem</string>
+    <string name="lora_value_none">Nenhum</string>
     <string name="low_battery">Bateria Fraca</string>
     <string name="low_battery_message">O nó %1$s está com bateria fraca (%2$d%)</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
@@ -411,7 +413,6 @@
     <string name="neighbor_info">Informações do Vizinho</string>
     <string name="neighbor_info_config">Configuração de Inform. do Vizinho</string>
     <string name="network">Rede</string>
-    <string name="new_channel_rcvd">Novo link de canal recebido</string>
     <string name="new_node_seen">Novo Nó Visto: %1$s</string>
     <string name="new_nodes">Novos Nós</string>
     <string name="next">Avançar</string>
@@ -516,6 +517,8 @@
     <!-- REMOTE -->
     <string name="remote">Remoto</string>
     <string name="remote_admin">Administração Remota</string>
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Excluir</string>
     <string name="remote_hardware">Equipamento Remoto</string>
     <string name="remote_hardware_config">Configuração de Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto ativado</string>

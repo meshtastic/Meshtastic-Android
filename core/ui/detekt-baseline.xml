@@ -75,6 +75,9 @@
     <ID>ParameterNaming:PreferenceFooter.kt:onPositiveClicked: () -> Unit = {}</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Composable Content Alert") @Composable fun PreviewComposableAlert</ID>
     <ID>PreviewPublic:ScannedQrCodePreviews.kt:@PreviewLightDark @Composable fun PreviewScannedQrCodeAddToFullRadio</ID>
+    <ID>PreviewPublic:ScannedQrCodePreviews.kt:@PreviewLightDark @Composable fun PreviewScannedQrCodeAddWithRoom</ID>
+    <ID>PreviewPublic:ScannedQrCodePreviews.kt:@PreviewLightDark @Composable fun PreviewScannedQrCodeReplaceFewChanges</ID>
+    <ID>PreviewPublic:ScannedQrCodePreviews.kt:@PreviewLightDark @Composable fun PreviewScannedQrCodeReplaceManyChanges</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "HTML Alert") @Composable fun PreviewHtmlAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Icon and Text Alert") @Composable fun PreviewIconAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Multiple Choice Alert") @Composable fun PreviewMultipleChoiceAlert</ID>
@@ -82,6 +85,7 @@
     <ID>PreviewPublic:BitwisePreference.kt:@Preview(showBackground = true) @Composable fun BitwisePreferencePreview</ID>
     <ID>PreviewPublic:ChannelInfo.kt:@PreviewLightDark @Composable fun ChannelInfoPreview</ID>
     <ID>PreviewPublic:ChannelItem.kt:@Preview @Composable fun ChannelItemPreview</ID>
+    <ID>PreviewPublic:ChannelSelection.kt:@Preview @Composable fun ChannelSelectionPreview</ID>
     <ID>PreviewPublic:DistanceInfo.kt:@PreviewLightDark @Composable fun DistanceInfoPreview</ID>
     <ID>PreviewPublic:DropDownPreference.kt:@Preview(showBackground = true) @Composable fun DropDownPreferencePreview</ID>
     <ID>PreviewPublic:EditIPv4Preference.kt:@Preview(showBackground = true) @Composable fun EditIPv4PreferencePreview</ID>

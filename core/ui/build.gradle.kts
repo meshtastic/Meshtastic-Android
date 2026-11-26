@@ -94,7 +94,9 @@ kotlin {
 }
 
 // These fail in headless Chrome. Some compute their expected text with the blocking getString(), which has no wasmJs
-// implementation; the others find no displayed node or cannot inject input.
+// implementation; the others find no displayed node or cannot inject input. ScannedQrCodeDialogUiTest asserts on
+// rendered string resources, which Karma does not serve (404 on composeResources/.../strings.commonMain.cvr), and
+// ScannedQrCodeViewModelTest asserts on a snackbar built from them.
 meshtasticWeb.browserTestExclusions.addAll(
     "*DropDownPreferenceUiTest.*",
     "*ImportFabUiTest.*",
@@ -103,5 +105,7 @@ meshtasticWeb.browserTestExclusions.addAll(
     "*NodeItemDistanceUnitsTest.*",
     "*NodeItemUnheardMarkerTest.*",
     "*PositionPrecisionPreferenceUiTest.*",
+    "*ScannedQrCodeDialogUiTest.*",
+    "*ScannedQrCodeViewModelTest.*",
     "*SignalInfoUiTest.*",
 )

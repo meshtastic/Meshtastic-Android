@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Prepend the AppStream <description> for this version to the generated release notes.
 
+    release-highlights.py <metainfo> <config.properties> <notes.md>
+
 The metainfo entry is the only hand-written, user-facing prose in the repo and is
 already required by pull-request.yml on the VERSION_NAME_BASE bump. Reuse it rather
 than asking anyone to write the same sentence a second time.

@@ -227,6 +227,7 @@
     <!-- LORA -->
     <string name="lora">LoRA</string>
     <string name="lora_config">LoRA</string>
+    <string name="lora_value_none">Ништа</string>
     <string name="low_battery_message">Чвор %1$s има низак ниво батерије (%2$d%)</string>
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <!-- MAP -->
@@ -296,7 +297,6 @@
     <string name="navigate_back">Иди назад</string>
     <!-- NEIGHBOR -->
     <string name="network">Мрежа</string>
-    <string name="new_channel_rcvd">Примљен нови линк канала</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Укључи непознато</string>
@@ -366,6 +366,8 @@
     <string name="reboot">Поново покрени</string>
     <!-- REMOTE -->
     <string name="remote_admin">Удаљена администрација</string>
+    <string name="remote_contacts_ignore">Игнориши</string>
+    <string name="remote_contacts_remove">Уклони</string>
     <string name="remote_shell_key_alt">Висина</string>
     <string name="remote_shell_modifier_locked">Закључан</string>
     <string name="remote_shell_send">Пошаљи</string>

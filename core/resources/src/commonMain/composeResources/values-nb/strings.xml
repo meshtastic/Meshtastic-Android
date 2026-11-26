@@ -135,6 +135,7 @@
     <!-- LOG -->
     <string name="logs">Logger</string>
     <!-- LORA -->
+    <string name="lora_value_none">Ingen</string>
     <!-- MAP -->
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_cache_size">Nåværende størrelse for mellomlager</string>
@@ -180,7 +181,6 @@
     <string name="name">Navn</string>
     <string name="navigate_back">Gå tilbake</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">Inkluder ukjent</string>
@@ -231,6 +231,8 @@
     <string name="reboot">Omstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Fjernadministrasjon</string>
+    <string name="remote_contacts_ignore">Ignorer</string>
+    <string name="remote_contacts_remove">Fjern</string>
     <string name="remote_shell_modifier_locked">Låst</string>
     <string name="remote_shell_send">Send</string>
     <string name="remote_shell_status_not_connected">Ikke tilkoblet</string>

@@ -28,12 +28,7 @@ import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
-private const val SUFFIX_LENGTH = 4
-
-/**
- * Shared helpers for TCP device discovery logic used by both [CommonGetDiscoveredDevicesUseCase] and the
- * Android-specific variant.
- */
+// Shared helpers for TCP device discovery logic used by both CommonGetDiscoveredDevicesUseCase and the Android variant.
 
 /** Converts a list of [DiscoveredService] into [DeviceListEntry.Tcp] with display names derived from TXT records. */
 internal fun processTcpServices(
@@ -63,64 +58,52 @@ internal fun processTcpServices(
         .sortedBy { it.name }
 }
 
-/** Matches each discovered TCP entry to a [Node] from the database using its mDNS device ID. */
+/**
+ * Labels each discovered TCP entry with the node that is that radio: the live session's node when it is connected, else
+ * the node whose id the radio announces in its mDNS TXT record. Only a radio that announces no id falls back to the
+ * node number it reported at its last handshake, since the address may now belong to another radio.
+ */
 internal fun matchDiscoveredTcpNodes(
     entries: List<DeviceListEntry.Tcp>,
     nodeDb: Map<Int, Node>,
     resolvedServices: List<DiscoveredService>,
     databaseManager: DatabaseManager,
+    nums: LocalNodeNums,
 ): List<DeviceListEntry.Tcp> = entries.map { entry ->
-    val matchingNode =
-        if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-            val resolvedService = resolvedServices.find { "t${it.toAddressString()}" == entry.fullAddress }
-            val deviceId = resolvedService?.txt?.get("id")?.decodeToString()
-            nodeDb.values.find { node ->
-                node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
-            }
-        } else {
-            null
+    val resolvedService = resolvedServices.find { "t${it.toAddressString()}" == entry.fullAddress }
+    val deviceId = resolvedService?.txt?.get("id")?.decodeToString()
+    val identified =
+        when {
+            deviceId == null -> nums.recorded(entry.fullAddress)?.let(nodeDb::get)
+
+            databaseManager.hasDatabaseFor(entry.fullAddress) ->
+                nodeDb.values.find { node -> node.user.id == deviceId || node.user.id == "!$deviceId" }
+
+            else -> null
         }
-    entry.copy(node = matchingNode)
+    // A connected radio is its live node or, until that node's NodeInfo arrives, no node: any other match names a
+    // different radio.
+    val live = nums.live(entry.fullAddress)
+    entry.copy(node = if (live != null) nodeDb[live] else identified)
 }
 
 /**
- * Builds the "recent TCP devices" list by filtering out currently discovered addresses and matching each entry to a
- * [Node] by name suffix.
+ * Builds the "recent TCP devices" list by filtering out currently discovered addresses and labelling each entry with
+ * the node recorded for its address.
  */
 internal fun buildRecentTcpEntries(
     recentAddresses: List<RecentAddress>,
     discoveredAddresses: Set<String>,
     nodeDb: Map<Int, Node>,
-    databaseManager: DatabaseManager,
-): List<DeviceListEntry.Tcp> = recentAddresses
+    nums: LocalNodeNums,
+): List<DeviceListEntry> = recentAddresses
     .filterNot { discoveredAddresses.contains(it.address) }
     .map { DeviceListEntry.Tcp(it.name, it.address) }
     // The persisted list is not guaranteed unique: only add() dedupes, and legacy blobs bypass it. The device list
     // keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
     .distinctBy { it.fullAddress }
-    .map { entry ->
-        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, nodeDb, databaseManager))
-    }
+    .withLocalNodes(nodeDb, nums)
     .sortedBy { it.name }
-
-/**
- * Finds a [Node] matching the last `_`-delimited segment of [displayName], if a local database exists for the given
- * [fullAddress]. Used by both TCP recent-device matching and Android USB device matching to avoid duplicated
- * suffix-lookup logic.
- */
-internal fun findNodeByNameSuffix(
-    displayName: String,
-    fullAddress: String,
-    nodeDb: Map<Int, Node>,
-    databaseManager: DatabaseManager,
-): Node? {
-    val suffix = displayName.split("_").lastOrNull()?.lowercase()
-    return if (!databaseManager.hasDatabaseFor(fullAddress) || suffix == null || suffix.length < SUFFIX_LENGTH) {
-        null
-    } else {
-        nodeDb.values.find { it.user.id.lowercase().endsWith(suffix) }
-    }
-}
 
 /**
  * The virtual devices offered behind the Demo Mode gate, shared so the common and Android discovery paths cannot
@@ -136,8 +119,10 @@ internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean
         DeviceListEntry.Mock(safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode"))
     val replay =
         if (showReplay) {
-            val label =
-                safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }.getOrDefault("Demo Mode (Replay)")
+            val label = safeCatchingAll {
+                getStringSuspend(Res.string.demo_mode_replay)
+            }
+                .getOrDefault("Demo Mode (Replay)")
             DeviceListEntry.Replay(label)
         } else {
             null

@@ -78,6 +78,9 @@ class FakeBleScanner :
     var lastScanAddress: String? = null
         private set
 
+    /** Set false to stand in for a platform whose device identifier is not a MAC. */
+    override var addressIsHardware: Boolean = true
+
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         lastScanServiceUuid = serviceUuid
         lastScanAddress = address
@@ -418,6 +421,11 @@ class FakeBluetoothRepository :
 
     fun setHasPermissions(hasPermissions: Boolean) {
         _state.value = _state.value.copy(hasPermissions = hasPermissions)
+    }
+
+    /** Replaces the devices the OS reports as already paired, in the order the platform returns them. */
+    fun setBondedDevices(devices: List<BleDevice>) {
+        _state.value = _state.value.copy(bondedDevices = devices)
     }
 
     /**

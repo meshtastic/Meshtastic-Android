@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-11-20
+last_updated: 2026-11-25
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -275,6 +275,19 @@ Remote administration changes another node's settings over the mesh. The target 
 3. Modify configuration.
 4. Tap **Save** or **Save & restart**. The changes are sent over the mesh.
 
+#### Contacts and favorites on a remote node
+
+A remote node's **Settings** has a **Contacts and favorites** row that edits that node's own node database, not your radio's. It lists the nodes your radio knows, with your own node first, then your favorites, then the most recently heard. Each has buttons for **Send contact & favorite**, **Unfavorite**, **Ignore**, **Unignore** and **Remove**. **Ignore** and **Remove** ask before sending. To send a node your radio doesn't know, paste its contact URL and use the same button there.
+
+- **Send contact & favorite** gives the remote node that node's public key, so the two can exchange direct messages, and favorites it there. It is the only way to favorite a node on the remote node, because a favorite sent on its own does nothing for a node the remote node doesn't know.
+- On a **Client Base** remote node, **Send contact & favorite** sends the contact, waits for the remote node to confirm it, then sends the favorite. If the contact isn't confirmed, the favorite isn't sent. Favorites change what a Client Base rebroadcasts.
+- A node your radio has no trusted public key for stays in the list, but its **Send contact & favorite** button is disabled. It can still be unfavorited, ignored, unignored and removed.
+- **Ignore** makes the remote node drop that node's packets and delete what it stored from it. **Unignore** lifts the block.
+- **Remove** deletes the node from the remote node's database until it hears from it again.
+- The remote node can't report which favorites or contacts it already holds, so the list shows your radio's nodes, not its.
+
+Each button shows the result under the node: acknowledged, or no confirmation.
+
 ### Device Actions
 
 **Settings → Administration** holds one-shot actions, each behind a confirmation dialog:
@@ -388,6 +401,8 @@ generated at build time by AboutLibraries.
 - **"Could not reach node — try again or move closer."** The target may be out of range or offline, or it doesn't list your node's public key as an admin key. Check the **Admin Key** entries on the target node.
 - **"Connect to a radio to administer remote nodes."** Your own node isn't connected. Reconnect it from the [Connections](connections) screen.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
+- **"No confirmation from …"** on **Contacts and favorites.** The acknowledgement can be lost on a busy mesh even when the change applied. These changes are safe to send again.
+- **A node removed from a remote node still shows in an app connected to it.** The remote node's firmware doesn't tell its connected clients about the removal, so they keep showing the removed node.
 
 ## Related Topics
 

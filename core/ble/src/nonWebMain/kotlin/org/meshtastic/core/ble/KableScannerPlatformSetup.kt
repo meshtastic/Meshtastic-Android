@@ -26,3 +26,9 @@ internal expect fun ScannerBuilder.platformScanConfig()
  * the JVM/btleplug backend evaluates predicates with a hardcoded null address so it matches nothing.
  */
 internal expect val supportsNativeAddressScanFilter: Boolean
+
+/**
+ * Whether Kable's device identifier is a hardware MAC here. Android reports the MAC and Linux a BlueZ path that
+ * [normalizeBleAddress] reduces to it; Apple's CoreBluetooth hides the MAC behind a per-host UUID.
+ */
+internal expect val bleAddressIsHardware: Boolean

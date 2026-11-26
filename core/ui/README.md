@@ -16,10 +16,10 @@ The `:core:ui` module contains Compose Multiplatform components, themes, and uti
 - **`TransportIcon`**: Shows the connection type (BLE, USB, TCP).
 - **`MainAppBar`**: The standard top app bar used in the app.
 - **`NodeItem`** / **`NodeChip`**: Node list rows and chips.
-- **`MeshtasticImportFAB`** (`component/ImportFab.kt`) and **`ScannedQrCodeDialog`** (`qr/`): The import entry points (scan a QR code or NFC tag, or enter a URL) and the dialog that takes in shared channels. For a Replace code it shows the LoRa changes. For an Add code it lists the incoming channels and the channel slots in use.
+- **`MeshtasticImportFAB`** (`component/ImportFab.kt`) and **`ScannedQrCodeDialog`** (`qr/`): The import entry points (scan a QR code or NFC tag, or enter a URL) and the dialog that takes in shared channels. A single-choice Replace/Add control picks the mode and only the confirm button imports. Replace lists every LoRa setting that changes (`qr/ChannelImportSummary.kt` derives the list from the config that is written), with changes to sending and receiving grouped first; Add lists the incoming channels and the channel slots in use. Each channel row states MQTT uplink, MQTT downlink and position sharing. The title and actions are pinned while the content scrolls.
 
 ### 3. App shell and theme
-- **`MeshtasticAppShell`**, **`MeshtasticNavigationSuite`**, **`MeshtasticNavDisplay`**: The adaptive navigation shell shared by Android and Desktop, on Navigation 3.
+- **`MeshtasticAppShell`**, **`MeshtasticNavigationSuite`**, **`MeshtasticNavDisplay`**: The adaptive navigation shell on Navigation 3, which `MeshtasticMainScreen` in `:appShell` assembles for every host.
 - **`AppTheme`** (`theme/`): The Material 3 theme, colors and typography.
 - **`AlertManager`** / **`SnackbarManager`** (`util/`): App-wide alert and snackbar queues.
 - **`Local*` composition locals** (`util/`): Platform capabilities the hosts provide to shared code, such as the barcode scanner, NFC, and map views.

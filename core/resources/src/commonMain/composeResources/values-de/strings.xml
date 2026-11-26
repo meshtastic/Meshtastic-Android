@@ -48,7 +48,6 @@
     <!-- ADD -->
     <string name="add">Hinzufügen</string>
     <string name="add_a_note">Persönliche Notiz hinzufügen.</string>
-    <string name="add_channels_description">Die folgenden Kanäle wurden im QR-Code gefunden. Wählen Sie, welche Sie Ihrem Gerät hinzufügen möchten. Vorhandene Kanäle werden beibehalten.</string>
     <string name="add_custom_tile_source">Netzwerk Kachelquelle hinzufügen</string>
     <string name="add_favorite">Zu Favoriten hinzufügen</string>
     <string name="add_layer">Ebene hinzufügen</string>
@@ -751,6 +750,10 @@
     <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_fem_lna_auto">Automatisch</string>
+    <string name="lora_field_frequency_offset">Frequenzversatz</string>
+    <string name="lora_field_modem_preset">Modem Voreinstellungen</string>
+    <string name="lora_value_none">Keins</string>
     <string name="low_battery">Niedriger Akkustand</string>
     <string name="low_battery_message">Knoten %1$s hat einen niedrigen Ladezustand (%2$d%)</string>
     <string name="low_battery_title">Leerer Akku: %1$s</string>
@@ -914,7 +917,6 @@
     <string name="neighbor_info">Nachbarinformation</string>
     <string name="neighbor_info_config">Einstellungen Nachbarinformation</string>
     <string name="network">Netzwerk</string>
-    <string name="new_channel_rcvd">Neue Kanal-URL empfangen</string>
     <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="new_node_seen">Neuen Knoten gesehen: %1$s</string>
     <string name="new_nodes">Neue Knoten</string>
@@ -1139,6 +1141,8 @@
     <string name="remote">Entfernt</string>
     <string name="remote_admin">Ferneinstellung</string>
     <string name="remote_admin_unreachable">Knoten nicht erreichbar - erneut versuchen oder Standort wechseln.</string>
+    <string name="remote_contacts_ignore">Ignorieren</string>
+    <string name="remote_contacts_remove">Entfernen</string>
     <string name="remote_hardware">Entfernte Hardware</string>
     <string name="remote_hardware_config">Einstellung entfernte Hardware</string>
     <string name="remote_hardware_enabled">Einstellung entfernte Hardware</string>
@@ -1156,7 +1160,6 @@
     <string name="remove_layer">Ebene entfernen</string>
     <string name="remove_node_text">Dieser Knoten wird aus der Liste entfernt, bis dein Knoten wieder Daten von ihm erhält.</string>
     <string name="replace">Ersetzen</string>
-    <string name="replace_channels_and_settings_description">Dieser QR-Code enthält eine komplette Konfiguration. Hierdurch werden Ihre bestehenden Kanäle und Funkeinstellungen ersetzt. Alle vorhandenen Kanäle werden entfernt.</string>
     <string name="reply">Antworten</string>
     <string name="replying_to">Antworten auf %1$s</string>
     <string name="report">Melden</string>
@@ -1470,18 +1473,16 @@
     <string name="widget_telemetry_title">Telemetrie</string>
     <!-- WIFI -->
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
-    <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>
     <string name="wifi_provision_connect_failed">Verbindung fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_description">Stellen Sie Ihrem mPWRD-OS Gerät WLAN Zugangsdaten über Bluetooth zur Verfügung.</string>
     <string name="wifi_provision_device_found">Gerät gefunden</string>
     <string name="wifi_provision_hidden_network">Verstecktes Netzwerk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Erfahren Sie mehr über das mPWRD-OS Projekt\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_devices">Keine Geräte gefunden</string>
     <string name="wifi_provision_no_networks">Keine Netzwerke gefunden</string>
-    <string name="wifi_provision_scan_networks">Suche nach Netzwerken</string>
     <string name="wifi_provision_scanning_ble">Gerät wird gesucht...</string>
     <string name="wifi_provision_scanning_wifi">Scanne…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
-    <string name="wifi_provision_ssid_label">Netzwerkname (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Netzwerk eingeben oder auswählen</string>
     <string name="wifi_provision_success_description">Ihr mPWRD-OS Gerät ist dem Wi-Fi-Netzwerk beigetreten.</string>
     <string name="wifi_provision_success_device_connected">Gerät verbunden</string>

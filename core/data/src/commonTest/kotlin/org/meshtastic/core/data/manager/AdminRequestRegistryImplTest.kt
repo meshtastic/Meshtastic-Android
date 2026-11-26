@@ -26,7 +26,7 @@ class AdminRequestRegistryImplTest {
 
     @Test
     fun `a registered id is consumed once`() {
-        registry.register(42)
+        registry.register(42, DEST, null)
 
         assertTrue(registry.consume(42))
         assertFalse(registry.consume(42))
@@ -39,15 +39,15 @@ class AdminRequestRegistryImplTest {
 
     @Test
     fun `id zero is never outstanding`() {
-        registry.register(0)
+        registry.register(0, DEST, null)
 
         assertFalse(registry.consume(0))
     }
 
     @Test
     fun `clearAll forgets every outstanding id`() {
-        registry.register(1)
-        registry.register(2)
+        registry.register(1, DEST, null)
+        registry.register(2, DEST, null)
 
         registry.clearAll()
 
@@ -57,10 +57,14 @@ class AdminRequestRegistryImplTest {
 
     @Test
     fun `the oldest id is dropped past the bound`() {
-        (1..129).forEach(registry::register)
+        (1..129).forEach { registry.register(it, DEST, null) }
 
         assertFalse(registry.consume(1))
         assertTrue(registry.consume(2))
         assertTrue(registry.consume(129))
+    }
+
+    private companion object {
+        const val DEST = 99999
     }
 }

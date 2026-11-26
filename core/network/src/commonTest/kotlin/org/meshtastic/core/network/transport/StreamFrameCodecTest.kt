@@ -341,6 +341,37 @@ class StreamFrameCodecTest {
     }
 
     @Test
+    fun `frameAndSend writes a payload of exactly the frame limit`() = runTest {
+        val sentBytes = mutableListOf<ByteArray>()
+
+        val written =
+            codec.frameAndSend(ByteArray(StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE), sendBytes = { sentBytes.add(it) })
+
+        assertTrue(written)
+        assertEquals(
+            listOf(StreamFrameCodec.HEADER_SIZE, StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE),
+            sentBytes.map { it.size },
+        )
+    }
+
+    @Test
+    fun `frameAndSend refuses a payload over the frame limit without writing or flushing`() = runTest {
+        val sentBytes = mutableListOf<ByteArray>()
+        var flushed = false
+
+        val written =
+            codec.frameAndSend(
+                ByteArray(StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE + 1),
+                sendBytes = { sentBytes.add(it) },
+                flush = { flushed = true },
+            )
+
+        assertEquals(false, written)
+        assertTrue(sentBytes.isEmpty(), "an oversize payload must never reach the stream")
+        assertEquals(false, flushed)
+    }
+
+    @Test
     fun `WAKE_BYTES is four START1 bytes`() {
         assertEquals(4, StreamFrameCodec.WAKE_BYTES.size)
         StreamFrameCodec.WAKE_BYTES.forEach { assertEquals(0x94.toByte(), it) }

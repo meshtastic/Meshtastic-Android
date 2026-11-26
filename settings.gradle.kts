@@ -19,10 +19,17 @@ pluginManagement {
     includeBuild("build-logic/settings-plugin")
     includeBuild("build-logic")
     repositories {
-        google {
-            content {
+        // Google-only groups resolve from Google's repository alone, as in the root settings.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("./offline-repository")
+                },
+            )
+            filter {
                 includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
         }
@@ -54,10 +61,20 @@ dependencyResolutionManagement {
     repositories {
         // Only enable mavenLocal for local JitPack testing; never in CI.
         if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
-        google {
-            content {
+        // AndroidX and the Android build tools are published only to Google's repository. Exclusive, so no other
+        // repository is asked for them: Gradle stops at a repository's error, and Central's 429 ahead of Google's
+        // repository failed the build before Google's was reached. The offline repository is the network-less copy a
+        // Flatpak build resolves from. com.google.* stays open to the other repositories, which host much of it.
+        exclusiveContent {
+            forRepositories(
+                google { content { includeGroupByRegex("com\\.google.*") } },
+                maven {
+                    name = "OfflineGoogleArtifacts"
+                    url = uri("./offline-repository")
+                },
+            )
+            filter {
                 includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
         }
@@ -167,6 +184,7 @@ include(
     ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",
+    ":appShell",
     ":desktopApp",
     ":androidApp",
     ":core:barcode",

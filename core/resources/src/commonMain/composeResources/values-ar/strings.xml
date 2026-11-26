@@ -134,6 +134,7 @@
     <!-- LORA -->
     <string name="lora">إعدادات لورا</string>
     <string name="lora_config">إعدادات لورا</string>
+    <string name="lora_value_none">لا يوجد</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>
     <!-- MAP -->
     <string name="map_filter_display_title">إعدادات الشاشة</string>
@@ -169,7 +170,6 @@
     <string name="name">الاسم</string>
     <string name="navigate_back">العودة إلى الخلف</string>
     <!-- NEIGHBOR -->
-    <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_include_unknown">عربي</string>
@@ -209,6 +209,7 @@
     <string name="radio_setup_name_headline">الاسم</string>
     <string name="reboot">إعادة التشغيل</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">تجاهل</string>
     <string name="remote_shell_modifier_locked">مقفل</string>
     <string name="remote_shell_send">ارسل</string>
     <string name="remote_shell_status_not_connected">غير متصل</string>

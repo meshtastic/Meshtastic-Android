@@ -257,7 +257,12 @@ internal fun Project.configureWasmJsCompilations() {
         gradle.sharedServices.registerIfAbsent("meshtasticWasmLinkLimit", WasmLinkLimit::class.java) {
             maxParallelUsages.set(WASM_PARALLEL_LINKS)
         }
-    tasks.withType<KotlinJsIrLink>().configureEach { usesService(linkLimit) }
+    tasks.withType<KotlinJsIrLink>().configureEach {
+        usesService(linkLimit)
+        // A relink over a warm build/klib/cache mixes callable-reference classes between modules and emits wasm Chrome
+        // refuses to compile, which Karma reports only as a silent browser. Every development link starts cold.
+        incrementalWasm = false
+    }
     extensions.configure<KotlinMultiplatformExtension> {
         sourceSets
             .named { it.startsWith("wasmJs") }

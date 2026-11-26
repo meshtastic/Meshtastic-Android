@@ -45,6 +45,7 @@ import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.relayIsRfHop
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.ActiveConversationTracker
@@ -182,7 +183,7 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.ROUTING_APP -> {
-                handleRouting(packet, dataPacket, session)
+                handleRouting(packet, session)
             }
 
             PortNum.PAXCOUNTER_APP -> {
@@ -380,7 +381,19 @@ class MeshDataHandlerImpl(
         rememberDataPacket(dataPacket, myNodeNum, session = session)
     }
 
-    private fun handleRouting(packet: MeshPacket, dataPacket: DataPacket, session: RadioSessionContext) {
+    /**
+     * The relay an ack names, or null when its byte is only the acking node's own: an ack heard over the air with no
+     * hops used carries the transmitter's byte, and one from MQTT a node across the bridge. An implicit ack is built
+     * locally with `hop_start` 0 from an overheard rebroadcast, so it keeps the relayer's byte.
+     */
+    private fun ackRelayNode(packet: MeshPacket): Int? {
+        val heardDirect = packet.hop_start != 0 && packet.hop_limit == packet.hop_start
+        return packet.relay_node.takeUnless {
+            heardDirect || !relayIsRfHop(packet.transport_mechanism.value, packet.via_mqtt == true)
+        }
+    }
+
+    private fun handleRouting(packet: MeshPacket, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
@@ -392,7 +405,7 @@ class MeshDataHandlerImpl(
             packet.decoded?.request_id ?: 0,
             packet.from,
             r.error_reason?.value ?: 0,
-            dataPacket.relayNode,
+            ackRelayNode(packet),
             session,
             ackProofStatus = packet.ack_proof_status.value,
         )
@@ -661,6 +674,7 @@ class MeshDataHandlerImpl(
                     },
                     packetId = packet.id,
                     status = MessageStatus.RECEIVED,
+                    relayNode = packet.relay_node,
                     to = toId,
                     channel = dataPacket.channel,
                     xeddsaSigned = packet.xeddsa_signed,
