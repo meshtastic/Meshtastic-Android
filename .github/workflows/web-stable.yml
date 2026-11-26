@@ -1,0 +1,74 @@
+name: Web Stable
+
+# Deploys a release's web distribution to app.meshtastic.org. A production promotion
+# dispatches it with the release tag (promote.yml); a manual dispatch is the retry path, and
+# a dispatch with an older tag is the rollback. Nothing is built here: the site is the
+# meshtastic-web-<version>.zip the internal cut attached to the release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag whose web distribution to deploy (e.g., v2.8.5)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  attestations: read # gh attestation verify
+
+# Serialized, never cancelled: an interrupted deploy must not race the one after it.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    # The environment holds the Vercel token and ids, and admits only main.
+    environment:
+      name: web-stable
+      url: https://app.meshtastic.org
+    steps:
+      - name: Checkout the deploy action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/actions/vercel-deploy
+
+      # The web build runs soft at the internal cut, so a release can lack the zip.
+      - name: Download the release's web distribution
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/web"
+          if ! gh release download "$TAG" --repo "$REPO" --pattern 'meshtastic-web-*.zip' --dir "$RUNNER_TEMP/web"; then
+            echo "::error::Could not download meshtastic-web-<version>.zip from release $TAG: the tag, the release or the asset is missing."
+            exit 1
+          fi
+          mapfile -t zips < <(find "$RUNNER_TEMP/web" -name 'meshtastic-web-*.zip')
+          if [[ ${#zips[@]} -ne 1 ]]; then
+            echo "::error::Expected one web distribution on $TAG, found ${#zips[@]}."
+            exit 1
+          fi
+          # release-web attested the zip it built; a file swapped in afterwards does not verify.
+          gh attestation verify "${zips[0]}" --repo "$REPO"
+          unzip -q "${zips[0]}" -d "$RUNNER_TEMP/web/dist"
+          echo "ASSET=$(basename "${zips[0]}")" >> "$GITHUB_ENV"
+
+      - name: Deploy to app.meshtastic.org
+        uses: ./.github/actions/vercel-deploy
+        with:
+          dist: ${{ runner.temp }}/web/dist
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_org_id: ${{ vars.VERCEL_ORG_ID }}
+          vercel_project_id: ${{ vars.VERCEL_PROJECT_ID }}
+
+      - name: Summarize
+        env:
+          TAG: ${{ inputs.tag }}
+        run: echo "Deployed ${ASSET} from ${TAG} to https://app.meshtastic.org" >> "$GITHUB_STEP_SUMMARY"

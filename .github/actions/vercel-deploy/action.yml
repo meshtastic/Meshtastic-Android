@@ -1,0 +1,66 @@
+name: 'Deploy the web app to Vercel'
+description: >
+  Deploys a built web distribution to a Vercel project's production domain as prebuilt static
+  output. The calling job names the GitHub environment that holds the project's token and ids.
+
+inputs:
+  dist:
+    description: 'Directory holding the web distribution (index.html, webApp.js, the wasm modules)'
+    required: true
+  vercel_token:
+    description: 'Vercel token scoped to the project'
+    required: true
+  vercel_org_id:
+    description: 'Vercel team id'
+    required: true
+  vercel_project_id:
+    description: 'Vercel project id'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Build Output API v3, written by hand: Vercel serves static/ as it is and runs no build, so
+    # the project's framework and build settings never apply. The .br copies stay behind because
+    # Vercel compresses wasm and JavaScript itself. The content-hashed modules (20 hex digits,
+    # the names sw.js calls HASHED) never change under a name; everything else keeps Vercel's
+    # default, which revalidates.
+    - name: Stage the prebuilt output
+      shell: bash
+      env:
+        DIST: ${{ inputs.dist }}
+      run: |
+        for f in index.html webApp.js; do
+          if [[ ! -f "$DIST/$f" ]]; then
+            echo "::error::$DIST is not a web distribution: $f is missing."
+            exit 1
+          fi
+        done
+        out="$RUNNER_TEMP/vercel-site/.vercel/output"
+        rm -rf "$RUNNER_TEMP/vercel-site"
+        mkdir -p "$out/static"
+        cp -R "$DIST"/. "$out/static/"
+        find "$out/static" -name '*.br' -delete
+        cat > "$out/config.json" <<'EOF'
+        {
+          "version": 3,
+          "routes": [
+            {
+              "src": "^/(.*/)?[0-9a-f]{20}\\.(wasm|js|mjs)$",
+              "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
+              "continue": true
+            },
+            { "handle": "filesystem" }
+          ]
+        }
+        EOF
+        echo "Staged $(find "$out/static" -type f | wc -l) files, $(du -sh "$out/static" | cut -f1)."
+
+    - name: Deploy to Vercel
+      shell: bash
+      working-directory: ${{ runner.temp }}/vercel-site
+      env:
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+      run: npx --yes vercel@67.0.0 deploy --prebuilt --prod --yes

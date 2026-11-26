@@ -82,7 +82,8 @@ jobs:
               - '.github/workflows/reusable-check.yml'
               - '.github/actions/gradle-setup/**'
             # The modules with a wasmJs target (meshtastic.kmp.web) and what shapes their web build. Only a PR
-            # builds the web target; the merge queue and main never do. check-changes-filter.py fails the PR
+            # checks the web target; the merge queue never builds it, and main builds it only to deploy
+            # the snapshot site (web-snapshot.yml). check-changes-filter.py fails the PR
             # when a module applying meshtastic.kmp.web is missing here.
             web:
               - 'webApp/**'
