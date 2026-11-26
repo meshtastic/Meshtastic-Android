@@ -451,6 +451,15 @@ class RadioConfigViewModelTest {
     private fun runTest(block: suspend TestScope.() -> Unit) =
         kotlinx.coroutines.test.runTest(testDispatcher, testBody = block)
 
+    /**
+     * `UiText.resolve()` loads its string on a real thread, outside the test scheduler and past [tearDown]'s cancel; a
+     * test whose action ends in a snackbar awaits it, or the load resumes on Main after `resetMain` and fails a later
+     * test.
+     */
+    private fun snackbarShown(): CompletableDeferred<Unit> = CompletableDeferred<Unit>().also { shown ->
+        every { snackbarManager.showSnackbar(any(), any(), any(), any(), any()) } calls { shown.complete(Unit) }
+    }
+
     private fun createViewModel(destNum: Int? = null, snackbarManager: SnackbarManager = this.snackbarManager) =
         RadioConfigViewModel(
             initialDestNum = destNum,
@@ -1561,13 +1570,10 @@ class RadioConfigViewModelTest {
             {
                 throw MalformedMeshtasticUrlException("bad profile")
             }
-        // UiText.resolve() loads the string on real Dispatchers.Default, outside the test scheduler,
-        // so await the snackbar call instead of draining with runCurrent().
-        val snackbarShown = CompletableDeferred<Unit>()
-        every { snackbarManager.showSnackbar(any(), any(), any(), any(), any()) } calls { snackbarShown.complete(Unit) }
+        val snackbar = snackbarShown()
 
         viewModel.installProfile(profile)
-        snackbarShown.await()
+        snackbar.await()
 
         verify { snackbarManager.showSnackbar(message = "This Channel URL is invalid and can not be used") }
     }
@@ -2287,7 +2293,9 @@ class RadioConfigViewModelTest {
 
         // Empty SecurityConfig is the fallback before the device's config response arrives — backing it up and later
         // restoring it would wipe the device's real keys with blanks.
+        val snackbar = snackbarShown()
         viewModel.backupSecurityKeys(Config.SecurityConfig.Builder().build())
+        snackbar.await()
 
         verify(exactly(0)) { securityKeyBackupStore.save(any(), any(), any(), any(), any()) }
     }
@@ -2315,7 +2323,9 @@ class RadioConfigViewModelTest {
                     wb.private_key = "priv".encodeUtf8()
                 }
                 .build()
+        val snackbar = snackbarShown()
         viewModel.backupSecurityKeys(config)
+        snackbar.await()
 
         // Pin the exact base64 so a public/private swap or encoding change is caught.
         verify { securityKeyBackupStore.save(123, "cHVi", "cHJpdg==", any(), "Base Station") }
@@ -2328,7 +2338,9 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel()
         every { securityKeyBackupStore.get(123) } returns null
 
+        val snackbar = snackbarShown()
         viewModel.restoreSecurityKeys()
+        snackbar.await()
 
         verifySuspend(exactly(0)) { radioConfigUseCase.setConfig(any(), any()) }
     }
@@ -2350,7 +2362,9 @@ class RadioConfigViewModelTest {
         every { securityKeyBackupStore.get(123) } returns stored
         every { importSecurityConfigUseCase(stored) } returns Result.success(decoded)
 
+        val snackbar = snackbarShown()
         viewModel.restoreSecurityKeys()
+        snackbar.await()
 
         verifySuspend {
             radioConfigUseCase.setConfig(123, Config.Builder().also { wb -> wb.security = decoded }.build())
@@ -2368,7 +2382,9 @@ class RadioConfigViewModelTest {
         every { securityKeyBackupStore.get(456) } returns stored
         every { importSecurityConfigUseCase(stored) } returns Result.success(decoded)
 
+        val snackbar = snackbarShown()
         viewModel.restoreSecurityKeys(fromNodeNum = 456)
+        snackbar.await()
 
         verifySuspend {
             radioConfigUseCase.setConfig(123, Config.Builder().also { wb -> wb.security = decoded }.build())
@@ -2414,7 +2430,9 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
+        val snackbar = snackbarShown()
         viewModel.deleteSecurityKeyBackup(backupNodeNum = 456)
+        snackbar.await()
 
         verify { securityKeyBackupStore.delete(456) }
         verify(exactly(0)) { securityKeyBackupStore.delete(123) }
