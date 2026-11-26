@@ -1868,6 +1868,8 @@
     <string name="remote">Удаленные</string>
     <string name="remote_admin">Удаленное администрирование</string>
     <string name="remote_admin_unreachable">Не удается подключиться к ноде — попробуй еще раз или подойди ближе.</string>
+    <string name="remote_contacts_ignore">Игнорировать</string>
+    <string name="remote_contacts_remove">Удалить</string>
     <string name="remote_hardware">Удаленное устройство</string>
     <string name="remote_hardware_config">Настройка удаленного оборудования</string>
     <string name="remote_hardware_enabled">Удаленное оборудование включено</string>

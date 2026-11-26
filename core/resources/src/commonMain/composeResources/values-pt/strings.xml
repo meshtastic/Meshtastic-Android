@@ -795,6 +795,8 @@
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administração Remota</string>
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Remover</string>
     <string name="remote_hardware">Equipamento remoto</string>
     <string name="remote_hardware_config">Configuração de Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto ativado</string>

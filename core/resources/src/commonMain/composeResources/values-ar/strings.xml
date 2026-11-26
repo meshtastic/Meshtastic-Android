@@ -209,6 +209,7 @@
     <string name="radio_setup_name_headline">الاسم</string>
     <string name="reboot">إعادة التشغيل</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">تجاهل</string>
     <string name="remote_shell_modifier_locked">مقفل</string>
     <string name="remote_shell_send">ارسل</string>
     <string name="remote_shell_status_not_connected">غير متصل</string>

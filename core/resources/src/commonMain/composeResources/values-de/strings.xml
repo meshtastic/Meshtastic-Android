@@ -1141,6 +1141,8 @@
     <string name="remote">Entfernt</string>
     <string name="remote_admin">Ferneinstellung</string>
     <string name="remote_admin_unreachable">Knoten nicht erreichbar - erneut versuchen oder Standort wechseln.</string>
+    <string name="remote_contacts_ignore">Ignorieren</string>
+    <string name="remote_contacts_remove">Entfernen</string>
     <string name="remote_hardware">Entfernte Hardware</string>
     <string name="remote_hardware_config">Einstellung entfernte Hardware</string>
     <string name="remote_hardware_enabled">Einstellung entfernte Hardware</string>

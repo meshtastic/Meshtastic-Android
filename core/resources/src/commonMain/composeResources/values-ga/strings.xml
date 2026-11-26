@@ -227,6 +227,8 @@
     <string name="reboot">Athmhaoinigh</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
+    <string name="remote_contacts_ignore">Ignóra</string>
+    <string name="remote_contacts_remove">Bain</string>
     <string name="remote_shell_modifier_locked">Ceangailte</string>
     <string name="remote_shell_send">Seol</string>
     <string name="remote_shell_status_not_connected">Ní ceangailte</string>

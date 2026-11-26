@@ -874,6 +874,8 @@
     <string name="remote">Віддалений</string>
     <string name="remote_admin">Віддалене керування</string>
     <string name="remote_admin_unreachable">Не вдалося зв'язатися з вузлом — спробуйте ще раз або підійдіть ближче.</string>
+    <string name="remote_contacts_ignore">Ігнорувати</string>
+    <string name="remote_contacts_remove">Видалити</string>
     <string name="remote_hardware">Віддалене обладнання</string>
     <string name="remote_hardware_config">Конфігурація віддаленого пристрою</string>
     <string name="remote_hardware_enabled">Конфігурація віддаленого пристрою активована</string>

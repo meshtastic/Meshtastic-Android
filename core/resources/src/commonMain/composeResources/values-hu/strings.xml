@@ -567,6 +567,8 @@
     <!-- REMOTE -->
     <string name="remote">Távoli</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
+    <string name="remote_contacts_ignore">Mellőzés</string>
+    <string name="remote_contacts_remove">Törlés</string>
     <string name="remote_hardware">Távoli hardver</string>
     <string name="remote_hardware_config">Távoli hardver beállításai</string>
     <string name="remote_hardware_enabled">Távoli hardver engedélyezve</string>

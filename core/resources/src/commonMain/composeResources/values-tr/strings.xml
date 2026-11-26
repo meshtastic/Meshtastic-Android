@@ -401,6 +401,8 @@
     <string name="reboot">Yeniden başlat</string>
     <!-- REMOTE -->
     <string name="remote_admin">Uzaktan Yönetim</string>
+    <string name="remote_contacts_ignore">Yok say</string>
+    <string name="remote_contacts_remove">Kaldır</string>
     <string name="remote_hardware">Uzaktan Donanım</string>
     <string name="remote_hardware_config">Uzak Donanım Ayarı</string>
     <string name="remote_hardware_enabled">Uzak Donanım etkin</string>

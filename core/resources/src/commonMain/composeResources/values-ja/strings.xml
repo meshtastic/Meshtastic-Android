@@ -1225,6 +1225,8 @@
     <string name="remote">リモート</string>
     <string name="remote_admin">リモート管理</string>
     <string name="remote_admin_unreachable">ノードに到達できませんでした。もう一度試すか、近づいてください。</string>
+    <string name="remote_contacts_ignore">無視</string>
+    <string name="remote_contacts_remove">削除</string>
     <string name="remote_hardware">遠隔ハードウェア</string>
     <string name="remote_hardware_config">リモートハードウェア設定</string>
     <string name="remote_hardware_enabled">リモートハードウェアを有効化</string>

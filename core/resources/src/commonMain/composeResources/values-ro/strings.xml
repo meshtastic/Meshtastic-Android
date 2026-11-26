@@ -758,6 +758,8 @@
     <!-- REMOTE -->
     <string name="remote">De la distanta</string>
     <string name="remote_admin">Administrare la distanță</string>
+    <string name="remote_contacts_ignore">Ignoră</string>
+    <string name="remote_contacts_remove">Eliminare</string>
     <string name="remote_hardware">Hardware la distanță</string>
     <string name="remote_hardware_config">Configurare hardware la distanță</string>
     <string name="remote_hardware_enabled">Hardware extern activat</string>

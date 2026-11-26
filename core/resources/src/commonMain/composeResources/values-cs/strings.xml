@@ -1474,6 +1474,8 @@
     <string name="remote">Vzdálený</string>
     <string name="remote_admin">Vzdálená administrace</string>
     <string name="remote_admin_unreachable">Nelze se připojit k uzlu — zkuste to znovu nebo se přesuňte blíže.</string>
+    <string name="remote_contacts_ignore">Ignorovat</string>
+    <string name="remote_contacts_remove">Odstranit</string>
     <string name="remote_hardware">Vzdálený hardware</string>
     <string name="remote_hardware_config">Konfigurace vzdáleného modulu</string>
     <string name="remote_hardware_enabled">Vzdálený modul povolen</string>

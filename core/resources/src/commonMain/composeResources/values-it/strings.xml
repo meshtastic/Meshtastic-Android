@@ -1230,6 +1230,8 @@
     <string name="remote">Controllo remoto</string>
     <string name="remote_admin">Amministrazione Remota</string>
     <string name="remote_admin_unreachable">Impossibile raggiungere il nodo — riprova o avvicinati.</string>
+    <string name="remote_contacts_ignore">Ignora</string>
+    <string name="remote_contacts_remove">Elimina</string>
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configurazione Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto abilitato</string>

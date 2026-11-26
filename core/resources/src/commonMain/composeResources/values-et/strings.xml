@@ -1366,6 +1366,8 @@
     <string name="remote">Kaugjuhtimine</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="remote_admin_unreachable">Sõlmega ei õnnest ühenduda – proovi uuesti või liigu lähemale.</string>
+    <string name="remote_contacts_ignore">Eira</string>
+    <string name="remote_contacts_remove">Eemalda</string>
     <string name="remote_hardware">Kaugriistvara</string>
     <string name="remote_hardware_config">Kaug riistvara sätted</string>
     <string name="remote_hardware_enabled">Kaug riistvara lubatud</string>

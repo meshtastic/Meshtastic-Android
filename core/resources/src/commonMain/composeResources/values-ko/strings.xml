@@ -394,6 +394,8 @@
     <!-- REMOTE -->
     <string name="remote">원격</string>
     <string name="remote_admin">원격 설정</string>
+    <string name="remote_contacts_ignore">무시하기</string>
+    <string name="remote_contacts_remove">지우기</string>
     <string name="remote_hardware">원격 하드웨어</string>
     <string name="remote_hardware_config">원격 하드웨어 설정</string>
     <string name="remote_hardware_enabled">원격 하드웨어 활성화</string>

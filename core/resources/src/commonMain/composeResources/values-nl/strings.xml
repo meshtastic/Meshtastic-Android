@@ -328,6 +328,8 @@
     <string name="reboot">Herstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Extern beheer</string>
+    <string name="remote_contacts_ignore">Negeer</string>
+    <string name="remote_contacts_remove">Verwijder</string>
     <string name="remote_hardware">Externe Hardware</string>
     <string name="remote_hardware_config">Externe hardwareconfiguratie</string>
     <string name="remote_hardware_enabled">Externe hardware ingeschakeld</string>
