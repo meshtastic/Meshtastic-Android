@@ -27,10 +27,11 @@ class JvmUsbScannerTest {
     fun `an entry is stored by its port address and shown by its system name`() {
         val link = "/dev/serial/by-id/usb-RAKwireless_WisCore_RAK4631_Board_7885014CB2C5B186-if00"
 
-        val entry = usbEntries(listOf(SerialPortEntry("ttyACM3", link))).single()
+        val entry = usbEntries(listOf(SerialPortEntry("ttyACM3", link, namesRadio = true))).single()
 
         assertEquals("s$link", entry.fullAddress)
         assertEquals("ttyACM3", entry.name)
         assertEquals(JvmUsbDeviceData("ttyACM3"), entry.usbData)
+        assertEquals(true, entry.addressNamesRadio)
     }
 }

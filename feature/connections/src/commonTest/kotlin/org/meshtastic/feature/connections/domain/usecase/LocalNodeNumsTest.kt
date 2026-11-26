@@ -22,6 +22,7 @@ import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.feature.connections.model.UsbDeviceData
 import kotlin.test.Test
 
 /**
@@ -78,4 +79,28 @@ class LocalNodeNumsTest {
 
         labelled.map { it.node } shouldBe listOf(sd7t, other)
     }
+
+    @Test
+    fun `serial entry whose address names one radio shows its recorded node`() {
+        val entry = usbEntry("s/dev/serial/by-id/usb-RAKwireless_WisCore_RAK4631_Board_7885014CB2C5B186-if00", true)
+        val nums = LocalNodeNums(recorded = mapOf(normalizeAddress(entry.fullAddress) to sd7t.num), live = null)
+
+        listOf(entry).withLocalNodes(nodeDb, nums).single().node shouldBe sd7t
+    }
+
+    @Test
+    fun `serial entry whose address names only a port or model shows no recorded node`() {
+        val entry = usbEntry("s/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0", false)
+        val nums = LocalNodeNums(recorded = mapOf(normalizeAddress(entry.fullAddress) to sd7t.num), live = null)
+
+        listOf(entry).withLocalNodes(nodeDb, nums).single().node shouldBe null
+    }
+
+    private fun usbEntry(fullAddress: String, addressNamesRadio: Boolean) = DeviceListEntry.Usb(
+        usbData = object : UsbDeviceData {},
+        name = "ttyACM3",
+        fullAddress = fullAddress,
+        bonded = true,
+        addressNamesRadio = addressNamesRadio,
+    )
 }
