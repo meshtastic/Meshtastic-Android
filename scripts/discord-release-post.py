@@ -50,13 +50,14 @@ def description(notes: str, track: str, url: str) -> str:
     blocks = [(f"### {name}", items) for name, items in sections]
     out = head
     omitted = sum(len(items) for _, items in blocks)
+    room = LIMIT - len(f"\n\n[{omitted} more in the full notes]({url})")
     for heading, items in blocks:
         block = f"\n\n{heading}"
-        if len(out) + len(block) + len(items[0]) + 1 > LIMIT - 80:
+        if len(out) + len(block) + len(items[0]) + 1 > room:
             break
         out += block
         for item in items:
-            if len(out) + len(item) + 1 > LIMIT - 80:
+            if len(out) + len(item) + 1 > room:
                 break
             out += f"\n{item}"
             omitted -= 1
