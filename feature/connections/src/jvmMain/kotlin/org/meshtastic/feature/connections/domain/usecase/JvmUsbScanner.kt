@@ -51,5 +51,6 @@ internal fun usbEntries(ports: List<SerialPortEntry>): List<DeviceListEntry.Usb>
         fullAddress = "s${port.address}",
         bonded = true, // Desktop serial ports don't need Android USB permission bonding
         node = null,
+        addressNamesRadio = port.namesRadio,
     )
 }

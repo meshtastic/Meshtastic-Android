@@ -53,12 +53,14 @@ sealed class DeviceListEntry(
         override fun copy(node: Node?): Ble = copy(device = device, bonded = bonded, node = node)
     }
 
+    /** [addressNamesRadio] is true when [fullAddress] belongs to one physical radio, not a port or a USB model id. */
     data class Usb(
         val usbData: UsbDeviceData,
         override val name: String,
         override val fullAddress: String,
         override val bonded: Boolean,
         override val node: Node? = null,
+        val addressNamesRadio: Boolean = false,
     ) : DeviceListEntry(name = name, fullAddress = fullAddress, bonded = bonded, node = node) {
         override fun copy(node: Node?): Usb =
             copy(usbData = usbData, name = name, fullAddress = fullAddress, bonded = bonded, node = node)
